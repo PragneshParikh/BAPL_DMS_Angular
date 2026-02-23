@@ -24,19 +24,58 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
+              "src/favicon.ico",
+              "src/assets"
             ],
             "styles": [
-              "src/styles.scss"
+              "node_modules/prismjs/themes/prism.css",
+              "node_modules/shepherd.js/dist/css/shepherd.css",
+              "node_modules/flatpickr/dist/flatpickr.css",
+              "src/styles.scss",
+              "node_modules/slick-carousel/slick/slick.scss",
+              "node_modules/slick-carousel/slick/slick-theme.scss",
+              "node_modules/@ctrl/ngx-emoji-mart/picker.css",
+              "src/assets/scss/bootstrap.scss",
+              "src/assets/scss/icons.scss",
+              "src/assets/scss/app.scss"
             ],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            "scripts": [
+              "node_modules/jquery/dist/jquery.min.js",
+              "node_modules/slick-carousel/slick/slick.min.js"
+            ],
+            "allowedCommonJsDependencies": [
+              "ev-emitter/ev-emitter",
+              "can-use-dom",
+              "core-js/modules/es.array.filter.js",
+              "core-js/modules/es.array.iterator.js",
+              "core-js/modules/es.array.reduce.js",
+              "core-js/modules/es.function.name.js",
+              "core-js/modules/es.object.assign.js",
+              "core-js/modules/es.object.to-string.js",
+              "core-js/modules/es.parse-int.js",
+              "core-js/modules/es.regexp.exec.js",
+              "core-js/modules/es.string.iterator.js",
+              "core-js/modules/es.string.match.js",
+              "core-js/modules/es.string.replace.js",
+              "core-js/modules/es.weak-map.js",
+              "core-js/modules/web.dom-collections.iterator.js",
+              "lodash.debounce",
+              "lodash.memoize",
+              "lodash.throttle",
+              "rxjs/internal/operators",
+              "moment",
+              "lottie-web",
+              "ngx-lightbox",
+              "ngx-masonry",
+              "leaflet",
+              "sweetalert2",
+              "lodash",
+              "@ckeditor/ckeditor5-build-classic",
+              "ngx-csv/ngx-csv",
+              "dropzone",
+              "file-saver",
+              "prismjs"
+            ]
           },
           "configurations": {
             "production": {
@@ -99,5 +138,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "27d7a950-2210-4a5f-a5ce-8b4abf9c3826"
   }
 }
