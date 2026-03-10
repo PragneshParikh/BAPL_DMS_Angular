@@ -1,0 +1,79 @@
+.account-master-container{
+background:#f6f6f6;
+padding:10px;
+border:1px solid #ccc;
+}
+
+.header{
+background:#3d556b;
+color:white;
+padding:8px 12px;
+font-weight:600;
+}
+
+.label{
+font-size:13px;
+margin-bottom:3px;
+}
+
+.left-panel{
+border-right:1px solid #ddd;
+padding-right:10px;
+}
+
+.multiselect-container{
+position:relative;
+}
+
+.multiselect-display{
+border:1px solid #ccc;
+padding:5px 8px;
+background:white;
+cursor:pointer;
+font-size:13px;
+display:flex;
+justify-content:space-between;
+}
+
+.dropdown-panel{
+position:absolute;
+background:white;
+border:1px solid #ccc;
+width:100%;
+z-index:1000;
+padding:8px;
+}
+
+.dropdown-actions{
+display:flex;
+justify-content:space-between;
+margin-bottom:6px;
+font-size:12px;
+}
+
+.select-all{
+color:green;
+cursor:pointer;
+}
+
+.clear-all{
+color:red;
+cursor:pointer;
+}
+
+.checkbox-list{
+max-height:200px;
+overflow-y:auto;
+border:1px solid #eee;
+padding:5px;
+}
+
+.expand-box{
+margin-top:10px;
+background:#ddd;
+padding:6px;
+display:flex;
+justify-content:space-between;
+font-size:13px;
+cursor:pointer;
+}

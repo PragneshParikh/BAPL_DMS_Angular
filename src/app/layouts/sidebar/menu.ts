@@ -11,23 +11,30 @@ export const MENU: MenuItem[] = [
     label: 'MENUITEMS.Master.TEXT',
     icon: 'ri-dashboard-2-line',
     isCollapsed: true,
+
     subItems: [
       {
-          id : 5,
-          label : 'Item Master Spares',
-          link : '/workshop/item-master',
-          parentId: 2,
-          module: 'workshop'
+        id: 4,
+        label: 'Dealer Master',
+        link: '/dealer-master',
+        parentId: 2
+      },
+      {
+        id: 5,
+        label: 'Item Master Spares',
+        link: '/workshop/item-master',
+        parentId: 2,
+        module: 'workshop'
 
-      },{
-          id : 6,
-          label : 'Item Master FG',
-          link : '/showroom/itemmaster-fg',
-          parentId: 2,
-          module: 'showroom'
+      }, {
+        id: 6,
+        label: 'Item Master FG',
+        link: '/showroom/itemmaster-fg',
+        parentId: 2,
+        module: 'showroom'
       }
     ]
-    }
+  }
   //     {
   //       id: 4,
   //       label: 'MENUITEMS.DASHBOARD.LIST.CRM',

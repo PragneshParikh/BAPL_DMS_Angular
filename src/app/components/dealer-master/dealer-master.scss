@@ -1,0 +1,95 @@
+table>thead>tr>th {
+    background-color: #747CA0;
+    color: #ffffff;
+}
+.dealer-table th,
+.dealer-table td{
+white-space: nowrap;
+}
+
+.table-gridjs th.sort {
+  padding-right: 30px;
+}
+.section-header{
+    background-color:#747CA0;
+    color:#fff;
+    padding:8px 15px;
+    font-weight:600;
+}
+
+.dealer-modal-header {
+  background-color: #747CA0;
+  color: white;
+}
+
+.dealer-modal-header .modal-title {
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Fixed header */
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 1055;
+}
+
+/* Fixed footer */
+.modal-footer {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  z-index: 1055;
+}
+
+/* Scrollable body */
+.modal-body {
+  max-height: 65vh;
+  overflow-y: auto;
+}
+.dealer-modal-header {
+  background-color: #747CA0;
+  color: #ffffff;
+}
+
+.dealer-modal-header .modal-title {
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Fixed header */
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 1055;
+}
+
+/* Fixed footer */
+.modal-footer {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  z-index: 1055;
+}
+
+/* Scrollable body */
+.modal-body {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+// .my-4{
+//     margin-top: 0.5rem !important;
+//     margin-bottom: 0.5rem !important;
+//     color: #747CA0 !important;
+// }
+.custom-hr{
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #000008 !important;
+    // border: none;
+    // border-top: 3px solid #000008;
+}
+
