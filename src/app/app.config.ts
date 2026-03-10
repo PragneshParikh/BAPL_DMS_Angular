@@ -23,13 +23,15 @@ import { ApikeyEffects } from './store/APIKey/apikey_effect';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-
+import { FormsModule } from '@angular/forms';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    provideHttpClient(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     importProvidersFrom(
+      FormsModule,
       TranslateModule.forRoot({
         defaultLanguage: 'en',
         loader: {

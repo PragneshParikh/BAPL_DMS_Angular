@@ -8,83 +8,73 @@ export const MENU: MenuItem[] = [
   },
   {
     id: 2,
-    label: 'MENUITEMS.Master.TEXT',
+    label: 'Master',
     icon: 'ri-dashboard-2-line',
     isCollapsed: true,
 
     subItems: [
       {
+        id: 3,
+        label: 'Location Master',
+        link: '/location-master',
+        parentId: 2
+      },
+      {
+        id: 3,
+        label: 'MENUITEMS.DASHBOARD.LIST.ANALYTICS',
+        link: '/analytics',
+        parentId: 2
+      },
+      {
         id: 4,
-        label: 'Dealer Master',
-        link: '/dealer-master',
+        label: 'MENUITEMS.DASHBOARD.LIST.CRM',
+        link: '/crm',
         parentId: 2
       },
       {
         id: 5,
-        label: 'Item Master Spares',
-        link: '/workshop/item-master',
-        parentId: 2,
-        module: 'workshop'
-
-      }, {
+        label: 'MENUITEMS.DASHBOARD.LIST.ECOMMERCE',
+        link: '/',
+        parentId: 2
+      },
+      {
         id: 6,
-        label: 'Item Master FG',
-        link: '/showroom/itemmaster-fg',
+        label: 'MENUITEMS.DASHBOARD.LIST.CRYPTO',
+        link: '/crypto',
+        parentId: 2
+      },
+      {
+        id: 7,
+        label: 'MENUITEMS.DASHBOARD.LIST.PROJECTS',
+        link: '/projects',
+        parentId: 2
+      },
+      {
+        id: 7,
+        label: 'MENUITEMS.DASHBOARD.LIST.NFT',
+        link: '/nft',
         parentId: 2,
-        module: 'showroom'
+      },
+      {
+        id: 8,
+        label: 'MENUITEMS.DASHBOARD.LIST.JOB',
+        link: '/job',
+        parentId: 2,
+      },
+      {
+        id: 9,
+        label: 'MENUITEMS.PAGES.LIST.BLOG',
+        link: '/dashboard-blog',
+        parentId: 2,
       }
     ]
-  }
-  //     {
-  //       id: 4,
-  //       label: 'MENUITEMS.DASHBOARD.LIST.CRM',
-  //       link: '/crm',
-  //       parentId: 2
-  //     },
-  //     {
-  //       id: 5,
-  //       label: 'MENUITEMS.DASHBOARD.LIST.ECOMMERCE',
-  //       link: '/',
-  //       parentId: 2
-  //     },
-  //     {
-  //       id: 6,
-  //       label: 'MENUITEMS.DASHBOARD.LIST.CRYPTO',
-  //       link: '/crypto',
-  //       parentId: 2
-  //     },
-  //     {
-  //       id: 7,
-  //       label: 'MENUITEMS.DASHBOARD.LIST.PROJECTS',
-  //       link: '/projects',
-  //       parentId: 2
-  //     },
-  //     {
-  //       id: 7,
-  //       label: 'MENUITEMS.DASHBOARD.LIST.NFT',
-  //       link: '/nft',
-  //       parentId: 2,
-  //     },
-  //     {
-  //       id: 8,
-  //       label: 'MENUITEMS.DASHBOARD.LIST.JOB',
-  //       link: '/job',
-  //       parentId: 2,
-  //     },
-  //     {
-  //       id: 9,
-  //       label: 'MENUITEMS.PAGES.LIST.BLOG',
-  //       link: '/dashboard-blog',
-  //       parentId: 2,
-  //     }
-  //   ]
-  // },
-  // {
-  //   id: 8,
-  //   label: 'MENUITEMS.APPS.TEXT',
-  //   icon: 'ri-apps-2-line',
-  //   isCollapsed: true,
-  //   subItems: [
+  },
+  {
+    id: 8,
+    label: 'MENUITEMS.APPS.TEXT',
+    icon: 'ri-apps-2-line',
+    isCollapsed: true,
+    subItems: [
 
   //     {
   //       id: 9,
@@ -1467,5 +1457,4 @@ export const MENU: MenuItem[] = [
   //     },
   //   ]
   // }
-
-];
+// ];
