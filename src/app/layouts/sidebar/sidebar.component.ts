@@ -11,11 +11,11 @@ import { SimplebarAngularModule } from 'simplebar-angular';
 import { ModuleService } from '../../services/moduleservice';
 
 @Component({
-    selector: 'app-sidebar',
-    templateUrl: './sidebar.component.html',
-    styleUrls: ['./sidebar.component.scss'],
-    imports: [CommonModule, NgbCollapseModule, RouterModule, TranslateModule, SimplebarAngularModule],
-    standalone: true
+  selector: 'app-sidebar',
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['./sidebar.component.scss'],
+  imports: [CommonModule, NgbCollapseModule, RouterModule, TranslateModule, SimplebarAngularModule],
+  standalone: true
 })
 export class SidebarComponent implements OnInit {
 

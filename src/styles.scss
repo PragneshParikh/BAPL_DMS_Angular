@@ -50,31 +50,44 @@
 }
 
 
-#landingnft{
-    .slick-dots{
+#landingnft {
+    .slick-dots {
         bottom: -36px;
         z-index: 1;
-        .slick-active{
-            button{
+
+        .slick-active {
+            button {
                 background-color: #3577f1 !important;
             }
         }
     }
-    .slick-dots li{
+
+    .slick-dots li {
         height: 7px !important;
     }
+
     .slick-dots li button {
         width: 22px !important;
         height: 5px !important;
         border: none;
-        background-color: rgba(109,98,253,.2) !important;
+        background-color: rgba(109, 98, 253, .2) !important;
         padding: 0px;
         margin: 0px;
         transition: all .3s;
         border-radius: 50px;
-        &::before{
+
+        &::before {
             display: none;
         }
     }
 
 }
+
+// #region Customized styles for BGauss DMS
+/* Custom styles for BGauss DMS */
+table>thead>tr {
+    background-color: #343a40 !important;
+    color: #FFFFFF !important;
+}
+
+// #endregion

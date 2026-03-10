@@ -14,6 +14,12 @@ export const MENU: MenuItem[] = [
 
     subItems: [
       {
+        id: 2,
+        label: 'Color Master',
+        link: '/color',
+        parentId: 1
+      },
+      {
         id: 3,
         label: 'Location Master',
         link: '/location-master',
@@ -32,14 +38,20 @@ export const MENU: MenuItem[] = [
         link: '/workshop/item-master',
         parentId: 2,
         module: 'workshop'
-
-      }, {
+      },
+      {
         id: 6,
         label: 'Item Master FG',
         link: '/showroom/itemmaster-fg',
         parentId: 2,
         module: 'showroom'
-      }
+      },
+      {
+        id: 7,
+        label: 'API Tracking',
+        link: '/api-tracking',
+        parentId: 1
+      },
     ]
   }
 ];

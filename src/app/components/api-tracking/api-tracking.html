@@ -1,0 +1,162 @@
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs title="API Tracking"></app-breadcrumbs>
+<!-- End Breadcrumbs -->
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+
+            <div class="card-body">
+                <div class="row">
+
+                    <!-- Date Range Filter -->
+                    <div class="col-lg-3">
+                        <div class="mb-3">
+                            <label class="form-label mb-0">Select Range</label>
+                            <input class="form-control form-control-sm flatpickr-input" type="text" mwlFlatpickr
+                                [(ngModel)]="dateRange" [altInput]="true" [convertModelValue]="true" mode="range"
+                                altFormat="d M, Y" dateFormat="d M, Y">
+                        </div>
+                    </div>
+
+                    <!-- API Unique Filter -->
+                    <div class="col-lg-3">
+                        <div class="mb-3">
+                            <label class="form-label mb-0">API Unique</label>
+                            <select class="form-select form-select-sm  mb-3" aria-label=".form-select-sm example"
+                                [(ngModel)]="selectedEndPoint">
+                                <option selected>Open this select menu</option>
+                                <option value="color">Color</option>
+                                <option value="dealer">Dealer</option>
+                                <option value="location">Location</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Search Criteria Filter -->
+                    <div class="col-lg-3">
+                        <div class="mb-3">
+                            <label class="form-label mb-0">Search Criteria</label>
+                            <!-- Input Group Sizing -->
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" aria-label="Sizing example input"
+                                    aria-describedby="inputGroup-sizing-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Status Filter -->
+                    <div class="col-lg-3">
+                        <div class="mb-3">
+                            <label class="form-label mb-0">API Status</label>
+                            <select class="form-select form-select-sm  mb-3" aria-label=".form-select-sm example"
+                                [(ngModel)]="selectedStatus">
+                                <option selected>Open this select menu</option>
+                                <option value="1">Success</option>
+                                <option value="2">Failed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="col-lg-3">
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-primary btn-sm" (click)=filterdRecords()>
+                                <i class="ri-search-line align-bottom me-1"></i>Search</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <div class="table-responsive" style="overflow-x:auto;">
+                    <table class="table table-gridjs" style="table-layout: fixed; width: 100%;">
+                        <thead>
+                            <tr>
+                                <th class="sort" data-sort="name" (click)="sortData('srno')" style="width: 7%;">Sr. No.
+                                </th>
+                                <th class="sort" data-sort="name" (click)="sortData('endpoint')" style="width: 15%;">API
+                                    Unique</th>
+                                <th class="sort" data-sort="name" (click)="sortData('dateofhit')" style="width: 15%;">
+                                    Date of
+                                    Hit</th>
+                                <th class="sort" data-sort="name" (click)="sortData('payload')" style="width: 25%;">API
+                                    Payload</th>
+                                <th class="sort" data-sort="name" (click)="sortData('status')" style="width: 10%;">API
+                                    Status</th>
+                                <th class="sort" data-sort="name" (click)="sortData('response')" style="width: 30%;">API
+                                    Response</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for ( data of pagedData ; track $index) {
+                            <tr>
+                                <td class="text-center">
+                                    {{ data.srno }}
+                                </td>
+                                <td>
+                                    {{ data.endpoint }}
+                                </td>
+                                <td>
+                                    {{ data.dateofhit | date:'MM/dd/yyyy hh:mm a' }}
+                                </td>
+                                <td class="truncate-column">
+                                    {{ data.payload }}
+                                    <br>
+                                    <button type="button" class="btn btn-primary btn-sm"
+                                        (click)="openPayload(RowPayloadModel, data.payload)">
+                                        View Payload</button>
+                                </td>
+                                <td>
+                                    {{ data.status }}
+                                </td>
+                                <td class="truncate-column">
+                                    {{ data.response }}
+                                    <br>
+                                    <button type="button" class="btn btn-primary btn-sm"
+                                        (click)="openPayload(RowPayloadModel, data.response)">
+                                        View Response</button>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="col-sm-12 col-md-12">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+                        <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="refreshData()" [maxSize]="5" [boundaryLinks]="true">
+                        </ngb-pagination>
+                    </div>
+                </div>
+                <!-- End Pagination -->
+            </div>
+        </div><!-- end card-body -->
+    </div><!-- end card -->
+</div>
+<!-- end col -->
+<!-- end row -->
+
+<ng-template #RowPayloadModel role="document" let-modal>
+    <div class="col-xxl-6">
+        <div class="card">
+            <div class="modal-header" style="background-color: #747CA0; padding: 5px;">
+                <h5 class="modal-title" id="varyingcontentModalLabel" style="color: white;">API Tracking Payload</h5>
+                <button type="button" class="btn-close" aria-hidden="true" style="color: white;"
+                    (click)="modal.dismiss('Cross click')"></button>
+            </div>
+            <div class="card-body">
+
+                {{ jsonString }}
+
+            </div><!-- end card-body -->
+        </div><!-- end card -->
+    </div>
+</ng-template>

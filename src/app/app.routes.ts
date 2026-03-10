@@ -32,7 +32,9 @@ export const routes: Routes = [
       { path: 'dealer-master', component: DealerMaster },
       { path: 'dealer-account-master', component: DealerAccountMaster },
       { path: 'upload', component: DealerMasterBulkDataDipatch },
-      { path: 'location-master', component: LocationMasterComponent }
+      { path: 'location-master', component: LocationMasterComponent },
+      { path: 'color', loadComponent: () => import('./components/color/color').then(m => m.Color) },
+      { path: 'api-tracking', loadComponent: () => import('./components/api-tracking/api-tracking').then(m => m.ApiTracking) }
     ]
   }
 ];

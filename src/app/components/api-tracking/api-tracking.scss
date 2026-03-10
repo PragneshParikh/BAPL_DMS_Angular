@@ -1,0 +1,19 @@
+table>thead>tr>th {
+    background-color: #747CA0 !important;
+    color: white !important;
+}
+
+.table-gridjs>tbody>tr>td {
+    padding: 5px !important;
+}
+
+.truncate-column {
+    max-width: 200px;
+    /* adjust width as needed */
+    white-space: nowrap;
+    /* keep text in single line */
+    overflow: hidden;
+    /* hide overflow */
+    text-overflow: ellipsis;
+    /* show "..." for overflow */
+}
