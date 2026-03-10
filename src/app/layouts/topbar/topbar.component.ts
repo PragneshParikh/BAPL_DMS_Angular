@@ -20,6 +20,7 @@ import { NgbDropdownModule, NgbModal, NgbNavModule } from '@ng-bootstrap/ng-boot
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SimplebarAngularModule } from 'simplebar-angular';
+import { ModuleService } from '../../services/moduleservice';
 
 @Component({
     selector: 'app-topbar',
@@ -29,6 +30,7 @@ import { SimplebarAngularModule } from 'simplebar-angular';
     standalone: true
 })
 export class TopbarComponent implements OnInit {
+  activeModule = 'showroom'; // added by kajal
   messages: any
   element: any;
   mode: string | undefined;
@@ -51,7 +53,7 @@ export class TopbarComponent implements OnInit {
 
   constructor(@Inject(DOCUMENT) private document: any, private eventService: EventService, public languageService: LanguageService, private modalService: NgbModal,
     public _cookiesService: CookieService, public translate: TranslateService, private authService: AuthenticationService, private authFackservice: AuthfakeauthenticationService,
-    private router: Router, private TokenStorageService: TokenStorageService) { }
+    private moduleService: ModuleService,private router: Router, private TokenStorageService: TokenStorageService) { }
 
   ngOnInit(): void {
     this.userData = this.TokenStorageService.getUser();
@@ -66,7 +68,9 @@ export class TopbarComponent implements OnInit {
     } else {
       this.flagvalue = val.map(element => element.flag);
     }
-
+ this.moduleService.activeModule$.subscribe(module=>{
+    this.activeModule = module;
+  });
     // Fetch Data
     this.allnotifications = allNotification;
 
@@ -78,6 +82,23 @@ export class TopbarComponent implements OnInit {
       this.total += item_price
     });
   }
+
+  /**
+   * switch menus showroom, workshop and account
+   */
+  setModule(module: string){
+
+  this.moduleService.setModule(module);
+
+  if(module === 'showroom'){
+    this.router.navigate(['/showroom/itemmaster-fg']);
+  }else{
+    this.router.navigate(['/workshop/item-master']);
+  }
+
+}
+  
+
 
   /**
    * Toggle the menu bar when having mobile screen

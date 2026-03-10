@@ -8,6 +8,7 @@ import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { SimplebarAngularModule } from 'simplebar-angular';
+import { ModuleService } from '../../services/moduleservice';
 
 @Component({
     selector: 'app-sidebar',
@@ -24,13 +25,44 @@ export class SidebarComponent implements OnInit {
   @ViewChild('sideMenu') sideMenu!: ElementRef;
   @Output() mobileMenuButtonClicked = new EventEmitter();
 
-  constructor(private router: Router, public translate: TranslateService) {
+  constructor(private router: Router, private moduleService: ModuleService,public translate: TranslateService) {
     translate.setDefaultLang('en');
   }
 
   ngOnInit(): void {
     // Menu Items
-    this.menuItems = MENU;
+    //added by kajal
+    this.moduleService.activeModule$.subscribe(module => {
+
+    const menuCopy = JSON.parse(JSON.stringify(MENU));
+
+    this.menuItems = menuCopy.map((menu:any)=>{
+
+      if(menu.subItems){
+
+        menu.subItems = menu.subItems.filter((item:any)=>{
+
+          if(!item.module){
+            return true;
+          }
+
+          return item.module === module;
+
+        });
+
+      }
+
+      return menu;
+
+    });
+
+    setTimeout(()=>{
+      this.initActiveMenu();
+    });
+
+  });
+
+//end by kajal
     this.router.events.subscribe((event) => {
       if (document.documentElement.getAttribute('data-layout') != "twocolumn") {
         if (event instanceof NavigationEnd) {
