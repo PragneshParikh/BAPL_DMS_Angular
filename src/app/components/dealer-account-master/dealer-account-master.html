@@ -1,176 +1,165 @@
 <div class="account-master-container">
 
-<div class="header">
-<i class="ri-links-line"></i> Account Link Master
-</div>
+    <div class="header">
+        <i class="ri-links-line"></i> Account Link Master
+    </div>
 
-<div class="row g-3">
+    <div class="row g-3">
 
-<!-- LEFT PANEL -->
-<div class="col-md-3 left-panel">
+        <!-- LEFT PANEL -->
+        <div class="col-md-3 left-panel">
 
-<label class="label">Select Group</label>
+            <label class="label">Select Group</label>
 
-<select class="form-select form-select-sm mb-2"
-[(ngModel)]="selectedGroup">
-<option>Spares</option>
-<option>Service</option>
-<option>Accessories</option>
-</select>
-
-
-<label class="label">Group Name(s)</label>
-
-<div class="multiselect-container">
-
-<div class="multiselect-display"
-(click)="toggleDropdown()">
-
-{{ getSelectedNames() || 'Select Group Names' }}
-
-<span class="dropdown-arrow">▼</span>
-
-</div>
+            <select class="form-select form-select-sm mb-2" [(ngModel)]="selectedGroup">
+                <option>Spares</option>
+                <option>Service</option>
+                <option>Accessories</option>
+            </select>
 
 
-<div class="dropdown-panel" *ngIf="dropdownOpen">
+            <label class="label">Group Name(s)</label>
 
-<div class="dropdown-actions">
+            <div class="multiselect-container">
 
-<span class="select-all"
-(click)="selectAll()">✔ Select All</span>
+                <div class="multiselect-display" (click)="toggleDropdown()">
 
-<span class="clear-all"
-(click)="clearAll()">✖ Clear All</span>
+                    {{ getSelectedNames() || 'Select Group Names' }}
 
-</div>
+                    <span class="dropdown-arrow">▼</span>
 
-<input
-type="text"
-class="form-control form-control-sm mb-2"
-placeholder="Search Group"
-[(ngModel)]="searchGroup">
-
-<div class="checkbox-list">
-
-<div class="form-check"
-*ngFor="let group of filteredGroups()">
-
-<input
-class="form-check-input"
-type="checkbox"
-[(ngModel)]="group.selected">
-
-<label class="form-check-label">
-{{group.name}}
-</label>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
+                </div>
 
 
-<!-- RIGHT PANEL -->
-<div class="col-md-9">
+                <div class="dropdown-panel" *ngIf="dropdownOpen">
 
-<div class="row g-2">
+                    <div class="dropdown-actions">
 
-<div class="col-md-6">
-<label class="label">Purchase Account Head Taxable</label>
-<select class="form-select form-select-sm">
-<option>Purchase Account Head Taxable</option>
-</select>
-</div>
+                        <span class="select-all" (click)="selectAll()">✔ Select All</span>
 
-<div class="col-md-6">
-<label class="label">Sale Acct. Head Taxable</label>
-<select class="form-select form-select-sm">
-<option>Sale Account Head Taxable</option>
-</select>
-</div>
+                        <span class="clear-all" (click)="clearAll()">✖ Clear All</span>
 
-</div>
+                    </div>
 
+                    <input type="text" class="form-control form-control-sm mb-2" placeholder="Search Group"
+                        [(ngModel)]="searchGroup">
 
-<div class="row g-2 mt-1">
+                    <div class="checkbox-list">
 
-<div class="col-md-3">
-<label class="label">SGST</label>
-<select class="form-select form-select-sm">
-<option>SGST Account</option>
-</select>
-</div>
+                        <div class="form-check" *ngFor="let group of filteredGroups()">
 
-<div class="col-md-3">
-<label class="label">CGST</label>
-<select class="form-select form-select-sm">
-<option>CGST Account</option>
-</select>
-</div>
+                            <input class="form-check-input" type="checkbox" [(ngModel)]="group.selected">
 
-<div class="col-md-3">
-<label class="label">IGST</label>
-<select class="form-select form-select-sm">
-<option>IGST Account</option>
-</select>
-</div>
+                            <label class="form-check-label">
+                                {{group.name}}
+                            </label>
 
-<div class="col-md-3">
-<label class="label">UGST</label>
-<select class="form-select form-select-sm">
-<option>UGST</option>
-</select>
-</div>
+                        </div>
 
-</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
 
 
-<div class="row g-2 mt-1">
+        <!-- RIGHT PANEL -->
+        <div class="col-md-9">
 
-<div class="col-md-4">
-<label class="label">Registration Amount Account</label>
-<select class="form-select form-select-sm">
-<option>Choose Account Name</option>
-</select>
-</div>
+            <div class="row g-2">
 
-<div class="col-md-3">
-<label class="label">Insurance Amount Account</label>
-<select class="form-select form-select-sm">
-<option>Insurance Amount Account</option>
-</select>
-</div>
+                <div class="col-md-6">
+                    <label class="label">Purchase Account Head Taxable</label>
+                    <select class="form-select form-select-sm">
+                        <option>Purchase Account Head Taxable</option>
+                    </select>
+                </div>
 
-<div class="col-md-3">
-<label class="label">Labour Account</label>
-<select class="form-select form-select-sm">
-<option>Choose Account Name</option>
-</select>
-</div>
+                <div class="col-md-6">
+                    <label class="label">Sale Acct. Head Taxable</label>
+                    <select class="form-select form-select-sm">
+                        <option>Sale Account Head Taxable</option>
+                    </select>
+                </div>
 
-<div class="col-md-3">
-<label class="label">TCS Account</label>
-<select class="form-select form-select-sm">
-<option>Choose Account Name</option>
-</select>
-</div>
+            </div>
 
-<div class="col-md-4">
-<label class="label">CESS</label>
-<select class="form-select form-select-sm">
-<option>Choose Account Name</option>
-</select>
-</div>
 
-</div>
+            <div class="row g-2 mt-1">
 
-<!-- 
+                <div class="col-md-3">
+                    <label class="label">SGST</label>
+                    <select class="form-select form-select-sm">
+                        <option>SGST Account</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="label">CGST</label>
+                    <select class="form-select form-select-sm">
+                        <option>CGST Account</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="label">IGST</label>
+                    <select class="form-select form-select-sm">
+                        <option>IGST Account</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="label">UGST</label>
+                    <select class="form-select form-select-sm">
+                        <option>UGST</option>
+                    </select>
+                </div>
+
+            </div>
+
+
+            <div class="row g-2 mt-1">
+
+                <div class="col-md-4">
+                    <label class="label">Registration Amount Account</label>
+                    <select class="form-select form-select-sm">
+                        <option>Choose Account Name</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="label">Insurance Amount Account</label>
+                    <select class="form-select form-select-sm">
+                        <option>Insurance Amount Account</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="label">Labour Account</label>
+                    <select class="form-select form-select-sm">
+                        <option>Choose Account Name</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="label">TCS Account</label>
+                    <select class="form-select form-select-sm">
+                        <option>Choose Account Name</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="label">CESS</label>
+                    <select class="form-select form-select-sm">
+                        <option>Choose Account Name</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- 
 <div class="row g-2 mt-1">
 
 <div class="col-md-4">
@@ -183,31 +172,31 @@ type="checkbox"
 </div> -->
 
 
-<div class="expand-box">
-Other Accounts
-<span>+</span>
-</div>
+            <div class="expand-box">
+                Other Accounts
+                <span>+</span>
+            </div>
 
-<div class="expand-box">
-Old Accounts
-<span>+</span>
-</div>
+            <div class="expand-box">
+                Old Accounts
+                <span>+</span>
+            </div>
 
 
-<div class="text-end mt-3">
+            <div class="text-end mt-3">
 
-<button class="btn btn-success btn-sm me-2">
-Save
-</button>
+                <button class="btn btn-success btn-sm me-2">
+                    Save
+                </button>
 
-<button class="btn btn-danger btn-sm">
-Cancel
-</button>
+                <button class="btn btn-danger btn-sm">
+                    Cancel
+                </button>
 
-</div>
+            </div>
 
-</div>
+        </div>
 
-</div>
+    </div>
 
 </div>

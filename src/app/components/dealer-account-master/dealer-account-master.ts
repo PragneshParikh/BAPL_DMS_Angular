@@ -11,43 +11,43 @@ import { CommonModule } from '@angular/common';
 })
 export class DealerAccountMaster {
 
-selectedGroup:any='';
-searchGroup='';
-dropdownOpen=false;
+  selectedGroup: any = '';
+  searchGroup = '';
+  dropdownOpen = false;
 
-groups:any[]=[
-{name:'Other',selected:false},
-{name:'Others',selected:false},
-{name:'Outside Labour',selected:false},
-{name:'Packing',selected:false},
-{name:'Paid Service',selected:false},
-{name:'Parts',selected:false},
-{name:'Patent, Trademark & Copyright',selected:false}
-];
+  groups: any[] = [
+    { name: 'Other', selected: false },
+    { name: 'Others', selected: false },
+    { name: 'Outside Labour', selected: false },
+    { name: 'Packing', selected: false },
+    { name: 'Paid Service', selected: false },
+    { name: 'Parts', selected: false },
+    { name: 'Patent, Trademark & Copyright', selected: false }
+  ];
 
-toggleDropdown(){
-this.dropdownOpen=!this.dropdownOpen;
-}
+  toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
 
-selectAll(){
-this.groups.forEach(g=>g.selected=true);
-}
+  selectAll() {
+    this.groups.forEach(g => g.selected = true);
+  }
 
-clearAll(){
-this.groups.forEach(g=>g.selected=false);
-}
+  clearAll() {
+    this.groups.forEach(g => g.selected = false);
+  }
 
-filteredGroups(){
-return this.groups.filter(g =>
-g.name.toLowerCase().includes(this.searchGroup.toLowerCase())
-);
-}
+  filteredGroups() {
+    return this.groups.filter(g =>
+      g.name.toLowerCase().includes(this.searchGroup.toLowerCase())
+    );
+  }
 
-getSelectedNames(){
-return this.groups
-.filter(g=>g.selected)
-.map(g=>g.name)
-.join(', ');
-}
+  getSelectedNames() {
+    return this.groups
+      .filter(g => g.selected)
+      .map(g => g.name)
+      .join(', ');
+  }
 
 }

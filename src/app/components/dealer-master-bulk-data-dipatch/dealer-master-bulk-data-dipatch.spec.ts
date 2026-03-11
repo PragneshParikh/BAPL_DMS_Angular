@@ -10,7 +10,7 @@ describe('DealerMasterBulkDataDipatch', () => {
     await TestBed.configureTestingModule({
       imports: [DealerMasterBulkDataDipatch]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(DealerMasterBulkDataDipatch);
     component = fixture.componentInstance;

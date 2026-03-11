@@ -10,7 +10,7 @@ describe('DealerAccountMaster', () => {
     await TestBed.configureTestingModule({
       imports: [DealerAccountMaster]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(DealerAccountMaster);
     component = fixture.componentInstance;

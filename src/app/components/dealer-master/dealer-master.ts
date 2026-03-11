@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { DealerService } from '../../services/dealer-service';
+import { DealerService } from '../../core/services/dealer-service';
 import { FormsModule } from '@angular/forms';
 import '@angular/localize/init';
+import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-dealer-master',
@@ -20,7 +21,7 @@ export class DealerMaster implements OnInit {
   dealerList: any[] = [];
   originalDealerList: any[] = [];
   paginatedDealerList: any[] = [];
-selectedMaster:any='';
+  selectedMaster: any = '';
   page = 1;
   pageSize = 10;
 
@@ -30,15 +31,16 @@ selectedMaster:any='';
   searchTerm = '';
 
   selectedDealer: any;
-
+  private searchSubject = new Subject<string>();
   constructor(
     private dealerService: DealerService,
     private modalService: NgbModal
-  ) {}
+  ) { }
 
   ngOnInit(): void {
 
     this.loadDealers();
+    this.setupSearch();
   }
 
 
@@ -52,9 +54,9 @@ selectedMaster:any='';
 
         const data = res.data || [];
         this.dealerList = data.map((dealer: any, index: number) => ({
-        ...dealer,
-        slNo: index + 1
-      }));
+          ...dealer,
+          slNo: index + 1
+        }));
         this.originalDealerList = [...this.dealerList];
 
         this.refreshPage();
@@ -134,30 +136,84 @@ selectedMaster:any='';
 
 
 
-uploadFile(){
-console.log("Upload clicked for:",this.selectedMaster);
-}
+  uploadFile() {
+    console.log("Upload clicked for:", this.selectedMaster);
+  }
 
-onRowSelect(dealer:any){
-console.log("Selected Dealer:",dealer);
-}
+  onRowSelect(dealer: any) {
+    console.log("Selected Dealer:", dealer);
+  }
 
-toggleSelectAll(event:any){
+  toggleSelectAll(event: any) {
 
-const checked=event.target.checked;
+    const checked = event.target.checked;
 
-this.paginatedDealerList.forEach((dealer:any)=>{
-dealer.selected=checked;
-});
+    this.paginatedDealerList.forEach((dealer: any) => {
+      dealer.selected = checked;
+    });
 
-}
+  }
 
-printSelected(){
+  printSelected() {
 
-const selectedDealers=this.paginatedDealerList.filter((d:any)=>d.selected);
+    const selectedDealers = this.paginatedDealerList.filter((d: any) => d.selected);
 
-console.log("Selected Dealers:",selectedDealers);
+    console.log("Selected Dealers:", selectedDealers);
 
-}
- 
+  }
+
+  downloadDealerExcel() {
+
+    this.dealerService.downloadDealerExcel().subscribe((data: Blob) => {
+
+      const blob = new Blob([data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const downloadURL = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = downloadURL;
+      link.download = 'DealerList.xlsx';
+
+      link.click();
+
+      window.URL.revokeObjectURL(downloadURL);
+
+    });
+
+  }
+
+  setupSearch() {
+
+    this.searchSubject.pipe(
+
+      debounceTime(400),
+      distinctUntilChanged(),
+
+      switchMap(search =>
+        this.dealerService.getDealers(search)
+      )
+
+    ).subscribe({
+
+      next: (res: any) => {
+
+        this.dealerList = res.data || [];
+        this.page = 1;
+
+        this.refreshPage();
+
+      },
+
+      error: err => console.error(err)
+
+    });
+
+  }
+
+  onSearchChange() {
+    this.searchSubject.next(this.searchTerm);
+  }
+
 }
