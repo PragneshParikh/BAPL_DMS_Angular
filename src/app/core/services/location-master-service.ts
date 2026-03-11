@@ -8,10 +8,16 @@ import { Observable } from 'rxjs';
 export class LocationMasterService {
 
   private apiUrl = "http://localhost:5215/api/LocationMaster/GetAllLocationMaster";
+  private dealerUrl = "http://localhost:5215/api/DealerMaster/GetDealerDropdown";
+  
 
   constructor(private http: HttpClient) {}
 
   getAllLocationMaster(): Observable<any> {
     return this.http.get<any>(this.apiUrl);
+  }
+
+  getDealerDropdown(): Observable<any> {
+    return this.http.get<any>(this.dealerUrl);
   }
 }

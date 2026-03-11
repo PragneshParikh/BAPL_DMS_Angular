@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { LocationMasterService } from '../../services/location-master-service';
+import { LocationMasterService } from '../../core/services/location-master-service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import * as bootstrap from 'bootstrap';
@@ -33,10 +33,12 @@ export class LocationMasterComponent implements OnInit {
   sortColumn = '';
   sortDirection = 'asc';
 
+
   constructor(private locationService: LocationMasterService) { }
 
   ngOnInit(): void {
     this.loadLocations();
+    this.loadDealerDropdown();
   }
 
   loadLocations() {
@@ -175,5 +177,11 @@ export class LocationMasterComponent implements OnInit {
 
     }
 
+  }
+  loadDealerDropdown() {
+    this.locationService.getDealerDropdown().subscribe((res: any) => {
+      console.log("Dealer API Response:", res);
+      this.dealerList = res;
+    });
   }
 }
