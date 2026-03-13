@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
@@ -12,8 +12,15 @@ export class Form22masterservice {
 
   }
 
-  getForm22masterdetails(): Observable<any> {
-    return this.httpClient.get<any[]>(`${this.baseUrl}/Form22Master`);
+  getForm22masterdetails(search: string=''): Observable<any> {
+
+    let params = new HttpParams()
+      .set('search',search ?? '');
+
+    if (search && search.trim() !== '') {
+      params = params.set('search', search.trim());
+    }
+    return this.httpClient.get<any[]>(`${this.baseUrl}/Form22Master`, { params });
   }
 
   insertForm22Master(data: any) {

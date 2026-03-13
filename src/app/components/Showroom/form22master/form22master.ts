@@ -43,8 +43,10 @@ export class Form22master implements OnInit {
   //load page details
   griddata: any[] = [];
   filteredData: any[] = [];
+
   searchTerm: string = '';
   selectedForm22Item: any;
+  
   pagedData: any[] = [];
   // pagination
   page = 1;
@@ -61,18 +63,23 @@ export class Form22master implements OnInit {
 
   ngOnInit() {
     this.loadOemModels();
+    this.loadForm22Items();
+  }
+  //  API CALL
+  loadForm22Items(search?: string) {
 
-    this.form22service.getForm22masterdetails().subscribe((res: any) => {
+    this.form22service.getForm22masterdetails(this.searchTerm).subscribe((res: any) => {
+
       this.griddata = res;
-
-      // initialize table
       this.filteredData = [...this.griddata];
       this.collectionSize = this.filteredData.length;
 
       this.refreshTable();
 
       console.log(this.griddata);
+
     });
+
   }
   //Oem dropdown binding
   loadOemModels() {
@@ -80,7 +87,15 @@ export class Form22master implements OnInit {
       this.oemModelList = res;
     });
   }
+//  SEARCH FUNCTION
 
+ searchItems(event: any) {
+
+  this.searchTerm = event.target.value || '';
+  this.loadForm22Items(this.searchTerm);
+
+}
+  
 
   //add oem details
   addForm22Master() {
