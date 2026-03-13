@@ -21,13 +21,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SimplebarAngularModule } from 'simplebar-angular';
 import { ModuleService } from '../../services/moduleservice';
+import { MenuService } from '../../core/services/menu-service';
 
 @Component({
-    selector: 'app-topbar',
-    templateUrl: './topbar.component.html',
-    styleUrls: ['./topbar.component.scss'],
-    imports:  [CommonModule, NgbNavModule, FormsModule, ReactiveFormsModule, SimplebarAngularModule, NgbDropdownModule],
-    standalone: true
+  selector: 'app-topbar',
+  templateUrl: './topbar.component.html',
+  styleUrls: ['./topbar.component.scss'],
+  imports: [CommonModule, NgbNavModule, FormsModule, ReactiveFormsModule, SimplebarAngularModule, NgbDropdownModule],
+  standalone: true
 })
 export class TopbarComponent implements OnInit {
   activeModule = 'showroom'; // added by kajal
@@ -51,9 +52,12 @@ export class TopbarComponent implements OnInit {
   @ViewChild('removenotification') removenotification !: TemplateRef<any>;
   notifyId: any;
 
+  public selectedOption: string = 'ShowRoom';
+
   constructor(@Inject(DOCUMENT) private document: any, private eventService: EventService, public languageService: LanguageService, private modalService: NgbModal,
     public _cookiesService: CookieService, public translate: TranslateService, private authService: AuthenticationService, private authFackservice: AuthfakeauthenticationService,
-    private moduleService: ModuleService,private router: Router, private TokenStorageService: TokenStorageService) { }
+    private moduleService: ModuleService, private router: Router, private TokenStorageService: TokenStorageService,
+    private menuService: MenuService) { }
 
   ngOnInit(): void {
     this.userData = this.TokenStorageService.getUser();
@@ -68,9 +72,9 @@ export class TopbarComponent implements OnInit {
     } else {
       this.flagvalue = val.map(element => element.flag);
     }
- this.moduleService.activeModule$.subscribe(module=>{
-    this.activeModule = module;
-  });
+    this.moduleService.activeModule$.subscribe(module => {
+      this.activeModule = module;
+    });
     // Fetch Data
     this.allnotifications = allNotification;
 
@@ -86,18 +90,18 @@ export class TopbarComponent implements OnInit {
   /**
    * switch menus showroom, workshop and account
    */
-  setModule(module: string){
+  setModule(module: string) {
 
-  this.moduleService.setModule(module);
+    this.moduleService.setModule(module);
 
-  if(module === 'showroom'){
-    this.router.navigate(['/showroom/itemmaster-fg']);
-  }else{
-    this.router.navigate(['/workshop/item-master']);
+    if (module === 'showroom') {
+      this.router.navigate(['/showroom/itemmaster-fg']);
+    } else {
+      this.router.navigate(['/workshop/item-master']);
+    }
+
   }
 
-}
-  
 
 
   /**
@@ -187,6 +191,11 @@ export class TopbarComponent implements OnInit {
     { text: 'Arabic', flag: 'assets/images/flags/ar.svg', lang: 'ar' },
   ];
 
+  onSelectionChange(option: string) {
+    this.selectedOption = option;
+    this.menuService.filterMenu(option);
+  }
+
   /***
    * Language Value Set
    */
@@ -202,15 +211,15 @@ export class TopbarComponent implements OnInit {
    */
   logout() {
     this.authService.logout();
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/']);
   }
 
   windowScroll() {
     if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
-      (document.getElementById("back-to-top") as HTMLElement).style.display = "block";
+      // (document.getElementById("back-to-top") as HTMLElement).style.display = "block";
       document.getElementById('page-topbar')?.classList.add('topbar-shadow');
     } else {
-      (document.getElementById("back-to-top") as HTMLElement).style.display = "none";
+      // (document.getElementById("back-to-top") as HTMLElement).style.display = "none";
       document.getElementById('page-topbar')?.classList.remove('topbar-shadow');
     }
   }

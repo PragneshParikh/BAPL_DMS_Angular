@@ -34,7 +34,8 @@ export const routes: Routes = [
       { path: 'upload', component: DealerMasterBulkDataDipatch },
       { path: 'location-master', component: LocationMasterComponent },
       { path: 'color', loadComponent: () => import('./components/color/color').then(m => m.Color) },
-      { path: 'api-tracking', loadComponent: () => import('./components/api-tracking/api-tracking').then(m => m.ApiTracking) }
+      { path: 'api-tracking', loadComponent: () => import('./components/api-tracking/api-tracking').then(m => m.ApiTracking) },
+      { path: 'kit-creation', loadComponent: () => import('./components/kit-creation/kit-creation').then(m => m.KitCreation) }
     ]
   }
 ];

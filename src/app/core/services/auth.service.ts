@@ -7,13 +7,14 @@ import { GlobalComponent } from "../../global-component";
 import { Store } from '@ngrx/store';
 import { User } from '../../store/Authentication/auth.models';
 import { loginFailure, logout } from '../../store/Authentication/authentication.actions';
+import { environment } from '../../../environments/environment';
 
-const AUTH_API = GlobalComponent.AUTH_API;
+// const AUTH_API = GlobalComponent.AUTH_API;
 
 const httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-  };
-  
+};
+
 
 @Injectable({ providedIn: 'root' })
 
@@ -24,42 +25,23 @@ export class AuthenticationService {
 
     user!: User;
     currentUserValue: any;
+    private currentUserSubject = new BehaviorSubject<User | null>(null);
+    public currentUser$ = this.currentUserSubject.asObservable();
 
-    private currentUserSubject: BehaviorSubject<User>;
-    // public currentUser: Observable<User>;
+    protected baseUrl = environment.apiUrl;
 
-    constructor(private http: HttpClient, private store: Store) {
-        this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(sessionStorage.getItem('currentUser')!));
-        // this.currentUser = this.currentUserSubject.asObservable();
-     }
+    constructor(private httpClient: HttpClient,
+        private store: Store) {
 
-    /**
-     * Performs the register
-     * @param email email
-     * @param password password
-     */
-    register(email: string, first_name: string, password: string) {        
-        // return getFirebaseBackend()!.registerUser(email, password).then((response: any) => {
-        //     const user = response;
-        //     return user;
-        // });
+        const storedUser = sessionStorage.getItem('currentUser');
+        if (storedUser && storedUser !== 'undefined') {
 
-        // Register Api
-        return this.http.post(AUTH_API + 'signup', {
-            email,
-            first_name,
-            password,
-          }, httpOptions).pipe(
-            map((response: any) => {
-                const user = response;
-                return user;
-            }),
-            catchError((error: any) => {
-                const errorMessage = 'Login failed'; // Customize the error message as needed
-                this.store.dispatch(loginFailure({ error: errorMessage }));
-                return throwError(errorMessage);
-            })
-        );
+            // Check if storedUser is not null or undefined
+            const initialUser = storedUser ? JSON.parse(storedUser) : null;
+
+            this.currentUserSubject = new BehaviorSubject<User | null>(initialUser);
+            this.currentUser$ = this.currentUserSubject.asObservable();
+        }
     }
 
     /**
@@ -68,16 +50,12 @@ export class AuthenticationService {
      * @param password password of user
      */
     login(email: string, password: string) {
-        // return getFirebaseBackend()!.loginUser(email, password).then((response: any) => {
-        //     const user = response;
-        //     return user;
-        // });
 
-        return this.http.post(AUTH_API + 'signin', {
+        return this.httpClient.post(this.baseUrl + '/auth', {
             email,
             password
-          }, httpOptions).pipe(
-              map((response: any) => {
+        }, httpOptions).pipe(
+            map((response: any) => {
                 const user = response;
                 return user;
             }),
@@ -105,11 +83,6 @@ export class AuthenticationService {
         sessionStorage.removeItem('currentUser');
         sessionStorage.removeItem('token');
         this.currentUserSubject.next(null!);
-
-        return of(undefined).pipe(
-        
-        );
-
     }
 
     /**

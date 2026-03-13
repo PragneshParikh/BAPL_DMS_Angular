@@ -75,7 +75,7 @@
       </div>
       <ngx-simplebar class="sidebar-menu-scroll" style="max-height: calc(100vh - 70px)">
         <ul class="metismenu list-unstyled navbar-nav" id="navbar-nav">
-          @for(item of menuItems; track $index){
+          @for(item of filteredMenuItems; track $index){
           @if(item.isTitle){
           <li class="menu-title"><span data-key="t-menu">{{ item.label | translate }}</span></li>
           }@else {

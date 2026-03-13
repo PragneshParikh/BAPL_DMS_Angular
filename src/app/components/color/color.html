@@ -10,8 +10,8 @@
 
                 <div class="d-flex mb-2 align-items-center">
                     <div class="search-box d-inline-block mb-2 ms-auto">
-                        <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm">
-                        <i class="ri-search-line search-icon"></i>
+                        <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm"
+                            (keyup.enter)="onSearch()"> <i class="ri-search-line search-icon"></i>
                     </div>
                 </div>
 
@@ -29,7 +29,7 @@
                             @for ( data of pagedData; track $index) {
                             <tr (click)="onRowDoubleClick(RowDataModel,data)">
                                 <td class="text-center">
-                                    {{ data.srno }}
+                                    {{ data.id }}
                                 </td>
                                 <td>
                                     {{data.colorname}}
@@ -47,7 +47,8 @@
                 <div class="col-sm-12 col-md-12">
                     <div class="text-md-right float-md-end gridjs-pagination">
                         <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
-                            (pageChange)="refreshData()" [maxSize]="5" [boundaryLinks]="true">
+                            (pageChange)="refreshData()" (pageChange)="onPageChange($event)" [maxSize]="5"
+                            [boundaryLinks]="true">
                         </ngb-pagination>
                     </div>
                 </div>

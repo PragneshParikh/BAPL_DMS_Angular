@@ -11,18 +11,18 @@ import { TopbarComponent } from '../topbar/topbar.component';
 import { RightsidebarComponent } from '../rightsidebar/rightsidebar.component';
 
 @Component({
-    selector: 'app-vertical',
-    templateUrl: './vertical.component.html',
-    styleUrls: ['./vertical.component.scss'],
-    imports: [CommonModule, FooterComponent, RouterOutlet, SidebarComponent, TopbarComponent, RightsidebarComponent],
-    standalone: true
+  selector: 'app-vertical',
+  templateUrl: './vertical.component.html',
+  styleUrls: ['./vertical.component.scss'],
+  imports: [CommonModule, FooterComponent, RouterOutlet, SidebarComponent, TopbarComponent, RightsidebarComponent],
+  standalone: true
 })
 export class VerticalComponent implements OnInit {
 
   isCondensed = false;
-  getsize:any;
+  getsize: any;
 
-  constructor(private eventService: EventService, private router: Router, private activatedRoute: ActivatedRoute,private store: Store<RootReducerState>) {
+  constructor(private eventService: EventService, private router: Router, private activatedRoute: ActivatedRoute, private store: Store<RootReducerState>) {
   }
 
   ngOnInit(): void {
@@ -50,7 +50,7 @@ export class VerticalComponent implements OnInit {
     if (document.documentElement.getAttribute('data-sidebar-size') == 'lg') {
       this.store.select(getSidebarSize).subscribe((size) => {
         this.getsize = size
-        })
+      })
       window.addEventListener('resize', () => {
         var self = this;
         if (document.documentElement.clientWidth <= 767) {
@@ -62,7 +62,7 @@ export class VerticalComponent implements OnInit {
           document.querySelector('.hamburger-icon')?.classList.add('open')
         }
         else if (document.documentElement.clientWidth >= 1024) {
-          if(document.documentElement.getAttribute('data-layout-width') == 'fluid'){
+          if (document.documentElement.getAttribute('data-layout-width') == 'fluid') {
             document.documentElement.setAttribute('data-sidebar-size', self.getsize);
             document.querySelector('.hamburger-icon')?.classList.remove('open')
           }
@@ -72,18 +72,18 @@ export class VerticalComponent implements OnInit {
   }
   private handlePreloader(route: any) {
     const preloader = document.getElementById("preloader");
- 
+
     if (!preloader) return;
- 
+
     if (route !== '/disabled-route') {
       preloader.style.opacity = "1";
       preloader.style.visibility = "";
- 
+
       setTimeout(() => {
         preloader.style.opacity = "0";
         preloader.style.visibility = "hidden";
       }, 1000);
- 
+
     } else {
       preloader.style.opacity = "0";
       preloader.style.visibility = "hidden";

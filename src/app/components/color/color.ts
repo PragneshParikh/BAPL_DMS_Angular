@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { ColorMaster } from '../../core/services/color-master.service';
 import { MatSort } from '@angular/material/sort';
 import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
+import { ColorMasterService } from '../../core/services/color-master.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { NgbAccordionModule, NgbDropdownModule, NgbModal, NgbOffcanvas, NgbPaginationModule, NgbTooltipModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { PaginationService } from '../../core/services/pagination.service';
@@ -46,25 +46,31 @@ export class Color implements OnInit {
   /**
    *
    */
-  constructor(private colorMasterService: ColorMaster,
+  constructor(private colorMasterService: ColorMasterService,
     private modalService: NgbModal,
     public service: PaginationService) {
   }
 
   ngOnInit(): void {
-    this.colorMasterService.getColor().subscribe((res) => {
-      this.dataSource = res.map((item: any, index: number) => {
-        return { ...item, srno: index + 1 };
-      });
-      if (res && res.length > 0) {
-        this.collectionSize = res.length;
-        this.refreshData()
+    this.loadColorData();
+  }
+  loadColorData() {
+    this.colorMasterService.getColorByPaged(this.searchTerm, this.page - 1, this.pageSize).subscribe({
+      next: (res: any) => {
+        this.pagedData = [];
+        this.collectionSize = 0;
+
+        if (res) {
+          this.pagedData = res.data;
+          this.collectionSize = res.totalRecords;
+
+        }
+      }, error: (err) => {
+        console.error(err);
       }
-    }, error => {
-      console.error('Error fetching color data:', error);
+
     });
   }
-
   onRowDoubleClick(RowDataModel: any, data: any) {
 
     // clear the exising data
@@ -76,45 +82,12 @@ export class Color implements OnInit {
     // open the modal
     this.modalService.open(RowDataModel, { scrollable: true });
   }
-
   refreshData() {
     this.pagedData = this.dataSource.slice(
       (this.page - 1) * this.pageSize,
       (this.page) * this.pageSize
     );
   }
-
-  // sortData(column: string) {
-
-  //   if (this.sortColumn === column) {
-  //     this.sortDirection = !this.sortDirection;
-  //   } else {
-  //     this.sortColumn = column;
-  //     this.sortDirection = true;
-  //   }
-
-  //   this.dataSource.sort((a: any, b: any) => {
-
-  //     let valueA = a[column];
-  //     let valueB = b[column];
-
-  //     if (valueA == null) valueA = '';
-  //     if (valueB == null) valueB = '';
-
-  //     if (typeof valueA === 'string') {
-  //       valueA = valueA.toLowerCase();
-  //       valueB = valueB.toLowerCase();
-  //     }
-
-  //     if (valueA < valueB) return this.sortDirection ? -1 : 1;
-  //     if (valueA > valueB) return this.sortDirection ? 1 : -1;
-
-  //     return 0;
-  //   });
-
-  //   this.refreshData();
-  // }
-
   sortData(column: string) {
 
     if (this.sortColumn !== column) {
@@ -142,5 +115,13 @@ export class Color implements OnInit {
     // Reset to first page to show sorted items
     this.page = 1;
     this.refreshData();
+  }
+  onPageChange(page: number) {
+    this.page = page;
+    this.loadColorData();
+  }
+  onSearch() {
+    this.page = 1; // Reset to first page on new search
+    this.loadColorData();
   }
 }

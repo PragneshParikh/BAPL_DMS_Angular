@@ -1,0 +1,94 @@
+import { Component, EventEmitter, Output } from '@angular/core';
+import { ToastsContainer } from './toasts-container.component';
+import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { AuthfakeauthenticationService } from '../../core/services/authfake.service';
+import { AuthenticationService } from '../../core/services/auth.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { ToastService } from './toast-service';
+import { CommonModule } from '@angular/common';
+import { error } from 'console';
+
+@Component({
+  selector: 'app-login',
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  templateUrl: './login.html',
+  styleUrl: './login.scss',
+})
+export class Login {
+
+  @Output() loginStatus = new EventEmitter<boolean>();
+  // Login Form
+  loginForm!: UntypedFormGroup;
+  submitted = false;
+  // set the current year
+  year: number = new Date().getFullYear();
+  fieldTextType!: boolean;
+  isLoading = false;
+
+  constructor(private formBuilder: UntypedFormBuilder,
+    private authenticationService: AuthenticationService,
+    private router: Router,
+    public toastService: ToastService) {
+    // redirect to home if already logged in
+    if (this.authenticationService.currentUserValue) {
+      this.router.navigate(['/']);
+    }
+  }
+
+  ngOnInit(): void {
+    if (sessionStorage.getItem('currentUser')) {
+      this.router.navigate(['/']);
+    }
+    /**
+     * Form Validatyion
+     */
+    this.loginForm = this.formBuilder.group({
+      email: ['admin@bapl.com', [Validators.required, Validators.email]],
+      password: ['SecurePassword123!', [Validators.required]],
+    });
+    // get return url from route parameters or default to '/'
+    // this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+  }
+
+  // convenience getter for easy access to form fields
+  get f() { return this.loginForm.controls; }
+  /**
+   * Password Hide/Show
+   */
+  toggleFieldTextType() {
+    this.fieldTextType = !this.fieldTextType;
+  }
+
+  /**
+   * Form submit
+   */
+  onSubmit() {
+    this.submitted = true;
+    this.isLoading = true;
+
+    this.authenticationService.login(this.f['email'].value, this.f['password'].value).subscribe((data: any) => {
+      if (data.status == 'success') {
+        this.loginStatus.emit(true);
+        sessionStorage.setItem('toast', 'true');
+        sessionStorage.setItem('currentUser', JSON.stringify(data));
+        sessionStorage.setItem('token', data.token);
+        this.toastService.show(data.message, { classname: 'bg-success text-white', delay: 5000 });
+        this.router.navigate(['/']);
+      } else {
+        this.toastService.show(data.message, { classname: 'bg-danger text-white', delay: 5000 });
+      }
+      this.isLoading = false;
+    }, error => {
+      console.error('Login error:', error);
+      this.toastService.show('An error occurred during login. Please try again.', { classname: 'bg-danger text-white', delay: 5000 });
+      this.isLoading = false;
+    });
+
+    // stop here if form is invalid
+    if (this.loginForm.invalid) {
+      return;
+    }
+
+  }
+}

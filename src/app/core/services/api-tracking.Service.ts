@@ -18,12 +18,13 @@ export class ApiTrackingService {
     return this.httpClient.get(`${this.baseURL}/api-tracking`);
   }
 
-  getDataByFilter(fromDate: Date, toDate: Date, endPoint: string, status: string): Observable<any> {
+  getDataByFilter(fromDate: Date, toDate: Date, endPoint: string, searchCriteria: string, status: string): Observable<any> {
 
     const params = {
       fromDate: fromDate.toISOString(),
       toDate: toDate.toISOString(),
       endPoint: endPoint || '',
+      searchCriteria: searchCriteria || '',
       status: status || ''
     };
 

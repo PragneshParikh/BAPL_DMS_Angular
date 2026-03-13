@@ -5,6 +5,8 @@ import { SharedModule } from '../../shared/shared.module';
 import { FlatpickrModule, FlatpickrDefaults } from 'angularx-flatpickr';
 import { NgbAccordionModule, NgbDropdownModule, NgbModal, NgbPaginationModule, NgbTooltipModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
+import { nextTick } from 'process';
+import { error } from 'console';
 
 @Component({
   selector: 'app-api-tracking',
@@ -30,6 +32,7 @@ export class ApiTracking implements OnInit {
 
   selectedEndPoint: string = '';
   selectedStatus: string = '';
+  searchCriteria: string = '';
   dateRange: { from: Date; to: Date } = {
     from: new Date(new Date().setDate(new Date().getDate() - 15)),
     to: new Date()
@@ -69,13 +72,19 @@ export class ApiTracking implements OnInit {
     const fromDate = new Date(this.dateRange.from);
     const toDate = new Date(this.dateRange.to);
     const status = this.selectedStatus; // optional
+    const searchCriteria = this.searchCriteria; // optional
 
-    this.apiTrackingService.getDataByFilter(fromDate, toDate, endPoint, status).subscribe((res: any) => {
-      this.dataSource = res.map((item: any, index: number) => {
-        return { ...item, srno: index + 1 };
-      });
-      this.collectionSize = res.length;
-      this.refreshData();
+    this.apiTrackingService.getDataByFilter(fromDate, toDate, endPoint, searchCriteria, status).subscribe({
+      next: (res: any) => {
+        this.dataSource = res.map((item: any, index: number) => {
+          return { ...item, srno: index + 1 };
+        });
+        this.collectionSize = res.length;
+        this.refreshData();
+      }, error: (err) => {
+        console.error(err);
+      }
+
     });
 
   }

@@ -1,3 +1,4 @@
+import { link } from 'fs';
 import { MenuItem } from './menu.model';
 
 export const MENU: MenuItem[] = [
@@ -11,47 +12,56 @@ export const MENU: MenuItem[] = [
     label: 'Master',
     icon: 'ri-dashboard-2-line',
     isCollapsed: true,
-
     subItems: [
       {
-        id: 2,
+        id: 3,
         label: 'Color Master',
         link: '/color',
-        parentId: 1
+        parentId: 2,
+        module: 'showroom'
       },
-      {
-        id: 3,
-        label: 'Location Master',
-        link: '/location-master',
-        parentId: 2
-      },
-
       {
         id: 4,
-        label: 'Dealer Master',
-        link: '/dealer-master',
-        parentId: 2
+        label: 'Location Master',
+        link: '/location-master',
+        parentId: 2,
+        module: 'showroom'
       },
       {
         id: 5,
+        label: 'Dealer Master',
+        link: '/dealer-master',
+        parentId: 2,
+        module: 'workshop'
+      },
+      {
+        id: 6,
         label: 'Item Master Spares',
         link: '/workshop/item-master',
         parentId: 2,
         module: 'workshop'
       },
       {
-        id: 6,
+        id: 7,
         label: 'Item Master FG',
         link: '/showroom/itemmaster-fg',
         parentId: 2,
         module: 'showroom'
       },
       {
-        id: 7,
+        id: 8,
         label: 'API Tracking',
         link: '/api-tracking',
-        parentId: 1
+        parentId: 2,
+        module: 'workshop'
       },
+      {
+        id: 9,
+        label: 'KIT Creation',
+        link: '/kit-creation',
+        parentId: 2,
+        module: 'workshop'
+      }
     ]
   }
 ];
