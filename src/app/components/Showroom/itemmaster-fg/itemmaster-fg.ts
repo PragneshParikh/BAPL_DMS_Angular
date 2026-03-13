@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ItemMasterService } from '../../../services/item-master-service';
-import { NgbHighlight, NgbModal,NgbPaginationModule  } from '@ng-bootstrap/ng-bootstrap';
+import { ItemMasterService } from '../../../core/services/item-master-service';
+import { NgbHighlight, NgbModal,NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 @Component({
   selector: 'app-itemmaster-fg',
   standalone : true,
@@ -9,38 +11,79 @@ import { NgbHighlight, NgbModal,NgbPaginationModule  } from '@ng-bootstrap/ng-bo
   templateUrl: './itemmaster-fg.html',
   styleUrl: './itemmaster-fg.scss',
 })
-export class ItemmasterFG {
-griddata: any[] = [];
+export class ItemmasterFG implements OnInit {
+  griddata: any[] = [];
   filteredData: any[] = [];    // sorted data
-  pagedData: any[] = [];       // data for current page
-  searchTerm: any;
+  pagedData: any[] = []; 
+  selectedItem: any;      // data for current page
+  searchTerm: string = '';
 
   // pagination
-page = 1;
-pageSize = 5;
-collectionSize = 0;
-
+  page = 1;
+  pageSize = 10;
+  collectionSize = 0;
+  groupId = 6; // static group id
 // sorting
-sortColumn: string = '';
-sortDirection: 'asc' | 'desc' = 'asc';
+  sortColumn: string = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
+// RxJS subject for auto-search
+  private searchSubject: Subject<string> = new Subject();
   constructor(private itemService: ItemMasterService,
     private modalService: NgbModal
   ) { }
+  
 
   ngOnInit() {
-    this.itemService.getItems(6).subscribe((res: any) => {
-      this.griddata = res;
+    this.loadItems();
+  }
 
-      // initialize table
+  //  API CALL
+  loadItems(search?: string) {
+
+    this.itemService.getItems(this.groupId, this.searchTerm).subscribe((res: any) => {
+
+      this.griddata = res;
       this.filteredData = [...this.griddata];
       this.collectionSize = this.filteredData.length;
 
       this.refreshTable();
 
       console.log(this.griddata);
+
     });
+
   }
+  //  SEARCH FUNCTION
+
+ searchItems(event: any) {
+
+  this.searchTerm = event.target.value || '';
+  this.loadItems(this.searchTerm);
+
+}
   
+// download excel
+  downloadItemMasterExcel() {
+
+    this.itemService.downloadItemMasterExcel().subscribe((response: Blob) => {
+
+      const blob = new Blob([response], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'ItemMasterList.xlsx';
+
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+
+    });
+
+  }
   pageChange(page: number) {
     this.page = page;
     this.refreshTable();

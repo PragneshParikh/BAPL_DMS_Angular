@@ -8,10 +8,7 @@ import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { SimplebarAngularModule } from 'simplebar-angular';
-import { ModuleService } from '../../services/moduleservice';
 import { MenuService } from '../../core/services/menu-service';
-import { BehaviorSubject } from 'rxjs';
-import { get } from 'lodash';
 
 @Component({
   selector: 'app-sidebar',

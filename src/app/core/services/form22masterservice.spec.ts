@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Moduleservice } from './moduleservice';
+import { Form22masterservice } from './form22masterservice';
 
-describe('Moduleservice', () => {
-  let service: Moduleservice;
+describe('Form22masterservice', () => {
+  let service: Form22masterservice;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Moduleservice);
+    service = TestBed.inject(Form22masterservice);
   });
 
   it('should be created', () => {

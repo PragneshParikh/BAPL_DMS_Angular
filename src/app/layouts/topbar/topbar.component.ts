@@ -20,7 +20,6 @@ import { NgbDropdownModule, NgbModal, NgbNavModule } from '@ng-bootstrap/ng-boot
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SimplebarAngularModule } from 'simplebar-angular';
-import { ModuleService } from '../../services/moduleservice';
 import { MenuService } from '../../core/services/menu-service';
 
 @Component({
@@ -56,7 +55,7 @@ export class TopbarComponent implements OnInit {
 
   constructor(@Inject(DOCUMENT) private document: any, private eventService: EventService, public languageService: LanguageService, private modalService: NgbModal,
     public _cookiesService: CookieService, public translate: TranslateService, private authService: AuthenticationService, private authFackservice: AuthfakeauthenticationService,
-    private moduleService: ModuleService, private router: Router, private TokenStorageService: TokenStorageService,
+    private router: Router, private TokenStorageService: TokenStorageService,
     private menuService: MenuService) { }
 
   ngOnInit(): void {
@@ -72,9 +71,6 @@ export class TopbarComponent implements OnInit {
     } else {
       this.flagvalue = val.map(element => element.flag);
     }
-    this.moduleService.activeModule$.subscribe(module => {
-      this.activeModule = module;
-    });
     // Fetch Data
     this.allnotifications = allNotification;
 
@@ -86,23 +82,6 @@ export class TopbarComponent implements OnInit {
       this.total += item_price
     });
   }
-
-  /**
-   * switch menus showroom, workshop and account
-   */
-  setModule(module: string) {
-
-    this.moduleService.setModule(module);
-
-    if (module === 'showroom') {
-      this.router.navigate(['/showroom/itemmaster-fg']);
-    } else {
-      this.router.navigate(['/workshop/item-master']);
-    }
-
-  }
-
-
 
   /**
    * Toggle the menu bar when having mobile screen
