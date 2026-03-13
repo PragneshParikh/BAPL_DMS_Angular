@@ -29,9 +29,22 @@
                     <input type="text" class="form-control" [(ngModel)]="locationName" (input)="checkKeywordReset()"
                         (keyup.enter)="searchLocation()" />
                 </div>
-                <div class="col-md-3 d-flex align-items-end">
+                <!-- <div class="col-md-3 d-flex align-items-end">
                     <button class="btn btn-success" (click)="searchLocation()">
                         Search
+                    </button>
+
+                    <button class="btn btn-success btn-sm me-3" (click)="downloadLocationExcel()">
+                        <i class="ri-file-excel-2-line"></i>
+                    </button>
+                </div> -->
+                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button class="btn btn-success" (click)="searchLocation()">
+                        Search
+                    </button>
+
+                    <button class="btn btn-success btn-bg" (click)="downloadLocationExcel()">
+                        <i class="ri-file-excel-2-line"></i>
                     </button>
                 </div>
             </div>

@@ -9,6 +9,7 @@ export class LocationMasterService {
 
   private apiUrl = "http://localhost:5215/api/LocationMaster/GetAllLocationMaster";
   private dealerUrl = "http://localhost:5215/api/DealerMaster/GetDealerDropdown";
+   private locationmasterexcelUrl ='http://localhost:5215/api/LocationMaster/DownloadLocationMasterExcel'
   
 
   constructor(private http: HttpClient) {}
@@ -19,5 +20,8 @@ export class LocationMasterService {
 
   getDealerDropdown(): Observable<any> {
     return this.http.get<any>(this.dealerUrl);
+  }
+   downloadLocationMasterExcel(): Observable<Blob> {
+    return this.http.get(this.locationmasterexcelUrl, { responseType: 'blob' });
   }
 }

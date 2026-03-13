@@ -1,0 +1,17 @@
+// table>thead>tr>th {
+//     background-color: #747CA0 !important;
+//     color: #ffffff !important;
+// }
+
+.table th.sort {
+    cursor: pointer;
+}
+
+.table th.sort:hover {
+    background-color: #636b8f;
+}
+
+.oem-table>th {
+    background-color: #747CA0;
+    color: #ffffff;
+}
