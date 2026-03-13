@@ -2,8 +2,7 @@ import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Login } from "./components/login/login";
 import { AuthenticationService } from './core/services/auth.service';
-import { ToastsContainer } from './components/login/toasts-container.component';
-
+import { ToastsContainer } from './shared/toaster/toasts-container.component';
 
 @Component({
   selector: 'app-root',
