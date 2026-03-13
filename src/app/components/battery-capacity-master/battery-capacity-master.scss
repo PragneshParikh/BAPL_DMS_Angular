@@ -1,0 +1,24 @@
+table>thead>tr>th {
+  background-color: #747CA0;
+  color: #ffffff;
+  
+}
+
+.battery-capacity-table th,
+.battery-capacity-table td {
+  white-space: nowrap;
+}
+.table-gridjs>tbody>tr>td {
+    padding: 5px !important;
+}
+
+.battery-capacity-modal-header {
+  background-color: #747CA0;
+  color: white;
+}
+
+.battery-capacity-modal-header .modal-title {
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+}

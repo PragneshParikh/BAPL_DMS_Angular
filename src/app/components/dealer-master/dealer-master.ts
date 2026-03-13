@@ -187,33 +187,42 @@ export class DealerMaster implements OnInit {
   setupSearch() {
 
     this.searchSubject.pipe(
-
       debounceTime(400),
       distinctUntilChanged(),
+      switchMap(search => this.dealerService.getDealers(search))
+    )
+      .subscribe({
 
-      switchMap(search =>
-        this.dealerService.getDealers(search)
-      )
+        next: (res: any) => {
 
-    ).subscribe({
+          const data = res.data || [];
 
-      next: (res: any) => {
+          this.dealerList = data.map((dealer: any, index: number) => ({
+            ...dealer,
+            slNo: index + 1
+          }));
 
-        this.dealerList = res.data || [];
-        this.page = 1;
+          this.page = 1;
 
-        this.refreshPage();
+          this.refreshPage();
 
-      },
+        },
 
-      error: err => console.error(err)
+        error: err => console.error(err)
 
-    });
+      });
 
   }
 
   onSearchChange() {
+
+    if (!this.searchTerm || this.searchTerm.trim() === '') {
+      this.loadDealers();
+      return;
+    }
+
     this.searchSubject.next(this.searchTerm);
+
   }
 
 }
