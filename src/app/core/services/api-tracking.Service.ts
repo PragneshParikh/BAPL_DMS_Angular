@@ -31,4 +31,7 @@ export class ApiTrackingService {
     return this.httpClient.get(`${this.baseURL}/api-tracking/FilterData`, { params });
 
   }
+  getExcelDownload(): Observable<any> {
+    return this.httpClient.get(`${this.baseURL}/api-tracking/DownloadExcel`, { responseType: 'blob' });
+  }
 }

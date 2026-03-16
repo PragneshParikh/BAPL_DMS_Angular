@@ -23,8 +23,7 @@
                     <div class="col-lg-3">
                         <div class="mb-3">
                             <label class="form-label mb-0">API Unique</label>
-                            <select class="form-select form-select-sm  mb-3" aria-label=".form-select-sm example"
-                                [(ngModel)]="selectedEndPoint">
+                            <select class="form-select form-select-sm mb-3" [(ngModel)]="selectedEndPoint">
                                 <option selected>Open this select menu</option>
                                 <option value="color">Color</option>
                                 <option value="dealer">Dealer</option>
@@ -37,10 +36,8 @@
                     <div class="col-lg-3">
                         <div class="mb-3">
                             <label class="form-label mb-0">Search Criteria</label>
-                            <!-- Input Group Sizing -->
                             <div class="input-group input-group-sm">
-                                <input type="text" class="form-control" aria-label="Sizing example input"
-                                    [(ngModel)]="searchCriteria" aria-describedby="inputGroup-sizing-sm">
+                                <input type="text" class="form-control" [(ngModel)]="searchCriteria">
                             </div>
                         </div>
                     </div>
@@ -49,8 +46,7 @@
                     <div class="col-lg-3">
                         <div class="mb-3">
                             <label class="form-label mb-0">API Status</label>
-                            <select class="form-select form-select-sm  mb-3" aria-label=".form-select-sm example"
-                                [(ngModel)]="selectedStatus">
+                            <select class="form-select form-select-sm mb-3" [(ngModel)]="selectedStatus">
                                 <option selected>Open this select menu</option>
                                 <option value="1">Success</option>
                                 <option value="2">Failed</option>
@@ -58,11 +54,19 @@
                         </div>
                     </div>
 
-                    <!-- Search Button -->
+                    <!-- Search and Excel Buttons -->
                     <div class="col-lg-3">
                         <div class="mb-3">
-                            <button type="button" class="btn btn-primary btn-sm" (click)=filterdRecords()>
-                                <i class="ri-search-line align-bottom me-1"></i>Search</button>
+
+                            <button type="button" class="btn btn-primary btn-sm me-2" (click)="filterdRecords()">
+                                <i class="ri-search-line align-bottom me-1"></i>
+                                Search
+                            </button>
+
+                            <button type="button" class="btn btn-success btn-sm" (click)="downloadApiTrackingExcel()">
+                                <i class="ri-file-excel-2-line align-bottom me-1"></i>
+                            </button>
+
                         </div>
                     </div>
 

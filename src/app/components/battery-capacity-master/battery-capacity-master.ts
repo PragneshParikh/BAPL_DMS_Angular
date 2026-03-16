@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbPaginationModule, NgbHighlight, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BatteryCapacityMasterService } from '../../core/services/battery-capacity-master-service';
 import Swal from 'sweetalert2';
+import { ToastService } from '../../shared/toaster/toast-service';
 
 @Component({
   selector: 'app-battery-capacity-master',
@@ -28,7 +29,7 @@ export class BatteryCapacityMaster {
 
   constructor(
     private batteryService: BatteryCapacityMasterService,
-    private modalService: NgbModal
+    private modalService: NgbModal, public toastService: ToastService 
   ) { }
 
   ngOnInit() {
@@ -95,103 +96,173 @@ export class BatteryCapacityMaster {
 
   }
 
-  addBattery(modal: any) {
+//   addBattery(modal: any) {
 
-    if (!this.selectedBattery.batteryCapacity) {
-      alert('Battery Capacity is required');
-      return;
-    }
+//     if (!this.selectedBattery.batteryCapacity) {
+//       alert('Battery Capacity is required');
+//       return;
+//     }
 
-    this.batteryService.addBatteryCapacityMaster(this.selectedBattery)
-      .subscribe({
+//     this.batteryService.addBatteryCapacityMaster(this.selectedBattery)
+//       .subscribe({
 
-        next: (res: any) => {
+//         next: (res: any) => {
 
-          Swal.fire({
-  title: "Success!",
-  text: "Battery capacity added successfully!",
-  icon: "success",
-  draggable: true
-});
+//           Swal.fire({
+//   title: "Success!",
+//   text: "Battery capacity added successfully!",
+//   icon: "success",
+//   draggable: true
+// });
 
-          modal.close();
+//           modal.close();
 
-          this.loadBatteryCapacities();
+//           this.loadBatteryCapacities();
 
-        },
+//         },
 
-        error: () => {
+//         error: () => {
 
-            Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: "Something went wrong!",
+//             Swal.fire({
+//             icon: "error",
+//             title: "Oops...",
+//             text: "Something went wrong!",
            
-          });
+//           });
 
-        }
+//         }
 
-      });
+//       });
 
+//   }
+
+addBattery(modal: any) {
+
+  if (!this.selectedBattery.batteryCapacity) {
+
+    this.toastService.show('Battery Capacity is required', {
+      classname: 'bg-danger text-white',
+      delay: 4000
+    });
+
+    return;
   }
 
-  updateBattery(modal: any) {
+  this.batteryService.addBatteryCapacityMaster(this.selectedBattery)
+    .subscribe({
 
-    this.batteryService
-      .updateBatteryCapacityMaster(this.selectedBattery.id, this.selectedBattery)
-      .subscribe({
+      next: () => {
 
-        next: (res: any) => {
+        this.toastService.show('Battery capacity added successfully!', {
+          classname: 'bg-success text-white',
+          delay: 5000
+        });
 
+        modal.close();
+        this.loadBatteryCapacities();
 
-          modal.close();
+      },
 
-          this.loadBatteryCapacities();
+      error: () => {
 
-        },
-
-        error: () => {
-
-          Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: "Something went wrong!",
-           
-          });
-
-        }
-
-      });
-
-  }
-
-  confirmUpdate(modal: any) {
-
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to update this Battery Capacity?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, Update"
-    }).then((result) => {
-
-      if (result.isConfirmed) {
-
-        this.updateBattery(modal);
-        Swal.fire("BatteryCapacity Masteru Udated!");
-
-
-      }
-      else {
-        Swal.fire("Changes not saved!");
+        this.toastService.show('Failed to add battery capacity', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
 
       }
 
     });
 
-  }
+}
+
+  // updateBattery(modal: any) {
+
+  //   this.batteryService
+  //     .updateBatteryCapacityMaster(this.selectedBattery.id, this.selectedBattery)
+  //     .subscribe({
+
+  //       next: (res: any) => {
+
+
+  //         modal.close();
+
+  //         this.loadBatteryCapacities();
+
+  //       },
+
+  //       error: () => {
+
+  //         Swal.fire({
+  //           icon: "error",
+  //           title: "Oops...",
+  //           text: "Something went wrong!",
+           
+  //         });
+
+  //       }
+
+  //     });
+
+  // }
+updateBattery(modal: any) {
+
+  this.batteryService
+    .updateBatteryCapacityMaster(this.selectedBattery.id, this.selectedBattery)
+    .subscribe({
+
+      next: (res: any) => {
+
+        modal.close();
+
+        this.toastService.show('Battery capacity updated successfully!', {
+          classname: 'bg-success text-white',
+          delay: 5000
+        });
+
+        this.loadBatteryCapacities();
+
+      },
+
+      error: () => {
+
+        this.toastService.show('Something went wrong while updating!', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+
+      }
+
+    });
+
+}
+  // confirmUpdate(modal: any) {
+
+  //   Swal.fire({
+  //     title: "Are you sure?",
+  //     text: "Do you want to update this Battery Capacity?",
+  //     icon: "warning",
+  //     showCancelButton: true,
+  //     confirmButtonColor: "#3085d6",
+  //     cancelButtonColor: "#d33",
+  //     confirmButtonText: "Yes, Update"
+  //   }).then((result) => {
+
+  //     if (result.isConfirmed) {
+
+  //       this.updateBattery(modal);
+  //       Swal.fire("BatteryCapacity Masteru Udated!");
+
+
+  //     }
+  //     else {
+  //       Swal.fire("Changes not saved!");
+
+  //     }
+
+  //   });
+
+  // }
 
 
   downloadBatteryCapacityMasterExcel() {

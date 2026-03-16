@@ -20,4 +20,9 @@ export class ColorMasterService {
   getColorByPaged(searchTerm: string = null, pageIndex: number, pageSize: number): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/color/paged?searchTerm=${searchTerm}&pageIndex=${pageIndex}&pageSize=${pageSize}`);
   }
+   getExcelDownload(): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/color/downloadColorExcel`, { responseType: 'blob' });
+  }
+
 }
+  

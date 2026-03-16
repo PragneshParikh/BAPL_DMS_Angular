@@ -123,4 +123,26 @@ export class ApiTracking implements OnInit {
     this.page = 1;
     this.refreshData();
   }
+
+  downloadApiTrackingExcel() {
+
+    this.apiTrackingService.getExcelDownload().subscribe((data: Blob) => {
+
+      const blob = new Blob([data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const downloadURL = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = downloadURL;
+      link.download = 'ApiTrackingList.xlsx';
+
+      link.click();
+
+      window.URL.revokeObjectURL(downloadURL);
+
+    });
+
+  }
 }

@@ -153,8 +153,61 @@
 
 
 <!-- MODAL -->
-
 <ng-template #editModal let-modal>
+
+    <form #batteryForm="ngForm">
+
+        <div class="modal-header battery-capacity-modal-header">
+            <h5 class="modal-title">
+                {{ isEditMode ? 'Edit Battery Capacity' : 'Add Battery Capacity' }}
+            </h5>
+            <button class="btn-close" (click)="modal.dismiss()"></button>
+        </div>
+
+        <div class="modal-body">
+
+            <div class="mb-3">
+                <label class="form-label">Battery Capacity</label>
+
+                <input type="text" class="form-control" name="batteryCapacity" required #batteryCapacity="ngModel"
+                    [(ngModel)]="selectedBattery.batteryCapacity">
+
+                <!-- Validation Message -->
+                <div class="text-danger mt-1" *ngIf="batteryCapacity.invalid && batteryCapacity.touched">
+                    Battery Capacity is required
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-check form-switch form-switch-lg form-switch-success">
+                    <label class="form-label" for="SwitchCheck3">Is Active</label>
+
+                    <input class="form-check-input" type="checkbox" role="switch" id="SwitchCheck3" name="isActive"
+                        [(ngModel)]="selectedBattery.isActive">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button type="button" class="btn btn-danger" (click)="modal.dismiss()">
+                Cancel
+            </button>
+
+            <button type="button" class="btn btn-success" [disabled]="batteryForm.invalid"
+                (click)="isEditMode ? updateBattery(modal) : addBattery(modal)">
+
+                {{ isEditMode ? 'Update' : 'Save' }}
+
+            </button>
+
+        </div>
+
+    </form>
+
+</ng-template>
+<!-- <ng-template #editModal let-modal>
 
     <div class="modal-header battery-capacity-modal-header">
 
@@ -202,4 +255,4 @@
 
     </div>
 
-</ng-template>
+</ng-template> -->
