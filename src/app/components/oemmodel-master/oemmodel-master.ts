@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { OemmodelMasterService } from '../../core/services/oemmodel-master-service';
 import { OemModelViewModel } from '../../ViewModels/OemModelViewModel';
-
+import { ToastService } from '../../shared/toaster/toast-service';
 declare var bootstrap: any;
 
 @Component({
@@ -34,8 +34,10 @@ export class OemmodelMasterComponent implements OnInit {
 
   sortColumn = '';
   sortDirection = 'asc';
+  formSubmitted = false;
 
-  constructor(private modelService: OemmodelMasterService) { }
+  constructor(private modelService: OemmodelMasterService,
+    public toastService: ToastService) { }
 
   ngOnInit(): void {
     this.loadModels();
@@ -172,27 +174,43 @@ export class OemmodelMasterComponent implements OnInit {
     }
 
   }
+
   updateModel() {
 
     this.modelService.updateOEMModel(this.selectedModel)
       .subscribe({
 
-        next: (res) => {
+        next: (res: any) => {
 
-          console.log(res);
+          console.log("Updated Successfully");
+
+          // Show success toast
+          this.toastService.show(res.message || "Model updated successfully", {
+            classname: 'bg-success text-white',
+            delay: 5000
+          });
 
           this.loadModels();
 
           const modal = bootstrap.Modal.getInstance(
             document.getElementById('editModelModal')
           );
-
           modal.hide();
+
+          // Reset formSubmitted for next open
+          this.formSubmitted = false;
 
         },
 
-        error: (err) => {
+        error: (err: any) => {
           console.error("Update Error:", err);
+
+          // Show error toast
+          this.toastService.show(err.error?.message || "Failed to update model", {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          });
+
         }
 
       });
@@ -214,27 +232,43 @@ export class OemmodelMasterComponent implements OnInit {
     modal.show();
 
   }
+
   addModel() {
 
     this.modelService.AddOEMModel(this.selectedModel)
       .subscribe({
 
-        next: (res) => {
+        next: (res: any) => {
 
           console.log("Saved Successfully");
+
+          // Show success toast
+          this.toastService.show(res.message || "Model added successfully", {
+            classname: 'bg-success text-white',
+            delay: 5000
+          });
 
           this.loadModels();
 
           const modal = bootstrap.Modal.getInstance(
             document.getElementById('addModelModal')
           );
-
           modal.hide();
+
+          // Reset formSubmitted for next open
+          this.formSubmitted = false;
 
         },
 
-        error: (err) => {
+        error: (err: any) => {
           console.log("Save Error:", err);
+
+          // Show error toast
+          this.toastService.show(err.error?.message || "Failed to add model", {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          });
+
         }
 
       });

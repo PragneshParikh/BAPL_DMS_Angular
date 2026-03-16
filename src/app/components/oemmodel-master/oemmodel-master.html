@@ -4,64 +4,8 @@
 
 <div class="row">
     <div class="col-lg-12">
-
-        <!-- CARD 1 : SEARCH / FILTER -->
-        <!-- <div class="card">
-
-<div class="card-header">
-
-<div class="row">
-
-<div class="col-md-4">
-<label class="form-label">Model Name</label>
-
-<input type="text"
-       class="form-control"
-       [(ngModel)]="modelName"
-       placeholder="Enter Model Name">
-
-</div>
-
-<div class="col-md-3">
-<label class="form-label">Per Page Records</label>
-
-<select class="form-control form-control-sm form-select"
-        [(ngModel)]="pageSize"
-        (change)="refreshPage()">
-
-<option value="5">5</option>
-<option value="10">10</option>
-<option value="25">25</option>
-<option value="50">50</option>
-<option value="100">100</option>
-
-</select>
-</div>
-
-<div class="col-md-2 d-flex align-items-end ms-auto gap-2">
-
-<button class="btn btn-success btn-sm" (click)="searchModel()">
-<i class="ri-search-line me-1"></i>
-Search
-</button>
-
-<button class="btn btn-success btn-sm" (click)="downloadOEMModelExcel()">
-<i class="ri-file-excel-2-line"></i>
-</button>
-
-<button class="btn btn-success btn-sm plus" (click)="openAddModal()">
-+
-</button>
-
-</div>
-
-</div>
-</div>
-</div> -->
         <div class="card">
-
             <div class="card-body">
-
                 <!-- Form for search + filters -->
                 <form class="row g-2 align-items-end" (ngSubmit)="searchModel()">
 
@@ -97,75 +41,49 @@ Search
 
                         <button type="button" class="btn btn-success btn-sm plus" (click)="openAddModal()">+</button>
                     </div>
-
                 </form>
-
             </div>
-
         </div>
 
         <!-- CARD 2 : TABLE -->
         <div class="card mt-3">
-
             <div class="card-body">
-
                 <p>Total Record(s): {{totalRecords}}</p>
-
                 <div class="table-responsive">
-
                     <table class="table table-gridjs table-striped">
-
                         <thead>
                             <tr class="oem-table">
-
                                 <th class="sort">S.No.</th>
-
                                 <th class="sort" [ngClass]="getSortClass('modelName')" (click)="sort('modelName')">
                                     OEM Model Name
                                 </th>
-
                                 <th class="sort" [ngClass]="getSortClass('modelShortName')"
                                     (click)="sort('modelShortName')">
                                     OEM Model Short Name
                                 </th>
-
                                 <th class="sort" [ngClass]="getSortClass('id')" (click)="sort('id')">
                                     Id
                                 </th>
-
                                 <th>Active</th>
-
                                 <th>Action</th>
-
                             </tr>
                         </thead>
-
                         <tbody>
-
                             <tr *ngFor="let model of pagedModelList; let i=index">
-
                                 <td>{{(page-1)*pageSize + i + 1}}</td>
-
                                 <td>{{model.modelName}}</td>
-
                                 <td>{{model.modelShortName}}</td>
-
                                 <td>{{model.id}}</td>
-
                                 <td>
 
                                     <span class="badge" [ngClass]="model.isActive ? 'bg-success' : 'bg-danger'">
                                         {{ model.isActive ? 'Active' : 'Inactive' }}
                                     </span>
-
                                 </td>
-
                                 <td>
-
                                     <button class="btn btn-sm btn-soft-primary" (click)="openEditModal(model)">
                                         <i class="ri-edit-line"></i>
                                     </button>
-
                                 </td>
 
                             </tr>
@@ -216,17 +134,29 @@ Search
 
                             <div class="col-md-4">
                                 <label>Model Name</label>
-                                <input class="form-control" [(ngModel)]="selectedModel.modelName">
+                                <input class="form-control" [(ngModel)]="selectedModel.modelName" name="editModelName"
+                                    required #editModelName="ngModel">
+
+                                <div *ngIf="editModelName.invalid && (editModelName.touched || formSubmitted)"
+                                    class="text-danger mt-1">
+                                    Model Name is required
+                                </div>
                             </div>
 
                             <div class="col-md-4">
                                 <label>Model Short Name</label>
-                                <input class="form-control" [(ngModel)]="selectedModel.modelShortName">
+                                <input class="form-control" [(ngModel)]="selectedModel.modelShortName"
+                                    name="editModelShortName" required #editModelShortName="ngModel">
+
+                                <div *ngIf="editModelShortName.invalid && (editModelShortName.touched || formSubmitted)"
+                                    class="text-danger mt-1">
+                                    Model Short Name is required
+                                </div>
                             </div>
 
                             <div class="col-md-4">
                                 <label>Id</label>
-                                <input class="form-control" [(ngModel)]="selectedModel.id" readonly>
+                                <input class="form-control" [(ngModel)]="selectedModel.id" name="editId" readonly>
                             </div>
 
                         </div>
@@ -238,7 +168,7 @@ Search
                                 <label class="form-label">Active</label>
 
                                 <input class="form-check-input" type="checkbox" role="switch"
-                                    [(ngModel)]="selectedModel.isActive">
+                                    [(ngModel)]="selectedModel.isActive" name="editIsActive">
 
                             </div>
 
@@ -250,7 +180,8 @@ Search
                                 Cancel
                             </button>
 
-                            <button class="btn btn-success" data-bs-dismiss="modal" (click)="updateModel()">
+                            <button class="btn btn-success"
+                                (click)="formSubmitted=true; editModelName.valid && editModelShortName.valid && updateModel()">
                                 Update
                             </button>
 
@@ -263,8 +194,6 @@ Search
             </div>
 
         </div>
-
-
         <!-- ADD MODAL -->
         <!-- <div class="modal fade" id="addModelModal" tabindex="-1">
 
@@ -337,6 +266,7 @@ Search
             </div>
 
         </div> -->
+
         <div class="modal fade" id="addModelModal" tabindex="-1">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -355,8 +285,10 @@ Search
                             <div class="col-md-6">
                                 <label class="form-label">Model Name</label>
                                 <input type="text" class="form-control" [(ngModel)]="selectedModel.modelName"
-                                    placeholder="Enter Model Name" required #modelNameInput="ngModel">
-                                <div *ngIf="modelNameInput.invalid && modelNameInput.touched" class="text-danger mt-1">
+                                    name="modelName" placeholder="Enter Model Name" required #modelNameInput="ngModel">
+
+                                <div *ngIf="modelNameInput.invalid && (modelNameInput.touched || formSubmitted)"
+                                    class="text-danger mt-1">
                                     Model Name is required.
                                 </div>
                             </div>
@@ -365,8 +297,9 @@ Search
                             <div class="col-md-6">
                                 <label class="form-label">Model Short Name</label>
                                 <input type="text" class="form-control" [(ngModel)]="selectedModel.modelShortName"
-                                    required #modelShortNameInput="ngModel">
-                                <div *ngIf="modelShortNameInput.invalid && modelShortNameInput.touched"
+                                    name="modelShortName" required #modelShortNameInput="ngModel">
+
+                                <div *ngIf="modelShortNameInput.invalid && (modelShortNameInput.touched || formSubmitted)"
                                     class="text-danger mt-1">
                                     Model Short Name is required.
                                 </div>
@@ -376,8 +309,8 @@ Search
                             <div class="col-md-4 mt-3">
                                 <div class="form-check form-switch form-switch-lg form-switch-success">
                                     <label class="form-label">Active</label>
-                                    <input class="form-check-input" type="checkbox"
-                                        [(ngModel)]="selectedModel.isActive">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="selectedModel.isActive"
+                                        name="isActive">
                                 </div>
                             </div>
 
@@ -387,8 +320,9 @@ Search
                     <!-- Modal Footer -->
                     <div class="modal-footer">
                         <button class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+
                         <button class="btn btn-success"
-                            (click)="modelNameInput.valid && modelShortNameInput.valid && addModel()">
+                            (click)="formSubmitted=true; modelNameInput.valid && modelShortNameInput.valid && addModel()">
                             Save
                         </button>
                     </div>
