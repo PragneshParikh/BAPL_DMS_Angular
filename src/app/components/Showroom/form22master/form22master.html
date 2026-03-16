@@ -5,69 +5,122 @@
         <h4 class="mb-sm-0">Form 22 specification</h4>
     </div>
     <ng-template #AddFrom22itemModal let-modal>
-        <div class="card">
-            <div class="modal-header item-modal-header">
-                <h5 class="modal-title">
-                    Add Form22 Master Details</h5>
-                <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
-            </div>
-            <div class="card-body">
 
-                <div class="row">
-                    <div class="col-md-3 dropdown-wrapper">
-                        <label class="form-label">OEM Model Name</label>
-                        <select class="form-select form-select-sm" [(ngModel)]="formData.oemmodelId">
-                            <option value="">-- Select Oemmodel name --</option>
-                            <option *ngFor="let o of oemModelList" [ngValue]="o.oemmodelId">
-                                {{o.oemModelName}}
-                            </option>
-                        </select>
+        <form #form22Form="ngForm">
+
+            <div class="card">
+
+                <div class="modal-header item-modal-header">
+                    <h5 class="modal-title">Add Form22 Master Details</h5>
+                    <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <!-- OEM Model -->
+                        <div class="col-md-3 dropdown-wrapper">
+                            <label class="form-label">OEM Model Name</label>
+
+                            <select class="form-select form-select-sm" name="oemmodelId"
+                                [(ngModel)]="formData.oemmodelId" required #oemmodelId="ngModel">
+
+                                <option value="">-- Select Oemmodel name --</option>
+
+                                <option *ngFor="let o of oemModelList" [ngValue]="o.oemmodelId">
+                                    {{o.oemModelName}}
+                                </option>
+
+                            </select>
+
+                            <small class="text-danger" *ngIf="oemmodelId.invalid && oemmodelId.touched">
+                                OEM Model Name is required
+                            </small>
+
+                        </div>
+
+
+                        <!-- Sound Level Horn -->
+                        <div class="col-md-3">
+                            <label class="form-label">Sound Level Horn</label>
+
+                            <input type="text" class="form-control form-control-sm" name="soundLevelHorn"
+                                [(ngModel)]="formData.soundLevelHorn" required #soundLevelHorn="ngModel" />
+
+                            <small class="text-danger" *ngIf="soundLevelHorn.invalid && soundLevelHorn.touched">
+                                Sound Level Horn is required
+                            </small>
+
+                        </div>
+
+
+                        <!-- Passby Noise Level -->
+                        <div class="col-md-3">
+                            <label class="form-label">Pass by noise level</label>
+
+                            <input type="text" class="form-control form-control-sm" name="passbyNoiseLevel"
+                                [(ngModel)]="formData.passbyNoiseLevel" required #passbyNoiseLevel="ngModel" />
+
+                            <small class="text-danger" *ngIf="passbyNoiseLevel.invalid && passbyNoiseLevel.touched">
+                                Passby Noise Level is required
+                            </small>
+
+                        </div>
+
+
+                        <!-- Certificate No -->
+                        <div class="col-md-3">
+                            <label class="form-label">Type of Certificate No</label>
+
+                            <input type="text" class="form-control form-control-sm" name="approvalCertificateNo"
+                                [(ngModel)]="formData.approvalCertificateNo" required
+                                #approvalCertificateNo="ngModel" />
+
+                            <small class="text-danger"
+                                *ngIf="approvalCertificateNo.invalid && approvalCertificateNo.touched">
+                                Certificate No is required
+                            </small>
+
+                        </div>
+
                     </div>
+
+                </div>
+
+
+                <div class="row p-3">
+
                     <div class="col-md-3">
-                        <label class="form-label">Sound Level Horn</label>
-                        <input type="text" class="form-control form-control-sm" [(ngModel)]="formData.soundLevelHorn" />
+
+                        <div class="form-check form-switch form-switch-lg form-switch-success">
+
+                            <label class="form-label">IsActive</label>
+
+                            <input class="form-check-input" type="checkbox" name="isActive"
+                                [(ngModel)]="formData.isActive">
+
+                        </div>
+
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label">Pass by noise level</label>
-                        <input type="text" class="form-control form-control-sm"
-                            [(ngModel)]="formData.passbyNoiseLevel" />
+
+                    <div class="col-md-3 d-flex align-items-end">
+
+                        <button class="btn btn-success" [disabled]="form22Form.invalid" (click)="addForm22Master()">
+
+                            Add
+
+                        </button>
+
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Type of Certificate No</label>
-                        <input type="text" class="form-control form-control-sm"
-                            [(ngModel)]="formData.approvalCertificateNo" />
-                    </div>
+
                 </div>
+
             </div>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-check form-switch form-switch-lg form-switch-success">
-                        <label class="form-label" for="SwitchCheck3">IsActive</label>
 
-                        <input class="form-check-input" type="checkbox" role="switch" id="SwitchCheck3" name="IsActive"
-                            [(ngModel)]="formData.isActive">
-                    </div>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-success" (click)="addForm22Master()">
-                        Add
-                    </button>
-                </div>
-                <div *ngIf="showAlert"
-                    class="alert alert-secondary alert-dismissible alert-label-icon rounded-label shadow fade show"
-                    role="alert">
+        </form>
 
-                    <i class="ri-check-double-line label-icon"></i>
-
-                    <strong>Success</strong> - Data saved successfully
-
-                    <button type="button" class="btn-close" (click)="showAlert=false">
-                    </button>
-
-                </div>
-            </div>
-        </div>
     </ng-template>
 </div>
 <!-- view details -->
@@ -84,15 +137,16 @@
                     <button class="btn btn-success btn-sm me-3" (click)="downloadForm22MasterExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
- 
+
                     <!-- Search Box -->
                     <div class="search-box">
-                        <input type="text" class="form-control search" placeholder="Search..." (input)="searchItems($event)"/>
+                        <input type="text" class="form-control search" placeholder="Search..."
+                            (input)="searchItems($event)" />
                         <i class="ri-search-line search-icon"></i>
                     </div>
- 
+
                 </div>
- 
+
             </div>
             <!-- end card header -->
 
