@@ -30,7 +30,6 @@ import { MenuService } from '../../core/services/menu-service';
   standalone: true
 })
 export class TopbarComponent implements OnInit {
-  activeModule = 'showroom'; // added by kajal
   messages: any
   element: any;
   mode: string | undefined;
@@ -51,7 +50,7 @@ export class TopbarComponent implements OnInit {
   @ViewChild('removenotification') removenotification !: TemplateRef<any>;
   notifyId: any;
 
-  public selectedOption: string = 'ShowRoom';
+  public selectedOption: string = localStorage.getItem('selectedModule') ? JSON.parse(localStorage.getItem('selectedModule') || '{}') : 'ShowRoom';
 
   constructor(@Inject(DOCUMENT) private document: any, private eventService: EventService, public languageService: LanguageService, private modalService: NgbModal,
     public _cookiesService: CookieService, public translate: TranslateService, private authService: AuthenticationService, private authFackservice: AuthfakeauthenticationService,
@@ -171,8 +170,12 @@ export class TopbarComponent implements OnInit {
   ];
 
   onSelectionChange(option: string) {
-    this.selectedOption = option;
-    this.menuService.filterMenu(option);
+    if (option !== this.selectedOption) {
+      this.selectedOption = option;
+      localStorage.setItem('selectedModule', JSON.stringify(option));
+      this.menuService.filterMenu(option);
+      this.router.navigate(['/']);
+    }
   }
 
   /***
@@ -190,7 +193,7 @@ export class TopbarComponent implements OnInit {
    */
   logout() {
     this.authService.logout();
-    this.router.navigate(['/']);
+    this.router.navigate(['/login']);
   }
 
   windowScroll() {

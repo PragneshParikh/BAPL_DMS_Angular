@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Login } from "./components/login/login";
 import { AuthenticationService } from './core/services/auth.service';
 import { ToastsContainer } from './shared/toaster/toasts-container.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Login, ToastsContainer],
+  imports: [RouterOutlet, ToastsContainer, CommonModule],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

@@ -1,13 +1,13 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { AuthenticationService } from '../../core/services/auth.service';
-import { Router } from '@angular/router';
+import { AuthenticationService } from '../../../core/services/auth.service';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ToastService } from '../../shared/toaster/toast-service';
+import { ToastService } from '../../../shared/toaster/toast-service';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -33,7 +33,7 @@ export class Login {
   }
 
   ngOnInit(): void {
-    if (sessionStorage.getItem('currentUser')) {
+    if (localStorage.getItem('currentUser')) {
       this.router.navigate(['/']);
     }
     /**
@@ -66,9 +66,9 @@ export class Login {
     this.authenticationService.login(this.f['email'].value, this.f['password'].value).subscribe((data: any) => {
       if (data.status == 'success') {
         this.loginStatus.emit(true);
-        sessionStorage.setItem('toast', 'true');
-        sessionStorage.setItem('currentUser', JSON.stringify(data));
-        sessionStorage.setItem('token', data.token);
+        localStorage.setItem('toast', 'true');
+        localStorage.setItem('currentUser', JSON.stringify(data));
+        localStorage.setItem('token', data.token);
         this.toastService.show(data.message, { classname: 'bg-success text-white', delay: 5000 });
         this.router.navigate(['/']);
       } else {

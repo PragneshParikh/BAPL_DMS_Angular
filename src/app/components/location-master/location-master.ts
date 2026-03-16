@@ -184,26 +184,26 @@ export class LocationMasterComponent implements OnInit {
       this.dealerList = res;
     });
   }
-downloadLocationExcel() {
-  this.locationService.downloadLocationMasterExcel().subscribe({
-    next: (response: Blob) => {
+  downloadLocationExcel() {
+    this.locationService.downloadLocationMasterExcel().subscribe({
+      next: (response: Blob) => {
 
-      const blob = new Blob([response], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
+        const blob = new Blob([response], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
 
-      const url = window.URL.createObjectURL(blob);
+        const url = window.URL.createObjectURL(blob);
 
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'LocationMaster.xlsx';
-      a.click();
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'LocationMaster.xlsx';
+        a.click();
 
-      window.URL.revokeObjectURL(url);
-    },
-    error: (err) => {
-      console.log(err);
-    }
-  });
-}
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    });
+  }
 }

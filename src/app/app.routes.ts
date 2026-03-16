@@ -9,11 +9,16 @@ import { Form22master } from './components/Showroom/form22master/form22master';
 import { ItemMaster } from './components/Workshop/item-master/item-master';
 import { ItemmasterFG } from './components/Showroom/itemmaster-fg/itemmaster-fg';
 import { OemmodelMasterComponent } from './components/oemmodel-master/oemmodel-master';
+import { AuthGuard } from './core/guards/auth.guard';
 
 
 export const routes: Routes = [
+  { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
+  { path: 'forgot-password', loadComponent: () => import('./components/account/forgot-password/forgot-password').then(m => m.ForgotPassword) },
+  { path: 'reset-password', loadComponent: () => import('./components/account/reset-password/reset-password').then(m => m.ResetPassword) },
   {
     path: '', component: LayoutComponent,
+    canActivate: [AuthGuard],
     children: [
 
       // SHOWROOM MODULE
@@ -42,7 +47,8 @@ export const routes: Routes = [
       { path: 'api-tracking', loadComponent: () => import('./components/api-tracking/api-tracking').then(m => m.ApiTracking) },
       { path: 'battery-capacity-master', component: BatteryCapacityMaster },
       { path: 'oemmodel-master', component: OemmodelMasterComponent },
-      { path: 'kit-creation', loadComponent: () => import('./components/kit-creation/kit-creation').then(m => m.KitCreation) }
+      { path: 'kit-creation', loadComponent: () => import('./components/kit-creation/kit-creation').then(m => m.KitCreation) },
+      { path: 'data-seed', loadComponent: () => import('./components/data-seed/data-seed').then(m => m.DataSeed) }
     ]
   }
 ];

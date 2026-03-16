@@ -11,7 +11,8 @@ export class MenuService {
 
   private baseURL = environment.apiUrl;
 
-  private activeModuleSource = new BehaviorSubject<string>('showroom');
+  activeMenuModule = localStorage.getItem('selectedModule') ? JSON.parse(localStorage.getItem('selectedModule') || '{}') : 'ShowRoom';
+  private activeModuleSource = new BehaviorSubject<string>(this.activeMenuModule);
   activeModule$ = this.activeModuleSource.asObservable();
 
   private menuSource = new BehaviorSubject<any[]>([]);

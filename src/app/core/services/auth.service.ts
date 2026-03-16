@@ -24,7 +24,6 @@ const httpOptions = {
 export class AuthenticationService {
 
     user!: User;
-    currentUserValue: any;
     private currentUserSubject = new BehaviorSubject<User | null>(null);
     public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -33,7 +32,7 @@ export class AuthenticationService {
     constructor(private httpClient: HttpClient,
         private store: Store) {
 
-        const storedUser = sessionStorage.getItem('currentUser');
+        const storedUser = localStorage.getItem('currentUser');
         if (storedUser && storedUser !== 'undefined') {
 
             // Check if storedUser is not null or undefined
@@ -42,6 +41,11 @@ export class AuthenticationService {
             this.currentUserSubject = new BehaviorSubject<User | null>(initialUser);
             this.currentUser$ = this.currentUserSubject.asObservable();
         }
+    }
+
+
+    public get currentUserValue(): User | null {
+        return this.currentUserSubject.value;
     }
 
     /**
@@ -80,20 +84,36 @@ export class AuthenticationService {
         this.store.dispatch(logout());
         // logout the user
         // return getFirebaseBackend()!.logout();
-        sessionStorage.removeItem('currentUser');
-        sessionStorage.removeItem('token');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('token');
+        localStorage.removeItem('selectedModule');
         this.currentUserSubject.next(null!);
     }
 
-    /**
-     * Reset password
-     * @param email email
-     */
-    resetPassword(email: string) {
-        return getFirebaseBackend()!.forgetPassword(email).then((response: any) => {
-            const message = response.data;
-            return message;
-        });
+    forgotPassword(email: string) {
+        return this.httpClient.post(this.baseUrl + '/auth/forgot-password', { email }, httpOptions).pipe(
+            map((response: any) => {
+                return response;
+            }),
+            catchError((error: any) => {
+                const errorMessage = 'Password reset failed'; // Customize the error message as needed
+                return throwError(errorMessage);
+            })
+        );
+
+    }
+
+    resetPassword(email: string, token: string, password: string, confirmPassword: string) {
+        return this.httpClient.post(this.baseUrl + '/auth/reset-password', { email, token, password, confirmPassword }, httpOptions).pipe(
+            map((response: any) => {
+                return response;
+            }),
+            catchError((error: any) => {
+                const errorMessage = 'Password reset failed'; // Customize the error message as needed
+                return throwError(errorMessage);
+            })
+        );
+
     }
 
 }
