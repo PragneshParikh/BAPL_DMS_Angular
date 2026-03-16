@@ -14,7 +14,8 @@ export const environment = {
     messagingSenderId: '',
     appId: '',
     measurementId: ''
-  }
+  },
+  apiUrl: 'https://localhost:7203/api'
 };
 
 /*
