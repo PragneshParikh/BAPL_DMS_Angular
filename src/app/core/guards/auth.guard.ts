@@ -3,29 +3,50 @@ import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/ro
 
 // Auth Services
 import { AuthenticationService } from '../services/auth.service';
-import { AuthfakeauthenticationService } from '../services/authfake.service';
-import { environment } from '../../../environments/environment';
+import { RolewiseMenuService } from '../services/rolewisemenu-service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard {
     constructor(
         private router: Router,
+        private roleMenuService: RolewiseMenuService,
         private authService: AuthenticationService
     ) { }
 
-    canActivate() {
-
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
         const currentUser = this.authService.currentUserValue;
-        if (currentUser) {
-            // logged in so return true
+
+        if (!currentUser) {
+            this.router.navigate(['/login']);
+            return false;
+        }
+
+        const requestedUrl = state.url;
+
+        if (requestedUrl === '/' || requestedUrl === '') {
             return true;
         }
-        // check if user data is in storage is logged in via API.
-        if (localStorage.getItem('currentUser')) {
-            return true;
+
+        let menuRights: any[] = [];
+
+        try {
+            menuRights = JSON.parse(localStorage.getItem('menuRights') || '[]');
+        } catch (e) {
+            console.error('Invalid menuRights in localStorage');
+            this.router.navigate(['/login']);
+            return false;
         }
-        // not logged in so redirect to login page with the return url
-        this.router.navigate(['/login']);
-        return false;
+
+        const hasAccess = menuRights.some(m =>
+            requestedUrl.includes(m.pathName) ||
+            requestedUrl.includes(m.subMenuId)
+        );
+
+        if (!hasAccess) {
+            this.router.navigate(['/']);
+            return false;
+        }
+
+        return true;
     }
 }

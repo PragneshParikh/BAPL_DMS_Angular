@@ -9,7 +9,8 @@ import { CommonModule } from '@angular/common';
 import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { SimplebarAngularModule } from 'simplebar-angular';
 import { MenuService } from '../../core/services/menu-service';
-
+import { BehaviorSubject } from 'rxjs';
+import { RolewiseMenuService } from '../../core/services/rolewisemenu-service';
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
@@ -26,17 +27,16 @@ export class SidebarComponent implements OnInit {
   @ViewChild('sideMenu') sideMenu!: ElementRef;
   @Output() mobileMenuButtonClicked = new EventEmitter();
 
-
-  constructor(private router: Router,
-    public translate: TranslateService,
-    private menuService: MenuService) {
+  constructor(public translate: TranslateService,
+    private menuService: MenuService,
+    private roleWiseMenuService: RolewiseMenuService) {
     translate.setDefaultLang('en');
   }
 
   async ngOnInit() {
 
     await this.getMasterMenu();
-
+    this.loadRoleWiseMenuRights();
     // Subscribe to active module for filtering
     this.menuService.activeModule$.subscribe(module => this.filterMenuByModule(module));
 
@@ -240,4 +240,16 @@ export class SidebarComponent implements OnInit {
       });
     });
   }
+
+  loadRoleWiseMenuRights() {
+    this.roleWiseMenuService.getByRoleId(null).subscribe({
+      next: (menuRights: any) => {
+        // this.menuRightsSubject.next(menuRights);
+        localStorage.setItem('menuRights', JSON.stringify(menuRights));
+      }, error: (err) => {
+        console.log('Something went wrong ', err);
+      }
+    });
+  }
+
 }

@@ -35,11 +35,8 @@ export class AuthenticationService {
         const storedUser = localStorage.getItem('currentUser');
         if (storedUser && storedUser !== 'undefined') {
 
-            // Check if storedUser is not null or undefined
-            const initialUser = storedUser ? JSON.parse(storedUser) : null;
 
-            this.currentUserSubject = new BehaviorSubject<User | null>(initialUser);
-            this.currentUser$ = this.currentUserSubject.asObservable();
+            this.currentUserSubject.next(JSON.parse(storedUser));
         }
     }
 
@@ -60,8 +57,17 @@ export class AuthenticationService {
             password
         }, httpOptions).pipe(
             map((response: any) => {
-                const user = response;
-                return user;
+                if (response.status === 'success') {
+                    const user: any = response;
+
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    localStorage.setItem('token', response.token);
+                    this.currentUserSubject.next(user); // 🔑 this is key for AuthGuard
+
+                    return response;
+                } else {
+                    return response;
+                }
             }),
             catchError((error: any) => {
                 const errorMessage = 'Login failed'; // Customize the error message as needed
@@ -87,6 +93,7 @@ export class AuthenticationService {
         localStorage.removeItem('currentUser');
         localStorage.removeItem('token');
         localStorage.removeItem('selectedModule');
+        localStorage.removeItem('menuRights');
         this.currentUserSubject.next(null!);
     }
 

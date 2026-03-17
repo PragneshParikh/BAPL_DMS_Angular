@@ -65,10 +65,6 @@ export class Login {
 
     this.authenticationService.login(this.f['email'].value, this.f['password'].value).subscribe((data: any) => {
       if (data.status == 'success') {
-        this.loginStatus.emit(true);
-        localStorage.setItem('toast', 'true');
-        localStorage.setItem('currentUser', JSON.stringify(data));
-        localStorage.setItem('token', data.token);
         this.toastService.show(data.message, { classname: 'bg-success text-white', delay: 5000 });
         this.router.navigate(['/']);
       } else {
