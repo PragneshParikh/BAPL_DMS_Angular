@@ -97,16 +97,24 @@ export class AuthenticationService {
     }
 
     forgotPassword(email: string) {
-        return this.httpClient.post(this.baseUrl + '/auth/forgot-password', { email }, httpOptions).pipe(
-            map((response: any) => {
-                return response;
-            }),
-            catchError((error: any) => {
-                const errorMessage = 'Password reset failed'; // Customize the error message as needed
-                return throwError(errorMessage);
-            })
-        );
+        return this.httpClient
+            .post<{ success: boolean; message: string }>(
+                `${this.baseUrl}/auth/forgot-password`,
+                { email }
+            )
+            .pipe(
+                map((response) => {
+                    // If the API returns a valid object, just pass it along
+                    return response;
+                }),
+                catchError((error) => {
+                    console.error('Forgot password API error:', error);
 
+                    // Wrap the error in the same object shape so component code works
+                    const fallback = { success: false, message: 'Password reset failed. Please try again.' };
+                    return throwError(fallback);
+                })
+            );
     }
 
     resetPassword(email: string, token: string, password: string, confirmPassword: string) {
