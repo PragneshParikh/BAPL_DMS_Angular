@@ -40,7 +40,6 @@ export class AuthenticationService {
         }
     }
 
-
     public get currentUserValue(): User | null {
         return this.currentUserSubject.value;
     }
@@ -121,6 +120,14 @@ export class AuthenticationService {
             })
         );
 
+    }
+
+    getAccessPermission(subMenuId: number) {
+        const permissions = JSON.parse(localStorage.getItem('menuRights') || '[]');
+
+        const match = permissions.find((p: any) => p.subMenuId === subMenuId);
+
+        return match.permission;
     }
 
 }

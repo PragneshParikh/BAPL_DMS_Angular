@@ -154,20 +154,20 @@ export class HsnCodeMaster implements OnInit {
 
   // ================= SEARCH =================
   setupSearch() {
-  this.searchSubject.pipe(
-    debounceTime(400),
-    distinctUntilChanged(),
-    switchMap(search => 
-      this.hsnService.getHSNCodeMasterList(search || '')
-    )
-  ).subscribe({
-    next: (data) => {
-      this.hsnCodeList = data || [];
-      this.page = 1;
-      this.refreshPage();
-    }
-  });
-}
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      switchMap(search =>
+        this.hsnService.getHSNCodeMasterList(search || '')
+      )
+    ).subscribe({
+      next: (data) => {
+        this.hsnCodeList = data || [];
+        this.page = 1;
+        this.refreshPage();
+      }
+    });
+  }
 
   onSearchChange() {
     if (!this.searchTerm.trim()) {
@@ -200,65 +200,65 @@ export class HsnCodeMaster implements OnInit {
     });
   }
 
-  
+
 
   // ================= SAVE =================
- saveHsn() {
+  saveHsn() {
 
-  if (!this.formHsn.hsncode || !this.formHsn.type) {
-    this.toastService.show('HSN Code and Type are required', {
-      classname: 'bg-danger text-white',
-      delay: 4000
-    });
-    return;
-  }
-
-  this.hsnService.addHSNCodeMaster(this.formHsn).subscribe({
-
-    next: () => {
-      this.toastService.show('HSN Code added successfully!', {
-        classname: 'bg-success text-white',
-        delay: 5000
+    if (!this.formHsn.hsncode || !this.formHsn.type) {
+      this.toastService.show('HSN Code and Type are required', {
+        classname: 'bg-danger text-white',
+        delay: 4000
       });
-
-      this.modalRef.close();   
-      this.loadHsnCodes();
-    },
-
-    error: (err) => {
-
-      console.log(err);
-
-      let message = 'Something went wrong';
-
-      if (err?.error) {
-        if (typeof err.error === 'string') {
-          message = err.error;
-        } else if (err.error.message) {
-          message = err.error.message;
-        }
-      }
-
-      this.toastService.show(message, {
-        classname: 'bg-warning text-white',
-        delay: 5000
-      });
-
+      return;
     }
 
-  });
-}
+    this.hsnService.addHSNCodeMaster(this.formHsn).subscribe({
 
-onSubmit(form: any) {
-  if (form.invalid) {
-    Object.values(form.controls).forEach((control: any) => {
-      control.markAsTouched();
+      next: () => {
+        this.toastService.show('HSN Code added successfully!', {
+          classname: 'bg-success text-white',
+          delay: 5000
+        });
+
+        this.modalRef.close();
+        this.loadHsnCodes();
+      },
+
+      error: (err) => {
+
+        console.log(err);
+
+        let message = 'Something went wrong';
+
+        if (err?.error) {
+          if (typeof err.error === 'string') {
+            message = err.error;
+          } else if (err.error.message) {
+            message = err.error.message;
+          }
+        }
+
+        this.toastService.show(message, {
+          classname: 'bg-warning text-white',
+          delay: 5000
+        });
+
+      }
+
     });
-    return;
   }
 
-  this.saveHsn();
-}
+  onSubmit(form: any) {
+    if (form.invalid) {
+      Object.values(form.controls).forEach((control: any) => {
+        control.markAsTouched();
+      });
+      return;
+    }
+
+    this.saveHsn();
+  }
   downloadHSNCodeMasterExcel() {
 
     this.hsnService.downloadHSNCodeMasterExcel().subscribe((data: Blob) => {
@@ -283,25 +283,25 @@ onSubmit(form: any) {
   // ================= EDIT =================
   openEditModal(hsn: HsnCodeMasterViewModel) {
     this.isDuplicateHSN = false;
- 
+
     this.isAddMode = false;
     this.isViewMode = true;
- 
+
     this.selectedHSNCodeId = hsn.id;
- 
+
     this.formHsn = {
       hsncode: hsn.hsncode,
       description: hsn.description,
       type: hsn.type
     };
- 
+
     this.originalFormHsn = { ...this.formHsn };
- 
+
     this.modalRef = this.modalService.open(this.hsnModal, {
       size: 'lg',
       centered: true
     });
   }
- 
+
 
 }

@@ -44,7 +44,8 @@
                         </button>
 
 
-                        <button class="btn btn-success btn-sm" (click)="openAddModal(editModal)">
+                        <button [hidden]="batteryCapacityAccess < accessRole.ModifyOnly" class="btn btn-success btn-sm"
+                            (click)="openAddModal(editModal)">
                             <i class="ri-add-line me-1"></i>
                             <!-- Add -->
                         </button>

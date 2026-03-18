@@ -10,8 +10,8 @@ import { ItemMaster } from './components/Workshop/item-master/item-master';
 import { ItemmasterFG } from './components/Showroom/itemmaster-fg/itemmaster-fg';
 import { OemmodelMasterComponent } from './components/oemmodel-master/oemmodel-master';
 import { AuthGuard } from './core/guards/auth.guard';
-import { HsnCodeMaster } from './components/hsn-code-master/hsn-code-master';
 import { TaxCodeMasterComponent } from './components/taxcode-master/taxcode-master';
+import { HsnCodeMaster } from './components/hsn-code-master/hsn-code-master';
 
 
 export const routes: Routes = [
@@ -27,8 +27,8 @@ export const routes: Routes = [
       {
         path: 'showroom',
         children: [
-          { path: 'itemmaster-fg', component: ItemmasterFG },
-          { path: 'form22master', component: Form22master }
+          { path: 'itemmaster-fg', component: ItemmasterFG, data: [6] },
+          { path: 'form22master', component: Form22master, data: [10] }
         ]
       },
 
@@ -36,24 +36,24 @@ export const routes: Routes = [
       {
         path: 'workshop',
         children: [
-          { path: 'item-master', component: ItemMaster }
+          { path: 'item-master', component: ItemMaster, data: [5] }
         ]
       },
 
       // MASTER MODULE (COMMON)
-      { path: 'dealer-master', component: DealerMaster },
-      { path: 'dealer-account-master', component: DealerAccountMaster },
-      { path: 'upload', component: DealerMasterBulkDataDipatch },
-      { path: 'location-master', component: LocationMasterComponent },
-      { path: 'color', loadComponent: () => import('./components/color/color').then(m => m.Color) },
-      { path: 'api-tracking', loadComponent: () => import('./components/api-tracking/api-tracking').then(m => m.ApiTracking) },
-      { path: 'battery-capacity-master', component: BatteryCapacityMaster },
-      { path: 'oemmodel-master', component: OemmodelMasterComponent },
-      { path: 'kit-creation', loadComponent: () => import('./components/kit-creation/kit-creation').then(m => m.KitCreation) },
-      { path: 'data-seed', loadComponent: () => import('./components/data-seed/data-seed').then(m => m.DataSeed) },
-      { path: 'hsnCode-master', component: HsnCodeMaster },
-      { path: 'taxcode-master', component: TaxCodeMasterComponent },
-
+      { path: 'dealer-master', component: DealerMaster, data: [4] },
+      { path: 'dealer-account-master', component: DealerAccountMaster, data: [] },
+      { path: 'upload', component: DealerMasterBulkDataDipatch, data: [] },
+      { path: 'location-master', component: LocationMasterComponent, data: [3] },
+      { path: 'color', data: [2], loadComponent: () => import('./components/color/color').then(m => m.Color) },
+      { path: 'api-tracking', data: [7], loadComponent: () => import('./components/api-tracking/api-tracking').then(m => m.ApiTracking) },
+      { path: 'battery-capacity-master', data: [8], component: BatteryCapacityMaster },
+      { path: 'oemmodel-master', data: [11], component: OemmodelMasterComponent },
+      { path: 'kit-creation', data: [], loadComponent: () => import('./components/kit-creation/kit-creation').then(m => m.KitCreation) },
+      { path: 'data-seed', data: [9], loadComponent: () => import('./components/data-seed/data-seed').then(m => m.DataSeed) },
+      { path: 'hsnCode-master', component: HsnCodeMaster, data: [13] },
+      { path: 'taxcode-master', component: TaxCodeMasterComponent, data: [14] },
+      { path: 'access-control', data: [9], loadComponent: () => import('./components/access-control/access-control').then(m => m.AccessControl) }
     ]
   }
 ];

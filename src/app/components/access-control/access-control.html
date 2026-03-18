@@ -1,0 +1,68 @@
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs title="Access Control"></app-breadcrumbs>
+<!-- End Breadcrumbs -->
+
+<div class="card p-3">
+    <table class="table table-gridjs" style="table-layout: fixed; width: 100%;">
+        <thead>
+            <tr>
+                <th>Form Name</th>
+                <th>Access</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <ng-container *ngFor="let parent of parents; let i = index">
+
+                <ng-container *ngIf="parent.children?.length > 0; else noChild">
+
+                    <!-- Parent Row -->
+                    <tr>
+                        <td colspan="2" (click)="toggleChild(i)" style="cursor: pointer;">
+                            <i class="mdi me-2" [class.mdi-chevron-down]="!parent.expanded"
+                                [class.mdi-chevron-up]="parent.expanded">
+                            </i>
+                            {{ parent.name }}
+                        </td>
+                    </tr>
+
+                    <!-- Child Table -->
+                    <tr *ngIf="parent.expanded">
+                        <td colspan="2">
+                            <table class="table table-bordered w-100">
+                                <tbody>
+                                    <tr *ngFor="let child of parent.children">
+                                        <td class="align-middle">{{ child.name }}</td>
+                                        <td class="align-middle">
+                                            <select class="form-select form-select-sm" [(ngModel)]="child.access">
+                                                <option *ngFor="let option of accessOptions" [value]="option">
+                                                    {{ option }}
+                                                </option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+
+                </ng-container>
+
+                <!-- ✅ Parent WITHOUT children -->
+                <ng-template #noChild>
+                    <tr>
+                        <td class="align-middle">{{ parent.name }}</td>
+                        <td>
+                            <select class="form-select form-select-sm" [(ngModel)]="parent.access">
+                                <option *ngFor="let option of accessOptions" [value]="option">
+                                    {{ option }}
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                </ng-template>
+
+            </ng-container>
+        </tbody>
+    </table>
+</div>

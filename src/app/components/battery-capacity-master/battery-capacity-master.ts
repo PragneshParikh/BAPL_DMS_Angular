@@ -7,10 +7,11 @@ import {
   NgbModal,
   NgbModalRef
 } from '@ng-bootstrap/ng-bootstrap';
-
 import { BatteryCapacityMasterService } from '../../core/services/battery-capacity-master-service';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { BatteryApiResponse, BatteryCapacity } from '../../ViewModels/BatteryCapacityMaster/BatteryCapacity';
+import { AuthenticationService } from '../../core/services/auth.service';
+import { AccessRoles } from '../../constant';
 
 @Component({
   selector: 'app-battery-capacity-master',
@@ -41,16 +42,21 @@ export class BatteryCapacityMaster {
 
   private modalRef!: NgbModalRef;
 
+  batteryCapacityAccess = 0;
+  accessRole = AccessRoles;
+
   constructor(
     private batteryService: BatteryCapacityMasterService,
     private modalService: NgbModal,
-    public toastService: ToastService
+    public toastService: ToastService,
+    private authenticationService: AuthenticationService
   ) { }
 
   /* ================= INIT ================= */
 
   ngOnInit(): void {
     this.loadBatteryCapacities();
+    this.batteryCapacityAccess = this.authenticationService.getAccessPermission(8);
   }
 
   /* ================= LOAD ================= */
