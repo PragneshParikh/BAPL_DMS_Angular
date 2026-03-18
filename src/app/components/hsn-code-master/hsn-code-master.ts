@@ -280,5 +280,28 @@ onSubmit(form: any) {
     });
 
   }
+  // ================= EDIT =================
+  openEditModal(hsn: HsnCodeMasterViewModel) {
+    this.isDuplicateHSN = false;
+ 
+    this.isAddMode = false;
+    this.isViewMode = true;
+ 
+    this.selectedHSNCodeId = hsn.id;
+ 
+    this.formHsn = {
+      hsncode: hsn.hsncode,
+      description: hsn.description,
+      type: hsn.type
+    };
+ 
+    this.originalFormHsn = { ...this.formHsn };
+ 
+    this.modalRef = this.modalService.open(this.hsnModal, {
+      size: 'lg',
+      centered: true
+    });
+  }
+ 
 
 }
