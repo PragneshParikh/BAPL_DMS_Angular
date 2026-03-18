@@ -1,0 +1,31 @@
+table > thead > tr > th {
+  background-color: #747CA0;
+  color: #ffffff;
+}
+
+.tax-table th,
+.tax-table td {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.table-gridjs th.sort {
+  padding-right: 30px;
+}
+
+.plus {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 10px;
+}
+
+.sort-asc::after {
+  content: ' ▲';
+  font-size: 10px;
+}
+
+.sort-desc::after {
+  content: ' ▼';
+  font-size: 10px;
+}

@@ -11,6 +11,7 @@ import { ItemmasterFG } from './components/Showroom/itemmaster-fg/itemmaster-fg'
 import { OemmodelMasterComponent } from './components/oemmodel-master/oemmodel-master';
 import { AuthGuard } from './core/guards/auth.guard';
 import { HsnCodeMaster } from './components/hsn-code-master/hsn-code-master';
+import { TaxCodeMasterComponent } from './components/taxcode-master/taxcode-master';
 
 
 export const routes: Routes = [
@@ -51,6 +52,8 @@ export const routes: Routes = [
       { path: 'kit-creation', loadComponent: () => import('./components/kit-creation/kit-creation').then(m => m.KitCreation) },
       { path: 'data-seed', loadComponent: () => import('./components/data-seed/data-seed').then(m => m.DataSeed) },
       { path: 'hsnCode-master', component: HsnCodeMaster },
+      { path: 'taxcode-master', component: TaxCodeMasterComponent },
+
     ]
   }
 ];
