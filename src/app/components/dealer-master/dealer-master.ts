@@ -3,9 +3,9 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DealerService } from '../../core/services/dealer-service';
 import { FormsModule } from '@angular/forms';
-import '@angular/localize/init';
 import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
-
+import { DealerMasterViewModel } from '../../ViewModels/Dealer/DealerMasterViewModel';
+import { DealerApiResponse } from '../../ViewModels/Dealer/DealerApiResponse';
 @Component({
   selector: 'app-dealer-master',
   standalone: true,
@@ -16,12 +16,14 @@ import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 
 export class DealerMaster implements OnInit {
 
-  @ViewChild('dealerModal') dealerModal!: TemplateRef<any>;
+  @ViewChild('dealerModal') dealerModal!: TemplateRef<unknown>;
 
-  dealerList: any[] = [];
-  originalDealerList: any[] = [];
-  paginatedDealerList: any[] = [];
-  selectedMaster: any = '';
+  dealerList: DealerMasterViewModel[] = [];
+  originalDealerList: DealerMasterViewModel[] = [];
+  paginatedDealerList: DealerMasterViewModel[] = [];
+
+  selectedDealer!: DealerMasterViewModel;
+
   page = 1;
   pageSize = 10;
 
@@ -30,51 +32,49 @@ export class DealerMaster implements OnInit {
 
   searchTerm = '';
 
-  selectedDealer: any;
   private searchSubject = new Subject<string>();
+
   constructor(
     private dealerService: DealerService,
     private modalService: NgbModal
   ) { }
 
-  ngOnInit(): void {
+  /* ================= INIT ================= */
 
+  ngOnInit(): void {
     this.loadDealers();
     this.setupSearch();
   }
 
+  /* ================= LOAD ================= */
 
-  // ================= LOAD DEALERS FROM API =================
-
-  loadDealers() {
+  loadDealers(): void {
 
     this.dealerService.getDealers().subscribe({
 
-      next: (res: any) => {
+      next: (res: DealerApiResponse) => {
 
         const data = res.data || [];
-        this.dealerList = data.map((dealer: any, index: number) => ({
+
+        this.dealerList = data.map((dealer, index) => ({
           ...dealer,
           slNo: index + 1
         }));
+
         this.originalDealerList = [...this.dealerList];
 
         this.refreshPage();
-
       },
 
-      error: (err) => {
-        console.error(err);
-      }
+      error: (err) => console.error(err)
 
     });
 
   }
 
+  /* ================= PAGINATION ================= */
 
-  // ================= PAGINATION =================
-
-  refreshPage() {
+  refreshPage(): void {
 
     const start = (this.page - 1) * this.pageSize;
     const end = start + this.pageSize;
@@ -83,6 +83,7 @@ export class DealerMaster implements OnInit {
 
   }
 
+  /* ================= SORT ================= */
 
   // ================= SORTING =================
 
@@ -114,15 +115,11 @@ export class DealerMaster implements OnInit {
     });
 
     this.refreshPage();
-
   }
 
+  /* ================= MODAL ================= */
 
-
-
-  // ================= MODAL =================
-
-  openDealerModal(dealer: any) {
+  openDealerModal(dealer: DealerMasterViewModel): void {
 
     this.selectedDealer = dealer;
 
@@ -134,35 +131,29 @@ export class DealerMaster implements OnInit {
 
   }
 
+  /* ================= SELECT ================= */
 
+  toggleSelectAll(event: Event): void {
 
-  uploadFile() {
-    console.log("Upload clicked for:", this.selectedMaster);
-  }
+    const checked = (event.target as HTMLInputElement).checked;
 
-  onRowSelect(dealer: any) {
-    console.log("Selected Dealer:", dealer);
-  }
-
-  toggleSelectAll(event: any) {
-
-    const checked = event.target.checked;
-
-    this.paginatedDealerList.forEach((dealer: any) => {
+    this.paginatedDealerList.forEach(dealer => {
       dealer.selected = checked;
     });
 
   }
 
-  printSelected() {
+  printSelected(): void {
 
-    const selectedDealers = this.paginatedDealerList.filter((d: any) => d.selected);
+    const selectedDealers = this.paginatedDealerList.filter(d => d.selected);
 
-    console.log("Selected Dealers:", selectedDealers);
+    console.log('Selected Dealers:', selectedDealers);
 
   }
 
-  downloadDealerExcel() {
+  /* ================= EXCEL ================= */
+
+  downloadDealerExcel(): void {
 
     this.dealerService.downloadDealerExcel().subscribe((data: Blob) => {
 
@@ -170,51 +161,49 @@ export class DealerMaster implements OnInit {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });
 
-      const downloadURL = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(blob);
 
       const link = document.createElement('a');
-      link.href = downloadURL;
+      link.href = url;
       link.download = 'DealerList.xlsx';
-
       link.click();
 
-      window.URL.revokeObjectURL(downloadURL);
+      window.URL.revokeObjectURL(url);
 
     });
 
   }
 
-  setupSearch() {
+  /* ================= SEARCH ================= */
+
+  setupSearch(): void {
 
     this.searchSubject.pipe(
       debounceTime(400),
       distinctUntilChanged(),
       switchMap(search => this.dealerService.getDealers(search))
-    )
-      .subscribe({
+    ).subscribe({
 
-        next: (res: any) => {
+      next: (res: DealerApiResponse) => {
 
-          const data = res.data || [];
+        const data = res.data || [];
 
-          this.dealerList = data.map((dealer: any, index: number) => ({
-            ...dealer,
-            slNo: index + 1
-          }));
+        this.dealerList = data.map((dealer, index) => ({
+          ...dealer,
+          slNo: index + 1
+        }));
 
-          this.page = 1;
+        this.page = 1;
+        this.refreshPage();
+      },
 
-          this.refreshPage();
+      error: err => console.error(err)
 
-        },
-
-        error: err => console.error(err)
-
-      });
+    });
 
   }
 
-  onSearchChange() {
+  onSearchChange(): void {
 
     if (!this.searchTerm || this.searchTerm.trim() === '') {
       this.loadDealers();

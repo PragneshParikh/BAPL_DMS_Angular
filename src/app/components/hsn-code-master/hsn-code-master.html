@@ -1,0 +1,195 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">HSN Code Master</h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <div class="card">
+
+            <!-- HEADER -->
+            <div class="card-header">
+                <div class="d-flex justify-content-end align-items-center">
+
+                    <!--BUTTONS -->
+                    <div class="d-flex gap-2 me-3">
+                        <button class="btn btn-success btn-sm" (click)="openAddModal()">
+                            <i class="ri-add-line"></i>
+                        </button>
+
+                        <button class="btn btn-success btn-sm" (click)="downloadHSNCodeMasterExcel()">
+                            <i class="ri-file-excel-2-line"></i>
+                        </button>
+                    </div>
+
+                    <!-- SEARCH -->
+                    <div class="search-box">
+                        <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm"
+                            (input)="onSearchChange()" />
+                        <i class="ri-search-line search-icon"></i>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- BODY -->
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-gridjs table-striped hsn-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sl No.</th>
+                                <th class="sort" (click)="onSort('hsncode')" style="cursor:pointer">HSN Code</th>
+                                <th class="sort" (click)="onSort('description')" style="cursor:pointer">Description</th>
+                                <th class="sort" (click)="onSort('type')" style="cursor:pointer">Type</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @if (paginatedHsnCodes?.length === 0) {
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    No data available
+                                </td>
+                            </tr>
+                            }
+
+                            @for (hsn of paginatedHsnCodes; track $index) {
+                            <tr (click)="openEditModal(hsn)" style="cursor:pointer">
+
+                                <td>
+                                    {{ (page - 1) * pageSize + $index + 1 }}
+                                </td>
+
+                                <td>
+                                    <ngb-highlight [result]="hsn.hsncode" [term]="searchTerm"></ngb-highlight>
+                                </td>
+
+                                <td>
+                                    <div class="truncate-column">
+                                        <ngb-highlight [result]="hsn.description" [term]="searchTerm"></ngb-highlight>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <ngb-highlight [result]="hsn.type" [term]="searchTerm"></ngb-highlight>
+                                </td>
+
+                            </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <!-- PAGINATION -->
+                <div class="row mt-3">
+                    <div class="col-sm-12">
+                        <div class="float-md-end">
+                            <ngb-pagination [collectionSize]="hsnCodeList.length" [(page)]="page" [pageSize]="pageSize"
+                                (pageChange)="refreshPage()">
+                            </ngb-pagination>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- =================ADD/VIEW MODAL ================= -->
+<ng-template #hsnModal let-modal>
+
+    <!-- FORM -->
+    <form #hsnForm="ngForm" (ngSubmit)="onSubmit(hsnForm)">
+
+        <!-- HEADER -->
+        <div class="modal-header hsn-modal-header">
+            <h5 class="modal-title">
+                {{ isAddMode ? 'Add HSN Code' : 'HSN Code Details' }}
+            </h5>
+
+            <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+        </div>
+
+        <!-- BODY -->
+        <div class="modal-body">
+
+            <div class="row">
+
+                <!-- HSN Code -->
+                <div class="col-md-4">
+                    <label class="form-label">HSN Code</label>
+
+                    <input class="form-control form-control-sm" name="hsncode" required pattern="^[0-9]*$"
+                        #hsncode="ngModel" [(ngModel)]="formHsn.hsncode" [readonly]="isViewMode" />
+
+                    <!-- VALIDATION -->
+                    <div class="text-danger mt-1" *ngIf="hsncode.invalid && hsncode.touched && !isViewMode">
+                        HSN Code is required
+                    </div>
+                </div>
+
+                <!-- TYPE -->
+                <div class="col-md-4">
+                    <label class="form-label">Type</label>
+
+                    <select class="form-select form-select-sm" name="type" required #type="ngModel"
+                        [(ngModel)]="formHsn.type" [disabled]="isViewMode">
+
+                        <option value="" disabled>Select Type</option>
+                        <option value="HSN">HSN</option>
+                        <option value="SAC">SAC</option>
+                    </select>
+
+                    <!-- VALIDATION -->
+                    <div class="text-danger mt-1" *ngIf="type.invalid && type.touched && !isViewMode">
+                        Type is required
+                    </div>
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="col-md-12 mt-3">
+                    <label class="form-label">Description</label>
+
+                    <textarea rows="3" class="form-control form-control-sm" name="description" required
+                        #description="ngModel" [(ngModel)]="formHsn.description" [readonly]="isViewMode">
+                    </textarea>
+
+                    <!-- VALIDATION -->
+                    <div class="text-danger mt-1" *ngIf="description.invalid && description.touched && !isViewMode">
+                        Description is required
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="modal-footer">
+
+            <!-- SAVE -->
+            <button type="submit" class="btn btn-success" *ngIf="isAddMode">
+                Save
+            </button>
+
+            <!-- CLOSE -->
+            <button type="button" class="btn btn-danger" (click)="modal.close()">
+                Close
+            </button>
+
+        </div>
+
+    </form>
+
+</ng-template>

@@ -1,10 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgbPaginationModule, NgbHighlight, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {
+  NgbPaginationModule,
+  NgbHighlight,
+  NgbModal,
+  NgbModalRef
+} from '@ng-bootstrap/ng-bootstrap';
+
 import { BatteryCapacityMasterService } from '../../core/services/battery-capacity-master-service';
-import Swal from 'sweetalert2';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { BatteryApiResponse, BatteryCapacity } from '../../ViewModels/BatteryCapacityMaster/BatteryCapacity';
 
 @Component({
   selector: 'app-battery-capacity-master',
@@ -13,36 +19,49 @@ import { ToastService } from '../../shared/toaster/toast-service';
   templateUrl: './battery-capacity-master.html',
   styleUrl: './battery-capacity-master.scss',
 })
-
 export class BatteryCapacityMaster {
 
-  allBatteryCapacities: any[] = [];
-  filteredBatteryCapacities: any[] = [];
-  sortColumn: string = '';
+  allBatteryCapacities: BatteryCapacity[] = [];
+  filteredBatteryCapacities: BatteryCapacity[] = [];
+
+  sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
+
   searchTerm = '';
   page = 1;
   pageSize = 10;
 
-  selectedBattery: any = {};
+  selectedBattery: BatteryCapacity = {
+    id: 0,
+    batteryCapacity: '',
+    isActive: true
+  };
+
   isEditMode = false;
+
+  private modalRef!: NgbModalRef;
 
   constructor(
     private batteryService: BatteryCapacityMasterService,
-    private modalService: NgbModal, public toastService: ToastService 
+    private modalService: NgbModal,
+    public toastService: ToastService
   ) { }
 
-  ngOnInit() {
+  /* ================= INIT ================= */
+
+  ngOnInit(): void {
     this.loadBatteryCapacities();
   }
 
-  loadBatteryCapacities() {
+  /* ================= LOAD ================= */
+
+  loadBatteryCapacities(): void {
 
     this.batteryService.getBatteryCapcityMaster().subscribe({
 
-      next: (res: any) => {
+      next: (res: BatteryApiResponse) => {
 
-        this.allBatteryCapacities = res.data;
+        this.allBatteryCapacities = res.data || [];
         this.filteredBatteryCapacities = [...this.allBatteryCapacities];
 
       }
@@ -51,14 +70,18 @@ export class BatteryCapacityMaster {
 
   }
 
-  get paginatedData() {
+  /* ================= PAGINATION ================= */
+
+  get paginatedData(): BatteryCapacity[] {
 
     const start = (this.page - 1) * this.pageSize;
     return this.filteredBatteryCapacities.slice(start, start + this.pageSize);
 
   }
 
-  onSearchChange() {
+  /* ================= SEARCH ================= */
+
+  onSearchChange(): void {
 
     if (!this.searchTerm) {
       this.filteredBatteryCapacities = [...this.allBatteryCapacities];
@@ -73,199 +96,111 @@ export class BatteryCapacityMaster {
 
   }
 
-  openAddModal(content: any) {
+  /* ================= MODAL ================= */
+
+  openAddModal(content: TemplateRef<unknown>): void {
 
     this.isEditMode = false;
 
     this.selectedBattery = {
+      id: 0,
       batteryCapacity: '',
       isActive: true
     };
 
-    this.modalService.open(content, { centered: true });
+    this.modalRef = this.modalService.open(content, { centered: true });
 
   }
 
-  openEditModal(content: any, item: any) {
+  openEditModal(content: TemplateRef<unknown>, item: BatteryCapacity): void {
 
     this.isEditMode = true;
 
     this.selectedBattery = { ...item };
 
-    this.modalService.open(content, { centered: true });
+    this.modalRef = this.modalService.open(content, { centered: true });
 
   }
 
-//   addBattery(modal: any) {
+  /* ================= ADD ================= */
 
-//     if (!this.selectedBattery.batteryCapacity) {
-//       alert('Battery Capacity is required');
-//       return;
-//     }
+  addBattery(): void {
 
-//     this.batteryService.addBatteryCapacityMaster(this.selectedBattery)
-//       .subscribe({
+    if (!this.selectedBattery.batteryCapacity) {
 
-//         next: (res: any) => {
+      this.toastService.show('Battery Capacity is required', {
+        classname: 'bg-danger text-white',
+        delay: 4000
+      });
 
-//           Swal.fire({
-//   title: "Success!",
-//   text: "Battery capacity added successfully!",
-//   icon: "success",
-//   draggable: true
-// });
+      return;
+    }
 
-//           modal.close();
+    this.batteryService.addBatteryCapacityMaster(this.selectedBattery)
+      .subscribe({
 
-//           this.loadBatteryCapacities();
+        next: () => {
 
-//         },
+          this.toastService.show('Battery capacity added successfully!', {
+            classname: 'bg-success text-white',
+            delay: 5000
+          });
 
-//         error: () => {
+          this.modalRef.close();
+          this.loadBatteryCapacities();
 
-//             Swal.fire({
-//             icon: "error",
-//             title: "Oops...",
-//             text: "Something went wrong!",
-           
-//           });
+        },
 
-//         }
+        error: () => {
 
-//       });
+          this.toastService.show('Failed to add battery capacity', {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          });
 
-//   }
+        }
 
-addBattery(modal: any) {
+      });
 
-  if (!this.selectedBattery.batteryCapacity) {
-
-    this.toastService.show('Battery Capacity is required', {
-      classname: 'bg-danger text-white',
-      delay: 4000
-    });
-
-    return;
   }
 
-  this.batteryService.addBatteryCapacityMaster(this.selectedBattery)
-    .subscribe({
+  /* ================= UPDATE ================= */
 
-      next: () => {
+  updateBattery(): void {
 
-        this.toastService.show('Battery capacity added successfully!', {
-          classname: 'bg-success text-white',
-          delay: 5000
-        });
+    this.batteryService
+      .updateBatteryCapacityMaster(this.selectedBattery.id, this.selectedBattery)
+      .subscribe({
 
-        modal.close();
-        this.loadBatteryCapacities();
+        next: () => {
 
-      },
+          this.modalRef.close();
 
-      error: () => {
+          this.toastService.show('Battery capacity updated successfully!', {
+            classname: 'bg-success text-white',
+            delay: 5000
+          });
 
-        this.toastService.show('Failed to add battery capacity', {
-          classname: 'bg-danger text-white',
-          delay: 5000
-        });
+          this.loadBatteryCapacities();
 
-      }
+        },
 
-    });
+        error: () => {
 
-}
+          this.toastService.show('Something went wrong while updating!', {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          });
 
-  // updateBattery(modal: any) {
+        }
 
-  //   this.batteryService
-  //     .updateBatteryCapacityMaster(this.selectedBattery.id, this.selectedBattery)
-  //     .subscribe({
+      });
 
-  //       next: (res: any) => {
+  }
 
+  /* ================= EXCEL ================= */
 
-  //         modal.close();
-
-  //         this.loadBatteryCapacities();
-
-  //       },
-
-  //       error: () => {
-
-  //         Swal.fire({
-  //           icon: "error",
-  //           title: "Oops...",
-  //           text: "Something went wrong!",
-           
-  //         });
-
-  //       }
-
-  //     });
-
-  // }
-updateBattery(modal: any) {
-
-  this.batteryService
-    .updateBatteryCapacityMaster(this.selectedBattery.id, this.selectedBattery)
-    .subscribe({
-
-      next: (res: any) => {
-
-        modal.close();
-
-        this.toastService.show('Battery capacity updated successfully!', {
-          classname: 'bg-success text-white',
-          delay: 5000
-        });
-
-        this.loadBatteryCapacities();
-
-      },
-
-      error: () => {
-
-        this.toastService.show('Something went wrong while updating!', {
-          classname: 'bg-danger text-white',
-          delay: 5000
-        });
-
-      }
-
-    });
-
-}
-  // confirmUpdate(modal: any) {
-
-  //   Swal.fire({
-  //     title: "Are you sure?",
-  //     text: "Do you want to update this Battery Capacity?",
-  //     icon: "warning",
-  //     showCancelButton: true,
-  //     confirmButtonColor: "#3085d6",
-  //     cancelButtonColor: "#d33",
-  //     confirmButtonText: "Yes, Update"
-  //   }).then((result) => {
-
-  //     if (result.isConfirmed) {
-
-  //       this.updateBattery(modal);
-  //       Swal.fire("BatteryCapacity Masteru Udated!");
-
-
-  //     }
-  //     else {
-  //       Swal.fire("Changes not saved!");
-
-  //     }
-
-  //   });
-
-  // }
-
-
-  downloadBatteryCapacityMasterExcel() {
+  downloadBatteryCapacityMasterExcel(): void {
 
     this.batteryService.downloadBatteryCapacityMasterExcel().subscribe((data: Blob) => {
 
@@ -273,56 +208,22 @@ updateBattery(modal: any) {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });
 
-      const downloadURL = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(blob);
 
       const link = document.createElement('a');
-      link.href = downloadURL;
+      link.href = url;
       link.download = 'BatteryCapacityList.xlsx';
-
       link.click();
 
-      window.URL.revokeObjectURL(downloadURL);
+      window.URL.revokeObjectURL(url);
 
     });
 
   }
 
+  /* ================= SORT ================= */
 
-  // onSort(column: string) {
-
-  //   if (this.sortColumn === column) {
-  //     this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-  //   } else {
-  //     this.sortColumn = column;
-  //     this.sortDirection = 'asc';
-  //   }
-
-  //   this.filteredBatteryCapacities.sort((a, b) => {
-
-  //     let valueA = a[column];
-  //     let valueB = b[column];
-
-  //     // Handle boolean sorting
-  //     if (typeof valueA === 'boolean') valueA = valueA ? 1 : 0;
-  //     if (typeof valueB === 'boolean') valueB = valueB ? 1 : 0;
-
-  //     // Handle null values
-  //     if (valueA == null) valueA = '';
-  //     if (valueB == null) valueB = '';
-
-  //     valueA = valueA.toString().toLowerCase();
-  //     valueB = valueB.toString().toLowerCase();
-
-  //     if (valueA < valueB) return this.sortDirection === 'asc' ? -1 : 1;
-  //     if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
-
-  //     return 0;
-
-  //   });
-
-  // }
-
-  onSort(column: string) {
+  onSort(column: string): void {
 
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
@@ -333,42 +234,38 @@ updateBattery(modal: any) {
 
     this.filteredBatteryCapacities.sort((a, b) => {
 
-      let valueA = a[column];
-      let valueB = b[column];
+      switch (column) {
 
-      // Boolean handling
-      if (typeof valueA === 'boolean') valueA = valueA ? 1 : 0;
-      if (typeof valueB === 'boolean') valueB = valueB ? 1 : 0;
+        case 'batteryCapacity': {
 
-      // Battery capacity numeric sorting
-      if (column === 'batteryCapacity') {
+          const numA = parseFloat(a.batteryCapacity);
+          const numB = parseFloat(b.batteryCapacity);
 
-        const numA = parseFloat(valueA);
-        const numB = parseFloat(valueB);
+          if (numA !== numB) {
+            return this.sortDirection === 'asc' ? numA - numB : numB - numA;
+          }
 
-        if (numA !== numB) {
           return this.sortDirection === 'asc'
-            ? numA - numB
-            : numB - numA;
+            ? a.batteryCapacity.localeCompare(b.batteryCapacity)
+            : b.batteryCapacity.localeCompare(a.batteryCapacity);
         }
 
-        return this.sortDirection === 'asc'
-          ? valueA.localeCompare(valueB)
-          : valueB.localeCompare(valueA);
+        case 'isActive': {
+
+          const valA = a.isActive ? 1 : 0;
+          const valB = b.isActive ? 1 : 0;
+
+          return this.sortDirection === 'asc' ? valA - valB : valB - valA;
+        }
+
+        default:
+          return 0;
       }
-
-      // Normal sorting
-      valueA = valueA?.toString().toLowerCase() || '';
-      valueB = valueB?.toString().toLowerCase() || '';
-
-      if (valueA < valueB) return this.sortDirection === 'asc' ? -1 : 1;
-      if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
-
-      return 0;
 
     });
 
     this.page = 1;
 
   }
+
 }
