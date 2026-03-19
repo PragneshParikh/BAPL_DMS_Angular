@@ -153,9 +153,15 @@
                         id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true"
                         aria-expanded="false">
                         <i class='bx bx-bell fs-22'></i>
+
+                        @if(unReadInwards > 0){
                         <span
-                            class="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-danger">3<span
-                                class="visually-hidden">unread messages</span></span>
+                            class="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-danger">
+                            {{ unReadInwards }}
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
+                        }
+
                     </button>
                     <div ngbDropdownMenu class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
                         aria-labelledby="page-header-notifications-dropdown">
@@ -167,77 +173,47 @@
                                         <h6 class="m-0 fs-16 fw-semibold text-white"> Notifications </h6>
                                     </div>
                                     <div class="col-auto dropdown-tabs">
-                                        <span class="badge bg-light text-body fs-13"> {{allnotifications?.length}}
+                                        <span class="badge bg-light text-body fs-13"> {{vehicleDispatch?.length}}
                                             New</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="px-2 pt-2">
+                            <div class="px-2 pt-2" (click)="$event.stopPropagation()">
                                 <ul ngbNav #nav="ngbNav" [activeId]="1"
                                     class="nav nav-tabs dropdown-tabs nav-tabs-custom" id="notificationItemsTab">
                                     <li [ngbNavItem]="1">
                                         <a ngbNavLink>
-                                            All ({{allnotifications?.length}})
+                                            Sell Invoice
                                         </a>
                                         <ng-template ngbNavContent>
                                             <div class="tab-pane fade show active py-2 ps-2" id="all-noti-tab"
                                                 role="tabpanel">
                                                 <ngx-simplebar style="max-height: 300px;">
                                                     <div class="pe-2">
-                                                        @for(item of allnotifications;track $index){
+                                                        @for(item of vehicleDispatch;track $index){
                                                         <div
                                                             class="text-reset notification-item d-block dropdown-item position-relative">
                                                             <div class=" d-flex">
-                                                                @if(item.img){
-                                                                <img src="{{item.img}}"
-                                                                    class="me-3 rounded-circle avatar-xs"
-                                                                    alt="user-pic">
                                                                 <div class="flex-grow-1">
                                                                     <a href="javascript:void(0);"
                                                                         class="stretched-link">
                                                                         <h6 class="mt-0 mb-1 fs-13 fw-semibold">
-                                                                            {{item.title}}</h6>
+                                                                            Invoice No: {{item.invoice_no}}</h6>
                                                                     </a>
                                                                     <div class="fs-13 text-muted">
-                                                                        <p class="mb-1">{{item.desc}}</p>
+                                                                        <p class="mb-1">Item Code: {{item.item_code}}
+                                                                        </p>
                                                                     </div>
                                                                     <p
                                                                         class="mb-0 fs-11 fw-medium text-uppercase text-muted">
-                                                                        <span><i class="mdi mdi-clock-outline"></i>
-                                                                            {{item.time}}</span>
+                                                                        <span>Invoice Date: {{item.invoice_date}}</span>
                                                                     </p>
                                                                 </div>
-                                                                }@else {
-                                                                <div class="avatar-xs me-3">
-                                                                    <span
-                                                                        class="avatar-title bg-info-subtle text-info rounded-circle fs-16">
-                                                                        <i class="bx {{item.icon}}"></i>
-                                                                    </span>
-                                                                </div>
-                                                                <div class="flex-grow-1">
-                                                                    <a href="javascript:void(0);"
-                                                                        class="stretched-link">
-                                                                        <h6 class="mt-0 mb-2 lh-base">{{item.desc}}
-                                                                        </h6>
-                                                                    </a>
-                                                                    <p
-                                                                        class="mb-0 fs-11 fw-medium text-uppercase text-muted">
-                                                                        <span><i
-                                                                                class="mdi mdi-clock-outline"></i>{{item.time}}</span>
-                                                                    </p>
-                                                                </div>
-                                                                }
 
-
-                                                                <div class="px-2 fs-15">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        [(ngModel)]="item.state"
-                                                                        (change)="onCheckboxChange($event,'1')"
-                                                                        value="{{item.id}}">
-                                                                </div>
                                                             </div>
                                                         </div>
+                                                        <div class="dropdown-divider"></div>
                                                         } @empty{
                                                         <div class="tab-pane p-4" id="alerts-tab" role="tabpanel"
                                                             aria-labelledby="alerts-tab">
@@ -252,14 +228,14 @@
                                                             </div>
                                                         </div>
                                                         }
-                                                        @if(allnotifications?.length > 0){
+                                                        <!-- @if(vehicleDispatch?.length > 0){
                                                         <div class="my-3 text-center">
                                                             <button type="button"
                                                                 class="btn btn-soft-success waves-effect waves-light">View
                                                                 All Notifications <i
                                                                     class="ri-arrow-right-line align-middle"></i></button>
                                                         </div>
-                                                        }
+                                                        } -->
                                                     </div>
 
 
@@ -269,14 +245,14 @@
                                     </li>
                                     <li [ngbNavItem]="2">
                                         <a ngbNavLink>
-                                            Messages
+                                            Part Invoice
                                         </a>
                                         <ng-template ngbNavContent>
                                             <div class="tab-pane fade show active py-2 ps-2" id="all-noti-tab"
                                                 role="tabpanel">
                                                 <ngx-simplebar style="max-height: 300px;">
                                                     <div class="pe-2">
-                                                        @for(message of messages;track $index){
+                                                        @for(message of partsDispatch;track $index){
                                                         <div class="text-reset notification-item d-block dropdown-item">
                                                             <div class="d-flex">
                                                                 <img src="{{message.avatar}}"
@@ -301,7 +277,6 @@
                                                                     <input class="form-check-input" type="checkbox"
                                                                         value="{{message.id}}"
                                                                         [(ngModel)]="message.state"
-                                                                        (change)="onCheckboxChange($event,'2')"
                                                                         id="{{message.checkboxId}}">
                                                                     <label class="form-check-label"
                                                                         for="{{message.checkboxId}}"></label>
@@ -322,7 +297,7 @@
                                                             </div>
                                                         </div>
                                                         }
-                                                        @if(messages?.length > 0){
+                                                        @if(partsDispatch?.length > 0){
                                                         <div class="my-3 text-center">
                                                             <button type="button"
                                                                 class="btn btn-soft-success waves-effect waves-light">View
@@ -339,7 +314,7 @@
                                     </li>
                                     <li [ngbNavItem]="3">
                                         <a ngbNavLink>
-                                            Alerts
+                                            D2D
                                         </a>
                                         <ng-template ngbNavContent>
                                             <div class="tab-pane p-4" id="alerts-tab" role="tabpanel"
@@ -383,47 +358,28 @@
                     <button type="button" class="btn material-shadow-none" id="page-header-user-dropdown"
                         data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ngbDropdownToggle>
                         <span class="d-flex align-items-center">
-                            <img class="rounded-circle header-profile-user" src="assets/images/users/avatar-1.jpg"
-                                alt="Header Avatar">
+                            <!-- <img class="rounded-circle header-profile-user" src="assets/images/users/avatar-1.jpg"
+                                alt="Header Avatar"> -->
+                            <span
+                                class="rounded-circle header-profile-user d-flex justify-content-center align-items-center bg-primary text-white"
+                                style="width: 32px; height: 32px;">
+                                {{ userData.compName?.charAt(0) | uppercase }}
+                            </span>
                             <span class="text-start ms-xl-2">
                                 <span
-                                    class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{userData.first_name}}
-                                    {{userData.last_name}}</span>
-                                <span class="d-none d-xl-block ms-1 fs-12 text-muted user-name-sub-text">{{userData.role
-                                    == 0 ? 'Admin':'User'}}</span>
+                                    class="d-none d-xl-block ms-1 fs-12 text-muted user-name-sub-text">{{userData.userName}}</span>
                             </span>
                         </span>
                     </button>
                     <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
                         <!-- item-->
-                        <h6 class="dropdown-header">Welcome Anna!</h6>
-                        <a class="dropdown-item" routerLink="/pages/profile"><i
-                                class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span
-                                class="align-middle">Profile</span></a>
-                        <a class="dropdown-item" routerLink="/apps/chat"><i
-                                class="mdi mdi-message-text-outline text-muted fs-16 align-middle me-1"></i> <span
-                                class="align-middle">Messages</span></a>
-                        <a class="dropdown-item" routerLink="/tasks/kanban"><i
-                                class="mdi mdi-calendar-check-outline text-muted fs-16 align-middle me-1"></i> <span
-                                class="align-middle">Taskboard</span></a>
-                        <a class="dropdown-item" routerLink="/pages/faqs"><i
-                                class="mdi mdi-lifebuoy text-muted fs-16 align-middle me-1"></i> <span
-                                class="align-middle">Help</span></a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" routerLink="/pages/profile"><i
-                                class="mdi mdi-wallet text-muted fs-16 align-middle me-1"></i> <span
-                                class="align-middle">Balance : <b>$5971.67</b></span></a>
-                        <a class="dropdown-item" routerLink="/pages/profile"><span
-                                class="badge bg-success-subtle text-success mt-1 float-end">New</span><i
-                                class="mdi mdi-cog-outline text-muted fs-16 align-middle me-1"></i> <span
-                                class="align-middle">Settings</span></a>
-                        <a class="dropdown-item" routerLink="/auth/lockscreen/basic"><i
-                                class="mdi mdi-lock text-muted fs-16 align-middle me-1"></i> <span
-                                class="align-middle">Lock
-                                screen</span></a>
-                        <a class="dropdown-item" href="javascript: void(0);" (click)="logout()"><i
-                                class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i> <span
-                                class="align-middle" data-key="t-logout">Logout</span></a>
+                        <h6 class="dropdown-header text-dark">{{userData.compName}}</h6>
+                        <h6 class="dropdown-header">{{userData.userName}}</h6>
+                        <h6 class="dropdown-header text-dark">Last Login : {{ lastLoginDate$ | async }}</h6>
+                        <a class="dropdown-item" href="javascript: void(0);" (click)="logout()">
+                            <i class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i>
+                            <span class="align-middle" data-key="t-logout">Logout</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -450,8 +406,7 @@
             <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
                 <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal"
                     (click)="modal.dismiss('Cross click')">Close</button>
-                <button type="button" class="btn w-sm btn-danger" id="delete-notification"
-                    (click)="notificationDelete()">Yes, Delete It!</button>
+                <button type="button" class="btn w-sm btn-danger" id="delete-notification">Yes, Delete It!</button>
             </div>
         </div>
 

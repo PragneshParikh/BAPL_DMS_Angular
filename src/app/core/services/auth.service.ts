@@ -34,8 +34,6 @@ export class AuthenticationService {
 
         const storedUser = localStorage.getItem('currentUser');
         if (storedUser && storedUser !== 'undefined') {
-
-
             this.currentUserSubject.next(JSON.parse(storedUser));
         }
     }
@@ -49,10 +47,10 @@ export class AuthenticationService {
      * @param email email of user
      * @param password password of user
      */
-    login(email: string, password: string) {
+    login(username: string, password: string) {
 
         return this.httpClient.post(this.baseUrl + '/auth', {
-            email,
+            username,
             password
         }, httpOptions).pipe(
             map((response: any) => {
@@ -73,13 +71,6 @@ export class AuthenticationService {
                 return throwError(errorMessage);
             })
         );
-    }
-
-    /**
-     * Returns the current user
-     */
-    public currentUser(): any {
-        return getFirebaseBackend()!.getAuthenticatedUser();
     }
 
     /**

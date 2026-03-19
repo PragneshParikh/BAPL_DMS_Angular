@@ -40,8 +40,8 @@ export class Login {
      * Form Validatyion
      */
     this.loginForm = this.formBuilder.group({
-      email: ['admin@bapl.com', [Validators.required, Validators.email]],
-      password: ['SecurePassword123!', [Validators.required]],
+      username: ['CUS0435', [Validators.required]],
+      password: ['Dealer@123', [Validators.required]],
     });
     // get return url from route parameters or default to '/'
     // this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
@@ -63,7 +63,7 @@ export class Login {
     this.submitted = true;
     this.isLoading = true;
 
-    this.authenticationService.login(this.f['email'].value, this.f['password'].value).subscribe((data: any) => {
+    this.authenticationService.login(this.f['username'].value, this.f['password'].value).subscribe((data: any) => {
       if (data.status == 'success') {
         this.toastService.show(data.message, { classname: 'bg-success text-white', delay: 5000 });
         this.router.navigate(['/']);

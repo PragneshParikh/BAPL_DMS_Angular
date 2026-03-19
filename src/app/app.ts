@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnDestroy, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AuthenticationService } from './core/services/auth.service';
 import { ToastsContainer } from './shared/toaster/toasts-container.component';
@@ -10,9 +10,13 @@ import { CommonModule } from '@angular/common';
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
+export class App implements OnDestroy {
   isLoggedIn = false;
   protected readonly title = signal('BAPL_DMS_Angular');
 
   constructor(private authService: AuthenticationService) { }
+
+  ngOnDestroy(): void {
+    this.authService.logout();
+  }
 }
