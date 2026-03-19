@@ -12,6 +12,8 @@ import { OemmodelMasterComponent } from './components/oemmodel-master/oemmodel-m
 import { AuthGuard } from './core/guards/auth.guard';
 import { TaxCodeMasterComponent } from './components/taxcode-master/taxcode-master';
 import { HsnCodeMaster } from './components/hsn-code-master/hsn-code-master';
+import { Hsnwisetaxcode } from './components/hsnwisetaxcode/hsnwisetaxcode';
+import { AgreegateTaxCodeMaster } from './components/agreegate-tax-code-master/agreegate-tax-code-master';
 
 
 export const routes: Routes = [
@@ -53,7 +55,9 @@ export const routes: Routes = [
       { path: 'data-seed', data: [9], loadComponent: () => import('./components/data-seed/data-seed').then(m => m.DataSeed) },
       { path: 'hsnCode-master', component: HsnCodeMaster, data: [13] },
       { path: 'taxcode-master', component: TaxCodeMasterComponent, data: [14] },
-      { path: 'access-control', data: [9], loadComponent: () => import('./components/access-control/access-control').then(m => m.AccessControl) }
+      { path: 'access-control', data: [9], loadComponent: () => import('./components/access-control/access-control').then(m => m.AccessControl) },
+      { path: 'agreegate-tax-code-master', component: AgreegateTaxCodeMaster, data: [12] },
+      { path: 'hsnwisetaxcode', component: Hsnwisetaxcode, data: [16] }
     ]
   }
 ];

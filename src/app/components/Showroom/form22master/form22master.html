@@ -298,3 +298,60 @@
     </div>
 
 </ng-template>
+
+<ng-template #From22itemModal let-modal>
+
+    <div class="modal-header item-modal-header">
+        <h5 class="modal-title">
+            Form22 Master Details</h5>
+        <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+    </div>
+
+    <div class="modal-body">
+        <div class="row">
+
+            <div class="col-md-3">
+                <label class="form-label">OEM Model Name</label>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedForm22Item.oemmodelId">
+                    <option value="">-- Select Oemmodel name --</option>
+                    <option *ngFor="let o of oemModelList" [ngValue]="o.oemmodelId">
+                        {{o.oemModelName}}
+                    </option>
+                </select>
+                <!-- <label class="form-label">OEM Model Name</label>
+                <input class="form-control form-control-sm" [value]="selectedForm22Item?.oemModelName"> -->
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Sound Level Horn</label>
+                <input class="form-control form-control-sm" [value]="selectedForm22Item?.soundLevelHorn">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Pass by noise level</label>
+                <input class="form-control form-control-sm" [value]="selectedForm22Item?.passbyNoiseLevel">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Type of Certificate No.</label>
+                <input class="form-control form-control-sm" [value]="selectedForm22Item?.approvalCertificateNo">
+            </div>
+
+            <div class="col-md-3">
+                <input class="form-check-input" type="checkbox" [(ngModel)]="selectedForm22Item.isActive">
+
+                <label class="form-check-label ms-2">
+
+                    {{ selectedForm22Item.isActive == true ? 'Active' : 'Inactive' }}
+
+                </label>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" (click)="updateForm22Master()">Save</button>
+        <button class="btn btn-light" (click)="modal.close()">Cancel</button>
+    </div>
+
+</ng-template>

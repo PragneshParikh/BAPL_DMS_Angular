@@ -121,8 +121,7 @@ export class ItemmasterFG implements OnInit {
   }
 
   openDetails(modal: any, item: any) {
-    this.searchTerm = item;
-    this.modalService.open(modal, { size: 'xl' });
-  }
-
+  this.selectedItem = item;   // ✅ IMPORTANT
+  this.modalService.open(modal, { size: 'xl' });
+}
 }

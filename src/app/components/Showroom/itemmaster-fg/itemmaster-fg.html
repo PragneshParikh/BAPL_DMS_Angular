@@ -31,11 +31,11 @@
                 <th class="sort" (click)="sort('itemname')" data-sort="itemname">Vehicle Name</th>
                 <th class="sort" (click)="sort('itemcode')" data-sort="itemcode">Vehicle Code</th>
                 <th class="sort" (click)="sort('itemdesc')" data-sort="itemdesc">Item Description</th>
-                <th class="sort" (click)="sort('iselectric')" data-sort="iselectric">Is OEM Model</th>
-                <th class="sort" (click)="sort('hsncode')" data-sort="hsncode">HSNCode</th>
+                <!-- <th class="sort" (click)="sort('iselectric')" data-sort="iselectric">Is OEM Model</th>
+                <th class="sort" (click)="sort('hsncode')" data-sort="hsncode">HSNCode</th> -->
                 <!-- <th class="sort" (click)="sort('custprice')" style="cursor:pointer" data-sort="custprice">Customer Price</th>
                 <th class="sort" (click)="sort('dlrprice')" style="cursor:pointer" data-sort="dlrprice">Dealer Price</th> -->
-                <th class="sort" (click)="sort('igst')" data-sort="igst">IGST</th>
+                <!-- <th class="sort" (click)="sort('igst')" data-sort="igst">IGST</th> -->
                 <th class="sort" (click)="sort('status')" data-sort="status">Status</th>
               </tr>
             </thead>
@@ -74,7 +74,7 @@
                 <td>
                   <ngb-highlight [result]="data.itemdesc" [term]="searchTerm"></ngb-highlight>
                 </td>
-                <td>
+                <!-- <td>
                   <span class="badge" [ngClass]="data.iselectric ? 'bg-success' : 'bg-danger'">
                     {{ data.iselectric ? 'Yes' : 'No' }}
                   </span>
@@ -82,7 +82,7 @@
 
                 <td>
                   <ngb-highlight [result]="data.hsncode" [term]="searchTerm"></ngb-highlight>
-                </td>
+                </td> -->
 
                 <!-- <td>
                   <ngb-highlight [result]="data.custprice" [term]="searchTerm"></ngb-highlight>
@@ -91,9 +91,9 @@
                 <td>
                   <ngb-highlight [result]="data.dlrprice" [term]="searchTerm"></ngb-highlight>
                 </td> -->
-                <td>
+                <!-- <td>
                   <ngb-highlight [result]="data.igst" [term]="searchTerm"></ngb-highlight>
-                </td>
+                </td> -->
                 <td>
                   <span class="badge" [ngClass]="data.status ? 'bg-success' : 'bg-danger'">
                     {{ data.status ? 'Active' : 'Inactive' }}
@@ -150,7 +150,7 @@
     <div class="row">
       <div class="col-md-3">
         <label class="form-label">Model Type</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 6 ? 'Parts' : 'Vehicle'" readonly>
+        <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 11 ? 'Parts' : 'Vehicle'" readonly>
       </div>
 
       <div class="col-md-3">
@@ -170,7 +170,7 @@
 
 <div class="col-md-3">
         <label class="form-label">Select Group</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 6 ? 'Spares' : 'FG'" readonly>
+        <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 11 ? 'Spares' : 'FG'" readonly>
       </div>
 
       <div class="col-md-3">

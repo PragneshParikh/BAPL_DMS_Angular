@@ -1,0 +1,215 @@
+<div>
+    <!-- SEARCH CARD -->
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+        <h4 class="mb-sm-0">Agreegate Tax Code Master</h4>
+    </div>
+    <!--Add page-->
+    <ng-template #AddAgreegateTaxcode let-modal>
+        <form #addAggregateTaxForm="ngForm" (ngSubmit)="addAggregateTax()">
+
+            <div class="card">
+
+                <!-- Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Aggregate TaxCode Details</h5>
+                    <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body">
+                    <div *ngIf="showAlert" class="alert alert-warning material-shadow alert-dismissible fade show"
+                        role="alert">
+
+                        <strong>Warning!</strong> {{ alertMessage }}
+
+                        <button type="button" class="btn-close" (click)="showAlert = false">
+                        </button>
+                    </div>
+                    <div class="row">
+
+                        <!-- Aggregate Tax Code -->
+                        <div class="col-md-2">
+                            <label class="form-label">Aggregate Tax Code</label>
+
+                            <input type="text" class="form-control form-control-md" name="ataxCode"
+                                [(ngModel)]="formData.ataxCode" required #ataxCode="ngModel" />
+
+                            <small class="text-danger" *ngIf="ataxCode.invalid && ataxCode.touched">
+                                Aggregate Tax Code is required
+                            </small>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-md-2">
+                            <label class="form-label">Description</label>
+
+                            <input type="text" class="form-control form-control-md" name="description"
+                                [(ngModel)]="formData.description" required #description="ngModel" />
+
+                            <small class="text-danger" *ngIf="description.invalid && description.touched">
+                                Description is required
+                            </small>
+                        </div>
+                        <!-- Tax Code (Auto Filled) -->
+                        <div class="col-md-2">
+                            <label class="form-label">Tax Code</label>
+
+                            <select class="form-select form-select-md" [(ngModel)]="selectedTax" name="taxCode"
+                                (change)="onTaxChange()">
+                                <option [ngValue]="null">-- Select TaxCode --</option>
+                                <option *ngFor="let t of taxList" [ngValue]="t">
+                                    {{ t.taxCode }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Tax Rate -->
+                        <div class="col-md-2">
+                            <label class="form-label">Tax Rate</label>
+                            <input type="text" class="form-control form-control-md" name="TaxRate"
+                                [(ngModel)]="formData.TaxRate" readonly />
+                        </div>
+                        <div class="col-md-3">
+                            <label lass="form-label"></label>
+                            <button type="submit" class="btn btn-success" [disabled]="addAggregateTaxForm.invalid">
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <!-- <div class="row p-3"> -->
+
+                <!-- </div> -->
+            </div>
+            <div class="">
+                <!-- CHILD TABLE -->
+                <table class="table table-bordered">
+                    <thead class="table-bgColor">
+                        <tr>
+                            <th>ATaxCode</th>
+                            <th>Description</th>
+                            <th>Sr No.</th>
+                            <th>Tax Code</th>
+                            <th>Tax Rate</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let at of addGridData.taxDetails">
+                            <td>{{addGridData.ataxCode}}</td>
+                            <td>{{addGridData.description}}</td>
+                            <td>{{ at.srNo }}</td>
+                            <td>{{ at.taxCode }}</td>
+                            <td>{{ at.taxRate }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </ng-template>
+</div>
+
+<!-- view list details -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-end align-items-center">
+                    <!-- Add Form22master Button -->
+                    <button class="btn btn-success btn-sm me-3" (click)="openAddDetails(AddAgreegateTaxcode)">
+                        <i class="ri-add-line"></i>
+                    </button>
+                    <!-- Search Box -->
+                    <div class="search-box">
+                        <input type="text" class="form-control search" placeholder="Search..."
+                            (input)="searchItems($event)" />
+                        <i class="ri-search-line search-icon"></i>
+                    </div>
+                </div>
+            </div>
+            <!-- end card header -->
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-gridjs">
+                        <thead class="table-bgColor">
+                            <tr>
+                                <th class="sort" (click)="sort('ataxCode')" data-sort="ataxCode">Agreegate Tax Code</th>
+                                <th class="sort" (click)="sort('description')" data-sort="description">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let data of pagedData" (click)="openDetails(ViewAgreegateModal, data)"
+                                style="cursor:pointer">
+                                <td>{{ data.ataxCode }}</td>
+                                <td>{{ data.description }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row justify-content-md-between align-items-md-center">
+                    <!-- Pagination -->
+                    <div class="col-sm-12 col-md-5">
+                        <div class="text-md-right float-md-end gridjs-pagination">
+                            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                                (pageChange)="pageChange($event)">
+                            </ngb-pagination>
+                        </div>
+                    </div>
+                    <!-- End Pagination -->
+                </div>
+            </div><!-- end card-body -->
+        </div><!-- end card -->
+    </div>
+    <!-- end col -->
+</div>
+<!-- end row -->
+
+<!--View popup details-->
+<ng-template #ViewAgreegateModal let-modal>
+
+
+    <div class="modal-header aggregate-modal-header">
+        <h5 class="modal-title">
+            Aggregate Tax Details</h5>
+        <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+    </div>
+
+
+    <div class="modal-body">
+        <!-- HEADER -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label>Aggregate Tax Code</label>
+                <input class="form-control" [value]="selectedagreegateitem?.ataxCode" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label>Description</label>
+                <input class="form-control" [value]="selectedagreegateitem?.description" readonly>
+            </div>
+        </div>
+
+        <!-- CHILD TABLE -->
+        <table class="table table-bordered">
+            <thead class="table-bgColor">
+                <tr>
+                    <th>Sr No</th>
+                    <th>Tax Code</th>
+                    <th>Tax Rate</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr *ngFor="let t of selectedagreegateitem?.taxDetails">
+                    <td>{{ t.srNo }}</td>
+                    <td>{{ t.taxCode }}</td>
+                    <td>{{ t.taxRate }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+</ng-template>
