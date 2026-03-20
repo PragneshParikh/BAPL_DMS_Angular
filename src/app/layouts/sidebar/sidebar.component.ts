@@ -11,6 +11,7 @@ import { SimplebarAngularModule } from 'simplebar-angular';
 import { MenuService } from '../../core/services/menu-service';
 import { BehaviorSubject } from 'rxjs';
 import { RolewiseMenuService } from '../../core/services/rolewisemenu-service';
+import { LoaderService } from '../../core/services/loader';
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
@@ -29,17 +30,20 @@ export class SidebarComponent implements OnInit {
 
   constructor(public translate: TranslateService,
     private menuService: MenuService,
-    private roleWiseMenuService: RolewiseMenuService) {
+    private roleWiseMenuService: RolewiseMenuService,
+    private loader: LoaderService
+  ) {
     translate.setDefaultLang('en');
   }
 
   async ngOnInit() {
 
+    this.loader.show();
     await this.getMasterMenu();
     this.loadRoleWiseMenuRights();
     // Subscribe to active module for filtering
     this.menuService.activeModule$.subscribe(module => this.filterMenuByModule(module));
-
+    this.loader.hide();
   }
 
   /***
