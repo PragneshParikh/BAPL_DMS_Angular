@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ItemMasterService } from '../../../core/services/item-master-service';
 import { NgbHighlight, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { LoaderService } from '../../../core/services/loader';
 
 @Component({
   selector: 'app-item-master',
@@ -32,8 +33,9 @@ export class ItemMaster implements OnInit {
 
   constructor(
     private itemService: ItemMasterService,
+    private loader: LoaderService,
     private modalService: NgbModal
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadItems();
@@ -41,28 +43,36 @@ export class ItemMaster implements OnInit {
 
   //  API CALL
   loadItems(search?: string) {
+    this.loader.show();
 
-    this.itemService.getItems(this.groupId, this.searchTerm).subscribe((res: any) => {
+    this.itemService.getItems(this.groupId, this.searchTerm).subscribe({
+      next: (res: any) => {
 
-      this.griddata = res;
-      this.filteredData = [...this.griddata];
-      this.collectionSize = this.filteredData.length;
+        this.griddata = res;
+        this.filteredData = [...this.griddata];
+        this.collectionSize = this.filteredData.length;
 
-      this.refreshTable();
+        this.refreshTable();
+        this.loader.hide();
 
-      console.log(this.griddata);
+        console.log(this.griddata);
+      },
+      error: (err) => {
+        console.log(err);
+        this.loader.hide();
+      }
 
     });
 
   }
 
   //  SEARCH
- searchItems(event: any) {
+  searchItems(event: any) {
 
-  this.searchTerm = event.target.value || '';
-  this.loadItems(this.searchTerm);
+    this.searchTerm = event.target.value || '';
+    this.loadItems(this.searchTerm);
 
-}
+  }
 
   // pagination
   pageChange(page: number) {

@@ -5,7 +5,7 @@
     </div>
     <!--Add page-->
     <ng-template #AddAgreegateTaxcode let-modal>
-        <form #addAggregateTaxForm="ngForm" (ngSubmit)="addAggregateTax()">
+        <form #addAggregateTaxForm="ngForm" (ngSubmit)="addAggregateTax(addAggregateTaxForm)">
 
             <div class="card">
 
@@ -34,7 +34,7 @@
                             <input type="text" class="form-control form-control-md" name="ataxCode"
                                 [(ngModel)]="formData.ataxCode" required #ataxCode="ngModel" />
 
-                            <small class="text-danger" *ngIf="ataxCode.invalid && ataxCode.touched">
+                            <small class="text-danger" *ngIf="ataxCode.invalid && (ataxCode.touched ||addAggregateTaxForm.submitted)">
                                 Aggregate Tax Code is required
                             </small>
                         </div>
@@ -46,7 +46,7 @@
                             <input type="text" class="form-control form-control-md" name="description"
                                 [(ngModel)]="formData.description" required #description="ngModel" />
 
-                            <small class="text-danger" *ngIf="description.invalid && description.touched">
+                            <small class="text-danger" *ngIf="description.invalid && (description.touched ||addAggregateTaxForm.submitted)">
                                 Description is required
                             </small>
                         </div>
@@ -54,13 +54,17 @@
                         <div class="col-md-2">
                             <label class="form-label">Tax Code</label>
 
-                            <select class="form-select form-select-md" [(ngModel)]="selectedTax" name="taxCode"
+                            <select class="form-select form-select-md custom-dropdown"  [(ngModel)]="selectedTax" required #taxCode="ngModel" name="taxCode"
                                 (change)="onTaxChange()">
                                 <option [ngValue]="null">-- Select TaxCode --</option>
                                 <option *ngFor="let t of taxList" [ngValue]="t">
                                     {{ t.taxCode }}
                                 </option>
                             </select>
+
+                            <small class="text-danger" *ngIf="taxCode.invalid && (taxCode.touched ||addAggregateTaxForm.submitted)">
+                                taxCode is required
+                            </small>
                         </div>
 
                         <!-- Tax Rate -->

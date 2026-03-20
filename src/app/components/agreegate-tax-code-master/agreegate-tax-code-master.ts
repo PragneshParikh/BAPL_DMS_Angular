@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { NgbHighlight, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { AgreegateTaxCodeMasterservice } from '../../core/services/agreegate-tax-code-masterservice';
 import { debug } from 'console';
+import { LoaderService } from '../../core/services/loader';
+import { ToastService } from '../../shared/toaster/toast-service';
 
 @Component({
   selector: 'app-agreegate-tax-code-master',
@@ -21,6 +23,8 @@ export class AgreegateTaxCodeMaster implements OnInit {
 
   constructor(
     private agreegatetaxService: AgreegateTaxCodeMasterservice,
+    private loader: LoaderService,
+    public toaster: ToastService,
     private modalService: NgbModal
   ) { }
 
@@ -73,7 +77,7 @@ export class AgreegateTaxCodeMaster implements OnInit {
     });
   }
   onTaxChange() {
-debugger
+    debugger
     if (this.selectedTax) {
 
       // 👇 BOTH values set karo
@@ -87,6 +91,7 @@ debugger
   }
   // LOAD DATA
   loadAggreegateTaxCode() {
+    this.loader.show();
     this.agreegatetaxService.getAggregateTaxcodesAsync(this.searchTerm)
       .subscribe({
         next: (res: any) => {
@@ -97,10 +102,13 @@ debugger
           this.filteredData = Array.isArray(res.data) ? res.data : [];
 
           this.collectionSize = this.filteredData.length;
-
+          this.loader.hide();
           this.refreshTable();
         },
-        error: (err) => console.error(err)
+        error: (err) => {
+          console.error(err)
+          this.loader.hide();
+        }
       });
   }
 
@@ -132,7 +140,7 @@ debugger
       });
   }
   //  INSERT
- addAggregateTax () {
+  addAggregateTax(form: any) {
 
     debugger;
     const nextSrNo = this.addGridData.taxDetails.length + 1;
@@ -149,7 +157,7 @@ debugger
         }
       ]
     };
-
+    this.loader.show()
     this.agreegatetaxService.insertAggregateTaxCode(payload)
       .subscribe({
         next: (res: any) => {
@@ -162,12 +170,18 @@ debugger
             taxCode: this.formData.TaxCode,
             taxRate: this.formData.TaxRate
           });
+          this.toaster.show('Aggregate TaxCode details added successfully!', {
+            classname: 'bg-success text-white',
+            delay: 5000
+          });
           this.loadAggreegateTaxCode();
-          this.resetForm();
+          this.loader.hide();
+          form.resetForm();
         },
         error: (err) => {
           this.alertMessage = err.error?.message;
           this.showAlert = true;
+          this.loader.hide();
         }
       });
   }

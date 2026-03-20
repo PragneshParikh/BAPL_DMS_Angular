@@ -4,9 +4,8 @@
     <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
         <h4 class="mb-sm-0">Form 22 specification</h4>
     </div>
-    <ng-template #AddFrom22itemModal let-modal>
-
-        <form #form22Form="ngForm">
+    <ng-template #form22Form let-modal>
+        <form #form22Form="ngForm" (ngSubmit)="addForm22Master(form22Form)">
 
             <div class="card">
 
@@ -34,7 +33,7 @@
 
                             </select>
 
-                            <small class="text-danger" *ngIf="oemmodelId.invalid && oemmodelId.touched">
+                            <small class="text-danger" *ngIf="oemmodelId.invalid && (oemmodelId.touched || form22Form.submitted)">
                                 OEM Model Name is required
                             </small>
 
@@ -48,7 +47,7 @@
                             <input type="text" class="form-control form-control-sm" name="soundLevelHorn"
                                 [(ngModel)]="formData.soundLevelHorn" required #soundLevelHorn="ngModel" />
 
-                            <small class="text-danger" *ngIf="soundLevelHorn.invalid && soundLevelHorn.touched">
+                            <small class="text-danger" *ngIf="soundLevelHorn.invalid && (soundLevelHorn.touched || form22Form.submitted)">
                                 Sound Level Horn is required
                             </small>
 
@@ -62,7 +61,7 @@
                             <input type="text" class="form-control form-control-sm" name="passbyNoiseLevel"
                                 [(ngModel)]="formData.passbyNoiseLevel" required #passbyNoiseLevel="ngModel" />
 
-                            <small class="text-danger" *ngIf="passbyNoiseLevel.invalid && passbyNoiseLevel.touched">
+                            <small class="text-danger" *ngIf="passbyNoiseLevel.invalid && (passbyNoiseLevel.touched || form22Form.submitted)">
                                 Passby Noise Level is required
                             </small>
 
@@ -78,7 +77,7 @@
                                 #approvalCertificateNo="ngModel" />
 
                             <small class="text-danger"
-                                *ngIf="approvalCertificateNo.invalid && approvalCertificateNo.touched">
+                                *ngIf="approvalCertificateNo.invalid && (approvalCertificateNo.touched || form22Form.submitted)">
                                 Certificate No is required
                             </small>
 
@@ -107,7 +106,7 @@
 
                     <div class="col-md-3 d-flex align-items-end">
 
-                        <button class="btn btn-success" [disabled]="form22Form.invalid" (click)="addForm22Master()">
+                        <button class="btn btn-success" [disabled]="form22Form.invalid">
 
                             Add
 
@@ -130,7 +129,7 @@
             <div class="card-header">
                 <div class="d-flex justify-content-end align-items-center">
                     <!-- Add Form22master Button -->
-                    <button class="btn btn-success btn-sm me-3" (click)="openAddDetails(AddFrom22itemModal,formData)">
+                    <button class="btn btn-success btn-sm me-3" (click)="openAddDetails(form22Form,formData)">
                         <i class="ri-add-line"></i>
                     </button>
                     <!-- Download Excel Button -->
@@ -155,7 +154,7 @@
                     <table class="table table-gridjs">
                         <thead class="table-bgColor">
                             <tr>
-                                <th class="sort" (click)="sort('id')" data-sort="id">Sr No.</th>
+                                <th>Sr No.</th>
                                 <th class="sort" (click)="sort('oemModelName')" data-sort="oemModelName">OEM Model
                                     Name</th>
                                 <th class="sort" (click)="sort('soundLevelHorn')" data-sort="soundLevelHorn">Sound
@@ -175,7 +174,7 @@
 
                             <tr (click)="openDetails(From22itemModal,data)" style="cursor:pointer">
                                 <td>
-                                    <ngb-highlight [result]="data.id" [term]="searchTerm"></ngb-highlight>
+                                    {{ (page - 1) * pageSize + $index + 1 }}
                                 </td>
 
                                 <td>

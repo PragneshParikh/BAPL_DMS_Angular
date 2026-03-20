@@ -27,7 +27,7 @@
           <table class="table table-gridjs">
             <thead class="table-bgColor">
               <tr>
-                <th class="sort" (click)="sort('id')" data-sort="id">Sr No.</th>
+                <th>Sr No.</th>
                 <th class="sort" (click)="sort('itemtype')" data-sort="itemtype">Item Type</th>
                 <th class="sort" (click)="sort('itemname')" data-sort="itemname">Part No</th>
                 <th class="sort" (click)="sort('itemcode')" data-sort="itemcode">Part Code</th>
@@ -46,7 +46,7 @@
                 style="cursor:pointer">
 
                 <td>
-                  <ngb-highlight [result]="data.id" [term]="searchTerm"></ngb-highlight>
+                  {{ (page - 1) * pageSize + i + 1 }}
                 </td>
 
                 <td>
@@ -317,8 +317,7 @@
   </div>
 
   <div class="modal-footer">
-    <button class="btn btn-primary">Save</button>
-    <button class="btn btn-light" (click)="modal.close()">Cancel</button>
+    <button class="btn btn-danger" (click)="modal.close()">Cancel</button>
   </div>
 
 </ng-template>

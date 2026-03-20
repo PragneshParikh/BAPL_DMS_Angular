@@ -6,7 +6,7 @@
 
     <!--Add page-->
     <ng-template #AddHSNWiseATaxcode let-modal>
-        <form #addHsnwiseATaxForm="ngForm" (ngSubmit)="addHSNWiseATax()">
+        <form #addHsnwiseATaxForm="ngForm" (ngSubmit)="addHSNWiseATax(addHsnwiseATaxForm)">
 
             <div class="card">
 
@@ -20,9 +20,7 @@
                 <div class="card-body">
                     <div *ngIf="showAlert" class="alert alert-warning material-shadow alert-dismissible fade show"
                         role="alert">
-
-                         {{ alertMessage }}
-
+                        {{ alertMessage }}
                         <button type="button" class="btn-close" (click)="showAlert = false">
                         </button>
                     </div>
@@ -32,13 +30,15 @@
                         <div class="col-md-2">
                             <label class="form-label">HSN Code</label>
 
-                            <select class="form-select form-select-md" [(ngModel)]="formData.hsncode" name="HsnCodeDD" #HsnCodeDD="ngModel" required>
+                            <select class="form-select form-select-md" [(ngModel)]="formData.hsncode" name="HsnCodeDD"
+                                #HsnCodeDD="ngModel" required>
                                 <option [ngValue]="null">-- Select HSNCode --</option>
                                 <option *ngFor="let h of HsnCodeDDList" [ngValue]="h.hsnCodeDD">
                                     {{ h.hsnCodeDD }}
                                 </option>
                             </select>
-                            <small class="text-danger" *ngIf="HsnCodeDD.invalid && HsnCodeDD.touched">
+                            <small class="text-danger"
+                                *ngIf="HsnCodeDD.invalid && (HsnCodeDD.touched || addHsnwiseATaxForm.submitted)">
                                 HSNCode is required
                             </small>
                         </div>
@@ -52,19 +52,20 @@
                                     {{ a.ataxCode }}
                                 </option>
                             </select>
-                            <small class="text-danger" *ngIf="ataxCode.invalid && ataxCode.touched">
+                            <small class="text-danger"
+                                *ngIf="ataxCode.invalid && (ataxCode.touched || addHsnwiseATaxForm.submitted)">
                                 Aggregate Tax Code is required
                             </small>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">TaxCode</label>
-                            <input type="text" class="form-control form-control-md" name="taxCode" [(ngModel)]="formData.taxCode"
-                                readonly>
+                            <input type="text" class="form-control form-control-md" name="taxCode"
+                                [(ngModel)]="formData.taxCode" readonly>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">TaxRate</label>
-                            <input type="text" class="form-control form-control-md" name="taxRate" [(ngModel)]="formData.taxRate"
-                                readonly>
+                            <input type="text" class="form-control form-control-md" name="taxRate"
+                                [(ngModel)]="formData.taxRate" readonly>
                         </div>
                         <!-- Description -->
                         <!-- Custom Radio Color -->
@@ -101,7 +102,8 @@
                             <input type="date" class="form-control" [(ngModel)]="formData.effectivedate"
                                 name="effectivedate" required #effectiveDateInput="ngModel">
 
-                            <div *ngIf="effectiveDateInput.invalid && effectiveDateInput.touched" class="text-danger">
+                            <div *ngIf="effectiveDateInput.invalid && (effectiveDateInput.touched || addHsnwiseATaxForm.submitted)"
+                                class="text-danger">
                                 Effective Date is required.
                             </div>
                         </div>

@@ -1,20 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ItemMasterService } from '../../../core/services/item-master-service';
-import { NgbHighlight, NgbModal,NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbHighlight, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { LoaderService } from '../../../core/services/loader';
+import { error } from 'console';
 @Component({
   selector: 'app-itemmaster-fg',
-  standalone : true,
-  imports: [CommonModule, NgbHighlight,NgbPaginationModule ],
+  standalone: true,
+  imports: [CommonModule, NgbHighlight, NgbPaginationModule],
   templateUrl: './itemmaster-fg.html',
   styleUrl: './itemmaster-fg.scss',
 })
 export class ItemmasterFG implements OnInit {
   griddata: any[] = [];
   filteredData: any[] = [];    // sorted data
-  pagedData: any[] = []; 
+  pagedData: any[] = [];
   selectedItem: any;      // data for current page
   searchTerm: string = '';
 
@@ -23,15 +25,16 @@ export class ItemmasterFG implements OnInit {
   pageSize = 10;
   collectionSize = 0;
   groupId = 6; // static group id
-// sorting
+  // sorting
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
-// RxJS subject for auto-search
+  // RxJS subject for auto-search
   private searchSubject: Subject<string> = new Subject();
   constructor(private itemService: ItemMasterService,
+    private loader: LoaderService,
     private modalService: NgbModal
   ) { }
-  
+
 
   ngOnInit() {
     this.loadItems();
@@ -39,30 +42,36 @@ export class ItemmasterFG implements OnInit {
 
   //  API CALL
   loadItems(search?: string) {
+    this.loader.show();
 
-    this.itemService.getItems(this.groupId, this.searchTerm).subscribe((res: any) => {
+    this.itemService.getItems(this.groupId, this.searchTerm).subscribe({
+      next: (res: any) => {
 
-      this.griddata = res;
-      this.filteredData = [...this.griddata];
-      this.collectionSize = this.filteredData.length;
+        this.griddata = res;
+        this.filteredData = [...this.griddata];
+        this.collectionSize = this.filteredData.length;
 
-      this.refreshTable();
-
-      console.log(this.griddata);
+        this.refreshTable();
+        this.loader.hide();
+      },
+      error: (err) => {
+        console.error(err);
+        this.loader.hide();
+      }
 
     });
 
   }
   //  SEARCH FUNCTION
 
- searchItems(event: any) {
+  searchItems(event: any) {
 
-  this.searchTerm = event.target.value || '';
-  this.loadItems(this.searchTerm);
+    this.searchTerm = event.target.value || '';
+    this.loadItems(this.searchTerm);
 
-}
-  
-// download excel
+  }
+
+  // download excel
   downloadItemMasterExcel() {
 
     this.itemService.downloadItemMasterExcel().subscribe((response: Blob) => {
@@ -109,8 +118,8 @@ export class ItemmasterFG implements OnInit {
       return this.sortDirection === 'asc' ? result : -result;
     });
 
-   this.page = 1;   // reset page after sorting
-  this.refreshTable();
+    this.page = 1;   // reset page after sorting
+    this.refreshTable();
   }
   refreshTable() {
 
@@ -121,7 +130,7 @@ export class ItemmasterFG implements OnInit {
   }
 
   openDetails(modal: any, item: any) {
-  this.selectedItem = item;   // ✅ IMPORTANT
-  this.modalService.open(modal, { size: 'xl' });
-}
+    this.selectedItem = item;   // ✅ IMPORTANT
+    this.modalService.open(modal, { size: 'xl' });
+  }
 }

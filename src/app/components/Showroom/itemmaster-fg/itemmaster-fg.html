@@ -26,7 +26,7 @@
           <table class="table table-gridjs">
             <thead class="table-bgColor">
               <tr>
-                <th class="sort" (click)="sort('id')" data-sort="id">Sr No.</th>
+                <th>Sr No.</th>
                 <th class="sort" (click)="sort('itemtype')" data-sort="itemtype">Item Type</th>
                 <th class="sort" (click)="sort('itemname')" data-sort="itemname">Vehicle Name</th>
                 <th class="sort" (click)="sort('itemcode')" data-sort="itemcode">Vehicle Code</th>
@@ -57,11 +57,10 @@
 
               <tr (click)="openDetails(itemModal,data)" style="cursor:pointer">
                 <td>
-                  <ngb-highlight [result]="data.id" [term]="searchTerm"></ngb-highlight>
+                  {{ (page - 1) * pageSize + $index + 1 }}
                 </td>
                 <td>
-                  <ngb-highlight [result]="data?.grpid == 11 ? 'Parts' : 'Vehicle'"
-                    [term]="searchTerm"></ngb-highlight>
+                  <ngb-highlight [result]="data?.grpid == 11 ? 'Parts' : 'Vehicle'" [term]="searchTerm"></ngb-highlight>
                 </td>
                 <td>
                   <ngb-highlight [result]="data.itemname" [term]="searchTerm"></ngb-highlight>
@@ -123,11 +122,12 @@
           </div>
           <!-- Pagination -->
           <div class="col-sm-12 col-md-5">
-              <div class="text-md-right float-md-end gridjs-pagination">
-                <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize" (pageChange)="pageChange($event)" >
+            <div class="text-md-right float-md-end gridjs-pagination">
+              <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                (pageChange)="pageChange($event)">
               </ngb-pagination>
-              </div>
             </div>
+          </div>
           <!-- End Pagination -->
         </div>
       </div><!-- end card-body -->
@@ -150,7 +150,8 @@
     <div class="row">
       <div class="col-md-3">
         <label class="form-label">Model Type</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 11 ? 'Parts' : 'Vehicle'" readonly>
+        <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 11 ? 'Parts' : 'Vehicle'"
+          readonly>
       </div>
 
       <div class="col-md-3">
@@ -162,13 +163,13 @@
         <label class="form-label">Model Description</label>
         <textarea class="form-control form-control-sm" rows="2" readonly>{{selectedItem?.itemdesc}}</textarea>
       </div>
-      
+
       <div class="col-md-3">
         <label class="form-label">Model Code</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.itemcode" readonly>
       </div>
 
-<div class="col-md-3">
+      <div class="col-md-3">
         <label class="form-label">Select Group</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 11 ? 'Spares' : 'FG'" readonly>
       </div>
@@ -181,17 +182,17 @@
         <label class="form-label">OEM Model Name</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.oemmodelname" readonly>
       </div>
-      
+
       <div class="col-md-3">
         <label class="form-label">Electric Vehicle</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.iselectric ? 'Yes' : 'No'" readonly>
       </div>
-      
+
       <div class="col-md-3">
         <label class="form-label">No. Of Charger</label>
         <input class="form-control form-control-sm" [value]="" readonly>
       </div>
-      
+
       <div class="col-md-3">
         <label class="form-label">No. Of Batteries</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.noofbatteries" readonly>
@@ -200,7 +201,7 @@
         <label class="form-label">Battery Type</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.batterytypeidno" readonly>
       </div>
-      
+
       <div class="col-md-3">
         <label class="form-label">System Voltage</label>
         <input class="form-control form-control-sm" [value]="" readonly>
@@ -261,7 +262,7 @@
         <label class="form-label">Vehicle Category</label>
         <input class="form-control form-control-sm" [value]="" readonly>
       </div>
-      
+
       <div class="col-md-3">
         <label class="form-label">Warranty Period</label>
         <input class="form-control form-control-sm" [value]="" readonly>
@@ -298,8 +299,7 @@
   </div>
 
   <div class="modal-footer">
-    <button class="btn btn-primary">Save</button>
-    <button class="btn btn-light" (click)="modal.close()">Cancel</button>
+       <button class="btn btn-danger" (click)="modal.close()">Close</button>
   </div>
 
 </ng-template>

@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { NgbHighlight, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { Hsnwisetaxcodeservice } from '../../core/services/hsnwisetaxcodeservice';
 import { AddHsnTaxPayload, HsnTaxFormModel } from '../../ViewModels/HSNWiseTaxcodeModel';
+import { LoaderService } from '../../core/services/loader';
+import { ToastService } from '../../shared/toaster/toast-service';
 
 @Component({
   selector: 'app-hsnwisetaxcode',
@@ -21,12 +23,14 @@ export class Hsnwisetaxcode implements OnInit {
 
   constructor(
     private hsnwisetaxcodeservice: Hsnwisetaxcodeservice,
+    private loader: LoaderService,
+    public  toaster: ToastService,
     private modalService: NgbModal
   ) { }
 
   // PAGINATION
   page = 1;
-  pageSize = 5;
+  pageSize = 10;
   collectionSize = 0;
   pagedData: any[] = [];
 
@@ -39,7 +43,7 @@ export class Hsnwisetaxcode implements OnInit {
   alertMessage: string = '';
 
   // FORM DATA
-  payload : any
+  payload: any
   formData: HsnTaxFormModel = {
     id: 0,
     hsncode: '',
@@ -53,10 +57,10 @@ export class Hsnwisetaxcode implements OnInit {
   };
 
   // DROPDOWNS
-  selectedTax: any = null;   // FIX (type)
+  selectedTax: any = null;   // FIX (type) for TaxCode
   HsnCodeDDList: any[] = [];
   ataxCodeList: any[] = [];
-  
+
 
   // GRID DATA
   griddata: any[] = [];
@@ -93,15 +97,21 @@ export class Hsnwisetaxcode implements OnInit {
 
   // MAIN LIST
   getHsnwiseTaxcodedetails() {
+    this.loader.show();
     this.hsnwisetaxcodeservice.getHsnwiseTaxcodedetails(this.searchTerm)
       .subscribe({
         next: (res: any) => {
           this.griddata = res;
           this.filteredData = [...this.griddata];
           this.collectionSize = this.filteredData.length;
+          this.loader.hide();
           this.refreshTable();
         },
-        error: (err) => console.error(err)
+        error: (err) => {
+          console.error(err)
+          this.loader.hide();
+        }
+
       });
   }
 
@@ -127,8 +137,9 @@ export class Hsnwisetaxcode implements OnInit {
   }
 
   // INSERT
-  addHSNWiseATax() {
-debugger;
+  addHSNWiseATax(form: any) {
+    //debugger;
+
     const payload: AddHsnTaxPayload = {
       hsncode: this.formData.hsncode || '',
       ataxCode: this.formData.ataxCode,
@@ -138,20 +149,24 @@ debugger;
     };
 
     console.log("Payload :", payload);
-
+    this.loader.show();
     this.hsnwisetaxcodeservice.insertHsnwiseTaxcodedetails(payload)
       .subscribe({
         next: () => {
-          this.showAlert = true;
-          this.alertMessage = 'Data added successfully';
+          this.toaster.show('HSNWise TaxCode details added successfully!', {
+            classname: 'bg-success text-white',
+            delay: 5000
+          });
 
           this.getHsnwiseTaxcodedetails();
-          this.resetForm();
+          this.loader.hide();
+          form.resetForm();
         },
         error: (err) => {
           console.error(err);
           this.showAlert = true;
-          this.alertMessage = 'Error while inserting data';
+          this.alertMessage = 'Failed to adding HSNWise TaxCode details';
+          this.loader.hide();
         }
       });
   }
@@ -198,16 +213,14 @@ debugger;
   resetForm() {
     this.formData = {
       id: 0,
-      hsncode: '',
+      hsncode: null,
       selectedATax: null,
       ataxCode: '',
       taxCode: '',
-      taxRate: 0,   
+      taxRate: 0,
       stateflag: '',
       effectivedate: '',
       createdBy: 'Admin'
     };
-
-    this.selectedTax = null;
   }
 }

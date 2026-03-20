@@ -4,6 +4,8 @@ import { Form22masterservice } from '../../../core/services/form22masterservice'
 import { NgbHighlight, NgbModal, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { Form22MasterModel } from '../../../ViewModels/Form22MasterModel';
+import { ToastService } from '../../../shared/toaster/toast-service';
+import { LoaderService } from '../../../core/services/loader';
 
 @Component({
   selector: 'app-form22master',
@@ -17,7 +19,6 @@ export class Form22master implements OnInit {
   //binding dropdown value fields
   oemModelList: any[] = [];
   selectedOemModelId: number | null = null;
-
 
   //binding modal data to pass in insert api
   formData: Form22MasterModel = {
@@ -35,18 +36,13 @@ export class Form22master implements OnInit {
 
   };
 
-
-
-  //success messages 
-  showAlert: boolean = false;
-
   //load page details
   griddata: any[] = [];
   filteredData: any[] = [];
 
   searchTerm: string = '';
   selectedForm22Item: any;
-  
+
   pagedData: any[] = [];
   // pagination
   page = 1;
@@ -58,6 +54,8 @@ export class Form22master implements OnInit {
 
 
   constructor(private form22service: Form22masterservice,
+    public toaster: ToastService,
+    private loader: LoaderService,
     private modalService: NgbModal
   ) { }
 
@@ -67,57 +65,87 @@ export class Form22master implements OnInit {
   }
   //  API CALL
   loadForm22Items(search?: string) {
+    this.loader.show();
+    this.form22service.getForm22masterdetails(this.searchTerm).subscribe({
+      next: (res: any) => {
+        this.griddata = res;
+        this.filteredData = [...this.griddata];
+        this.collectionSize = this.filteredData.length;
+        this.loader.hide();
+        this.refreshTable();
 
-    this.form22service.getForm22masterdetails(this.searchTerm).subscribe((res: any) => {
-
-      this.griddata = res;
-      this.filteredData = [...this.griddata];
-      this.collectionSize = this.filteredData.length;
-
-      this.refreshTable();
-
-      console.log(this.griddata);
-
+        //console.log(this.griddata);
+      },
+      error: (err) => {
+        console.log(err);
+        this.loader.hide();
+      }
     });
 
   }
+
   //Oem dropdown binding
   loadOemModels() {
     this.form22service.getForm22masterdetails().subscribe((res: any) => {
       this.oemModelList = res;
     });
   }
-//  SEARCH FUNCTION
 
- searchItems(event: any) {
-
-  this.searchTerm = event.target.value || '';
-  this.loadForm22Items(this.searchTerm);
-
-}
-  
+  //  SEARCH FUNCTION
+  searchItems(event: any) {
+    this.searchTerm = event.target.value || '';
+    this.loadForm22Items(this.searchTerm);
+  }
 
   //add oem details
-  addForm22Master() {
+  addForm22Master(form: any) {
+    debugger;
 
+    const payload: Form22MasterModel = {
+      id: 0,
+      oemmodelId: this.formData.oemmodelId,
+      oemModelName: this.formData.oemModelName,
+      soundLevelHorn: this.formData.soundLevelHorn,
+      passbyNoiseLevel: this.formData.passbyNoiseLevel,
+      approvalCertificateNo: this.formData.approvalCertificateNo,
+      isActive: true,
+      createdBy: 'Admin',
+      createdDate: new Date(),
+      updatedBy: 'Admin',
+      updatedDate: new Date()
+    };
 
-    this.form22service.insertForm22Master(this.formData)
+    this.loader.show();
+
+    this.form22service.insertForm22Master(payload)
       .subscribe({
-
         next: (res) => {
-          console.log("Inserted Successfully", res);
-          this.showAlert = true;
-        },
 
+          this.loader.hide();
+
+          this.toaster.show('Form22 Master details added successfully!', {
+            classname: 'bg-success text-white',
+            delay: 5000
+          });
+
+          this.loadForm22Items();
+          // form.resetForm();
+        },
         error: (err) => {
           console.error(err);
+
+          this.loader.hide();
+
+          this.toaster.show('Failed to submit Form22 Master details!', {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          });
         }
 
       });
-
   }
-  //update oem details
 
+  //update oem details
   updateForm22Master() {
 
     const updateData = {
@@ -130,13 +158,35 @@ export class Form22master implements OnInit {
       updatedBy: "Kajal Tiwari"
     };
 
+    this.loader.show();
+
     this.form22service.updateForm22Master(this.formData.id, updateData)
-      .subscribe(res => {
+      .subscribe({
+        next: (res) => {
 
-        console.log("Update Success");
+          this.toaster.show('Form22 Master details Updated successfully!', {
+            classname: 'bg-success text-white',
+            delay: 5000
+          });
 
+          this.loader.hide();
+        },
+
+        error: (err) => {
+          console.error('Update Error:', err);
+
+          this.toaster.show('Error while updating Form22 Master!', {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          });
+
+          this.loader.hide();
+        },
+
+        complete: () => {
+          console.log('Update API completed');
+        }
       });
-
   }
 
 
@@ -145,25 +195,25 @@ export class Form22master implements OnInit {
     this.page = page;
     this.refreshTable();
   }
-//download Form 22 master excel file
-downloadForm22MasterExcel() {
-  this.form22service.downloadForm22MasterExcel().subscribe((response: Blob) => {
+  //download Form 22 master excel file
+  downloadForm22MasterExcel() {
+    this.form22service.downloadForm22MasterExcel().subscribe((response: Blob) => {
 
-    const blob = new Blob([response], { 
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      const blob = new Blob([response], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Form22MasterList.xlsx';
+
+      link.click();
+      window.URL.revokeObjectURL(url);
+
     });
-
-    const url = window.URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'Form22MasterList.xlsx';
-
-    link.click();
-    window.URL.revokeObjectURL(url);
-
-  });
-}
+  }
 
   //sorting
   sort(column: string) {
@@ -203,8 +253,26 @@ downloadForm22MasterExcel() {
     this.modalService.open(modal, { size: 'xl' });
   }
   openAddDetails(modal: any, item: any) {
+    this.resetForm();
     this.formData = item;
     this.modalService.open(modal, { size: 'xl' });
+  }
+
+  resetForm() {
+    this.formData = {
+      id: 0,
+      oemmodelId: 0,
+      oemModelName: '',
+      soundLevelHorn: '',
+      passbyNoiseLevel: '',
+      approvalCertificateNo: '',
+      isActive: true,
+      createdBy: 'Admin',
+      createdDate: new Date(),
+      updatedBy: '',
+      updatedDate: new Date()
+
+    };
   }
 
 }
