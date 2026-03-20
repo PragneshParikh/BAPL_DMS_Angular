@@ -134,7 +134,7 @@
                     <div class="col-md-6 mt-3">
                         <label class="form-label">Effective Date</label>
                         <input type="date" class="form-control" [(ngModel)]="selectedTaxCode.effectiveDate"
-                            name="effectiveDate" required #effectiveDateInput="ngModel">
+                            name="effectiveDate" [min]="todayDate" required #effectiveDateInput="ngModel">
 
                         <div *ngIf="effectiveDateInput.invalid && (effectiveDateInput.touched || formSubmitted)"
                             class="text-danger mt-1">

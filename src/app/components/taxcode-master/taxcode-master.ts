@@ -25,6 +25,7 @@ export class TaxCodeMasterComponent implements OnInit {
 
   searchTerm = '';
   formSubmitted = false;
+  todayDate: string = '';
 
   page = 1;
   pageSize = 10;
@@ -39,6 +40,8 @@ export class TaxCodeMasterComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    const today = new Date();
+    this.todayDate = this.formatDateForInput(today.toISOString());
     this.loadTaxCodes();
   }
 
@@ -64,6 +67,10 @@ export class TaxCodeMasterComponent implements OnInit {
         }));
 
         this.originalTaxCodeList = [...this.taxCodeList];
+        
+        // Main table should only show the NEWEST record for each unique tax code
+        this.taxCodeList = this.getDistinctTaxCodes(this.originalTaxCodeList);
+
         this.page = 1;
         this.loadPage();
       },
@@ -75,6 +82,25 @@ export class TaxCodeMasterComponent implements OnInit {
         });
       }
     });
+  }
+
+  getDistinctTaxCodes(list: any[]): any[] {
+    const map = new Map<string, any>();
+    for (const item of list) {
+        const key = (item.taxcode || '').toLowerCase();
+        if (!map.has(key)) {
+            map.set(key, item);
+        } else {
+            const existing = map.get(key);
+            const date1 = new Date(item.effectiveDate || 0).getTime();
+            const date2 = new Date(existing.effectiveDate || 0).getTime();
+            // Compare by effectiveDate (keep the newest)
+            if (date1 > date2 || (date1 === date2 && item.id > existing.id)) {
+                map.set(key, item);
+            }
+        }
+    }
+    return Array.from(map.values());
   }
 
   loadPage() {
@@ -90,7 +116,8 @@ export class TaxCodeMasterComponent implements OnInit {
   }
 
   searchTaxCode() {
-    let filtered = [...this.originalTaxCodeList];
+    let distinctList = this.getDistinctTaxCodes(this.originalTaxCodeList);
+    let filtered = [...distinctList];
 
     if (this.searchTerm?.trim()) {
       const term = this.searchTerm.toLowerCase();
@@ -159,7 +186,7 @@ export class TaxCodeMasterComponent implements OnInit {
       effectiveDate: tax.effectiveDate ? this.formatDateForInput(tax.effectiveDate) : ''
     };
 
-    // Load History for the selected tax code
+    // Load History for the selected tax code (DESCENDING by effective date)
     this.historyList = this.originalTaxCodeList
       .filter(x => (x.taxcode || '').toLowerCase() === (tax.taxcode || '').toLowerCase())
       .sort((a, b) => new Date(b.effectiveDate || 0).getTime() - new Date(a.effectiveDate || 0).getTime());
