@@ -73,7 +73,7 @@ export class AgreegateTaxCodeMaster implements OnInit {
     });
   }
   onTaxChange() {
-
+debugger
     if (this.selectedTax) {
 
       // 👇 BOTH values set karo
@@ -132,9 +132,10 @@ export class AgreegateTaxCodeMaster implements OnInit {
       });
   }
   //  INSERT
-  addAggregateTax() {
+ addAggregateTax () {
 
     debugger;
+    const nextSrNo = this.addGridData.taxDetails.length + 1;
     const payload = {
       ataxCode: this.formData.ataxCode,
       description: this.formData.description,
@@ -142,7 +143,7 @@ export class AgreegateTaxCodeMaster implements OnInit {
       taxDetails: [
         {
 
-          srNo: this.formData.SrNo,
+          srNo: nextSrNo,
           taxCode: this.formData.TaxCode,
           taxRate: this.formData.TaxRate
         }
@@ -157,7 +158,7 @@ export class AgreegateTaxCodeMaster implements OnInit {
           this.addGridData.description = this.formData.description;
 
           this.addGridData.taxDetails.push({
-            srNo: this.formData.SrNo,
+            srNo: nextSrNo,
             taxCode: this.formData.TaxCode,
             taxRate: this.formData.TaxRate
           });
