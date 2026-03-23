@@ -35,7 +35,7 @@ export class AuthenticationService {
 
         const storedUser = storageService.getUser();
         if (storedUser && storedUser !== 'undefined') {
-            this.currentUserSubject.next(JSON.parse(storedUser));
+            this.currentUserSubject.next(storedUser);
         }
     }
 
