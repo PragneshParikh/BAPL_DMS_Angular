@@ -40,6 +40,10 @@ export class App implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    window.addEventListener('beforeunload', this.clearStorage.bind(this));
+  }
+
+  clearStorage() {
     this.authService.logout();
   }
 }

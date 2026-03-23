@@ -1,12 +1,9 @@
 import { Injectable } from '@angular/core';
-import { getFirebaseBackend } from '../../authUtils';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { GlobalComponent } from "../../global-component";
-import { Store } from '@ngrx/store';
+import { Store, StoreModule } from '@ngrx/store';
 import { User } from '../../store/Authentication/auth.models';
-import { loginFailure, logout } from '../../store/Authentication/authentication.actions';
 import { environment } from '../../../environments/environment';
 
 // const AUTH_API = GlobalComponent.AUTH_API;
@@ -29,8 +26,9 @@ export class AuthenticationService {
 
     protected baseUrl = environment.apiUrl;
 
-    constructor(private httpClient: HttpClient,
-        private store: Store) {
+    constructor(
+        private httpClient: HttpClient
+    ) {
 
         const storedUser = localStorage.getItem('currentUser');
         if (storedUser && storedUser !== 'undefined') {
@@ -77,7 +75,7 @@ export class AuthenticationService {
      * Logout the user
      */
     logout() {
-        this.store.dispatch(logout());
+        // this.store.dispatch(logout());
         // logout the user
         // return getFirebaseBackend()!.logout();
         localStorage.removeItem('currentUser');
@@ -128,6 +126,5 @@ export class AuthenticationService {
 
         return match.permission;
     }
-
 }
 

@@ -1,12 +1,8 @@
 import { Component, OnInit, EventEmitter, Output, Inject, ViewChild, TemplateRef, DOCUMENT } from '@angular/core';
 
-import { EventService } from '../../core/services/event.service';
-
 //Logout
 import { AuthenticationService } from '../../core/services/auth.service';
-import { AuthfakeauthenticationService } from '../../core/services/authfake.service';
 import { Router } from '@angular/router';
-import { TokenStorageService } from '../../core/services/token-storage.service';
 
 // Language
 import { CookieService } from 'ngx-cookie-service';
@@ -17,8 +13,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SimplebarAngularModule } from 'simplebar-angular';
 import { MenuService } from '../../core/services/menu-service';
-import { partsDispatch, saleInvoice, vehicleDispatch } from './data';
+import { partsDispatch, saleInvoice } from './data';
 import { map, Observable, of } from 'rxjs';
+import { VehicleDispatchservice } from '../../core/services/vehicle-dispatchservice';
+import { LoaderService } from '../../core/services/loader';
+import { InvoiceDetail } from '../../dialogs/invoice-detail/invoice-detail';
+import { result } from 'lodash';
 @Component({
   selector: 'app-topbar',
   templateUrl: './topbar.component.html',
@@ -36,6 +36,8 @@ import { map, Observable, of } from 'rxjs';
 export class TopbarComponent implements OnInit {
   partsDispatch: any[] = [];
   vehicleDispatch: any[] = [];
+  invoiceNotifications: any[] = [];
+  partsNotifications: any[] = [];
   saleInvoice: any[] = [];
   element: any;
   mode: string | undefined;
@@ -56,10 +58,18 @@ export class TopbarComponent implements OnInit {
   unReadInwards: number = 0;
   public selectedOption: string = localStorage.getItem('selectedModule') ? JSON.parse(localStorage.getItem('selectedModule') || '{}') : 'ShowRoom';
 
-  constructor(@Inject(DOCUMENT) private document: any, private eventService: EventService, public languageService: LanguageService, private modalService: NgbModal,
-    public _cookiesService: CookieService, public translate: TranslateService, private authService: AuthenticationService, private authFackservice: AuthfakeauthenticationService,
-    private router: Router, private TokenStorageService: TokenStorageService,
-    private menuService: MenuService) { }
+  constructor(
+    @Inject(DOCUMENT) private document: any,
+    public languageService: LanguageService,
+    private modalService: NgbModal,
+    public _cookiesService: CookieService,
+    public translate: TranslateService,
+    private authService: AuthenticationService,
+    private router: Router,
+    private menuService: MenuService,
+    private vehicleDispatchService: VehicleDispatchservice,
+    private loader: LoaderService
+  ) { }
 
   ngOnInit(): void {
     this.userData = this.authService.currentUserValue;
@@ -86,10 +96,11 @@ export class TopbarComponent implements OnInit {
       })
     );
 
+    this.getVehicleDispatchNotification();
+
     // Fetch Data
     this.saleInvoice = saleInvoice;
     this.partsDispatch = partsDispatch;
-    this.vehicleDispatch = vehicleDispatch;
   }
 
   /**
@@ -172,16 +183,6 @@ export class TopbarComponent implements OnInit {
     }
   }
 
-  // Delete Item
-  // deleteItem(event: any, id: any) {
-  //   var price = event.target.closest('.dropdown-item').querySelector('.item_price').innerHTML;
-  //   var Total_price = this.total - price;
-  //   this.total = Total_price;
-  //   this.cart_length = this.cart_length - 1;
-  //   this.total > 1 ? (document.getElementById("empty-cart") as HTMLElement).style.display = "none" : (document.getElementById("empty-cart") as HTMLElement).style.display = "block";
-  //   document.getElementById('item_' + id)?.remove();
-  // }
-
   toggleDropdown(event: Event) {
     event.stopPropagation();
     if (this.isDropdownOpen) {
@@ -242,52 +243,6 @@ export class TopbarComponent implements OnInit {
 
   // Remove Notification
   checkedValGet: any[] = [];
-  // onCheckboxChange(event: any, id: any) {
-  //   this.notifyId = id
-  //   var result;
-  //   if (id == '1') {
-  //     var checkedVal: any[] = [];
-  //     for (var i = 0; i < this.allnotifications.length; i++) {
-  //       if (this.allnotifications[i].state == true) {
-  //         result = this.allnotifications[i].id;
-  //         checkedVal.push(result);
-  //       }
-  //     }
-  //     this.checkedValGet = checkedVal;
-  //   } else {
-  //     var checkedVal: any[] = [];
-  //     for (var i = 0; i < this.messages.length; i++) {
-  //       if (this.messages[i].state == true) {
-  //         result = this.messages[i].id;
-  //         checkedVal.push(result);
-  //       }
-  //     }
-  //     this.checkedValGet = checkedVal;
-  //   }
-  //   checkedVal.length > 0 ? (document.getElementById("notification-actions") as HTMLElement).style.display = 'block' : (document.getElementById("notification-actions") as HTMLElement).style.display = 'none';
-  // }
-
-  // notificationDelete() {
-  //   if (this.notifyId == '1') {
-  //     for (var i = 0; i < this.checkedValGet.length; i++) {
-  //       for (var j = 0; j < this.allnotifications.length; j++) {
-  //         if (this.allnotifications[j].id == this.checkedValGet[i]) {
-  //           this.allnotifications.splice(j, 1)
-  //         }
-  //       }
-  //     }
-  //   } else {
-  //     for (var i = 0; i < this.checkedValGet.length; i++) {
-  //       for (var j = 0; j < this.messages.length; j++) {
-  //         if (this.messages[j].id == this.checkedValGet[i]) {
-  //           this.messages.splice(j, 1)
-  //         }
-  //       }
-  //     }
-  //   }
-  //   this.calculatenotification()
-  //   this.modalService.dismissAll();
-  // }
 
   calculatenotification() {
     this.totalNotify = 0;
@@ -298,4 +253,68 @@ export class TopbarComponent implements OnInit {
       document.querySelector('.empty-notification-elem')?.classList.remove('d-none')
     }
   }
+  getVehicleDispatchNotification() {
+    this.loader.show();
+    this.vehicleDispatchService.getByVehicleStatus(false).subscribe({
+      next: (result) => {
+        this.vehicleDispatch = result;
+
+        // Group by invoice number
+        const groupedInvoices = this.vehicleDispatch.reduce((acc: any, item: any) => {
+          const invoiceNo = item.invoiceNo;
+          if (!acc[invoiceNo]) {
+            acc[invoiceNo] = {
+              invoiceNumber: invoiceNo,
+              invoiceDate: item.invoiceDate,
+              numberOfItems: 0,
+              status: 'Received' // You can adjust this based on your logic
+            };
+          }
+          acc[invoiceNo].numberOfItems += 1;
+          return acc;
+        }, {});
+
+        // Convert grouped object to array
+        this.invoiceNotifications = Object.values(groupedInvoices);
+
+        this.loader.hide();
+      },
+      error: (err) => {
+        console.error(err);
+        this.loader.hide();
+      }
+    });
+  }
+  onClickInvoiceNumber(invoiceData) {
+
+    const modalRef = this.modalService.open(InvoiceDetail, {
+      size: 'xl',      // modal size: 'sm', 'lg', 'xl'
+      backdrop: 'static', // prevent closing by clicking outside
+      keyboard: false    // prevent closing with ESC
+    });
+
+    const invoiceDetails = this.vehicleDispatch.filter(x => x.invoiceNo === invoiceData.invoiceNumber);
+    // Pass data to the modal component
+    modalRef.componentInstance.invoiceDetails = invoiceDetails;
+
+    // Optional: handle modal close or dismiss
+    modalRef.result.then(
+      (result) => {
+        if (result && result.isAccepted) {
+          // this.lotInspectionService.insertInvoice(invoiceNo).subscribe({
+          //   next: (res) => {
+          //     console.log('Records inserted');
+          //   },
+          //   error: (err) => {
+          //     console.error(err);
+          //   }
+          // });
+        }
+      },
+      (reason) => {
+        console.log('Modal dismissed:', reason);
+      }
+    );
+  }
+
 }

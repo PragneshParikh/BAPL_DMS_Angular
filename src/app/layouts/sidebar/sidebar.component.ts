@@ -38,12 +38,10 @@ export class SidebarComponent implements OnInit {
 
   async ngOnInit() {
 
-    this.loader.show();
     await this.getMasterMenu();
     this.loadRoleWiseMenuRights();
     // Subscribe to active module for filtering
     this.menuService.activeModule$.subscribe(module => this.filterMenuByModule(module));
-    this.loader.hide();
   }
 
   /***
@@ -233,25 +231,31 @@ export class SidebarComponent implements OnInit {
 
   async getMasterMenu(): Promise<any> {
     return new Promise((resolve, reject) => {
+      this.loader.show();
       this.menuService.getMenu().subscribe({
         next: (menu: any) => {
           this.menuItems = menu;
           resolve(menu);
+          this.loader.hide();
         }, error: (err) => {
           console.error('Error fetching menu:', err);
           reject(err);
+          this.loader.hide();
         }
       });
     });
   }
 
   loadRoleWiseMenuRights() {
+    this.loader.show();
     this.roleWiseMenuService.getByRoleId(null).subscribe({
       next: (menuRights: any) => {
         // this.menuRightsSubject.next(menuRights);
         localStorage.setItem('menuRights', JSON.stringify(menuRights));
+        this.loader.hide();
       }, error: (err) => {
-        console.log('Something went wrong ', err);
+        console.error('Something went wrong ', err);
+        this.loader.show();
       }
     });
   }
