@@ -5,6 +5,8 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { Store, StoreModule } from '@ngrx/store';
 import { User } from '../../store/Authentication/auth.models';
 import { environment } from '../../../environments/environment';
+import { StorageService } from './storage';
+import { getUser } from '../../store/Authentication/authentication-selector';
 
 // const AUTH_API = GlobalComponent.AUTH_API;
 
@@ -27,10 +29,11 @@ export class AuthenticationService {
     protected baseUrl = environment.apiUrl;
 
     constructor(
-        private httpClient: HttpClient
+        private httpClient: HttpClient,
+        private storageService: StorageService
     ) {
 
-        const storedUser = localStorage.getItem('currentUser');
+        const storedUser = storageService.getUser();
         if (storedUser && storedUser !== 'undefined') {
             this.currentUserSubject.next(JSON.parse(storedUser));
         }
@@ -55,7 +58,7 @@ export class AuthenticationService {
                 if (response.status === 'success') {
                     const user: any = response;
 
-                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    this.storageService.setUser(user);
                     localStorage.setItem('token', response.token);
                     this.currentUserSubject.next(user); // 🔑 this is key for AuthGuard
 
