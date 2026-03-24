@@ -28,6 +28,11 @@ export class StorageService {
         return data?.userId;
     }
 
+    getDealerCode() {
+        const data = this.getUser();
+        return data?.userName;
+    }
+
     clear() {
         localStorage.removeItem('currentUser');
     }
