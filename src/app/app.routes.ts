@@ -14,6 +14,7 @@ import { TaxCodeMasterComponent } from './components/taxcode-master/taxcode-mast
 import { HsnCodeMaster } from './components/hsn-code-master/hsn-code-master';
 import { Hsnwisetaxcode } from './components/hsnwisetaxcode/hsnwisetaxcode';
 import { AgreegateTaxCodeMaster } from './components/agreegate-tax-code-master/agreegate-tax-code-master';
+import { Lotinspection } from './components/lotinspection/lotinspection';
 
 
 export const routes: Routes = [
@@ -57,7 +58,9 @@ export const routes: Routes = [
       { path: 'taxcode-master', component: TaxCodeMasterComponent, data: [14] },
       { path: 'access-control', data: [9], loadComponent: () => import('./components/access-control/access-control').then(m => m.AccessControl) },
       { path: 'agreegate-tax-code-master', component: AgreegateTaxCodeMaster, data: [12] },
-      { path: 'hsnwisetaxcode', component: Hsnwisetaxcode, data: [16] }
+      { path: 'hsnwisetaxcode', component: Hsnwisetaxcode, data: [16] },
+      { path: 'lotinspection', component: Lotinspection, data: [18] }
+
     ]
   }
 ];

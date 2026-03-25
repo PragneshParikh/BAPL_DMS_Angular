@@ -211,6 +211,10 @@
                             </tr>
 
                             }
+                            <!-- No Data Row -->
+                            <tr *ngIf="!pagedData || pagedData.length === 0">
+                                <td colspan="2" class="text-center">No Data Available</td>
+                            </tr>
 
                         </tbody>
                     </table>

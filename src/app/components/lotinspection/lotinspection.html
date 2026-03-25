@@ -1,0 +1,211 @@
+<div class="card-body">
+    <div class="page-content p-0">
+        <div class="container-fluid px-1">
+
+            <!-- ================= HEADER ================= -->
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
+                <h5 class="mb-0">LOT Inspection</h5>
+
+                <input class="form-control form-control-sm w-auto" value="01 Apr 2025 to 31 Mar 2026" readonly>
+            </div>
+
+            <!-- ================= ACCORDION ================= -->
+            <div class="accordion" id="accordionExample">
+
+                <!-- ================= LOGISTIC INFO ================= -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button py-2" data-bs-toggle="collapse" data-bs-target="#logisticinfo">
+                            Logistic Information
+                        </button>
+                    </h2>
+
+                    <div id="logisticinfo" class="accordion-collapse collapse show">
+                        <div class="accordion-body py-2">
+
+                            <div class="row g-2">
+
+                                <div class="col-md-3">
+                                    <label>Invoice No</label>
+                                    <input class="form-control form-control-sm" value="GJ01AB1234">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Invoice Date</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>LOT No.</label>
+                                    <input class="form-control form-control-sm" value="1" readonly>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Date of Arrival</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Time of Arrival</label>
+                                    <input type="time" class="form-control form-control-sm">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>L.R. No</label>
+                                    <input class="form-control form-control-sm" value="123">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>L.R. Date</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Truck No</label>
+                                    <input class="form-control form-control-sm" value="GJ01AB1234">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Transporter Name</label>
+                                    <input class="form-control form-control-sm" value="ABC Logistics">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Driver Name</label>
+                                    <input class="form-control form-control-sm" value="Ramesh Kumar">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Driver Contact</label>
+                                    <input class="form-control form-control-sm" value="9876543210">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Remarks</label>
+                                    <input class="form-control form-control-sm" value="Testing view">
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= DAMAGE ================= -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button py-2" data-bs-toggle="collapse" data-bs-target="#damage">
+                            Damage Inspection
+                        </button>
+                    </h2>
+
+                    <div id="damage" class="accordion-collapse collapse show">
+                        <div class="accordion-body p-2">
+
+                            <div class="table-responsive custom-scroll">
+                                <table class="table table-bordered table-sm mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Model Name</th>
+                                            <th>Chassis No</th>
+                                            <th>Motor No</th>
+                                            <th>Battery No</th>
+                                            <th>Charger No</th>
+                                            <th>Key & Fobs set(qty)</th>
+                                            <th>Charger(qty)</th>
+                                            <th>Mirror set(qty)</th>
+                                            <th>First Aid Kit(qty)</th>
+                                            <th>Tool Kit(qty)</th>
+                                            <th>Insp. date</th>
+                                            <th>Vehicle Status</th>
+                                            <th>Damage Details</th>
+                                            <th>Remarks</th>
+                                            <th>Supervisor Name</th>
+                                            <th>Location Name</th>
+                                            <th>Upload</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr>
+                                            <td>BGauss C12 MAX 3.0 Ice Green</td>
+                                            <td>P6DEC12DPEB004412</td>
+                                            <td>MTC12HB2614810</td>
+                                            <td>TK614813BZC027082</td>
+                                            <td><input class="form-control form-control-sm" value="TKBG14A04BZ0119"></td>
+                                            <td><input class="form-control form-control-sm" value="1"></td>
+                                            <td><input class="form-control form-control-sm" value="1"></td>
+                                            <td><input class="form-control form-control-sm" value="1"></td>
+                                            <td><input class="form-control form-control-sm" value="1"></td>
+                                            <td><input class="form-control form-control-sm" value="1"></td>
+                                            <td><input type="date" class="form-control form-control-sm"></td>
+
+                                            <td>
+                                                <select class="form-select form-select-sm">
+                                                    <option selected>OK</option>
+                                                    <option>Damaged</option>
+                                                </select>
+                                            </td>
+
+                                            <td><input class="form-control form-control-sm" value="ok"></td>
+                                            <td><input class="form-control form-control-sm"></td>
+                                            <td><input class="form-control form-control-sm" value="Tushar"></td>
+                                            <td><input class="form-control form-control-sm" value="Showroom"></td>
+                                            <td>
+                                                <input type="file" #fileInput1 hidden (change)="onFileSelected($event)">
+                                                <i class="ri-upload-2-line text-primary" style="cursor:pointer"
+                                                    (click)="fileInput1.click()"></i>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>BGauss C12i MAX 2.0 Pearl White</td>
+                                            <td>P6DEC12CPEB019611</td>
+                                            <td>MTC12HB2614742</td>
+                                            <td>TK614812BZC026969</td>
+                                            <td><input class="form-control form-control-sm" value="TKBG14A04BZ0021"></td>
+                                            <td><input class="form-control form-control-sm" value="1"></td>
+                                            <td><input class="form-control form-control-sm" value="1"></td>
+                                            <td><input class="form-control form-control-sm" value="1"></td>
+                                            <td><input class="form-control form-control-sm" value="1"></td>
+                                            <td><input class="form-control form-control-sm" value="1"></td>
+                                            <td><input type="date" class="form-control form-control-sm"></td>
+
+                                            <td>
+                                                <select class="form-select form-select-sm">
+                                                    <option>OK</option>
+                                                    <option selected>Damaged</option>
+                                                </select>
+                                            </td>
+
+                                            <td><input class="form-control form-control-sm" value="Scratches"></td>
+                                            <td><input class="form-control form-control-sm"></td>
+                                            <td><input class="form-control form-control-sm" value="Tushar"></td>
+                                            <td><input class="form-control form-control-sm" value="Showroom"></td>
+
+                                            <td>
+                                                <input type="file" #fileInput2 hidden (change)="onFileSelected($event)">
+                                                <i class="ri-upload-2-line text-primary" style="cursor:pointer"
+                                                    (click)="fileInput2.click()"></i>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= BUTTONS ================= -->
+            <div class="text-end mt-2">
+                <button class="btn btn-success btn-sm me-2">Save</button>
+                <button class="btn btn-danger btn-sm">Cancel</button>
+            </div>
+
+        </div>
+    </div>
+</div>
