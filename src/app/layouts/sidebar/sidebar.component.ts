@@ -12,6 +12,7 @@ import { MenuService } from '../../core/services/menu-service';
 import { BehaviorSubject } from 'rxjs';
 import { RolewiseMenuService } from '../../core/services/rolewisemenu-service';
 import { LoaderService } from '../../core/services/loader';
+import { StorageService } from '../../core/services/storage';
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
@@ -31,7 +32,8 @@ export class SidebarComponent implements OnInit {
   constructor(public translate: TranslateService,
     private menuService: MenuService,
     private roleWiseMenuService: RolewiseMenuService,
-    private loader: LoaderService
+    private loader: LoaderService,
+    private storageService: StorageService
   ) {
     translate.setDefaultLang('en');
   }
@@ -250,8 +252,7 @@ export class SidebarComponent implements OnInit {
     this.loader.show();
     this.roleWiseMenuService.getByRoleId(null).subscribe({
       next: (menuRights: any) => {
-        // this.menuRightsSubject.next(menuRights);
-        localStorage.setItem('menuRights', JSON.stringify(menuRights));
+        this.storageService.setMenuRights(menuRights);
         this.loader.hide();
       }, error: (err) => {
         console.error('Something went wrong ', err);

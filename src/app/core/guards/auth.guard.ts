@@ -4,13 +4,15 @@ import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/ro
 // Auth Services
 import { AuthenticationService } from '../services/auth.service';
 import { RolewiseMenuService } from '../services/rolewisemenu-service';
+import { StorageService } from '../services/storage';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard {
     constructor(
         private router: Router,
         private roleMenuService: RolewiseMenuService,
-        private authService: AuthenticationService
+        private authService: AuthenticationService,
+        private storageService: StorageService
     ) { }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
@@ -30,7 +32,7 @@ export class AuthGuard {
         let menuRights: any[] = [];
 
         try {
-            menuRights = JSON.parse(localStorage.getItem('menuRights') || '[]');
+            menuRights = this.storageService.getMenuRights();
         } catch (e) {
             console.error('Invalid menuRights in localStorage');
             this.router.navigate(['/login']);

@@ -33,6 +33,16 @@ export class StorageService {
         return data?.userName;
     }
 
+    setMenuRights(menu) {
+        const encode = this.encode(menu);
+        localStorage.setItem('menuRights', encode);
+    }
+
+    getMenuRights() {
+        const data = localStorage.getItem('menuRights');
+        return data ? this.decode(data) : null;
+    }
+
     clear() {
         localStorage.removeItem('currentUser');
     }

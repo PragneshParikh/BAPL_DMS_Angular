@@ -123,7 +123,7 @@ export class AuthenticationService {
     }
 
     getAccessPermission(subMenuId: number) {
-        const permissions = JSON.parse(localStorage.getItem('menuRights') || '[]');
+        const permissions = this.storageService.getMenuRights();
 
         const match = permissions.find((p: any) => p.subMenuId === subMenuId);
 
