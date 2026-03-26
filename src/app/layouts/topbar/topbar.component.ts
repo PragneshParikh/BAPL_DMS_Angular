@@ -19,6 +19,10 @@ import { VehicleDispatchservice } from '../../core/services/vehicle-dispatchserv
 import { LoaderService } from '../../core/services/loader';
 import { InvoiceDetail } from '../../dialogs/invoice-detail/invoice-detail';
 import { result } from 'lodash';
+import { StorageService } from '../../core/services/storage';
+import { Lotinspectionservice } from '../../core/services/lotinspectionservice';
+import { error } from 'console';
+import { ToastService } from '../../shared/toaster/toast-service';
 @Component({
   selector: 'app-topbar',
   templateUrl: './topbar.component.html',
@@ -57,6 +61,7 @@ export class TopbarComponent implements OnInit {
   notifyId: any;
   unReadInwards: number = 0;
   public selectedOption: string = localStorage.getItem('selectedModule') ? JSON.parse(localStorage.getItem('selectedModule') || '{}') : 'ShowRoom';
+  dealerCode: string = '';
 
   constructor(
     @Inject(DOCUMENT) private document: any,
@@ -68,7 +73,10 @@ export class TopbarComponent implements OnInit {
     private router: Router,
     private menuService: MenuService,
     private vehicleDispatchService: VehicleDispatchservice,
-    private loader: LoaderService
+    private loader: LoaderService,
+    private storageService: StorageService,
+    private lotInspectionService: Lotinspectionservice,
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -95,6 +103,8 @@ export class TopbarComponent implements OnInit {
         return `${day}/${month}/${year} ${hoursStr}:${minutes} ${ampm}`;
       })
     );
+
+    this.dealerCode = this.storageService.getDealerCode();
 
     this.getVehicleDispatchNotification();
 
@@ -255,7 +265,7 @@ export class TopbarComponent implements OnInit {
   }
   getVehicleDispatchNotification() {
     this.loader.show();
-    this.vehicleDispatchService.getByVehicleStatus(false).subscribe({
+    this.vehicleDispatchService.getByVehicleStatus(false, this.dealerCode).subscribe({
       next: (result) => {
         this.vehicleDispatch = result;
 
@@ -301,20 +311,43 @@ export class TopbarComponent implements OnInit {
     modalRef.result.then(
       (result) => {
         if (result && result.isAccepted) {
-          // this.lotInspectionService.insertInvoice(invoiceNo).subscribe({
-          //   next: (res) => {
-          //     console.log('Records inserted');
-          //   },
-          //   error: (err) => {
-          //     console.error(err);
-          //   }
-          // });
+          this.loader.show();
+          this.lotInspectionService.acceptInvoiceHeader(invoiceData.invoiceNumber).subscribe({
+            next: (res) => {
+              this.updateNotificationStatusByInvoice(invoiceData.invoiceNumber);
+              this.loader.hide();
+            },
+            error: (err) => {
+              this.loader.hide();
+              console.error(err);
+            }
+          });
         }
       },
       (reason) => {
         console.log('Modal dismissed:', reason);
       }
     );
+  }
+  updateNotificationStatusByInvoice(invoiceNumber: string) {
+    this.vehicleDispatchService.updateStatusByInvoiceNumber(invoiceNumber).subscribe({
+      next: (res) => {
+        this.getVehicleDispatchNotification();
+
+        this.router.navigate(['/lotinspection/:invoiceNo']);
+
+        this.toastService.show('Record updated sucessfully', {
+          classname: 'bg-success text-white',
+          delay: 5000
+        });
+      }, error: (err) => {
+        this.toastService.show('Something went wrong', {
+          classname: 'bg-warning text-white',
+          delay: 5000
+        });
+        console.log
+      }
+    })
   }
 
 }

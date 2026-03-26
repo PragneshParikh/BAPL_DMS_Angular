@@ -15,7 +15,13 @@ export class VehicleDispatchservice {
     return this.httpClient.get(`${this.baseUrl}`);
   }
 
-  getByVehicleStatus(status: boolean): Observable<any> {
-    return this.httpClient.get(`${this.baseUrl}/vehicle-dispatch?status=${status}`);
+  getByVehicleStatus(status: boolean, dealerCode: string): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/vehicle-dispatch?dealerCode=${dealerCode}&status=${status}`);
+  }
+
+  updateStatusByInvoiceNumber(invoice: string): Observable<any> {
+    return this.httpClient.post(`${this.baseUrl}/vehicle-dispatch/UpdateInvoiceStatus`, `"${invoice}"`, {
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }

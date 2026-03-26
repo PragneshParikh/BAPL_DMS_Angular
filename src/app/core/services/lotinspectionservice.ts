@@ -14,12 +14,14 @@ export class Lotinspectionservice {
   }
   //  Insert Header (Invoice Accept)
   acceptInvoiceHeader(invoiceNo: string): Observable<any> {
-    return this.httpClient.post(`${this.baseUrl}/LOTInspection/AcceptInvoices/`,invoiceNo);
+    return this.httpClient.post(`${this.baseUrl}/LOTInspection/AcceptInvoices`, `"${invoiceNo}"`, {
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   // Insert invoice details
   InsertDetailsByInvoice(data: any): Observable<any> {
-    return this.httpClient.post(`${this.baseUrl}/LotInspectionDetails/InsertDetailsByInvoice`,data, {
+    return this.httpClient.post(`${this.baseUrl}/LotInspectionDetails/InsertDetailsByInvoice`, data, {
       headers: { 'Content-Type': 'application/json' }
     });
   }
