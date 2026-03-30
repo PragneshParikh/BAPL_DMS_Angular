@@ -74,7 +74,7 @@ export class DealerMaster implements OnInit {
 
   /* ================= PAGINATION ================= */
 
-  refreshPage(): void {
+ refreshPage(): void {
 
     const start = (this.page - 1) * this.pageSize;
     const end = start + this.pageSize;
@@ -82,7 +82,7 @@ export class DealerMaster implements OnInit {
     this.paginatedDealerList = this.dealerList.slice(start, end);
 
   }
-
+ 
   /* ================= SORT ================= */
 
   // ================= SORTING =================

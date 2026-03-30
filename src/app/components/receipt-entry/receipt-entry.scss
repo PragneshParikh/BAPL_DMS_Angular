@@ -1,0 +1,22 @@
+table>thead>tr>th {
+  background-color: #747CA0;
+  color: #ffffff;
+}
+
+.receipt-table th,
+.receipt-table td {
+  white-space: nowrap;
+}
+.table-gridjs th.sort {
+  padding-right: 30px;
+}
+.receipt-modal-header {
+  background-color: #747CA0;
+  color: white;
+}
+
+.receipt-modal-header .modal-title {
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+}
