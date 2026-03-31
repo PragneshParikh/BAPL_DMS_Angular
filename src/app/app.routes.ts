@@ -18,6 +18,7 @@ import { Lotinspection } from './components/lotinspection/lotinspection';
 import { LotInspectionDetails } from './components/lotinspection/lot-inspection-details/lot-inspection-details/lot-inspection-details';
 import { ReceiptEntry } from './components/receipt-entry/receipt-entry';
 import { AddReceiptEntry } from './components/receipt-entry/add-receipt-entry/add-receipt-entry';
+import { JobCard } from './components/job-card/job-card';
 
 
 export const routes: Routes = [
@@ -69,7 +70,8 @@ export const routes: Routes = [
       { path: 'receipt-entry/edit/:id', component: AddReceiptEntry, data: [15] },
       { path: 'customer-ledger', data: [], loadComponent: () => import('./components/customer-ledger/customer-ledger-list/customer-ledger-list').then(m => m.CustomerLedgerList) },
       { path: 'customer-ledger/:id', data: [], loadComponent: () => import('./components/customer-ledger/customer-ledger').then(m => m.CustomerLedger) },
-      { path: 'delivery-certificate', data: [], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) }
+      { path: 'delivery-certificate', data: [], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
+      {path:'job-card',component:JobCard,data:[]}
     ]
   }
 ];
