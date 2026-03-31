@@ -6,6 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { DealerMasterViewModel } from '../../ViewModels/Dealer/DealerMasterViewModel';
 import { DealerApiResponse } from '../../ViewModels/Dealer/DealerApiResponse';
+import { ToastService } from '../../shared/toaster/toast-service';
+import { LoaderService } from '../../core/services/loader';
 @Component({
   selector: 'app-dealer-master',
   standalone: true,
@@ -36,7 +38,9 @@ export class DealerMaster implements OnInit {
 
   constructor(
     private dealerService: DealerService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private loader: LoaderService,
+    private toaster: ToastService
   ) { }
 
   /* ================= INIT ================= */
@@ -50,26 +54,43 @@ export class DealerMaster implements OnInit {
 
   loadDealers(): void {
 
-    this.dealerService.getDealers().subscribe({
+   this.loader.show();
 
-      next: (res: DealerApiResponse) => {
+this.dealerService.getDealers().subscribe({
+  next: (res: DealerApiResponse) => {
 
-        const data = res.data || [];
+    const data = res.data || [];
 
-        this.dealerList = data.map((dealer, index) => ({
-          ...dealer,
-          slNo: index + 1
-        }));
+    this.dealerList = data.map((dealer, index) => ({
+      ...dealer,
+      slNo: index + 1
+    }));
 
-        this.originalDealerList = [...this.dealerList];
+    this.originalDealerList = [...this.dealerList];
 
-        this.refreshPage();
-      },
+    this.refreshPage();
 
-      error: (err) => console.error(err)
-
+    // ✅ Success toaster
+    this.toaster.show('Dealers loaded successfully!', {
+      classname: 'bg-success text-white',
+      delay: 3000
     });
 
+    this.loader.hide();
+  },
+
+  error: (err) => {
+    console.error(err);
+
+    // ❌ Error toaster
+    this.toaster.show('Failed to load dealers!', {
+      classname: 'bg-danger text-white',
+      delay: 5000
+    });
+
+    this.loader.hide();
+  }
+});
   }
 
   /* ================= PAGINATION ================= */
@@ -155,6 +176,7 @@ export class DealerMaster implements OnInit {
 
   downloadDealerExcel(): void {
 
+    this.loader.show();
     this.dealerService.downloadDealerExcel().subscribe((data: Blob) => {
 
       const blob = new Blob([data], {
@@ -169,7 +191,8 @@ export class DealerMaster implements OnInit {
       link.click();
 
       window.URL.revokeObjectURL(url);
-
+      this.loader.hide();
+      this.toaster.show('Dealer Excel downloaded successfully', { classname: 'bg-success text-light' , delay: 3000 });
     });
 
   }

@@ -118,7 +118,7 @@
                 {{ isAddMode ? 'Add HSN Code' : 'HSN Code Details' }}
             </h5>
 
-            <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+            <button type="button" class="btn-close btn-close-white btn-sm" (click)="modal.dismiss()"></button>
         </div>
 
         <!-- BODY -->
@@ -179,12 +179,12 @@
         <div class="modal-footer">
 
             <!-- SAVE -->
-            <button type="submit" class="btn btn-success" *ngIf="isAddMode">
+            <button type="submit" class="btn btn-primary btn-sm" *ngIf="isAddMode">
                 Save
             </button>
 
             <!-- CLOSE -->
-            <button type="button" class="btn btn-danger" (click)="modal.close()">
+            <button type="button" class="btn btn-danger btn-sm" (click)="modal.close()">
                 Close
             </button>
 

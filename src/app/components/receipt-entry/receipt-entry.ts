@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { StorageService } from '../../core/services/storage';
 import { Router, RouterOutlet } from '@angular/router';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { debounceTime, Subject, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-receipt-entry',
@@ -42,7 +43,8 @@ export class ReceiptEntry implements OnInit {
   locations: LocationName[] = [];
   selectedLocation: string = '';
 
-  
+
+  searchSubject = new Subject<string>();
   constructor(
     private receiptEntryService: ReceiptEntryService,
     private loader: LoaderService,
@@ -53,8 +55,11 @@ export class ReceiptEntry implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.loadReceiptEntries();
+   // this.loadReceiptEntries();
+    this.setupSearch(); 
     this.fetchLocations();
+      this.searchSubject.next(''); // initial load
+
   }
   fetchLocations(): void {
     const dealerCode = this.storageService.getDealerCode();
@@ -196,6 +201,117 @@ export class ReceiptEntry implements OnInit {
     // ADD
     this.router.navigate(['/receipt-entry/add']);
   }
+}
+
+//  downloadReceiptExcel(): void {
+//    this.loader.show();
+//    this.receiptEntryService.downloadReceiptExcel().subscribe((data: Blob) => {
+//       this.loader.show();
+
+//       const blob = new Blob([data], {
+//         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+//       });
+
+//       const url = window.URL.createObjectURL(blob);
+
+//       const link = document.createElement('a');
+//       link.href = url;
+//       link.download = 'ReceiptList.xlsx';
+//       link.click();
+
+//       window.URL.revokeObjectURL(url);
+//       this.loader.hide();
+
+//     });
+//       this.loader.hide();
+
+//   }
+
+downloadReceiptExcel(): void {
+  this.loader.show();
+
+  this.receiptEntryService.downloadReceiptExcel().subscribe({
+    next: (data: Blob) => {
+
+      const blob = new Blob([data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'ReceiptList.xlsx';
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+
+      //  Success toaster
+      this.toaster.show('Excel downloaded successfully!', {
+        classname: 'bg-success text-white',
+        delay: 3000
+      });
+
+      this.loader.hide();
+    },
+
+    error: (err) => {
+      console.error('Download error:', err);
+
+      // Error toaster
+      this.toaster.show('Failed to download Excel!', {
+        classname: 'bg-danger text-white',
+        delay: 5000
+      });
+
+      this.loader.hide();
+    }
+  });
+}
+
+ setupSearch() {
+  this.searchSubject.pipe(
+    debounceTime(300),
+    switchMap(search => {
+      this.loader.show();
+      return this.receiptEntryService.getReceiptList(search || '');
+    })
+  ).subscribe({
+    next: (data) => {
+      this.receiptEntries = data || [];
+      this.filteredReceipts = [...this.receiptEntries];
+
+      this.page = 1;
+      this.updatePagination();
+
+      this.loader.hide();
+    },
+    error: (err) => {
+      this.loader.hide();
+      console.error('Error fetching receipts', err);
+    }
+  });
+}
+
+ 
+  onSearchChange() {
+  const term = this.searchTerm?.toLowerCase() || '';
+
+  this.filteredReceipts = this.receiptEntries.filter((item: any) => {
+    return Object.values(item).some((val: any) => {
+      if (!val) return false;
+
+      // handle date separately
+      if (val instanceof Date) {
+        return val.toLocaleDateString().toLowerCase().includes(term);
+      }
+
+      return val.toString().toLowerCase().includes(term);
+    });
+  });
+
+  this.page = 1;
+  this.updatePagination();
 }
 
 }

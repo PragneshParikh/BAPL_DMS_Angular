@@ -7,6 +7,7 @@ import { HsnCodeMasterService } from '../../core/services/hsn-code-master-servic
 import { HsnCodeMasterViewModel } from '../../ViewModels/HSNCodeMaster/HSNCodeMaterViewModel';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { HsnCodeMasterAddEditModel } from '../../ViewModels/HSNCodeMaster/HsnCodeMasterAddEditModel';
+import { LoaderService } from '../../core/services/loader';
 
 @Component({
   selector: 'app-hsn-code-master',
@@ -52,7 +53,8 @@ export class HsnCodeMaster implements OnInit {
   constructor(
     private hsnService: HsnCodeMasterService,
     private modalService: NgbModal,
-    public toastService: ToastService
+    public toastService: ToastService,
+    public loader: LoaderService
   ) { }
 
   ngOnInit(): void {
@@ -62,13 +64,17 @@ export class HsnCodeMaster implements OnInit {
 
   // ================= LOAD =================
   loadHsnCodes(search?: string) {
+
+    this.loader.show();
     this.hsnService.getHSNCodeMasterList(search).subscribe({
       next: (data) => {
         this.hsnCodeList = data || [];
         this.page = 1;
         this.refreshPage();
+        this.loader.hide();
       },
       error: () => {
+        this.loader.hide();
         this.toastService.show('Failed to load data', {
           classname: 'bg-danger text-white',
           delay: 4000
@@ -169,15 +175,20 @@ export class HsnCodeMaster implements OnInit {
     });
   }
 
-  onSearchChange() {
-    if (!this.searchTerm.trim()) {
-      this.loadHsnCodes();
-      return;
-    }
-    this.searchSubject.next(this.searchTerm);
-  }
+  // onSearchChange() {
+  //   if (!this.searchTerm.trim()) {
+  //     this.loadHsnCodes();
+  //     return;
+  //   }
+  //   this.searchSubject.next(this.searchTerm);
+  // }
 
   // ================= ADD =================
+  
+  onSearchChange() {
+  const value = this.searchTerm?.trim() || '';
+  this.searchSubject.next(value);
+}
   openAddModal() {
     this.isDuplicateHSN = false;
 
@@ -212,10 +223,11 @@ export class HsnCodeMaster implements OnInit {
       });
       return;
     }
-
+this.loader.show();
     this.hsnService.addHSNCodeMaster(this.formHsn).subscribe({
 
       next: () => {
+        this.loader.hide();
         this.toastService.show('HSN Code added successfully!', {
           classname: 'bg-success text-white',
           delay: 5000
@@ -226,7 +238,7 @@ export class HsnCodeMaster implements OnInit {
       },
 
       error: (err) => {
-
+this.loader.hide();
         console.log(err);
 
         let message = 'Something went wrong';
@@ -260,7 +272,7 @@ export class HsnCodeMaster implements OnInit {
     this.saveHsn();
   }
   downloadHSNCodeMasterExcel() {
-
+this.loader.show();
     this.hsnService.downloadHSNCodeMasterExcel().subscribe((data: Blob) => {
 
       const blob = new Blob([data], {
@@ -278,7 +290,7 @@ export class HsnCodeMaster implements OnInit {
       window.URL.revokeObjectURL(downloadURL);
 
     });
-
+this.loader.hide();
   }
   // ================= EDIT =================
   openEditModal(hsn: HsnCodeMasterViewModel) {
