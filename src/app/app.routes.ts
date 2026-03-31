@@ -63,9 +63,11 @@ export const routes: Routes = [
       { path: 'hsnwisetaxcode', component: Hsnwisetaxcode, data: [16] },
       { path: 'lotinspection', component: Lotinspection, data: [18] },
       { path: 'receipt-entry', component: ReceiptEntry, data: [15] },
-      { path: 'receipt-entry', component: ReceiptEntry, data: [15] },
       { path: 'receipt-entry/add', component: AddReceiptEntry, data: [15] },
-      { path: 'receipt-entry/edit/:id', component: AddReceiptEntry, data: [15] }
+      { path: 'receipt-entry/edit/:id', component: AddReceiptEntry, data: [15] },
+      { path: 'customer-ledger', data: [], loadComponent: () => import('./components/customer-ledger/customer-ledger-list/customer-ledger-list').then(m => m.CustomerLedgerList) },
+      { path: 'customer-ledger/:id', data: [], loadComponent: () => import('./components/customer-ledger/customer-ledger').then(m => m.CustomerLedger) },
+      { path: 'delivery-certificate', data: [], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) }
     ]
   }
 ];

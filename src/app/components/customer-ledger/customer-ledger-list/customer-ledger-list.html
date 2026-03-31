@@ -1,0 +1,146 @@
+<div id="customer-ledger-list">
+    <!-- Start Breadcrumbs -->
+    <app-breadcrumbs title="Customer Ledger"></app-breadcrumbs>
+    <!-- End Breadcrumbs -->
+
+    <div class="card-body">
+        <div class="page-content p-0">
+            <div class="container-fluid px-1">
+
+                <!-- Filter Card -->
+                <!-- <div class="card">
+                <div class="card-body">
+
+                    <div class="row g-3 align-items-end">
+
+                        <\!-- Ledger Name --\>
+                        <div class="col-md-3">
+                            <label class="form-label">Ledger Name</label>
+                            <input type="text" class="form-control form-select-sm">
+                        </div>
+
+                        <\!-- Mobile No --\>
+                        <div class="col-md-2">
+                            <label class="form-label">Mobile No</label>
+                            <input type="text" class="form-control form-select-sm">
+                        </div>
+
+                        <\!-- Email --\>
+                        <div class="col-md-2">
+                            <label class="form-label">Email</label>
+                            <input type="text" class="form-control form-select-sm">
+                        </div>
+
+                        <\!-- Ledger Type --\>
+                        <div class="col-md-2">
+                            <label class="form-label">Ledger Type</label>
+                            <select class="form-select form-select-sm" name="ledgerType" required>
+                                <option value="Against Lead">Party</option>
+                                <option value="Receipt">Financier</option>
+                                <option value="Receipt">Institutional</option>
+                                <option value="Receipt">Insurance</option>
+                            </select>
+                        </div>
+
+                        <\!-- Search Button --\>
+                        <div class="col-md-1 d-grid">
+                            <button class="btn btn-sm btn-success">
+                                Search
+                            </button>
+                        </div>
+                        <div class="col-md-1 d-grid">
+                            <button class="btn btn-sm btn-success" (click)="newLedger()">
+                                Add
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div> -->
+                <!-- End Filter Card -->
+
+                <!-- Table Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div class="text-muted">
+                                Total Record(s): {{ collectionSize }}
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <button class="btn btn-success btn-sm">
+                                    <i class="ri-file-excel-2-line"></i>
+                                </button>
+
+                                <div class="search-box position-relative">
+                                    <input type="text" class="form-control" placeholder="Search..."
+                                        [(ngModel)]="searchTerm" (keyup)="onSearchChange()">
+                                    <i class="ri-search-line search-icon"></i>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover table-bordered mb-0 table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="sort" (click)="onSort('ledgerType')">
+                                            Ledger Type</th>
+                                        <th class="sort" (click)="onSort('ledgerName')">
+                                            Ledger
+                                            Name</th>
+                                        <th class="sort" (click)="onSort('mobileNumber')">
+                                            Mobile No.</th>
+                                        <th class="sort" (click)="onSort('email')">Email
+                                        </th>
+                                        <th class="sort" (click)="onSort('city')">City</th>
+                                        <th class="sort" (click)="onSort('state')">State
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr *ngFor="let customer of dataSource; trackBy: trackByCustomer" class="table-row"
+                                        (click)="onCustomerClick(customer)">
+                                        <td>{{ customer?.ledgerType }}</td>
+                                        <td>{{ customer?.ledgerName }}</td>
+                                        <td>{{ customer?.mobileNumber }}</td>
+                                        <td>{{ customer?.eMail }}</td>
+                                        <td>{{ customer?.city }}</td>
+                                        <td>{{ customer?.state }}</td>
+                                    </tr>
+
+                                    <!-- No Data -->
+                                    <tr *ngIf="!dataSource || dataSource.length === 0">
+                                        <td colspan="6" class="text-center text-muted py-3">
+                                            No Data Available
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <!-- PAGINATION -->
+                        <div class="col-sm-12 col-md-12 mt-2">
+                            <div class="text-md-right float-md-end gridjs-pagination">
+                                <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                                    (pageChange)="onPageChange($event)" [maxSize]="5" [boundaryLinks]="true">
+                                </ngb-pagination>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<router-outlet></router-outlet>

@@ -1,0 +1,5 @@
+@media print {
+  body { margin: 0; }
+  #reportContent { width: 190mm; margin: auto; }
+  button { display: none; } /* hide buttons during print */
+}

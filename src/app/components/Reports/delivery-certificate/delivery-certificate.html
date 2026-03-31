@@ -1,0 +1,17 @@
+<div id="reportContent">
+    <h1>Monthly Report</h1>
+    <p>Date: {{ currentDate }}</p>
+
+    <table border="1" cellspacing="0" cellpadding="5">
+        <tr>
+            <th>Name</th>
+            <th>Score</th>
+        </tr>
+        <tr *ngFor="let item of reportData">
+            <td>{{ item.name }}</td>
+            <td>{{ item.score }}</td>
+        </tr>
+    </table>
+</div>
+
+<button (click)="printReport()">Print Preview</button>
