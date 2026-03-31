@@ -5,6 +5,8 @@ import { LedgerMaster } from '../../../core/services/ledger-master';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { LoaderService } from '../../../core/services/loader';
+import { ToastService } from '../../../shared/toaster/toast-service';
 
 @Component({
   selector: 'app-customer-ledger-list',
@@ -26,7 +28,9 @@ export class CustomerLedgerList implements OnInit {
 
   constructor(
     private ledgerMasterService: LedgerMaster,
-    private route: Router
+    private route: Router,
+    private loader: LoaderService,
+    private toaster: ToastService,
   ) { }
 
   ngOnInit(): void {
@@ -34,6 +38,7 @@ export class CustomerLedgerList implements OnInit {
   }
 
   getCustomerLedgerDetails() {
+    this.loader.show();
     this.ledgerMasterService.getLedgerByPaged(this.searchTerm, this.page - 1, this.pageSize).subscribe({
       next: (res) => {
         this.collectionSize = 0;
@@ -42,8 +47,14 @@ export class CustomerLedgerList implements OnInit {
           this.dataSource = res.data;
           this.collectionSize = res.totalRecords;
         }
+        this.loader.hide();
       }, error: (err) => {
         console.log(err);
+        this.loader.hide();
+        this.toaster.show('Something went wrong', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
       }
     })
   }

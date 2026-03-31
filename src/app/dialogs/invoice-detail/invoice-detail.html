@@ -10,50 +10,34 @@
     <div class="row">
         <div class="col-lg-12">
             <div class="modal-body">
-                <div class="card-header">
-                    <div class="d-flex justify-content-end align-items-center gap-2">
-
-                        <!-- Download Excel Button -->
-                        <!-- <button class="btn btn-success btn-sm" (click)="downloadInvoiceExcel()">
-                                <i class="ri-file-excel-2-line"></i>
-                            </button> -->
-
-                        <!-- Search Box -->
-                        <!-- <div class="search-box">
-                                <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchTerm"
-                                    (keyup.enter)="onSearch()">
-                                <i class="ri-search-line search-icon"></i>
-                            </div> -->
-                    </div>
-                </div>
 
                 <div class="table-responsive">
-                    <table class="table table-gridjs">
+                    <table class="table table-sm table-gridjs">
                         <thead>
                             <tr>
-                                <th class="sort" data-sort="srno" style="width: 7%;">Sr. No. </th>
-                                <th class="sort" data-sort="colorcode">Vehicle Color Code </th>
-                                <th class="sort" data-sort="chessisno">Chasis No Converter </th>
-                                <th class="sort" data-sort="chessisno">Charger Controller </th>
-                                <th class="sort" data-sort="batteryid">Battery ID <br>
+                                <th>Sr. No. </th>
+                                <th class="sort" (click)="onSort('colrCode')">Vehicle Color Code </th>
+                                <th class="sort" (click)="onSort('chasisNo')">Chasis No Converter </th>
+                                <th class="sort" (click)="onSort('controllerNo')">Charger Controller </th>
+                                <th class="sort" (click)="onSort('batteryIdno')">Battery ID <br>
                                     Battery No
                                 </th>
-                                <th class="sort" data-sort="Chemical Capacity">Chemical Capacity </th>
-                                <th class="sort" data-sort="Soundbar_sr_no">Soundbar Sr. No.
+                                <th class="sort" (click)="onSort('')">Chemical Capacity </th>
+                                <th class="sort" (click)="onSort('soundbarSerno')">Soundbar Sr. No.
                                     <br>
                                     Immobilizer No
                                 </th>
-                                <th class="sort" data-sort="Soundbar_sr_no">VCU <br>
+                                <th class="sort" (click)="onSort('vcu')">VCU <br>
                                     Voltage
                                 </th>
-                                <th class="sort" data-sort="fame2discount">Fame2 Discount <br>
+                                <th class="sort" (click)="onSort('fame2Discount')">Fame2 Discount <br>
                                     Freight <br>
                                     Insurance
                                 </th>
-                                <th class="sort" data-sort="fame2discount">VIN Warranty </th>
-                                <th class="sort" data-sort="motorwarranty">Motor Warranty </th>
-                                <th class="sort" data-sort="motorwarranty">Battery Warranty </th>
-                                <th class="sort" data-sort="motorwarranty">Charger Warranty </th>
+                                <th class="sort" (click)="onSort('vinWarranty')">VIN Warranty </th>
+                                <th class="sort" (click)="onSort('motorWarranty')">Motor Warranty </th>
+                                <th class="sort" (click)="onSort('batteryWarranty')">Battery Warranty </th>
+                                <th class="sort" (click)="onSort('chargerWarranty')">Charger Warranty </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -111,8 +95,8 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-danger" (click)="close(false)">Close</button>
-            <button class="btn btn-primary" (click)="close(true)">Accept</button>
+            <button class="btn btn-sm btn-danger" (click)="close(false)">Close</button>
+            <button class="btn btn-sm btn-primary" (click)="close(true)">Accept</button>
         </div>
     </div><!-- end card-body -->
 </div>

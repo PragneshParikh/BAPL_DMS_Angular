@@ -6,14 +6,17 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { tap } from 'rxjs';
+import { Gender } from '../../constant';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-customer-ledger',
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './customer-ledger.html',
   styleUrl: './customer-ledger.scss',
 })
 export class CustomerLedger {
+  genders = Gender
   formData = {
     id: 0,
     ledgerCode: '',

@@ -24,4 +24,15 @@
         font-size: 15px;
         font-weight: 600;
     }
+
+    th.sort {
+        vertical-align: middle;
+    }
+
+    th.sort::before,
+th.sort::after {
+    position: absolute;
+    right: 8px;
+}
+
 }

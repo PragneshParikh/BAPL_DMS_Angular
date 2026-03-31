@@ -7,59 +7,6 @@
         <div class="page-content p-0">
             <div class="container-fluid px-1">
 
-                <!-- Filter Card -->
-                <!-- <div class="card">
-                <div class="card-body">
-
-                    <div class="row g-3 align-items-end">
-
-                        <\!-- Ledger Name --\>
-                        <div class="col-md-3">
-                            <label class="form-label">Ledger Name</label>
-                            <input type="text" class="form-control form-select-sm">
-                        </div>
-
-                        <\!-- Mobile No --\>
-                        <div class="col-md-2">
-                            <label class="form-label">Mobile No</label>
-                            <input type="text" class="form-control form-select-sm">
-                        </div>
-
-                        <\!-- Email --\>
-                        <div class="col-md-2">
-                            <label class="form-label">Email</label>
-                            <input type="text" class="form-control form-select-sm">
-                        </div>
-
-                        <\!-- Ledger Type --\>
-                        <div class="col-md-2">
-                            <label class="form-label">Ledger Type</label>
-                            <select class="form-select form-select-sm" name="ledgerType" required>
-                                <option value="Against Lead">Party</option>
-                                <option value="Receipt">Financier</option>
-                                <option value="Receipt">Institutional</option>
-                                <option value="Receipt">Insurance</option>
-                            </select>
-                        </div>
-
-                        <\!-- Search Button --\>
-                        <div class="col-md-1 d-grid">
-                            <button class="btn btn-sm btn-success">
-                                Search
-                            </button>
-                        </div>
-                        <div class="col-md-1 d-grid">
-                            <button class="btn btn-sm btn-success" (click)="newLedger()">
-                                Add
-                            </button>
-                        </div>
-
-                    </div>
-
-                </div>
-            </div> -->
-                <!-- End Filter Card -->
-
                 <!-- Table Card -->
                 <div class="card">
                     <div class="card-header">
@@ -70,6 +17,10 @@
                             </div>
 
                             <div class="d-flex align-items-center gap-2">
+
+                                <button class="btn btn-sm btn-success" (click)="newLedger()">
+                                    Add
+                                </button>
 
                                 <button class="btn btn-success btn-sm">
                                     <i class="ri-file-excel-2-line"></i>
