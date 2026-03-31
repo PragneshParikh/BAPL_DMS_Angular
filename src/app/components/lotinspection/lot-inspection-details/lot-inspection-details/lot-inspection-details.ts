@@ -24,9 +24,9 @@ export class LotInspectionDetails implements OnInit {
   detailList: Detail[] = [];
   locations: LocationName[];
   selectedLocation: string = '';
-  selectedvehiclefasteringcover: string='';
-  selectedPlastingcover: string='';
-  selectedSupervisor:string='';
+  selectedvehiclefasteringcover: string = '';
+  selectedPlastingcover: string = '';
+  selectedSupervisor: string = '';
   router: any;
 
   constructor(
@@ -39,28 +39,28 @@ export class LotInspectionDetails implements OnInit {
   ) { }
 
   ngOnInit(): void {
-  //this.loader.show();
-this.fetchLocations();
-  this.route.paramMap.subscribe(params => {
-    this.invoiceNo = params.get('invoiceNo') || '';
 
-    if (this.invoiceNo) {
-      this.getInvoiceData();
-    } else {
-      console.log('error')
-      //this.loader.hide(); // important if no invoiceNo
-    }
-  });
-}
+    this.fetchLocations();
+    this.route.paramMap.subscribe(params => {
+      this.invoiceNo = params.get('invoiceNo') || '';
 
-fetchLocations(): void {
-  
+      if (this.invoiceNo) {
+        this.getInvoiceData();
+      } else {
+        console.log('error')
+        //this.loader.hide(); // important if no invoiceNo
+      }
+    });
+  }
+
+  fetchLocations(): void {
+
     const dealerCode = this.storageService.getDealerCode();
 
     this.receiptEntryService.getLocationList(dealerCode).subscribe({
       next: (data: LocationName[]) => {
         this.locations = data;
-       // console.log("location data",data)
+        // console.log("location data",data)
       },
       error: (err) => {
         console.error('Error fetching locations', err);
@@ -94,77 +94,82 @@ fetchLocations(): void {
 
   // ================= GET DATA =================
   getInvoiceData() {
+    this.loader.show();
     this.lotInspectionDetailservice.getAllDetailsByInvoice(this.invoiceNo).subscribe({
-      next:(res: any) => {
+      next: (res: any) => {
+        this.loader.hide();
+        if (res?.data?.length) {
 
-      if (res?.data?.length) {
+          const first = res.data[0];
 
-        const first = res.data[0];
+          // HEADER
+          this.headerObj = {
+            invoiceNo: first.invoiceNo,
+            invoiceDate: first.invoiceDate,
+            lotNo: first.lotNo,
+            arrivalDate: first.arrivalDate,
+            arrivalTime: first.arrivalTime,
+            lrNo: first.lrNo,
+            lrDate: first.lrDate,
+            truckNo: first.truckNo,
+            transporterName: first.transporterName,
+            driverName: first.driverName,
+            driverContact: first.driverContact,
+            commonRemarks: first.commonRemarks,
+            vehicleFasteningBracket: first.vehicleFasteningBracket,
+            plasticCover: first.plasticCover,
+            nameSupervisor: first.nameSupervisor,
+            dealerCode: this.storageService.getDealerCode()
+          };
 
-        // HEADER
-        this.headerObj = {
-          invoiceNo: first.invoiceNo,
-          invoiceDate: first.invoiceDate,
-          lotNo: first.lotNo,
-          arrivalDate: first.arrivalDate,
-          arrivalTime: first.arrivalTime,
-          lrNo: first.lrNo,
-          lrDate: first.lrDate,
-          truckNo: first.truckNo,
-          transporterName: first.transporterName,
-          driverName: first.driverName,
-          driverContact: first.driverContact,
-          commonRemarks: first.commonRemarks,
-          vehicleFasteningBracket: first.vehicleFasteningBracket,
-          plasticCover: first.plasticCover,
-          nameSupervisor: first.nameSupervisor,
-          dealerCode: this.storageService.getDealerCode()
-        };
+          // DETAILS
+          this.detailList = res.data.map((x: any) => ({
+            id: x.id,
+            lotHeaderID: x.lotHeaderID,
+            modelName: x.modelName,
+            chassisNo: x.chassisNo,
+            motorNo: x.motorNo,
+            batteryNo: x.batteryNo,
+            chargerNo: x.chargerNo,
 
-        // DETAILS
-        this.detailList = res.data.map((x: any) => ({
-          id: x.id,
-          lotHeaderID: x.lotHeaderID,
-          modelName: x.modelName,
-          chassisNo: x.chassisNo,
-          motorNo: x.motorNo,
-          batteryNo: x.batteryNo,
-          chargerNo: x.chargerNo,
+            keyFobSetQty: x.keyFobSetQty,
+            chargerQty: x.chargerQty,
+            mirrorSetQty: x.mirrorsetQty,
+            firstAidKitQty: x.firstaidkitQty,
+            toolkitQty: x.toolKitQty,
 
-          keyFobSetQty: x.keyFobSetQty,
-          chargerQty: x.chargerQty,
-          mirrorSetQty: x.mirrorsetQty,
-          firstAidKitQty: x.firstaidkitQty,
-          toolkitQty: x.toolKitQty,
+            ownersManual: x.ownersManual,
+            ignitionKeySet: x.ignitionKeyset,
+            attributeCard: x.attributeCard,
+            chargingKit: x.chargingKit,
 
-          ownersManual: x.ownersManual,
-          ignitionKeySet: x.ignitionKeyset,
-          attributeCard : x.attributeCard,
-          chargingKit: x.chargingKit,
+            inspectionDate: x.inspectionDate,
+            vehicleStatus: x.vehicleStatus,
+            damageDetails: x.damageDetails,
+            chassisWiseRemarks: x.chassisWiseRemarks,
+            modelWiseSupervisorName: x.modelWiseSupervisorName,
+            locationName: x.locationName,
+            UpdatedBy: 'Admin',
+            UpdatedDate: this.formatDate(new Date()),
 
-          inspectionDate: x.inspectionDate,
-          vehicleStatus: x.vehicleStatus,
-          damageDetails: x.damageDetails,
-          chassisWiseRemarks: x.chassisWiseRemarks,
-          modelWiseSupervisorName : x.modelWiseSupervisorName,
-          locationName: x.locationName,
-          UpdatedBy: 'Admin',
-          UpdatedDate: this.formatDate(new Date()),
-
-          file: null,
-          preview: null
-        }));
-        //this.loader.hide();
-        console.log("Header:", this.headerObj);
-        console.log("Details:", this.detailList);
+            file: null,
+            preview: null
+          }));
+          //this.loader.hide();
+          console.log("Header:", this.headerObj);
+          console.log("Details:", this.detailList);
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching locations', err);
+        this.loader.hide();
       }
-    }});
+    });
   }
 
   // ================= SAVE DATA =================
   saveData() {
-    debugger;
-    //this.loader.show()
+    //debugger;
     //update json object
     let model = {
       lotInspectedHeaderDetails: {},
@@ -209,45 +214,44 @@ fetchLocations(): void {
 
         OwnersManual: item.ownersManual || 0,
         IgnitionKeySet: item.ignitionKeySet || 0,
-        
+
 
         InspectionDate: item.inspectionDate || '',
         VehicleStatus: item.vehicleStatus || '',
         DamageDetails: item.damageDetails || '',
         ChassisWiseRemarks: item.chassisWiseRemarks || '',
-        AttributeCard:item.attributeCard || 0,
+        AttributeCard: item.attributeCard || 0,
         ChargingKit: item.chargingKit || 0,
-        modelWiseSupervisorName : item.modelWiseSupervisorName || '',
+        modelWiseSupervisorName: item.modelWiseSupervisorName || '',
         //lotVehicleDamageImage :item.lotVehicleDamageImage || '',
         LocationName: item.locationName || '',
         UpdatedBy: item.UpdatedBy || '',
         UpdatedDate: item.UpdatedDate || ''
       }
       invoiceDetails.push(list);
-      });
+    });
 
     model.lotInspectedDetails = invoiceDetails;
-      
+    this.loader.show();
     this.lotInspectionDetailservice.updateLotInspectedDetails(model).subscribe({
-      next: () => {
-        //this.loader.hide();
+      next: (res) => {
+        this.loader.hide()
+        this.toaster.show('LOT inspection details Updated successfully!', {
+          classname: 'bg-success text-white',
+          delay: 3000
+        });
 
-          this.toaster.show('LOT inspection details Updated successfully!', {
-            classname: 'bg-success text-white',
-            delay: 5000
-          });
-         this.router.navigate(['/lotinspection']);
       },
       error: (err) => {
-        
-        console.error(err)
-      //this.loader.hide();
 
-          this.toaster.show('Failed to submit  Lot Inspection details!', {
-            classname: 'bg-danger text-white',
-            delay: 5000
-          });
-      
+        console.error(err)
+        this.loader.hide();
+
+        this.toaster.show('Failed to submit  Lot Inspection details!', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+
       }
     });
   }
