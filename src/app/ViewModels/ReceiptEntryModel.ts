@@ -11,6 +11,7 @@ export interface ReceiptEntryModel {
 
   bookingId?: string;
   mobileNo?: string;
+  email?: string;
 
   partyName?: string;
 
@@ -18,6 +19,9 @@ export interface ReceiptEntryModel {
   businessType?: string;
 
   productCode: string;
+  productName?: string;
+  productColor?: string;
+  productDescription?: string;
 
   salesExecutive?: string;
 

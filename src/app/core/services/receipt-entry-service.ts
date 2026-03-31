@@ -22,6 +22,16 @@ export class ReceiptEntryService {
 
 
   }
+
+   getReceiptList(searchTerm: string): Observable<any[]> {
+    let params = new HttpParams();
+
+    if (searchTerm) {
+      params = params.set('searchTerm', searchTerm);
+    }
+
+    return this.http.get<any[]>(`${this.apiUrl}/ReceiptEntry/getAllReceiptList`, { params });
+  }
   getReceiptEntryList(filter: ReceiptFilter): Observable<ReceiptEntryModel[]> {
 
     let params = new HttpParams();
@@ -82,6 +92,13 @@ export class ReceiptEntryService {
   checkLeadExist(mobileNo: string | null, bookingId: string | null) {
     return this.http.get<boolean>(
       `${this.apiUrl}/ReceiptEntry/checkLeadExist?mobileNo=${mobileNo ?? ''}&bookingId=${bookingId ?? ''}`
+    );
+  }
+
+  downloadReceiptExcel() {
+    return this.http.get(
+      `${this.apiUrl}/ReceiptEntry/download`,
+      { responseType: 'blob' }
     );
   }
 

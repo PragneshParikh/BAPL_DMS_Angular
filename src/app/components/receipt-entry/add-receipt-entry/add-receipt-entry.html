@@ -14,12 +14,13 @@
                         <div class="card">
                             <div class="card-body">
 
-                                <form #receiptForm="ngForm">
-
+                                <form #receiptForm="ngForm" (ngSubmit)="onSubmit(receiptForm)">
                                     <!-- 🔹 Row 1 -->
                                     <div class="row mb-2">
                                         <div class="col-md-3">
-                                            <label>Location</label>
+                                            <label>
+                                                Location <span class="text-danger">*</span>
+                                            </label>
                                             <select class="form-select form-select-sm" [(ngModel)]="formData.location"
                                                 name="location" #location="ngModel" required>
                                                 <option value="">Select Location</option>
@@ -46,7 +47,7 @@
                                         </div>
 
                                         <div class="col-md-3">
-                                            <label>Sale Type</label>
+                                            <label>Sale Type<span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm" [(ngModel)]="formData.saleType"
                                                 name="saleType" #saleType="ngModel" required
                                                 (change)="onSaleTypeChange()">
@@ -77,7 +78,7 @@
                                                 [readonly]="formData.saleType === 'Against Lead'">
                                         </div>
 
-                                        <div class="col-md-3">
+                                        <!-- <div class="col-md-3">
                                             <label>Customer Type</label><br>
                                             <div class="d-flex gap-3 mt-1">
                                                 <label>
@@ -94,19 +95,52 @@
                                                     B2C
                                                 </label>
                                             </div>
-                                        </div>
+                                        </div> -->
+
 
                                         <div class="col-md-3">
-                                            <label>Party Name</label>
+                                            <label>Customer Type</label><br>
+
+                                            <div class="d-flex gap-3 mt-1">
+
+                                                <label>
+                                                    <input type="radio" value="b2b" name="customerType"
+                                                        [(ngModel)]="formData.customerType" #customerType="ngModel"
+                                                        (change)="onCustomerTypeChange()" required>
+                                                    B2B
+                                                </label>
+
+                                                <label>
+                                                    <input type="radio" value="b2c" name="customerType"
+                                                        [(ngModel)]="formData.customerType"
+                                                        (change)="onCustomerTypeChange()" required>
+                                                    B2C
+                                                </label>
+
+                                            </div>
+
+                                            <div class="text-danger mt-1"
+                                                *ngIf="customerType.invalid && (customerType.touched || receiptForm.submitted)">
+                                                <small>Customer Type is required.</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Party Name<span class="text-danger">*</span></label>
                                             <ng-container
                                                 *ngIf="formData.saleType === 'Receipt'; else againstLeadInput">
                                                 <select class="form-select form-select-sm"
-                                                    [(ngModel)]="formData.partyName" name="partyNameInput" required>
+                                                    [(ngModel)]="formData.partyName" name="partyNameInput"
+                                                    #partyName="ngModel" required>
                                                     <option value="">--Select Party--</option>
                                                     <option *ngFor="let p of filteredParties" [value]="p.ledgerName">
                                                         {{ p.ledgerName }}
                                                     </option>
                                                 </select>
+                                                <div class="text-danger mt-1"
+                                                    *ngIf="partyName.invalid && (partyName.touched || receiptForm.submitted)">
+                                                    <small>Party Name is required.</small>
+                                                </div>
+
                                             </ng-container>
 
                                             <ng-template #againstLeadInput>
@@ -114,6 +148,8 @@
                                                     [(ngModel)]="formData.partyName" name="partyNameInput" readonly
                                                     required>
                                             </ng-template>
+
+
                                         </div>
                                     </div>
 
@@ -122,25 +158,25 @@
                                         <div class="col-md-3">
                                             <label>Financier</label>
                                             <select class="form-select form-select-sm" [(ngModel)]="formData.financier"
-                                                name="financier" #financier="ngModel" required>
+                                                name="financier" #financier="ngModel">
                                                 <option value="">--Select--</option>
                                                 <option *ngFor="let f of financiers" [value]="f.ledgerName">
                                                     {{ f.ledgerName }}
                                                 </option>
                                             </select>
-                                            <div class="text-danger mt-1"
+                                            <!-- <div class="text-danger mt-1"
                                                 *ngIf="financier.invalid && financier.touched">
                                                 <small *ngIf="financier.errors?.['required']">
                                                     Financier is required.
                                                 </small>
-                                            </div>
+                                            </div> -->
                                         </div>
 
                                         <div class="col-md-3">
                                             <label>Sales Executive</label>
                                             <select class="form-select form-select-sm"
                                                 [(ngModel)]="formData.salesExecutive" name="salesExecutive"
-                                                #salesExecutive="ngModel" required>
+                                                #salesExecutive="ngModel">
                                                 <option value="">--Select--</option>
                                                 <option value="Alice">Alice</option>
                                                 <option value="Bob">Bob</option>
@@ -148,16 +184,16 @@
                                             </select>
 
                                             <!-- Validation Message -->
-                                            <div class="text-danger mt-1"
+                                            <!-- <div class="text-danger mt-1"
                                                 *ngIf="salesExecutive.invalid && (salesExecutive.touched || receiptForm?.submitted)">
                                                 <small *ngIf="salesExecutive.errors?.['required']">
                                                     Sales Executive is required.
                                                 </small>
-                                            </div>
+                                            </div> -->
                                         </div>
 
                                         <div class="col-md-3">
-                                            <label>Product Name</label>
+                                            <label>Product Name<span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm"
                                                 (change)="onProductChange($event)" [(ngModel)]="formData.productName"
                                                 name="productName" #productName="ngModel" required>
@@ -190,21 +226,41 @@
                                         </div>
 
                                         <div class="col-md-3">
-                                            <label>Receipt Type</label>
+                                            <label>Receipt Type<span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm"
-                                                [(ngModel)]="formData.receiptType" name="receiptType" required>
+                                                [(ngModel)]="formData.receiptType" name="receiptType" #receiptType="ngModel" required>
                                                 <option value="">--Select--</option>
                                                 <option value="Cash">Cash</option>
                                                 <option value="Cheque">Cheque</option>
                                                 <option value="UPI payment">UPI Payment</option>
                                                 <option value="Bank transfer">Bank Transfer</option>
                                             </select>
+                                             <div class="text-danger mt-1"
+                                                *ngIf="receiptType.invalid && (receiptType.touched || receiptForm?.submitted)">
+                                                <small *ngIf="receiptType.errors?.['required']">
+                                                    Receipt Type is required.
+                                                </small>
+                                            </div>
                                         </div>
-
                                         <div class="col-md-3">
-                                            <label>Amount</label>
+                                            <label>Total Amount<span class="text-danger">*</span></label>
+
                                             <input type="number" class="form-control form-control-sm"
-                                                [(ngModel)]="formData.totalAmount" name="amount" required>
+                                                [(ngModel)]="formData.totalAmount" name="amount" #amount="ngModel"
+                                                required step="0.01" min="0.01"
+                                                [class.is-invalid]="amount.invalid && (amount.touched || receiptForm.submitted)">
+
+                                            <div class="text-danger mt-1"
+                                                *ngIf="amount.invalid && (amount.touched || receiptForm.submitted)">
+
+                                                <small *ngIf="amount.errors?.['required']">
+                                                    Amount is required.
+                                                </small>
+                                                <small *ngIf="amount.errors?.['min']">
+                                                    Amount is required.
+                                                </small>
+
+                                            </div>
                                         </div>
 
                                         <div class="col-md-3"></div>
@@ -229,17 +285,15 @@
                                     <div class="row mt-4">
                                         <div class="col-md-12 d-flex justify-content-end gap-2">
 
+                                            <!-- Add / Update Button -->
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                               Save
+                                            </button>
                                             <!-- Cancel Button -->
                                             <button type="button" class="btn btn-danger btn-sm " (click)="onCancel()">
                                                 <i class="bi bi-arrow-left"></i> Cancel
                                             </button>
 
-                                            <!-- Add / Update Button -->
-                                            <button type="submit" class="btn btn-primary btn-sm"
-                                                (click)="onSubmit(receiptForm)">
-                                                <i class="bi bi-plus"></i>
-                                                {{ isEditMode ? 'Update' : 'Add' }}
-                                            </button>
 
                                         </div>
                                     </div>

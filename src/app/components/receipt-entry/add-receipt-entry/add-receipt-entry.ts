@@ -51,7 +51,7 @@ export class AddReceiptEntry implements OnInit {
     mobileNo: null,
     refNo: null,
     narration: null,
-    totalAmount: 0,
+    totalAmount: 0.00,
     customerType: 'b2c'
   };
 
@@ -63,9 +63,7 @@ export class AddReceiptEntry implements OnInit {
   apiResponse!: ReceiptEntryEditModel;
   isEditMode: boolean = false;
   id: any;
-  // partyName: any;
-  // email: string;
-  // pinCode: any;
+  
   model: any;
   modalRef: any;
   // customerType: string = 'b2c'; // default
@@ -95,6 +93,7 @@ export class AddReceiptEntry implements OnInit {
     //this.receiptDate = 
     this.fetchLocations();
     this.getFinanciers();
+    
 
     this.router.paramMap.subscribe(async params => {
       this.id = params.get('id');
@@ -215,6 +214,7 @@ export class AddReceiptEntry implements OnInit {
       this.receiptEntryService.getLedgerByType('Party').subscribe({
         next: (res) => {
           this.parties = res;
+        this.onCustomerTypeChange();
 
           // ✅ Fix mapping for edit mode
           if (this.apiResponse) {
@@ -245,6 +245,9 @@ export class AddReceiptEntry implements OnInit {
     this.receiptEntryService.getLocationList(dealerCode).subscribe({
       next: (data: LocationName[]) => {
         this.locations = data;
+         if (!this.isEditMode && this.locations.length > 0) {
+        this.formData.location = this.locations[0].locname;
+      }
         console.log('Fetched locations:', this.locations);
       },
       error: (err) => {
@@ -355,8 +358,9 @@ export class AddReceiptEntry implements OnInit {
             }
           },
           error: (err) => {
-             this.toaster.show(err||err.msg, {
-            classname: 'bg-success text-white',
+            this.loader.hide();
+             this.toaster.show('Record not found', {
+            classname: 'bg-warning text-white',
             delay: 5000
           });
           }
@@ -443,7 +447,7 @@ this.loader.show();
     this.formData.selectedProduct = "";
     this.formData.selectedReceiptType = '';
     this.formData.refNo = '';
-    this.formData.totalAmount = 0;
+    this.formData.totalAmount = 0.00;
     this.formData.narration = '';
     this.formData.mobileNo = '';
     this.formData.receiptDate = this.today;
@@ -471,7 +475,7 @@ this.loader.show();
         const control = receiptForm.controls[field];
         control.markAsTouched({ onlySelf: true });
       });
-      return; // Stop here, don't call API
+      return; 
     }
 
     const payload: ReceiptEntryAddViewModel = {
