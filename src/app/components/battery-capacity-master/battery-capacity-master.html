@@ -173,16 +173,16 @@
 
         <div class="modal-footer">
 
-            <button type="button" class="btn btn-danger" (click)="modal.dismiss()">
-                Cancel
-            </button>
-
-            <button type="button" class="btn btn-success" [disabled]="batteryForm.invalid"
+            <button type="button" class="btn btn-primary btn-sm" [disabled]="batteryForm.invalid"
                 (click)="isEditMode ? updateBattery() : addBattery()">
 
-                {{ isEditMode ? 'Update' : 'Save' }}
+                Save
 
             </button>
+            <button type="button" class="btn btn-light btn-sm" (click)="modal.dismiss()">
+                Close
+            </button>
+
 
         </div>
 

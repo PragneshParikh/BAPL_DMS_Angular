@@ -289,8 +289,18 @@ export class HsnCodeMaster implements OnInit {
 
       window.URL.revokeObjectURL(downloadURL);
 
+      this.loader.hide();
+      this.toastService.show('Excel downloaded successfully!', {
+        classname: 'bg-success text-white',
+        delay: 5000
+      }); 
+    }, error => {
+      this.loader.hide();
+      this.toastService.show('Failed to download Excel', {
+        classname: 'bg-danger text-white',
+        delay: 5000
+      });
     });
-    this.loader.hide();
   }
   // ================= EDIT =================
   openEditModal(hsn: HsnCodeMasterViewModel) {

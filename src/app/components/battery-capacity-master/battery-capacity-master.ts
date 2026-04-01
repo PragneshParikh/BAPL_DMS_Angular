@@ -7,6 +7,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { BatteryApiResponse, BatteryCapacity } from '../../ViewModels/BatteryCapacityMaster/BatteryCapacity';
 import { AuthenticationService } from '../../core/services/auth.service';
 import { AccessRoles } from '../../constant';
+import { LoaderService } from '../../core/services/loader';
 
 @Component({
   selector: 'app-battery-capacity-master',
@@ -44,6 +45,7 @@ export class BatteryCapacityMaster {
     private batteryService: BatteryCapacityMasterService,
     private modalService: NgbModal,
     public toastService: ToastService,
+    private loader: LoaderService,
     private authenticationService: AuthenticationService
   ) { }
 
@@ -57,14 +59,14 @@ export class BatteryCapacityMaster {
   /* ================= LOAD ================= */
 
   loadBatteryCapacities(): void {
-
+this.loader.show();
     this.batteryService.getBatteryCapcityMaster().subscribe({
 
       next: (res: BatteryApiResponse) => {
 
         this.allBatteryCapacities = res.data || [];
         this.filteredBatteryCapacities = [...this.allBatteryCapacities];
-
+this.loader.hide();
       }
 
     });
@@ -136,12 +138,12 @@ export class BatteryCapacityMaster {
 
       return;
     }
-
+this.loader.show();
     this.batteryService.addBatteryCapacityMaster(this.selectedBattery)
       .subscribe({
 
         next: () => {
-
+this.loader.hide();
           this.toastService.show('Battery capacity added successfully!', {
             classname: 'bg-success text-white',
             delay: 5000
@@ -153,7 +155,7 @@ export class BatteryCapacityMaster {
         },
 
         error: () => {
-
+this.loader.hide();
           this.toastService.show('Failed to add battery capacity', {
             classname: 'bg-danger text-white',
             delay: 5000
@@ -202,7 +204,7 @@ export class BatteryCapacityMaster {
   /* ================= EXCEL ================= */
 
   downloadBatteryCapacityMasterExcel(): void {
-
+    this.loader.show();
     this.batteryService.downloadBatteryCapacityMasterExcel().subscribe((data: Blob) => {
 
       const blob = new Blob([data], {
@@ -217,9 +219,20 @@ export class BatteryCapacityMaster {
       link.click();
 
       window.URL.revokeObjectURL(url);
+      this.loader.hide();
+      this.toastService.show('Excel downloaded successfully!', {
+        classname: 'bg-success text-white',
+        delay: 5000
+      });
 
-    });
-
+    },
+      error => {
+        this.loader.hide();
+        this.toastService.show('Failed to download Excel', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        }   );
+      });
   }
 
   /* ================= SORT ================= */
