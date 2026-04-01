@@ -8,7 +8,7 @@
       <div class="card-header">
         <div class="d-flex justify-content-end align-items-center">
           <!-- Download Excel Button -->
-          <button class="btn btn-success btn-sm me-3" (click)="downloadItemMasterExcel()">
+          <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'" (click)="downloadItemMasterExcel()">
             <i class="ri-file-excel-2-line"></i>
           </button>
           <!-- Search Box -->

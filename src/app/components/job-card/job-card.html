@@ -108,26 +108,25 @@
                         </div>
                         <!-- Search Button -->
                         <div class="col-md-1 d-grid">
-                            <button
-                                class="btn btn-sm btn-success"><!--(click)="searchItems(fromDate.value, toDate.value, invoiceNo.value)"-->
-                                <i class="ri-search-line"></i>
+                            <button class="btn btn-sm btn-primary">
+                                Search
                             </button>
                         </div>
                         <!--End search button-->
                         <!-- Download Excel Button (click)="downloadItemMasterExcel()" -->
                         <div class="col-md-1 d-grid">
-                            <button class="btn btn-success btn-sm me-3">
+                            <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'" >
                                 <i class="ri-file-excel-2-line"></i>
                             </button>
                         </div>
                         <!--End Excel button-->
                         <!-- Add Button-->
-                         <div class="col-md-1 d-grid">
-                            <button class="btn btn-success btn-sm me-3">
-                                <i class="ri-add-line"></i>
+                        <div class="col-md-1 d-grid">
+                            <button class="btn btn-primary btn-sm ">
+                                Add
                             </button>
                         </div>
-                         <!--End add button-->
+                        <!--End add button-->
                     </div>
                 </div>
             </div>
@@ -158,7 +157,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    
+
                                 </tr>
                                 <!-- No Data -->
                                 <tr *ngIf="collectionSize === 0">

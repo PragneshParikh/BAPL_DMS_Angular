@@ -9,11 +9,11 @@
             <div class="card-header">
                 <div class="d-flex justify-content-end align-items-center">
 
-                    <button class="btn btn-success btn-sm me-2" (click)="openAddModal()">
-                        <i class="ri-add-line"></i>
+                    <button class="btn btn-primary btn-sm me-2" (click)="openAddModal()">
+                       Add
                     </button>
 
-                    <button class="btn btn-success btn-sm me-3" (click)="downloadTaxCodeExcel()">
+                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'" (click)="downloadTaxCodeExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
 

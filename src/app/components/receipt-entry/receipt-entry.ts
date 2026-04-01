@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ReceiptEntryService } from '../../core/services/receipt-entry-service';
 import { LoaderService } from '../../core/services/loader';
-import { NgbHighlight, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbHighlight, NgbModal, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { LocationName, ReceiptEntryModel, ReceiptFilter } from '../../ViewModels/ReceiptEntryModel';
 import { FlatpickrModule, FlatpickrDefaults } from 'angularx-flatpickr';
 import { CommonModule } from '@angular/common';
@@ -20,7 +20,8 @@ import { debounceTime, Subject, switchMap } from 'rxjs';
     NgbHighlight,
     NgbPaginationModule,
     FlatpickrModule,
-    RouterOutlet
+    RouterOutlet,
+    NgbTooltipModule
   ],
   providers: [FlatpickrDefaults, FlatpickrModule],
 })
@@ -202,30 +203,6 @@ export class ReceiptEntry implements OnInit {
     this.router.navigate(['/receipt-entry/add']);
   }
 }
-
-//  downloadReceiptExcel(): void {
-//    this.loader.show();
-//    this.receiptEntryService.downloadReceiptExcel().subscribe((data: Blob) => {
-//       this.loader.show();
-
-//       const blob = new Blob([data], {
-//         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-//       });
-
-//       const url = window.URL.createObjectURL(blob);
-
-//       const link = document.createElement('a');
-//       link.href = url;
-//       link.download = 'ReceiptList.xlsx';
-//       link.click();
-
-//       window.URL.revokeObjectURL(url);
-//       this.loader.hide();
-
-//     });
-//       this.loader.hide();
-
-//   }
 
 downloadReceiptExcel(): void {
   this.loader.show();

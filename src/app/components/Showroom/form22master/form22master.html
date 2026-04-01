@@ -129,11 +129,11 @@
             <div class="card-header">
                 <div class="d-flex justify-content-end align-items-center">
                     <!-- Add Form22master Button -->
-                    <button class="btn btn-success btn-sm me-3" (click)="openAddDetails(form22Form,formData)">
-                        <i class="ri-add-line"></i>
+                    <button class="btn btn-primary btn-sm me-3" (click)="openAddDetails(form22Form,formData)">
+                       Add
                     </button>
                     <!-- Download Excel Button -->
-                    <button class="btn btn-success btn-sm me-3" (click)="downloadForm22MasterExcel()">
+                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'" (click)="downloadForm22MasterExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
 

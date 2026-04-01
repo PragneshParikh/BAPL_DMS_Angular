@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Form22masterservice } from '../../../core/services/form22masterservice';
-import { NgbHighlight, NgbModal, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
+import { NgbHighlight, NgbModal, NgbPagination, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { Form22MasterModel } from '../../../ViewModels/Form22MasterModel';
 import { ToastService } from '../../../shared/toaster/toast-service';
@@ -10,7 +10,7 @@ import { LoaderService } from '../../../core/services/loader';
 @Component({
   selector: 'app-form22master',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbHighlight, NgbPagination],
+  imports: [CommonModule, FormsModule, NgbHighlight, NgbPagination,NgbTooltipModule],
   templateUrl: './form22master.html',
   styleUrl: './form22master.scss',
 })

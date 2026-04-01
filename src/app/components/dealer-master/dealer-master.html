@@ -2,7 +2,7 @@
     <h4 class="mb-sm-0">Dealer Master</h4>
 </div>
 
-<div class="row">
+<div class="row " id="dealerMaster">
     <div class="col-lg-12">
         <div class="card">
 
@@ -11,7 +11,7 @@
                 <div class="d-flex justify-content-end align-items-center">
 
                     <!-- Download Excel Button -->
-                    <button class="btn btn-success btn-sm me-3" (click)="downloadDealerExcel()">
+                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'" (click)="downloadDealerExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
 
@@ -29,7 +29,7 @@
             <div class="card-body">
 
                 <div class="table-responsive">
-                    <table class="table table-gridjs table-striped dealer-table">
+                    <table class="table  table-striped dealer-table table-sm" style="font-size: 12px;">
                         <thead>
                             <tr>
                                 <th>Sl No.</th>
@@ -48,7 +48,7 @@
                                     Person</th>
                                 <th class="sort" (click)="onSort('phoneOff')" style="cursor: pointer">Phone Office</th>
                                 <th class="sort" (click)="onSort('compgstinNo')" style="cursor: pointer">GSTIN</th>
-                                <th class="sort" (click)="onSort('b2b')" style="cursor: pointer">B2B</th>
+                                <th class="sort sort-special" (click)="onSort('b2b')" style="cursor: pointer">B2B  </th>
                                 <th class="sort" (click)="onSort('regDate')" style="cursor: pointer">Reg Date</th>
                             </tr>
                         </thead>

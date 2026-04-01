@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ItemMasterService } from '../../../core/services/item-master-service';
-import { NgbHighlight, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbHighlight, NgbModal, NgbPaginationModule, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { LoaderService } from '../../../core/services/loader';
@@ -9,7 +9,7 @@ import { error } from 'console';
 @Component({
   selector: 'app-itemmaster-fg',
   standalone: true,
-  imports: [CommonModule, NgbHighlight, NgbPaginationModule],
+  imports: [CommonModule, NgbHighlight, NgbPaginationModule,NgbTooltipModule],
   templateUrl: './itemmaster-fg.html',
   styleUrl: './itemmaster-fg.scss',
 })

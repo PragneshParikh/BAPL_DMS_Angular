@@ -31,15 +31,15 @@
 
                     <!-- Buttons aligned at bottom right -->
                     <div class="col-md-2 ms-auto d-flex gap-2">
-                        <button type="submit" class="btn btn-success btn-sm">
-                            <i class="ri-search-line me-1"></i> Search
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            Search
                         </button>
 
-                        <button type="button" class="btn btn-success btn-sm" (click)="downloadOEMModelExcel()">
+                        <button type="button" class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"[ngbTooltip]="'Export to Excel'" (click)="downloadOEMModelExcel()">
                             <i class="ri-file-excel-2-line"></i>
                         </button>
 
-                        <button type="button" class="btn btn-success btn-sm plus" (click)="openAddModal()">+</button>
+                        <button type="button" class="btn btn-primary btn-sm plus" (click)="openAddModal()">Add</button>
                     </div>
                 </form>
             </div>

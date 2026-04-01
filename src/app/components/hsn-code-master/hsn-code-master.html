@@ -13,7 +13,7 @@
 
                     <!--BUTTONS -->
                     <div class="d-flex gap-2 me-3">
-                        <button class="btn btn-success btn-sm" (click)="openAddModal()">
+                        <button class="btn btn-primary btn-sm" (click)="openAddModal()">
                             Add
                         </button>
 
@@ -38,7 +38,7 @@
 
                 <div class="table-responsive">
 
-                    <table class="table table-hover table-bordered mb-0 table-sm">
+                    <table class="table table-hover table-bordered mb-0 table-sm"style="font-size: 12px;">
 
                         <thead>
                             <tr>
@@ -127,7 +127,7 @@
 
                 <!-- HSN Code -->
                 <div class="col-md-4">
-                    <label class="form-label">HSN Code</label>
+                    <label class="form-label">HSN Code<span class="text-danger">*</span></label>
 
                     <input class="form-control form-control-sm" name="hsncode" required pattern="^[0-9]*$"
                         #hsncode="ngModel" [(ngModel)]="formHsn.hsncode" [readonly]="isViewMode" />
@@ -140,7 +140,7 @@
 
                 <!-- TYPE -->
                 <div class="col-md-4">
-                    <label class="form-label">Type</label>
+                    <label class="form-label">Type<span class="text-danger">*</span></label>
 
                     <select class="form-select form-select-sm" name="type" required #type="ngModel"
                         [(ngModel)]="formHsn.type" [disabled]="isViewMode">
@@ -158,7 +158,7 @@
 
                 <!-- DESCRIPTION -->
                 <div class="col-md-12 mt-3">
-                    <label class="form-label">Description</label>
+                    <label class="form-label">Description<span class="text-danger">*</span></label>
 
                     <textarea rows="3" class="form-control form-control-sm" name="description" required
                         #description="ngModel" [(ngModel)]="formHsn.description" [readonly]="isViewMode">

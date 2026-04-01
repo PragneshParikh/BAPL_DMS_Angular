@@ -2,7 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPaginationModule, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { OemmodelMasterService } from '../../core/services/oemmodel-master-service';
 import { OemModelViewModel } from '../../ViewModels/OemModelViewModel';
 import { ToastService } from '../../shared/toaster/toast-service';
@@ -11,7 +11,7 @@ declare var bootstrap: any;
 @Component({
   selector: 'app-oemmodel-master',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbPaginationModule],
+  imports: [CommonModule, FormsModule, NgbPaginationModule,NgbTooltipModule],
   templateUrl: './oemmodel-master.html',
   styleUrl: './oemmodel-master.scss'
 })

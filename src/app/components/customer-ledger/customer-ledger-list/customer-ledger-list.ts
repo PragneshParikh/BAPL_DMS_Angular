@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Route, Router, RouterOutlet } from "@angular/router";
 import { SharedModule } from '../../../shared/shared.module';
 import { LedgerMaster } from '../../../core/services/ledger-master';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LoaderService } from '../../../core/services/loader';
@@ -10,7 +10,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 
 @Component({
   selector: 'app-customer-ledger-list',
-  imports: [RouterOutlet, SharedModule, NgbPaginationModule, CommonModule, FormsModule],
+  imports: [RouterOutlet, SharedModule, NgbPaginationModule, CommonModule, FormsModule,NgbTooltipModule],
   templateUrl: './customer-ledger-list.html',
   styleUrl: './customer-ledger-list.scss',
 })

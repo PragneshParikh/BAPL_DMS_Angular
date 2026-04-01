@@ -95,11 +95,11 @@
         <div class="d-flex justify-content-end align-items-center">
             <!--BUTTONS -->
             <div class="d-flex gap-2 me-3">
-                <button class="btn btn-success btn-sm" (click)="navigateToAddReceiptEntry()">
-                    <i class="ri-add-line"></i>
+                <button class="btn btn-primary btn-sm" (click)="navigateToAddReceiptEntry()">
+                   Add
                 </button>
 
-                <button class="btn btn-success btn-sm" (click)="downloadReceiptExcel()">
+                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'" (click)="downloadReceiptExcel()">
                     <i class="ri-file-excel-2-line"></i>
                 </button>
             </div>
@@ -111,14 +111,14 @@
                 <i class="ri-search-line search-icon"></i>
             </div>
         </div>
-        <div class="table-responsive">
+        <div class="table-responsive" id="receiptTable">
 
             <!-- Total Records -->
             <div class="mb-2 text-muted">
                 Total Record(s): {{ filteredReceipts.length }}
             </div>
 
-            <table class="table table-gridjs table-striped receipt-table">
+            <table class="table table-sm table-striped receipt-table" style="font-size: 12px;" >
 
                 <!-- TABLE HEADER -->
                 <thead>

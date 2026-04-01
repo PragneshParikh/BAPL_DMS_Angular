@@ -40,11 +40,11 @@
 
                         <div class="d-flex align-items-center gap-2">
 
-                            <button class="btn btn-sm btn-success" (click)="openAddModal(editModal)">
+                            <button class="btn btn-sm btn-primary" (click)="openAddModal(editModal)">
                                 Add
                             </button>
 
-                            <button class="btn btn-success btn-sm" ngbTooltip="Export to Excel"
+                            <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
                                 (click)="downloadBatteryCapacityMasterExcel()">
                                 <i class="ri-file-excel-2-line"></i>
                             </button>
@@ -60,9 +60,9 @@
                     </div>
                 </div>
 
-                <div class="table-responsive">
+                <div class="table-responsive" id="batteryCapacity">
 
-                    <table class="table table-gridjs table-striped">
+                    <table class="table table-sm table-striped" style="font-size: 12px;">
 
                         <thead>
                             <tr>
@@ -149,7 +149,7 @@
         <div class="modal-body">
 
             <div class="mb-3">
-                <label class="form-label">Battery Capacity</label>
+                <label class="form-label">Battery Capacity<span class="text-danger">*</span></label>
 
                 <input type="text" class="form-control" name="batteryCapacity" required #batteryCapacity="ngModel"
                     [(ngModel)]="selectedBattery.batteryCapacity">
