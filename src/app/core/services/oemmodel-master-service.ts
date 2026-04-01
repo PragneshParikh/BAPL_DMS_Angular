@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -8,7 +9,7 @@ import { Observable } from 'rxjs';
 export class OemmodelMasterService {
 
   // API Base URL
-  private apiUrl = 'http://localhost:5215/api/OEMModelMaster';
+  private apiUrl = `${environment.apiUrl}/OEMModelMaster`;
 
   constructor(private http: HttpClient) { }
 
