@@ -10,3 +10,7 @@ export const Gender = [
     { title: 'Female', value: 'female' },
 ]
 
+export const TRANSACTION_TYPES = [
+  { name: 'B2B', type: 'B2B' },
+  { name: 'B2C', type: 'B2C' }
+];

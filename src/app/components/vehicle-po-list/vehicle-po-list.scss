@@ -1,0 +1,35 @@
+.nav-tabs-custom {
+    border-bottom: 2px solid #e9ebec;
+    .nav-link {
+        border: none;
+        font-weight: 500;
+        color: #878a99;
+        &.active {
+            color: #405189;
+            background-color: transparent;
+            &::after {
+                content: "";
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background-color: #405189;
+            }
+        }
+    }
+}
+
+.table-nowrap {
+    white-space: nowrap;
+}
+
+thead th {
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px !important;
+}
+
+tbody td {
+    font-size: 13px;
+}

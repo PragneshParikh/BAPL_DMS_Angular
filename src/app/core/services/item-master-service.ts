@@ -12,17 +12,25 @@ export class ItemMasterService {
 
   constructor(private http: HttpClient) { }
 
-  getItems(grpidno: number, search: string=''): Observable<any> {
+  getItems(grpidno: number, search: string = '', itemtype?: number): Observable<any> {
 
     let params = new HttpParams()
       .set('grpidno', grpidno.toString())
-      .set('search',search ?? '');
+      .set('search', search ?? '');
 
     if (search && search.trim() !== '') {
       params = params.set('search', search.trim());
     }
 
+    if (itemtype !== undefined) {
+      params = params.set('itemtype', itemtype.toString());
+    }
+
     return this.http.get<any>(`${this.baseUrl}/ItemMaster`, { params });
+  }
+
+  getPurchaseDetailsByModelNo(modelNo: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/ItemMaster/GetPurchaseDetailsByModelNo/${modelNo}`);
   }
 
   downloadItemMasterExcel() {
