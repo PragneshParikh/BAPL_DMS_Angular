@@ -137,7 +137,7 @@ export class Hsnwisetaxcode implements OnInit {
   }
 
   // INSERT
-  addHSNWiseATax(form: any) {
+  addHSNWiseATax(form: any, modal: any) {
     //debugger;
 
     const payload: AddHsnTaxPayload = {
@@ -160,6 +160,10 @@ export class Hsnwisetaxcode implements OnInit {
 
           this.getHsnwiseTaxcodedetails();
           this.loader.hide();
+          setTimeout(() => {
+          modal.close();   // this will close popup
+          form.resetForm(); // optional reset
+        }, 1000); // 1 sec delay
           form.resetForm();
         },
         error: (err) => {

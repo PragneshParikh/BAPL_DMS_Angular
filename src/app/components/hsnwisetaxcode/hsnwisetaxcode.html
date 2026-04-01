@@ -6,7 +6,7 @@
 
     <!--Add page-->
     <ng-template #AddHSNWiseATaxcode let-modal>
-        <form #addHsnwiseATaxForm="ngForm" (ngSubmit)="addHSNWiseATax(addHsnwiseATaxForm)">
+        <form #addHsnwiseATaxForm="ngForm" (ngSubmit)="addHSNWiseATax(addHsnwiseATaxForm, modal)">
 
             <div class="card">
 
@@ -29,8 +29,8 @@
                         <!-- HSN Code (Auto Filled) -->
                         <div class="col-md-2">
                             <label class="form-label">HSN Code</label>
-
-                            <select class="form-select form-select-md" [(ngModel)]="formData.hsncode" name="HsnCodeDD"
+                            <span class="text-danger">*</span>
+                            <select class="form-select form-select-sm" [(ngModel)]="formData.hsncode" name="HsnCodeDD"
                                 #HsnCodeDD="ngModel" required>
                                 <option [ngValue]="null">-- Select HSNCode --</option>
                                 <option *ngFor="let h of HsnCodeDDList" [ngValue]="h.hsnCodeDD">
@@ -45,7 +45,8 @@
                         <!-- Aggregate Tax Code -->
                         <div class="col-md-2">
                             <label class="form-label">Aggregate TaxCode</label>
-                            <select class="form-select form-select-md" name="ataxCode" #ataxCode="ngModel" required
+                            <span class="text-danger">*</span>
+                            <select class="form-select form-select-sm" name="ataxCode" #ataxCode="ngModel" required
                                 [(ngModel)]="formData.selectedATax" (change)="onATaxCodeChange()">
                                 <option [ngValue]="null">-- Select ATaxCode --</option>
                                 <option *ngFor="let a of ataxCodeList" [ngValue]="a">
@@ -59,23 +60,25 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">TaxCode</label>
-                            <input type="text" class="form-control form-control-md" name="taxCode"
+                            <span class="text-danger">*</span>
+                            <input type="text" class="form-control form-control-sm" name="taxCode"
                                 [(ngModel)]="formData.taxCode" readonly>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">TaxRate</label>
-                            <input type="text" class="form-control form-control-md" name="taxRate"
+                            <span class="text-danger">*</span>
+                            <input type="text" class="form-control form-control-sm" name="taxRate"
                                 [(ngModel)]="formData.taxRate" readonly>
                         </div>
                         <!-- Description -->
                         <!-- Custom Radio Color -->
                         <div class="col-md-3">
-                            <label class="form-label d-block">State Flag</label>
-
+                            <label class="form-label d-block">State Flag<span class="text-danger">*</span></label>
+                            
                             <div class="d-flex gap-3 align-items-center">
 
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="stateFlag" id="same" value="S"
+                                    <input class="form-check-input form-check-input-sm" type="radio" name="stateFlag" id="same" value="S"
                                         [(ngModel)]="formData.stateflag" #stateFlag="ngModel" required>
                                     <label class="form-check-label" for="same">
                                         Same
@@ -83,7 +86,7 @@
                                 </div>
 
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="stateFlag" id="other" value="O"
+                                    <input class="form-check-input form-check-input-sm" type="radio" name="stateFlag" id="other" value="O"
                                         [(ngModel)]="formData.stateflag" required>
                                     <label class="form-check-label" for="other">
                                         Other
@@ -98,8 +101,9 @@
                             </small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Effective Date</label>
-                            <input type="date" class="form-control" [(ngModel)]="formData.effectivedate"
+                            <label class="form-label">Effective Date <span class="text-danger">*</span></label>
+                            
+                            <input type="date" class="form-control form-control-sm" [(ngModel)]="formData.effectivedate"
                                 name="effectivedate" required #effectiveDateInput="ngModel">
 
                             <div *ngIf="effectiveDateInput.invalid && (effectiveDateInput.touched || addHsnwiseATaxForm.submitted)"
@@ -107,9 +111,9 @@
                                 Effective Date is required.
                             </div>
                         </div>
-                        <div class="col-6 mt-3 d-flex justify-content-end">
-                            <button type="submit" class="btn btn-success px-4" [disabled]="addHsnwiseATaxForm.invalid">
-                                <i class="ri-add-line me-1"></i> Add
+                        <div class="col-md-6 div-btn-add">
+                            <button type="submit" class="btn btn-add btn-sm" [disabled]="addHsnwiseATaxForm.invalid">
+                              Save
                             </button>
                         </div>
 

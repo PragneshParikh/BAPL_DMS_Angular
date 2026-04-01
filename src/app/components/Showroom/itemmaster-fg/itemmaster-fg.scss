@@ -1,3 +1,13 @@
+#itemmaster-fg {
+
+    .table .sort::before {
+        top: 6px;
+    }
+
+    .table .sort::after {
+        top: 0px;
+    }
+}
 .table-bgColor  > tr>th{
     background-color: #747CA0;
     color: #ffff;
