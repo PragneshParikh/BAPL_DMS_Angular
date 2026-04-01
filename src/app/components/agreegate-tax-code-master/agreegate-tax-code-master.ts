@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbHighlight, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
@@ -17,7 +17,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
     NgbPaginationModule
   ],
   templateUrl: './agreegate-tax-code-master.html',
-  styleUrls: ['./agreegate-tax-code-master.scss'],
+  styleUrls: ['./agreegate-tax-code-master.scss']
 })
 export class AgreegateTaxCodeMaster implements OnInit {
 
@@ -58,7 +58,7 @@ export class AgreegateTaxCodeMaster implements OnInit {
 
   //  PAGINATION
   page = 1;
-  pageSize = 5;
+  pageSize = 10;
   collectionSize = 0;
 
   //  SORTING
@@ -77,7 +77,6 @@ export class AgreegateTaxCodeMaster implements OnInit {
     });
   }
   onTaxChange() {
-    debugger
     if (this.selectedTax) {
 
       // 👇 BOTH values set karo
@@ -96,9 +95,6 @@ export class AgreegateTaxCodeMaster implements OnInit {
       .subscribe({
         next: (res: any) => {
 
-          console.log("FULL RESPONSE:", res);
-
-          // CORRECT FIX
           this.filteredData = Array.isArray(res.data) ? res.data : [];
 
           this.collectionSize = this.filteredData.length;

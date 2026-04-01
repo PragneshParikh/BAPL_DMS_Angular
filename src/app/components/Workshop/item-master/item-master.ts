@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ItemMasterService } from '../../../core/services/item-master-service';
-import { NgbHighlight, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbHighlight, NgbModal, NgbPaginationModule, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { LoaderService } from '../../../core/services/loader';
 
 @Component({
   selector: 'app-item-master',
   standalone: true,
-  imports: [CommonModule, NgbHighlight, NgbPaginationModule],
+  imports: [CommonModule, NgbHighlight, NgbPaginationModule, NgbTooltipModule],
   templateUrl: './item-master.html',
   styleUrl: './item-master.scss',
 })

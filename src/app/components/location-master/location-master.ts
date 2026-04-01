@@ -3,7 +3,7 @@ import { LocationMasterService } from '../../core/services/location-master-servi
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import * as bootstrap from 'bootstrap';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import '@angular/localize/init';
 
 declare var bootstrap: any;
@@ -11,7 +11,7 @@ declare var bootstrap: any;
 @Component({
   selector: 'app-location-master',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbPaginationModule],
+  imports: [CommonModule, FormsModule, NgbPaginationModule, NgbTooltipModule],
   templateUrl: './location-master.html'
 })
 

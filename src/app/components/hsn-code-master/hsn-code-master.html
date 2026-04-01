@@ -2,7 +2,7 @@
     <h4 class="mb-sm-0">HSN Code Master</h4>
 </div>
 
-<div class="row">
+<div class="row" id="hsn-code-master">
     <div class="col-lg-12">
 
         <div class="card">
@@ -14,10 +14,11 @@
                     <!--BUTTONS -->
                     <div class="d-flex gap-2 me-3">
                         <button class="btn btn-success btn-sm" (click)="openAddModal()">
-                            <i class="ri-add-line"></i>
+                            Add
                         </button>
 
-                        <button class="btn btn-success btn-sm" (click)="downloadHSNCodeMasterExcel()">
+                        <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                            (click)="downloadHSNCodeMasterExcel()">
                             <i class="ri-file-excel-2-line"></i>
                         </button>
                     </div>
@@ -37,7 +38,7 @@
 
                 <div class="table-responsive">
 
-                    <table class="table table-gridjs table-striped hsn-table">
+                    <table class="table table-hover table-bordered mb-0 table-sm">
 
                         <thead>
                             <tr>
@@ -89,13 +90,11 @@
                 </div>
 
                 <!-- PAGINATION -->
-                <div class="row mt-3">
-                    <div class="col-sm-12">
-                        <div class="float-md-end">
-                            <ngb-pagination [collectionSize]="hsnCodeList.length" [(page)]="page" [pageSize]="pageSize"
-                                (pageChange)="refreshPage()">
-                            </ngb-pagination>
-                        </div>
+                <div class="col-sm-12 col-md-12 mt-2">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+                        <ngb-pagination [collectionSize]="hsnCodeList.length" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="refreshPage()" [maxSize]="10" [boundaryLinks]="true">
+                        </ngb-pagination>
                     </div>
                 </div>
 

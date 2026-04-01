@@ -1,12 +1,7 @@
 import { Component, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {
-  NgbPaginationModule,
-  NgbHighlight,
-  NgbModal,
-  NgbModalRef
-} from '@ng-bootstrap/ng-bootstrap';
+import { NgbPaginationModule, NgbHighlight, NgbModal, NgbModalRef, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { BatteryCapacityMasterService } from '../../core/services/battery-capacity-master-service';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { BatteryApiResponse, BatteryCapacity } from '../../ViewModels/BatteryCapacityMaster/BatteryCapacity';
@@ -16,7 +11,7 @@ import { AccessRoles } from '../../constant';
 @Component({
   selector: 'app-battery-capacity-master',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbPaginationModule, NgbHighlight],
+  imports: [CommonModule, FormsModule, NgbPaginationModule, NgbHighlight, NgbTooltipModule],
   templateUrl: './battery-capacity-master.html',
   styleUrl: './battery-capacity-master.scss',
 })

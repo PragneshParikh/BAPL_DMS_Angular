@@ -10,7 +10,7 @@ describe('AgreegateTaxCodeMaster', () => {
     await TestBed.configureTestingModule({
       imports: [AgreegateTaxCodeMaster]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(AgreegateTaxCodeMaster);
     component = fixture.componentInstance;

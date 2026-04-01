@@ -5,64 +5,12 @@
 <div class="row">
     <div class="col-lg-12">
 
-        <!-- FILTER CARD -->
-        <!-- <div class="card">
-            <div class="card-header">
-
-                <div class="row align-items-end"> -->
-
-        <!-- Search -->
-        <!-- <div class="col-md-4">
-                        <label class="form-label">Battery Capacity</label>
-                        <input type="text" class="form-control form-control-sm" placeholder="Enter battery capacity"
-                            (keyup.enter)="onSearchChange()" [(ngModel)]="searchTerm">
-                    </div> -->
-
-        <!-- Page Size -->
-        <!-- <div class="col-md-3"> -->
-        <!-- <label class="form-label">Per Page Records</label>
-                        <select class="form-select form-select-sm" [(ngModel)]="pageSize">
-                            <option [ngValue]="5">5</option>
-                            <option [ngValue]="10">10</option>
-                            <option [ngValue]="25">25</option>
-                            <option [ngValue]="50">50</option>
-                            <option [ngValue]="100">100</option>
-
-                        </select>
-                    </div> -->
-
-        <!-- Buttons -->
-        <!-- <div class="col-md-3 d-flex align-items-end ms-auto gap-2">
-
-                        <button class="btn btn-success btn-sm" (click)="onSearchChange()">
-                            <i class="ri-search-line me-1"></i>
-                            Search
-                        </button>
-
-                        <button class="btn btn-success btn-sm me-3" (click)="downloadBatteryCapacityMasterExcel()">
-                            <i class="ri-file-excel-2-line "></i>
-                        </button>
-
-
-                        <button [hidden]="batteryCapacityAccess < accessRole.ModifyOnly" class="btn btn-success btn-sm"
-                            (click)="openAddModal(editModal)">
-                            <i class="ri-add-line me-1"></i> -->
-        <!-- Add -->
-        <!-- </button>
-
-                    </div>
-
-                </div>
-            </div>
-        </div> -->
-        <!-- HEADER -->
-        <!-- TABLE CARD -->
         <div class="card">
             <div class="card-body">
-                <div class="card-header">
+                <!-- <div class="card-header">
                     <div class="d-flex justify-content-end align-items-center">
 
-                        <!--BUTTONS -->
+                        <\!--BUTTONS --\>
                         <div class="d-flex gap-2 me-3">
                             <button class="btn btn-success btn-sm" (click)="openAddModal(editModal)">
                                 <i class="ri-add-line"></i>
@@ -73,7 +21,7 @@
                             </button>
                         </div>
 
-                        <!-- SEARCH -->
+                        <\!-- SEARCH --\>
                         <div class="search-box">
                             <input type="text" class="form-control search" placeholder="Search..."
                                 [(ngModel)]="searchTerm" (input)="onSearchChange()" />
@@ -81,13 +29,38 @@
                         </div>
 
                     </div>
+                </div> -->
+
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div class="text-muted">
+                            Total Record(s): {{ filteredBatteryCapacities.length }}
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+
+                            <button class="btn btn-sm btn-success" (click)="openAddModal(editModal)">
+                                Add
+                            </button>
+
+                            <button class="btn btn-success btn-sm" ngbTooltip="Export to Excel"
+                                (click)="downloadBatteryCapacityMasterExcel()">
+                                <i class="ri-file-excel-2-line"></i>
+                            </button>
+
+                            <div class="search-box position-relative">
+                                <input type="text" class="form-control search" placeholder="Search..."
+                                    [(ngModel)]="searchTerm" (input)="onSearchChange()" />
+                                <i class="ri-search-line search-icon"></i>
+                            </div>
+
+                        </div>
+
+                    </div>
                 </div>
 
                 <div class="table-responsive">
-
-                    <div class="mb-2 text-muted">
-                        Total Record(s): {{ filteredBatteryCapacities.length }}
-                    </div>
 
                     <table class="table table-gridjs table-striped">
 
@@ -136,12 +109,6 @@
                                     </span>
                                 </td>
 
-                                <!-- <td>
-                                    <button class="btn btn-sm btn-soft-primary" (click)="openEditModal(editModal,item)">
-                                        <i class=" ri-edit-line"></i>
-                                    </button>
-                                </td> -->
-
                             </tr>
 
                             }
@@ -152,21 +119,12 @@
                 </div>
 
                 <!-- PAGINATION -->
-                <div class="row mt-3">
-
-                    <div class="col-sm-12">
-
-                        <div class="float-md-end">
-
-                            <ngb-pagination [collectionSize]="filteredBatteryCapacities.length" [(page)]="page"
-                                [pageSize]="pageSize" [boundaryLinks]="true">
-
-                            </ngb-pagination>
-
-                        </div>
-
+                <div class="col-sm-12 col-md-12 mt-2">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+                        <ngb-pagination [collectionSize]="filteredBatteryCapacities.length" [(page)]="page"
+                            [pageSize]="pageSize" [maxSize]="10" [boundaryLinks]="true">
+                        </ngb-pagination>
                     </div>
-
                 </div>
 
             </div>

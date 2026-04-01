@@ -26,8 +26,8 @@
                             <select class="form-select form-select-sm mb-3" [(ngModel)]="selectedEndPoint">
                                 <option selected>Open this select menu</option>
                                 <option value="color">Color</option>
-                                <option value="dealer">Dealer</option>
-                                <option value="location">Location</option>
+                                <option value="dealermaster">Dealer</option>
+                                <option value="hsncodemaster">HSNCodeMaster</option>
                             </select>
                         </div>
                     </div>
@@ -48,8 +48,8 @@
                             <label class="form-label mb-0">API Status</label>
                             <select class="form-select form-select-sm mb-3" [(ngModel)]="selectedStatus">
                                 <option selected>Open this select menu</option>
-                                <option value="1">Success</option>
-                                <option value="2">Failed</option>
+                                <option value="success">Success</option>
+                                <option value="failed">Failed</option>
                             </select>
                         </div>
                     </div>
@@ -128,6 +128,11 @@
                                 </td>
                             </tr>
                             }
+
+                            <!-- No Data Row -->
+                            <tr *ngIf="pagedData.length === 0">
+                                <td colspan="6" class="text-center">No Data Available</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

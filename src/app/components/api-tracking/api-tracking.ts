@@ -7,6 +7,8 @@ import { NgbAccordionModule, NgbDropdownModule, NgbModal, NgbPaginationModule, N
 import { CommonModule } from '@angular/common';
 import { nextTick } from 'process';
 import { error } from 'console';
+import { LoaderService } from '../../core/services/loader';
+import { ToastService } from '../../shared/toaster/toast-service';
 
 @Component({
   selector: 'app-api-tracking',
@@ -50,8 +52,12 @@ export class ApiTracking implements OnInit {
   pagedData: any[] = [];
   // #endregion
 
-  constructor(private apiTrackingService: ApiTrackingService,
-    private modalService: NgbModal) {
+  constructor(
+    private apiTrackingService: ApiTrackingService,
+    private modalService: NgbModal,
+    private loader: LoaderService,
+    public toaster: ToastService,
+  ) {
   }
 
   ngOnInit() {
@@ -74,6 +80,7 @@ export class ApiTracking implements OnInit {
     const status = this.selectedStatus; // optional
     const searchCriteria = this.searchCriteria; // optional
 
+    this.loader.show();
     this.apiTrackingService.getDataByFilter(fromDate, toDate, endPoint, searchCriteria, status).subscribe({
       next: (res: any) => {
         this.dataSource = res.map((item: any, index: number) => {
@@ -81,8 +88,15 @@ export class ApiTracking implements OnInit {
         });
         this.collectionSize = res.length;
         this.refreshData();
+        this.loader.hide();
       }, error: (err) => {
         console.error(err);
+        this.loader.hide();
+
+        this.toaster.show('Something went wrong', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
       }
 
     });

@@ -143,15 +143,16 @@
         </form>
     </ng-template>
 </div>
+
 <!-- view list details -->
-<div class="row">
+<div class="row" id="hsnwise-tax-code">
     <div class="col-lg-12">
         <div class="card">
             <div class="card-header">
                 <div class="d-flex justify-content-end align-items-center">
                     <!-- Add HSNWiseTaxCode Button -->
                     <button class="btn btn-success btn-sm me-3" (click)="openAddDetails(AddHSNWiseATaxcode)">
-                        <i class="ri-add-line"></i>
+                        Add
                     </button>
                     <!-- Search Box -->
                     <div class="search-box">
@@ -164,7 +165,7 @@
             <!-- end card header -->
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-gridjs">
+                    <table class="table table-hover table-bordered mb-0 table-sm">
                         <thead class="table-bgColor">
                             <tr>
                                 <th class="sort" (click)="sort('hsncode')" data-sort="Hsncode">HSNCode</th>
@@ -184,8 +185,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="row justify-content-md-between align-items-md-center">
-                    <!-- Pagination -->
+                <!-- <div class="row justify-content-md-between align-items-md-center">
+                    <\!-- Pagination --\>
                     <div class="col-sm-12 col-md-5">
                         <div class="text-md-right float-md-end gridjs-pagination">
                             <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
@@ -193,7 +194,15 @@
                             </ngb-pagination>
                         </div>
                     </div>
-                    <!-- End Pagination -->
+                    <\!-- End Pagination --\>
+                </div> -->
+                <!-- PAGINATION -->
+                <div class="col-sm-12 col-md-12 mt-2">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+                        <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="pageChange($event)" [maxSize]="10" [boundaryLinks]="true">
+                        </ngb-pagination>
+                    </div>
                 </div>
             </div><!-- end card-body -->
         </div><!-- end card -->

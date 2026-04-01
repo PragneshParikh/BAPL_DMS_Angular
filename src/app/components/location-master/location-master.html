@@ -8,7 +8,8 @@
             <div class="row">
                 <div class="col-md-3 dropdown-wrapper">
                     <label class="form-label">Dealer Name</label>
-                    <select class="form-select" [(ngModel)]="dealerCode" (ngModelChange)="checkSearchReset()">
+                    <select class="form-select form-select-sm" [(ngModel)]="dealerCode"
+                        (ngModelChange)="checkSearchReset()">
                         <option value="">-- Select Dealer --</option>
                         <option *ngFor="let d of dealerList" [value]="d.dealerCode">
                             {{d.dealerName}}
@@ -17,7 +18,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Location Area</label>
-                    <select class="form-select" [(ngModel)]="locationArea">
+                    <select class="form-select form-select-sm" [(ngModel)]="locationArea">
                         <option value="">-- Select Area --</option>
                         <option *ngFor="let area of locationAreaMaster" [value]="area.id">
                             {{area.name}}
@@ -26,24 +27,16 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Location Name</label>
-                    <input type="text" class="form-control" [(ngModel)]="locationName" (input)="checkKeywordReset()"
-                        (keyup.enter)="searchLocation()" />
+                    <input type="text" class="form-control form-control-sm" [(ngModel)]="locationName"
+                        (input)="checkKeywordReset()" (keyup.enter)="searchLocation()" />
                 </div>
-                <!-- <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-success" (click)="searchLocation()">
-                        Search
-                    </button>
-
-                    <button class="btn btn-success btn-sm me-3" (click)="downloadLocationExcel()">
-                        <i class="ri-file-excel-2-line"></i>
-                    </button>
-                </div> -->
                 <div class="col-md-3 d-flex align-items-end gap-2">
-                    <button class="btn btn-success" (click)="searchLocation()">
+                    <button class="btn btn-success btn-sm" (click)="searchLocation()">
                         Search
                     </button>
 
-                    <button class="btn btn-success btn-bg" (click)="downloadLocationExcel()">
+                    <button class="btn btn-success btn-bg btn-sm" [ngbTooltip]="'Export to Excel'"
+                        (click)="downloadLocationExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
                 </div>
@@ -54,7 +47,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle">
+                <table class="table table-hover table-bordered mb-0 table-sm">
                     <thead>
                         <tr style="background-color:#747CA0 !important;color:white">
                             <th class="sort">S.No</th>

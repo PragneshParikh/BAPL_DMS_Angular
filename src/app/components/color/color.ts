@@ -9,6 +9,8 @@ import { RootReducerState } from '../../store';
 import { Store } from '@ngrx/store';
 import { SharedModule } from '../../shared/shared.module';
 import { error } from 'console';
+import { LoaderService } from '../../core/services/loader';
+import { ToastService } from '../../shared/toaster/toast-service';
 
 @Component({
   selector: 'app-color',
@@ -21,7 +23,9 @@ import { error } from 'console';
     NgbTooltipModule,
     NgbDropdownModule,
     NgbAccordionModule,
-    SharedModule],
+    SharedModule,
+    NgbTooltipModule
+  ],
   providers: [DatePipe],
   templateUrl: './color.html',
   styleUrl: './color.scss',
@@ -46,15 +50,20 @@ export class Color implements OnInit {
   /**
    *
    */
-  constructor(private colorMasterService: ColorMasterService,
+  constructor(
+    private colorMasterService: ColorMasterService,
     private modalService: NgbModal,
-    public service: PaginationService) {
+    public service: PaginationService,
+    private loader: LoaderService,
+    public toaster: ToastService,
+  ) {
   }
 
   ngOnInit(): void {
     this.loadColorData();
   }
   loadColorData() {
+    this.loader.show();
     this.colorMasterService.getColorByPaged(this.searchTerm, this.page - 1, this.pageSize).subscribe({
       next: (res: any) => {
         this.pagedData = [];
@@ -65,8 +74,14 @@ export class Color implements OnInit {
           this.collectionSize = res.totalRecords;
 
         }
+        this.loader.hide();
       }, error: (err) => {
         console.error(err);
+        this.loader.hide();
+        this.toaster.show('Something went wrong', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
       }
 
     });

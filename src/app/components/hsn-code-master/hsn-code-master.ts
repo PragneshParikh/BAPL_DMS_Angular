@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { NgbModal, NgbModule, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModule, NgbModalRef, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { HsnCodeMasterService } from '../../core/services/hsn-code-master-service';
@@ -12,7 +12,7 @@ import { LoaderService } from '../../core/services/loader';
 @Component({
   selector: 'app-hsn-code-master',
   standalone: true,
-  imports: [CommonModule, NgbModule, FormsModule],
+  imports: [CommonModule, NgbModule, FormsModule, NgbTooltipModule],
   templateUrl: './hsn-code-master.html',
   styleUrl: './hsn-code-master.scss'
 })
@@ -184,11 +184,11 @@ export class HsnCodeMaster implements OnInit {
   // }
 
   // ================= ADD =================
-  
+
   onSearchChange() {
-  const value = this.searchTerm?.trim() || '';
-  this.searchSubject.next(value);
-}
+    const value = this.searchTerm?.trim() || '';
+    this.searchSubject.next(value);
+  }
   openAddModal() {
     this.isDuplicateHSN = false;
 
@@ -223,7 +223,7 @@ export class HsnCodeMaster implements OnInit {
       });
       return;
     }
-this.loader.show();
+    this.loader.show();
     this.hsnService.addHSNCodeMaster(this.formHsn).subscribe({
 
       next: () => {
@@ -238,7 +238,7 @@ this.loader.show();
       },
 
       error: (err) => {
-this.loader.hide();
+        this.loader.hide();
         console.log(err);
 
         let message = 'Something went wrong';
@@ -272,7 +272,7 @@ this.loader.hide();
     this.saveHsn();
   }
   downloadHSNCodeMasterExcel() {
-this.loader.show();
+    this.loader.show();
     this.hsnService.downloadHSNCodeMasterExcel().subscribe((data: Blob) => {
 
       const blob = new Blob([data], {
@@ -290,7 +290,7 @@ this.loader.show();
       window.URL.revokeObjectURL(downloadURL);
 
     });
-this.loader.hide();
+    this.loader.hide();
   }
   // ================= EDIT =================
   openEditModal(hsn: HsnCodeMasterViewModel) {

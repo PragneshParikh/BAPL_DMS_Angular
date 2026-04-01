@@ -24,7 +24,7 @@ export class Hsnwisetaxcode implements OnInit {
   constructor(
     private hsnwisetaxcodeservice: Hsnwisetaxcodeservice,
     private loader: LoaderService,
-    public  toaster: ToastService,
+    public toaster: ToastService,
     private modalService: NgbModal
   ) { }
 
