@@ -332,20 +332,21 @@ export class TopbarComponent implements OnInit {
   updateNotificationStatusByInvoice(invoiceNumber: string) {
     this.vehicleDispatchService.updateStatusByInvoiceNumber(invoiceNumber).subscribe({
       next: (res) => {
-        this.getVehicleDispatchNotification();
-
-        this.router.navigate(['/lotinspection/:invoiceNo']);
-
         this.toastService.show('Record updated sucessfully', {
           classname: 'bg-success text-white',
           delay: 5000
         });
+
+        this.getVehicleDispatchNotification();
+
+        this.router.navigate(['/lot-inspection-details', invoiceNumber]);
+
       }, error: (err) => {
         this.toastService.show('Something went wrong', {
           classname: 'bg-warning text-white',
           delay: 5000
         });
-        console.log
+        console.log(err);
       }
     })
   }

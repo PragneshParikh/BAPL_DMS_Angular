@@ -71,7 +71,7 @@ export const routes: Routes = [
       { path: 'customer-ledger', data: [], loadComponent: () => import('./components/customer-ledger/customer-ledger-list/customer-ledger-list').then(m => m.CustomerLedgerList) },
       { path: 'customer-ledger/:id', data: [], loadComponent: () => import('./components/customer-ledger/customer-ledger').then(m => m.CustomerLedger) },
       { path: 'delivery-certificate', data: [], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
-      {path:'job-card',component:JobCard,data:[]}
+      { path: 'job-card', component: JobCard, data: [] }
     ]
   }
 ];

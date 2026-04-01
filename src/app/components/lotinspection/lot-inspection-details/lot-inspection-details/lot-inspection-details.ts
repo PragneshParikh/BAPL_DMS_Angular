@@ -97,7 +97,7 @@ export class LotInspectionDetails implements OnInit {
     this.loader.show();
     this.lotInspectionDetailservice.getAllDetailsByInvoice(this.invoiceNo).subscribe({
       next: (res: any) => {
-        this.loader.hide();
+
         if (res?.data?.length) {
 
           const first = res.data[0];
@@ -159,6 +159,9 @@ export class LotInspectionDetails implements OnInit {
           console.log("Header:", this.headerObj);
           console.log("Details:", this.detailList);
         }
+        setTimeout(() => {
+          this.loader.hide();
+        });
       },
       error: (err) => {
         console.error('Error fetching locations', err);
