@@ -30,8 +30,8 @@
                         <!-- Aggregate Tax Code -->
                         <div class="col-md-2">
                             <label class="form-label">Aggregate Tax Code</label>
-
-                            <input type="text" class="form-control form-control-md" name="ataxCode"
+                            <span class="text-danger">*</span>
+                            <input type="text" class="form-control form-control-sm" name="ataxCode"
                                 [(ngModel)]="formData.ataxCode" required #ataxCode="ngModel" />
 
                             <small class="text-danger"
@@ -43,8 +43,8 @@
                         <!-- Description -->
                         <div class="col-md-2">
                             <label class="form-label">Description</label>
-
-                            <input type="text" class="form-control form-control-md" name="description"
+                            <span class="text-danger">*</span>
+                            <input type="text" class="form-control form-control-sm" name="description"
                                 [(ngModel)]="formData.description" required #description="ngModel" />
 
                             <small class="text-danger"
@@ -55,8 +55,8 @@
                         <!-- Tax Code (Auto Filled) -->
                         <div class="col-md-2">
                             <label class="form-label">Tax Code</label>
-
-                            <select class="form-select form-select-md custom-dropdown" [(ngModel)]="selectedTax"
+                            <span class="text-danger">*</span>
+                            <select class="form-select form-select-sm custom-dropdown" [(ngModel)]="selectedTax"
                                 required #taxCode="ngModel" name="taxCode" (change)="onTaxChange()">
                                 <option [ngValue]="null">-- Select TaxCode --</option>
                                 <option *ngFor="let t of taxList" [ngValue]="t">
@@ -73,13 +73,13 @@
                         <!-- Tax Rate -->
                         <div class="col-md-2">
                             <label class="form-label">Tax Rate</label>
-                            <input type="text" class="form-control form-control-md" name="TaxRate"
+                            <input type="text" class="form-control form-control-sm" name="TaxRate"
                                 [(ngModel)]="formData.TaxRate" readonly />
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 div-btn-add">
                             <label lass="form-label"></label>
-                            <button type="submit" class="btn btn-success" [disabled]="addAggregateTaxForm.invalid">
-                                Add
+                            <button type="submit" class="btn btn-add" [disabled]="addAggregateTaxForm.invalid">
+                                Save
                             </button>
                         </div>
                     </div>
@@ -92,7 +92,7 @@
             </div>
             <div class="">
                 <!-- CHILD TABLE -->
-                <table class="table table-bordered">
+                <table class="table table-hover table-bordered table-sm">
                     <thead class="table-bgColor">
                         <tr>
                             <th>ATaxCode</th>
@@ -211,7 +211,7 @@
         </div>
 
         <!-- CHILD TABLE -->
-        <table class="table table-bordered">
+        <table class="table table-hover table-bordered table-sm">
             <thead class="table-bgColor">
                 <tr>
                     <th>Sr No</th>

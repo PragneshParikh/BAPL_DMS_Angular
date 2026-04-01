@@ -46,7 +46,7 @@ export class Form22master implements OnInit {
   pagedData: any[] = [];
   // pagination
   page = 1;
-  pageSize = 5;
+  pageSize = 10;
   collectionSize = 0;
 
   sortColumn: string = '';
@@ -98,7 +98,7 @@ export class Form22master implements OnInit {
   }
 
   //add oem details
-  addForm22Master(form: any) {
+  addForm22Master(form: any, modal: any) {
     debugger;
 
     const payload: Form22MasterModel = {
@@ -129,6 +129,10 @@ export class Form22master implements OnInit {
           });
 
           this.loadForm22Items();
+          setTimeout(() => {
+          modal.close();   // this will close popup
+          form.resetForm(); // optional reset
+        }, 1000); // 1 sec delay
           // form.resetForm();
         },
         error: (err) => {
@@ -146,15 +150,15 @@ export class Form22master implements OnInit {
   }
 
   //update oem details
-  updateForm22Master() {
-
+  updateForm22Master(modal: any) {
+debugger;
     const updateData = {
-      id: this.formData.id,
-      oemmodelId: this.formData.oemmodelId,
-      soundLevelHorn: this.formData.soundLevelHorn,
-      passbyNoiseLevel: this.formData.passbyNoiseLevel,
-      approvalCertificateNo: this.formData.approvalCertificateNo,
-      isActive: this.formData.isActive,
+      id: this.selectedForm22Item.id,
+      oemmodelId: this.selectedForm22Item.oemmodelId,
+      soundLevelHorn: this.selectedForm22Item.soundLevelHorn,
+      passbyNoiseLevel: this.selectedForm22Item.passbyNoiseLevel,
+      approvalCertificateNo: this.selectedForm22Item.approvalCertificateNo,
+      isactive: this.selectedForm22Item.isactive,
       updatedBy: "Kajal Tiwari"
     };
 
@@ -170,6 +174,9 @@ export class Form22master implements OnInit {
           });
 
           this.loader.hide();
+          setTimeout(() => {
+          modal.close();   // this will close popup
+        }, 1000); // 1 sec delay
         },
 
         error: (err) => {
@@ -248,8 +255,8 @@ export class Form22master implements OnInit {
 
     this.pagedData = this.filteredData.slice(start, end);
   }
-  openDetails(modal: any, item: any) {
-    this.selectedForm22Item = item;
+  openDetails(modal: any, data: any) {
+    this.selectedForm22Item = { ...data };
     this.modalService.open(modal, { size: 'xl' });
   }
   openAddDetails(modal: any, item: any) {

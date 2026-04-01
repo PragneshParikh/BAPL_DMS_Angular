@@ -1,3 +1,14 @@
+#form22master {
+
+    .table .sort::before {
+        top: 6px;
+    }
+
+    .table .sort::after {
+        top: 0px;
+    }
+}
+
 .table-bgColor  > tr>th{
     background-color: #747CA0;
     color: #ffff;
@@ -22,7 +33,23 @@
 .btn-close-white {
 color: white;
 }
- 
+
+.btn-add{
+  background-color: #747CA0;
+  color: white;
+ }
+
+ .div-btn-add{
+  margin-right: 7.5%;
+  margin-bottom: 1%;
+  padding-left: 0%;
+ }
+
+ .form-switch-success .form-check-input:checked{
+  padding-left: 40px;
+    margin-left: 1px;
+    margin-right: 4px;
+ }
 /* Fixed footer */
 .modal-footer {
   position: sticky;
