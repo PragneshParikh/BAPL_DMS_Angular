@@ -26,6 +26,7 @@ export interface Header {
     vehicleFasteningBracket?: string;
     plasticCover?: string;
     nameSupervisor?: string;
+    locationName?: string;
     UpdatedBy?: string;
     UpdatedDate?: string; // ISO string (yyyy-MM-dd)
 }
@@ -54,7 +55,7 @@ export interface Detail {
     chargingKit?:number;
     attributeCard?:number;
     modelWiseSupervisorName?: string;
-    locationName?: string;
+    
 
     //lotVehicleDamageImage?: File; // file upload
     UpdatedBy?: string;

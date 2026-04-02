@@ -95,6 +95,16 @@ export class LotInspectionDetails implements OnInit {
   // ================= GET DATA =================
   getInvoiceData() {
     this.loader.show();
+    // current datetime 
+    const today = new Date();
+    const now = new Date();
+    const defaultvalue = 1;
+    //current time 
+    const formattedDate = today.toISOString().split('T')[0];
+    const formattedTime =
+      String(now.getHours()).padStart(2, '0') + ':' +
+      String(now.getMinutes()).padStart(2, '0');
+
     this.lotInspectionDetailservice.getAllDetailsByInvoice(this.invoiceNo).subscribe({
       next: (res: any) => {
 
@@ -107,18 +117,19 @@ export class LotInspectionDetails implements OnInit {
             invoiceNo: first.invoiceNo,
             invoiceDate: first.invoiceDate,
             lotNo: first.lotNo,
-            arrivalDate: first.arrivalDate,
-            arrivalTime: first.arrivalTime,
+            arrivalDate: first.arrivalDate || formattedDate,
+            arrivalTime: first.arrivalTime || formattedTime,
             lrNo: first.lrNo,
-            lrDate: first.lrDate,
+            lrDate: first.lrDate || formattedDate,
             truckNo: first.truckNo,
             transporterName: first.transporterName,
             driverName: first.driverName,
             driverContact: first.driverContact,
             commonRemarks: first.commonRemarks,
-            vehicleFasteningBracket: first.vehicleFasteningBracket,
-            plasticCover: first.plasticCover,
-            nameSupervisor: first.nameSupervisor,
+            vehicleFasteningBracket: first.vehicleFasteningBracket || this.selectedvehiclefasteringcover,
+            plasticCover: first.plasticCover || this.selectedPlastingcover,
+            nameSupervisor: first.nameSupervisor || this.selectedSupervisor,
+            locationName: first.locationName || this.selectedLocation,
             dealerCode: this.storageService.getDealerCode()
           };
 
@@ -132,23 +143,20 @@ export class LotInspectionDetails implements OnInit {
             batteryNo: x.batteryNo,
             chargerNo: x.chargerNo,
 
-            keyFobSetQty: x.keyFobSetQty,
-            chargerQty: x.chargerQty,
-            mirrorSetQty: x.mirrorsetQty,
-            firstAidKitQty: x.firstaidkitQty,
-            toolkitQty: x.toolKitQty,
+            keyFobSetQty: x.keyFobSetQty || defaultvalue,
+            chargerQty: x.chargerQty || defaultvalue,
+            mirrorSetQty: x.mirrorsetQty || defaultvalue,
+            firstAidKitQty: x.firstaidkitQty || defaultvalue,
+            toolkitQty: x.toolKitQty || defaultvalue,
+            ownersManual: x.ownersManual || defaultvalue,
+            ignitionKeySet: x.ignitionKeyset || defaultvalue,
+            attributeCard: x.attributeCard || defaultvalue,
+            chargingKit: x.chargingKit || defaultvalue,
 
-            ownersManual: x.ownersManual,
-            ignitionKeySet: x.ignitionKeyset,
-            attributeCard: x.attributeCard,
-            chargingKit: x.chargingKit,
-
-            inspectionDate: x.inspectionDate,
+            inspectionDate: x.inspectionDate || formattedDate,
             vehicleStatus: x.vehicleStatus,
             damageDetails: x.damageDetails,
             chassisWiseRemarks: x.chassisWiseRemarks,
-            modelWiseSupervisorName: x.modelWiseSupervisorName,
-            locationName: x.locationName,
             UpdatedBy: 'Admin',
             UpdatedDate: this.formatDate(new Date()),
 
@@ -194,6 +202,7 @@ export class LotInspectionDetails implements OnInit {
       vehicleFasteningBracket: this.headerObj.vehicleFasteningBracket || '',
       plasticCover: this.headerObj.plasticCover || '',
       nameSupervisor: this.headerObj.nameSupervisor || '',
+      LocationName: this.headerObj.locationName || '',
       updatedBy: 'Admin',
       updatedDate: new Date().toISOString()
     }
@@ -212,20 +221,16 @@ export class LotInspectionDetails implements OnInit {
         MirrorSetQty: (item.mirrorSetQty || 0),
         FirstAidKitQty: (item.firstAidKitQty || 0),
         ToolkitQty: (item.toolkitQty || 0),
-
         OwnersManual: item.ownersManual || 0,
         IgnitionKeySet: item.ignitionKeySet || 0,
-
+        AttributeCard: item.attributeCard || 0,
+        ChargingKit: item.chargingKit || 0,
 
         InspectionDate: item.inspectionDate || '',
         VehicleStatus: item.vehicleStatus || '',
         DamageDetails: item.damageDetails || '',
         ChassisWiseRemarks: item.chassisWiseRemarks || '',
-        AttributeCard: item.attributeCard || 0,
-        ChargingKit: item.chargingKit || 0,
-        modelWiseSupervisorName: item.modelWiseSupervisorName || '',
         //lotVehicleDamageImage :item.lotVehicleDamageImage || '',
-        LocationName: item.locationName || '',
         UpdatedBy: item.UpdatedBy || '',
         UpdatedDate: item.UpdatedDate || ''
       }
