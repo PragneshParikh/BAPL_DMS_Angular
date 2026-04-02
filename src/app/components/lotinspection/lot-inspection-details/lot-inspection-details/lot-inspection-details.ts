@@ -172,7 +172,6 @@ export class LotInspectionDetails implements OnInit {
 
   // ================= SAVE DATA =================
   saveData() {
-    //debugger;
     //update json object
     let model = {
       lotInspectedHeaderDetails: {},
@@ -204,7 +203,6 @@ export class LotInspectionDetails implements OnInit {
     //Lot inspection Details mapping
     var invoiceDetails: any[] = [];
     this.detailList.forEach((item, i) => {
-      debugger
       const list = {
         Id: item.id,
         LotHeaderId: item.lotHeaderID,

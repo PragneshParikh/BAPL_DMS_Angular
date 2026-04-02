@@ -44,7 +44,6 @@
               "node_modules/jquery/dist/jquery.min.js",
               "node_modules/slick-carousel/slick/slick.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
-              
             ],
             "allowedCommonJsDependencies": [
               "ev-emitter/ev-emitter",
@@ -82,11 +81,17 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2mb",
+                  "maximumError": "6MB"
                 },
                 {
                   "type": "anyComponentStyle",

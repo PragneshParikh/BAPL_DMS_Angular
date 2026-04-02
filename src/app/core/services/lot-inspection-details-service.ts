@@ -10,9 +10,8 @@ export class LotInspectionDetailsservice {
 
   protected baseUrl = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private httpClient: HttpClient) { }
 
-  }
   //  Insert Header (Invoice Accept)
   acceptInvoiceHeader(invoiceNo: string): Observable<any> {
     return this.httpClient.post(`${this.baseUrl}/LOTInspection/AcceptInvoices/`, invoiceNo);
@@ -27,7 +26,6 @@ export class LotInspectionDetailsservice {
 
   // Update invoice details
   updateLotInspectedDetails(formData: any): Observable<any> {
-    debugger
     return this.httpClient.put(
       `${this.baseUrl}/LOTInspection/UpdateLotInspectedDetails`,
       formData
@@ -36,7 +34,6 @@ export class LotInspectionDetailsservice {
 
   // get all details based on invoice no
   getAllDetailsByInvoice(invoiceNo: string = ''): Observable<any> {
-    //debugger
     let params = new HttpParams().set('invoiceNo', invoiceNo ?? '');
 
     if (invoiceNo && invoiceNo.trim() !== '') {

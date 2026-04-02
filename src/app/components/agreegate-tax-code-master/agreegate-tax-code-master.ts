@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgbHighlight, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { AgreegateTaxCodeMasterservice } from '../../core/services/agreegate-tax-code-masterservice';
-import { debug } from 'console';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 
@@ -13,7 +12,6 @@ import { ToastService } from '../../shared/toaster/toast-service';
   imports: [
     CommonModule,
     FormsModule,
-    NgbHighlight,
     NgbPaginationModule
   ],
   templateUrl: './agreegate-tax-code-master.html',
@@ -138,7 +136,6 @@ export class AgreegateTaxCodeMaster implements OnInit {
   //  INSERT
   addAggregateTax(form: any) {
 
-    debugger;
     const nextSrNo = this.addGridData.taxDetails.length + 1;
     const payload = {
       ataxCode: this.formData.ataxCode,
@@ -239,7 +236,6 @@ export class AgreegateTaxCodeMaster implements OnInit {
 
   //  OPEN ADD MODAL
   openAddDetails(modal: any) {
-    debugger;
     this.resetForm();
     this.addGridData = {
       ataxCode: '',

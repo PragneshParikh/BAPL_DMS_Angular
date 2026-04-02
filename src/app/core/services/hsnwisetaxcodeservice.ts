@@ -2,17 +2,13 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-
 @Injectable({
   providedIn: 'root',
 })
 export class Hsnwisetaxcodeservice {
   protected baseUrl = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient) {
-
-  }
+  constructor(private httpClient: HttpClient) { }
 
   getHsncodeList(): Observable<any> {
     return this.httpClient.get<any[]>(`${this.baseUrl}/HSNWiseTaxCode/GetHsncodeList`);
@@ -29,10 +25,10 @@ export class Hsnwisetaxcodeservice {
     });
   }
 
-  getHsnwiseTaxcodedetails(search: string=''): Observable<any> {
+  getHsnwiseTaxcodedetails(search: string = ''): Observable<any> {
 
     let params = new HttpParams()
-      .set('search',search ?? '');
+      .set('search', search ?? '');
 
     if (search && search.trim() !== '') {
       params = params.set('search', search.trim());

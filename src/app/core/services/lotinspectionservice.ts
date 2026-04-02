@@ -9,19 +9,18 @@ import { Observable } from 'rxjs';
 export class Lotinspectionservice {
   protected baseUrl = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private httpClient: HttpClient) { }
 
-  }
-  getAllLotInspectionHeaderDetails(search: string=''): Observable<any>{
-    let params = new HttpParams().set('search',search ?? '');
-  
+  getAllLotInspectionHeaderDetails(search: string = ''): Observable<any> {
+    let params = new HttpParams().set('search', search ?? '');
 
-    if(search && search.trim() !== ''){
+
+    if (search && search.trim() !== '') {
       params = params.set('search', search.trim());
     }
- return this.httpClient.get<any[]>(`${this.baseUrl}/LOTInspection/GetAllAcceptedInvoiceList`,{params});
+    return this.httpClient.get<any[]>(`${this.baseUrl}/LOTInspection/GetAllAcceptedInvoiceList`, { params });
   }
- //  Insert Header (Invoice Accept)
+  //  Insert Header (Invoice Accept)
   acceptInvoiceHeader(invoiceNo: string): Observable<any> {
     return this.httpClient.post(`${this.baseUrl}/LOTInspection/AcceptInvoices`, `"${invoiceNo}"`, {
       headers: { 'Content-Type': 'application/json' }

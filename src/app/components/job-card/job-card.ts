@@ -5,14 +5,14 @@ import { StorageService } from '../../core/services/storage';
 import { LocationName } from '../../ViewModels/ReceiptEntryModel';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { JobType,JobSource } from '../../constant';
+import { JobType, JobSource } from '../../constant';
 import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { Router,RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-job-card',
   standalone: true,
-  imports: [CommonModule, FormsModule,RouterModule,NgbPaginationModule, NgbTooltipModule],
+  imports: [CommonModule, FormsModule, RouterModule, NgbPaginationModule, NgbTooltipModule],
   templateUrl: './job-card.html',
   styleUrl: './job-card.scss',
 })
@@ -103,7 +103,6 @@ export class JobCard {
   }
   //Navigate Job Card Add form
   onNavigate() {
-    debugger
     this.router.navigate(['/job-card-addForm', 'test']);
   }
 }

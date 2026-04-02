@@ -10,7 +10,7 @@ import { LoaderService } from '../../../core/services/loader';
 @Component({
   selector: 'app-form22master',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbHighlight, NgbPagination,NgbTooltipModule],
+  imports: [CommonModule, FormsModule, NgbHighlight, NgbPagination, NgbTooltipModule],
   templateUrl: './form22master.html',
   styleUrl: './form22master.scss',
 })
@@ -99,7 +99,6 @@ export class Form22master implements OnInit {
 
   //add oem details
   addForm22Master(form: any, modal: any) {
-    debugger;
 
     const payload: Form22MasterModel = {
       id: 0,
@@ -130,9 +129,9 @@ export class Form22master implements OnInit {
 
           this.loadForm22Items();
           setTimeout(() => {
-          modal.close();   // this will close popup
-          form.resetForm(); // optional reset
-        }, 1000); // 1 sec delay
+            modal.close();   // this will close popup
+            form.resetForm(); // optional reset
+          }, 1000); // 1 sec delay
           // form.resetForm();
         },
         error: (err) => {
@@ -151,7 +150,6 @@ export class Form22master implements OnInit {
 
   //update oem details
   updateForm22Master(modal: any) {
-debugger;
     const updateData = {
       id: this.selectedForm22Item.id,
       oemmodelId: this.selectedForm22Item.oemmodelId,
@@ -175,8 +173,8 @@ debugger;
 
           this.loader.hide();
           setTimeout(() => {
-          modal.close();   // this will close popup
-        }, 1000); // 1 sec delay
+            modal.close();   // this will close popup
+          }, 1000); // 1 sec delay
         },
 
         error: (err) => {

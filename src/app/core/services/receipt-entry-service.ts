@@ -10,20 +10,14 @@ import { LmsleadMaster } from '../../ViewModels/LmsleadMaster';
   providedIn: 'root',
 })
 export class ReceiptEntryService {
-  updateReceiptEntry(id: any, payload: ReceiptEntryAddViewModel) {
-    throw new Error('Method not implemented.');
-  }
 
   private apiUrl = environment.apiUrl;
   /**
    *
    */
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient) { }
 
-
-  }
-
-   getReceiptList(searchTerm: string): Observable<any[]> {
+  getReceiptList(searchTerm: string): Observable<any[]> {
     let params = new HttpParams();
 
     if (searchTerm) {
@@ -82,8 +76,6 @@ export class ReceiptEntryService {
   getReceiptById(id: number) {
     return this.http.get<ReceiptEntryEditModel>(`${this.apiUrl}/ReceiptEntry/receiptById?id=${id}`);
   }
-
-
 
   updateReceipt(id: number, payload: any) {
     return this.http.put(`${this.apiUrl}/ReceiptEntry/editReceiptEntry?id=${id}`, payload);

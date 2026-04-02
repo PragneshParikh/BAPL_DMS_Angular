@@ -8,10 +8,11 @@ import { HsnCodeMasterViewModel } from '../../ViewModels/HSNCodeMaster/HSNCodeMa
   providedIn: 'root',
 })
 export class HsnCodeMasterService {
-   private apiUrl = environment.apiUrl;
+  private apiUrl = environment.apiUrl;
+
   constructor(private http: HttpClient) { }
 
-getHSNCodeMasterList(search?: string): Observable<any> {
+  getHSNCodeMasterList(search?: string): Observable<any> {
 
     let params = new HttpParams();
 
@@ -22,16 +23,15 @@ getHSNCodeMasterList(search?: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/HSNCodeMaster/list`, { params });
   }
 
-
   updateHSNCodeMaster(id: number, data: any): Observable<any> {
 
     return this.http.put(`${this.apiUrl}/HSNCodeMaster/update/${id}`, data);
   }
 
   addHSNCodeMaster(data: any): Observable<any> {
-   return this.http.post(`${this.apiUrl}/HSNCodeMaster/create`, data);
+    return this.http.post(`${this.apiUrl}/HSNCodeMaster/create`, data);
   }
- 
+
   downloadHSNCodeMasterExcel() {
     return this.http.get(`${this.apiUrl}/HSNCodeMaster/download`,
       {

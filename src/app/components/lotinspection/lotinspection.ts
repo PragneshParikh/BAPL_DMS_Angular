@@ -46,7 +46,7 @@ export class Lotinspection implements OnInit {
 
 
   ngOnInit() {
-    
+
 
     // default search (today to today)
     //this.searchTerm = `${today} to ${today}`;
@@ -55,7 +55,6 @@ export class Lotinspection implements OnInit {
   }
   // LOAD DATA
   loadLotInspectionList() {
-    //debugger;
     this.loader.show();
     this.lotinspectionService.getAllLotInspectionHeaderDetails(this.searchTerm || '')
       .subscribe({
@@ -69,7 +68,7 @@ export class Lotinspection implements OnInit {
 
           this.refreshTable();
           this.loader.hide();
-          
+
         },
         error: (err) => {
           console.error(err)
@@ -79,7 +78,6 @@ export class Lotinspection implements OnInit {
   }
   //  SEARCH
   searchItems(fromDate: string, toDate: string, invoiceNo: string) {
-//debugger;
     let searchText = '';
 
     // Priority 1: Invoice No
@@ -131,8 +129,7 @@ export class Lotinspection implements OnInit {
   }
 
   // Navigation on Lot Inspection Header Form page
-  onNavigate(invoiceNo : string) {
-    debugger
+  onNavigate(invoiceNo: string) {
     //this.router.navigate(['lotinspection', invoiceNo]);
     this.router.navigate(['/lot-inspection-details', invoiceNo]);
   }

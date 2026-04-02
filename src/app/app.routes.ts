@@ -60,6 +60,7 @@ export const routes: Routes = [
       { path: 'battery-capacity-master', data: [8], component: BatteryCapacityMaster },
       { path: 'oemmodel-master', data: [11], component: OemmodelMasterComponent },
       { path: 'kit-creation', data: [], loadComponent: () => import('./components/kit-creation/kit-creation').then(m => m.KitCreation) },
+      { path: 'kit-creation/:id', data: [], loadComponent: () => import('./components/kit-creation/kit-creation-details/kit-creation-details').then(m => m.KitCreationDetails) },
       { path: 'data-seed', data: [9], loadComponent: () => import('./components/data-seed/data-seed').then(m => m.DataSeed) },
       { path: 'hsnCode-master', component: HsnCodeMaster, data: [13] },
       { path: 'taxcode-master', component: TaxCodeMasterComponent, data: [14] },
@@ -75,7 +76,7 @@ export const routes: Routes = [
       { path: 'customer-ledger/:id', data: [], loadComponent: () => import('./components/customer-ledger/customer-ledger').then(m => m.CustomerLedger) },
       { path: 'delivery-certificate', data: [], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
       { path: 'job-card', component: JobCard, data: [23] },
-      { path: 'job-card-addForm/:test', component: JobCardAddForm, data:[23]},
+      { path: 'job-card-addForm/:test', component: JobCardAddForm, data: [23] },
       { path: 'vehicle-po', component: VehiclePO, data: [17] },
       { path: 'vehicle-po/:ponumber', component: VehiclePO, data: [17] },
       { path: 'vehicle-po-list', component: VehiclePoList, data: [17] }
