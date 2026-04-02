@@ -9,18 +9,19 @@ import { environment } from '../../../environments/environment';
 export class OemmodelMasterService {
 
   // API Base URL
-  private apiUrl = `${environment.apiUrl}/OEMModelMaster`;
+  // private apiUrl = `${environment.apiUrl}/OEMModelMaster`;
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 
   // Get All OEM Models
   getAllOEMModels(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/GetAllOEMModels`);
+    return this.http.get(`${this.apiUrl}/OEMModelMaster/GetAllOEMModels`);
   }
 
   // Save / Insert OEM Model
   AddOEMModel(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/AddOEMModel`, data);
+    return this.http.post(`${this.apiUrl}/OEMModelMaster/AddOEMModel`, data);
   }
 
   // // Update OEM Model
@@ -30,19 +31,19 @@ export class OemmodelMasterService {
 
   // Delete OEM Model
   deleteOEMModel(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/DeleteOEMModel/${id}`);
+    return this.http.delete(`${this.apiUrl}/OEMModelMaster/DeleteOEMModel/${id}`);
   }
 
   // Excel Download
   downloadOEMModelExcel(): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/downloadOEMModelExcel`, {
+    return this.http.get(`${this.apiUrl}/OEMModelMaster/downloadOEMModelExcel`, {
       responseType: 'blob'
     });
   }
   updateOEMModel(data: any) {
 
     return this.http.put(
-      `${this.apiUrl}/UpdateOEMModel`,
+      `${this.apiUrl}/OEMModelMaster/UpdateOEMModel`,
       data,
       { responseType: 'text' }
     );

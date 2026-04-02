@@ -173,12 +173,12 @@
                                 [(ngModel)]="currentItem.qty" (input)="calculateRowTotals()" [readonly]="isSubmitted">
                         </div>
 
-                        <div class="col-md-1">
+                        <!-- <div class="col-md-1">
                             <button class="btn btn-sm btn-outline-success w-100">
                                 <i class="ri-battery-2-charge-line"></i>
                                 Battery
                             </button>
-                        </div>
+                        </div> -->
 
                         <div class="col-md-1">
                             <label class="form-label mb-0 small">Rate</label>
@@ -187,7 +187,7 @@
                         </div>
 
                         <div class="col-md-1">
-                            <label class="form-label mb-0 small">(-) Disc. Amt.</label>
+                            <label class="form-label mb-0 small">Subsidy</label>
                             <input type="number" class="form-control form-control-sm bg-light" name="discAmt"
                                 [(ngModel)]="currentItem.discAmt" (input)="calculateRowTotals()"
                                 [readonly]="isSubmitted">
@@ -254,12 +254,12 @@
                                         <!-- <th>(-) Subsidy</th> -->
                                         <th>Net Amount</th>
                                         <th>Cur.Stock</th>
-                                        <th>Battery Chemical</th>
+                                        <!-- <th>Battery Chemical</th>
                                         <th>Battery Capacity</th>
                                         <th>Battery Make</th>
                                         <th>System Voltage</th>
                                         <th>Battery Type</th>
-                                        <th>Trans Type</th>
+                                        <th>Trans Type</th> -->
                                     </tr>
                                 </thead>
                                 <tbody class="text-center align-middle" style="white-space: nowrap;">
@@ -288,12 +288,12 @@
                                         <!-- <td class="text-end">{{item.subsidy | number:'1.2-2'}}</td> -->
                                         <td class="text-end">{{item.amount | number:'1.2-2'}}</td>
                                         <td>0</td>
+                                        <!-- <td></td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
                                         <td></td>
-                                        <td></td>
-                                        <td>{{selectedTransactionType}}</td>
+                                        <td>{{selectedTransactionType}}</td> -->
                                     </tr>
                                 </tbody>
                             </table>

@@ -39,7 +39,18 @@ export class VehiclePoList implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.initDefaultDates();
     this.loadPOList();
+  }
+
+  initDefaultDates() {
+    const to = new Date();
+    const from = new Date();
+    from.setDate(to.getDate() - 7);
+
+    // Format as YYYY-MM-DD for input type="date"
+    this.dateTo = to.toISOString().split('T')[0];
+    this.dateFrom = from.toISOString().split('T')[0];
   }
 
   loadPOList() {
@@ -50,9 +61,7 @@ export class VehiclePoList implements OnInit {
         console.log('PO List res:', res);
         const flattened = this.flattenPOList(res);
         this.originalPurchaseOrders = flattened;
-        this.purchaseOrders = flattened;
-        this.totalRecords = this.purchaseOrders.length;
-        this.loadPage();
+        this.onSearch(); // Apply the default 7-day filter and sorting
       },
       error: (err) => {
         this.loader.hide();
@@ -140,6 +149,19 @@ export class VehiclePoList implements OnInit {
     this.purchaseOrders = filtered;
     this.page = 1;
     this.totalRecords = this.purchaseOrders.length;
+
+    // Maintain sort order after filtering
+    if (this.sortColumn) {
+      this.purchaseOrders.sort((a: any, b: any) => {
+        let valueA = a[this.sortColumn] || '';
+        let valueB = b[this.sortColumn] || '';
+
+        if (valueA < valueB) return this.sortDirection === 'asc' ? -1 : 1;
+        if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
     this.loadPage();
   }
 
@@ -154,8 +176,8 @@ export class VehiclePoList implements OnInit {
   }
 
   // ================= SORT =================
-  sortColumn = '';
-  sortDirection = 'asc';
+  sortColumn = 'rawDate';
+  sortDirection = 'desc';
 
   sort(column: string) {
     if (this.sortColumn === column) {
@@ -165,16 +187,7 @@ export class VehiclePoList implements OnInit {
       this.sortDirection = 'asc';
     }
 
-    this.purchaseOrders.sort((a: any, b: any) => {
-      let valueA = a[column] || '';
-      let valueB = b[column] || '';
-
-      if (valueA < valueB) return this.sortDirection === 'asc' ? -1 : 1;
-      if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-
-    this.loadPage();
+    this.onSearch();
   }
 
   getSortClass(column: string) {

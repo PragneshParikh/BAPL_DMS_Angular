@@ -150,36 +150,76 @@ export class VehiclePO implements OnInit {
               const modelInfo = this.modelList.find(m => m.itemcode === itemCode);
               const itmTaxes = item.Taxes || item.taxes || item.purchaseOrderTaxes || item.PurchaseOrderTaxes || [];
 
-              // Helper for safe tax extraction - matches any tax code containing the keyword (e.g., IGST18 matches IGST)
+              // Compute correctly instead of relying on flawed DB TaxableAmount
+              const qty = item.Qty ?? item.qty ?? 0;
+              const rate = item.Rate ?? item.rate ?? 0;
+              const grossAmount = qty * rate;
+              const discAmt = item.DiscAmt ?? item.discAmt ?? item.Subsidy ?? item.subsidy ?? 0;
+              const taxableAmount = Math.max(0, grossAmount - discAmt); 
+
+              // Helper for safe tax extraction and correction
               const getTax = (code: string) => {
                 const upperTarget = code.toUpperCase();
+                let finalTaxAmount = 0;
+                
                 const matches = itmTaxes.filter((t: any) => (t.TaxCode || t.taxCode || '').toUpperCase().includes(upperTarget));
-
+                
                 if (matches.length > 0) {
-                  return matches.reduce((sum: number, t: any) => sum + (Number(t.TaxAmount ?? t.taxAmount ?? t.Amount ?? t.amount) || 0), 0);
+                  finalTaxAmount = matches.reduce((sum: number, t: any) => {
+                     // 1. Explicit DB TaxRate
+                     let taxRate = Number(t.TaxRate ?? t.taxRate ?? t.Rate ?? t.rate);
+                     if (taxRate && taxRate > 0) {
+                         return sum + (taxableAmount * taxRate / 100);
+                     }
+                     // 2. Extract from code string (e.g. IGST18 -> 18)
+                     const codeStr = String(t.TaxCode || t.taxCode || '');
+                     const rateMatch = codeStr.match(/\d+(\.\d+)?/);
+                     if (rateMatch) {
+                         return sum + (taxableAmount * parseFloat(rateMatch[0]) / 100);
+                     }
+                     // 3. Fallback raw amount
+                     return sum + (Number(t.TaxAmount ?? t.taxAmount ?? t.Amount ?? t.amount) || 0);
+                  }, 0);
+                } else {
+                  // Fallback to direct properties on the item object
+                  const itemKeys = Object.keys(item);
+                  const matchingKey = itemKeys.find(k => k.toUpperCase().includes(upperTarget) && (k.toUpperCase().includes('AMT') || k.toUpperCase().includes('AMOUNT')));
+                  if (matchingKey) {
+                      finalTaxAmount = Number(item[matchingKey]) || 0;
+                  } else {
+                      finalTaxAmount = Number(item[code] ?? item[code.toLowerCase()]) || 0;
+                  }
                 }
 
-                // Fallback to direct properties on the item object
-                const itemKeys = Object.keys(item);
-                const matchingKey = itemKeys.find(k => k.toUpperCase().includes(upperTarget) && (k.toUpperCase().includes('AMT') || k.toUpperCase().includes('AMOUNT')));
-                if (matchingKey) return Number(item[matchingKey]) || 0;
+                // Guard: If backend calculated it on Gross Amount, correct it for Taxable
+                if (finalTaxAmount > 0 && grossAmount > 0) {
+                    const deducedRate = (finalTaxAmount / grossAmount) * 100;
+                    const roundedRate = Math.round(deducedRate * 10) / 10;
+                    const validGSTRates = [1.5, 2.5, 3, 5, 6, 9, 12, 14, 18, 28];
+                    
+                    if (validGSTRates.includes(roundedRate)) {
+                        return (taxableAmount * roundedRate) / 100;
+                    }
+                }
 
-                return Number(item[code] ?? item[code.toLowerCase()]) || 0;
+                return finalTaxAmount;
               };
 
               const sgstAmt = getTax('SGST');
               const cgstAmt = getTax('CGST');
               const igstAmt = getTax('IGST');
 
+              const totalAmount = taxableAmount + sgstAmt + cgstAmt + igstAmt;
+
               return {
                 modelNo: itemCode,
-                description: item.Description || item.description || item.modelDescription || item.ModelDescription || modelInfo?.itemdesc || '',
-                color: item.Color || item.color || item.colour || item.Colour || modelInfo?.colorcode || '',
-                qty: item.Qty || item.qty || 0,
-                rate: item.Rate || item.rate || 0,
-                discAmt: item.DiscAmt || item.discAmt || item.Subsidy || item.subsidy || 0,
-                amount: item.LineAmount || item.lineAmount || item.Amount || item.amount || (item.TaxableAmount + sgstAmt + cgstAmt + igstAmt) || 0,
-                taxableAmount: item.TaxableAmount ?? item.taxableAmount ?? item.LineAmount ?? item.lineAmount ?? 0,
+                description: item.Description || item.description || item.modelDescription || item.ModelDescription || modelInfo?.itemdesc || modelInfo?.Itemdesc || '',
+                color: item.Color || item.color || item.colour || item.Colour || modelInfo?.colorcode || modelInfo?.colorCode || modelInfo?.Colorcode || modelInfo?.color || modelInfo?.Color || modelInfo?.colorname || modelInfo?.ColorName || '',
+                qty: qty,
+                rate: rate,
+                discAmt: discAmt,
+                amount: totalAmount,
+                taxableAmount: taxableAmount,
                 sgstAmt: sgstAmt,
                 cgstAmt: cgstAmt,
                 igstAmt: igstAmt,
@@ -276,8 +316,8 @@ export class VehiclePO implements OnInit {
             if (!item.description || !item.color) {
               const modelInfo = this.modelList.find(m => m.itemcode === item.modelNo);
               if (modelInfo) {
-                item.description = modelInfo.itemdesc || item.description;
-                item.color = modelInfo.colorcode || item.color;
+                item.description = item.description || modelInfo.itemdesc || modelInfo.Itemdesc || modelInfo.description || '';
+                item.color = item.color || modelInfo.colorcode || modelInfo.colorCode || modelInfo.Colorcode || modelInfo.color || modelInfo.Color || modelInfo.colorName || modelInfo.ColorName || modelInfo.Colour || modelInfo.colour || '';
               }
             }
           });
@@ -450,6 +490,14 @@ export class VehiclePO implements OnInit {
       this.itemService.getPurchaseDetailsByModelNo(this.currentItem.modelNo).subscribe({
         next: (res: any) => {
           if (res) {
+            // Patch missing description or color if it wasn't populated from list
+            if (!this.currentItem.description) {
+               this.currentItem.description = res.itemdesc || res.itemDesc || res.Itemdesc || '';
+            }
+            if (!this.currentItem.color) {
+               this.currentItem.color = res.colorcode || res.colorCode || res.Colorcode || res.color || res.Color || res.colorname || res.ColorName || '';
+            }
+
             this.currentItem.rawSgstRate = res.sgst || res.sGst || res.Sgst || 0;
             this.currentItem.rawCgstRate = res.cgst || res.cGst || res.Cgst || 0;
             this.currentItem.rawIgstRate = res.igst || res.iGst || res.Igst || 0;
