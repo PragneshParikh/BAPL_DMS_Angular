@@ -1,14 +1,7 @@
-<div class="card-body">
-    <div class="page-content p-0">
-        <div class="container-fluid px-1">
             <!--PAGE Title-->
-            <div class="row">
-                <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
                         <h5 class="mb-0">Job Card List</h5>
                     </div>
-                </div>
-            </div>
             <!--End-->
             <!-- Filter Card -->
             <div class="card">
@@ -44,15 +37,9 @@
                             <label class="form-lael">Service Type</label>
                             <select class="form-select form-select-sm text-truncate" (change)="onJobType($event)">
                                 <option value="">Select Job Type</option>
-                                <option value="PDI">PDI</option>
-                                <option value="Accidental">Accidental</option>
-                                <option value="In Warranty Period">In Warranty Period</option>
-                                <option value="Post Warranty Period">Post Warranty Period </option>
-                                <option value="Routine">Routine</option>
-                                <option value="Transit">Transit</option>
-                                <option value="Against Advance Booking">Against Advance Booking</option>
-                                <option value="Refurbish">Refurbish</option>
-                                <option value="Recall">Recall</option>
+                                <option *ngFor="let job of JobType" [value]="job.value">
+                                    {{ job.name }}
+                                </option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -69,11 +56,9 @@
                             <label class="form-lael">Job Source</label>
                             <select class="form-select form-select-sm text-truncate" (change)="onJobSource($event)">
                                 <option value="">Select Job Source</option>
-                                <option value="Advance Booking">Advance Booking</option>
-                                <option value="Walk In">Walk In</option>
-                                <option value="RSA">RSA</option>
-                                <option value="Door Step Service">Door Step Service</option>
-                                <option value="Mega Camp">Mega Camp</option>
+                               <option *ngFor="let jobsource of JobSource" [value]="jobsource.value">
+                                    {{ jobsource.name }}
+                                </option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -98,8 +83,7 @@
                             <label class="form-lael">View Jobs</label>
                             <select class="form-select form-select-sm text-truncate" (change)="onViewJobs($event)">
                                 <option value="">Select View Jobs</option>
-                                <option value="PDI">PDI</option>
-                                <option value="Services">Services</option>
+                                <option value="All">All</option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -122,7 +106,7 @@
                         <!--End Excel button-->
                         <!-- Add Button-->
                         <div class="col-md-1 d-grid">
-                            <button class="btn btn-primary btn-sm ">
+                            <button class="btn btn-primary btn-sm" (click)="onNavigate()">
                                 Add
                             </button>
                         </div>
@@ -178,6 +162,4 @@
                 </div>
             </div>
             <!--End-->
-        </div>
-    </div>
-</div>
+<router-outlet></router-outlet>

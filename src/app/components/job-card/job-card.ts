@@ -5,18 +5,21 @@ import { StorageService } from '../../core/services/storage';
 import { LocationName } from '../../ViewModels/ReceiptEntryModel';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { JobType,JobSource } from '../../constant';
 import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { Router,RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-job-card',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbPaginationModule, NgbTooltipModule],
+  imports: [CommonModule, FormsModule,RouterModule,NgbPaginationModule, NgbTooltipModule],
   templateUrl: './job-card.html',
   styleUrl: './job-card.scss',
 })
 export class JobCard {
+  JobType = JobType;
+  JobSource = JobSource;
   locations: LocationName[];
-
   //dropdown changes
   selectedLocation: string = '';
   selectedJobtype: string = '';
@@ -33,7 +36,8 @@ export class JobCard {
 
 
   constructor(private receiptEntryService: ReceiptEntryService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -63,25 +67,25 @@ export class JobCard {
     const target = event.target as HTMLSelectElement;
     this.selectedJobtype = target.value;
 
-    console.log('Selected Location:', this.selectedLocation);
+    console.log('Selected Location:', this.selectedJobtype);
   }
   onJobSource(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedJobSource = target.value;
 
-    console.log('Selected Location:', this.selectedLocation);
+    console.log('Selected Location:', this.selectedJobSource);
   }
   onComplaints(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedComplaints = target.value;
 
-    console.log('Selected Location:', this.selectedLocation);
+    console.log('Selected Location:', this.selectedComplaints);
   }
   onViewJobs(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedViewJobs = target.value;
 
-    console.log('Selected Location:', this.selectedLocation);
+    console.log('Selected Location:', this.selectedViewJobs);
   }
 
   //  PAGINATION
@@ -97,5 +101,9 @@ export class JobCard {
 
     this.pagedData = this.filteredData.slice(start, end);
   }
-
+  //Navigate Job Card Add form
+  onNavigate() {
+    debugger
+    this.router.navigate(['/job-card-addForm', 'test']);
+  }
 }

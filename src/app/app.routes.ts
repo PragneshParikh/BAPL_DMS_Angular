@@ -21,6 +21,7 @@ import { AddReceiptEntry } from './components/receipt-entry/add-receipt-entry/ad
 import { JobCard } from './components/job-card/job-card';
 import { VehiclePO } from './components/vehicle-po/vehicle-po';
 import { VehiclePoList } from './components/vehicle-po-list/vehicle-po-list';
+import { JobCardAddForm } from './components/job-card/job-card-addForm/job-card-add-form/job-card-add-form';
 
 
 export const routes: Routes = [
@@ -73,7 +74,8 @@ export const routes: Routes = [
       { path: 'customer-ledger', data: [], loadComponent: () => import('./components/customer-ledger/customer-ledger-list/customer-ledger-list').then(m => m.CustomerLedgerList) },
       { path: 'customer-ledger/:id', data: [], loadComponent: () => import('./components/customer-ledger/customer-ledger').then(m => m.CustomerLedger) },
       { path: 'delivery-certificate', data: [], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
-      { path: 'job-card', component: JobCard, data: [] },
+      { path: 'job-card', component: JobCard, data: [23] },
+      { path: 'job-card-addForm/:test', component: JobCardAddForm, data:[23]},
       { path: 'vehicle-po', component: VehiclePO, data: [17] },
       { path: 'vehicle-po/:ponumber', component: VehiclePO, data: [17] },
       { path: 'vehicle-po-list', component: VehiclePoList, data: [17] }
