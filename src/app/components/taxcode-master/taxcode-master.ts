@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { TaxCodeMasterService } from '../../core/services/taxcode-master-service';
+import { LoaderService } from '../../core/services/loader';
 
 declare var bootstrap: any;
 
@@ -36,7 +37,8 @@ export class TaxCodeMasterComponent implements OnInit {
 
   constructor(
     private taxCodeService: TaxCodeMasterService,
-    private toastr: ToastService
+    private toastr: ToastService,
+    private loader: LoaderService
   ) { }
 
   ngOnInit(): void {
@@ -56,8 +58,10 @@ export class TaxCodeMasterComponent implements OnInit {
   }
 
   loadTaxCodes() {
+    this.loader.show();
     this.taxCodeService.getAllTaxCodes().subscribe({
       next: (res: any) => {
+        this.loader.hide();
         this.taxCodeList = (res || []).map((item: any) => ({
           id: item.id ?? 0,
           taxcode: item.taxcode ?? item.taxCode ?? '',
@@ -75,6 +79,7 @@ export class TaxCodeMasterComponent implements OnInit {
         this.loadPage();
       },
       error: (err) => {
+        this.loader.hide();
         console.error('Load Tax Codes Error:', err);
         this.toastr.show('Failed to load Tax Code list', {
           classname: 'bg-danger text-white',
@@ -240,10 +245,12 @@ export class TaxCodeMasterComponent implements OnInit {
       updatedDate: new Date()
     };
 
+    this.loader.show();
     if (payload.id === 0) {
 
       this.taxCodeService.addTaxCode(payload).subscribe({
         next: () => {
+          this.loader.hide();
           this.toastr.show('Tax Code added successfully', {
             classname: 'bg-success text-white',
             delay: 5000
@@ -252,6 +259,7 @@ export class TaxCodeMasterComponent implements OnInit {
           this.loadTaxCodes();
         },
         error: (err) => {
+          this.loader.hide();
           console.error(err);
           this.toastr.show('Failed to add Tax Code', {
             classname: 'bg-danger text-white',
@@ -264,6 +272,7 @@ export class TaxCodeMasterComponent implements OnInit {
 
       this.taxCodeService.updateTaxCode(payload).subscribe({
         next: () => {
+          this.loader.hide();
           this.toastr.show('Tax Code updated successfully', {
             classname: 'bg-success text-white',
             delay: 5000
@@ -272,6 +281,7 @@ export class TaxCodeMasterComponent implements OnInit {
           this.loadTaxCodes();
         },
         error: (err) => {
+          this.loader.hide();
           console.error(err);
           this.toastr.show('Failed to update Tax Code', {
             classname: 'bg-danger text-white',
@@ -289,8 +299,10 @@ export class TaxCodeMasterComponent implements OnInit {
   }
 
   downloadTaxCodeExcel() {
+    this.loader.show();
     this.taxCodeService.downloadTaxCodeExcel().subscribe({
       next: (response: Blob) => {
+        this.loader.hide();
         const blob = new Blob([response], {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
@@ -308,6 +320,7 @@ export class TaxCodeMasterComponent implements OnInit {
         });
       },
       error: (err) => {
+        this.loader.hide();
         console.error('Excel Download Error:', err);
         this.toastr.show('Excel download failed', {
           classname: 'bg-danger text-white',

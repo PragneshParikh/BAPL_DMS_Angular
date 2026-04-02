@@ -6,12 +6,13 @@ import { NgbPaginationModule, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap
 import { OemmodelMasterService } from '../../core/services/oemmodel-master-service';
 import { OemModelViewModel } from '../../ViewModels/OemModelViewModel';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { LoaderService } from '../../core/services/loader';
 declare var bootstrap: any;
 
 @Component({
   selector: 'app-oemmodel-master',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbPaginationModule,NgbTooltipModule],
+  imports: [CommonModule, FormsModule, NgbPaginationModule, NgbTooltipModule],
   templateUrl: './oemmodel-master.html',
   styleUrl: './oemmodel-master.scss'
 })
@@ -25,10 +26,10 @@ export class OemmodelMasterComponent implements OnInit {
 
   selectedModel: OemModelViewModel = new OemModelViewModel();
 
-  modelName = '';
+  searchTerm = '';
 
   page = 1;
-  pageSize = 25;
+  pageSize = 10;
 
   totalRecords = 0;
 
@@ -37,7 +38,8 @@ export class OemmodelMasterComponent implements OnInit {
   formSubmitted = false;
 
   constructor(private modelService: OemmodelMasterService,
-    public toastService: ToastService) { }
+    public toastr: ToastService,
+    private loader: LoaderService) { }
 
   ngOnInit(): void {
     this.loadModels();
@@ -45,11 +47,11 @@ export class OemmodelMasterComponent implements OnInit {
 
   // ================= GET LIST =================
   loadModels() {
-
+    this.loader.show();
     this.modelService.getAllOEMModels().subscribe({
 
       next: (res: any) => {
-
+        this.loader.hide();
         console.log("API DATA:", res);
 
         this.modelList = res;
@@ -60,6 +62,7 @@ export class OemmodelMasterComponent implements OnInit {
       },
 
       error: (err) => {
+        this.loader.hide();
         console.error("API ERROR:", err);
       }
 
@@ -70,23 +73,19 @@ export class OemmodelMasterComponent implements OnInit {
   // ================= SEARCH =================
 
   searchModel() {
-
     let filtered = this.originalModelList;
 
-    if (this.modelName) {
-
+    if (this.searchTerm?.trim()) {
+      const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(x =>
-        x.modelName?.toLowerCase().includes(this.modelName.toLowerCase())
+        (x.modelName?.toLowerCase().includes(term)) ||
+        (x.modelShortName?.toLowerCase().includes(term))
       );
-
     }
 
     this.modelList = filtered;
-
     this.page = 1;
-
     this.loadPage();
-
   }
   // ================= PAGINATION =================
   loadPage() {
@@ -176,16 +175,16 @@ export class OemmodelMasterComponent implements OnInit {
   }
 
   updateModel() {
-
+    this.loader.show();
     this.modelService.updateOEMModel(this.selectedModel)
       .subscribe({
 
         next: (res: any) => {
-
+          this.loader.hide();
           console.log("Updated Successfully");
 
           // Show success toast
-          this.toastService.show(res.message || "Model updated successfully", {
+          this.toastr.show(res.message || "Model Changes successfully Added", {
             classname: 'bg-success text-white',
             delay: 5000
           });
@@ -203,10 +202,11 @@ export class OemmodelMasterComponent implements OnInit {
         },
 
         error: (err: any) => {
+          this.loader.hide();
           console.error("Update Error:", err);
 
           // Show error toast
-          this.toastService.show(err.error?.message || "Failed to update model", {
+          this.toastr.show(err.error?.message || "Failed to update model", {
             classname: 'bg-danger text-white',
             delay: 5000
           });
@@ -234,16 +234,16 @@ export class OemmodelMasterComponent implements OnInit {
   }
 
   addModel() {
-
+    this.loader.show();
     this.modelService.AddOEMModel(this.selectedModel)
       .subscribe({
 
         next: (res: any) => {
-
+          this.loader.hide();
           console.log("Saved Successfully");
 
           // Show success toast
-          this.toastService.show(res.message || "Model added successfully", {
+          this.toastr.show(res.message || "Model added successfully", {
             classname: 'bg-success text-white',
             delay: 5000
           });
@@ -261,10 +261,11 @@ export class OemmodelMasterComponent implements OnInit {
         },
 
         error: (err: any) => {
+          this.loader.hide();
           console.log("Save Error:", err);
 
           // Show error toast
-          this.toastService.show(err.error?.message || "Failed to add model", {
+          this.toastr.show(err.error?.message || "Failed to add model", {
             classname: 'bg-danger text-white',
             delay: 5000
           });
@@ -288,11 +289,11 @@ export class OemmodelMasterComponent implements OnInit {
 
   }
   downloadOEMModelExcel() {
-
+    this.loader.show();
     this.modelService.downloadOEMModelExcel().subscribe({
 
       next: (response: Blob) => {
-
+        this.loader.hide();
         const blob = new Blob([response], {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
@@ -304,12 +305,13 @@ export class OemmodelMasterComponent implements OnInit {
         a.download = 'OEMModelMaster.xlsx';
         a.click();
 
-        window.URL.revokeObjectURL(url);
-
+        this.toastr.show('Excel downloaded successfully', { classname: 'bg-success text-white', delay: 5000 });
       },
 
       error: (err) => {
-        console.log(err);
+        this.loader.hide();
+        console.error('Excel Download Error:', err);
+        this.toastr.show('Excel download failed', { classname: 'bg-danger text-white', delay: 5000 });
       }
 
     });

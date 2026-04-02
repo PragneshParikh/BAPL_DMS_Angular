@@ -1,17 +1,28 @@
-// table>thead>tr>th {
-//     background-color: #747CA0 !important;
-//     color: #ffffff !important;
-// }
-
-.table th.sort {
-    cursor: pointer;
+table > thead > tr > th {
+  background-color: #747CA0;
+  color: #ffffff;
 }
 
-.table th.sort:hover {
+.tax-table th,
+.tax-table td {
+  white-space: nowrap;
+  vertical-align: middle;
+  padding: 8px 12px;
+}
+
+.plus {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 10px;
+}
+
+.sort {
+  position: relative;
+  padding-right: 25px !important; // create space for the indicator
+  cursor: pointer;
+}
+
+.sort:hover {
     background-color: #636b8f;
-}
-
-.oem-table>th {
-    background-color: #747CA0;
-    color: #ffffff;
 }

@@ -7,6 +7,7 @@ table > thead > tr > th {
 .tax-table td {
   white-space: nowrap;
   vertical-align: middle;
+  padding: 8px 12px;
 }
 
 .table-gridjs th.sort {
@@ -23,9 +24,16 @@ table > thead > tr > th {
 .sort-asc::after {
   content: ' ▲';
   font-size: 10px;
+  margin-left: 8px;
 }
 
 .sort-desc::after {
   content: ' ▼';
   font-size: 10px;
+  margin-left: 8px;
+}
+
+.sort {
+  position: relative;
+  padding-right: 25px !important; // create space for the indicator
 }

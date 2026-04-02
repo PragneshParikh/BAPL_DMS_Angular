@@ -28,7 +28,7 @@
 
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-gridjs table-striped tax-table">
+                    <table class="table table-hover table-bordered mb-0 table-sm tax-table">
                         <thead>
                             <tr>
                                 <th>S.No.</th>
@@ -170,12 +170,15 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
-
-                <button class="btn btn-success"
+                 <button class="btn btn-primary btn-sm"
                     (click)="formSubmitted = true; taxCodeInput.valid && taxRateInput.valid && effectiveDateInput.valid && addOrUpdateTaxCode()">
-                    {{ selectedTaxCode.id === 0 ? 'Save' : 'Update' }}
+                    {{ selectedTaxCode.id === 0 ? 'Save' : 'Save' }}
                 </button>
+                <button class="btn btn-light btn-sm" data-bs-dismiss="modal">Close</button>
+                <!-- <button class="btn btn-success"
+                    (click)="formSubmitted = true; taxCodeInput.valid && taxRateInput.valid && effectiveDateInput.valid && addOrUpdateTaxCode()">
+                    {{ selectedTaxCode.id === 0 ? 'Save' : 'Add' }}
+                </button> -->
             </div>
 
         </div>

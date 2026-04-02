@@ -44,7 +44,7 @@ export class OemmodelMasterService {
     return this.http.put(
       `${this.apiUrl}/UpdateOEMModel`,
       data,
-      { responseType: 'text' }   // ⭐ important
+      { responseType: 'text' } 
     );
 
   }

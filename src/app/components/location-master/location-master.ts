@@ -5,6 +5,8 @@ import { CommonModule } from '@angular/common';
 import * as bootstrap from 'bootstrap';
 import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import '@angular/localize/init';
+import { LoaderService } from '../../core/services/loader';
+import { ToastService } from '../../shared/toaster/toast-service';
 
 declare var bootstrap: any;
 
@@ -34,7 +36,9 @@ export class LocationMasterComponent implements OnInit {
   sortDirection = 'asc';
 
 
-  constructor(private locationService: LocationMasterService) { }
+  constructor(private locationService: LocationMasterService,
+    private loader: LoaderService,
+    public toastr: ToastService) { }
 
   ngOnInit(): void {
     this.loadLocations();
@@ -42,15 +46,19 @@ export class LocationMasterComponent implements OnInit {
   }
 
   loadLocations() {
+    this.loader.show();
     this.locationService.getAllLocationMaster().subscribe({
       next: (res: any) => {
+        this.loader.hide();
         console.log(res);
-        this.locationList = res;
-        this.originalLocationList = res;
+        const data = res?.data || res;
+        this.locationList = data;
+        this.originalLocationList = data;
         this.loadPage();// for pagination
       },
 
       error: (err) => {
+        this.loader.hide();
         console.log(err);
       }
     });
@@ -179,15 +187,24 @@ export class LocationMasterComponent implements OnInit {
 
   }
   loadDealerDropdown() {
-    this.locationService.getDealerDropdown().subscribe((res: any) => {
-      console.log("Dealer API Response:", res);
-      this.dealerList = res;
+    this.loader.show();
+    this.locationService.getDealerDropdown().subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        console.log("Dealer API Response:", res);
+        this.dealerList = res?.data || res;
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error("Dealer Dropdown Error:", err);
+      }
     });
   }
   downloadLocationExcel() {
+    this.loader.show();
     this.locationService.downloadLocationMasterExcel().subscribe({
       next: (response: Blob) => {
-
+        this.loader.hide();
         const blob = new Blob([response], {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
@@ -200,9 +217,12 @@ export class LocationMasterComponent implements OnInit {
         a.click();
 
         window.URL.revokeObjectURL(url);
+        this.toastr.show('Excel downloaded successfully', { classname: 'bg-success text-white', delay: 5000 });
       },
       error: (err) => {
+        this.loader.hide();
         console.log(err);
+        this.toastr.show('Excel download failed', { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
   }

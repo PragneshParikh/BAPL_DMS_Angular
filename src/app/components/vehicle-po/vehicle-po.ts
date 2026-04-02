@@ -8,6 +8,8 @@ import { VehiclePoService } from '../../core/services/vehicle-po-service';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TRANSACTION_TYPES } from '../../constant';
+import { LoaderService } from '../../core/services/loader';
+import { ToastService } from '../../shared/toaster/toast-service';
 
 export interface PurchaseOrderItemViewModel {
   ItemCode: string;
@@ -83,7 +85,9 @@ export class VehiclePO implements OnInit {
     private itemService: ItemMasterService,
     private vehiclePoService: VehiclePoService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private loader: LoaderService,
+    public toaster: ToastService
   ) { }
 
   ngOnInit() {
@@ -112,13 +116,16 @@ export class VehiclePO implements OnInit {
   }
 
   generateNewOrderNo() {
-    this.orderNo = 'P0-6'; // Logic for new order number
+   // this.orderNo = 'P0-7'; // Logic for new order number
+    this.orderNo = 'TEMP-' + Date.now();
   }
 
   loadPODetails(poNumber: string) {
+    this.loader.show();
     console.log('Loading details for PO:', poNumber);
     this.vehiclePoService.getPOByNumber(poNumber).subscribe({
       next: (response: any) => {
+        this.loader.hide();
         console.log('API Response for PO details:', response);
         const res = Array.isArray(response) ? response[0] : response;
 
@@ -141,7 +148,28 @@ export class VehiclePO implements OnInit {
             this.purchaseDetails = itemsArr.map((item: any) => {
               const itemCode = item.ItemCode || item.itemCode || item.modelNo || item.ModelNo;
               const modelInfo = this.modelList.find(m => m.itemcode === itemCode);
-              const itmTaxes = item.Taxes || item.taxes || [];
+              const itmTaxes = item.Taxes || item.taxes || item.purchaseOrderTaxes || item.PurchaseOrderTaxes || [];
+
+              // Helper for safe tax extraction - matches any tax code containing the keyword (e.g., IGST18 matches IGST)
+              const getTax = (code: string) => {
+                const upperTarget = code.toUpperCase();
+                const matches = itmTaxes.filter((t: any) => (t.TaxCode || t.taxCode || '').toUpperCase().includes(upperTarget));
+
+                if (matches.length > 0) {
+                  return matches.reduce((sum: number, t: any) => sum + (Number(t.TaxAmount ?? t.taxAmount ?? t.Amount ?? t.amount) || 0), 0);
+                }
+
+                // Fallback to direct properties on the item object
+                const itemKeys = Object.keys(item);
+                const matchingKey = itemKeys.find(k => k.toUpperCase().includes(upperTarget) && (k.toUpperCase().includes('AMT') || k.toUpperCase().includes('AMOUNT')));
+                if (matchingKey) return Number(item[matchingKey]) || 0;
+
+                return Number(item[code] ?? item[code.toLowerCase()]) || 0;
+              };
+
+              const sgstAmt = getTax('SGST');
+              const cgstAmt = getTax('CGST');
+              const igstAmt = getTax('IGST');
 
               return {
                 modelNo: itemCode,
@@ -150,11 +178,11 @@ export class VehiclePO implements OnInit {
                 qty: item.Qty || item.qty || 0,
                 rate: item.Rate || item.rate || 0,
                 discAmt: item.DiscAmt || item.discAmt || item.Subsidy || item.subsidy || 0,
-                amount: item.LineAmount || item.lineAmount || item.Amount || item.amount || 0,
-                taxableAmount: item.TaxableAmount || item.taxableAmount || item.LineAmount || item.lineAmount || 0,
-                sgstAmt: itmTaxes.find((t: any) => (t.TaxCode || t.taxCode) === 'SGST')?.TaxAmount ?? itmTaxes.find((t: any) => (t.TaxCode || t.taxCode) === 'SGST')?.taxAmount ?? 0,
-                cgstAmt: itmTaxes.find((t: any) => (t.TaxCode || t.taxCode) === 'CGST')?.TaxAmount ?? itmTaxes.find((t: any) => (t.TaxCode || t.taxCode) === 'CGST')?.taxAmount ?? 0,
-                igstAmt: itmTaxes.find((t: any) => (t.TaxCode || t.taxCode) === 'IGST')?.TaxAmount ?? itmTaxes.find((t: any) => (t.TaxCode || t.taxCode) === 'IGST')?.taxAmount ?? 0,
+                amount: item.LineAmount || item.lineAmount || item.Amount || item.amount || (item.TaxableAmount + sgstAmt + cgstAmt + igstAmt) || 0,
+                taxableAmount: item.TaxableAmount ?? item.taxableAmount ?? item.LineAmount ?? item.lineAmount ?? 0,
+                sgstAmt: sgstAmt,
+                cgstAmt: cgstAmt,
+                igstAmt: igstAmt,
                 subsidy: item.Subsidy || item.subsidy || 0
               };
             });
@@ -170,8 +198,9 @@ export class VehiclePO implements OnInit {
         }
       },
       error: (err) => {
+        this.loader.hide();
         console.error('Error loading PO details:', err);
-        alert('Could not load PO details. Please check the console for more info.');
+        this.toaster.show('Could not load PO details. Please check the console for more info.', { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
   }
@@ -264,8 +293,11 @@ export class VehiclePO implements OnInit {
       return;
     }
 
+    this.loader.show();
+
     this.itemService.getPurchaseDetailsByModelNo(this.currentItem.modelNo).subscribe({
       next: (res: any) => {
+        this.loader.hide();
         console.log('Model details response:', res);
         if (res) {
           this.currentItem.description = res.itemdesc || res.itemDesc || res.Itemdesc;
@@ -282,6 +314,7 @@ export class VehiclePO implements OnInit {
         }
       },
       error: (err) => {
+        this.loader.hide();
         console.error('Error fetching model details:', err);
       }
     });
@@ -289,7 +322,7 @@ export class VehiclePO implements OnInit {
 
   addPurchaseItem() {
     if (!this.currentItem.modelNo) {
-      alert('Please select a model');
+      this.toaster.show('Please select a model', { classname: 'bg-danger text-white', delay: 3000 });
       return;
     }
 
@@ -443,9 +476,11 @@ export class VehiclePO implements OnInit {
 
   onSave() {
     if (this.purchaseDetails.length === 0) {
-      alert('Please add at least one item to the purchase details.');
+      this.toaster.show('Please add at least one item to the purchase details.', { classname: 'bg-danger text-white', delay: 3000 });
       return;
     }
+
+    this.loader.show();
 
     const dealerCode = this.storageService.getDealerCode();
     const poModel = {
@@ -468,16 +503,18 @@ export class VehiclePO implements OnInit {
 
     saveObs.subscribe({
       next: (res) => {
+        this.loader.hide();
         if (res.success) {
-          alert(res.message || 'Purchase Order saved successfully.');
+          this.toaster.show(res.message || 'Purchase Order saved successfully.', { classname: 'bg-success text-white', delay: 5000 });
           this.router.navigate(['/vehicle-po-list']);
         } else {
-          alert(res.message || 'Error saving Purchase Order.');
+          this.toaster.show(res.message || 'Error saving Purchase Order.', { classname: 'bg-danger text-white', delay: 5000 });
         }
       },
       error: (err) => {
+        this.loader.hide();
         console.error('Save error:', err);
-        alert(err.error?.message || 'Error connecting to server.');
+        this.toaster.show(err.error?.message || 'Error connecting to server.', { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
   }
@@ -486,22 +523,26 @@ export class VehiclePO implements OnInit {
     const poFullNumber = this.prefixNo + this.orderNo;
 
     if (!poFullNumber) {
-      alert('Invalid PO Number. Please ensure the PO is saved correctly.');
+      this.toaster.show('Invalid PO Number. Please ensure the PO is saved correctly.', { classname: 'bg-danger text-white', delay: 5000 });
       return;
     }
+
+    this.loader.show();
 
     console.log('Submitting to ERP, PO Number:', poFullNumber);
 
     this.vehiclePoService.sendToERP(this.orderNo).subscribe({
       next: (res: any) => {
+        this.loader.hide();
         console.log('Submit to ERP response:', res);
-        alert('Submit to ERP successful!');
+        this.toaster.show('Submit to ERP successful!', { classname: 'bg-success text-white', delay: 5000 });
         this.isSubmitted = true; // Disable button after success
         this.router.navigate(['/vehicle-po-list']);
       },
       error: (err) => {
+        this.loader.hide();
         console.error('Error submitting to ERP:', err);
-        alert('An error occurred while submitting to ERP: ' + (err.error?.message || err.message));
+        this.toaster.show('An error occurred while submitting to ERP: ' + (err.error?.message || err.message), { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
   }

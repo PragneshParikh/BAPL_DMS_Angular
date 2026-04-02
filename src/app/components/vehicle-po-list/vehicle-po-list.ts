@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { VehiclePoListService } from '../../core/services/vehicle-po-list-service';
 import { TRANSACTION_TYPES } from '../../constant';
+import { LoaderService } from '../../core/services/loader';
 
 @Component({
   selector: 'app-vehicle-po-list',
@@ -33,7 +34,8 @@ export class VehiclePoList implements OnInit {
 
   constructor(
     private router: Router,
-    private poListService: VehiclePoListService
+    private poListService: VehiclePoListService,
+    private loader: LoaderService
   ) { }
 
   ngOnInit() {
@@ -41,8 +43,10 @@ export class VehiclePoList implements OnInit {
   }
 
   loadPOList() {
+    this.loader.show();
     this.poListService.getPOList().subscribe({
       next: (res: any[]) => {
+        this.loader.hide();
         console.log('PO List res:', res);
         const flattened = this.flattenPOList(res);
         this.originalPurchaseOrders = flattened;
@@ -50,7 +54,10 @@ export class VehiclePoList implements OnInit {
         this.totalRecords = this.purchaseOrders.length;
         this.loadPage();
       },
-      error: (err) => console.error('Error fetching PO list:', err)
+      error: (err) => {
+        this.loader.hide();
+        console.error('Error fetching PO list:', err);
+      }
     });
   }
 
