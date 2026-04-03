@@ -51,7 +51,7 @@
                                             <select class="form-select form-select-sm" [(ngModel)]="formData.saleType"
                                                 name="saleType" #saleType="ngModel" required
                                                 (change)="onSaleTypeChange()">
-                                                <option value="">--Select--</option>
+                                                <option value="">--Select Sale Type--</option>
                                                 <option value="Against Lead">Against Lead</option>
                                                 <option value="Receipt">Receipt</option>
                                             </select>
@@ -131,7 +131,7 @@
                                                 <select class="form-select form-select-sm"
                                                     [(ngModel)]="formData.partyName" name="partyNameInput"
                                                     #partyName="ngModel" required>
-                                                    <option value="">--Select Party--</option>
+                                                    <option value="">--Select Party Name--</option>
                                                     <option *ngFor="let p of filteredParties" [value]="p.ledgerName">
                                                         {{ p.ledgerName }}
                                                     </option>
@@ -157,19 +157,46 @@
                                     <div class="row mb-2">
                                         <div class="col-md-3">
                                             <label>Financier</label>
-                                            <select class="form-select form-select-sm" [(ngModel)]="formData.financier"
-                                                name="financier" #financier="ngModel">
-                                                <option value="">--Select--</option>
-                                                <option *ngFor="let f of financiers" [value]="f.ledgerName">
-                                                    {{ f.ledgerName }}
-                                                </option>
-                                            </select>
-                                            <!-- <div class="text-danger mt-1"
-                                                *ngIf="financier.invalid && financier.touched">
-                                                <small *ngIf="financier.errors?.['required']">
-                                                    Financier is required.
-                                                </small>
-                                            </div> -->
+                                            <div class="d-flex align-items-center">
+                                                <!-- Select -->
+                                                <select class="form-select form-select-sm scrollable-dropdown"
+                                                    [(ngModel)]="formData.financier" name="financier"
+                                                    #financier="ngModel">
+
+                                                    <option class="dropdown-list" value="">--Select Financier--</option>
+
+                                                    <option *ngFor="let f of financiers" [value]="f.ledgerName">
+
+                                                        {{ f.ledgerName }}
+
+                                                    </option>
+                                                    <option *ngFor="let f of financiers" [value]="f.ledgerName">
+
+                                                        {{ f.ledgerName }}
+
+                                                    </option>
+                                                    <option *ngFor="let f of financiers" [value]="f.ledgerName">
+
+                                                        {{ f.ledgerName }}
+
+                                                    </option>
+                                                    <option *ngFor="let f of financiers" [value]="f.ledgerName">
+
+                                                        {{ f.ledgerName }}
+
+                                                    </option>
+
+                                                </select>
+
+                                                <!-- Add Button -->
+
+                                                <button type="button" class="btn btn-sm btn-primary"
+                                                    (click)="openCustomerLedgerAdd()"
+                                                    [ngbTooltip]="'Add New Financier'">
+                                                    +
+                                                </button>
+                                            </div>
+
                                         </div>
 
                                         <div class="col-md-3">
@@ -177,19 +204,11 @@
                                             <select class="form-select form-select-sm"
                                                 [(ngModel)]="formData.salesExecutive" name="salesExecutive"
                                                 #salesExecutive="ngModel">
-                                                <option value="">--Select--</option>
+                                                <option value="">--Select Sales Executive--</option>
                                                 <option value="Alice">Alice</option>
                                                 <option value="Bob">Bob</option>
                                                 <option value="Vishal">Vishal</option>
                                             </select>
-
-                                            <!-- Validation Message -->
-                                            <!-- <div class="text-danger mt-1"
-                                                *ngIf="salesExecutive.invalid && (salesExecutive.touched || receiptForm?.submitted)">
-                                                <small *ngIf="salesExecutive.errors?.['required']">
-                                                    Sales Executive is required.
-                                                </small>
-                                            </div> -->
                                         </div>
 
                                         <div class="col-md-3">
@@ -197,7 +216,7 @@
                                             <select class="form-select form-select-sm"
                                                 (change)="onProductChange($event)" [(ngModel)]="formData.productName"
                                                 name="productName" #productName="ngModel" required>
-                                                <option value="">--Select Product--</option>
+                                                <option value="">--Select Product Name--</option>
                                                 <option *ngFor="let prod of products" [value]="prod.itemcode">
                                                     {{ prod.itemname }}
                                                 </option>
@@ -228,14 +247,15 @@
                                         <div class="col-md-3">
                                             <label>Receipt Type<span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm"
-                                                [(ngModel)]="formData.receiptType" name="receiptType" #receiptType="ngModel" required>
-                                                <option value="">--Select--</option>
+                                                [(ngModel)]="formData.receiptType" name="receiptType"
+                                                #receiptType="ngModel" required>
+                                                <option value="">--Select Receipt Type--</option>
                                                 <option value="Cash">Cash</option>
                                                 <option value="Cheque">Cheque</option>
                                                 <option value="UPI payment">UPI Payment</option>
                                                 <option value="Bank transfer">Bank Transfer</option>
                                             </select>
-                                             <div class="text-danger mt-1"
+                                            <div class="text-danger mt-1"
                                                 *ngIf="receiptType.invalid && (receiptType.touched || receiptForm?.submitted)">
                                                 <small *ngIf="receiptType.errors?.['required']">
                                                     Receipt Type is required.
@@ -287,7 +307,7 @@
 
                                             <!-- Add / Update Button -->
                                             <button type="submit" class="btn btn-primary btn-sm">
-                                               Save
+                                                Save
                                             </button>
                                             <!-- Cancel Button -->
                                             <button type="button" class="btn btn-light btn-sm" (click)="onCancel()">
@@ -381,8 +401,8 @@
             </div>
             <div class="row mt-3 text-end">
                 <div class="col-md-12">
-                    <button class="btn btn-success" (click)="approveLead(modal)">Approve</button>
-                    <button class="btn btn-secondary ms-2" (click)="modal.dismiss()">Cancel</button>
+                    <button class="btn btn-light btn-sm ms-2" (click)="modal.dismiss()">Close</button>
+                    <button class="btn btn-primary btn-sm" (click)="approveLead(modal)">Accept</button>
                 </div>
             </div>
         </div>

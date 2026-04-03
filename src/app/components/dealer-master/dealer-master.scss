@@ -11,12 +11,13 @@
 }
  .sort
     {
-        padding-right: 35px; // extra space for icons
+        padding-right: 35px;
     }
 
 .dealer-table th,
 .dealer-table td {
   white-space: nowrap;
+  width:max-content ;
 }
 
 
@@ -95,15 +96,8 @@
   overflow-y: auto;
 }
 
-// .my-4{
-//     margin-top: 0.5rem !important;
-//     margin-bottom: 0.5rem !important;
-//     color: #747CA0 !important;
-// }
 .custom-hr {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
   color: #000008 !important;
-  // border: none;
-  // border-top: 3px solid #000008;
 }

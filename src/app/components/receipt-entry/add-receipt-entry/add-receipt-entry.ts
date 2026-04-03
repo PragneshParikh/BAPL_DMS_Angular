@@ -5,14 +5,15 @@ import { LocationName, ReceiptEntryAddViewModel, ReceiptEntryEditModel } from '.
 import { StorageService } from '../../../core/services/storage';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgbHighlight, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbHighlight, NgbModal, NgbPaginationModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { FlatpickrModule } from 'angularx-flatpickr';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { LedgerMaster } from '../../../ViewModels/LedgerMasterViewModel';
 import { ItemMasterService } from '../../../core/services/item-master-service';
 import { LmsleadMaster } from '../../../ViewModels/LmsleadMaster';
-import { resolve } from 'path';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
+import { CustomerLedger } from '../../customer-ledger/customer-ledger';
 
 @Component({
   selector: 'app-add-receipt-entry',
@@ -23,7 +24,9 @@ import { ToastService } from '../../../shared/toaster/toast-service';
     NgbHighlight,
     NgbPaginationModule,
     FlatpickrModule,
-    RouterOutlet
+    RouterOutlet,
+    NgSelectModule,
+    NgbTooltip
   ],
 })
 export class AddReceiptEntry implements OnInit {
@@ -43,11 +46,11 @@ export class AddReceiptEntry implements OnInit {
     receiptDate: this.today,
     saleType: 'Receipt',
     bookingId: null,
-    partyName: null,
-    financier: null,
-    productName: null,
-    salesExecutive: null,
-    receiptType: null,
+    partyName: "",
+    financier: "",
+    productName: "",
+    salesExecutive: "",
+    receiptType: "",
     mobileNo: null,
     refNo: null,
     narration: null,
@@ -63,7 +66,7 @@ export class AddReceiptEntry implements OnInit {
   apiResponse!: ReceiptEntryEditModel;
   isEditMode: boolean = false;
   id: any;
-  
+
   model: any;
   modalRef: any;
   // customerType: string = 'b2c'; // default
@@ -93,7 +96,7 @@ export class AddReceiptEntry implements OnInit {
     //this.receiptDate = 
     this.fetchLocations();
     this.getFinanciers();
-    
+
 
     this.router.paramMap.subscribe(async params => {
       this.id = params.get('id');
@@ -200,6 +203,7 @@ export class AddReceiptEntry implements OnInit {
     console.log('Selected product:', this.selectedProduct);
   }
   getFinanciers() {
+
     this.receiptEntryService.getLedgerByType('Financier').subscribe({
       next: (res) => {
         this.financiers = res;
@@ -214,7 +218,7 @@ export class AddReceiptEntry implements OnInit {
       this.receiptEntryService.getLedgerByType('Party').subscribe({
         next: (res) => {
           this.parties = res;
-        this.onCustomerTypeChange();
+          this.onCustomerTypeChange();
 
           // ✅ Fix mapping for edit mode
           if (this.apiResponse) {
@@ -245,9 +249,9 @@ export class AddReceiptEntry implements OnInit {
     this.receiptEntryService.getLocationList(dealerCode).subscribe({
       next: (data: LocationName[]) => {
         this.locations = data;
-         if (!this.isEditMode && this.locations.length > 0) {
-        this.formData.location = this.locations[0].locname;
-      }
+        if (!this.isEditMode && this.locations.length > 0) {
+          this.formData.location = this.locations[0].locname;
+        }
         console.log('Fetched locations:', this.locations);
       },
       error: (err) => {
@@ -298,19 +302,259 @@ export class AddReceiptEntry implements OnInit {
     this.modalService.open(this.ReceiptEntryModal, { size: 'lg', backdrop: 'static' });
   }
 
- 
+
+  // searchLead() {
+  //   let mobileNo: string | null = null;
+  //   let bookingId: string | null = null;
+
+  //      if (this.searchType === 'Mobile No') {
+  //     mobileNo = this.searchText.trim();
+
+  //     if (!mobileNo) {
+  //        this.toaster.show('Please enter mobile number!', {
+  //           classname: 'bg-warning text-white',
+  //           delay: 5000
+  //         });
+  //       return;
+  //     }
+
+  //   } else if (this.searchType === 'Booking Id') {
+  //     const id = Number(this.searchText);
+
+  //     if (isNaN(id)) {
+  //       this.toaster.show('Please enter booking id!', {
+  //           classname: 'bg-warning text-white',
+  //           delay: 5000
+  //         });
+  //       return;
+  //     }
+
+  //     bookingId = id.toString(); // ✅ convert to string for API
+  //   }
+
+  //   //  Check if already exists in Receipt Entry
+  //   this.loader.show();
+  //   // this.receiptEntryService.checkLeadExist(mobileNo, bookingId).subscribe({
+  //   //   next: (exists: boolean) => {
+  //   //     if (exists) {
+  //   //       this.loader.hide();
+  //   //        this.toaster.show('Receipt already exists for this Mobile No / Booking ID!', {
+  //   //         classname: 'bg-danger text-white',
+  //   //         delay: 5000
+  //   //       });
+  //   //       return;
+  //   //     }
+
+  //   //     //call API to add 
+
+  //   //     const bookingIdNumber = bookingId ? Number(bookingId) : null;
+
+  //   //     this.receiptEntryService.getLeadByMobileOrBooking(mobileNo, bookingIdNumber).subscribe({
+  //   //       next: (res) => {
+  //   //         console.log('Lead search result:', res);
+  //   //         this.loader.hide();
+  //   //         this.leadResult = res;
+
+  //   //         if (!res) {
+  //   //           this.loader.hide();
+  //   //             this.toaster.show('No record found for the given Mobile No / Booking ID!', {
+  //   //         classname: 'bg-success text-white',
+  //   //         delay: 5000
+  //   //       });
+  //   //         }
+  //   //       },
+  //   //       error: (err) => {
+  //   //         this.loader.hide();
+  //   //          this.toaster.show('Record not found', {
+  //   //         classname: 'bg-warning text-white',
+  //   //         delay: 5000
+  //   //       });
+  //   //       }
+  //   //     });
+
+  //   //   },
+  //   //   error: (err) => {
+  //   //      this.toaster.show(err, {
+  //   //         classname: 'bg-danger text-white',
+  //   //         delay: 5000
+  //   //       });
+  //   //     console.error(err);
+  //   //   }
+  //   // });
+  // this.receiptEntryService.getLeadByMobileOrBooking(mobileNo, bookingIdNumber)
+  // .subscribe({
+  //   next: (res) => {
+  //     console.log('Lead search result:', res);
+
+  //     this.loader.hide();
+
+  //     // ✅ set lead data properly
+  //     this.leadResult = res.lead;
+
+  //     // ❌ if no lead
+  //     if (!res.lead) {
+  //       this.toaster.show('No record found for the given Mobile No / Booking ID!', {
+  //         classname: 'bg-warning text-white',
+  //         delay: 5000
+  //       });
+  //       return;
+  //     }
+
+  //     // ✅ NEW LEDGER CREATED → REDIRECT
+  //     if (res.isNew && res.ledgerId) {
+  //       this.toaster.show('Ledger created. Please complete details.', {
+  //         classname: 'bg-info text-white',
+  //         delay: 5000
+  //       });
+
+  //       this.modalService.dismissAll();
+
+  //       this.navigation.navigate(['/customer-ledger', res.ledgerId]); // 🔥 MAIN GOAL
+  //     }
+  //   },
+  //   error: () => {
+  //     this.loader.hide();
+  //     this.toaster.show('Record not found', {
+  //       classname: 'bg-danger text-white',
+  //       delay: 5000
+  //     });
+  //   }
+  // });
+
+  // }
+
+  // searchLead() {
+  //   let mobileNo: string | null = null;
+  //   let bookingId: string | null = null;
+
+  //   // ✅ Input handling
+  //   if (this.searchType === 'Mobile No') {
+  //     mobileNo = this.searchText.trim();
+
+  //     if (!mobileNo) {
+  //       this.toaster.show('Please enter mobile number!', {
+  //         classname: 'bg-warning text-white',
+  //         delay: 5000
+  //       });
+  //       return;
+  //     }
+
+  //   } else if (this.searchType === 'Booking Id') {
+  //     const id = Number(this.searchText);
+
+  //     if (isNaN(id)) {
+  //       this.toaster.show('Please enter booking id!', {
+  //         classname: 'bg-warning text-white',
+  //         delay: 5000
+  //       });
+  //       return;
+  //     }
+
+  //     bookingId = id.toString();
+  //   }
+
+  //   // ✅ Convert bookingId to number
+  //   const bookingIdNumber = bookingId ? Number(bookingId) : null;
+
+  //   this.loader.show();
+
+  //   // ✅ OPTIONAL (recommended): Check duplicate receipt
+  //   this.receiptEntryService.checkLeadExist(mobileNo, bookingId).subscribe({
+  //     next: (exists: boolean) => {
+
+  //       if (exists) {
+  //         this.loader.hide();
+
+  //         this.leadResult = null; // ❌ hide collapsible UI
+
+  //         this.toaster.show('Receipt already exists for this Mobile No / Booking ID!', {
+  //           classname: 'bg-danger text-white',
+  //           delay: 5000
+  //         });
+
+  //         return; // 🔴 STOP
+  //       }
+
+  //       // ✅ MAIN API CALL
+  //       this.receiptEntryService.getLeadByMobileOrBooking(mobileNo, bookingIdNumber)
+  //         .subscribe({
+  //           next: (res) => {
+  //             console.log('Lead search result:', res);
+
+  //             this.loader.hide();
+
+  //             // ✅ assign lead properly
+  //             this.leadResult = res?.lead || null;
+
+  //             if (!res?.lead) {
+  //               this.toaster.show('No record found for the given Mobile No / Booking ID!', {
+  //                 classname: 'bg-warning text-white',
+  //                 delay: 5000
+  //               });
+  //               return;
+  //             }
+
+  //             // ✅ REDIRECT if ledger created
+  //             if (res.isNew && res.ledgerId) {
+  //               this.toaster.show('Ledger created. Please complete details.', {
+  //                 classname: 'bg-success text-white',
+  //                 delay: 5000
+  //               });
+
+  //               this.modalService.dismissAll();
+
+  //               if (res.isNew && res.ledgerId) {
+
+  //                 this.toaster.show('Ledger created. Please complete details.', {
+  //                   classname: 'bg-success text-white',
+  //                   delay: 5000
+  //                 });
+
+  //                 this.modalService.dismissAll(); // close lead modal
+
+  //                 const modalRef = this.modalService.open(CustomerLedger, {
+  //                   size: 'lg',
+  //                   backdrop: 'static'
+  //                 });
+
+  //                 modalRef.componentInstance.ledgerId = res.ledgerId; // ✅ PASS ID
+  //               }
+  //             }
+  //           },
+  //           error: () => {
+  //             this.loader.hide();
+  //             this.toaster.show('Record not found', {
+  //               classname: 'bg-danger text-white',
+  //               delay: 5000
+  //             });
+  //           }
+  //         });
+  //     },
+
+  //     error: (err) => {
+  //       this.loader.hide();
+  //       console.error(err);
+  //       this.toaster.show('Something went wrong', {
+  //         classname: 'bg-danger text-white',
+  //         delay: 5000
+  //       });
+  //     }
+  //   });
+  // }
+
   searchLead() {
     let mobileNo: string | null = null;
     let bookingId: string | null = null;
 
-       if (this.searchType === 'Mobile No') {
+    // ✅ Input handling
+    if (this.searchType === 'Mobile No') {
       mobileNo = this.searchText.trim();
 
       if (!mobileNo) {
-         this.toaster.show('Please enter mobile number!', {
-            classname: 'bg-warning text-white',
-            delay: 5000
-          });
+        this.toaster.show('Please enter mobile number!', {
+          classname: 'bg-warning text-white',
+          delay: 5000
+        });
         return;
       }
 
@@ -319,60 +563,92 @@ export class AddReceiptEntry implements OnInit {
 
       if (isNaN(id)) {
         this.toaster.show('Please enter booking id!', {
-            classname: 'bg-warning text-white',
-            delay: 5000
-          });
+          classname: 'bg-warning text-white',
+          delay: 5000
+        });
         return;
       }
 
-      bookingId = id.toString(); // ✅ convert to string for API
+      bookingId = id.toString();
     }
 
-    //  Check if already exists in Receipt Entry
+    const bookingIdNumber = bookingId ? Number(bookingId) : null;
+
     this.loader.show();
+
+    // ✅ Check duplicate receipt
     this.receiptEntryService.checkLeadExist(mobileNo, bookingId).subscribe({
       next: (exists: boolean) => {
+        console.log(exists);
+
         if (exists) {
+          console.log(exists);
           this.loader.hide();
-           this.toaster.show('Receipt already exists for this Mobile No / Booking ID!', {
-            classname: 'bg-success text-white',
-            delay: 5000
-          });
-        }
+          this.leadResult = null;
 
-        //call API to add 
-
-        const bookingIdNumber = bookingId ? Number(bookingId) : null;
-
-        this.receiptEntryService.getLeadByMobileOrBooking(mobileNo, bookingIdNumber).subscribe({
-          next: (res) => {
-            this.loader.hide();
-            this.leadResult = res;
-
-            if (!res) {
-              this.loader.hide();
-                this.toaster.show('No record found for the given Mobile No / Booking ID!', {
-            classname: 'bg-success text-white',
-            delay: 5000
-          });
-            }
-          },
-          error: (err) => {
-            this.loader.hide();
-             this.toaster.show('Record not found', {
-            classname: 'bg-warning text-white',
-            delay: 5000
-          });
-          }
-        });
-
-      },
-      error: (err) => {
-         this.toaster.show(err, {
+          this.toaster.show('Receipt already exists for this Mobile No / Booking ID!', {
             classname: 'bg-danger text-white',
             delay: 5000
           });
+
+          return;
+        }
+
+        //  MAIN API CALL
+        this.receiptEntryService.getLeadByMobileOrBooking(mobileNo, bookingIdNumber)
+          .subscribe({
+            next: (res) => {
+              console.log('Lead search result:', res);
+
+              this.loader.hide();
+
+              this.leadResult = res?.lead || null;
+
+              if (!res?.lead) {
+                this.toaster.show('No record found for the given Mobile No / Booking ID!', {
+                  classname: 'bg-warning text-white',
+                  delay: 5000
+                });
+                return;
+              }
+
+              //OPEN CUSTOMER LEDGER IF NEW
+              if (res.isNew && res.ledgerId) {
+
+                this.toaster.show('Ledger created. Please complete details.', {
+                  classname: 'bg-success text-white',
+                  delay: 5000
+                });
+
+                this.modalService.dismissAll(); // close lead search modal
+
+                const modalRef = this.modalService.open(CustomerLedger, {
+                  size: 'lg',
+                  backdrop: 'static'
+                });
+
+                modalRef.componentInstance.ledgerId = res.ledgerId;
+              }
+            },
+            error: () => {
+              this.loader.hide();
+
+              this.toaster.show('Record not found', {
+                classname: 'bg-danger text-white',
+                delay: 5000
+              });
+            }
+          });
+      },
+
+      error: (err) => {
+        this.loader.hide();
         console.error(err);
+
+        this.toaster.show('Something went wrong', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
       }
     });
   }
@@ -380,10 +656,10 @@ export class AddReceiptEntry implements OnInit {
 
   approveLead(modal: any) {
     if (!this.leadResult) {
-  this.toaster.show('No lead selected to approve!', {
-            classname: 'bg-warning text-white',
-            delay: 5000
-          });      return;
+      this.toaster.show('No lead selected to approve!', {
+        classname: 'bg-warning text-white',
+        delay: 5000
+      }); return;
     }
     this.formData.bookingId = this.leadResult.leadid?.toString() || '';
     this.formData.partyName = this.leadResult.name || '';
@@ -397,7 +673,7 @@ export class AddReceiptEntry implements OnInit {
   }
 
   onAddClick() {
-this.loader.show();
+    this.loader.show();
     const payload: ReceiptEntryAddViewModel = {
       location: this.formData.location,
       receiptNo: this.formData.receiptNo || this.nextReceiptNo,
@@ -420,19 +696,19 @@ this.loader.show();
     this.receiptEntryService.addReceiptEntry(payload).subscribe({
       next: (res) => {
         this.loader.hide();
-         this.toaster.show('Receipt added Succesfully!', {
-            classname: 'bg-success text-white',
-            delay: 5000
-          });
+        this.toaster.show('Receipt added Succesfully!', {
+          classname: 'bg-success text-white',
+          delay: 5000
+        });
         this.resetForm();
         this.navigation.navigate(['/receipt-entry']);
       },
       error: (err) => {
         console.error('API Error:', err);
-         this.toaster.show('Failed to add receipt entry', {
-            classname: 'bg-danger text-white',
-            delay: 5000
-          });
+        this.toaster.show('Failed to add receipt entry', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
       }
     });
   }
@@ -475,7 +751,7 @@ this.loader.show();
         const control = receiptForm.controls[field];
         control.markAsTouched({ onlySelf: true });
       });
-      return; 
+      return;
     }
 
     const payload: ReceiptEntryAddViewModel = {
@@ -503,7 +779,7 @@ this.loader.show();
       // ✅ Call Update API
       this.receiptEntryService.updateReceipt(this.id, payload).subscribe({
         next: (res) => {
-           this.toaster.show('Receipt updated successfully!', {
+          this.toaster.show('Receipt updated successfully!', {
             classname: 'bg-success text-white',
             delay: 5000
           });
@@ -511,7 +787,7 @@ this.loader.show();
         },
         error: (err) => {
           console.error('Update error:', err);
-           this.toaster.show('Failed to update the receipt!', {
+          this.toaster.show('Failed to update the receipt!', {
             classname: 'bg-danger text-white',
             delay: 5000
           });
@@ -544,4 +820,41 @@ this.loader.show();
 
   }
 
+  backToList() {
+    this.navigation.navigate(['/receipt-entry']);
+  }
+
+  openCustomerLedgerAdd() {
+    const modalRef = this.modalService.open(CustomerLedger, {
+      size: 'lg',
+      backdrop: 'static'
+    });
+
+    modalRef.componentInstance.defaultLedgerType = 'Financier';
+
+    modalRef.result.then((newId) => {
+      if (newId) {
+
+        console.log(newId);
+
+        // ✅ IMPORTANT: subscribe and act AFTER data comes
+        this.receiptEntryService.getLedgerByType('Financier').subscribe({
+          next: (res) => {
+            this.financiers = res;
+
+            // ✅ Force change detection via new reference
+            this.financiers = [...this.financiers];
+
+            // ✅ OPTIONAL: auto-select newly added
+            const added = this.financiers.find(f => f.id === newId);
+            if (added) {
+              console.log('Newly added financier:', added);
+              this.formData.financier = added.ledgerName;
+              this.selectedFinancier = added.ledgerName;
+            }
+          }
+        });
+      }
+    }).catch(() => { });
+  }
 }

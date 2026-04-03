@@ -11,7 +11,8 @@
                 <div class="d-flex justify-content-end align-items-center">
 
                     <!-- Download Excel Button -->
-                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'" (click)="downloadDealerExcel()">
+                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
+                        (click)="downloadDealerExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
 
@@ -28,8 +29,8 @@
 
             <div class="card-body">
 
-                <div class="table-responsive">
-                    <table class="table  table-striped dealer-table table-sm" style="font-size: 12px;">
+                <div class="table-responsive fixed-table">
+                    <table class="table table-striped dealer-table table-sm" style="font-size: 12px;">
                         <thead>
                             <tr>
                                 <th>Sl No.</th>
@@ -48,7 +49,9 @@
                                     Person</th>
                                 <th class="sort" (click)="onSort('phoneOff')" style="cursor: pointer">Phone Office</th>
                                 <th class="sort" (click)="onSort('compgstinNo')" style="cursor: pointer">GSTIN</th>
-                                <th class="sort sort-special" (click)="onSort('b2b')" style="cursor: pointer">B2B  </th>
+                                <th class="sort" (click)="onSort('tradCert')" style="cursor: pointer">Trade Certificate
+                                </th>
+                                <th class="sort sort-special" (click)="onSort('b2b')" style="cursor: pointer">B2B </th>
                                 <th class="sort" (click)="onSort('regDate')" style="cursor: pointer">Reg Date</th>
                             </tr>
                         </thead>
@@ -79,6 +82,7 @@
                                 <td><ngb-highlight [result]="dealer.phoneOff" [term]="searchTerm"></ngb-highlight></td>
                                 <td><ngb-highlight [result]="dealer.compgstinNo" [term]="searchTerm"></ngb-highlight>
                                 </td>
+                                <td><ngb-highlight [result]="dealer.tradCert" [term]="searchTerm"></ngb-highlight></td>
                                 <td>
                                     <span class="badge" [ngClass]="dealer.b2b ? 'bg-success' : 'bg-danger'">
                                         {{ dealer.b2b ? 'Yes' : 'No' }}
@@ -162,12 +166,12 @@
 
             <div class="col-md-6">
                 <label class="form-label">Address 1</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.adress1" readonly>
+                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress1" readonly></textarea>
             </div>
 
             <div class="col-md-6">
                 <label class="form-label">Address 2</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.adress2" readonly>
+                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress2" readonly></textarea>
             </div>
 
         </div>
@@ -255,7 +259,7 @@
 
             <div class="col-md-4">
                 <label class="form-label">Trade Certificate</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.tradCert" readonly>
+                <input class="form-control form-control-sm" [(ngModel)]="selectedDealer.tradCert">
             </div>
 
             <div class="col-md-4">
@@ -315,6 +319,9 @@
     </div>
 
     <div class="modal-footer">
+        <button class="btn btn-primary btn-sm" (click)="updateTradeCertificate()">
+            Save
+        </button>
         <button class="btn btn-light btn-sm" (click)="modal.close()">Close</button>
     </div>
 

@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { ReceiptEntryAddViewModel, ReceiptEntryEditModel, ReceiptEntryModel, ReceiptFilter } from '../../ViewModels/ReceiptEntryModel';
 import { LedgerMaster } from '../../ViewModels/LedgerMasterViewModel';
 import { LmsleadMaster } from '../../ViewModels/LmsleadMaster';
+import { LeadResponse } from '../../ViewModels/LedgerResponse';
 
 @Injectable({
   providedIn: 'root',
@@ -58,12 +59,12 @@ export class ReceiptEntryService {
     );
   }
 
-  getLeadByMobileOrBooking(mobileNo: string | null, bookingId: number | null): Observable<LmsleadMaster> {
+  getLeadByMobileOrBooking(mobileNo: string | null, bookingId: number | null): Observable<LeadResponse> {
     let params = new HttpParams();
     if (mobileNo) params = params.set('mobileNo', mobileNo);
     if (bookingId !== null) params = params.set('bookingId', bookingId.toString());
 
-    return this.http.get<LmsleadMaster>(`${this.apiUrl}/LMSLeadMaster/lmsLeadbyMob`, { params });
+    return this.http.get<LeadResponse>(`${this.apiUrl}/LMSLeadMaster/lmsLeadbyMob`, { params });
   }
 
   addReceiptEntry(data: ReceiptEntryAddViewModel) {

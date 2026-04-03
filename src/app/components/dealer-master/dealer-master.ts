@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DealerService } from '../../core/services/dealer-service';
 import { FormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
@@ -33,6 +33,7 @@ export class DealerMaster implements OnInit {
   sortDirection: 'asc' | 'desc' = 'asc';
 
   searchTerm = '';
+  modalRef!: NgbModalRef;
 
   private searchSubject = new Subject<string>();
 
@@ -70,11 +71,7 @@ this.dealerService.getDealers().subscribe({
 
     this.refreshPage();
 
-    // ✅ Success toaster
-    this.toaster.show('Dealers loaded successfully!', {
-      classname: 'bg-success text-white',
-      delay: 3000
-    });
+  
 
     this.loader.hide();
   },
@@ -139,18 +136,28 @@ this.dealerService.getDealers().subscribe({
   }
 
   /* ================= MODAL ================= */
+openDealerModal(dealer: DealerMasterViewModel): void {
 
-  openDealerModal(dealer: DealerMasterViewModel): void {
+  this.selectedDealer = { ...dealer }; // ✅ clone (important)
 
-    this.selectedDealer = dealer;
+  this.modalRef = this.modalService.open(this.dealerModal, {
+    windowClass: 'dealer-modal',
+    size: 'xl',
+    scrollable: true
+  });
 
-    this.modalService.open(this.dealerModal, {
-      windowClass: 'dealer-modal',
-      size: 'xl',
-      scrollable: true
-    });
+}
+  // openDealerModal(dealer: DealerMasterViewModel): void {
 
-  }
+  //   this.selectedDealer = dealer;
+
+  //   this.modalService.open(this.dealerModal, {
+  //     windowClass: 'dealer-modal',
+  //     size: 'xl',
+  //     scrollable: true
+  //   });
+
+  // }
 
   /* ================= SELECT ================= */
 
@@ -236,5 +243,35 @@ this.dealerService.getDealers().subscribe({
     this.searchSubject.next(this.searchTerm);
 
   }
+updateTradeCertificate() {
+  this.loader.show();
+
+  this.dealerService.updateTradeCertificate(
+    this.selectedDealer.id,
+    this.selectedDealer.tradCert
+  ).subscribe({
+    next: (res: any) => {
+      this.loader.hide();
+
+      this.modalRef.close();
+
+      this.loadDealers();
+
+      this.toaster.show(
+        'Trade Certificate updated successfully',
+        { classname: 'bg-success text-light', delay: 3000 }
+      );
+    },
+    error: (err) => {
+      this.loader.hide();
+      console.error(err);
+
+      this.toaster.show(
+        'Error updating Trade Certificate',
+        { classname: 'bg-danger text-light', delay: 3000 }
+      );
+    }
+  });
+}
 
 }

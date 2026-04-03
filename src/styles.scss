@@ -90,4 +90,10 @@ table>thead>tr>th {
     color: white !important;
 }
 
+.fixed-table {
+    height: 350px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
 // #endregion

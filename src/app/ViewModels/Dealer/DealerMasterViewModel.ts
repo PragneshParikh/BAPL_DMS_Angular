@@ -1,4 +1,5 @@
 export interface DealerMasterViewModel {
+  id: number;
   compname: string;
   compcode: string;
   adress1: string;
@@ -14,6 +15,7 @@ export interface DealerMasterViewModel {
   regDate: string;
   tradCert?: string;
   compgstinNo?: string;
+  tradeCert: string;
   brandName?: string;
   compImage?: string;
   dealercode: string;

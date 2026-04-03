@@ -1,0 +1,634 @@
+<!-- Page Title -->
+
+<div class="page-title-box d-sm-flex align-items-center justify-content-between mb-3">
+
+    <h4 class="mb-0 text-primary">Vehicle Sale</h4>
+
+</div>
+
+
+
+<div class="card">
+
+    <div class="card-header d-flex justify-content-between align-items-center">
+
+        <h5 class="mb-0 text-primary">
+
+            <i class="ri-car-line me-1"></i> Add Vehicle Sale
+
+        </h5>
+
+
+
+        <div class="d-flex gap-2 me-3">
+
+            <button class="btn btn-success btn-sm">
+
+                <i class="ri-add-line"></i>
+
+            </button>
+
+
+
+            <button class="btn btn-success btn-sm">
+
+                <i class="ri-file-excel-2-line"></i>
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="card-body">
+
+
+
+        <form #vehicleSaleForm="ngForm">
+
+
+
+            <!-- ================= SALE INFO ================= -->
+
+            <!-- SALE INFO -->
+            <div class="d-flex justify-content-between align-items-center mb-1" data-bs-toggle="collapse"
+                data-bs-target="#saleInfo" aria-expanded="true" style="cursor: pointer;">
+
+                <h5 class="fs-14 text-primary mb-0">
+                    <i class="ri-information-line me-1"></i>Sale Info
+                </h5>
+
+                <i class="ri-arrow-down-s-line"></i>
+            </div>
+
+            <div class="collapse show" id="saleInfo">
+                <div class="card card-body">
+                    <div class="row g-3">
+
+                        <div class="col-md-3">
+                            <label>Sale Date</label>
+                            <input type="date" class="form-control form-control-sm" [(ngModel)]="model.saleDate"
+                                name="saleDate" readonly>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm">Sale Bill No</label>
+                            <input type="text" class="form-control form-control-sm" readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label>
+                                Location <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-select-sm" [(ngModel)]="model.location" name="location"
+                                #location="ngModel" required>
+                                <option value="">Select Location</option>
+                                <option>L1</option>
+                                <option>L2</option>
+                            </select>
+                            <div *ngIf="location.invalid && (location.touched || receiptForm.submitted)"
+                                class="text-danger mt-1">
+                                Location is required.
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm">Sale Type</label>
+                            <select class="form-select form-select-sm">
+                                <option>Select Sale Type</option>
+                            </select>
+                        </div>
+                        <!-- B2B Switch -->
+                        <div class="col-md-3">
+                            <label class="form-label d-block mb-1">Customer Type</label>
+
+                            <div class="btn-group w-auto" role="group">
+                                <input type="radio" class="btn-check" name="customerType" id="b2c" checked>
+                                <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2c">B2C</label>
+
+                                <input type="radio" class="btn-check" name="customerType" id="b2b">
+                                <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2b">B2B</label>
+                            </div>
+                        </div>
+
+                        <!-- D2D Switch -->
+                        <div class="col-md-3">
+                            <label class="form-label d-block">D2D</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="d2dSwitch">
+                                <label class="form-check-label" for="d2dSwitch">Enable</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm">Financier</label>
+                            <select class="form-select form-select-sm">
+                                <option>Select Financier</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm">Billing Type</label>
+                            <select class="form-select form-select-sm">
+                                <option>Select Billing Type</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm">Customer Name</label>
+                            <input type="text" class="form-control form-control-sm">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm">Billing Name</label>
+                            <input type="text" class="form-control form-control-sm">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm">Bill From</label>
+                            <select class="form-select form-select-sm">
+                                <option>Select Bill From</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm">Sales Executive</label>
+                            <select class="form-select form-select-sm">
+                                <option>Select Sales Executive</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm">Temporary Registration Required</label>
+                            <select class="form-select form-select-sm" id="tempRegRequired">
+                                <option value="">Select</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3 d-none" id="tempRegNoField">
+                            <label class="form-label form-label-sm">Temporary Registration No</label>
+                            <input type="text" class="form-control form-control-sm" id="tempRegNo">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm">Booking ID</label>
+                            <input type="text" class="form-control form-control-sm" readonly>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm">Print Type</label>
+                            <select class="form-select form-select-sm" id="printType">
+                                <option value="onroad">On Road</option>
+                                <option value="exshowroom">Ex Showroom</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+            <!-- ================= VEHICLE DETAILS ================= -->
+
+            <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
+                data-bs-toggle="collapse" data-bs-target="#vehicleDetails" aria-expanded="false"
+                style="cursor: pointer;">
+
+                <div class="d-flex align-items-center gap-2">
+                    <i class="ri-car-line text-primary"></i>
+                    <h6 class="mb-0 fw-semibold text-primary">Vehicle Details</h6>
+                </div>
+
+                <i class="ri-arrow-down-s-line transition-icon"></i>
+            </div>
+
+            <div id="vehicleDetails" class="collapse">
+                <div class="card card-body border-0 shadow-sm p-3">
+
+                    <!-- ROW 1 -->
+                    <div class="row g-2 align-items-end">
+
+                        <div class="col-md-3">
+                            <label class="form-label-sm mb-1">Chassis No.</label>
+                            <select class="form-select form-select-sm">
+                                <option>Chassis 1</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label-sm mb-1">Item Rate</label>
+                            <input class="form-control form-control-sm">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label-sm mb-1">Pre Gst Disc.</label>
+                            <input class="form-control form-control-sm">
+                        </div>
+
+                        <div class="col-md-1">
+                            <label class="form-label-sm mb-1">Reg Amt.</label>
+                            <input class="form-control form-control-sm">
+                        </div>
+
+                        <div class="col-md-1">
+                            <label class="form-label-sm mb-1">Ins. Amt</label>
+                            <input class="form-control form-control-sm">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label-sm mb-1">Devices</label>
+                            <button class="form-control form-control-sm text-start">
+                                Select Devices
+                            </button>
+                        </div>
+
+                        <div class="col-md-1">
+                            <label class="form-label-sm mb-1">Mfg Year</label>
+                            <input class="form-control form-control-sm">
+                        </div>
+
+                    </div>
+
+                    <!-- ROW 2 (FIXED SPACING) -->
+                    <div class="row g-2 mt-2 align-items-end">
+
+                        <!-- SWITCHES (reduced width) -->
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center gap-2">
+
+                                <div>
+                                    <small class="text-muted d-block">Kit</small>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary active px-2 py-0">Y</button>
+                                        <button class="btn btn-outline-primary px-2 py-0">N</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <small class="text-muted d-block">Delivered</small>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary active px-2 py-0">Y</button>
+                                        <button class="btn btn-outline-primary px-2 py-0">N</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <small class="text-muted d-block">Exchange</small>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary active px-2 py-0">Y</button>
+                                        <button class="btn btn-outline-primary px-2 py-0">N</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Segment (moved closer) -->
+                        <div class="col-md-2">
+                            <label class="form-label-sm mb-1">Segment</label>
+                            <select class="form-select form-select-sm">
+                                <option>Select</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label-sm mb-1">Institutional</label>
+                            <select class="form-select form-select-sm">
+                                <option>Select</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label-sm mb-1">Scheme</label>
+                            <select class="form-select form-select-sm">
+                                <option>Select Scheme</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- ROW 3 (NEW FIELDS) -->
+                    <div class="row g-2 mt-2 align-items-end">
+
+                        <!-- Narration -->
+                        <div class="col-md-9">
+                            <label class="form-label-sm mb-1">Narration</label>
+                            <input class="form-control form-control-sm">
+                        </div>
+
+                        <!-- Final Amount -->
+                        <div class="col-md-3">
+                            <label class="form-label-sm mb-1">Final Amount</label>
+                            <input class="form-control form-control-sm" readonly>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+
+
+
+            <!-- =================EXTRA CHARGES ================= -->
+            <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
+                data-bs-toggle="collapse" data-bs-target="#extraCharges" aria-expanded="false" style="cursor: pointer;">
+
+                <div class="d-flex align-items-center gap-2">
+                    <i class="ri-money-rupee-circle-line text-primary"></i>
+                    <h6 class="mb-0 fw-semibold text-primary">Extra Charges</h6>
+                </div>
+
+                <i class="ri-arrow-down-s-line transition-icon"></i>
+
+            </div>
+
+            <div id="extraCharges" class="collapse">
+
+                <!-- ROW 1 -->
+                <div class="row g-2">
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Accessory Bill No</label>
+                        <input type="text" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Accessory Amount</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.accessoryAmount">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Discount Type</label>
+                        <select class="form-select form-select-sm">
+                            <option>Select</option>
+                            <option>Percentage</option>
+                            <option>Amount</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Post Gst Disc. Amt</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                </div>
+
+                <!-- ROW 2 -->
+                <div class="row g-2 mt-1">
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">GoodLife Amnt.</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Number Plate Amnt</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Handeling Charges</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.handlingCharges">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Smart Card Amnt</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                </div>
+
+                <!-- ROW 3 -->
+                <div class="row g-2 mt-1">
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Est.Kit Amnt</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">HP Amount</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.hpAmount">
+                    </div>
+
+                    <!-- SWITCH -->
+                    <div class="col-md-3">
+                        <label class="form-label-sm d-block">Extended Warranty</label>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary active px-2 py-0">Yes</button>
+                            <button class="btn btn-outline-primary px-2 py-0">No</button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Warranty Amount</label>
+                        <input type="number" class="form-control form-control-sm" readonly>
+                    </div>
+
+                </div>
+
+                <!-- ROW 4 -->
+                <div class="row g-2 mt-1">
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">FameII Incentive Amnt</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Satate Subsidy Amnt</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= ACCESSORIES ================= -->
+
+            <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
+                data-bs-toggle="collapse" data-bs-target="#billDetails" aria-expanded="false" style="cursor: pointer;">
+
+                <div class="d-flex align-items-center gap-2">
+                    <i class="ri-file-list-3-line text-primary"></i>
+                    <h6 class="mb-0 fw-semibold text-primary">Accessories Billing</h6>
+                </div>
+
+                <i class="ri-arrow-down-s-line transition-icon"></i>
+
+            </div>
+
+            <div id="billDetails" class="collapse">
+
+                <!-- ROW 1 (Readonly Info) -->
+                <div class="row g-2">
+
+                    <div class="col-md-2">
+                        <label class="form-label-sm">Bill No</label>
+                        <input class="form-control form-control-sm" readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label-sm">Bill date</label>
+                        <input type="date" class="form-control form-control-sm" readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label-sm">Location</label>
+                        <input class="form-control form-control-sm" readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label-sm">BillType</label>
+                        <input class="form-control form-control-sm" readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label-sm">Party Name</label>
+                        <input class="form-control form-control-sm" readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label-sm">PartyState</label>
+                        <input class="form-control form-control-sm" readonly>
+                    </div>
+
+                </div>
+
+                <!-- ROW 2 (Editable Inputs) -->
+                <div class="row g-2 mt-1">
+
+                    <div class="col-md-2">
+                        <label class="form-label-sm">Item Name</label>
+                        <input class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label-sm">Description</label>
+                        <input class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label-sm">Qty</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label-sm">Rate</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label-sm">Discount</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label-sm">Discount Type</label>
+                        <select class="form-select form-select-sm">
+                            <option>Select</option>
+                            <option>Percentage</option>
+                            <option>Amount</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Device No</label>
+                        <input class="form-control form-control-sm">
+                    </div>
+
+                </div>
+
+                <!-- ROW 3 -->
+                <div class="row g-2 mt-1">
+
+                    <div class="col-md-2">
+                        <label class="form-label-sm">GST%</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Total Amt</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ================= REFERRAL ================= -->
+
+            <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
+                data-bs-toggle="collapse" data-bs-target="#referral" aria-expanded="false" style="cursor: pointer;">
+
+                <div class="d-flex align-items-center gap-2">
+                    <i class="ri-user-star-line text-primary"></i>
+                    <h6 class="mb-0 fw-semibold text-primary">Referral Details</h6>
+                </div>
+
+                <i class="ri-arrow-down-s-line transition-icon"></i>
+
+            </div>
+
+            <div id="referral" class="collapse">
+
+                <!-- ROW 1 -->
+                <div class="row g-2">
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Referral Name</label>
+                        <input class="form-control form-control-sm" [(ngModel)]="model.referralName"
+                            name="referralName">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Mobile</label>
+                        <input class="form-control form-control-sm" [(ngModel)]="model.referralMobile"
+                            name="referralMobile">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Email</label>
+                        <input type="email" class="form-control form-control-sm" [(ngModel)]="model.referralEmail"
+                            name="referralEmail">
+                    </div>
+
+                    <!-- NEW FIELD -->
+                    <div class="col-md-3">
+                        <label class="form-label-sm">Referral Point</label>
+                        <input class="form-control form-control-sm" [(ngModel)]="model.referralPoint"
+                            name="referralPoint">
+                    </div>
+
+                </div>
+
+                <!-- ROW 2 -->
+                <div class="row g-2 mt-1">
+
+                    <div class="col-md-12">
+                        <label class="form-label-sm">Referral Remarks</label>
+                        <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="model.referralRemarks"
+                            name="referralRemarks"></textarea>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+        </form>
+
+
+
+    </div>
+
+</div>

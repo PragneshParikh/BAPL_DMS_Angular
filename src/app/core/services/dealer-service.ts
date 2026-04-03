@@ -33,4 +33,14 @@ export class DealerService {
     { responseType: 'blob' }
   );
 }
+
+updateTradeCertificate(dealerId: number, tradeCertificate: string) {
+  return this.http.put(
+    `${this.apiUrl}/DealerMaster/updateTradeCertificate?dealerId=${dealerId}`,
+    JSON.stringify(tradeCertificate),
+    {
+      headers: { 'Content-Type': 'application/json' }
+    }
+  );
+}
 }

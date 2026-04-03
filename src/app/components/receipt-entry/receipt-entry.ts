@@ -291,4 +291,8 @@ downloadReceiptExcel(): void {
   this.updatePagination();
 }
 
+navigateToVehicleSaleBill() {
+  this.router.navigate(['//receipt-entry/test']);
+}
+
 }
