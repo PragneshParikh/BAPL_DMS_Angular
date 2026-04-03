@@ -60,7 +60,9 @@
                                         <td>{{ i + 1 }}</td>
                                         <td>{{ kit.kitName }}</td>
                                         <td>{{ kit.kitDate }}</td>
-                                        <td>{{ kit.status }}</td>
+                                        <span class="badge" [ngClass]="kit.status ? 'bg-success' : 'bg-danger'">
+                                            {{ kit.status ? 'Active' : 'Inactive' }}
+                                        </span>
                                     </tr>
 
                                     <!-- No Data -->

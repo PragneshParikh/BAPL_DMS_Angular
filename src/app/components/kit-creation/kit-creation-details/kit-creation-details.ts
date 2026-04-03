@@ -84,7 +84,7 @@ export class KitCreationDetails implements OnInit {
         console.error(err);
         this.loader.hide();
         this.toaster.show('Something went wrong', {
-          class: 'bg-danger text-white',
+          classname: 'bg-danger text-white',
           delay: 5000
         })
       }
@@ -270,19 +270,20 @@ export class KitCreationDetails implements OnInit {
         this.kitDetails = this.kitDetails.map(item => ({ ...item, isDirty: false }));
         this.loader.hide();
         this.showToast(`Kit details ${action} successfully!`);
+        this.backToList();
       },
       error: (err) => this.handleError(err)
     });
   }
 
   private showToast(message: string) {
-    this.toaster.show(message, { class: 'bg-success text-white', delay: 5000 });
+    this.toaster.show(message, { classname: 'bg-success text-white', delay: 5000 });
   }
 
   private handleError(err: any) {
     console.error(err);
     this.loader.hide();
-    this.toaster.show('Something went wrong', { class: 'bg-danger text-white', delay: 5000 });
+    this.toaster.show('Something went wrong', { classname: 'bg-danger text-white', delay: 5000 });
   }
 
 }
