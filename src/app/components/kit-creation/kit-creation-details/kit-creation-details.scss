@@ -1,7 +1,18 @@
-.no-arrow {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background: none;
-  border: 1px solid #ced4da;
+
+#kit-creation-details {
+  
+    .no-arrow {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background: none;
+      border: 1px solid #ced4da;
+    }
+    .table .sort::before {
+        top: 6px;
+    }
+
+    .table .sort::after {
+        top: 0px;
+    }
 }

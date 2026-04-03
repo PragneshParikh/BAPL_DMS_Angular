@@ -59,10 +59,12 @@
                                         (click)="onKitClick(kit)">
                                         <td>{{ i + 1 }}</td>
                                         <td>{{ kit.kitName }}</td>
-                                        <td>{{ kit.kitDate }}</td>
-                                        <span class="badge" [ngClass]="kit.status ? 'bg-success' : 'bg-danger'">
-                                            {{ kit.status ? 'Active' : 'Inactive' }}
-                                        </span>
+                                        <td>{{ kit.kitDate | date: 'dd-MM-yyyy' }}</td>
+                                        <td>
+                                            <span class="badge" [ngClass]="kit.status ? 'bg-success' : 'bg-danger'">
+                                                {{ kit.status ? 'Active' : 'Inactive' }}
+                                            </span>
+                                        </td>
                                     </tr>
 
                                     <!-- No Data -->
