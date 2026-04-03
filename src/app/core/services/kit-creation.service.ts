@@ -10,10 +10,26 @@ export class KitCreationService {
 
   private baseURL = environment.apiUrl;
 
-  constructor(private httpclient: HttpClient) { }
+  constructor(private httpClient: HttpClient) { }
 
   getKits(): Observable<any> {
-    return this.httpclient.get(`${this.baseURL}/kit`);
+    return this.httpClient.get(`${this.baseURL}/kit-header`);
+  }
+
+  getKitByPaged(searchTerm: string = null, pageIndex: number, pageSize: number): Observable<any> {
+    return this.httpClient.get(`${this.baseURL}/kit-header/paged?searchTerm=${searchTerm}&pageIndex=${pageIndex}&pageSize=${pageSize}`);
+  }
+
+  getKitById(id: number): Observable<any> {
+    return this.httpClient.get(`${this.baseURL}/kit-header/${id}`);
+  }
+
+  save(data: any): Observable<any> {
+    return this.httpClient.post(`${this.baseURL}/kit-header`, data);
+  }
+
+  update(data: any): Observable<any> {
+    return this.httpClient.put(`${this.baseURL}/kit-header`, data);
   }
 
 }

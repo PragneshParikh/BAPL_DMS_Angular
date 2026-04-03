@@ -4,61 +4,63 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { KitCreationService } from '../../core/services/kit-creation.service';
+import { privateDecrypt } from 'crypto';
+import { LoaderService } from '../../core/services/loader';
+import { ToastService } from '../../shared/toaster/toast-service';
+import { Router, RouterOutlet } from "@angular/router";
 
 @Component({
   selector: 'app-kit-creation',
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, SharedModule, NgbModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, SharedModule, NgbModule, RouterOutlet],
   templateUrl: './kit-creation.html',
   styleUrl: './kit-creation.scss',
 })
 export class KitCreation implements OnInit {
 
-  searchTerm: string = '';
-  dataSource: any[] = [];
-  rowData: any = {};
+  public searchTerm: string = '';
   kitData: any[] = [];
 
   page = 1;
   pageSize = 10;
+  collectionSize = 0;
 
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
-  constructor(private kitCreationService: KitCreationService,
-    private modalService: NgbModal) {
-
-  }
+  constructor(
+    private kitCreationService: KitCreationService,
+    private loader: LoaderService,
+    private toaster: ToastService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
-    this.kitData = [];
-    this.loadKitData();
+    this.getKitCreationData();
   }
 
-  loadKitData() {
+  getKitCreationData() {
 
-    this.kitCreationService.getKits().subscribe({
-
+    this.loader.show();
+    this.kitCreationService.getKitByPaged(this.searchTerm, this.page - 1, this.pageSize).subscribe({
       next: (res: any) => {
-        const data = res.data || [];
-        this.kitData = data.map((kit: any, index: number) => ({
-          ...kit,
-          slNo: index + 1
-        }));
-        this.dataSource = [...this.kitData];
+        this.kitData = [];
+        this.collectionSize = 0;
 
-        this.refreshPage();
+        if (res) {
+          this.kitData = res.data;
+          this.collectionSize = res.totalRecords;
+
+        }
+        this.loader.hide();
       }, error: (err) => {
+        this.loader.hide();
         console.error(err);
+        this.toaster.show('Something went wrong', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
       }
     });
-  }
-
-  refreshPage() {
-
-    const start = (this.page - 1) * this.pageSize;
-    const end = start + this.pageSize;
-
-    this.kitData = this.dataSource.slice(start, end);
   }
 
   //#region Sorting
@@ -71,7 +73,7 @@ export class KitCreation implements OnInit {
       this.sortDirection = 'asc';
     }
 
-    this.dataSource.sort((a, b) => {
+    this.kitData.sort((a, b) => {
 
       let valueA = a[column];
       let valueB = b[column];
@@ -89,9 +91,24 @@ export class KitCreation implements OnInit {
 
     });
 
-    this.refreshPage();
-
   }
   //#endregion
+
+  onPageChange(page: number) {
+    this.page = page;
+    this.getKitCreationData();
+  }
+
+  newKit() {
+    this.router.navigate(['/kit-creation', 0]);
+  }
+  onSearchChange() {
+
+  }
+  onKitClick(rowData: any) {
+    if (rowData) {
+      this.router.navigate(['/kit-creation', rowData.id]);
+    }
+  }
 
 }

@@ -1,0 +1,136 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">Service KIT</h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+
+                <form #kitHeaderForm="ngForm">
+                    <!-- Top Row -->
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <label> Select Finished Good <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" name="finishedGoodsName"
+                                #finishedGoodsName="ngModel" [(ngModel)]="kitHeaderData.kitName" required>
+                            @if (finishedGoodsName.invalid && finishedGoodsName.touched) {
+                            <small class="text-danger">
+                                Finished Good is required
+                            </small>
+                            }
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-check form-switch d-inline-block">
+                                <input type="checkbox" class="form-check-input" name="status" #status="ngModel"
+                                    [(ngModel)]="kitHeaderData.status">
+                                <label class="form-check-label small" for="status">{{ kitHeaderData.status === true ?
+                                    'Active' :'InActive' }}</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <form #kitCreationForm="ngForm" (ngSubmit)="onSubmit(kitCreationForm)">
+                    <!-- Second Row -->
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <label> Select Item <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" name="itemCode" [(ngModel)]="kitItemData.itemId"
+                                required (change)="onItemChange($event)">
+                                <option *ngFor="let item of itemList" value="{{item.id}}">{{ item.itemname}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label> Item Description</label>
+                            <select class="form-select form-select-sm no-arrow" name="itemDesc"
+                                [(ngModel)]="kitItemData.itemId" required (change)="onItemChange($event)"
+                                [disabled]="true">
+                                <option *ngFor="let item of itemList" value="{{item.id}}">{{ item.itemdesc }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label> Quantity <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" name="quantity" #quantity="ngModel"
+                                [(ngModel)]="kitItemData.quantity" required>
+                            @if (quantity.invalid && quantity.touched) {
+                            <small class="text-danger">
+                                Quantity is required
+                            </small>
+                            }
+                        </div>
+
+                        <div class="col-md-2">
+                            <label> &nbsp; </label><br>
+                            <button type="submit" [disabled]="kitCreationForm.invalid"
+                                class="btn btn-primary btn-sm float-end me-1">
+                                Add Item
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover table-bordered mb-0 table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="sort" (click)="onSort('')">
+                                    Sr.No.</th>
+                                <th class="sort" (click)="onSort('')">
+                                    Item Name</th>
+                                <th class="sort" (click)="onSort('')">
+                                    Qty</th>
+                                <th class="sort" (click)="onSort('')">Descritpion
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngFor="let kit of kitDetails; let i = index" class="table-row"
+                                (click)="onItemClick(kit, i)">
+                                <td>{{ i + 1 }}</td>
+                                <td>{{ kit?.itemName }}</td>
+                                <td>{{ kit?.quantity }}</td>
+                                <td>{{ kit?.itemDescription }}</td>
+                            </tr>
+
+                            <!-- No Data -->
+                            <tr *ngIf="!kitDetails || kitDetails.length === 0">
+                                <td colspan="4" class="text-center text-muted py-3">
+                                    No Data Available
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <!-- PAGINATION -->
+                <div class="col-sm-12 col-md-12 mt-2">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+                        <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="onPageChange($event)" [maxSize]="5" [boundaryLinks]="true">
+                        </ngb-pagination>
+                    </div>
+                </div>
+
+                <!-- Button -->
+                <div class="row col-sm-12 col-md-12 pt-2">
+                    <div class="col-md-12">
+                        <button type="button" class="btn btn-primary btn-sm float-end" (click)="backToList()">
+                            Cancel
+                        </button>
+                        <button type="button" [disabled]="kitHeaderForm.invalid"
+                            class="btn btn-primary btn-sm float-end me-1" (click)="saveKit(kitHeaderForm)">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!-- end card -->
+</div>

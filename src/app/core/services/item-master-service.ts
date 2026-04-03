@@ -39,4 +39,8 @@ export class ItemMasterService {
     });
   }
 
+  getItemsByItemType(itemtype: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/ItemMaster/GetByItemType/${itemtype}`);
+  }
+
 }

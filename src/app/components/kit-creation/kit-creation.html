@@ -1,45 +1,91 @@
-<!-- Header -->
-<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-    <h4 class="mb-sm-0">KIT Creation</h4>
-    <div class="position-relative">
-        <input type="text" placeholder="Search..." autocomplete="on" class="form-control" [(ngModel)]="searchTerm">
-    </div>
-</div>
-<!-- KIT Table -->
+<div id="kit-creation-list">
+    <!-- Start Breadcrumbs -->
+    <app-breadcrumbs title="KIT Creation"></app-breadcrumbs>
+    <!-- End Breadcrumbs -->
 
+    <div class="card-body">
+        <div class="page-content p-0">
+            <div class="container-fluid px-1">
 
+                <!-- Table Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
 
-<div class="table-responsive">
-    <table class="table table-gridjs table-striped dealer-table">
-        <thead>
-            <tr>
-                <th class="sort" (click)="onSort('compname')" style="cursor: pointer">Sr. No.</th>
-                <th class="sort" (click)="onSort('dealercode')" style="cursor: pointer">Product Name</th>
-                <th class="sort" (click)="onSort('city')" style="cursor: pointer">Date Added</th>
-                <th class="sort" (click)="onSort('state')" style="cursor: pointer">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (kit of kitData; track $index) {
-            <tr style="cursor: pointer">
-                <td><ngb-highlight [result]="kit.srno" [term]="searchTerm"></ngb-highlight></td>
-                <td><ngb-highlight [result]="kit.productName" [term]="searchTerm"></ngb-highlight></td>
-                <td><ngb-highlight [result]="kit.DateAdded" [term]="searchTerm"></ngb-highlight></td>
-                <td><ngb-highlight [result]="kit.Status" [term]="searchTerm"></ngb-highlight></td>
-            </tr>
-            }
-        </tbody>
-    </table>
-</div>
+                            <div class="text-muted">
+                                Total Record(s): {{ collectionSize }}
+                            </div>
 
+                            <div class="d-flex align-items-center gap-2">
 
-<!-- Pagination -->
-<div class="row mt-3">
-    <div class="col-sm-12 col-md-20">
-        <div class="text-md-right float-md-end gridjs-pagination">
-            <ngb-pagination [collectionSize]="kitData.length" [(page)]="page" [pageSize]="pageSize"
-                (pageChange)="refreshPage()" [boundaryLinks]="true">
-            </ngb-pagination>
+                                <button class="btn btn-sm btn-primary" (click)="newKit()">
+                                    Add
+                                </button>
+
+                                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'">
+                                    <i class="ri-file-excel-2-line"></i>
+                                </button>
+
+                                <div class="search-box position-relative">
+                                    <input type="text" class="form-control" placeholder="Search..."
+                                        [(ngModel)]="searchTerm" (keyup)="onSearchChange()">
+                                    <i class="ri-search-line search-icon"></i>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover table-bordered mb-0 table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="sort" (click)="onSort('')">
+                                            Sr. No.</th>
+                                        <th class="sort" (click)="onSort('')">
+                                            Product Name</th>
+                                        <th class="sort" (click)="onSort('')">
+                                            Date Added</th>
+                                        <th class="sort" (click)="onSort('')">Status
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr *ngFor="let kit of kitData; let i = index" class="table-row"
+                                        (click)="onKitClick(kit)">
+                                        <td>{{ i + 1 }}</td>
+                                        <td>{{ kit.kitName }}</td>
+                                        <td>{{ kit.kitDate }}</td>
+                                        <td>{{ kit.status }}</td>
+                                    </tr>
+
+                                    <!-- No Data -->
+                                    <tr *ngIf="!kitData || kitData.length === 0">
+                                        <td colspan="4" class="text-center text-muted py-3">
+                                            No Data Available
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <!-- PAGINATION -->
+                        <div class="col-sm-12 col-md-12 mt-2">
+                            <div class="text-md-right float-md-end gridjs-pagination">
+                                <ngb-pagination [collectionSize]="kitData.length" [(page)]="page" [pageSize]="pageSize"
+                                    (pageChange)="onPageChange($event)" [boundaryLinks]="true" [maxSize]="10">
+                                </ngb-pagination>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
+<router-outlet></router-outlet>
