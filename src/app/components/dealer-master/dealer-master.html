@@ -1,328 +1,328 @@
-<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-    <h4 class="mb-sm-0">Dealer Master</h4>
-</div>
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+        <h4 class="mb-sm-0">Dealer Master</h4>
+    </div>
 
-<div class="row " id="dealerMaster">
-    <div class="col-lg-12">
-        <div class="card">
+    <div class="row " id="dealerMaster">
+        <div class="col-lg-12">
+            <div class="card">
 
-            <div class="card-header">
+                <div class="card-header">
 
-                <div class="d-flex justify-content-end align-items-center">
+                    <div class="d-flex justify-content-end align-items-center">
 
-                    <!-- Download Excel Button -->
-                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
-                        (click)="downloadDealerExcel()">
-                        <i class="ri-file-excel-2-line"></i>
-                    </button>
+                        <!-- Download Excel Button -->
+                        <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
+                            (click)="downloadDealerExcel()">
+                            <i class="ri-file-excel-2-line"></i>
+                        </button>
 
-                    <!-- Search Box -->
-                    <div class="search-box">
-                        <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm"
-                            (input)="onSearchChange()" (keyup.enter)="onSearchChange()" />
-                        <i class="ri-search-line search-icon"></i>
+                        <!-- Search Box -->
+                        <div class="search-box">
+                            <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm"
+                                (input)="onSearchChange()" (keyup.enter)="onSearchChange()" />
+                            <i class="ri-search-line search-icon"></i>
+                        </div>
+
                     </div>
 
                 </div>
 
-            </div>
+                <div class="card-body">
 
-            <div class="card-body">
+                    <div class="table-responsive fixed-table">
+                        <table class="table table-striped dealer-table table-sm" style="font-size: 12px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">Sl No.</th>
+                                    <th class="sort col-compname" (click)="onSort('compname')" style="cursor: pointer">Company Name</th>
+                                    <th class="sort col-code" (click)="onSort('dealercode')" style="cursor: pointer">Dealer Code</th>
+                                    <th class="sort col-city" (click)="onSort('city')" style="cursor: pointer">City</th>
+                                    <th class="sort col-state" (click)="onSort('state')" style="cursor: pointer">State</th>
+                                    <th class="sort col-mobile" (click)="onSort('mobile')" style="cursor: pointer">Mobile</th>
+                                    <th class="sort col-email" (click)="onSort('email')" style="cursor: pointer">Email</th>
+                                    <th class="sort col-compcode" (click)="onSort('compcode')" style="cursor: pointer">Company Code</th>
+                                    <th class="sort col-adress1" (click)="onSort('adress1')" style="cursor: pointer">Address 1</th>
+                                    <th class="sort col-adress2" (click)="onSort('adress2')" style="cursor: pointer">Address 2</th>
+                                    <th class="sort col-pin" (click)="onSort('pin')" style="cursor: pointer">Pin</th>
+                                    <th class="sort col-pan" (click)="onSort('pan')" style="cursor: pointer">PAN</th>
+                                    <th class="sort col-contactperson" (click)="onSort('contactperson')" style="cursor: pointer">Contact
+                                        Person</th>
+                                    <th class="sort col-phoneOff" (click)="onSort('phoneOff')" style="cursor: pointer">Phone Office</th>
+                                    <th class="sort col-compgstinNo" (click)="onSort('compgstinNo')" style="cursor: pointer">GSTIN</th>
+                                    <th class="sort col-tradCert" (click)="onSort('tradCert')" style="cursor: pointer">Trade Certificate
+                                    </th>
+                                    <th style="width: 80px;" class="sort sort-special " (click)="onSort('b2b')" style="cursor: pointer">B2B </th>
+                                    <th class="sort col-regDate" (click)="onSort('regDate')" style="cursor: pointer">Reg Date</th>
+                                </tr>
+                            </thead>
 
-                <div class="table-responsive fixed-table">
-                    <table class="table table-striped dealer-table table-sm" style="font-size: 12px;">
-                        <thead>
-                            <tr>
-                                <th>Sl No.</th>
-                                <th class="sort" (click)="onSort('compname')" style="cursor: pointer">Company Name</th>
-                                <th class="sort" (click)="onSort('dealercode')" style="cursor: pointer">Dealer Code</th>
-                                <th class="sort" (click)="onSort('city')" style="cursor: pointer">City</th>
-                                <th class="sort" (click)="onSort('state')" style="cursor: pointer">State</th>
-                                <th class="sort" (click)="onSort('mobile')" style="cursor: pointer">Mobile</th>
-                                <th class="sort" (click)="onSort('email')" style="cursor: pointer">Email</th>
-                                <th class="sort" (click)="onSort('compcode')" style="cursor: pointer">Company Code</th>
-                                <th class="sort" (click)="onSort('adress1')" style="cursor: pointer">Address 1</th>
-                                <th class="sort" (click)="onSort('adress2')" style="cursor: pointer">Address 2</th>
-                                <th class="sort" (click)="onSort('pin')" style="cursor: pointer">Pin</th>
-                                <th class="sort" (click)="onSort('pan')" style="cursor: pointer">PAN</th>
-                                <th class="sort" (click)="onSort('contactperson')" style="cursor: pointer">Contact
-                                    Person</th>
-                                <th class="sort" (click)="onSort('phoneOff')" style="cursor: pointer">Phone Office</th>
-                                <th class="sort" (click)="onSort('compgstinNo')" style="cursor: pointer">GSTIN</th>
-                                <th class="sort" (click)="onSort('tradCert')" style="cursor: pointer">Trade Certificate
-                                </th>
-                                <th class="sort sort-special" (click)="onSort('b2b')" style="cursor: pointer">B2B </th>
-                                <th class="sort" (click)="onSort('regDate')" style="cursor: pointer">Reg Date</th>
-                            </tr>
-                        </thead>
+                            <tbody>
+                                @if (paginatedDealerList.length === 0) {
+                                <tr>
+                                    <td colspan="17" class="text-center">No data available</td>
+                                </tr>
+                                }
+                                @for (dealer of paginatedDealerList; track $index) {
+                                <tr (click)="openDealerModal(dealer)" style="cursor: pointer">
+                                    <td>{{ (page - 1) * pageSize + $index + 1 }}</td>
+                                    <td><ngb-highlight [result]="dealer.compname" [term]="searchTerm"></ngb-highlight></td>
+                                    <td><ngb-highlight [result]="dealer.dealercode" [term]="searchTerm"></ngb-highlight>
+                                    </td>
+                                    <td><ngb-highlight [result]="dealer.city" [term]="searchTerm"></ngb-highlight></td>
+                                    <td><ngb-highlight [result]="dealer.state" [term]="searchTerm"></ngb-highlight></td>
+                                    <td><ngb-highlight [result]="dealer.mobile" [term]="searchTerm"></ngb-highlight></td>
+                                    <td><ngb-highlight [result]="dealer.email" [term]="searchTerm"></ngb-highlight></td>
+                                    <td><ngb-highlight [result]="dealer.compcode" [term]="searchTerm"></ngb-highlight></td>
+                                    <td><ngb-highlight [result]="dealer.adress1" [term]="searchTerm"></ngb-highlight></td>
+                                    <td><ngb-highlight [result]="dealer.adress2" [term]="searchTerm"></ngb-highlight></td>
+                                    <td><ngb-highlight [result]="dealer.pin" [term]="searchTerm"></ngb-highlight></td>
+                                    <td><ngb-highlight [result]="dealer.pan" [term]="searchTerm"></ngb-highlight></td>
+                                    <td><ngb-highlight [result]="dealer.contactperson" [term]="searchTerm"></ngb-highlight>
+                                    </td>
+                                    <td><ngb-highlight [result]="dealer.phoneOff" [term]="searchTerm"></ngb-highlight></td>
+                                    <td><ngb-highlight [result]="dealer.compgstinNo" [term]="searchTerm"></ngb-highlight>
+                                    </td>
+                                    <td><ngb-highlight [result]="dealer.tradCert" [term]="searchTerm"></ngb-highlight></td>
+                                    <td>
+                                        <span class="badge" [ngClass]="dealer.b2b ? 'bg-success' : 'bg-danger'">
+                                            {{ dealer.b2b ? 'Yes' : 'No' }}
+                                        </span>
+                                    </td>
+                                    <td><ngb-highlight [result]="dealer.regDate" [term]="searchTerm"></ngb-highlight></td>
+                                </tr>
 
-                        <tbody>
-                            @if (paginatedDealerList.length === 0) {
-                            <tr>
-                                <td colspan="17" class="text-center">No data available</td>
-                            </tr>
-                            }
-                            @for (dealer of paginatedDealerList; track $index) {
-                            <tr (click)="openDealerModal(dealer)" style="cursor: pointer">
-                                <td>{{ (page - 1) * pageSize + $index + 1 }}</td>
-                                <td><ngb-highlight [result]="dealer.compname" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.dealercode" [term]="searchTerm"></ngb-highlight>
-                                </td>
-                                <td><ngb-highlight [result]="dealer.city" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.state" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.mobile" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.email" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.compcode" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.adress1" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.adress2" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.pin" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.pan" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.contactperson" [term]="searchTerm"></ngb-highlight>
-                                </td>
-                                <td><ngb-highlight [result]="dealer.phoneOff" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.compgstinNo" [term]="searchTerm"></ngb-highlight>
-                                </td>
-                                <td><ngb-highlight [result]="dealer.tradCert" [term]="searchTerm"></ngb-highlight></td>
-                                <td>
-                                    <span class="badge" [ngClass]="dealer.b2b ? 'bg-success' : 'bg-danger'">
-                                        {{ dealer.b2b ? 'Yes' : 'No' }}
-                                    </span>
-                                </td>
-                                <td><ngb-highlight [result]="dealer.regDate" [term]="searchTerm"></ngb-highlight></td>
-                            </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
 
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                    <!-- Pagination -->
 
-                <!-- Pagination -->
+                    <div class="row mt-3">
+                        <div class="col-sm-12 col-md-20">
+                            <div class="text-md-right float-md-end gridjs-pagination">
 
-                <div class="row mt-3">
-                    <div class="col-sm-12 col-md-20">
-                        <div class="text-md-right float-md-end gridjs-pagination">
+                                <ngb-pagination [collectionSize]="dealerList.length" [(page)]="page" [pageSize]="pageSize"
+                                    (pageChange)="refreshPage()" [boundaryLinks]="true">
 
-                            <ngb-pagination [collectionSize]="dealerList.length" [(page)]="page" [pageSize]="pageSize"
-                                (pageChange)="refreshPage()" [boundaryLinks]="true">
+                                </ngb-pagination>
 
-                            </ngb-pagination>
-
+                            </div>
                         </div>
                     </div>
+
+                </div> <!-- card-body -->
+
+            </div> <!-- card -->
+        </div> <!-- col-lg-12 -->
+    </div> <!-- row -->
+
+    <!-- Dealer Modal -->
+
+    <ng-template #dealerModal let-modal>
+
+        <div class="modal-header dealer-modal-header">
+            <h5 class="modal-title">
+                <i class="ri-building-line me-1"></i>
+                Dealer Details
+            </h5>
+
+            <button class="btn-close btn-close-white btn-sm" (click)="modal.dismiss()">
+            </button>
+
+        </div>
+
+        <div class="modal-body">
+
+            <!-- Dealer Info -->
+
+            <h5 class="mb-2 text-primary">Dealer Info</h5>
+
+            <div class="row">
+
+                <div class="col-md-3">
+                    <label class="form-label">Company Name</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.compname" readonly>
                 </div>
 
-            </div> <!-- card-body -->
+                <div class="col-md-3">
+                    <label class="form-label">Company Code</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.compcode" readonly>
+                </div>
 
-        </div> <!-- card -->
-    </div> <!-- col-lg-12 -->
-</div> <!-- row -->
+                <div class="col-md-3">
+                    <label class="form-label">Dealer Code</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.dealercode" readonly>
+                </div>
 
-<!-- Dealer Modal -->
+                <div class="col-md-3">
+                    <label class="form-label">Credit Limit</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.ceditLimit" readonly>
+                </div>
 
-<ng-template #dealerModal let-modal>
-
-    <div class="modal-header dealer-modal-header">
-        <h5 class="modal-title">
-            <i class="ri-building-line me-1"></i>
-            Dealer Details
-        </h5>
-
-        <button class="btn-close btn-close-white btn-sm" (click)="modal.dismiss()">
-        </button>
-
-    </div>
-
-    <div class="modal-body">
-
-        <!-- Dealer Info -->
-
-        <h5 class="mb-2 text-primary">Dealer Info</h5>
-
-        <div class="row">
-
-            <div class="col-md-3">
-                <label class="form-label">Company Name</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.compname" readonly>
             </div>
 
-            <div class="col-md-3">
-                <label class="form-label">Company Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.compcode" readonly>
+            <div class="row mt-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">Address 1</label>
+                    <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress1" readonly></textarea>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Address 2</label>
+                    <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress2" readonly></textarea>
+                </div>
+
             </div>
 
-            <div class="col-md-3">
-                <label class="form-label">Dealer Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.dealercode" readonly>
+            <div class="row mt-3">
+
+                <div class="col-md-3">
+                    <label class="form-label">City</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.city" readonly>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">State</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.state" readonly>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Pin Code</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.pin" readonly>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Mobile</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.mobile" readonly>
+                </div>
+
             </div>
 
-            <div class="col-md-3">
-                <label class="form-label">Credit Limit</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.ceditLimit" readonly>
+            <hr class="custom-hr">
+
+            <!-- Contact Info -->
+
+            <h5 class="mb-2 text-primary">Contact Info</h5>
+
+            <div class="row">
+
+                <div class="col-md-4">
+                    <label class="form-label">Email</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.email" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Contact Person</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.contactperson" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Phone Office</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.phoneOff" readonly>
+                </div>
+
             </div>
 
-        </div>
+            <hr class="custom-hr">
 
-        <div class="row mt-3">
+            <!-- Other Info -->
 
-            <div class="col-md-6">
-                <label class="form-label">Address 1</label>
-                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress1" readonly></textarea>
+            <h5 class="mb-2 text-primary">Other Info</h5>
+
+            <div class="row">
+
+                <div class="col-md-4">
+                    <label class="form-label">Brand Name</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.brandName" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">GSTIN</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.compgstinNo" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">PAN</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.pan" readonly>
+                </div>
+
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Address 2</label>
-                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress2" readonly></textarea>
+            <div class="row mt-3">
+
+                <div class="col-md-4">
+                    <label class="form-label">CIN No</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.cinNo" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Trade Certificate</label>
+                    <input class="form-control form-control-sm" [(ngModel)]="selectedDealer.tradCert">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Area Office Id</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.areaofficeid" readonly>
+                </div>
+
             </div>
 
-        </div>
+            <div class="row mt-3">
 
-        <div class="row mt-3">
+                <div class="col-md-4">
+                    <label class="form-label">VAT No</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.vatNo" readonly>
+                </div>
 
-            <div class="col-md-3">
-                <label class="form-label">City</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.city" readonly>
+                <div class="col-md-4">
+                    <label class="form-label">Is TCS</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.isTcs ? 'Yes' : 'No'" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">TCS Percent</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.tcsPercent" readonly>
+                </div>
+
             </div>
 
-            <div class="col-md-3">
-                <label class="form-label">State</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.state" readonly>
+            <div class="row mt-3">
+
+                <div class="col-md-4">
+                    <label class="form-label">FameII Code</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.fameiiCode" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">B2B</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.b2b ? 'Yes' : 'No'" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Registration Date</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.regDate" readonly>
+                </div>
+
             </div>
 
-            <div class="col-md-3">
-                <label class="form-label">Pin Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.pin" readonly>
-            </div>
+            <div class="row mt-3">
 
-            <div class="col-md-3">
-                <label class="form-label">Mobile</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.mobile" readonly>
-            </div>
+                <div class="col-md-12">
+                    <label class="form-label">Registration Address</label>
+                    <input class="form-control form-control-sm" [value]="selectedDealer?.regAddress" readonly>
+                </div>
 
-        </div>
-
-        <hr class="custom-hr">
-
-        <!-- Contact Info -->
-
-        <h5 class="mb-2 text-primary">Contact Info</h5>
-
-        <div class="row">
-
-            <div class="col-md-4">
-                <label class="form-label">Email</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.email" readonly>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Contact Person</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.contactperson" readonly>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Phone Office</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.phoneOff" readonly>
-            </div>
-
-        </div>
-
-        <hr class="custom-hr">
-
-        <!-- Other Info -->
-
-        <h5 class="mb-2 text-primary">Other Info</h5>
-
-        <div class="row">
-
-            <div class="col-md-4">
-                <label class="form-label">Brand Name</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.brandName" readonly>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">GSTIN</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.compgstinNo" readonly>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">PAN</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.pan" readonly>
-            </div>
-
-        </div>
-
-        <div class="row mt-3">
-
-            <div class="col-md-4">
-                <label class="form-label">CIN No</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.cinNo" readonly>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Trade Certificate</label>
-                <input class="form-control form-control-sm" [(ngModel)]="selectedDealer.tradCert">
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Area Office Id</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.areaofficeid" readonly>
-            </div>
-
-        </div>
-
-        <div class="row mt-3">
-
-            <div class="col-md-4">
-                <label class="form-label">VAT No</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.vatNo" readonly>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Is TCS</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.isTcs ? 'Yes' : 'No'" readonly>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">TCS Percent</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.tcsPercent" readonly>
             </div>
 
         </div>
 
-        <div class="row mt-3">
-
-            <div class="col-md-4">
-                <label class="form-label">FameII Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.fameiiCode" readonly>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">B2B</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.b2b ? 'Yes' : 'No'" readonly>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Registration Date</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.regDate" readonly>
-            </div>
-
+        <div class="modal-footer">
+            <button class="btn btn-primary btn-sm" (click)="updateTradeCertificate()">
+                Save
+            </button>
+            <button class="btn btn-light btn-sm" (click)="modal.close()">Close</button>
         </div>
 
-        <div class="row mt-3">
-
-            <div class="col-md-12">
-                <label class="form-label">Registration Address</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.regAddress" readonly>
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="modal-footer">
-        <button class="btn btn-primary btn-sm" (click)="updateTradeCertificate()">
-            Save
-        </button>
-        <button class="btn btn-light btn-sm" (click)="modal.close()">Close</button>
-    </div>
-
-</ng-template>
+    </ng-template>

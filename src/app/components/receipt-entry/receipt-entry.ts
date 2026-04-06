@@ -56,7 +56,13 @@ export class ReceiptEntry implements OnInit {
   ) { }
 
   ngOnInit(): void {
+     const today = new Date();
+     const sevenDaysBefore = new Date(today);
+     sevenDaysBefore.setDate(today.getDate() - 7);
+
    // this.loadReceiptEntries();
+  this.filter.fromDate = sevenDaysBefore;
+this.filter.toDate = today; 
     this.setupSearch(); 
     this.fetchLocations();
       this.searchSubject.next(''); // initial load
@@ -248,11 +254,16 @@ downloadReceiptExcel(): void {
 
  setupSearch() {
   this.searchSubject.pipe(
-    debounceTime(300),
-    switchMap(search => {
-      this.loader.show();
-      return this.receiptEntryService.getReceiptList(search || '');
-    })
+  debounceTime(300),
+  switchMap(search => {
+    this.loader.show();
+
+    return this.receiptEntryService.getReceiptList(
+      search || '',
+      this.filter.fromDate,
+      this.filter.toDate
+    );
+  })
   ).subscribe({
     next: (data) => {
       this.receiptEntries = data || [];
@@ -294,5 +305,11 @@ downloadReceiptExcel(): void {
 navigateToVehicleSaleBill() {
   this.router.navigate(['//receipt-entry/test']);
 }
+private formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = ('0' + (date.getMonth() + 1)).slice(-2);
+  const day = ('0' + date.getDate()).slice(-2);
 
+  return `${year}-${month}-${day}`; // matches 'Y-m-d'
+}
 }

@@ -11,13 +11,28 @@
 }
  .sort
     {
+      width: 10rem;
         padding-right: 35px;
     }
+.dealer-table {
+  table-layout: fixed;
+  width: 100%;
+}
 
 .dealer-table th,
 .dealer-table td {
+  // white-space: nowrap;
+  // width:max-content ;
+    min-width: 120px;   /* prevents crushing */
+
   white-space: nowrap;
-  width:max-content ;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  // width: 200px;
+
+}
+.col-compname,.col-adress1,.col-adress2{
+  width: 20rem;
 }
 
 

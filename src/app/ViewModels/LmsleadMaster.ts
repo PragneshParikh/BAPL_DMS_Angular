@@ -8,6 +8,7 @@ export interface LmsleadMaster {
   date: string; // ISO date string, e.g. "2026-03-26T00:00:00Z"
   area?: string;
   city: string;
+  state?: string;
   brancharea: string;
   company: string;
   pincode?: number;

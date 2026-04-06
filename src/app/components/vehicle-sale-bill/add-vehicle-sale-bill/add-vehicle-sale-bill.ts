@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormsModule } from '@angular/forms';
+import { StorageService } from '../../../core/services/storage';
+import { LocationName } from '../../../ViewModels/ReceiptEntryModel';
+import { LocationMasterService } from '../../../core/services/location-master-service';
 
 @Component({
   selector: 'app-add-vehicle-sale-bill',
@@ -8,16 +11,23 @@ import { FormGroup, FormsModule } from '@angular/forms';
   styleUrl: './add-vehicle-sale-bill.scss',
 })
 export class AddVehicleSaleBill {
-    form!: FormGroup;
+  form!: FormGroup;
 
-   today = new Date().toISOString().split('T')[0];;
-model = {
+  /**
+   *
+   */
+  constructor(private storageService: StorageService,
+    private locationService: LocationMasterService) {
+  }
+  locations: LocationName[] = [];
+  today = new Date().toISOString().split('T')[0];
+  model = {
     // Sale Info
     saleDate: this.today,
     d2d: '',
     location: '',
     saleType: '',
-    saleTypeSwitch:'B2C',
+    saleTypeSwitch: 'B2C',
     cashAccount: '',
     customerName: '',
     billingName: '',
@@ -32,7 +42,7 @@ model = {
     insAmount: null,
     mfgYear: null,
     segment: '',
-    institutional:'',
+    institutional: '',
     scheme: '',
 
     // Extra Charges
@@ -54,4 +64,21 @@ model = {
     referralRemarks: '',
   };
 
+  fetchLocations(): void {
+    // this.getNextReceiptNo();
+    const dealerCode = this.storageService.getDealerCode();
+
+    this.locationService.getLocationByDealerCode(dealerCode).subscribe({
+      next: (data: LocationName[]) => {
+        this.locations = data;
+        // if (!this.isEditMode && this.locations.length > 0) {
+          this.model.location = this.locations[0].locname;
+        // }
+        console.log('Fetched locations:', this.locations);
+      },
+      error: (err) => {
+        console.error('Error fetching locations', err);
+      }
+    });
+  }
 }

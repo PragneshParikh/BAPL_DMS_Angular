@@ -114,8 +114,6 @@ export class AddReceiptEntry implements OnInit {
     return new Promise((resolve) => {
       this.receiptEntryService.getReceiptById(id).subscribe({
         next: (res: ReceiptEntryEditModel) => {
-          console.log('API response for receipt by ID:', res);
-
           this.apiResponse = res;
           this.formData = {
             location: res.location,
@@ -137,7 +135,7 @@ export class AddReceiptEntry implements OnInit {
 
           // apply filter
           this.onCustomerTypeChange();
-          // ✅ CALL HERE ALSO
+          //  CALL HERE ALSO
           this.mapEditDropdowns();
 
           return resolve(true);
@@ -150,7 +148,7 @@ export class AddReceiptEntry implements OnInit {
   mapEditDropdowns() {
     if (!this.apiResponse) return;
 
-    // ✅ Party
+    // Party
     if (this.apiResponse.saleType === 'Against Lead') {
       this.formData.partyName = this.apiResponse.partyName || '';
     } else if (this.parties.length) {
@@ -164,13 +162,13 @@ export class AddReceiptEntry implements OnInit {
     }
 
 
-    // ✅ Financier
+    // Financier
     if (this.financiers.length) {
       this.selectedFinancier =
         this.financiers.find(f => f.ledgerCode === this.apiResponse.financier)?.ledgerName || '';
     }
 
-    // ✅ Product
+    // Product
     if (this.products.length && this.apiResponse.productCode) {
       this.selectedProductCode = this.apiResponse.productName;
 
@@ -186,7 +184,7 @@ export class AddReceiptEntry implements OnInit {
         (res) => {
           this.products = res;
           resolve(res);
-          // this.mapEditDropdowns(); // ✅ added
+          // this.mapEditDropdowns(); // added
         },
         (err) => {
           resolve(true);
@@ -198,9 +196,7 @@ export class AddReceiptEntry implements OnInit {
 
   onProductChange(event: Event) {
     const selectedCode = (event.target as HTMLSelectElement).value;
-    console.log('Selected product code:', selectedCode);
     this.selectedProduct = this.products.find(p => p.itemcode === this.formData.productName) || null;
-    console.log('Selected product:', this.selectedProduct);
   }
   getFinanciers() {
 
@@ -208,7 +204,7 @@ export class AddReceiptEntry implements OnInit {
       next: (res) => {
         this.financiers = res;
 
-        this.mapEditDropdowns(); // ✅ added
+        this.mapEditDropdowns(); //  added
       }
     });
   }
@@ -220,7 +216,7 @@ export class AddReceiptEntry implements OnInit {
           this.parties = res;
           this.onCustomerTypeChange();
 
-          // ✅ Fix mapping for edit mode
+          //  Fix mapping for edit mode
           if (this.apiResponse) {
 
             if (this.apiResponse.saleType === 'Receipt') {
@@ -229,7 +225,7 @@ export class AddReceiptEntry implements OnInit {
               );
 
               if (match) {
-                this.formData.partyName = match.ledgerCode; // ✅ IMPORTANT
+                this.formData.partyName = match.ledgerCode; // IMPORTANT
               }
             } else {
               // Against Lead
@@ -263,8 +259,6 @@ export class AddReceiptEntry implements OnInit {
     this.receiptEntryService.getNextReceiptNo().subscribe({
       next: (data) => {
         this.nextReceiptNo = data;
-
-        console.log('data', data);
       }
     });
   }
@@ -303,250 +297,11 @@ export class AddReceiptEntry implements OnInit {
   }
 
 
-  // searchLead() {
-  //   let mobileNo: string | null = null;
-  //   let bookingId: string | null = null;
-
-  //      if (this.searchType === 'Mobile No') {
-  //     mobileNo = this.searchText.trim();
-
-  //     if (!mobileNo) {
-  //        this.toaster.show('Please enter mobile number!', {
-  //           classname: 'bg-warning text-white',
-  //           delay: 5000
-  //         });
-  //       return;
-  //     }
-
-  //   } else if (this.searchType === 'Booking Id') {
-  //     const id = Number(this.searchText);
-
-  //     if (isNaN(id)) {
-  //       this.toaster.show('Please enter booking id!', {
-  //           classname: 'bg-warning text-white',
-  //           delay: 5000
-  //         });
-  //       return;
-  //     }
-
-  //     bookingId = id.toString(); // ✅ convert to string for API
-  //   }
-
-  //   //  Check if already exists in Receipt Entry
-  //   this.loader.show();
-  //   // this.receiptEntryService.checkLeadExist(mobileNo, bookingId).subscribe({
-  //   //   next: (exists: boolean) => {
-  //   //     if (exists) {
-  //   //       this.loader.hide();
-  //   //        this.toaster.show('Receipt already exists for this Mobile No / Booking ID!', {
-  //   //         classname: 'bg-danger text-white',
-  //   //         delay: 5000
-  //   //       });
-  //   //       return;
-  //   //     }
-
-  //   //     //call API to add 
-
-  //   //     const bookingIdNumber = bookingId ? Number(bookingId) : null;
-
-  //   //     this.receiptEntryService.getLeadByMobileOrBooking(mobileNo, bookingIdNumber).subscribe({
-  //   //       next: (res) => {
-  //   //         console.log('Lead search result:', res);
-  //   //         this.loader.hide();
-  //   //         this.leadResult = res;
-
-  //   //         if (!res) {
-  //   //           this.loader.hide();
-  //   //             this.toaster.show('No record found for the given Mobile No / Booking ID!', {
-  //   //         classname: 'bg-success text-white',
-  //   //         delay: 5000
-  //   //       });
-  //   //         }
-  //   //       },
-  //   //       error: (err) => {
-  //   //         this.loader.hide();
-  //   //          this.toaster.show('Record not found', {
-  //   //         classname: 'bg-warning text-white',
-  //   //         delay: 5000
-  //   //       });
-  //   //       }
-  //   //     });
-
-  //   //   },
-  //   //   error: (err) => {
-  //   //      this.toaster.show(err, {
-  //   //         classname: 'bg-danger text-white',
-  //   //         delay: 5000
-  //   //       });
-  //   //     console.error(err);
-  //   //   }
-  //   // });
-  // this.receiptEntryService.getLeadByMobileOrBooking(mobileNo, bookingIdNumber)
-  // .subscribe({
-  //   next: (res) => {
-  //     console.log('Lead search result:', res);
-
-  //     this.loader.hide();
-
-  //     // ✅ set lead data properly
-  //     this.leadResult = res.lead;
-
-  //     // ❌ if no lead
-  //     if (!res.lead) {
-  //       this.toaster.show('No record found for the given Mobile No / Booking ID!', {
-  //         classname: 'bg-warning text-white',
-  //         delay: 5000
-  //       });
-  //       return;
-  //     }
-
-  //     // ✅ NEW LEDGER CREATED → REDIRECT
-  //     if (res.isNew && res.ledgerId) {
-  //       this.toaster.show('Ledger created. Please complete details.', {
-  //         classname: 'bg-info text-white',
-  //         delay: 5000
-  //       });
-
-  //       this.modalService.dismissAll();
-
-  //       this.navigation.navigate(['/customer-ledger', res.ledgerId]); // 🔥 MAIN GOAL
-  //     }
-  //   },
-  //   error: () => {
-  //     this.loader.hide();
-  //     this.toaster.show('Record not found', {
-  //       classname: 'bg-danger text-white',
-  //       delay: 5000
-  //     });
-  //   }
-  // });
-
-  // }
-
-  // searchLead() {
-  //   let mobileNo: string | null = null;
-  //   let bookingId: string | null = null;
-
-  //   // ✅ Input handling
-  //   if (this.searchType === 'Mobile No') {
-  //     mobileNo = this.searchText.trim();
-
-  //     if (!mobileNo) {
-  //       this.toaster.show('Please enter mobile number!', {
-  //         classname: 'bg-warning text-white',
-  //         delay: 5000
-  //       });
-  //       return;
-  //     }
-
-  //   } else if (this.searchType === 'Booking Id') {
-  //     const id = Number(this.searchText);
-
-  //     if (isNaN(id)) {
-  //       this.toaster.show('Please enter booking id!', {
-  //         classname: 'bg-warning text-white',
-  //         delay: 5000
-  //       });
-  //       return;
-  //     }
-
-  //     bookingId = id.toString();
-  //   }
-
-  //   // ✅ Convert bookingId to number
-  //   const bookingIdNumber = bookingId ? Number(bookingId) : null;
-
-  //   this.loader.show();
-
-  //   // ✅ OPTIONAL (recommended): Check duplicate receipt
-  //   this.receiptEntryService.checkLeadExist(mobileNo, bookingId).subscribe({
-  //     next: (exists: boolean) => {
-
-  //       if (exists) {
-  //         this.loader.hide();
-
-  //         this.leadResult = null; // ❌ hide collapsible UI
-
-  //         this.toaster.show('Receipt already exists for this Mobile No / Booking ID!', {
-  //           classname: 'bg-danger text-white',
-  //           delay: 5000
-  //         });
-
-  //         return; // 🔴 STOP
-  //       }
-
-  //       // ✅ MAIN API CALL
-  //       this.receiptEntryService.getLeadByMobileOrBooking(mobileNo, bookingIdNumber)
-  //         .subscribe({
-  //           next: (res) => {
-  //             console.log('Lead search result:', res);
-
-  //             this.loader.hide();
-
-  //             // ✅ assign lead properly
-  //             this.leadResult = res?.lead || null;
-
-  //             if (!res?.lead) {
-  //               this.toaster.show('No record found for the given Mobile No / Booking ID!', {
-  //                 classname: 'bg-warning text-white',
-  //                 delay: 5000
-  //               });
-  //               return;
-  //             }
-
-  //             // ✅ REDIRECT if ledger created
-  //             if (res.isNew && res.ledgerId) {
-  //               this.toaster.show('Ledger created. Please complete details.', {
-  //                 classname: 'bg-success text-white',
-  //                 delay: 5000
-  //               });
-
-  //               this.modalService.dismissAll();
-
-  //               if (res.isNew && res.ledgerId) {
-
-  //                 this.toaster.show('Ledger created. Please complete details.', {
-  //                   classname: 'bg-success text-white',
-  //                   delay: 5000
-  //                 });
-
-  //                 this.modalService.dismissAll(); // close lead modal
-
-  //                 const modalRef = this.modalService.open(CustomerLedger, {
-  //                   size: 'lg',
-  //                   backdrop: 'static'
-  //                 });
-
-  //                 modalRef.componentInstance.ledgerId = res.ledgerId; // ✅ PASS ID
-  //               }
-  //             }
-  //           },
-  //           error: () => {
-  //             this.loader.hide();
-  //             this.toaster.show('Record not found', {
-  //               classname: 'bg-danger text-white',
-  //               delay: 5000
-  //             });
-  //           }
-  //         });
-  //     },
-
-  //     error: (err) => {
-  //       this.loader.hide();
-  //       console.error(err);
-  //       this.toaster.show('Something went wrong', {
-  //         classname: 'bg-danger text-white',
-  //         delay: 5000
-  //       });
-  //     }
-  //   });
-  // }
-
   searchLead() {
     let mobileNo: string | null = null;
     let bookingId: string | null = null;
 
-    // ✅ Input handling
+    // Input handling
     if (this.searchType === 'Mobile No') {
       mobileNo = this.searchText.trim();
 
@@ -576,13 +331,10 @@ export class AddReceiptEntry implements OnInit {
 
     this.loader.show();
 
-    // ✅ Check duplicate receipt
+    // Check duplicate receipt
     this.receiptEntryService.checkLeadExist(mobileNo, bookingId).subscribe({
       next: (exists: boolean) => {
-        console.log(exists);
-
         if (exists) {
-          console.log(exists);
           this.loader.hide();
           this.leadResult = null;
 
@@ -598,7 +350,6 @@ export class AddReceiptEntry implements OnInit {
         this.receiptEntryService.getLeadByMobileOrBooking(mobileNo, bookingIdNumber)
           .subscribe({
             next: (res) => {
-              console.log('Lead search result:', res);
 
               this.loader.hide();
 
@@ -614,7 +365,7 @@ export class AddReceiptEntry implements OnInit {
 
               //OPEN CUSTOMER LEDGER IF NEW
               if (res.isNew && res.ledgerId) {
-
+                this.formData.partyName = res.lead?.name || '';
                 this.toaster.show('Ledger created. Please complete details.', {
                   classname: 'bg-success text-white',
                   delay: 5000
@@ -773,10 +524,8 @@ export class AddReceiptEntry implements OnInit {
       totalAmount: this.formData.totalAmount
     };
 
-    console.log('Payload:', payload);
-
     if (this.isEditMode && this.id) {
-      // ✅ Call Update API
+      // Call Update API
       this.receiptEntryService.updateReceipt(this.id, payload).subscribe({
         next: (res) => {
           this.toaster.show('Receipt updated successfully!', {
@@ -794,7 +543,7 @@ export class AddReceiptEntry implements OnInit {
         }
       });
     } else {
-      // ✅ Call Add API
+      //  Call Add API
       this.receiptEntryService.addReceiptEntry(payload).subscribe({
         next: (res) => {
           this.toaster.show('Receipt added successfully!', {
@@ -835,20 +584,17 @@ export class AddReceiptEntry implements OnInit {
     modalRef.result.then((newId) => {
       if (newId) {
 
-        console.log(newId);
-
-        // ✅ IMPORTANT: subscribe and act AFTER data comes
+        // IMPORTANT: subscribe and act AFTER data comes
         this.receiptEntryService.getLedgerByType('Financier').subscribe({
           next: (res) => {
             this.financiers = res;
 
-            // ✅ Force change detection via new reference
+            // Force change detection via new reference
             this.financiers = [...this.financiers];
 
-            // ✅ OPTIONAL: auto-select newly added
+            //  OPTIONAL: auto-select newly added
             const added = this.financiers.find(f => f.id === newId);
             if (added) {
-              console.log('Newly added financier:', added);
               this.formData.financier = added.ledgerName;
               this.selectedFinancier = added.ledgerName;
             }

@@ -138,7 +138,7 @@ this.dealerService.getDealers().subscribe({
   /* ================= MODAL ================= */
 openDealerModal(dealer: DealerMasterViewModel): void {
 
-  this.selectedDealer = { ...dealer }; // ✅ clone (important)
+  this.selectedDealer = { ...dealer }; 
 
   this.modalRef = this.modalService.open(this.dealerModal, {
     windowClass: 'dealer-modal',

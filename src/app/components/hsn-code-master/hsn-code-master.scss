@@ -12,11 +12,21 @@
     {
         padding-right: 35px; // extra space for icons
     }
+
+    .hsn-table {
+  table-layout: fixed;
+  width: 100%;
+}
 .hsn-table th,
 .hsn-table td {
-  white-space: nowrap;
+white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+.col-code { width: 15%; }
+.col-desc { width: 62%; }
+.col-type { width: 10%; }
 
 .table-gridjs th.sort {
   padding-right: 30px;
@@ -94,11 +104,11 @@
 }
 
 
-.truncate-column {
-  max-width: 700px;
-  /* fixed width */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-}
+// .truncate-column {
+//   max-width: 700px;
+//   /* fixed width */
+//   white-space: nowrap;
+//   overflow: hidden;
+//   text-overflow: ellipsis;
+//   display: block;
+// }

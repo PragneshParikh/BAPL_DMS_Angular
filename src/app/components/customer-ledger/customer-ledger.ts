@@ -48,7 +48,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
       private loader: LoaderService,
       private toaster: ToastService,
       private router: Router,
-       @Optional () public activeModal: NgbActiveModal // ✅ ADD THIS
+       @Optional () public activeModal: NgbActiveModal 
 
     ) {
       this.activatedRoute.paramMap.subscribe(params => {
