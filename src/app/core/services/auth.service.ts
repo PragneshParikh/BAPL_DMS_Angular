@@ -1,14 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { Store, StoreModule } from '@ngrx/store';
+import { BehaviorSubject, throwError } from 'rxjs';
 import { User } from '../../store/Authentication/auth.models';
 import { environment } from '../../../environments/environment';
 import { StorageService } from './storage';
-import { getUser } from '../../store/Authentication/authentication-selector';
 
-// const AUTH_API = GlobalComponent.AUTH_API;
 
 const httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -25,6 +22,7 @@ export class AuthenticationService {
     user!: User;
     private currentUserSubject = new BehaviorSubject<User | null>(null);
     public currentUser$ = this.currentUserSubject.asObservable();
+    private timeoutId: any;
 
     protected baseUrl = environment.apiUrl;
 
@@ -41,6 +39,26 @@ export class AuthenticationService {
 
     public get currentUserValue(): User | null {
         return this.currentUserSubject.value;
+    }
+
+    initAuth(): void {
+        const token = localStorage.getItem('token');
+
+        if (!token) return;
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const expiry = payload.exp * 1000;
+
+            if (expiry <= Date.now()) {
+                this.logout();
+            } else {
+                this.startTokenTimer(token);
+            }
+
+        } catch {
+            this.logout();
+        }
     }
 
     /**
@@ -60,7 +78,7 @@ export class AuthenticationService {
 
                     this.storageService.setUser(user);
                     localStorage.setItem('token', response.token);
-                    this.currentUserSubject.next(user); // 🔑 this is key for AuthGuard
+                    this.currentUserSubject.next(user);
 
                     return response;
                 } else {
@@ -129,5 +147,40 @@ export class AuthenticationService {
 
         return match.permission;
     }
+
+    startTokenTimer(token: string): void {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+
+            const expiry = payload.exp * 1000; // convert to milliseconds
+            const now = new Date().getTime();
+
+            const timeout = expiry - now;
+
+            // If already expired
+            if (timeout <= 0) {
+                this.logout();
+                return;
+            }
+
+            console.log(`Token expires in ${Math.floor(timeout / 1000)} seconds`);
+
+            // Clear existing timer
+            if (this.timeoutId) {
+                clearTimeout(this.timeoutId);
+            }
+
+            // Start new timer
+            this.timeoutId = setTimeout(() => {
+                console.log('Token expired → logging out');
+                this.logout();
+            }, timeout);
+
+        } catch (error) {
+            console.error('Invalid JWT token');
+            this.logout();
+        }
+    }
+
 }
 

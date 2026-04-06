@@ -39,10 +39,33 @@ export class AuthGuard {
             return false;
         }
 
-        const hasAccess = menuRights.some(m =>
-            requestedUrl.includes(m.pathName) ||
-            requestedUrl.includes(m.subMenuId)
-        );
+        const findRoute = (routes: any[], url: string): any | null => {
+            for (const r of routes) {
+                const fullPath = '/' + r.path;
+                if (url.startsWith(fullPath)) {
+                    return r;
+                }
+                if (r.children && r.children.length) {
+                    const childMatch = findRoute(r.children, url);
+                    if (childMatch) return childMatch;
+                }
+            }
+            return null;
+        };
+
+        const matchingRoute = findRoute(this.router.config, requestedUrl);
+
+        if (!matchingRoute) {
+            this.router.navigate(['/']);
+            return false;
+        }
+
+        const routePermissions: number[] = matchingRoute.data || [];
+
+        const hasAccess = routePermissions.length === 0 ||
+            routePermissions.some(p =>
+                menuRights.some(m => m.permission === p)
+            );
 
         if (!hasAccess) {
             this.router.navigate(['/']);
@@ -51,4 +74,5 @@ export class AuthGuard {
 
         return true;
     }
+
 }

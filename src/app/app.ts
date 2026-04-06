@@ -1,4 +1,4 @@
-import { Component, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
 import { AuthenticationService } from './core/services/auth.service';
 import { ToastsContainer } from './shared/toaster/toasts-container.component';
@@ -12,7 +12,7 @@ import { LoaderService } from './core/services/loader';
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App implements OnDestroy {
+export class App implements OnInit {
   isLoggedIn = false;
   protected readonly title = signal('BAPL_DMS_Angular');
 
@@ -39,11 +39,8 @@ export class App implements OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    window.addEventListener('beforeunload', this.clearStorage.bind(this));
+  ngOnInit(): void {
+    this.authService.initAuth();
   }
 
-  clearStorage() {
-    this.authService.logout();
-  }
 }
