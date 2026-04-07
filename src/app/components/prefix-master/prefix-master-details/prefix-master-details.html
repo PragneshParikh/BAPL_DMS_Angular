@@ -1,0 +1,89 @@
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        Number Sequence Configuration
+    </div>
+
+    <div class="card-body">
+        <div class="row g-3">
+
+            <!-- Module -->
+            <div class="col-md-3">
+                <label class="form-label">Module</label>
+                <select class="form-select form-select-sm" [(ngModel)]="sequence.moduleName">
+                    <option value="INVOICE">Invoice</option>
+                    <option value="PO">Purchase Order</option>
+                    <option value="QUOTATION">Quotation</option>
+                </select>
+            </div>
+
+            <!-- Prefix -->
+            <div class="col-md-3">
+                <label class="form-label">Prefix</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="sequence.prefix"
+                    placeholder="e.g. INV">
+            </div>
+
+            <!-- Dealer -->
+            <div class="col-md-3">
+                <label class="form-label">Dealer</label>
+                <select class="form-select form-select-sm" [(ngModel)]="sequence.dealerCode">
+                    <option *ngFor="let dealer of lstDealers" [value]="dealer.dealercode">
+                        {{ dealer.compname }}
+                    </option>
+                </select>
+            </div>
+
+            <!-- Financial Year -->
+            <div class="col-md-3">
+                <label class="form-label">Financial Year</label>
+                <select class="form-select form-select-sm" [(ngModel)]="sequence.financialYear">
+                    <option *ngFor="let fy of lstFinancialYears" [value]="fy">
+                        {{ fy }}
+                    </option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="row g-3">
+
+            <!-- Padding -->
+            <div class="col-md-3">
+                <label class="form-label">Number Length (Padding)</label>
+                <input type="number" class="form-control form-control-sm" [(ngModel)]="sequence.padding">
+            </div>
+
+            <!-- Next Number -->
+            <div class="col-md-3">
+                <label class="form-label">Next Number</label>
+                <input type="number" class="form-control form-control-sm" [(ngModel)]="sequence.nextNo" readonly>
+            </div>
+
+            <!-- Status -->
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label><br>
+                <div class="form-check form-switch d-inline-block">
+                    <input type="checkbox" class="form-check-input form-check-lg" name="status" #status="ngModel"
+                        [(ngModel)]="sequence.isActive">
+                    <label class="form-check-label small" for="status">{{ sequence.isActive === true ?
+                        'Active' :'InActive' }}</label>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row g-3">
+            <!-- Preview -->
+            <div class="col-md-3">
+                <label class="form-label">Preview</label>
+                <input type="text" class="form-control form-control-sm" [value]="generatePreview()" readonly>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card-footer text-end">
+        <button class="btn btn-primary btn-sm" (click)="saveSequence()">Save</button>
+        <button class="btn btn-danger btn-sm ms-2" (click)="backToList()">Cancel</button>
+    </div>
+</div>
