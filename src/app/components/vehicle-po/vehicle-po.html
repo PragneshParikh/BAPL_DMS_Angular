@@ -31,8 +31,9 @@
                         <!-- <select class="form-select form-select-sm border-start border-2">
                             <option>RRG Test Dealer Consig</option>
                         </select> -->
-                        <select class="form-select form-select-sm border-start border-2" [(ngModel)]="selectedLocation"
-                            (change)="onLocationChange()" [disabled]="isSubmitted">
+                        <select class="form-select form-select-sm border-start border-2"
+                            [class.is-invalid]="locationInvalid" [(ngModel)]="selectedLocation"
+                            (change)="onLocationChange(); locationInvalid = false" [disabled]="isSubmitted">
                             <option value="">--Select Location--</option>
                             <option *ngFor="let loc of locationList" [value]="loc.locname">
                                 {{loc.locname}}
@@ -78,7 +79,8 @@
                     <div class="col-md-2">
                         <label class="form-label mb-0 small">Transaction Type</label>
                         <select class="form-select form-select-sm border-start border-2"
-                            [(ngModel)]="selectedTransactionType" [disabled]="isSubmitted">
+                            [class.is-invalid]="transactionTypeInvalid" [(ngModel)]="selectedTransactionType"
+                            (change)="transactionTypeInvalid = false" [disabled]="isSubmitted">
                             <option value="">--Select--</option>
                             <option *ngFor="let type of transactionTypeList" [value]="type.type">
                                 {{type.name}}
@@ -109,7 +111,7 @@
                     <div class="col-md-2">
                         <label class="form-label mb-0 small">Famell</label>
                         <select class="form-select form-select-sm border-start border-2" [(ngModel)]="famell"
-                            [disabled]="isSubmitted">
+                            [disabled]="isSubmitted || !isFameEnabled">
                             <option value="Famell It">Famell It</option>
                         </select>
                     </div>
@@ -145,21 +147,21 @@
                 <div class="collapse show" id="purchaseDetails">
 
                     <div class="row g-1 mb-2 align-items-end">
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="form-label mb-0 small">Model</label>
                             <select class="form-select form-select-sm border-start border-2"
                                 [(ngModel)]="currentItem.modelNo" (change)="onModelChange()" [disabled]="isSubmitted">
                                 <option value="">--Select--</option>
-                                <option *ngFor="let item of modelList" [value]="item.itemcode">{{item.itemcode}}
+                                <option *ngFor="let item of modelList" [value]="item.itemcode">{{item.itemname}}
                                 </option>
                             </select>
                         </div>
 
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
                             <label class="form-label mb-0 small">Model Description</label>
                             <input type="text" class="form-control form-control-sm bg-light"
                                 [value]="currentItem.description" readonly>
-                        </div>
+                        </div> -->
 
                         <div class="col-md-2">
                             <label class="form-label mb-0 small">Colour</label>
@@ -186,11 +188,36 @@
                                 [value]="currentItem.rate | number:'1.2-2'" readonly>
                         </div>
 
-                        <div class="col-md-1">
+                        <!-- <div class="col-md-1">
                             <label class="form-label mb-0 small">Subsidy</label>
                             <input type="number" class="form-control form-control-sm bg-light" name="discAmt"
                                 [(ngModel)]="currentItem.discAmt" (input)="calculateRowTotals()"
-                                [readonly]="isSubmitted">
+                                [readonly]="isSubmitted" readonly>
+                        </div> -->
+                        <div class="col-md-1">
+                            <label class="form-label mb-0 small">Subsidy</label>
+                            <input type="number" class="form-control form-control-sm bg-light" name="discAmt"
+                                [(ngModel)]="currentItem.discAmt" readonly tabindex="-1">
+                        </div>
+
+                        <div class="col-md-1">
+                            <label class="form-label mb-0 small">Txbl Amnt</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control bg-light"
+                                    [value]="currentItem.taxableAmount | number:'1.2-2'" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label mb-0 small">Net Amount</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control bg-light"
+                                    [value]="currentItem.amount | number:'1.2-2'" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <button class="btn btn-sm btn-primary" (click)="addPurchaseItem()"
+                                [disabled]="isSubmitted">Add
+                            </button>
                         </div>
                     </div>
 
@@ -205,32 +232,25 @@
                             </div>
                         </div> -->
 
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-1">
                             <label class="form-label mb-0 small">Txbl Amnt</label>
                             <div class="input-group input-group-sm">
                                 <input type="text" class="form-control bg-light"
                                     [value]="currentItem.taxableAmount | number:'1.2-2'" readonly>
-                                <!-- <span class="input-group-text bg-primary text-white">
-                                    <i class="ri-information-line"></i>
-                                </span> -->
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-1">
                             <label class="form-label mb-0 small">Net Amount</label>
                             <div class="input-group input-group-sm">
                                 <input type="text" class="form-control bg-light"
                                     [value]="currentItem.amount | number:'1.2-2'" readonly>
-                                <!-- <span class="input-group-text bg-primary text-white">
-                                    <i class="ri-information-line"></i>
-                                </span> -->
                             </div>
-                        </div>
-                        <div class="col-md-2">
+                        </div> -->
+                        <!-- <div class="col-md-2">
                             <button class="btn btn-sm btn-primary" (click)="addPurchaseItem()"
                                 [disabled]="isSubmitted">Add
-                                <!-- <i class="ri-add-line"></i> Add -->
                             </button>
-                        </div>
+                        </div> -->
                     </div>
 
                     <!-- TABLE -->
@@ -343,7 +363,7 @@
                         <button class="btn btn-primary btn-sm" (click)="onSubmitToERP()" [disabled]="isSubmitted">Submit
                             To ERP</button>
                         <button class="btn btn-primary btn-sm" (click)="onSave()" [disabled]="isSubmitted">Save</button>
-                        <button class="btn btn-light btn-sm">Cancel</button>
+                        <button class="btn btn-light btn-sm" (click)="redirectToCreatePOList()">Cancel</button>
                     </div>
                 </div>
             </div>

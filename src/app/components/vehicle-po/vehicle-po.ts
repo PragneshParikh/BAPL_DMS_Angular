@@ -10,7 +10,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
-
+import Swal from 'sweetalert2';
 export interface PurchaseOrderItemViewModel {
   ItemCode: string;
   Qty: number;
@@ -23,6 +23,8 @@ export interface PurchaseOrderViewModel {
   CustomerCode: string;
   Items: PurchaseOrderItemViewModel[];
 }
+
+
 
 @Component({
   selector: 'app-vehicle-po',
@@ -49,6 +51,7 @@ export class VehiclePO implements OnInit {
   remarks: string = '';
   poType: string = 'Vehicle';
   isSubmitted: boolean = false;
+  isSaving: boolean = false;
   partyName: string = 'BGAUSS AUTO PRIVA';
   famell: string = 'Famell It';
   isGst: boolean = true;
@@ -58,6 +61,8 @@ export class VehiclePO implements OnInit {
   transactionTypeList = TRANSACTION_TYPES;
   selectedTransactionType: string = '';
   globalSubsidy: number = 0;
+  locationInvalid: boolean = false;
+  transactionTypeInvalid: boolean = false;
 
   currentItem: any = {
     modelNo: '',
@@ -116,7 +121,7 @@ export class VehiclePO implements OnInit {
   }
 
   generateNewOrderNo() {
-   // this.orderNo = 'P0-7'; // Logic for new order number
+    // this.orderNo = 'P0-7'; // Logic for new order number
     this.orderNo = 'TEMP-' + Date.now();
   }
 
@@ -155,51 +160,51 @@ export class VehiclePO implements OnInit {
               const rate = item.Rate ?? item.rate ?? 0;
               const grossAmount = qty * rate;
               const discAmt = item.DiscAmt ?? item.discAmt ?? item.Subsidy ?? item.subsidy ?? 0;
-              const taxableAmount = Math.max(0, grossAmount - discAmt); 
+              const taxableAmount = Math.max(0, grossAmount - discAmt);
 
               // Helper for safe tax extraction and correction
               const getTax = (code: string) => {
                 const upperTarget = code.toUpperCase();
                 let finalTaxAmount = 0;
-                
+
                 const matches = itmTaxes.filter((t: any) => (t.TaxCode || t.taxCode || '').toUpperCase().includes(upperTarget));
-                
+
                 if (matches.length > 0) {
                   finalTaxAmount = matches.reduce((sum: number, t: any) => {
-                     // 1. Explicit DB TaxRate
-                     let taxRate = Number(t.TaxRate ?? t.taxRate ?? t.Rate ?? t.rate);
-                     if (taxRate && taxRate > 0) {
-                         return sum + (taxableAmount * taxRate / 100);
-                     }
-                     // 2. Extract from code string (e.g. IGST18 -> 18)
-                     const codeStr = String(t.TaxCode || t.taxCode || '');
-                     const rateMatch = codeStr.match(/\d+(\.\d+)?/);
-                     if (rateMatch) {
-                         return sum + (taxableAmount * parseFloat(rateMatch[0]) / 100);
-                     }
-                     // 3. Fallback raw amount
-                     return sum + (Number(t.TaxAmount ?? t.taxAmount ?? t.Amount ?? t.amount) || 0);
+                    // 1. Explicit DB TaxRate
+                    let taxRate = Number(t.TaxRate ?? t.taxRate ?? t.Rate ?? t.rate);
+                    if (taxRate && taxRate > 0) {
+                      return sum + (taxableAmount * taxRate / 100);
+                    }
+                    // 2. Extract from code string (e.g. IGST18 -> 18)
+                    const codeStr = String(t.TaxCode || t.taxCode || '');
+                    const rateMatch = codeStr.match(/\d+(\.\d+)?/);
+                    if (rateMatch) {
+                      return sum + (taxableAmount * parseFloat(rateMatch[0]) / 100);
+                    }
+                    // 3. Fallback raw amount
+                    return sum + (Number(t.TaxAmount ?? t.taxAmount ?? t.Amount ?? t.amount) || 0);
                   }, 0);
                 } else {
                   // Fallback to direct properties on the item object
                   const itemKeys = Object.keys(item);
                   const matchingKey = itemKeys.find(k => k.toUpperCase().includes(upperTarget) && (k.toUpperCase().includes('AMT') || k.toUpperCase().includes('AMOUNT')));
                   if (matchingKey) {
-                      finalTaxAmount = Number(item[matchingKey]) || 0;
+                    finalTaxAmount = Number(item[matchingKey]) || 0;
                   } else {
-                      finalTaxAmount = Number(item[code] ?? item[code.toLowerCase()]) || 0;
+                    finalTaxAmount = Number(item[code] ?? item[code.toLowerCase()]) || 0;
                   }
                 }
 
                 // Guard: If backend calculated it on Gross Amount, correct it for Taxable
                 if (finalTaxAmount > 0 && grossAmount > 0) {
-                    const deducedRate = (finalTaxAmount / grossAmount) * 100;
-                    const roundedRate = Math.round(deducedRate * 10) / 10;
-                    const validGSTRates = [1.5, 2.5, 3, 5, 6, 9, 12, 14, 18, 28];
-                    
-                    if (validGSTRates.includes(roundedRate)) {
-                        return (taxableAmount * roundedRate) / 100;
-                    }
+                  const deducedRate = (finalTaxAmount / grossAmount) * 100;
+                  const roundedRate = Math.round(deducedRate * 10) / 10;
+                  const validGSTRates = [1.5, 2.5, 3, 5, 6, 9, 12, 14, 18, 28];
+
+                  if (validGSTRates.includes(roundedRate)) {
+                    return (taxableAmount * roundedRate) / 100;
+                  }
                 }
 
                 return finalTaxAmount;
@@ -226,6 +231,21 @@ export class VehiclePO implements OnInit {
                 subsidy: item.Subsidy || item.subsidy || 0
               };
             });
+
+            // Async fallback: fetch comprehensive model info for rows missing colors
+            this.purchaseDetails.forEach((pItem: any) => {
+              if (!pItem.color || !pItem.description) {
+                this.itemService.getPurchaseDetailsByModelNo(pItem.modelNo).subscribe({
+                  next: (res: any) => {
+                    if (res) {
+                      if (!pItem.color) pItem.color = res.colorcode || res.colorCode || res.Colorcode || res.color || res.Color || res.colorname || res.ColorName || '';
+                      if (!pItem.description) pItem.description = res.itemdesc || res.itemDesc || res.Itemdesc || '';
+                    }
+                  }
+                });
+              }
+            });
+
             console.log('Mapped purchaseDetails:', this.purchaseDetails);
             this.loadPage();
           } else {
@@ -335,22 +355,39 @@ export class VehiclePO implements OnInit {
 
     this.loader.show();
 
-    this.itemService.getPurchaseDetailsByModelNo(this.currentItem.modelNo).subscribe({
+    this.itemService.getPurchaseDetailsWithHsnTaxByModelNo(this.currentItem.modelNo).subscribe({
       next: (res: any) => {
         this.loader.hide();
         console.log('Model details response:', res);
         if (res) {
+          // Robust property extraction (handling different casing from backend)
+          const getVal = (obj: any, ...keys: string[]) => {
+            for (const key of keys) {
+              if (obj[key] !== undefined) return obj[key];
+              const lowerKey = key.toLowerCase();
+              if (obj[lowerKey] !== undefined) return obj[lowerKey];
+              const upperKey = key.toUpperCase();
+              if (obj[upperKey] !== undefined) return obj[upperKey];
+            }
+            return 0;
+          };
+
           this.currentItem.description = res.itemdesc || res.itemDesc || res.Itemdesc;
           this.currentItem.color = res.colorcode || res.colorCode || res.Colorcode;
-          this.currentItem.rate = res.ipurrate || res.iPurRate || res.Ipurrate;
-
-          this.currentItem.rawSgstRate = res.sgst || res.sGst || res.Sgst || 0;
-          this.currentItem.rawCgstRate = res.cgst || res.cGst || res.Cgst || 0;
-          this.currentItem.rawIgstRate = res.igst || res.iGst || res.Igst || 0;
-          this.currentItem.rawSubsidy = res.fame2amount || res.fame2Amount || res.Fame2amount || 0;
+          this.currentItem.rawSgstRate = getVal(res, 'Sgst', 'sgst', 'SGST');
+          this.currentItem.rawCgstRate = getVal(res, 'Cgst', 'cgst', 'CGST');
+          this.currentItem.rawIgstRate = getVal(res, 'Igst', 'igst', 'IGST');
+          this.currentItem.rate = getVal(res, 'Ipurrate', 'ipurrate', 'IPURRATE', 'rate');
+          this.currentItem.rawSubsidy = getVal(res, 'Fame2amount', 'fame2amount', 'fame2Amount');
           this.currentItem.itemType = res.itemtype || res.itemType || 0;
 
+          // Re-calculate totals immediately
           this.calculateRowTotals();
+
+          // Force UI refresh for the calculation fields
+          setTimeout(() => {
+            this.calculateRowTotals();
+          }, 50);
         }
       },
       error: (err) => {
@@ -366,7 +403,33 @@ export class VehiclePO implements OnInit {
       return;
     }
 
+    // Header validation (visual only, no toaster as per request)
+    this.locationInvalid = !this.selectedLocation;
+    this.transactionTypeInvalid = !this.selectedTransactionType;
+
+    if (this.locationInvalid || this.transactionTypeInvalid) {
+      return;
+    }
+
+    // Check for duplicate model in the list (using description/name)
+    const isDuplicate = this.purchaseDetails.some((item, index) =>
+      item.modelNo === this.currentItem.modelNo && index !== this.editingIndex
+    );
+
+    if (isDuplicate) {
+      this.toaster.show(`Model "${this.currentItem.description}" is already added. If you need to change the quantity, please edit the existing entry.`, { classname: 'bg-warning text-dark', delay: 5000 });
+      return;
+    }
+
+    this.calculateRowTotals();
+
     const newItem = { ...this.currentItem };
+
+    // Ensure all critical tax fields are copied as numbers
+    newItem.sgstAmt = Number(this.currentItem.sgstAmt) || 0;
+    newItem.cgstAmt = Number(this.currentItem.cgstAmt) || 0;
+    newItem.igstAmt = Number(this.currentItem.igstAmt) || 0;
+    newItem.amount = Number(this.currentItem.amount) || 0;
 
     if (this.editingIndex !== null) {
       this.purchaseDetails[this.editingIndex] = newItem;
@@ -408,7 +471,7 @@ export class VehiclePO implements OnInit {
 
     // Bind subsidy to discAmt if itemType is 11
     if (this.currentItem.itemType === 11) {
-      this.currentItem.discAmt = (this.globalSubsidy || 0) * qty;
+      this.currentItem.discAmt = (Number(this.currentItem.rawSubsidy) || 0) * qty;
     }
 
     let discAmt = Number(this.currentItem.discAmt) || 0;
@@ -432,34 +495,66 @@ export class VehiclePO implements OnInit {
     const locState = (dealerLoc?.state || dealerLoc?.State || '').trim();
     console.log('Detected state:', locState);
 
-    const isInterstate = locState ? locState.toLowerCase() !== 'maharashtra' : false;
-    console.log('Is Interstate:', isInterstate);
+    // Robust property extraction (handling different casing from backend)
+    const getVal = (obj: any, ...keys: string[]) => {
+      if (!obj) return 0;
+      for (const key of keys) {
+        if (obj[key] !== undefined && obj[key] !== null) return Number(obj[key]);
+        const lowerKey = key.toLowerCase();
+        if (obj[lowerKey] !== undefined && obj[lowerKey] !== null) return Number(obj[lowerKey]);
+        const upperKey = key.toUpperCase();
+        if (obj[upperKey] !== undefined && obj[upperKey] !== null) return Number(obj[upperKey]);
+      }
+      return 0;
+    };
 
-    let rawSgstRate = Number(this.currentItem.rawSgstRate) || 0;
-    let rawCgstRate = Number(this.currentItem.rawCgstRate) || 0;
-    let rawIgstRate = Number(this.currentItem.rawIgstRate) || 0;
+    const rawSgstRate = getVal(this.currentItem, 'rawSgstRate', 'sgst');
+    const rawCgstRate = getVal(this.currentItem, 'rawCgstRate', 'cgst');
+    const rawIgstRate = getVal(this.currentItem, 'rawIgstRate', 'igst');
+
+    console.log('Calculation rates:', { rawSgstRate, rawCgstRate, rawIgstRate });
+
+    // Determine if Interstate: 
+    // 1. Explicitly not Maharashtra
+    // 2. OR if Transaction Type is 'I' (Interstate)
+    // 3. OR if we have an IGST rate but no SGST/CGST rates (HSN mapping preference)
+    let isInterstate = locState ? locState.toLowerCase() !== 'maharashtra' : false;
+
+    if (this.selectedTransactionType === 'I') {
+      console.log('Forcing Interstate logic because Transaction Type is Interstate');
+      isInterstate = true;
+    } else if (this.selectedTransactionType === 'L') {
+      console.log('Forcing Local logic because Transaction Type is Local');
+      isInterstate = false;
+    } else if (rawIgstRate > 0 && (rawSgstRate === 0 && rawCgstRate === 0)) {
+      console.log('Auto-detecting Interstate because only IGST is present');
+      isInterstate = true;
+    }
+
+    console.log('Final isInterstate:', isInterstate);
 
     if (isInterstate) {
-      // Interstate logic: Use IGST (sum of SGST/CGST if IGST is 0)
-      let totalIgst = rawIgstRate;
-      if (totalIgst === 0) totalIgst = rawSgstRate + rawCgstRate;
-
+      // Interstate logic: Use IGST
       this.currentItem.sgstAmt = 0;
       this.currentItem.cgstAmt = 0;
-      this.currentItem.igstAmt = (this.currentItem.taxableAmount * totalIgst) / 100;
-    } else {
-      // Local logic: Use SGST/CGST (split IGST by 2 if they are 0)
-      let sRate = rawSgstRate;
-      let cRate = rawCgstRate;
+      this.currentItem.igstAmt = (this.currentItem.taxableAmount * rawIgstRate) / 100;
 
-      if (sRate === 0 && cRate === 0 && rawIgstRate > 0) {
-        sRate = rawIgstRate / 2;
-        cRate = rawIgstRate / 2;
+      // Secondary fallback if IGST is 0 but we have local rates (rare for Interstate)
+      if (this.currentItem.igstAmt === 0 && (rawSgstRate + rawCgstRate) > 0) {
+        this.currentItem.igstAmt = (this.currentItem.taxableAmount * (rawSgstRate + rawCgstRate)) / 100;
       }
-
-      this.currentItem.sgstAmt = (this.currentItem.taxableAmount * sRate) / 100;
-      this.currentItem.cgstAmt = (this.currentItem.taxableAmount * cRate) / 100;
+    } else {
+      // Local logic: Use SGST/CGST
+      this.currentItem.sgstAmt = (this.currentItem.taxableAmount * rawSgstRate) / 100;
+      this.currentItem.cgstAmt = (this.currentItem.taxableAmount * rawCgstRate) / 100;
       this.currentItem.igstAmt = 0;
+
+      // Fallback: if we only have an IGST rate in a local context, split it
+      if (this.currentItem.sgstAmt === 0 && this.currentItem.cgstAmt === 0 && rawIgstRate > 0) {
+        const halfIgst = rawIgstRate / 2;
+        this.currentItem.sgstAmt = (this.currentItem.taxableAmount * halfIgst) / 100;
+        this.currentItem.cgstAmt = (this.currentItem.taxableAmount * halfIgst) / 100;
+      }
     }
 
     this.currentItem.amount = this.currentItem.taxableAmount + this.currentItem.sgstAmt + this.currentItem.cgstAmt + this.currentItem.igstAmt;
@@ -487,15 +582,15 @@ export class VehiclePO implements OnInit {
 
     // Re-fetch model details to ensure all metadata (rates, itemType) for calculations are present
     if (this.currentItem.modelNo) {
-      this.itemService.getPurchaseDetailsByModelNo(this.currentItem.modelNo).subscribe({
+      this.itemService.getPurchaseDetailsWithHsnTaxByModelNo(this.currentItem.modelNo).subscribe({
         next: (res: any) => {
           if (res) {
             // Patch missing description or color if it wasn't populated from list
             if (!this.currentItem.description) {
-               this.currentItem.description = res.itemdesc || res.itemDesc || res.Itemdesc || '';
+              this.currentItem.description = res.itemdesc || res.itemDesc || res.Itemdesc || '';
             }
             if (!this.currentItem.color) {
-               this.currentItem.color = res.colorcode || res.colorCode || res.Colorcode || res.color || res.Color || res.colorname || res.ColorName || '';
+              this.currentItem.color = res.colorcode || res.colorCode || res.Colorcode || res.color || res.Color || res.colorname || res.ColorName || '';
             }
 
             this.currentItem.rawSgstRate = res.sgst || res.sGst || res.Sgst || 0;
@@ -514,12 +609,45 @@ export class VehiclePO implements OnInit {
 
   deleteItem(index: number) {
     if (this.isSubmitted) return;
-    if (confirm('Are you sure you want to delete this item?')) {
-      // Find the actual index in the main array
-      const actualIndex = (this.page - 1) * this.pageSize + index;
-      this.purchaseDetails.splice(actualIndex, 1);
-      this.loadPage();
-    }
+
+    Swal.fire({
+      title: 'Are you sure you want to delete?',
+      text: "",
+      icon: 'warning',
+      showCancelButton: true,
+      customClass: {
+        confirmButton: 'btn btn-primary w-xs me-2 mt-2',
+        cancelButton: 'btn btn-danger w-xs mt-2',
+      },
+      confirmButtonText: 'Yes, delete it!',
+      buttonsStyling: false,
+      showCloseButton: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Find the actual index in the main array
+        const actualIndex = (this.page - 1) * this.pageSize + index;
+        this.purchaseDetails.splice(actualIndex, 1);
+        this.loadPage();
+
+        Swal.fire({
+          title: 'Deleted!',
+          text: 'Your item has been deleted.',
+          icon: 'success',
+          customClass: {
+            confirmButton: 'btn btn-primary w-xs mt-2',
+          },
+          buttonsStyling: false
+        });
+      }
+    });
+  }
+
+  get isFameEnabled(): boolean {
+    // If ANY item in the PO or the current selection has a subsidy value, enable the dropdown
+    const hasCurrentSubsidy = (Number(this.currentItem?.rawSubsidy) || 0) > 0;
+    const hasListSubsidy = this.purchaseDetails?.some(item => (Number(item.subsidy) || Number(item.rawSubsidy) || 0) > 0);
+
+    return hasCurrentSubsidy || hasListSubsidy;
   }
 
   onSave() {
@@ -527,6 +655,17 @@ export class VehiclePO implements OnInit {
       this.toaster.show('Please add at least one item to the purchase details.', { classname: 'bg-danger text-white', delay: 3000 });
       return;
     }
+
+    // Header validation
+    this.locationInvalid = !this.selectedLocation;
+    this.transactionTypeInvalid = !this.selectedTransactionType;
+
+    if (this.locationInvalid || this.transactionTypeInvalid) {
+      return;
+    }
+
+    if (this.isSaving) return;
+    this.isSaving = true;
 
     this.loader.show();
 
@@ -552,6 +691,7 @@ export class VehiclePO implements OnInit {
     saveObs.subscribe({
       next: (res) => {
         this.loader.hide();
+        this.isSaving = false;
         if (res.success) {
           this.toaster.show(res.message || 'Purchase Order saved successfully.', { classname: 'bg-success text-white', delay: 5000 });
           this.router.navigate(['/vehicle-po-list']);
@@ -561,6 +701,7 @@ export class VehiclePO implements OnInit {
       },
       error: (err) => {
         this.loader.hide();
+        this.isSaving = false;
         console.error('Save error:', err);
         this.toaster.show(err.error?.message || 'Error connecting to server.', { classname: 'bg-danger text-white', delay: 5000 });
       }
@@ -593,5 +734,8 @@ export class VehiclePO implements OnInit {
         this.toaster.show('An error occurred while submitting to ERP: ' + (err.error?.message || err.message), { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
+  }
+  redirectToCreatePOList() {
+    this.router.navigate(['/vehicle-po-list']);
   }
 }

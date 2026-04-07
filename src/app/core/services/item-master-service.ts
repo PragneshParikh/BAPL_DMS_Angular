@@ -43,4 +43,8 @@ export class ItemMasterService {
     return this.http.get<any>(`${this.baseUrl}/ItemMaster/GetByItemType/${itemtype}`);
   }
 
+  getPurchaseDetailsWithHsnTaxByModelNo(modelNo: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/ItemMaster/GetPurchaseDetailsWithHsnTaxByModelNo/${modelNo}`);
+  }
+
 }
