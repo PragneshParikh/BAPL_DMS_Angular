@@ -1,11 +1,71 @@
 <div class="card">
   <!-- HEADER -->
   <div class="card-header d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">Job Card (Invoice No. 307)</h5>
-    <div>
-      <button class="btn btn-soft-secondary btn-sm me-2">Service History</button>
-      <button class="btn btn-soft-success btn-sm">Job Done</button>
+
+    <!-- LEFT SIDE (2 Dropdowns) -->
+    <div class="d-flex align-items-center gap-2">
+
+      <!-- Service History Dropdown -->
+      <div class="dropdown">
+        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          Service History
+        </button>
+
+        <div class="dropdown-menu p-2 shadow-lg" style="min-width: 800px;" (click)="$event.stopPropagation()">
+
+          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+            <table class="table table-bordered table-sm mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Sr.No</th>
+                  <th>Service Head</th>
+                  <th>Service Type</th>
+                  <th>Service Seq</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                  <th>Dealer Name</th>
+                  <th>Claim Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>Manoj</td>
+                  <td>1st free service</td>
+                  <td>1</td>
+                  <td>01/04/2026</td>
+                  <td><span class="badge bg-success">Availed</span></td>
+                  <td>DealerName</td>
+                  <td>ClaimDate</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Job Done Dropdown -->
+      <div class="dropdown">
+        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          Job Done
+        </button>
+
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item">Today's(10)</a></li>
+          <li><a class="dropdown-item">This Month(20)</a></li>
+          <li><a class="dropdown-item">Last Month(30)</a></li>
+          <li><a class="dropdown-item">Total(60)</a></li>
+        </ul>
+      </div>
+
     </div>
+
+    <!-- RIGHT SIDE (Invoice No) -->
+    <h5 class="mb-0">
+      Job Card (Invoice No. 307)
+    </h5>
+
   </div>
   <div class="card-body">
     <!-- ================= JOB BASIC ================= -->
@@ -18,13 +78,15 @@
         <div class="row">
           <!-- ================= LEFT SIDE (JOB DETAILS) ================= -->
           <div class="col-md-6 border-end pe-3">
-            <div class="row g-3">
+            <div class="row g-2">
               <div class="col-md-4">
                 <label>Job Type</label>
-                <select class="form-select form-select-sm text-truncate" (change)="onJobType($event)">
+                <select class="form-select form-select-sm" [(ngModel)]="selectedJobtype" (change)="onJobType($event)">
+
                   <option value="">Select Job Type</option>
-                  <option *ngFor="let job of JobType" [value]="job.value">
-                    {{ job.name }}
+
+                  <option *ngFor="let job of jobTypeList" [ngValue]="job.jobTypeId">
+                    {{ job.jobtypeName }}
                   </option>
                 </select>
               </div>
@@ -33,25 +95,33 @@
                 <input class="form-control form-control-sm" value="P6DEC12DPEC004809">
               </div>
               <div class="col-md-4">
-                <label>Vehicle Journey</label>
+                <label>Vehicle Kms.</label>
                 <input class="form-control form-control-sm" value="0">
               </div>
               <div class="col-md-4">
                 <label>Service Head</label>
-                <select class="form-select form-select-sm">
-                  <option value="">Select service head</option>
-                  <option value="Manoj">Manoj</option>
-                  <option value="Suraj">Suraj</option>
-                  <option value="Vishal">Vishal</option>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedServiceHead"
+                  (change)="onServiceHeadChange()">
+
+                  <option value="">Select Service Head</option>
+
+                  <option *ngFor="let sh of serviceHeadList" [ngValue]="sh.serviceHeadId">
+                    {{ sh.serviceHeadName }}
+                  </option>
+
                 </select>
               </div>
               <div class="col-md-4">
                 <label>Service Type</label>
-                <select class="form-select form-select-sm" (change)="onJobType($event)">
-                  <option value="">Select service Type</option>
-                  <option *ngFor="let job of JobType" [value]="job.value">
-                    {{ job.name }}
+                <select class="form-select form-select-sm" [(ngModel)]="selectedServiceType"
+                (change)="onServiceTypeChange()">
+
+                  <option value="">Select Service Type</option>
+
+                  <option *ngFor="let st of serviceTypeList" [ngValue]="st.serviceTypeId">
+                    {{ st.serviceTypeName }}
                   </option>
+
                 </select>
               </div>
               <div class="col-md-4">
@@ -67,17 +137,23 @@
                 <label>Coupon No</label>
                 <input class="form-control form-control-sm" value="0">
               </div>
+
               <h6>Job Details</h6>
               <hr class="custom-line">
+
               <div class="col-md-3">
                 <label>Job Prefix</label>
                 <input class="form-control form-control-sm" value="0">
               </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <label>Job In Date</label>
                 <input class="form-control form-control-sm" type="date">
               </div>
               <div class="col-md-3">
+                <label>Job In Time</label>
+                <input class="form-control form-control-sm" type="time">
+              </div>
+              <div class="col-md-2">
                 <label>Job No.</label>
                 <input class="form-control form-control-sm" value="0">
               </div>
@@ -85,32 +161,25 @@
                 <label>Manual Job No.</label>
                 <input class="form-control form-control-sm" value="0">
               </div>
-              <div class="col-md-3">
-                <label>Manual Job Time</label>
-                <input class="form-control form-control-sm" type="time">
-              </div>
-              <div class="col-md-3">
-                <label>Time In</label>
-                <input class="form-control form-control-sm" type="time">
-              </div>
-              <div class="col-md-3">
+
+              <div class="col-md-5">
                 <label>Est.Delivery Date</label>
                 <input class="form-control form-control-sm" type="date">
               </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <label>Est.Delivery Time</label>
                 <input class="form-control form-control-sm" type="time">
               </div>
-              <div class="col-md-3">
-                <label class="form-lael">Job Source/Location</label>
+              <div class="col-md-4">
+                <label class="form-lael">Job Source</label>
                 <select class="form-select form-select-sm text-truncate" (change)="onLocationChange($event)">
-                  <option value="">Select Location</option>
+                  <option value="">Select Source</option>
                   <option *ngFor="let loc of locations" [value]="loc.locname">
                     {{ loc.locname }}
                   </option>
                 </select>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <label>Supervisor/Advisor</label>
                 <select class="form-select form-select-sm">
                   <option value="">Select Supervisor</option>
@@ -119,7 +188,7 @@
                   <option value="Vishal">Vishal</option>
                 </select>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <label>Technician</label>
                 <select class="form-select form-select-sm">
                   <option value="">Select Technician</option>
@@ -132,70 +201,82 @@
                 <label>Job Estimate</label>
                 <input class="form-control form-control-sm" value="0">
               </div>
-              <div class="col-md-3">
-                <label>Date Of Failure</label>
-                <input class="form-control form-control-sm" type="date">
-              </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <label>Air Pressure Rear Tyre</label>
                 <input class="form-control form-control-sm" value="0">
               </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <label>Air Pressure Front Tyre</label>
                 <input class="form-control form-control-sm" value="0">
               </div>
-              <div class="col-md-3">
-                <label>Vehicle Category</label>
-                <select class="form-select form-select-sm">
-                  <option value="">Select Vehicle Category</option>
-                  <option value="FG">FG</option>
-                  <option value="Scooter">Scooter</option>
-                </select>
-              </div>
+
             </div>
           </div>
 
           <!-- ================= RIGHT SIDE (CUSTOMER DETAILS) ================= -->
           <div class="col-md-6 ps-3">
             <h6 class="mb-3">Customer Details</h6>
-
             <div class="row g-3">
-
-              <div class="col-md-6">
+              <div class="col-md-8">
                 <label>Customer Name</label>
                 <input class="form-control form-control-sm" placeholder="Enter name">
               </div>
 
-              <div class="col-md-6">
-                <label>Mobile No</label>
+              <div class="col-md-4">
+                <label>Mobile No.</label>
                 <input class="form-control form-control-sm" placeholder="Enter mobile">
               </div>
-
-              <div class="col-md-6">
-                <label>Email</label>
-                <input class="form-control form-control-sm" placeholder="Enter email">
+              <div class="col-md-4">
+                <label>Alternate Mobile No.</label>
+                <input class="form-control form-control-sm" placeholder="Enter mobile">
               </div>
-
-              <div class="col-md-6">
-                <label>City</label>
-                <input class="form-control form-control-sm" placeholder="Enter city">
-              </div>
-
-              <div class="col-md-12">
-                <label>Address</label>
-                <textarea class="form-control form-control-sm" rows="2"></textarea>
-              </div>
-
-              <div class="col-md-6">
-                <label>Vehicle Number</label>
+              <div class="col-md-4">
+                <label>Model Name</label>
                 <input class="form-control form-control-sm">
               </div>
 
-              <div class="col-md-6">
-                <label>Model</label>
+              <div class="col-md-4">
+                <label>Chassis No.</label>
                 <input class="form-control form-control-sm">
               </div>
 
+              <div class="col-md-4">
+                <label>Reg. No.</label>
+                <input class="form-control form-control-sm">
+              </div>
+
+              <div class="col-md-4">
+                <label>Motor No.</label>
+                <input class="form-control form-control-sm">
+              </div>
+
+              <div class="col-md-4">
+                <label>Battery No.</label>
+                <input class="form-control form-control-sm">
+              </div>
+
+              <div class="col-md-4">
+                <label>Sale Date</label>
+                <input class="form-control form-control-sm" type="date">
+              </div>
+
+              <div class="col-md-4">
+                <label>Insurance Expiry Date</label>
+                <input class="form-control form-control-sm" type="date">
+              </div>
+
+              <div class="col-md-4">
+                <label>Next Service Due Date</label>
+                <input class="form-control form-control-sm" type="date">
+              </div>
+              <div class="col-md-4">
+                <label>RSA Renewal Date</label>
+                <input class="form-control form-control-sm" type="date">
+              </div>
+              <div class="col-md-8">
+                <label>Remarks</label>
+                <textarea class="form-control form-control-sm" rows="5"></textarea>
+              </div>
             </div>
           </div>
 
@@ -210,21 +291,61 @@
       </div>
       <div class="section-body" *ngIf="isOpen.battery">
         <div class="row g-3">
-          <div class="col-md-6">
+          <div class="col-md-3">
             <label>Battery Make</label>
             <input class="form-control form-control-sm" value="Trontek Electronics ltd">
           </div>
-          <div class="col-md-6">
-            <label>Battery Serial No</label>
+          <div class="col-md-3">
+            <label>Battery Serial No(s)</label>
             <input class="form-control form-control-sm" value="TK614818CZC027901">
           </div>
-          <div class="col-md-6">
-            <label>Battery Capacity</label>
+          <div class="col-md-3">
+            <label>Battery Voltage at Full Charge(OCV)</label>
             <input class="form-control form-control-sm" value="2.7 kWh">
           </div>
-          <div class="col-md-6">
-            <label>Battery Chemical</label>
+          <div class="col-md-3">
+            <label>Battery Voltage at Full Charge(CCV)</label>
             <input class="form-control form-control-sm" value="LFP">
+          </div>
+          <div class="col-md-3">
+            <label>Battery Voltage at Discharge</label>
+            <input class="form-control form-control-sm" value="LFP">
+          </div>
+          <div class="col-md-3">
+            <label>Capacity(AH of Battery)</label>
+            <input class="form-control form-control-sm" value="LFP">
+          </div>
+          <div class="col-md-3">
+            <label>Battery Set Voltage</label>
+            <input class="form-control form-control-sm" value="LFP">
+          </div>
+          <div class="col-md-3">
+            <label>Motor Drawing Current(At No Load)</label>
+            <input class="form-control form-control-sm" value="LFP">
+          </div>
+          <div class="col-md-3">
+            <label>Charger Make</label>
+            <input class="form-control form-control-sm" value="Trontek Electronics ltd">
+          </div>
+          <div class="col-md-3">
+            <label>Charger No.</label>
+            <input class="form-control form-control-sm" value="Trontek Electronics ltd">
+          </div>
+          <div class="col-md-3">
+            <label>Coverter No.</label>
+            <input class="form-control form-control-sm" value="Trontek Electronics ltd">
+          </div>
+          <div class="col-md-3">
+            <label>Controller No. Make</label>
+            <input class="form-control form-control-sm" value="Trontek Electronics ltd">
+          </div>
+          <div class="col-md-3">
+            <label>Battery Chemical</label>
+            <input class="form-control form-control-sm" value="Trontek Electronics ltd">
+          </div>
+          <div class="col-md-3">
+            <label>Battery Capacity</label>
+            <input class="form-control form-control-sm" value="Trontek Electronics ltd">
           </div>
         </div>
       </div>
@@ -237,16 +358,20 @@
       </div>
       <div class="section-body" *ngIf="isOpen.voice">
         <div class="row g-3">
-          <div class="col-md-4">
+          <div class="col-md-3">
+            <label>Customer Voice</label>
+            <input class="form-control form-control-sm">
+          </div>
+          <div class="col-md-3">
             <label>Complaint Code</label>
             <input class="form-control form-control-sm">
           </div>
-          <div class="col-md-4">
-            <label>Description</label>
+          <div class="col-md-3">
+            <label>Complaint Description</label>
             <input class="form-control form-control-sm">
           </div>
-          <div class="col-md-4 d-flex align-items-end">
-            <button class="btn btn-primary btn-sm">Add</button>
+          <div class="col-md-3">
+            <button class="btn btn-primary btn-sm commonbtnAdd">Add</button>
           </div>
         </div>
         <div class="text-center mt-3 text-muted">
@@ -254,10 +379,153 @@
         </div>
       </div>
     </div>
+
+    <!-- ================== Comments section =============== -->
+    <div class="section-card">
+      <div class="section-header" (click)="toggle('comments')">
+        <h6 class="mb-0">Comments & Accessory</h6>
+        <i [class]="isOpen.voice ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+      </div>
+      <div class="section-body" *ngIf="isOpen.comments">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label>Observation(s)</label>
+            <textarea class="form-control form-control-sm">
+            </textarea>
+          </div>
+          <div class="col-md-3">
+            <label>Supervisor Comment</label>
+            <textarea class="form-control form-control-sm">
+            </textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================== Labour ====================== -->
+    <!-- <div class="section-card">
+      <div class="section-header" (click)="toggle('labour')">
+        <h6 class="mb-0">Labour</h6>
+        <i [class]="isOpen.voice ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+      </div>
+      <div class="section-body" *ngIf="isOpen.labour">
+        <div class="row g-3">
+          <h6 class="mb-0">Add Labour</h6>
+          <div class="col-md-3">
+            <label>Item Name</label>
+            <input class="form-control form-control-sm" type="text" placeholder="Search item" />
+          </div>
+          <div class="col-md-3">
+            <label>Hrs/TAT</label>
+            <input class="form-control form-control-sm" type="text" />
+          </div>
+          <div class="col-md-3">
+            <label>Amount</label>
+            <input class="form-control form-control-sm" type="text" />
+          </div>
+          <div class="col-md-3">
+            <button class="btn btn-primary btn-sm commonbtnAdd">Add</button>
+          </div>
+          <div class="mt-3 text-muted">
+            Total Amount :
+          </div>
+        </div>
+      </div>
+    </div> -->
+    <!-- ==================== Affected Parts =================== -->
+    <!-- <div class="section-card">
+      <div class="section-header" (click)="toggle('affectedparts')">
+        <h6 class="mb-0">Affected Parts</h6>
+        <i [class]="isOpen.voice ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+      </div>
+      <div class="section-body" *ngIf="isOpen.affectedparts">
+        <h6>Suggested Parts</h6>
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label>Select Item</label>
+            <input class="form-control form-control-sm" />
+          </div>
+          <div class="col-md-3">
+            <label>Item Description</label>
+            <input class="form-control form-control-sm" />
+          </div>
+          <div class="col-md-3">
+            <label>Item MRP</label>
+            <input class="form-control form-control-sm" />
+          </div>
+          <div class="col-md-3">
+            <label>Remarks</label>
+            <input class="form-control form-control-sm" />
+          </div>
+          <div class="col-md-6">
+            <label>Upload Image(Only .png.jpg images allowed)</label>
+            <input type="file" id="imageUpload" accept="image/*">
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-primary btn-sm commonbtnAdd">Add</button>
+          </div>
+          <div class="mt-3 text-muted">
+            Total Amount :
+          </div>
+        </div>
+        <div class="text-center mt-3 text-muted">
+          Record(s) not found.
+        </div>
+      </div>
+    </div> -->
+
+    <!-- =================== Insurance ========================== -->
+    <!-- <div class="section-card">
+      <div class="section-header" (click)="toggle('insurance')">
+        <h6 class="mb-0">Insurance</h6>
+        <i [class]="isOpen.voice ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+      </div>
+      <div class="section-body" *ngIf="isOpen.insurance">
+        <h6>Suggested Parts</h6>
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label>Insurance Party</label>
+            <input class="form-control form-control-sm" />
+          </div>
+          <div class="col-md-3">
+            <label>Surveyor name</label>
+            <input class="form-control form-control-sm" />
+          </div>
+          <div class="col-md-3">
+            <label>Contact Number</label>
+            <input class="form-control form-control-sm" />
+          </div>
+          <div class="col-md-3">
+            <label>Policy No.</label>
+            <input class="form-control form-control-sm" />
+          </div>
+          <div class="col-md-3">
+            <label>Claim No.</label>
+            <input class="form-control form-control-sm" />
+          </div>
+          <div class="col-md-3">
+            <label>Valid From</label>
+            <input class="form-control form-control-sm" />
+          </div>
+          <div class="col-md-3">
+            <label>Valid To</label>
+            <input class="form-control form-control-sm" />
+          </div>
+          <div class="col-md-3">
+            <label>Zero Dep.</label>
+            <select class="form-select form-select-sm">
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div> -->
   </div>
   <!-- FOOTER -->
   <div class="card-footer d-flex justify-content-end gap-2">
-    <button class="btn btn-add btn-sm">Save</button>
+    <button class="btn btn-primary btn-sm">Save</button>
+    <button class="btn btn-primary btn-sm">PDI Detail</button>
     <button class="btn btn-light btn-sm">Cancel</button>
   </div>
 </div>

@@ -23,6 +23,10 @@ export class Form22masterservice {
     return this.httpClient.get<any[]>(`${this.baseUrl}/Form22Master`, { params });
   }
 
+  getOemModelList():Observable<any>{
+     return this.httpClient.get<any[]>(`${this.baseUrl}/Form22Master/GetOemModelList`);
+  }
+
   insertForm22Master(data: any) {
     return this.httpClient.post(
       `${this.baseUrl}/Form22Master`,

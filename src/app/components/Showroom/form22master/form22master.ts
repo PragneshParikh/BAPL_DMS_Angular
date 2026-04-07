@@ -39,6 +39,7 @@ export class Form22master implements OnInit {
   //load page details
   griddata: any[] = [];
   filteredData: any[] = [];
+  oemModelnameList: any[] = [];
 
   searchTerm: string = '';
   selectedForm22Item: any;
@@ -84,12 +85,28 @@ export class Form22master implements OnInit {
 
   }
 
+
   //Oem dropdown binding
   loadOemModels() {
-    this.form22service.getForm22masterdetails().subscribe((res: any) => {
-      this.oemModelList = res;
+    this.form22service.getOemModelList().subscribe({
+      next: (res: any) => {
+        console.log('OEM Models:', res);
+
+        //  Direct assign (API already gives ID + Name)
+        this.oemModelList = res;
+      },
+      error: (err) => {
+        console.error('Error fetching OEM Models', err);
+      }
     });
   }
+
+  // ///oem all details
+  // loadOemModels() {
+  //   this.form22service.getForm22masterdetails().subscribe((res: any) => {
+  //     this.oemModelList = res;
+  //   });
+  // }
 
   //  SEARCH FUNCTION
   searchItems(event: any) {

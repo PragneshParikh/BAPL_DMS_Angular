@@ -29,6 +29,7 @@ export interface Header {
     locationName?: string;
     UpdatedBy?: string;
     UpdatedDate?: string; // ISO string (yyyy-MM-dd)
+    IsLotInspected?: boolean;
 }
 
 export interface Detail {

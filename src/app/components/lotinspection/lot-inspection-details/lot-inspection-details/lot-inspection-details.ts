@@ -9,6 +9,7 @@ import { LoaderService } from '../../../../core/services/loader';
 import { ToastService } from '../../../../shared/toaster/toast-service';
 import { LocationName } from '../../../../ViewModels/ReceiptEntryModel';
 import { ReceiptEntryService } from '../../../../core/services/receipt-entry-service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-lot-inspection-details',
@@ -180,12 +181,28 @@ export class LotInspectionDetails implements OnInit {
 
   // ================= SAVE DATA =================
   saveData() {
-    //update json object
+
+    // VALIDATION FIRST
+    const invalidRows = this.detailList.filter(x => !x.vehicleStatus || x.vehicleStatus === '');
+
+    if (invalidRows.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Vehicle Status Error',
+        text: 'Please select Vehicle Status for all ChassisNo.',
+        confirmButtonColor: '#747CA0',
+        width: '260px',   
+        padding: '0.3em'
+      });
+      return;
+    }
+
+    // THEN PREPARE DATA
     let model = {
       lotInspectedHeaderDetails: {},
       lotInspectedDetails: []
     };
-    // LOT Inspection HEADER (manual mapping)
+
     let formData = {
       invoiceNo: this.headerObj.invoiceNo || '',
       invoiceDate: this.headerObj.invoiceDate,
@@ -204,64 +221,62 @@ export class LotInspectionDetails implements OnInit {
       nameSupervisor: this.headerObj.nameSupervisor || '',
       LocationName: this.headerObj.locationName || '',
       updatedBy: 'Admin',
-      updatedDate: new Date().toISOString()
-    }
+      updatedDate: new Date().toISOString(),
+      IsLotInspected: true
+    };
 
     model.lotInspectedHeaderDetails = formData;
 
-    //Lot inspection Details mapping
-    var invoiceDetails: any[] = [];
-    this.detailList.forEach((item, i) => {
-      const list = {
+    // DETAILS MAPPING
+    let invoiceDetails: any[] = [];
+
+    this.detailList.forEach((item) => {
+      invoiceDetails.push({
         Id: item.id,
         LotHeaderId: item.lotHeaderID,
-        ChassisNo: (item.chassisNo || 0),
-        KeyFobSetQty: (item.keyFobSetQty || 0),
-        ChargerQty: (item.chargerQty || 0),
-        MirrorSetQty: (item.mirrorSetQty || 0),
-        FirstAidKitQty: (item.firstAidKitQty || 0),
-        ToolkitQty: (item.toolkitQty || 0),
+        ChassisNo: item.chassisNo || 0,
+        KeyFobSetQty: item.keyFobSetQty || 0,
+        ChargerQty: item.chargerQty || 0,
+        MirrorSetQty: item.mirrorSetQty || 0,
+        FirstAidKitQty: item.firstAidKitQty || 0,
+        ToolkitQty: item.toolkitQty || 0,
         OwnersManual: item.ownersManual || 0,
         IgnitionKeySet: item.ignitionKeySet || 0,
         AttributeCard: item.attributeCard || 0,
         ChargingKit: item.chargingKit || 0,
-
         InspectionDate: item.inspectionDate || '',
         VehicleStatus: item.vehicleStatus || '',
         DamageDetails: item.damageDetails || '',
         ChassisWiseRemarks: item.chassisWiseRemarks || '',
-        //lotVehicleDamageImage :item.lotVehicleDamageImage || '',
         UpdatedBy: item.UpdatedBy || '',
         UpdatedDate: item.UpdatedDate || ''
-      }
-      invoiceDetails.push(list);
+      });
     });
 
     model.lotInspectedDetails = invoiceDetails;
+
+    //  NOW SHOW LOADER
     this.loader.show();
+
+    //  API CALL
     this.lotInspectionDetailservice.updateLotInspectedDetails(model).subscribe({
       next: (res) => {
-        this.loader.hide()
+        this.loader.hide();
         this.toaster.show('LOT inspection details Updated successfully!', {
           classname: 'bg-success text-white',
           delay: 3000
         });
-
       },
       error: (err) => {
-
-        console.error(err)
+        console.error(err);
         this.loader.hide();
-
-        this.toaster.show('Failed to submit  Lot Inspection details!', {
+        this.toaster.show('Failed to submit Lot Inspection details!', {
           classname: 'bg-danger text-white',
           delay: 5000
         });
-
       }
     });
   }
-
   // ================= FILE =================
   onFileSelected(event: any, index: number) {
     const file = event.target.files[0];
