@@ -1,8 +1,16 @@
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-    <h4 class="mb-sm-0">
-        <i class="ri-car-line me-2"></i>{{ isSubmitted ? 'Vehicle Purchase Order Submitted in ERP' : 'Vehicle Purchase
+    <!-- <h4 class="mb-sm-0">
+        <i class="ri-car-line me-2"></i>{{ isSubmitted ? 'Vehicle Purchase Order Submitted to ERP' : 'Vehicle Purchase
         Order' }}
+    </h4> -->
+    <h4 class="mb-sm-0 text-center">
+        <i class="ri-car-line me-2"></i>
+        Vehicle Purchase Order
     </h4>
+
+    <span *ngIf="isSubmitted" class="text-primary fw-bold d-block text-center">
+        Submitted to ERP
+    </span>
     <div class="page-title-right">
         <div class="d-flex gap-1">
             <!-- <select class="form-select form-select-sm">
@@ -47,17 +55,21 @@
                             [readonly]="isSubmitted">
                     </div>
 
-                    <div class="col-md-1">
+                    <div class="col-md-2">
                         <label class="form-label mb-0 small">Order No</label>
                         <input type="text" class="form-control form-control-sm bg-light" [(ngModel)]="orderNo" readonly>
                     </div>
 
-                    <div class="col-md-1">
+                    <!-- <div class="col-md-1">
                         <label class="form-label mb-0 small">Date</label>
                         <input type="text" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="poDate"
                             readonly>
+                    </div> -->
+                    <div class="col-md-1">
+                        <label class="form-label mb-0 small">Date</label>
+                        <input type="text" class="form-control form-control-sm bg-light text-muted"
+                            [ngModel]="poDate | date:'yyyy-MM-dd'" readonly>
                     </div>
-
                     <div class="col-md-2">
                         <label class="form-label mb-0 small">Party Name</label>
                         <input type="text" class="form-control form-control-sm border-start border-2"

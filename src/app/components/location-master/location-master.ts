@@ -7,6 +7,8 @@ import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstra
 import '@angular/localize/init';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { StorageService } from '../../core/services/storage';
+import { locationAreaMaster } from '../../constant';
 
 declare var bootstrap: any;
 
@@ -23,6 +25,7 @@ export class LocationMasterComponent implements OnInit {
   originalLocationList: any[] = [];
   dealerList: any[] = [];
   dealerCode: string = '';
+  isDealer: boolean = false;
   locationArea: string = '';
   locationName: string = '';
   selectedLocation: any = {};
@@ -32,15 +35,23 @@ export class LocationMasterComponent implements OnInit {
   totalRecords = 0;
   startIndex = 0;
   endIndex = 0;
-  sortColumn = '';
-  sortDirection = 'asc';
+  sortColumn = 'rrglocationidno';
+  sortDirection = 'desc';
 
 
   constructor(private locationService: LocationMasterService,
     private loader: LoaderService,
+    private storageService: StorageService,
     public toastr: ToastService) { }
 
   ngOnInit(): void {
+    const storedDealerCode = this.storageService.getDealerCode();
+    // Assuming if dealerCode is present and not 'admin', it's a dealer
+    if (storedDealerCode && storedDealerCode.toLowerCase() !== 'admin') {
+      this.isDealer = true;
+      this.dealerCode = storedDealerCode;
+    }
+
     this.loadLocations();
     this.loadDealerDropdown();
   }
@@ -52,9 +63,16 @@ export class LocationMasterComponent implements OnInit {
         this.loader.hide();
         console.log(res);
         const data = res?.data || res;
-        this.locationList = data;
         this.originalLocationList = data;
+
+        if (this.isDealer && this.dealerCode) {
+          this.locationList = data.filter((x: any) => x.dealercode == this.dealerCode);
+        } else {
+          this.locationList = data;
+        }
+
         this.loadPage();// for pagination
+        this.sort(this.sortColumn, true);
       },
 
       error: (err) => {
@@ -66,10 +84,12 @@ export class LocationMasterComponent implements OnInit {
 
   searchLocation() {
     let filtered = this.originalLocationList;
-    if (this.dealerCode) {
-      filtered = filtered.filter((x: any) =>
-        x.dealercode == this.dealerCode
-      );
+
+    // Safety: Always enforce dealer restriction if user is a dealer
+    if (this.isDealer && this.dealerCode) {
+      filtered = filtered.filter((x: any) => x.dealercode == this.dealerCode);
+    } else if (this.dealerCode) {
+      filtered = filtered.filter((x: any) => x.dealercode == this.dealerCode);
     }
 
     if (this.locationArea) {
@@ -85,6 +105,7 @@ export class LocationMasterComponent implements OnInit {
     }
 
     this.locationList = filtered;
+    this.sort(this.sortColumn, true);
     this.page = 1;
     this.loadPage();
     // this.dealerCode = '';
@@ -93,11 +114,19 @@ export class LocationMasterComponent implements OnInit {
   }
 
   resetSearch() {
-
-    this.dealerCode = '';
-    this.locationArea = '';
-    this.locationName = '';
-    this.locationList = this.originalLocationList;
+    if (this.isDealer) {
+      // For dealers, reset only the non-dealer filters
+      this.locationArea = '';
+      this.locationName = '';
+      this.locationList = this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode);
+    } else {
+      this.dealerCode = '';
+      this.locationArea = '';
+      this.locationName = '';
+      this.locationList = this.originalLocationList;
+    }
+    this.page = 1;
+    this.loadPage();
   }
 
   openEditModal(location: any) {
@@ -107,12 +136,14 @@ export class LocationMasterComponent implements OnInit {
     );
     modal.show();
   }
-  sort(column: string) {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
+  sort(column: string, isDefault: boolean = false) {
+    if (!isDefault) {
+      if (this.sortColumn === column) {
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortColumn = column;
+        this.sortDirection = 'asc';
+      }
     }
     this.locationList.sort((a, b) => {
       let valueA = a[column] || '';
@@ -123,11 +154,7 @@ export class LocationMasterComponent implements OnInit {
     });
     this.loadPage();
   }
-  locationAreaMaster = [
-    { id: 1, name: 'Showroom' },
-    { id: 2, name: 'Workshop' },
-    { id: 3, name: 'Yard' }
-  ];
+  locationAreaMaster = locationAreaMaster;
   getLocationAreaName(id: number) {
     const area = this.locationAreaMaster.find(x => x.id == id);
     return area ? area.name : '';
@@ -154,7 +181,11 @@ export class LocationMasterComponent implements OnInit {
   checkSearchReset() {
 
     if (!this.dealerCode && !this.locationArea && !this.locationName) {
-      this.locationList = [...this.locationList];
+      if (this.isDealer && this.dealerCode) {
+        this.locationList = this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode);
+      } else {
+        this.locationList = [...this.originalLocationList];
+      }
       this.page = 1;
       this.loadPage();
     }
@@ -170,7 +201,12 @@ export class LocationMasterComponent implements OnInit {
     ) {
 
       this.page = 1;
-      // full list show
+      // full list show with dealer scope
+      if (this.isDealer && this.dealerCode) {
+        this.locationList = this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode);
+      } else {
+        this.locationList = [...this.originalLocationList];
+      }
       this.pagedLocationList = [...this.locationList];
       this.loadPage();
     }
@@ -179,7 +215,11 @@ export class LocationMasterComponent implements OnInit {
   checkKeywordReset() {
 
     if (!this.locationName || this.locationName.trim() === '') {
-      this.locationList = [...this.originalLocationList];
+      if (this.isDealer && this.dealerCode) {
+        this.locationList = this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode);
+      } else {
+        this.locationList = [...this.originalLocationList];
+      }
       this.page = 1;
       this.loadPage();
 
@@ -192,7 +232,13 @@ export class LocationMasterComponent implements OnInit {
       next: (res: any) => {
         this.loader.hide();
         console.log("Dealer API Response:", res);
-        this.dealerList = res?.data || res;
+        const dealers = res?.data || res;
+
+        if (this.isDealer && this.dealerCode) {
+          this.dealerList = dealers.filter((d: any) => d.dealerCode == this.dealerCode);
+        } else {
+          this.dealerList = dealers;
+        }
       },
       error: (err) => {
         this.loader.hide();

@@ -417,7 +417,7 @@ export class VehiclePO implements OnInit {
     );
 
     if (isDuplicate) {
-      this.toaster.show(`Model "${this.currentItem.description}" is already added. If you need to change the quantity, please edit the existing entry.`, { classname: 'bg-warning text-dark', delay: 5000 });
+      this.toaster.show(`Model "${this.currentItem.description}" is already added. If you need to change the quantity, please edit the existing entry.`, { classname: 'bg-danger text-dark', delay: 5000 });
       return;
     }
 

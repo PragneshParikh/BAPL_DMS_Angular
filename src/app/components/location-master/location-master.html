@@ -9,7 +9,7 @@
                 <div class="col-md-3 dropdown-wrapper">
                     <label class="form-label">Dealer Name</label>
                     <select class="form-select form-select-sm" [(ngModel)]="dealerCode"
-                        (ngModelChange)="checkSearchReset()">
+                        (ngModelChange)="checkSearchReset()" [disabled]="isDealer">
                         <option value="">-- Select Dealer --</option>
                         <option *ngFor="let d of dealerList" [value]="d.dealerCode">
                             {{d.dealerName}}
@@ -34,11 +34,15 @@
                     <button class="btn btn-primary btn-sm" (click)="searchLocation()">
                         Search
                     </button>
+                    <button class="btn btn-primary btn-sm" (click)="resetSearch()">
+                        Reset
+                    </button>
 
                     <button class="btn btn-success btn-bg btn-sm" [ngbTooltip]="'Export to Excel'"
                         (click)="downloadLocationExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
+
                 </div>
             </div>
         </div>
