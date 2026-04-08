@@ -148,7 +148,7 @@
               </div>
               <div class="col-md-4">
                 <label>Coupon No</label>
-                <input class="form-control form-control-sm" value="0">
+                <input class="form-control form-control-sm" [(ngModel)]="couponNo" readonly>
               </div>
 
               <h6>Job Details</h6>
@@ -185,10 +185,12 @@
               </div>
               <div class="col-md-4">
                 <label class="form-lael">Job Source</label>
-                <select class="form-select form-select-sm text-truncate" (change)="onLocationChange($event)">
-                  <option value="">Select Source</option>
-                  <option *ngFor="let loc of locations" [value]="loc.locname">
-                    {{ loc.locname }}
+                <select class="form-select form-select-sm" [(ngModel)]="selectedJobSources" (change)="onJobSource()">
+
+                  <option value="">Select Job Source</option>
+
+                  <option *ngFor="let job of jobSourceList" [ngValue]="job.jobSourceId">
+                    {{ job.jobSourceName }}
                   </option>
                 </select>
               </div>
@@ -306,11 +308,11 @@
         <div class="row g-3">
           <div class="col-md-3">
             <label>Battery Make</label>
-            <input class="form-control form-control-sm" value="Trontek Electronics ltd">
+            <input class="form-control form-control-sm" [(ngModel)]="batteryMake">
           </div>
           <div class="col-md-3">
             <label>Battery Serial No(s)</label>
-            <input class="form-control form-control-sm" value="TK614818CZC027901">
+            <input class="form-control form-control-sm" [(ngModel)]="batteryNumber">
           </div>
           <div class="col-md-3">
             <label>Battery Voltage at Full Charge(OCV)</label>
@@ -334,7 +336,7 @@
           </div>
           <div class="col-md-3">
             <label>Motor Drawing Current(At No Load)</label>
-            <input class="form-control form-control-sm" value="LFP">
+            <input class="form-control form-control-sm" [(ngModel)]="motorNo">
           </div>
           <div class="col-md-3">
             <label>Charger Make</label>
@@ -342,23 +344,23 @@
           </div>
           <div class="col-md-3">
             <label>Charger No.</label>
-            <input class="form-control form-control-sm" value="Trontek Electronics ltd">
+            <input class="form-control form-control-sm" [(ngModel)]="chargerNumber">
           </div>
           <div class="col-md-3">
             <label>Coverter No.</label>
-            <input class="form-control form-control-sm" value="Trontek Electronics ltd">
+            <input class="form-control form-control-sm" [(ngModel)]="converterNo">
           </div>
           <div class="col-md-3">
             <label>Controller No. Make</label>
-            <input class="form-control form-control-sm" value="Trontek Electronics ltd">
+            <input class="form-control form-control-sm" [(ngModel)]="controllerNo">
           </div>
           <div class="col-md-3">
             <label>Battery Chemical</label>
-            <input class="form-control form-control-sm" value="Trontek Electronics ltd">
+            <input class="form-control form-control-sm" [(ngModel)]="batteryChemestry">
           </div>
           <div class="col-md-3">
             <label>Battery Capacity</label>
-            <input class="form-control form-control-sm" value="Trontek Electronics ltd">
+            <input class="form-control form-control-sm" [(ngModel)]="batteryCapacity">
           </div>
         </div>
       </div>

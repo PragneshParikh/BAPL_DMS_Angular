@@ -13,7 +13,7 @@ export class JobCardService {
 
   
    getJobType(): Observable<any> {
-    debugger;;
+   // debugger;;
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetJobType`);
   }
   getServiceHead(jobTypeId: number): Observable<any>{
@@ -24,6 +24,10 @@ export class JobCardService {
   }
   getAllInspectedChassis(dealerCode: string): Observable<any>{
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetAllInspectedChassis?dealerCode=${dealerCode}`);
+  }
+  getJobSource(): Observable<any> {
+    //debugger;;
+    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetJobSource`);
   }
 
 }
