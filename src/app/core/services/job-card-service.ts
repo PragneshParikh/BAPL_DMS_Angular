@@ -22,5 +22,8 @@ export class JobCardService {
   getServiceType(serviceHeadId: number): Observable<any>{
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetServiceType?serviceHeadId=${serviceHeadId}`);
   }
+  getAllInspectedChassis(dealerCode: string): Observable<any>{
+    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetAllInspectedChassis?dealerCode=${dealerCode}`);
+  }
 
 }

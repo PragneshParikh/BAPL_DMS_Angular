@@ -75,7 +75,7 @@ export class ReceiptEntryService {
 }
 
   getLocationList(dealerCode: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/LocationMaster/GetAllShowroomLocationsofCurrentDelaer?dealerCode=${dealerCode}`);
+    return this.http.get(`${this.apiUrl}/LocationMaster/GetLocationTypeWiseNameByDealerCode?dealerCode=${dealerCode}`);
   }
   getNextReceiptNo(): Observable<string> {
     return this.http.get(`${this.apiUrl}/ReceiptEntry/getNextReceiptNo`, {

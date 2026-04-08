@@ -63,7 +63,7 @@
 
     <!-- RIGHT SIDE (Invoice No) -->
     <h5 class="mb-0">
-      Job Card (Invoice No. 307)
+      Job Card (Invoice No. {{ invoiceNo || '' }})
     </h5>
 
   </div>
@@ -81,7 +81,7 @@
             <div class="row g-2">
               <div class="col-md-4">
                 <label>Job Type</label>
-                <select class="form-select form-select-sm" [(ngModel)]="selectedJobtype" (change)="onJobType($event)">
+                <select class="form-select form-select-sm" [(ngModel)]="selectedJobtype" (change)="onJobType()">
 
                   <option value="">Select Job Type</option>
 
@@ -92,7 +92,12 @@
               </div>
               <div class="col-md-4">
                 <label>Select Chassis</label>
-                <input class="form-control form-control-sm" value="P6DEC12DPEC004809">
+                <select class="form-select form-select-sm" (change)="onChassisChange()" [(ngModel)]="selectedChassis">
+                  <option value="">Select Chassis</option>
+                  <option *ngFor="let item of chassisList" [value]="item.chassisNumber">
+                    {{ item.chassisNumber }}
+                  </option>
+                </select>
               </div>
               <div class="col-md-4">
                 <label>Vehicle Kms.</label>
@@ -100,29 +105,36 @@
               </div>
               <div class="col-md-4">
                 <label>Service Head</label>
-                <select class="form-select form-select-sm" [(ngModel)]="selectedServiceHead"
-                  (change)="onServiceHeadChange()">
+                <div *ngIf="serviceHeadList.length > 1; else singleHead">
+                  <select class="form-select form-select-sm" [(ngModel)]="selectedServiceHead"
+                    (change)="onServiceHeadChange()">
 
-                  <option value="">Select Service Head</option>
+                    <option value="">Select Service Head</option>
+                    <option *ngFor="let sh of serviceHeadList" [ngValue]="sh.serviceHeadId">
+                      {{ sh.serviceHeadName }}
+                    </option>
+                  </select>
+                </div>
 
-                  <option *ngFor="let sh of serviceHeadList" [ngValue]="sh.serviceHeadId">
-                    {{ sh.serviceHeadName }}
-                  </option>
-
-                </select>
+                <ng-template #singleHead>
+                  <input class="form-control form-control-sm" [value]="serviceHeadList[0]?.serviceHeadName" readonly>
+                </ng-template>
               </div>
               <div class="col-md-4">
                 <label>Service Type</label>
-                <select class="form-select form-select-sm" [(ngModel)]="selectedServiceType"
-                (change)="onServiceTypeChange()">
+                <div *ngIf="serviceTypeList.length > 1; else singleType">
+                  <select class="form-select form-select-sm" [(ngModel)]="selectedServiceType">
 
-                  <option value="">Select Service Type</option>
+                    <option value="">Select Service Type</option>
+                    <option *ngFor="let st of serviceTypeList" [ngValue]="st.serviceTypeId">
+                      {{ st.serviceTypeName }}
+                    </option>
+                  </select>
+                </div>
 
-                  <option *ngFor="let st of serviceTypeList" [ngValue]="st.serviceTypeId">
-                    {{ st.serviceTypeName }}
-                  </option>
-
-                </select>
+                <ng-template #singleType>
+                  <input class="form-control form-control-sm" [value]="serviceTypeList[0]?.serviceTypeName" readonly>
+                </ng-template>
               </div>
               <div class="col-md-4">
                 <label class="form-lael">Service Location</label>
@@ -131,6 +143,7 @@
                   <option *ngFor="let loc of locations" [value]="loc.locname">
                     {{ loc.locname }}
                   </option>
+
                 </select>
               </div>
               <div class="col-md-4">
