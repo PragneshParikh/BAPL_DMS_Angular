@@ -29,6 +29,22 @@ export const JobType = [
     {name:'Recall', value:'Recall'}
 ];
 
+export const BatteryType = [
+    {batterytypeidno:1, value:'Li'},
+    {batterytypeidno:2, value:'LT'},
+    {batterytypeidno:3, value:'LA'},
+    {batterytypeidno:4, value:'LFP'}
+];
+export const BatteryVoltage = [
+    {batteryVoltageidno:1, value:'12 Volt'},
+    {batteryVoltageidno:2, value:'24 Volt'},
+    {batteryVoltageidno:3, value:'32 Volt'},
+    {batteryVoltageidno:4, value:'48 Volt'},
+    {batteryVoltageidno:5, value:'52 Volt'},
+    {batteryVoltageidno:6, value:'60 Volt'},
+    {batteryVoltageidno:7, value:'72 Volt'}
+];
+
 export const JobSource = [
     {name:'Advance Booking', value:'Advance Booking'},
     {name:'Walk In',value:'Walk In'},
@@ -36,3 +52,9 @@ export const JobSource = [
     {name:'Door Step Service', value:'Door Step Service'},
     {name:'Mega Camp', value:'Mega Camp'}
 ];
+
+ export const locationAreaMaster = [
+    { id: 1, name: 'Showroom' },
+    { id: 2, name: 'Workshop' },
+    { id: 3, name: 'Yard' }
+  ];
