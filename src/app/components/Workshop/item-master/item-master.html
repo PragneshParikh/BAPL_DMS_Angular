@@ -135,199 +135,199 @@
 
   <div class="modal-header item-modal-header">
     <h5 class="modal-title">
-      Item Details</h5>
+      Parts Item Master</h5>
     <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
   </div>
 
   <div class="modal-body">
     <div class="row">
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Item Type</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.itemtype == 1 ? 'Vehicle' : 'Parts'"
           readonly>
       </div>
 
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Part No</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.itemname" readonly>
+        <input class="form-control form-control-sm" [value]="selectedItem?.itemname" readonly />
       </div>
-
-      <div class="col-md-3">
+      <div class="col-md-2">
+        <label class="form-label">Description</label>
+        <input type="text" class="form-control form-control-sm" [value]="selectedItem?.itemdesc" readonly />
+      </div>
+      <div class="col-md-2">
         <label class="form-label">Part Code</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.itemcode" readonly>
       </div>
-
-      <div class="col-md-3">
-        <label class="form-label">Item Description</label>
-        <textarea class="form-control form-control-sm" rows="2" readonly>{{selectedItem?.itemdesc}}</textarea>
-      </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Is OEM Part</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.iselectric ? 'Yes' : 'No'" readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">OEM Part No.</label>
         <input class="form-control form-control-sm" [value]="" readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
+        <label class="form-label">Select Group</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 1 ? 'Spares' : 'FG'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Vehicle Model Name</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.oemmodelname" readonly>
+      </div>
+      <div class="col-md-2">
         <label class="form-label">OEM Part Description</label>
         <input class="form-control form-control-sm" [value]="" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Group</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 1 ? 'FG' : 'Spares'" readonly>
-      </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">UOM</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [value]="'PCS'" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Model Name</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
-      </div>
-      <div class="col-md-3">
+      
+      <div class="col-md-2">
         <label class="form-label">HSN Code</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.hsncode" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Item MRP</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+      <div class="col-md-2">
+        <label class="form-label">TAX[%]</label>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">OEM MRP</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Sale Price</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Purchase Rate</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Min Order QTY</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">CGST</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.cgst" readonly>
-      </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">SGST</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.sgst" readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
+        <label class="form-label">CGST</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.cgst" readonly>
+      </div>
+      <div class="col-md-2">
         <label class="form-label">IGST</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.igst" readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">UGST</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.ugst" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Re-Ord</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+      <div class="col-md-2">
+        <label class="form-label">GST Cess</label>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Price List Amount</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+      <div class="col-md-2">
+        <label class="form-label">TCS</label>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Part Labr</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+      <div class="col-md-2">
+        <label class="form-label">Item Category</label>
+        <input class="form-control form-control-sm" [value]="'Parts'" readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">HRs/TAT</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
       </div>
-      <div class="col-md-6">
+      <div class="col-md-2">
+        <label class="form-label">List Price</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.dlrprice" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Item MRP</label>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">OEM MRP</label>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+      </div>
+       <div class="col-md-2">
+        <label class="form-label">Purchase Rate</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.ipurrate" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Sale Rate</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.custprice" readonly>
+      </div>
+     <div class="col-md-2">
+        <label class="form-label">Margin %</label>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+      </div>
+       <div class="col-md-2">
+        <label class="form-label">Part Labr</label>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Re-Ord</label>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Min Bill QTY</label>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Min Order QTY</label>
+        <input class="form-control form-control-sm" [value]="'1.00'" readonly>
+      </div>
+       <div class="col-md-2">
+        <label class="form-label">Warranty Period</label>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Month/Year</label>
+        <input class="form-control form-control-sm" [value]="'Month'" readonly>
+      </div>
+       <div class="col-md-2">
+        <label class="form-label">Warranty Kms.</label>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Item Wrnt. Period</label>
+        <input class="form-control form-control-sm" [value]="'No'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">VOR Rate</label>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">VOR Specific</label>
+        <input class="form-control form-control-sm" [value]="'Yes'" readonly>
+      </div>
+      <div class="col-md-12">
         <label class="form-label">Remarks</label>
         <input class="form-control form-control-sm" [value]="" readonly>
       </div>
-      <div class="col-md-6">
-        <label class="form-label">Speed Type</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Parts Category</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Warranty Period</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Month/Year</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Warranty Kms.</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Vehicle Type</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.vehtype" readonly>
-      </div>
-
-      <div class="col-md-3">
-        <label class="form-label">VOR Rate</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Customer Price</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.custprice" readonly>
-      </div>
-
-      <div class="col-md-3">
-        <label class="form-label">Dealer Price</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.dlrprice" readonly>
-      </div>
       <!-- Checkbox info -->
       <div class="row">
-        <div class="col-md-3">
-          <label class="form-check-label" for="formCheck6">Exmptd</label> |
+        <div class="col-md-2">
+          <label class="form-check-label" for="formCheck6">IS Exempted</label> |
           <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
           <label class="form-check-label" for="formCheck6">ToolKit/First Aid.</label> |
           <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
+          <label class="form-check-label" for="formCheck6">Must Stock</label> |
+          <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
+        </div>
+        <div class="col-md-2">
           <label class="form-check-label" for="formCheck6">Save as Helmet</label> |
           <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
           <label class="form-check-label" for="formCheck6">Non-Inventory</label> |
           <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
         </div>
-
-      </div>
-      <div class="row mt-2">
-
-        <div class="col-md-3">
+        <div class="col-md-2">
           <label class="form-check-label" for="formCheck6">In-eligible Input</label> |
           <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
         </div>
-        <div class="col-md-3">
-          <label class="form-check-label" for="formCheck6">Item Wrnt.Approval</label> |
-          <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
-        </div>
-        <div class="col-md-3">
-          <label class="form-check-label" for="formCheck6">VOR Specific</label> |
-          <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
-        </div>
       </div>
+      
+        
+      
       <!-- end checkbox -->
-
     </div>
-
   </div>
-
   <div class="modal-footer">
     <button class="btn btn-light" (click)="modal.close()">Close</button>
   </div>
-
 </ng-template>
 
 

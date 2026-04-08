@@ -8,7 +8,8 @@
       <div class="card-header">
         <div class="d-flex justify-content-end align-items-center">
           <!-- Download Excel Button -->
-          <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'" (click)="downloadItemMasterExcel()">
+          <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
+            (click)="downloadItemMasterExcel()">
             <i class="ri-file-excel-2-line"></i>
           </button>
           <!-- Search Box -->
@@ -148,158 +149,211 @@
 
   <div class="modal-body">
     <div class="row">
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Model Type</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 11 ? 'Parts' : 'Vehicle'"
           readonly>
       </div>
 
-      <div class="col-md-3">
+      <div class="col-md-2">
+        <label class="form-label">Veh. Type</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.vehtype == 2 ? 'Spares' : 'Electric vehicle'"
+          readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Speed Type</label>
+        <input class="form-control form-control-sm" [value]="'XYZ'" readonly>
+      </div>
+
+      <div class="col-md-2">
         <label class="form-label">Model Name</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.itemname" readonly>
       </div>
 
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Model Description</label>
-        <textarea class="form-control form-control-sm" rows="2" readonly>{{selectedItem?.itemdesc}}</textarea>
+        <textarea class="form-control form-control-sm" rows="1" readonly>{{selectedItem?.itemdesc}}</textarea>
       </div>
 
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Model Code</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.itemcode" readonly>
       </div>
-
-      <div class="col-md-3">
-        <label class="form-label">Select Group</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 11 ? 'Spares' : 'FG'" readonly>
-      </div>
-
-      <div class="col-md-3">
-        <label class="form-label">HSN Code</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.hsncode" readonly>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">OEM Model Name</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.oemmodelname" readonly>
-      </div>
-
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Electric Vehicle</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.iselectric ? 'Yes' : 'No'" readonly>
       </div>
-
-      <div class="col-md-3">
-        <label class="form-label">No. Of Charger</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
-      </div>
-
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">No. Of Batteries</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.noofbatteries" readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Battery Type</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.batterytypeidno" readonly>
+        <input class="form-control form-control-sm" [value]="getBatteryTypeName(selectedItem?.batterytypeidno)"
+          readonly>
       </div>
-
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">System Voltage</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [value]="getBatteryVoltageName(selectedItem?.batteryVoltageidno)"
+          readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Motor Type</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [value]="'PMSM'" readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Motor Watt</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [value]="'1000 Watt'" readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
+        <label class="form-label">Select Group</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 11 ? 'Spares' : 'FG'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">UOM</label>
+        <input class="form-control form-control-sm" [value]="'Pcs'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">HSN Code</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.hsncode" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">TAX[%]</label>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">SGST</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.sgst" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">CGST</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.cgst" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">IGST</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.igst" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">UGST</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.ugst" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">GST Cess</label>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">TCS</label>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Item Category</label>
+        <input class="form-control form-control-sm" [value]="'Vehicle'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Accsry Billing</label>
+        <input class="form-control form-control-sm" [value]="'Yes'" readonly>
+      </div>
+      <div class="col-md-2">
         <label class="form-label">Item CC</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.itemcc" readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
+        <label class="form-label">EX-Showroom Price</label>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Purchase Rate</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.ipurrate" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Sale Rate</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.custprice" readonly>
+      </div>
+      <div class="col-md-2">
         <label class="form-label">Service Days</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Accsry Billing</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+      <div class="col-md-2">
+        <label class="form-label">Handling Charges</label>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">HSRP</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.cgst" readonly>
+      <div class="col-md-2">
+        <label class="form-label">EX. Wrnty Amnt</label>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Speed Type</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.sgst" readonly>
+      <div class="col-md-2">
+        <label class="form-label">Insurance Amnt</label>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Vehicle Type</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.vehtype" readonly>
+      <div class="col-md-2">
+        <label class="form-label">Regist. Amnt</label>
+        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Re-Ord</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+      <div class="col-md-2">
+        <label class="form-label">Remark</label>
+        <input class="form-control form-control-sm" [value]="'Remarks'" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">FAME || INCENTIVE</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.fame2amount" readonly>
+      <div class="col-md-2">
+        <label class="form-label">Variant</label>
+        <input class="form-control form-control-sm" [value]="'select Variant'" readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Vehicle Color</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.colorName" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Vehicle Journey</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Vehicle Name</label>
+      <div class="col-md-2">
+        <label class="form-label">Vehicle Model Name</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.itemname" readonly>
       </div>
-      <div class="col-md-6">
+      <div class="col-md-2">
+        <label class="form-label">FAME || INCENTIVE</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.fame2amount" readonly>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">OEM Model Name</label>
+        <input class="form-control form-control-sm" [value]="selectedItem?.oemmodelname" readonly>
+      </div>
+      <div class="col-md-2">
         <label class="form-label">Vehicle Category</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [value]="'Vehicle Category'" readonly>
       </div>
-
-      <div class="col-md-3">
+      <div class="col-md-2">
+        <label class="form-label">HSRP</label>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
+      </div>
+      <div class="col-md-2">
         <label class="form-label">Warranty Period</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Month/Year</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [value]="'Month'" readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Warranty Kms.</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">Form-22 Header</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
-
-      <div class="col-md-3">
-        <label class="form-label">Grace Period For Job</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+       <div class="col-md-2">
+        <label class="form-label">No. Of Charger</label>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Remark</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+      <div class="col-md-2">
+        <label class="form-label">Vehicle Journey</label>
+        <input class="form-control form-control-sm" [value]="'select value'" readonly>
       </div>
-
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label">No. Of Tyres</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
-
     </div>
-
   </div>
 
   <div class="modal-footer">
-       <button class="btn btn-light btn-sm" (click)="modal.close()">Close</button>
+    <button class="btn btn-light btn-sm" (click)="modal.close()">Close</button>
   </div>
 
 </ng-template>

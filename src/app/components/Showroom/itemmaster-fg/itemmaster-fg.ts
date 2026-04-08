@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { LoaderService } from '../../../core/services/loader';
 import { error } from 'console';
+import { BatteryType, BatteryVoltage } from '../../../constant';
 @Component({
   selector: 'app-itemmaster-fg',
   standalone: true,
@@ -62,8 +63,18 @@ export class ItemmasterFG implements OnInit {
     });
 
   }
-  //  SEARCH FUNCTION
 
+  // get battery type 
+  getBatteryTypeName(id: number): string {
+  const battery = BatteryType.find(x => x.batterytypeidno === id);
+  return battery ? battery.value : '';
+}
+getBatteryVoltageName(id: number): string {
+  id=1
+  const batteryVoltage = BatteryVoltage.find(x => x.batteryVoltageidno === id);
+  return batteryVoltage ? batteryVoltage.value : '';
+}
+  //  SEARCH FUNCTION
   searchItems(event: any) {
 
     this.searchTerm = event.target.value || '';
