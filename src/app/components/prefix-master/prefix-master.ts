@@ -60,6 +60,7 @@ export class PrefixMaster implements OnInit {
 
   onPageChange(page: number) {
     this.page = page;
+    this.loadSequences();
   }
 
   loadSequences() {

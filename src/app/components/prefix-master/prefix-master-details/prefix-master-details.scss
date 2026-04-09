@@ -1,0 +1,21 @@
+.info-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.info-card {
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  background: #405189;
+  border-radius: 6px;
+  padding: 10px;
+  display: none;
+  z-index: 1000;
+}
+
+.info-wrapper:hover .info-card {
+  display: block;
+}

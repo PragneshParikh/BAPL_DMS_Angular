@@ -2,7 +2,7 @@ import { Component, OnInit, EventEmitter, Output, Inject, ViewChild, TemplateRef
 
 //Logout
 import { AuthenticationService } from '../../core/services/auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 // Language
 import { CookieService } from 'ngx-cookie-service';
@@ -33,7 +33,8 @@ import { ToastService } from '../../shared/toaster/toast-service';
     FormsModule,
     ReactiveFormsModule,
     SimplebarAngularModule,
-    NgbDropdownModule
+    NgbDropdownModule,
+    RouterLink
   ],
   standalone: true
 })
@@ -62,6 +63,9 @@ export class TopbarComponent implements OnInit {
   unReadInwards: number = 0;
   public selectedOption: string = localStorage.getItem('selectedModule') ? JSON.parse(localStorage.getItem('selectedModule') || '{}') : 'ShowRoom';
   dealerCode: string = '';
+
+  menuList: any[] = [];
+  searchResults: any[] = [];
 
   constructor(
     @Inject(DOCUMENT) private document: any,
@@ -202,7 +206,7 @@ export class TopbarComponent implements OnInit {
     }
   }
   // Search Topbar
-  Search() {
+  async Search() {
     var searchOptions = document.getElementById("search-close-options") as HTMLAreaElement;
     var dropdown = document.getElementById("search-dropdown") as HTMLAreaElement;
     var input: any, filter: any, ul: any, li: any, a: any | undefined, i: any, txtValue: any;
@@ -210,25 +214,22 @@ export class TopbarComponent implements OnInit {
     filter = input.value.toUpperCase();
     var inputLength = filter.length;
 
+    if (this.menuList.length === 0) {
+      await this.getMenuList();
+    }
+
+    this.searchResults = this.menuList
+      .flatMap(item => this.searchItemsWithLink(item, filter));
+
     if (inputLength > 0) {
       dropdown.classList.add("show");
       searchOptions.classList.remove("d-none");
-      var inputVal = input.value.toUpperCase();
+      var inputVal = input.value.toLowerCase();
       var notifyItem = document.getElementsByClassName("notify-item");
 
       Array.from(notifyItem).forEach(function (element: any) {
         var notifiTxt = ''
-        if (element.querySelector("h6")) {
-          var spantext = element.getElementsByTagName("span")[0].innerText.toLowerCase()
-          var name = element.querySelector("h6").innerText.toLowerCase()
-          if (name.includes(inputVal)) {
-            notifiTxt = name
-          } else {
-            notifiTxt = spantext
-          }
-        } else if (element.getElementsByTagName("span")) {
-          notifiTxt = element.getElementsByTagName("span")[0].innerText.toLowerCase()
-        }
+        notifiTxt = element.getElementsByTagName("span")[0].innerText.toLowerCase()
         if (notifiTxt)
           element.style.display = notifiTxt.includes(inputVal) ? "block" : "none";
 
@@ -237,6 +238,30 @@ export class TopbarComponent implements OnInit {
       dropdown.classList.remove("show");
       searchOptions.classList.add("d-none");
     }
+  }
+
+  private searchItemsWithLink(item: any, filter: string): any[] {
+    const search = filter.toLowerCase();
+    let results: any[] = [];
+
+    const matches =
+      item.label?.toLowerCase().includes(search) && item.link != null;
+
+    // Include item ONLY if it has link and matches
+    if (matches) {
+      results.push(item);
+    }
+
+    // Traverse subItems
+    if (item.subItems && item.subItems.length > 0) {
+      item.subItems.forEach(sub => {
+        results = results.concat(
+          this.searchItemsWithLink(sub, filter)
+        );
+      });
+    }
+
+    return results;
   }
 
   /**
@@ -349,6 +374,23 @@ export class TopbarComponent implements OnInit {
         console.log(err);
       }
     })
+  }
+
+  async getMenuList(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.loader.show();
+      this.menuService.getMenu().subscribe({
+        next: (menu: any) => {
+          this.menuList = menu;
+          resolve(menu);
+          this.loader.hide();
+        }, error: (err) => {
+          console.error('Error fetching menu:', err);
+          reject(err);
+          this.loader.hide();
+        }
+      });
+    });
   }
 
 }

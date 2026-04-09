@@ -3,252 +3,262 @@
     <h5 class="mb-0">LOT Inspection</h5>
 </div>
 <div class="card">
-<div class="card-body">
-    <div class="accordion" id="accordionExample">
+    <div class="card-body">
+        <div class="accordion" id="accordionExample">
 
-        <!-- LOGISTIC INFO -->
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button py-2" data-bs-toggle="collapse" data-bs-target="#logisticinfo">
-                    Logistic Information
-                </button>
-            </h2>
+            <!-- LOGISTIC INFO -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button py-2" data-bs-toggle="collapse" data-bs-target="#logisticinfo">
+                        Logistic Information
+                    </button>
+                </h2>
 
-            <div id="logisticinfo" class="accordion-collapse collapse show">
-                <div class="accordion-body py-2">
+                <div id="logisticinfo" class="accordion-collapse collapse show">
+                    <div class="accordion-body py-2">
 
-                    <div class="row g-2">
+                        <div class="row g-2">
 
-                        <div class="col-md-3">
-                            <label>Invoice No</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="headerObj.invoiceNo" readonly>
+                            <div class="col-md-3">
+                                <label>Invoice No</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.invoiceNo" readonly>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Invoice Date</label>
+                                <input type="date" class="form-control form-control-sm"
+                                    [(ngModel)]="headerObj.invoiceDate" readonly>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>LOT No.</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.lotNo" readonly>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Date of Arrival</label>
+                                <input type="date" class="form-control form-control-sm"
+                                    [(ngModel)]="headerObj.arrivalDate">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Time of Arrival</label>
+                                <input type="time" class="form-control form-control-sm"
+                                    [(ngModel)]="headerObj.arrivalTime">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>L.R. No</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.lrNo">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>L.R. Date</label>
+                                <input type="date" class="form-control form-control-sm" [(ngModel)]="headerObj.lrDate">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Truck No</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.truckNo">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Transporter Name</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.transporterName">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Driver Name</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.driverName">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Driver Contact</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.driverContact">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Remarks</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.commonRemarks">
+                            </div>
+
                         </div>
 
-                        <div class="col-md-3">
-                            <label>Invoice Date</label>
-                            <input type="date" class="form-control form-control-sm" [(ngModel)]="headerObj.invoiceDate"
-                                readonly>
-                        </div>
+                        <!-- DAMAGE SECTION -->
+                        <div class="row g-2 mt-2">
+                            <h6>Vehicle Damage Inspection Before Unloading</h6>
+                            <hr class="custom-line">
 
-                        <div class="col-md-3">
-                            <label>LOT No.</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="headerObj.lotNo" readonly>
-                        </div>
+                            <div class="col-md-3">
+                                <label>Vehicle Fastening Bracket</label>
+                                <select class="form-select form-select-sm"
+                                    [(ngModel)]="headerObj.vehicleFasteningBracket"
+                                    (change)="onvehiclefasteringcoverChange($event)">
+                                    <option value="">Select Value</option>
+                                    <option value="OK">OK</option>
+                                    <option value="Loose">Loose</option>
+                                </select>
+                            </div>
 
-                        <div class="col-md-3">
-                            <label>Date of Arrival</label>
-                            <input type="date" class="form-control form-control-sm" [(ngModel)]="headerObj.arrivalDate">
-                        </div>
+                            <div class="col-md-3">
+                                <label>Plastic Cover</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="headerObj.plasticCover"
+                                    (change)="onPlastingCoverChange($event)">
+                                    <option value="">Select plasticCover</option>
+                                    <option value="Available">Available</option>
+                                    <option value="Not Available">Not Available</option>
+                                    <option value="Damaged">Damaged</option>
+                                </select>
+                            </div>
 
-                        <div class="col-md-3">
-                            <label>Time of Arrival</label>
-                            <input type="time" class="form-control form-control-sm" [(ngModel)]="headerObj.arrivalTime">
-                        </div>
+                            <div class="col-md-3">
+                                <label>Name of Supervisor</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="headerObj.nameSupervisor"
+                                    (change)="onSupervicsorChange($event)">
+                                    <option value="">Select Supervisor</option>
+                                    <option value="Vishal">Vishal</option>
+                                    <option value="Tushar">Tushar</option>
+                                    <option value="Rakesh">Rakesh</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Location Name</label>
+                                <select class="form-select form-select-sm text-truncate"
+                                    [(ngModel)]="headerObj.locationName" (change)="onLocationChange($event)">
+                                    <option value="">Select Location</option>
+                                    <option *ngFor="let loc of locations" [value]="loc.locname">
+                                        {{ loc.locname }}
+                                    </option>
 
-                        <div class="col-md-3">
-                            <label>L.R. No</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="headerObj.lrNo">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>L.R. Date</label>
-                            <input type="date" class="form-control form-control-sm" [(ngModel)]="headerObj.lrDate">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>Truck No</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="headerObj.truckNo">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>Transporter Name</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="headerObj.transporterName">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>Driver Name</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="headerObj.driverName">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>Driver Contact</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="headerObj.driverContact">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>Remarks</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="headerObj.commonRemarks">
-                        </div>
-
-                    </div>
-
-                    <!-- DAMAGE SECTION -->
-                    <div class="row g-2 mt-2">
-                        <h6>Vehicle Damage Inspection Before Unloading</h6>
-                        <hr class="custom-line">
-
-                        <div class="col-md-3">
-                            <label>Vehicle Fastening Bracket</label>
-                            <select class="form-select form-select-sm" [(ngModel)]="headerObj.vehicleFasteningBracket"
-                                (change)="onvehiclefasteringcoverChange($event)">
-                                <option value="">Select Value</option>
-                                <option value="OK">OK</option>
-                                <option value="Loose">Loose</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>Plastic Cover</label>
-                            <select class="form-select form-select-sm" [(ngModel)]="headerObj.plasticCover"
-                                (change)="onPlastingCoverChange($event)">
-                                <option value="">Select plasticCover</option>
-                                <option value="Available">Available</option>
-                                <option value="Not Available">Not Available</option>
-                                <option value="Damaged">Damaged</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>Name of Supervisor</label>
-                            <select class="form-select form-select-sm" [(ngModel)]="headerObj.nameSupervisor"
-                                (change)="onSupervicsorChange($event)">
-                                <option value="">Select Supervisor</option>
-                                <option value="Vishal">Vishal</option>
-                                <option value="Tushar">Tushar</option>
-                                <option value="Rakesh">Rakesh</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label>Location Name</label>
-                            <select class="form-select form-select-sm text-truncate"
-                                [(ngModel)]="headerObj.locationName" (change)="onLocationChange($event)">
-                                <option value="">Select Location</option>
-                                <option *ngFor="let loc of locations" [value]="loc.locname">
-                                    {{ loc.locname }}
-                                </option>
-
-                            </select>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- RECEIPT ENTRY -->
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button py-2" data-bs-toggle="collapse" data-bs-target="#damage">
-                    Receipt Entry Details
-                </button>
-            </h2>
+            <!-- RECEIPT ENTRY -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button py-2" data-bs-toggle="collapse" data-bs-target="#damage">
+                        Receipt Entry Details
+                    </button>
+                </h2>
 
-            <div id="damage" class="accordion-collapse collapse show">
-                <div class="accordion-body p-2">
+                <div id="damage" class="accordion-collapse collapse show">
+                    <div class="accordion-body p-2">
 
-                    <div class="table-responsive table-wrapper" style="max-height: 400px; overflow: auto;">
+                        <div class="table-responsive table-wrapper" style="max-height: 400px; overflow: auto;">
 
-                        <table class="table table-bordered table-sm mb-0">
-                            <thead class="table-light sticky-top">
-                                <tr>
-                                    <th>ModelName</th>
-                                    <th>ChassisNo.</th>
-                                    <th>MotorNo.</th>
-                                    <th>BatteryNo.</th>
-                                    <th>ChargerNo.</th>
-                                    <th>KeyFobSetQty</th>
-                                    <th>ChargerQty</th>
-                                    <th>MirrorSetQty</th>
-                                    <th>FirstAidKitQty</th>
-                                    <th>ToolkitQty</th>
-                                    <th>OwnersManual</th>
-                                    <th>IgnitionKeySet</th>
-                                    <th>AttributeCard</th>
-                                    <th>ChargingKit</th>
-                                    <th>Insp. Date</th>
-                                    <th>VehicleStatus</th>
-                                    <th>DamageDetails</th>
-                                    <th>ModelWiseRemarks</th>
-                                    <th>UploadImage</th>
-                                </tr>
-                            </thead>
+                            <table class="table table-bordered table-sm mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>ModelName</th>
+                                        <th>ChassisNo.</th>
+                                        <th>MotorNo.</th>
+                                        <th>BatteryNo.</th>
+                                        <th>ChargerNo.</th>
+                                        <th>KeyFobSetQty</th>
+                                        <th>ChargerQty</th>
+                                        <th>MirrorSetQty</th>
+                                        <th>FirstAidKitQty</th>
+                                        <th>ToolkitQty</th>
+                                        <th>OwnersManual</th>
+                                        <th>IgnitionKeySet</th>
+                                        <th>AttributeCard</th>
+                                        <th>ChargingKit</th>
+                                        <th>Insp. Date</th>
+                                        <th>VehicleStatus</th>
+                                        <th>DamageDetails</th>
+                                        <th>ModelWiseRemarks</th>
+                                        <th>UploadImage</th>
+                                    </tr>
+                                </thead>
 
-                            <tbody>
-                                <tr *ngFor="let item of detailList; let i = index">
+                                <tbody>
+                                    <tr *ngFor="let item of detailList; let i = index">
 
-                                    <td>{{ item.modelName }}</td>
-                                    <td>{{ item.chassisNo }}</td>
-                                    <td>{{ item.motorNo }}</td>
-                                    <td>{{ item.batteryNo }}</td>
-                                    <td>{{ item.chargerNo }}</td>
-                                    <td><input [(ngModel)]="item.keyFobSetQty" class="form-control form-control-sm">
-                                    </td>
-                                    <td><input [(ngModel)]="item.chargerQty" class="form-control form-control-sm"></td>
-                                    <td><input [(ngModel)]="item.mirrorSetQty" class="form-control form-control-sm">
-                                    </td>
-                                    <td><input [(ngModel)]="item.firstAidKitQty" class="form-control form-control-sm">
-                                    </td>
-                                    <td><input [(ngModel)]="item.toolkitQty" class="form-control form-control-sm"></td>
-                                    <td><input [(ngModel)]="item.ownersManual" class="form-control form-control-sm">
-                                    </td>
-                                    <td><input [(ngModel)]="item.ignitionKeySet" class="form-control form-control-sm">
-                                    </td>
-                                    <td><input [(ngModel)]="item.attributeCard" class="form-control form-control-sm">
-                                    </td>
-                                    <td><input [(ngModel)]="item.chargingKit" class="form-control form-control-sm"></td>
+                                        <td>{{ item.modelName }}</td>
+                                        <td>{{ item.chassisNo }}</td>
+                                        <td>{{ item.motorNo }}</td>
+                                        <td>{{ item.batteryNo }}</td>
+                                        <td>{{ item.chargerNo }}</td>
+                                        <td><input [(ngModel)]="item.keyFobSetQty" class="form-control form-control-sm">
+                                        </td>
+                                        <td><input [(ngModel)]="item.chargerQty" class="form-control form-control-sm">
+                                        </td>
+                                        <td><input [(ngModel)]="item.mirrorSetQty" class="form-control form-control-sm">
+                                        </td>
+                                        <td><input [(ngModel)]="item.firstAidKitQty"
+                                                class="form-control form-control-sm">
+                                        </td>
+                                        <td><input [(ngModel)]="item.toolkitQty" class="form-control form-control-sm">
+                                        </td>
+                                        <td><input [(ngModel)]="item.ownersManual" class="form-control form-control-sm">
+                                        </td>
+                                        <td><input [(ngModel)]="item.ignitionKeySet"
+                                                class="form-control form-control-sm">
+                                        </td>
+                                        <td><input [(ngModel)]="item.attributeCard"
+                                                class="form-control form-control-sm">
+                                        </td>
+                                        <td><input [(ngModel)]="item.chargingKit" class="form-control form-control-sm">
+                                        </td>
 
-                                    <td>
-                                        <input type="date" [(ngModel)]="item.inspectionDate"
-                                            class="form-control form-control-sm">
-                                    </td>
+                                        <td>
+                                            <input type="date" [(ngModel)]="item.inspectionDate"
+                                                class="form-control form-control-sm">
+                                        </td>
 
-                                    <td>
-                                        <select class="form-select form-select-sm" [(ngModel)]="item.vehicleStatus"
-                                            class="form-select form-select-sm">
-                                            <option value="">Select Status</option>
-                                            <option value="OK">OK</option>
-                                            <option value="Damaged">Damaged</option>
-                                        </select>
-                                    </td>
+                                        <td>
+                                            <select class="form-select form-select-sm" [(ngModel)]="item.vehicleStatus"
+                                                class="form-select form-select-sm">
+                                                <option value="">Select Status</option>
+                                                <option value="OK">OK</option>
+                                                <option value="Damaged">Damaged</option>
+                                            </select>
+                                        </td>
 
-                                    <td><input [(ngModel)]="item.damageDetails" class="form-control form-control-sm">
-                                    </td>
-                                    <td><input [(ngModel)]="item.chassisWiseRemarks"
-                                            class="form-control form-control-sm">
-                                    </td>
-                                    <!-- FILE -->
-                                    <td>
-                                        <input type="file" hidden (change)="onFileSelected($event, i)" #fileInput>
+                                        <td><input [(ngModel)]="item.damageDetails"
+                                                class="form-control form-control-sm">
+                                        </td>
+                                        <td><input [(ngModel)]="item.chassisWiseRemarks"
+                                                class="form-control form-control-sm">
+                                        </td>
+                                        <!-- FILE -->
+                                        <td>
+                                            <input type="file" hidden (change)="onFileSelected($event, i)" #fileInput>
 
-                                        <i class="ri-upload-2-line text-primary" style="cursor:pointer"
-                                            (click)="fileInput.click()"></i>
+                                            <i class="ri-upload-2-line text-primary" style="cursor:pointer"
+                                                (click)="fileInput.click()"></i>
 
-                                        <!-- Preview -->
-                                        <!-- <img *ngIf="item.preview" [src]="item.preview" width="30" height="30"
+                                            <!-- Preview -->
+                                            <!-- <img *ngIf="item.preview" [src]="item.preview" width="30" height="30"
                                                     class="ms-1 rounded"> -->
-                                    </td>
+                                        </td>
 
-                                </tr>
+                                    </tr>
 
-                                <tr *ngIf="detailList.length === 0">
-                                    <td colspan="19" class="text-center text-muted">
-                                        No Data Available
-                                    </td>
-                                </tr>
+                                    <tr *ngIf="detailList.length === 0">
+                                        <td colspan="19" class="text-center text-muted">
+                                            No Data Available
+                                        </td>
+                                    </tr>
 
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
+
                     </div>
-
                 </div>
             </div>
+
         </div>
 
+        <!-- BUTTONS -->
+        <div class="text-end mt-2">
+            <button class="btn btn-add btn-sm me-2" (click)="saveData()">Save</button>
+            <button class="btn btn-light btn-sm ">Close</button>
+        </div>
     </div>
-
-    <!-- BUTTONS -->
-    <div class="text-end mt-2">
-        <button class="btn btn-add btn-sm me-2" (click)="saveData()">Save</button>
-        <button class="btn btn-light btn-sm ">Close</button>
-    </div>
-</div>
 </div>

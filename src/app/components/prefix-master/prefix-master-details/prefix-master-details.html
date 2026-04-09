@@ -7,13 +7,17 @@
         <div class="row g-3">
 
             <!-- Module -->
-            <div class="col-md-3">
+            <!-- <div class="col-md-3">
                 <label class="form-label">Module</label>
                 <select class="form-select form-select-sm" [(ngModel)]="sequence.moduleName">
-                    <option value="INVOICE">Invoice</option>
-                    <option value="PO">Purchase Order</option>
-                    <option value="QUOTATION">Quotation</option>
+                    <option *ngFor="let pt of prefixTypes" [value]="pt.value">
+                        {{ pt.name }}
+                    </option>
                 </select>
+            </div> -->
+            <div class="col-md-3">
+                <label class="form-label">Module</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="sequence.moduleName" readonly>
             </div>
 
             <!-- Prefix -->
@@ -24,14 +28,14 @@
             </div>
 
             <!-- Dealer -->
-            <div class="col-md-3">
+            <!-- <div class="col-md-3">
                 <label class="form-label">Dealer</label>
                 <select class="form-select form-select-sm" [(ngModel)]="sequence.dealerCode">
                     <option *ngFor="let dealer of lstDealers" [value]="dealer.dealercode">
                         {{ dealer.compname }}
                     </option>
                 </select>
-            </div>
+            </div> -->
 
             <!-- Financial Year -->
             <div class="col-md-3">
@@ -59,6 +63,12 @@
                 <input type="number" class="form-control form-control-sm" [(ngModel)]="sequence.nextNo" readonly>
             </div>
 
+            <!-- Separator -->
+            <div class="col-md-3">
+                <label class="form-label">Separator</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="sequence.separator" readonly>
+            </div>
+
             <!-- Status -->
             <div class="col-md-3">
                 <label class="form-label">&nbsp;</label><br>
@@ -76,7 +86,20 @@
             <!-- Preview -->
             <div class="col-md-3">
                 <label class="form-label">Preview</label>
-                <input type="text" class="form-control form-control-sm" [value]="generatePreview()" readonly>
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control form-control-sm" [value]="generatePreview()" readonly>
+                    <span class="input-group-text bg-primary text-white info-wrapper">
+                        <i class="ri-information-line"></i>
+                        <div class="info-card shadow">
+                            <p class="mb-0" [innerHTML]="prefixInfo()"></p>
+                        </div>
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label><br>
+                <label class="form-label">Count : {{ previewCount() }}</label>
             </div>
         </div>
 

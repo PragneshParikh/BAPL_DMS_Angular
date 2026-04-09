@@ -7,6 +7,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { PrefixService } from '../../../core/services/prefix';
 import { StorageService } from '../../../core/services/storage';
 import { Router } from '@angular/router';
+import { PrefixTypes } from '../../../constant';
 
 @Component({
   selector: 'app-prefix-master-details',
@@ -15,22 +16,21 @@ import { Router } from '@angular/router';
   styleUrl: './prefix-master-details.scss',
 })
 export class PrefixMasterDetails implements OnInit {
-
-  lstDealers: any[] = [];
+  // prefixTypes = PrefixTypes
+  // lstDealers: any[] = [];
   lstFinancialYears: string[] = [];
   sequence = {
-    moduleName: 'INVOICE',
-    dealerCode: '',
+    moduleName: 'Invoice',
+    separator: '/',
+    // dealerCode: '',
     financialYear: '',
-    prefix: '',
-    padding: 5,
+    prefix: 'INV',
+    padding: 3,
     nextNo: 0,
     isActive: true
   };
 
   constructor(
-    private dealerService: DealerService,
-    private loader: LoaderService,
     private toast: ToastService,
     private prefixService: PrefixService,
     private storageServie: StorageService,
@@ -38,33 +38,33 @@ export class PrefixMasterDetails implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.getDealers();
+    // this.getDealers();
 
     this.lstFinancialYears = this.generateFinancialYears();
 
     this.sequence.financialYear = this.getCurrentFinancialYear();
   }
 
-  getDealers() {
-    this.loader.show();
-    this.dealerService.getDealers().subscribe({
-      next: (response) => {
-        this.lstDealers = response.data
-          .sort((a, b) => a.compname.localeCompare(b.compname));
+  // getDealers() {
+  //   this.loader.show();
+  //   this.dealerService.getDealers().subscribe({
+  //     next: (response) => {
+  //       this.lstDealers = response.data
+  //         .sort((a, b) => a.compname.localeCompare(b.compname));
 
-        this.loader.hide();
-      },
-      error: (error) => {
-        this.loader.hide();
-        console.error('Error fetching dealers:', error);
-        this.toast.show('Something went wrong.', {
-          classname: 'bg-danger text-light',
-          delay: 5000
-        });
-      }
-    });
+  //       this.loader.hide();
+  //     },
+  //     error: (error) => {
+  //       this.loader.hide();
+  //       console.error('Error fetching dealers:', error);
+  //       this.toast.show('Something went wrong.', {
+  //         classname: 'bg-danger text-light',
+  //         delay: 5000
+  //       });
+  //     }
+  //   });
 
-  }
+  // }
 
   generateFinancialYears(): string[] {
     const years: string[] = [];
@@ -74,7 +74,7 @@ export class PrefixMasterDetails implements OnInit {
     for (let i = -5; i <= 5; i++) {
       const startYear = currentYear + i;
       const endYear = startYear + 1;
-      years.push(`${startYear.toString().slice(-2)}-${endYear.toString().slice(-2)}`);
+      years.push(`${startYear.toString()}-${endYear.toString()}`);
     }
     return years;
   }
@@ -82,7 +82,15 @@ export class PrefixMasterDetails implements OnInit {
   generatePreview() {
     const length = this.sequence.padding || 4;
     const masked = '#'.repeat(length);
-    return `${this.sequence.prefix || ''}${this.sequence.dealerCode || ''}${this.sequence.financialYear || ''}${masked}`;
+    return `${this.sequence.prefix || ''}${this.sequence.separator || ''}${'001'}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${this.sequence.separator || ''}${masked}`;
+    // return `${this.sequence.prefix || ''}${this.sequence.separator || ''}${this.sequence.dealerCode || ''}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${masked}`;
+  }
+
+  previewCount() {
+    const length = this.sequence.padding || 4;
+    const masked = '#'.repeat(length);
+    const value = `${this.sequence.prefix || ''}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${this.sequence.separator || ''}${masked}`;
+    return value.length;
   }
 
   saveSequence() {
@@ -90,12 +98,14 @@ export class PrefixMasterDetails implements OnInit {
     const masked = '#'.repeat(length);
     const numberSequence: any = {
       id: 0,
-      sequenceCode: `${this.sequence.prefix || ''}${this.sequence.dealerCode || ''}${this.sequence.financialYear || ''}`,
+      // sequenceCode: `${this.sequence.prefix || ''}${this.sequence.dealerCode || ''}${this.sequence.financialYear || ''}`,
+      sequenceCode: `${this.sequence.prefix || ''}${this.sequence.separator || ''}${'DealerCode'}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${this.sequence.separator || ''}${masked}`,
       sequenceName: this.sequence.moduleName,
-      format: `${this.sequence.prefix || ''}${this.sequence.dealerCode || ''}${this.sequence.financialYear || ''}${masked}`,
+      // format: `${this.sequence.prefix || ''}${this.sequence.dealerCode || ''}${this.sequence.financialYear || ''}${masked}`,
+      format: `${this.sequence.prefix || ''}${this.sequence.separator || ''}${'DealerCode'}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${this.sequence.separator || ''}${masked}`,
       nextNo: this.sequence.nextNo || 0,
       increment: 1,
-      dealerCode: this.sequence.dealerCode,
+      // dealerCode: this.sequence.dealerCode,
       year: this.sequence.financialYear,
       isActive: this.sequence.isActive,
       createdBy: this.storageServie.getUserId() || 0,
@@ -128,7 +138,21 @@ export class PrefixMasterDetails implements OnInit {
     let startYear = month >= 4 ? year : year - 1;
     let endYear = startYear + 1;
 
-    return `${startYear.toString().slice(-2)}-${endYear.toString().slice(-2)}`;
+    return `${startYear.toString()}-${endYear.toString()}`;
+  }
+
+  prefixInfo() {
+    return `<p class="p-1 text-white text-start">
+          Prefix is generated as:
+          <br>
+          <strong>${this.sequence.prefix || ''}</strong> = Prefix Text
+          <br>
+          <strong>${'001'}</strong> = Dealer Code (3 characters)
+          <br>
+          <strong>${this.sequence.financialYear || ''}</strong> = Financial Year
+          <br>
+          <strong>###</strong> = Number sequence with padding (3 characters)
+        </p>`;
   }
 
 }

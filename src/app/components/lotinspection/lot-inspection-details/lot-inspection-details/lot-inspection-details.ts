@@ -54,19 +54,19 @@ export class LotInspectionDetails implements OnInit {
     });
   }
 
-  fetchLocations(): void { 
-  const dealerCode = this.storageService.getDealerCode();
-  this.receiptEntryService.getLocationList(dealerCode).subscribe({
-    next: (data: any[]) => {
-      // only Workshop (id = 2)
-      this.locations = data.filter(x => x.locareadidNo === 2);
-      //console.log("Workshop Locations", this.locations);
-    },
-    error: (err) => {
-      console.error('Error fetching locations', err);
-    }
-  });
-}
+  fetchLocations(): void {
+    const dealerCode = this.storageService.getDealerCode();
+    this.receiptEntryService.getLocationList(dealerCode).subscribe({
+      next: (data: any[]) => {
+        // only Workshop (id = 2)
+        this.locations = data.filter(x => x.locareadidNo === 2);
+        //console.log("Workshop Locations", this.locations);
+      },
+      error: (err) => {
+        console.error('Error fetching locations', err);
+      }
+    });
+  }
   onLocationChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedLocation = target.value;
@@ -190,7 +190,7 @@ export class LotInspectionDetails implements OnInit {
         title: 'Vehicle Status Error',
         text: 'Please select Vehicle Status for all ChassisNo.',
         confirmButtonColor: '#747CA0',
-        width: '260px',   
+        width: '260px',
         padding: '0.3em'
       });
       return;
