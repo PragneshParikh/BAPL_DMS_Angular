@@ -39,13 +39,15 @@ export class KitCreationDetails implements OnInit {
   sortDirection: 'asc' | 'desc' = 'asc';
 
   page = 1;
-  pageSize = 5;
+  pageSize = 10;
   collectionSize = 0;
 
   selectedIndex: number | null = null;
   private isModify = false;
 
   private tempId = -1;
+
+  private kitHeaderId = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -66,6 +68,7 @@ export class KitCreationDetails implements OnInit {
       this.getItemList();
       if (kitHeaderId > 0) {
         this.isModify = true;
+        this.kitHeaderId = kitHeaderId;
         this.getHeaderDetails(kitHeaderId);
         this.getKitDetails(kitHeaderId);
       }
@@ -113,14 +116,14 @@ export class KitCreationDetails implements OnInit {
 
   getKitDetails(kitHeaderId: number) {
     // this.loader.show();
-    this.kitDetailsService.getKitDetailsByKitHeaderId(kitHeaderId).subscribe({
+    this.kitDetailsService.getKitDetailsByPaged(kitHeaderId, this.page - 1, this.pageSize).subscribe({
       next: (res) => {
         this.collectionSize = 0;
         this.kitDetails = [];
 
         if (res) {
-          this.kitDetails = res;
-          // this.collectionSize = res.totalRecords;
+          this.kitDetails = res.data;
+          this.collectionSize = res.totalRecords;
         }
         this.loader.hide();
       },
@@ -215,6 +218,7 @@ export class KitCreationDetails implements OnInit {
 
   onPageChange(page: number) {
     this.page = page;
+    this.getKitDetails(this.kitHeaderId);
   }
 
   onItemChange(item: any) {

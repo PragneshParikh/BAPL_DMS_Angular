@@ -15,6 +15,10 @@ export class KitDetailService {
     return this.httpClient.get(`${this.baseUrl}/kit-details/${headerId}`);
   }
 
+  getKitDetailsByPaged(headerId: number = 0, pageIndex: number, pageSize: number): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/kit-details/paged?headerId=${headerId}&pageIndex=${pageIndex}&pageSize=${pageSize}`);
+  }
+
   saveKitDetails(data: any): Observable<any> {
     return this.httpClient.post(`${this.baseUrl}/kit-details`, data);
   }
