@@ -1,1 +1,258 @@
-<p>vehicle-sale-bill works!</p>
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">Vehicle Sale Bill List</h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <!-- FILTER CARD -->
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+
+                    <!-- FROM DATE -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Date From</label>
+                        <input type="text" class="form-control form-control-sm" mwlFlatpickr
+                            [(ngModel)]="filter.fromDate" [altInput]="true" [altFormat]="'d-m-Y'"
+                            [dateFormat]="'Y-m-d'">
+                    </div>
+
+                    <!-- TO DATE -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Date To</label>
+                        <input type="text" class="form-control form-control-sm" mwlFlatpickr [(ngModel)]="filter.toDate"
+                            [altInput]="true" [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'">
+                    </div>
+
+                    <!-- SEARCH BUTTON -->
+                    <div class="col-md-auto ms-auto d-flex align-items-end gap-1">
+                        <button class="btn btn-primary btn-sm" (click)="onSearch()">
+                            Search
+                        </button>
+
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLE CARD -->
+        <div class="card">
+
+            <!-- HEADER -->
+            <div class="card-header">
+                <div class="d-flex justify-content-end align-items-center">
+
+
+
+                    <!-- RIGHT -->
+                    <div class="d-flex align-items-center gap-3">
+
+                        <!-- Buttons -->
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary btn-sm" (click)="navigateToAdd()">
+                                Add
+                            </button>
+
+                            <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'">
+                                <i class="ri-file-excel-2-line"></i>
+                            </button>
+                        </div>
+
+                        <!-- Search -->
+                        <div class="search-box">
+                            <input type="text" class="form-control search" placeholder="Search..."
+                                [(ngModel)]="searchTerm" (input)="onSearchChange()" />
+                            <i class="ri-search-line search-icon"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- BODY -->
+            <div class="card-body">
+
+                <div class="table-responsive fixed-table">
+
+                   <table class="table table-sm table-striped text-nowrap" style="font-size: 12px;">
+
+    <!-- HEADER -->
+    <thead class="table-light">
+        <tr>
+            <th>Sl No.</th>
+            <th (click)="onSort('saleBillNo')" style="cursor:pointer">Sale Bill No</th>
+            <th (click)="onSort('location')" style="cursor:pointer">Location</th>
+            <th (click)="onSort('saleDate')" style="cursor:pointer">Sale Date</th>
+            <th (click)="onSort('saleType')" style="cursor:pointer">Sale Type</th>
+            <th (click)="onSort('billType')" style="cursor:pointer">Bill Type</th>
+            <th (click)="onSort('customerName')" style="cursor:pointer">Customer Name</th>
+            <th (click)="onSort('billingName')" style="cursor:pointer">Billing Name</th>
+            <th (click)="onSort('totalAmount')" style="cursor:pointer">Total Amount</th>
+            <th>Total Items</th>
+        </tr>
+    </thead>
+
+    <!-- BODY -->
+    <tbody>
+
+        @if (paginatedBills.length === 0) {
+        <tr>
+            <td colspan="10" class="text-center">
+                No data available
+            </td>
+        </tr>
+        }
+
+        @for (item of paginatedBills; track $index) {
+        <tr style="cursor: pointer" (click)="viewDetails(item)">
+
+            <!-- Serial -->
+            <td>
+                {{ ($index + 1) + ((page - 1) * pageSize) }}
+            </td>
+
+            <!-- Sale Bill No -->
+            <td>
+                <ngb-highlight [result]="item.saleBillNo" [term]="searchTerm"></ngb-highlight>
+            </td>
+
+            <!-- Location -->
+            <td>
+                <ngb-highlight [result]="item.location" [term]="searchTerm"></ngb-highlight>
+            </td>
+
+            <!-- Sale Date -->
+            <td>
+                {{ item.saleDate | date:'dd-MM-yyyy' }}
+            </td>
+
+            <!-- Sale Type -->
+            <td>
+                {{ item.saleType }}
+            </td>
+
+            <!-- Bill Type -->
+            <td>
+                {{ item.billType }}
+            </td>
+
+            <!-- Customer -->
+            <td>
+                <ngb-highlight [result]="item.customerName" [term]="searchTerm"></ngb-highlight>
+            </td>
+
+            <!-- Billing Name -->
+            <td>
+                {{ item.billingName }}
+            </td>
+
+            <!-- Total Amount -->
+            <td>
+                ₹ {{ item.totalAmount }}
+            </td>
+
+            <!-- Items Count -->
+            <td>
+                {{ item.details?.length || 0 }}
+            </td>
+
+        </tr>
+        }
+
+    </tbody>
+
+</table>
+                </div>
+
+                <!-- PAGINATION -->
+                <div class="row mt-3">
+                    <div class="col-md-12 d-flex justify-content-end">
+
+                        <ngb-pagination [collectionSize]="filteredBills.length" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="onPageChange($event)" [boundaryLinks]="true">
+                        </ngb-pagination>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- DETAILS MODAL -->
+<ng-template #detailsModal let-modal>
+
+    <div class="modal-header">
+        <h5 class="modal-title">Vehicle Sale Bill Details</h5>
+        <button class="btn-close" (click)="modal.dismiss()"></button>
+    </div>
+
+    <div class="modal-body">
+
+        <!-- HEADER INFO -->
+        <div class="row mb-3">
+
+            <div class="col-md-4">
+                <label>Sale Bill No</label>
+                <input class="form-control form-control-sm" [value]="selectedBill?.saleBillNo" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label>Customer Name</label>
+                <input class="form-control form-control-sm" [value]="selectedBill?.customerName" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label>Total Amount</label>
+                <input class="form-control form-control-sm" [value]="selectedBill?.totalAmount" readonly>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <!-- DETAILS TABLE -->
+        <table class="table table-sm table-bordered">
+
+            <thead>
+                <tr>
+                    <th>Chassis No</th>
+                    <th>Item Rate</th>
+                    <th>Final Amount</th>
+                    <th>Segment</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @for (d of selectedBill?.details; track $index) {
+                <tr>
+                    <td>{{ d.chassisNo }}</td>
+                    <td>{{ d.itemRate }}</td>
+                    <td>{{ d.finalAmount }}</td>
+                    <td>{{ d.segment }}</td>
+                    <td>
+                        <span class="badge bg-success" *ngIf="d.isDelivered">Delivered</span>
+                        <span class="badge bg-warning" *ngIf="!d.isDelivered">Pending</span>
+                    </td>
+                </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-danger" (click)="modal.close()">Close</button>
+    </div>
+
+</ng-template>

@@ -73,3 +73,24 @@ export const PrefixTypes = [
     { name: 'Purchase Order', value: 'Purchase Order' },
     { name: 'Quotation', value: 'Quotation' }
 ]
+
+
+export const SaleTypeOptions = [
+    { name: 'Cash Sale', value: 'Cash' },
+    { name: 'Credit Sale', value: 'Credit' }
+];
+export const BillingTypeOptions = [
+    { name: 'Dealer Sale/Institutional', value: 'Dealer Sale/Institutional' },
+    { name: 'Counter Sale[Single]', value: 'Counter Sale[single]' }
+];
+export const BillFromOptions = [
+    { name: 'Direct Billing', value: 'direct' },
+    { name: 'Against Receipt', value: 'receipt' },
+    { name: 'Against Delivery', value: 'delivery' }
+];
+export const CashTypeOptions = [
+    { name: 'Cash', value: 'Cash' },
+    { name: 'Bank Transfer', value: 'Bank' },
+    { name: 'Cheque', value: 'Cheque' },
+    { name: 'UPI', value: 'UPI' },
+];

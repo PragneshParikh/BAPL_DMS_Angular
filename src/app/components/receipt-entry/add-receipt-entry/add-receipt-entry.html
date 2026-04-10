@@ -103,26 +103,26 @@
 
                                             <div class="d-flex gap-3 mt-1">
 
-                                                <label>
+                                                <!-- <label>
                                                     <input type="radio" value="b2b" name="customerType"
                                                         [(ngModel)]="formData.customerType" #customerType="ngModel"
                                                         (change)="onCustomerTypeChange()" required>
                                                     B2B
-                                                </label>
+                                                </label> -->
 
-                                                <label>
-                                                    <input type="radio" value="b2c" name="customerType"
-                                                        [(ngModel)]="formData.customerType"
+                                                <label *ngFor="let type of customerTypes">
+                                                    <input type="radio"name="customerTypes"
+                                                        [(ngModel)]="formData.customerTypes" #customerType="ngModel"
                                                         (change)="onCustomerTypeChange()" required>
-                                                    B2C
+                                                    {{ type.name }}
                                                 </label>
 
                                             </div>
 
-                                            <div class="text-danger mt-1"
-                                                *ngIf="customerType.invalid && (customerType.touched || receiptForm.submitted)">
+                                            <!-- <div class="text-danger mt-1"
+                                                *ngIf="customerType.invalid && (customerTypes.touched || receiptForm.submitted)">
                                                 <small>Customer Type is required.</small>
-                                            </div>
+                                            </div> -->
                                         </div>
                                         <div class="col-md-3">
                                             <label>Party Name<span class="text-danger">*</span></label>
@@ -170,21 +170,7 @@
                                                         {{ f.ledgerName }}
 
                                                     </option>
-                                                    <option *ngFor="let f of financiers" [value]="f.ledgerName">
 
-                                                        {{ f.ledgerName }}
-
-                                                    </option>
-                                                    <option *ngFor="let f of financiers" [value]="f.ledgerName">
-
-                                                        {{ f.ledgerName }}
-
-                                                    </option>
-                                                    <option *ngFor="let f of financiers" [value]="f.ledgerName">
-
-                                                        {{ f.ledgerName }}
-
-                                                    </option>
 
                                                 </select>
 
@@ -377,9 +363,9 @@
                     <input type="text" class="form-control" [value]="leadResult.area" readonly>
                 </div>
                 <div class="col-md-4">
-                        <label>State Name</label>
-                        <input type="text" class="form-control" [value]="leadResult.state" readonly>
-                    </div>
+                    <label>State Name</label>
+                    <input type="text" class="form-control" [value]="leadResult.state" readonly>
+                </div>
                 <div class="col-md-4">
                     <label>City Name</label>
                     <input type="text" class="form-control" [value]="leadResult.city" readonly>

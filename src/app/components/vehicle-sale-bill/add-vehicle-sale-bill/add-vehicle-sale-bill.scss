@@ -1,0 +1,56 @@
+.vehicle-form .form-control,
+.vehicle-form .form-select {
+    height: 28px;
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.vehicle-form label,
+.vehicle-form .form-label,
+.vehicle-form .form-label-sm {
+    font-size: 12px;
+    margin-bottom: 2px !important;
+}
+
+.vehicle-form .row {
+    margin-bottom: 2px;
+}
+
+.vehicle-form .card-body {
+    padding: 6px !important;
+}
+
+.vehicle-form .card-header {
+    padding: 4px 8px !important;
+}
+
+.vehicle-form .btn-sm {
+    padding: 2px 8px;
+    font-size: 12px;
+}
+
+.vehicle-form .btn-group .btn {
+    padding: 2px 6px;
+}
+
+.vehicle-form .form-check {
+    margin-bottom: 0;
+}
+
+.vehicle-form h5,
+.vehicle-form h6 {
+    font-size: 13px;
+}
+
+.vehicle-form .table td,
+.vehicle-form .table th {
+    padding: 4px 6px;
+    font-size: 12px;
+}
+
+.small-dropdown {
+  max-height: 150px;   /* controls height */
+  overflow-y: auto;    /* enables scroll */
+  font-size: 12px;     /* makes it compact */
+  z-index: 1000;
+}

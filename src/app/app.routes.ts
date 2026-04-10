@@ -23,6 +23,7 @@ import { VehiclePO } from './components/vehicle-po/vehicle-po';
 import { VehiclePoList } from './components/vehicle-po-list/vehicle-po-list';
 import { JobCardAddForm } from './components/job-card/job-card-addForm/job-card-add-form/job-card-add-form';
 import { AddVehicleSaleBill } from './components/vehicle-sale-bill/add-vehicle-sale-bill/add-vehicle-sale-bill';
+import { VehicleSaleBill } from './components/vehicle-sale-bill/vehicle-sale-bill';
 
 
 export const routes: Routes = [
@@ -73,7 +74,10 @@ export const routes: Routes = [
       { path: 'receipt-entry', component: ReceiptEntry, data: [15] },
       { path: 'receipt-entry/add', component: AddReceiptEntry, data: [15] },
       { path: 'receipt-entry/edit/:id', component: AddReceiptEntry, data: [15] },
-      { path: 'receipt-entry/test', component: AddVehicleSaleBill, data: [15] },
+      { path: 'vehicle-sale-bill/edit/:id', component: AddVehicleSaleBill, data: [15] },
+      {path: 'vehicle-sale-bill/add', component: AddVehicleSaleBill, data: [15] },
+      { path: 'vehicle-sale-bill', component: VehicleSaleBill, data: [15] },
+
       { path: 'customer-ledger', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger-list/customer-ledger-list').then(m => m.CustomerLedgerList) },
       { path: 'customer-ledger/:id', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger').then(m => m.CustomerLedger) },
       { path: 'delivery-certificate', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },

@@ -14,6 +14,7 @@ import { LmsleadMaster } from '../../../ViewModels/LmsleadMaster';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { CustomerLedger } from '../../customer-ledger/customer-ledger';
+import { TRANSACTION_TYPES } from '../../../constant';
 
 @Component({
   selector: 'app-add-receipt-entry',
@@ -30,6 +31,7 @@ import { CustomerLedger } from '../../customer-ledger/customer-ledger';
   ],
 })
 export class AddReceiptEntry implements OnInit {
+  customerTypes = TRANSACTION_TYPES;
   today = new Date().toISOString().split('T')[0];;
   @ViewChild('ReceiptEntryModal') ReceiptEntryModal!: TemplateRef<any>;
   selectedLead: LmsleadMaster | null = null;
@@ -69,12 +71,9 @@ export class AddReceiptEntry implements OnInit {
 
   model: any;
   modalRef: any;
-  // customerType: string = 'b2c'; // default
   filteredParties: LedgerMaster[] = [];
-  // receiptDate: string;
+  receiptDate: string;
   selectedSaleType: string;
-  // bookingId: string;
-  // mobileNo: string;
   constructor(private router: ActivatedRoute,
     private receiptEntryService: ReceiptEntryService,
     private storageService: StorageService,
@@ -92,8 +91,6 @@ export class AddReceiptEntry implements OnInit {
     this.loader.show();
     await this.getParties();
     await this.loadProducts();
-
-    //this.receiptDate = 
     this.fetchLocations();
     this.getFinanciers();
 
