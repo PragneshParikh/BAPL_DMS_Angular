@@ -7,6 +7,8 @@ import { ReceiptEntryService } from '../../../../core/services/receipt-entry-ser
 import { LocationName } from '../../../../ViewModels/ReceiptEntryModel';
 import { JobCardService } from '../../../../core/services/job-card-service';
 import { selectLeadData } from '../../../../store/CRM/crm_selector';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-job-card-add-form',
@@ -23,6 +25,7 @@ export class JobCardAddForm {
   serviceTypeList: any[] = [];
   locations: LocationName[];
   chassisList: any[] = [];
+  pdiCheckList: any[] = [];
 
 
   selectedJobtype: any;
@@ -39,8 +42,9 @@ export class JobCardAddForm {
   batteryMake: string = '';
   chargerNumber: string = '';
   controllerNo: string = '';
-  converterNo : string = '';
-  motorNo : string = '';
+  converterNo: string = '';
+  motorNo: string = '';
+  isPdiModalOpen = false;
 
 
 
@@ -56,13 +60,14 @@ export class JobCardAddForm {
 
   constructor(private storageService: StorageService,
     private receiptEntryService: ReceiptEntryService,
-    private jobCardService: JobCardService) { }
+    private jobCardService: JobCardService, private modalService: NgbModal) { }
 
   ngOnInit(): void {
     this.fetchLocations();
     this.loadJobTypes();
     this.loadChassisList();
     this.loadJobSorces();
+    this.loadPdiData();
   }
 
   //Fetech Dealer Location
@@ -131,6 +136,18 @@ export class JobCardAddForm {
     });
   }
 
+  // load pdi checklist
+  loadPdiData() {
+    this.jobCardService.getPdiChecklist().subscribe({
+      next: (res) => {
+        this.pdiCheckList = res;   // 👈 HERE
+        console.log(this.pdiCheckList);
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
 
   toggle(section: string) {
     Object.keys(this.isOpen).forEach(key => {
@@ -190,14 +207,14 @@ export class JobCardAddForm {
     if (!this.selectedChassis || this.selectedChassis === '') {
       this.invoiceNo = '';
       this.couponNo = '';
-      this.batteryCapacity='';
-      this.batteryChemestry='';
-      this.batteryMake='';
-      this.batteryNumber='';
-      this.chargerNumber='',
-      this.controllerNo='',
-      this.converterNo='',
-      this.motorNo=''
+      this.batteryCapacity = '';
+      this.batteryChemestry = '';
+      this.batteryMake = '';
+      this.batteryNumber = '';
+      this.chargerNumber = '',
+        this.controllerNo = '',
+        this.converterNo = '',
+        this.motorNo = ''
       return;
     }
     const selected = this.chassisList.find(
@@ -207,18 +224,56 @@ export class JobCardAddForm {
       this.invoiceNo = selected.invoiceNo;
       this.couponNo = this.selectedChassis.slice(-13);
       this.batteryCapacity = selected.batteryCapacity;
-      this.batteryMake=selected.batteryMake
-      this.batteryChemestry=selected.batteryChemestry
-      this.batteryNumber=selected.batteryNumber
-      this.motorNo=selected.motorNo
-      this.controllerNo=selected.controllerNo
-      this.converterNo=selected.converterNo
-      this.chargerNumber=selected.chargerNumber
+      this.batteryMake = selected.batteryMake
+      this.batteryChemestry = selected.batteryChemestry
+      this.batteryNumber = selected.batteryNumber
+      this.motorNo = selected.motorNo
+      this.controllerNo = selected.controllerNo
+      this.converterNo = selected.converterNo
+      this.chargerNumber = selected.chargerNumber
     }
   }
 
   onJobSource() {
     this.selectedJobSources = '';
+  }
+
+  // PDiChecklist popup
+  openPdiModal(content: any) {
+    this.pdiCheckList = this.pdiCheckList.map(x => ({
+      ...x,
+      status: true,
+      remarks: ''
+    }));
+
+    this.modalService.open(content, {
+      size: 'xl',
+      centered: true,
+      backdrop: 'static',
+      keyboard: false
+    });
+  }
+  validatePdi(): boolean {
+    return this.pdiCheckList.every(x =>
+      x.status !== null && x.status !== undefined && x.remarks && x.remarks.trim() !== ''
+    );
+  }
+  onClose(modal: any) {
+    if (!this.validatePdi()) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Incomplete Checklist',
+        text: 'Please complete all PDI items before closing',
+        width: '300px'
+      });
+      return;
+    }
+
+    modal.dismiss();
+  }
+
+  savePdi() {
+    console.log(this.pdiCheckList);
   }
 }
 

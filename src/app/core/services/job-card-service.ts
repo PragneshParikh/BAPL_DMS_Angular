@@ -29,5 +29,8 @@ export class JobCardService {
     //debugger;;
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetJobSource`);
   }
+  getPdiChecklist(): Observable<any>{
+    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetPdiChecklist`)
+  }
 
 }

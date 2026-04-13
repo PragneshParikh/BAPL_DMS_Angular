@@ -540,7 +540,66 @@
   <!-- FOOTER -->
   <div class="card-footer d-flex justify-content-end gap-2">
     <button class="btn btn-primary btn-sm">Save</button>
-    <button class="btn btn-primary btn-sm">PDI Detail</button>
+    <button class="btn btn-primary btn-sm" (click)="openPdiModal(PdiModelChecklist)">PDI Checklist</button>
     <button class="btn btn-light btn-sm">Cancel</button>
   </div>
 </div>
+
+<!-- =======================PDI Checklist Popup ============================== -->
+<ng-template #PdiModelChecklist let-modal>
+
+  <div class="modal-header">
+    <h5 class="modal-title">PDI Checklist</h5>
+    <button type="button" class="btn-close btn-close-white" (click)="onClose(modal)"></button>
+  </div>
+
+  <!-- Body (Scrollable) -->
+  <div class="modal-body p-0" style="max-height: 70vh; overflow-y: auto;">
+    
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm mb-0">
+
+        <thead class="table-light sticky-top">
+          <tr>
+            <th style="width: 60px;">Sr No</th>
+            <th style="width: 150px;">PDI Head</th>
+            <th>Description</th>
+            <th style="width: 100px;">Status</th>
+            <th style="width: 200px;">Remarks</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of pdiCheckList; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.pdiheadName }}</td>
+            <td>{{ item.pdidescription }}</td>
+
+            <td>
+              <div class="form-check form-switch d-flex justify-content-center">
+                <input class="form-check-input" type="checkbox"
+                       [(ngModel)]="item.status">
+              </div>
+            </td>
+
+            <td>
+              <input type="text"
+                     class="form-control form-control-sm"
+                     [(ngModel)]="item.remarks"
+                     placeholder="Enter remarks">
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="modal-footer">
+    <button class="btn btn-primary btn-sm" [disabled]="!validatePdi()" (click)="savePdi(); modal.close()">Save</button>
+    <button class="btn btn-light btn-sm" (click)="onClose(modal)">Close</button>
+  </div>
+
+</ng-template>
