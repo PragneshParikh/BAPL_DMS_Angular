@@ -1,0 +1,353 @@
+import { Component, OnInit } from '@angular/core';
+import { LocationMasterService } from '../../core/services/location-master-service';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { StorageService } from '../../core/services/storage';
+import { ItemMasterService } from '../../core/services/item-master-service';
+import { PartsPoService } from '../../core/services/parts-po-service';
+import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TRANSACTION_TYPES } from '../../constant';
+import { LoaderService } from '../../core/services/loader';
+import { ToastService } from '../../shared/toaster/toast-service';
+import Swal from 'sweetalert2';
+
+@Component({
+  selector: 'app-parts-po',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbPaginationModule],
+  templateUrl: './parts-po.html',
+  styleUrl: './parts-po.scss',
+})
+export class PartsPo implements OnInit {
+  locationList: any[] = [];
+  selectedLocation: string = '';
+
+  modelList: any[] = [];
+  purchaseDetails: any[] = [];
+  pagedPurchaseDetails: any[] = [];
+  page = 1;
+  pageSize = 5;
+
+  // Purchase Info fields (Prefix and OrderNo are UI-only for now)
+  prefixNo: string = '';
+  orderNo: string = '';
+  poDate: string = new Date().toISOString();
+  remarks: string = '';
+  poType: string = 'Parts';
+  isSubmitted: boolean = false;
+  isSaving: boolean = false;
+  partyName: string = 'BGAUSS AUTO PRIVATE LIMITED';
+  isGst: boolean = true;
+  isKit: boolean = false;
+  ponumber: string = '';
+  totalAmt: number = 0;
+  editingIndex: number | null = null;
+  transactionTypeList = TRANSACTION_TYPES;
+  selectedTransactionType: string = '';
+  
+  locationInvalid: boolean = false;
+  transactionTypeInvalid: boolean = false;
+
+  currentItem: any = {
+    partNo: '',
+    description: '',
+    qty: 0,
+    rate: 0,
+    mrp: 0, // UI-only
+    amount: 0,
+    taxableAmount: 0,
+    sgstAmt: 0,
+    cgstAmt: 0,
+    igstAmt: 0,
+    rawSgstRate: 0,
+    rawCgstRate: 0,
+    rawIgstRate: 0,
+    itemType: 1
+  };
+
+  constructor(
+    private locationService: LocationMasterService,
+    private storageService: StorageService,
+    private itemService: ItemMasterService,
+    private partsPoService: PartsPoService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private loader: LoaderService,
+    public toaster: ToastService
+  ) { }
+
+  ngOnInit() {
+    this.loadShowroomLocations();
+    this.loadItemMasterList();
+
+    this.route.params.subscribe(params => {
+      this.ponumber = params['ponumber'];
+      if (this.ponumber) {
+        // Load details logic would go here if editing
+      } else {
+        this.generateNewOrderNo();
+      }
+    });
+  }
+
+  generateNewOrderNo() {
+    this.orderNo = '1'; // Placeholder
+  }
+
+  loadShowroomLocations() {
+    const dealerCode = this.storageService.getDealerCode();
+    this.locationService.getAllLocationMaster().subscribe({
+      next: (allLocs: any[]) => {
+        const fullLocationMap = Array.isArray(allLocs) ? allLocs : [];
+        this.locationService.getLocationByDealerCode(dealerCode).subscribe({
+          next: (res: any) => {
+            const dealerLocs = Array.isArray(res) ? res : [];
+            this.locationList = dealerLocs.map(loc => {
+              const matchedLoc = fullLocationMap.find(m =>
+                (m.locname || '').trim().toLowerCase() === (loc.locname || '').trim().toLowerCase()
+              );
+              return {
+                ...loc,
+                state: matchedLoc?.state || matchedLoc?.State || loc.state || loc.State || ''
+              };
+            });
+            if (this.locationList.length > 0 && !this.selectedLocation) {
+              this.selectedLocation = this.locationList[0].locname;
+            }
+          }
+        });
+      }
+    });
+  }
+
+  onLocationChange() {
+    this.calculateRowTotals();
+  }
+
+  loadItemMasterList() {
+    // For Parts, itemType is 1
+    this.itemService.getItems(6, '', 1).subscribe({
+      next: (res: any[]) => {
+        this.modelList = Array.isArray(res) ? res : [];
+      },
+      error: (err) => console.error('Error loading item master:', err)
+    });
+  }
+
+  onModelChange() {
+    if (!this.currentItem.partNo) {
+      this.resetCurrentItem();
+      return;
+    }
+
+    this.loader.show();
+    this.itemService.getPurchaseDetailsWithHsnTaxByModelNo(this.currentItem.partNo).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        if (res) {
+          const getVal = (obj: any, ...keys: string[]) => {
+            for (const key of keys) {
+              if (obj[key] !== undefined) return obj[key];
+            }
+            return 0;
+          };
+
+          this.currentItem.description = res.itemdesc || res.itemDesc || res.Itemdesc;
+          this.currentItem.rawSgstRate = getVal(res, 'Sgst', 'sgst', 'SGST');
+          this.currentItem.rawCgstRate = getVal(res, 'Cgst', 'cgst', 'CGST');
+          this.currentItem.rawIgstRate = getVal(res, 'Igst', 'igst', 'IGST');
+          this.currentItem.rate = getVal(res, 'Ipurrate', 'ipurrate', 'IPURRATE', 'rate');
+          this.currentItem.mrp = 0; // Default MRP
+          this.currentItem.itemType = res.itemtype || res.itemType || 1;
+
+          this.calculateRowTotals();
+        }
+      },
+      error: (err) => {
+        this.loader.hide();
+      }
+    });
+  }
+
+  calculateRowTotals() {
+    let qty = Number(this.currentItem.qty) || 0;
+    let rate = Number(this.currentItem.rate) || 0;
+
+    let taxableAmount = (qty * rate);
+    this.currentItem.taxableAmount = taxableAmount > 0 ? taxableAmount : 0;
+
+    const dealerLoc = this.locationList.find(l =>
+      ((l.locname || '').trim().toLowerCase()) ===
+      ((this.selectedLocation || '').trim().toLowerCase())
+    ) || (this.locationList.length > 0 ? this.locationList[0] : null);
+
+    const locState = (dealerLoc?.state || '').trim();
+    
+    const rawSgstRate = Number(this.currentItem.rawSgstRate) || 0;
+    const rawCgstRate = Number(this.currentItem.rawCgstRate) || 0;
+    const rawIgstRate = Number(this.currentItem.rawIgstRate) || 0;
+
+    let isInterstate = locState ? locState.toLowerCase() !== 'maharashtra' : false;
+
+    if (this.selectedTransactionType === 'I') {
+      isInterstate = true;
+    } else if (this.selectedTransactionType === 'L') {
+      isInterstate = false;
+    }
+
+    if (isInterstate) {
+      this.currentItem.sgstAmt = 0;
+      this.currentItem.cgstAmt = 0;
+      this.currentItem.igstAmt = (this.currentItem.taxableAmount * rawIgstRate) / 100;
+    } else {
+      this.currentItem.sgstAmt = (this.currentItem.taxableAmount * rawSgstRate) / 100;
+      this.currentItem.cgstAmt = (this.currentItem.taxableAmount * rawCgstRate) / 100;
+      this.currentItem.igstAmt = 0;
+    }
+
+    this.currentItem.amount = this.currentItem.taxableAmount + this.currentItem.sgstAmt + this.currentItem.cgstAmt + this.currentItem.igstAmt;
+  }
+
+  addPurchaseItem() {
+    if (!this.currentItem.partNo) {
+      this.toaster.show('Please select a part', { classname: 'bg-danger text-white', delay: 3000 });
+      return;
+    }
+
+    this.locationInvalid = !this.selectedLocation;
+    this.transactionTypeInvalid = !this.selectedTransactionType;
+
+    if (this.locationInvalid || this.transactionTypeInvalid) {
+      return;
+    }
+
+    const isDuplicate = this.purchaseDetails.some((item, index) =>
+      item.partNo === this.currentItem.partNo && index !== this.editingIndex
+    );
+
+    if (isDuplicate) {
+      this.toaster.show(`Part "${this.currentItem.description}" is already added.`, { classname: 'bg-danger text-white', delay: 5000 });
+      return;
+    }
+
+    this.calculateRowTotals();
+
+    const newItem = { ...this.currentItem };
+
+    if (this.editingIndex !== null) {
+      this.purchaseDetails[this.editingIndex] = newItem;
+      this.editingIndex = null;
+    } else {
+      this.purchaseDetails.push(newItem);
+    }
+
+    this.resetCurrentItem();
+    this.loadPage();
+  }
+
+  resetCurrentItem() {
+    this.currentItem = {
+      partNo: '',
+      description: '',
+      qty: 0,
+      rate: 0,
+      mrp: 0,
+      amount: 0,
+      taxableAmount: 0,
+      sgstAmt: 0,
+      cgstAmt: 0,
+      igstAmt: 0,
+      rawSgstRate: 0,
+      rawCgstRate: 0,
+      rawIgstRate: 0,
+      itemType: 1
+    };
+    this.editingIndex = null;
+  }
+
+  loadPage() {
+    const start = (this.page - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.pagedPurchaseDetails = this.purchaseDetails.slice(start, end);
+  }
+
+  refreshPage() {
+    this.loadPage();
+  }
+
+  editItem(index: number) {
+    const actualIndex = (this.page - 1) * this.pageSize + index;
+    const item = this.purchaseDetails[actualIndex];
+    this.editingIndex = actualIndex;
+    this.currentItem = { ...item };
+  }
+
+  deleteItem(index: number) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const actualIndex = (this.page - 1) * this.pageSize + index;
+        this.purchaseDetails.splice(actualIndex, 1);
+        this.loadPage();
+      }
+    });
+  }
+
+  onSave() {
+    if (this.purchaseDetails.length === 0) {
+      this.toaster.show('Please add at least one item.', { classname: 'bg-danger text-white', delay: 3000 });
+      return;
+    }
+
+    if (this.isSaving) return;
+    this.isSaving = true;
+    this.loader.show();
+
+    const dealerCode = this.storageService.getDealerCode();
+    // PONumber is Prefix + OrderNo logic can be added later if needed. For now using orderNo.
+    const poModel = {
+      PONumber: this.prefixNo + this.orderNo,
+      PODate: this.poDate,
+      POType: this.poType,
+      CustomerCode: dealerCode,
+      TransactionType: this.selectedTransactionType,
+      Items: this.purchaseDetails.map((item) => ({
+        ItemCode: item.partNo,
+        Qty: item.qty
+      }))
+    };
+
+    this.partsPoService.createPartsPurchaseOrder(poModel).subscribe({
+      next: (res) => {
+        this.loader.hide();
+        this.isSaving = false;
+        if (res.success) {
+          this.toaster.show(res.message, { classname: 'bg-success text-white', delay: 5000 });
+          this.router.navigate(['/parts-po-list']);
+        } else {
+          this.toaster.show(res.message, { classname: 'bg-danger text-white', delay: 5000 });
+        }
+      },
+      error: (err) => {
+        this.loader.hide();
+        this.isSaving = false;
+        this.toaster.show('Error saving Parts PO.', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  }
+
+  onSubmitToERP() {
+    this.toaster.show('Submit to ERP logic to be implemented.', { classname: 'bg-info text-white', delay: 3000 });
+    // This will hit the /SendToERP endpoint eventually
+  }
+
+  onCancel() {
+    this.router.navigate(['/parts-po-list']);
+  }
+}

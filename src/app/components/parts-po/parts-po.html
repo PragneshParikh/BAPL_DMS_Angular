@@ -1,0 +1,240 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0 text-center">
+        <i class="ri-settings-line me-2"></i>
+        Parts Purchase Order
+    </h4>
+
+    <div class="page-title-right">
+        <div class="d-flex gap-1">
+            <button class="btn btn-sm btn-light"><i class="ri-printer-line"></i></button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header border-0 py-1"></div>
+
+            <div class="card-body pt-1 pb-2">
+                <!-- Purchase Info Header -->
+                <div class="row g-1 mb-2 align-items-end">
+                    <div class="col-md-1">
+                        <label class="form-label mb-0 small">Date</label>
+                        <input type="text" class="form-control form-control-sm bg-light"
+                            [ngModel]="poDate | date:'dd-MM-yyyy'" readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Location</label>
+                        <select class="form-select form-select-sm border-start border-2"
+                            [class.is-invalid]="locationInvalid" [(ngModel)]="selectedLocation"
+                            (change)="onLocationChange()">
+                            <option value="">--Select--</option>
+                            <option *ngFor="let loc of locationList" [value]="loc.locname">{{loc.locname}}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Prefix No.</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="prefixNo"
+                            placeholder="Prefix">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-0 small">Order No.</label>
+                        <input type="text" class="form-control form-control-sm bg-light" [(ngModel)]="orderNo" readonly>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-0 small">OrderType</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="poType">
+                            <option value="">--Select--</option>
+                            <option value="VOR">VOR</option>
+                            <option value="SSO">SSO</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-0 small">Party</label>
+                        <input type="text" class="form-control form-control-sm bg-light" [(ngModel)]="partyName"
+                            readonly>
+                    </div>
+
+                    <!-- <div class="col-md-1 text-center">
+                        <label class="form-label mb-0 d-block small">Cal. GST</label>
+                        <div class="form-check form-switch d-inline-block">
+                            <input type="checkbox" class="form-check-input" id="isGst" [(ngModel)]="isGst"
+                                [disabled]="isSubmitted">
+                            <label class="form-check-label small" for="isGst">{{ isGst ? 'Y' : 'N' }}</label>
+                        </div>
+                    </div> -->
+
+                    <div class="col-md-1 text-center">
+                        <label class="form-label mb-0 d-block small">Against KIT</label>
+                        <div class="form-check form-switch d-inline-block">
+                            <input type="checkbox" class="form-check-input" id="isKit" [(ngModel)]="isKit"
+                                [disabled]="isSubmitted">
+                            <label class="form-check-label small" for="isKit">{{ isKit ? 'Y' : 'N' }}</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- <hr class="border-secondary opacity-25 my-2"> -->
+
+                <!-- Item Selection Info -->
+                <div class="row g-1 mb-2 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label mb-0 small">Part No.</label>
+                        <select class="form-select form-select-sm border-start border-2"
+                            [(ngModel)]="currentItem.partNo" (change)="onModelChange()">
+                            <option value="">--Select--</option>
+                            <option *ngFor="let item of modelList" [value]="item.itemcode">{{item.itemname}}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-0 small text-success">Last Price: 0.00</label>
+                        <input type="number" class="form-control form-control-sm text-end bg-light" readonly
+                            placeholder="0.00">
+                    </div>
+
+                    <!-- <div class="col-md-4">
+                        <label class="form-label mb-0 small">Part Description</label>
+                        <input type="text" class="form-control form-control-sm bg-light"
+                            [value]="currentItem.description" readonly>
+                    </div> -->
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-0 small">Qty.</label>
+                        <input type="number" class="form-control form-control-sm text-end" [(ngModel)]="currentItem.qty"
+                            (input)="calculateRowTotals()">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-0 small">Rate</label>
+                        <input type="number" class="form-control form-control-sm text-end"
+                            [(ngModel)]="currentItem.rate" (input)="calculateRowTotals()">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-0 small">Cur. Stock</label>
+                        <input type="text" class="form-control form-control-sm bg-light text-center" value="0" readonly>
+                    </div>
+                    <!-- <div class="row g-1 mt-3"> -->
+                    <div class="col-md-4">
+                        <label class="form-label mb-0 small">Remarks</label>
+                        <textarea class="form-control form-control-sm" rows="1" [(ngModel)]="remarks"
+                            placeholder="Enter remarks..."></textarea>
+                    </div>
+                    <!-- </div> -->
+                    <div class="col-md-1">
+                        <button class="btn btn-sm btn-primary" (click)="addPurchaseItem()">+ Add</button>
+                    </div>
+
+                    <!-- Moved Transaction Type here to clear up first row if needed, or keep it near selection -->
+                    <div class="col-md-2" *ngIf="false"> <!-- Hidden for now to match screenshot sequence -->
+                        <label class="form-label mb-0 small">Transaction Type</label>
+                        <select class="form-select form-select-sm border-start border-2"
+                            [class.is-invalid]="transactionTypeInvalid" [(ngModel)]="selectedTransactionType">
+                            <option value="">--Select--</option>
+                            <option *ngFor="let type of transactionTypeList" [value]="type.type">{{type.name}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- TABLE -->
+                <div class="table-responsive border rounded mt-3">
+                    <table class="table table-sm table-striped table-bordered mb-0 small">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Action</th>
+                                <th>Part No.</th>
+                                <th>Part Desc.</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>IGST</th>
+                                <th>Amount</th>
+                                <th>MRP</th>
+                                <th>Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody class="align-middle">
+                            <tr *ngFor="let item of pagedPurchaseDetails; let i = index">
+                                <td class="text-center">{{(page - 1) * pageSize + i + 1}}</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-soft-info py-0 px-1 me-1" (click)="editItem(i)"><i
+                                            class="ri-pencil-line"></i></button>
+                                    <button class="btn btn-sm btn-soft-danger py-0 px-1" (click)="deleteItem(i)"><i
+                                            class="ri-delete-bin-line"></i></button>
+                                </td>
+                                <td>{{item.partNo}}</td>
+                                <td>{{item.description}}</td>
+                                <td class="text-center">{{item.qty}}</td>
+                                <td class="text-end">{{item.rate | number:'1.2-2'}}</td>
+                                <td class="text-end">{{item.igstAmt | number:'1.2-2'}}</td>
+                                <td class="text-end">{{item.amount | number:'1.2-2'}}</td>
+                                <td class="text-end">{{item.mrp | number:'1.2-2'}}</td>
+                                <td class="text-center">0</td>
+                            </tr>
+                            <!-- Total Row -->
+                            <tr class="fw-bold table-light" *ngIf="purchaseDetails.length > 0">
+                                <td colspan="4" class="text-end">Total :</td>
+                                <td class="text-center">{{purchaseDetails.length}}</td>
+                                <td></td>
+                                <td class="text-end">0.00</td> <!-- Sum IGST placeholder -->
+                                <td class="text-end">0.00</td> <!-- Sum Amount placeholder -->
+                                <td colspan="2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Remarks -->
+                <!-- <div class="row g-1 mt-3">
+                    <div class="col-md-6">
+                        <label class="form-label mb-0 small">Remarks</label>
+                        <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="remarks"
+                            placeholder="Enter remarks..."></textarea>
+                    </div>
+                </div> -->
+
+                <!-- Pagination -->
+                <div class="row mt-2" *ngIf="purchaseDetails.length > pageSize">
+                    <div class="col-12">
+                        <div class="float-end">
+                            <ngb-pagination [collectionSize]="purchaseDetails.length" [(page)]="page"
+                                [pageSize]="pageSize" (pageChange)="refreshPage()" [boundaryLinks]="true">
+                            </ngb-pagination>
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="card-footer bg-white border-top py-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex gap-1">
+                        <!-- Left side slots for potential future use or matching Vehicle PO -->
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" (click)="onSave()" [disabled]="isSubmitted">
+                            Save
+                        </button>
+                        <button class="btn btn-primary btn-sm" (click)="onSubmitToERP()" [disabled]="isSubmitted">
+                            Submit To ERP
+                        </button>
+                        <button class="btn btn-light btn-sm" (click)="onCancel()">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

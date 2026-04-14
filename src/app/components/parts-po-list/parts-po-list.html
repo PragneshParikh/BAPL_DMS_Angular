@@ -1,0 +1,124 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0 text-center">
+        <i class="ri-settings-line me-2"></i>
+        Parts Purchase Order List
+    </h4>
+
+    <div class="page-title-right">
+        <div class="d-flex gap-1">
+            <select class="form-select form-select-sm">
+                <option>01 Apr 2026 to 31 Mar 2027</option>
+            </select>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control" placeholder="Search...">
+                <span class="input-group-text"><i class="ri-search-line"></i></span>
+            </div>
+            <button class="btn btn-sm btn-light"><i class="ri-download-line"></i></button>
+            <button class="btn btn-sm btn-primary" (click)="redirectToCreatePO()"><i class="ri-add-line"></i></button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <!-- Filters -->
+                <div class="row g-3 mb-3 align-items-end">
+                    <div class="col-md-1">
+                        <label class="form-label mb-0 small">Date From</label>
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateFrom">
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label mb-0 small">Date To</label>
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateTo">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Order No.</label>
+                        <input type="text" class="form-control form-control-sm" placeholder="Enter Order No." [(ngModel)]="purchaseNo">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Location</label>
+                        <select class="form-select form-select-sm">
+                            <option value="">--Select--</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Party</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="partyName">
+                            <option value="">--Select--</option>
+                            <option value="BGAUSS AUTO PRIVATE LIMITED">BGAUSS AUTO PRIVATE LIMITED</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label mb-0 small">Against KIT</label>
+                        <button class="btn btn-sm btn-outline-secondary py-0 px-2 d-block mt-1">N</button>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">ERP Submit Status</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="isSubmitted">
+                            <option value="">Pending</option>
+                            <option value="Submited To Erp">Submitted</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-sm btn-outline-success w-100" (click)="onSearch()">
+                            <i class="ri-search-line me-1"></i>Search
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive border rounded mt-3">
+                    <table class="table table-sm table-striped table-bordered mb-0 small">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Action</th>
+                                <th>Date</th>
+                                <th>Order No.</th>
+                                <th>Location</th>
+                                <th>Party</th>
+                                <th>Part No.</th>
+                                <th>Order Qty</th>
+                                <th>Amount</th>
+                                <th>ERP Submit Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let po of pagedPurchaseOrders; let i = index">
+                                <td class="text-center">{{po.sNo}}</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-soft-info py-0 px-1 me-1" (click)="editPO(po)"><i class="ri-pencil-line"></i></button>
+                                </td>
+                                <td class="text-center">{{po.date}}</td>
+                                <td>{{po.purchaseNo}}</td>
+                                <td></td>
+                                <td>{{po.partyName}}</td>
+                                <td>{{po.partNo}}</td>
+                                <td class="text-center">{{po.orderQty}}</td>
+                                <td class="text-end">{{po.orderAmount}}</td>
+                                <td class="text-center">
+                                    <span class="badge" [ngClass]="po.isSubmitted === 'Submited To Erp' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'">
+                                        {{po.isSubmitted}}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <div class="float-end">
+                            <ngb-pagination [collectionSize]="totalRecords" [(page)]="page" [pageSize]="pageSize" (pageChange)="refreshPage()" [boundaryLinks]="true">
+                            </ngb-pagination>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

@@ -3,18 +3,18 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { VehiclePoListService } from '../../core/services/vehicle-po-list-service';
+import { PartsPoListService } from '../../core/services/parts-po-list-service';
 import { TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
 
 @Component({
-  selector: 'app-vehicle-po-list',
+  selector: 'app-parts-po-list',
   standalone: true,
   imports: [CommonModule, FormsModule, NgbPaginationModule],
-  templateUrl: './vehicle-po-list.html',
-  styleUrl: './vehicle-po-list.scss',
+  templateUrl: './parts-po-list.html',
+  styleUrl: './parts-po-list.scss',
 })
-export class VehiclePoList implements OnInit {
+export class PartsPoList implements OnInit {
   purchaseNo: string = '';
   dateFrom: string = '';
   dateTo: string = '';
@@ -34,7 +34,7 @@ export class VehiclePoList implements OnInit {
 
   constructor(
     private router: Router,
-    private poListService: VehiclePoListService,
+    private poListService: PartsPoListService,
     private loader: LoaderService
   ) { }
 
@@ -47,25 +47,22 @@ export class VehiclePoList implements OnInit {
     const to = new Date();
     const from = new Date();
     from.setDate(to.getDate() - 7);
-
-    // Format as YYYY-MM-DD for input type="date"
     this.dateTo = to.toISOString().split('T')[0];
     this.dateFrom = from.toISOString().split('T')[0];
   }
 
   loadPOList() {
     this.loader.show();
-    this.poListService.getPOList().subscribe({
+    this.poListService.getPartsPOList().subscribe({
       next: (res: any[]) => {
         this.loader.hide();
-        console.log('PO List res:', res);
         const flattened = this.flattenPOList(res);
         this.originalPurchaseOrders = flattened;
-        this.onSearch(); // Apply the default 7-day filter and sorting
+        this.onSearch();
       },
       error: (err) => {
         this.loader.hide();
-        console.error('Error fetching PO list:', err);
+        console.error('Error fetching Parts PO list:', err);
       }
     });
   }
@@ -78,17 +75,13 @@ export class VehiclePoList implements OnInit {
         po.items.forEach((item: any) => {
           flattened.push({
             sNo: sNo++,
-            prefixNo: '',
             purchaseNo: po.poNumber || po.ponumber,
             date: this.formatDate(po.poDate || po.podate),
             rawDate: new Date(po.poDate || po.podate),
-            transactionType: po.TransactionType || po.transactionType || '',
-            isSubmitted: po.isSubmitted || po.IsSubmitted || po.Status === 'Submitted' ? 'Submited To Erp' : 'Not Submited To Erp',
-            // partyName: po.customerCode,
+            transactionType: po.transactionType || '',
+            isSubmitted: po.isSubmitted ? 'Submited To Erp' : 'Not Submited To Erp',
             partyName: "BGAUSS AUTO PRIVATE LIMITED",
-            location: po.LocationName || po.locationName || po.LocName || po.locName || po.LocCode || po.locCode || po.loccode || '',
-            modelName: item.itemCode,
-            color: '',
+            partNo: item.itemCode,
             orderQty: item.qty,
             orderAmount: item.lineAmount?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'
           });
@@ -100,44 +93,25 @@ export class VehiclePoList implements OnInit {
 
   formatDate(dateStr: string): string {
     if (!dateStr) return '';
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('en-GB').replace(/\//g, '-'); // DD-MM-YYYY
-    } catch {
-      return dateStr;
-    }
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-GB').replace(/\//g, '-');
   }
 
   redirectToCreatePO() {
-    this.router.navigate(['/vehicle-po']);
+    this.router.navigate(['/parts-po']);
   }
 
   editPO(po: any) {
-    const poNumber = po.purchaseNo || po.PONumber;
-    if (poNumber) {
-      this.router.navigate(['/vehicle-po', poNumber]);
-    }
+    // Currently editing is mapped to same component
+    this.router.navigate(['/parts-po', po.purchaseNo]);
   }
 
   onSearch() {
     let filtered = this.originalPurchaseOrders;
-
-    if (this.purchaseNo) {
-      filtered = filtered.filter(x => x.purchaseNo?.toLowerCase().includes(this.purchaseNo.toLowerCase()));
-    }
-
-    if (this.partyName) {
-      filtered = filtered.filter(x => x.partyName?.toLowerCase().includes(this.partyName.toLowerCase()));
-    }
-
-    if (this.transactionType) {
-      filtered = filtered.filter(x => x.transactionType === this.transactionType);
-    }
-
-    if (this.isSubmitted) {
-      filtered = filtered.filter(x => x.isSubmitted === this.isSubmitted);
-    }
-
+    if (this.purchaseNo) filtered = filtered.filter(x => x.purchaseNo?.toLowerCase().includes(this.purchaseNo.toLowerCase()));
+    if (this.partyName) filtered = filtered.filter(x => x.partyName?.toLowerCase().includes(this.partyName.toLowerCase()));
+    if (this.transactionType) filtered = filtered.filter(x => x.transactionType === this.transactionType);
+    if (this.isSubmitted) filtered = filtered.filter(x => x.isSubmitted === this.isSubmitted);
     if (this.dateFrom && this.dateTo) {
       const from = new Date(this.dateFrom);
       from.setHours(0, 0, 0, 0);
@@ -145,23 +119,8 @@ export class VehiclePoList implements OnInit {
       to.setHours(23, 59, 59, 999);
       filtered = filtered.filter(x => x.rawDate >= from && x.rawDate <= to);
     }
-
     this.purchaseOrders = filtered;
-    this.page = 1;
     this.totalRecords = this.purchaseOrders.length;
-
-    // Maintain sort order after filtering
-    if (this.sortColumn) {
-      this.purchaseOrders.sort((a: any, b: any) => {
-        let valueA = a[this.sortColumn] || '';
-        let valueB = b[this.sortColumn] || '';
-
-        if (valueA < valueB) return this.sortDirection === 'asc' ? -1 : 1;
-        if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-
     this.loadPage();
   }
 
@@ -174,27 +133,4 @@ export class VehiclePoList implements OnInit {
   refreshPage() {
     this.loadPage();
   }
-
-  // ================= SORT =================
-  sortColumn = 'rawDate';
-  sortDirection = 'desc';
-
-  sort(column: string) {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
-    }
-
-    this.onSearch();
-  }
-
-  getSortClass(column: string) {
-    if (this.sortColumn === column) {
-      return this.sortDirection === 'asc' ? 'sort-asc' : 'sort-desc';
-    }
-    return '';
-  }
 }
-

@@ -21,6 +21,9 @@ export interface PurchaseOrderViewModel {
   PODate: string;
   POType: string;
   CustomerCode: string;
+  TransactionType?: string;
+  Remarks?: string;
+  LocCode?: string;
   Items: PurchaseOrderItemViewModel[];
 }
 
@@ -63,6 +66,7 @@ export class VehiclePO implements OnInit {
   globalSubsidy: number = 0;
   locationInvalid: boolean = false;
   transactionTypeInvalid: boolean = false;
+  qtyInvalid: boolean = false;
 
   currentItem: any = {
     modelNo: '',
@@ -142,7 +146,7 @@ export class VehiclePO implements OnInit {
           this.partyName = 'BGAUSS AUTO PRIV';
           this.isSubmitted = res.IsSubmitted || res.isSubmitted || res.issubmitted || res.status === 'Submitted' || false;
           this.remarks = res.Remarks || res.remarks || '';
-          this.selectedLocation = res.Location || res.location || res.LocName || res.locName || res.locname || this.selectedLocation;
+          this.selectedLocation = res.LocCode || res.locCode || res.loccode || this.selectedLocation;
           this.prefixNo = res.PrefixNo || res.prefixNo || '';
           this.selectedTransactionType = res.TransactionType || res.transactionType || '';
 
@@ -293,7 +297,7 @@ export class VehiclePO implements OnInit {
 
             // Set default if not already set by loadPODetails
             if (this.locationList.length > 0 && !this.selectedLocation) {
-              this.selectedLocation = this.locationList[0].locname;
+              this.selectedLocation = this.locationList[0].loccode || this.locationList[0].Loccode || this.locationList[0].locname;
             }
 
             // Recalculate if there's an item in progress
@@ -311,7 +315,7 @@ export class VehiclePO implements OnInit {
           next: (res: any) => {
             this.locationList = res;
             if (this.locationList.length > 0 && !this.selectedLocation) {
-              this.selectedLocation = this.locationList[0].locname;
+              this.selectedLocation = this.locationList[0].loccode || this.locationList[0].Loccode || this.locationList[0].locname;
             }
           }
         });
@@ -406,8 +410,9 @@ export class VehiclePO implements OnInit {
     // Header validation (visual only, no toaster as per request)
     this.locationInvalid = !this.selectedLocation;
     this.transactionTypeInvalid = !this.selectedTransactionType;
+    this.qtyInvalid = !this.currentItem.qty || this.currentItem.qty <= 0;
 
-    if (this.locationInvalid || this.transactionTypeInvalid) {
+    if (this.locationInvalid || this.transactionTypeInvalid || this.qtyInvalid) {
       return;
     }
 
@@ -676,6 +681,8 @@ export class VehiclePO implements OnInit {
       POType: this.poType,
       CustomerCode: dealerCode || this.selectedLocation,
       TransactionType: this.selectedTransactionType,
+      Remarks: this.remarks,
+      LocCode: this.selectedLocation,
       Items: this.purchaseDetails.map((item, index) => ({
         ItemCode: item.modelNo,
         Qty: item.qty,

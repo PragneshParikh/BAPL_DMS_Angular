@@ -23,6 +23,8 @@ import { VehiclePO } from './components/vehicle-po/vehicle-po';
 import { VehiclePoList } from './components/vehicle-po-list/vehicle-po-list';
 import { JobCardAddForm } from './components/job-card/job-card-addForm/job-card-add-form/job-card-add-form';
 import { AddVehicleSaleBill } from './components/vehicle-sale-bill/add-vehicle-sale-bill/add-vehicle-sale-bill';
+import { PartsPoList } from './components/parts-po-list/parts-po-list';
+import { PartsPo } from './components/parts-po/parts-po';
 import { VehicleSaleBill } from './components/vehicle-sale-bill/vehicle-sale-bill';
 
 
@@ -86,6 +88,9 @@ export const routes: Routes = [
       { path: 'vehicle-po', component: VehiclePO, data: [17] },
       { path: 'vehicle-po/:ponumber', component: VehiclePO, data: [17] },
       { path: 'vehicle-po-list', component: VehiclePoList, data: [17] },
+       { path: 'parts-po-list', component: PartsPoList, data: [32] },
+       { path: 'parts-po', component: PartsPo, data: [32] },
+       { path: 'parts-po/:ponumber', component: PartsPo, data: [32] },
       { path: 'prefix', data: [26], loadComponent: () => import('./components/prefix-master/prefix-master').then(m => m.PrefixMaster) },
       { path: 'prefix/:id', data: [26], loadComponent: () => import('./components/prefix-master/prefix-master-details/prefix-master-details').then(m => m.PrefixMasterDetails) }
 

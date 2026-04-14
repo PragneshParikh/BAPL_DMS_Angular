@@ -43,7 +43,7 @@
                             [class.is-invalid]="locationInvalid" [(ngModel)]="selectedLocation"
                             (change)="onLocationChange(); locationInvalid = false" [disabled]="isSubmitted">
                             <option value="">--Select Location--</option>
-                            <option *ngFor="let loc of locationList" [value]="loc.locname">
+                            <option *ngFor="let loc of locationList" [value]="loc.loccode">
                                 {{loc.locname}}
                             </option>
                         </select>
@@ -184,7 +184,8 @@
                         <div class="col-md-1">
                             <label class="form-label mb-0 small">Qty</label>
                             <input type="number" class="form-control form-control-sm text-end" name="qty"
-                                [(ngModel)]="currentItem.qty" (input)="calculateRowTotals()" [readonly]="isSubmitted">
+                                [class.is-invalid]="qtyInvalid"
+                                [(ngModel)]="currentItem.qty" (input)="qtyInvalid = false; calculateRowTotals()" [readonly]="isSubmitted">
                         </div>
 
                         <!-- <div class="col-md-1">
