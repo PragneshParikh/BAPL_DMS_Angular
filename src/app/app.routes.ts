@@ -77,7 +77,7 @@ export const routes: Routes = [
       { path: 'receipt-entry/add', component: AddReceiptEntry, data: [15] },
       { path: 'receipt-entry/edit/:id', component: AddReceiptEntry, data: [15] },
       { path: 'vehicle-sale-bill/edit/:id', component: AddVehicleSaleBill, data: [15] },
-      {path: 'vehicle-sale-bill/add', component: AddVehicleSaleBill, data: [15] },
+      { path: 'vehicle-sale-bill/add', component: AddVehicleSaleBill, data: [15] },
       { path: 'vehicle-sale-bill', component: VehicleSaleBill, data: [15] },
 
       { path: 'customer-ledger', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger-list/customer-ledger-list').then(m => m.CustomerLedgerList) },
@@ -88,11 +88,13 @@ export const routes: Routes = [
       { path: 'vehicle-po', component: VehiclePO, data: [17] },
       { path: 'vehicle-po/:ponumber', component: VehiclePO, data: [17] },
       { path: 'vehicle-po-list', component: VehiclePoList, data: [17] },
-       { path: 'parts-po-list', component: PartsPoList, data: [32] },
-       { path: 'parts-po', component: PartsPo, data: [32] },
-       { path: 'parts-po/:ponumber', component: PartsPo, data: [32] },
+      { path: 'parts-po-list', component: PartsPoList, data: [32] },
+      { path: 'parts-po', component: PartsPo, data: [32] },
+      { path: 'parts-po/:ponumber', component: PartsPo, data: [32] },
       { path: 'prefix', data: [26], loadComponent: () => import('./components/prefix-master/prefix-master').then(m => m.PrefixMaster) },
-      { path: 'prefix/:id', data: [26], loadComponent: () => import('./components/prefix-master/prefix-master-details/prefix-master-details').then(m => m.PrefixMasterDetails) }
+      { path: 'prefix/:id', data: [26], loadComponent: () => import('./components/prefix-master/prefix-master-details/prefix-master-details').then(m => m.PrefixMasterDetails) },
+      { path: 'material-transfer', data: [29], loadComponent: () => import('./components/material-transfer/material-transfer').then(m => m.MaterialTransfer) },
+      { path: 'material-transfer/:id', data: [29], loadComponent: () => import('./components/material-transfer/material-transfer-detail/material-transfer-detail').then(m => m.MaterialTransferDetail) }
 
     ]
   }
