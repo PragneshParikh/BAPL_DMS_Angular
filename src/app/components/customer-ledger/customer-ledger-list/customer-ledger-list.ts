@@ -10,7 +10,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 
 @Component({
   selector: 'app-customer-ledger-list',
-  imports: [RouterOutlet, SharedModule, NgbPaginationModule, CommonModule, FormsModule,NgbTooltipModule],
+  imports: [RouterOutlet, SharedModule, NgbPaginationModule, CommonModule, FormsModule, NgbTooltipModule],
   templateUrl: './customer-ledger-list.html',
   styleUrl: './customer-ledger-list.scss',
 })
@@ -42,11 +42,11 @@ export class CustomerLedgerList implements OnInit {
     this.ledgerMasterService.getLedgerByPaged(this.searchTerm, this.page - 1, this.pageSize).subscribe({
       next: (res) => {
         this.collectionSize = 0;
-
         if (res) {
           this.dataSource = res.data;
           this.collectionSize = res.totalRecords;
         }
+        console.log('ledger : ', this.dataSource);
         this.loader.hide();
       }, error: (err) => {
         console.log(err);
@@ -92,6 +92,7 @@ export class CustomerLedgerList implements OnInit {
   }
 
   onCustomerClick(row: any) {
+    console.log('onclick : ', row);
     if (row) {
       this.route.navigate(['/customer-ledger', row.id]);
     }
@@ -104,4 +105,5 @@ export class CustomerLedgerList implements OnInit {
   onSearchChange() {
     this.getCustomerLedgerDetails();
   }
+
 }

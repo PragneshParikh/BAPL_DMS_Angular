@@ -132,19 +132,16 @@
                             </textarea>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">City</label>
-                            <select class="form-select form-select-sm" name="city" [(ngModel)]="formData.city">
-                                <option value="City A">City A</option>
-                                <option value="City B">City B</option>
-                                <option value="City C">City C</option>
+                            <label class="form-label">State</label>
+                            <select class="form-select form-select-sm" name="state" [(ngModel)]="formData.state">
+                                <option *ngFor="let state of states" [value]="state.stateId">{{ state.stateName }}
+                                </option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">State</label>
-                            <select class="form-select form-select-sm" name="state" [(ngModel)]="formData.state">
-                                <option value="State A">State A</option>
-                                <option value="State B">State B</option>
-                                <option value="State C">State C</option>
+                            <label class="form-label">City</label>
+                            <select class="form-select form-select-sm" name="city" [(ngModel)]="formData.city">
+                                <option *ngFor="let city of cities" [value]="city.cityId">{{ city.cityName }}</option>
                             </select>
                         </div>
                         <div class="col-md-3">

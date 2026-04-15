@@ -9,6 +9,8 @@ import { tap } from 'rxjs';
 import { Gender, LedgerTypes } from '../../constant';
 import { CommonModule } from '@angular/common';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { CityService } from '../../core/services/city';
+import { StateService } from '../../core/services/state';
 
 
 @Component({
@@ -43,14 +45,18 @@ export class CustomerLedger {
   public isModify = false;
   isExternalCall: boolean;
 
+  cities: any[] = [];
+  states: any[] = [];
+
   constructor(
     private ledgerService: LedgerMaster,
     private activatedRoute: ActivatedRoute,
     private loader: LoaderService,
     private toaster: ToastService,
     private router: Router,
+    private cityService: CityService,
+    private stateService: StateService,
     @Optional() public activeModal: NgbActiveModal
-
   ) {
     this.activatedRoute.paramMap.subscribe(params => {
       const id = Number(params.get('id'));
@@ -64,6 +70,9 @@ export class CustomerLedger {
   @Input() defaultLedgerType: string = '';
 
   ngOnInit() {
+
+    this.getCity();
+    this.getState();
 
     this.isExternalCall = !!this.activeModal || !!this.ledgerId;
 
@@ -89,12 +98,10 @@ export class CustomerLedger {
     });
   }
 
-
   getCustomerLedgerDetails(id: any) {
     // this.loader.show();
     this.ledgerService.getLedgerById(id).subscribe({
       next: (res) => {
-        console.log(res);
         this.formData = {
           id: res.id,
           ledgerCode: res.ledgerCode,
@@ -175,6 +182,28 @@ export class CustomerLedger {
     else {
       this.router.navigate(['/customer-ledger']);
     }
+  }
+
+  getCity() {
+    this.cityService.get().subscribe({
+      next: (res) => {
+        this.cities = res;
+      },
+      error: (err) => {
+
+      }
+    });
+  }
+
+  getState() {
+    this.stateService.get().subscribe({
+      next: (res) => {
+        this.states = res;
+      },
+      error: () => {
+
+      }
+    });
   }
 
 

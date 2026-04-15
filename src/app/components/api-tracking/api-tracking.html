@@ -63,7 +63,8 @@
                                 Search
                             </button>
 
-                            <button type="button" class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'" (click)="downloadApiTrackingExcel()">
+                            <button type="button" class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                                (click)="downloadApiTrackingExcel()">
                                 <i class="ri-file-excel-2-line align-bottom me-1"></i>
                             </button>
 
@@ -154,7 +155,7 @@
 <!-- end row -->
 
 <ng-template #RowPayloadModel role="document" let-modal>
-    <div class="col-xxl-6">
+    <div class="col-md-12">
         <div class="card">
             <div class="modal-header" style="background-color: #747CA0; padding: 5px;">
                 <h5 class="modal-title" id="varyingcontentModalLabel" style="color: white;">API Tracking Payload</h5>
