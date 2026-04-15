@@ -1,0 +1,210 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">OEM Model Warranty</h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <!-- FILTER CARD -->
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+
+                    <!-- OEM Model Id -->
+                    <!-- <div class="col-md-2">
+                        <label class="form-label small">OEM Model Id</label>
+                        <input type="number" class="form-control form-control-sm"
+                               [(ngModel)]="filter.oemmodelId">
+                    </div> -->
+
+                    <!-- Effective Date -->
+                    <!-- From -->
+                    <!-- <div class="col-md-2">
+                        <label class="form-label small">Effective Date From</label>
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.effectiveDateFrom">
+                    </div> -->
+
+                    <!-- To -->
+                    <!-- <div class="col-md-2">
+                        <label class="form-label small">Effective Date To</label>
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.effectiveDateTo">
+                    </div> -->
+
+                     <div class="col-md-2">
+                        <label class="form-label mb-0 small">Effective Date From</label>
+                        <input type="text" class="form-control form-control-sm" style="font-size: 8px;" mwlFlatpickr
+                            [(ngModel)]="filter.effectiveDateFrom" [altInput]="true" [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'"
+                            placeholder="Select date">
+                    </div>
+
+                    <!-- To Date -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Effective Date To</label>
+                        <input type="text" class="form-control form-control-sm" mwlFlatpickr [(ngModel)]="filter.effectiveDateTo"
+                            [altInput]="true" [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'" placeholder="Select date">
+                    </div>
+
+
+                    <!-- Duration Type -->
+                    <!-- <div class="col-md-2">
+                        <label class="form-label small">Duration Type</label>
+                        <select class="form-select form-select-sm"
+                                [(ngModel)]="filter.durationType">
+                            <option value="">All</option>
+                            <option value="MONTH">Month</option>
+                            <option value="YEAR">Year</option>
+                        </select>
+                    </div> -->
+
+                    <!-- Buttons -->
+                    <div class="col-md-auto ms-auto d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" (click)="onSearch()">Search</button>
+                        <!-- <button class="btn btn-secondary btn-sm" (click)="resetFilter()">Reset</button> -->
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLE CARD -->
+        <div class="card">
+             <div class="card-header">
+
+            <div class="d-flex justify-content-end align-items-center">
+
+                <!-- LEFT SIDE -->
+                <!-- <div class="text-muted">
+                    Total Record(s): {{ filteredReceipts.length }}
+                </div> -->
+
+                <!-- RIGHT SIDE -->
+                <div class="d-flex align-items-center gap-3">
+
+                    <!-- Buttons -->
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" (click)="addNew()">
+                            Add
+                        </button>
+
+                        <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                          (click)="downloadExcel()" >
+                            <i class="ri-file-excel-2-line"></i>
+                        </button>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="search-box">
+                        <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm"
+                            (input)="onSearchChange()" />
+                        <i class="ri-search-line search-icon"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+            <div class="card-body">
+
+                <div class="table-responsive fixed-table" id="oemTable">
+
+                    <table class="table table-sm table-striped oem-table" style="font-size: 12px;">
+
+                        <!-- HEADER -->
+                        <thead>
+                            <tr>
+                                <th>Sl No.</th>
+
+                                <th class="sort" (click)="sort('oemmodelname')" style="cursor:pointer">
+                                    OEM Model
+                                </th>
+
+                                <th class="sort" (click)="sort('effectiveDate')" style="cursor:pointer">
+                                    Effective Date
+                                </th>
+
+                                <th class="sort" (click)="sort('odoreading')" style="cursor:pointer">
+                                    Odo Reading
+                                </th>
+
+                                <th class="sort" (click)="sort('durationType')" style="cursor:pointer">
+                                    Duration Type
+                                </th>
+
+                                <th class="sort" (click)="sort('duration')" style="cursor:pointer">
+                                    Duration
+                                </th>
+
+                                <th class="sort" (click)="sort('isB2b')" style="cursor:pointer">
+                                    B2B
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <!-- BODY -->
+                        <tbody>
+
+                            @if (paginatedList.length === 0) {
+                            <tr>
+                                <td colspan="7" class="text-center">No data available</td>
+                            </tr>
+                            }
+
+                            @for (item of paginatedList; track $index) {
+                            <tr (click)="edit(item)" style="cursor: pointer;">
+
+                                <td>{{ ($index + 1) + ((page - 1) * pageSize) }}</td>
+
+                                <td>
+                                    <ngb-highlight [result]="item.oemmodelname || ''" [term]="searchTerm">
+                                    </ngb-highlight>
+                                </td>
+
+                                <td>
+                                    <ngb-highlight [result]="(item.effectiveDate | date:'dd/MM/yyyy') || ''"
+                                        [term]="searchTerm">
+                                    </ngb-highlight>
+                                </td>
+
+                                <td>
+                                    <ngb-highlight [result]="item.odoreading?.toString() || ''" [term]="searchTerm">
+                                    </ngb-highlight>
+                                </td>
+
+                                <td>
+                                    <ngb-highlight [result]="item.durationType || ''" [term]="searchTerm">
+                                    </ngb-highlight>
+                                </td>
+
+                                <td>
+                                    <ngb-highlight [result]="item.duration?.toString() || ''" [term]="searchTerm">
+                                    </ngb-highlight>
+                                </td>
+
+                                <td>
+                                    <span class="badge" [ngClass]="item.isB2b ? 'bg-success' : 'bg-secondary'">
+                                        {{ item.isB2b ? 'Yes' : 'No' }}
+                                    </span>
+                                </td>
+
+                            </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+                </div>
+
+                <!-- PAGINATION -->
+                <div class="d-flex justify-content-end mt-3">
+                    <ngb-pagination [collectionSize]="filteredList.length" [(page)]="page" [pageSize]="pageSize"
+                        (pageChange)="onPageChange($event)">
+                    </ngb-pagination>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

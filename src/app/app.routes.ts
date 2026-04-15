@@ -26,6 +26,8 @@ import { AddVehicleSaleBill } from './components/vehicle-sale-bill/add-vehicle-s
 import { PartsPoList } from './components/parts-po-list/parts-po-list';
 import { PartsPo } from './components/parts-po/parts-po';
 import { VehicleSaleBill } from './components/vehicle-sale-bill/vehicle-sale-bill';
+import { OemmodelWarranty } from './components/oemmodel-warranty/oemmodel-warranty';
+import { AddOemmodelWarranty } from './components/oemmodel-warranty/add-oemmodel-warranty/add-oemmodel-warranty';
 
 
 export const routes: Routes = [
@@ -79,6 +81,10 @@ export const routes: Routes = [
       { path: 'vehicle-sale-bill/edit/:id', component: AddVehicleSaleBill, data: [15] },
       { path: 'vehicle-sale-bill/add', component: AddVehicleSaleBill, data: [15] },
       { path: 'vehicle-sale-bill', component: VehicleSaleBill, data: [15] },
+      { path: 'oemmodel-warranty', component: OemmodelWarranty, data: [19] },
+      { path: 'oemmodel-warranty/add', component: AddOemmodelWarranty, data: [19] },
+            { path: 'oemmodel-warranty/edit/:id', component: AddOemmodelWarranty, data: [19] },
+
 
       { path: 'customer-ledger', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger-list/customer-ledger-list').then(m => m.CustomerLedgerList) },
       { path: 'customer-ledger/:id', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger').then(m => m.CustomerLedger) },

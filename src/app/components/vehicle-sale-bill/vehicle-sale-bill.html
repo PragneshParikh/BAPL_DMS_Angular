@@ -76,96 +76,99 @@
             <!-- BODY -->
             <div class="card-body">
 
-                <div class="table-responsive fixed-table">
+                <div class="table-responsive fixed-table" id="saleTable">
 
-                   <table class="table table-sm table-striped text-nowrap" style="font-size: 12px;">
+                    <table class="table table-sm table-striped text-nowrap" style="font-size: 12px;">
 
-    <!-- HEADER -->
-    <thead class="table-light">
-        <tr>
-            <th>Sl No.</th>
-            <th (click)="onSort('saleBillNo')" style="cursor:pointer">Sale Bill No</th>
-            <th (click)="onSort('location')" style="cursor:pointer">Location</th>
-            <th (click)="onSort('saleDate')" style="cursor:pointer">Sale Date</th>
-            <th (click)="onSort('saleType')" style="cursor:pointer">Sale Type</th>
-            <th (click)="onSort('billType')" style="cursor:pointer">Bill Type</th>
-            <th (click)="onSort('customerName')" style="cursor:pointer">Customer Name</th>
-            <th (click)="onSort('billingName')" style="cursor:pointer">Billing Name</th>
-            <th (click)="onSort('totalAmount')" style="cursor:pointer">Total Amount</th>
-            <th>Total Items</th>
-        </tr>
-    </thead>
+                        <!-- HEADER -->
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sl No.</th>
+                                <th class="sort" (click)="onSort('saleBillNo')" style="cursor:pointer">Sale Bill No</th>
+                                <th class="sort" (click)="onSort('location')" style="cursor:pointer">Location</th>
+                                <th class="sort" (click)="onSort('saleDate')" style="cursor:pointer">Sale Date</th>
+                                <th class="sort" (click)="onSort('saleType')" style="cursor:pointer">Sale Type</th>
+                                <th class="sort" (click)="onSort('billType')" style="cursor:pointer">Bill Type</th>
+                                <th class="sort" (click)="onSort('customerName')" style="cursor:pointer">Customer Name
+                                </th>
+                                <th class="sort" (click)="onSort('billingName')" style="cursor:pointer">Billing Name
+                                </th>
+                                <th class="sort" (click)="onSort('totalAmount')" style="cursor:pointer">Total Amount
+                                </th>
+                                <th class="sort" (click)="onSort('totalItems')" style="cursor:pointer;">Total Items</th>
+                            </tr>
+                        </thead>
 
-    <!-- BODY -->
-    <tbody>
+                        <!-- BODY -->
+                        <tbody>
 
-        @if (paginatedBills.length === 0) {
-        <tr>
-            <td colspan="10" class="text-center">
-                No data available
-            </td>
-        </tr>
-        }
+                            @if (paginatedBills.length === 0) {
+                            <tr>
+                                <td colspan="10" class="text-center">
+                                    No data available
+                                </td>
+                            </tr>
+                            }
 
-        @for (item of paginatedBills; track $index) {
-        <tr style="cursor: pointer" (click)="viewDetails(item)">
+                            @for (item of paginatedBills; track $index) {
+                            <tr style="cursor: pointer" (click)="viewDetails(item)">
 
-            <!-- Serial -->
-            <td>
-                {{ ($index + 1) + ((page - 1) * pageSize) }}
-            </td>
+                                <!-- Serial -->
+                                <td>
+                                    {{ ($index + 1) + ((page - 1) * pageSize) }}
+                                </td>
 
-            <!-- Sale Bill No -->
-            <td>
-                <ngb-highlight [result]="item.saleBillNo" [term]="searchTerm"></ngb-highlight>
-            </td>
+                                <!-- Sale Bill No -->
+                                <td>
+                                    <ngb-highlight [result]="item.saleBillNo" [term]="searchTerm"></ngb-highlight>
+                                </td>
 
-            <!-- Location -->
-            <td>
-                <ngb-highlight [result]="item.location" [term]="searchTerm"></ngb-highlight>
-            </td>
+                                <!-- Location -->
+                                <td>
+                                    <ngb-highlight [result]="item.location" [term]="searchTerm"></ngb-highlight>
+                                </td>
 
-            <!-- Sale Date -->
-            <td>
-                {{ item.saleDate | date:'dd-MM-yyyy' }}
-            </td>
+                                <!-- Sale Date -->
+                                <td>
+                                    {{ item.saleDate | date:'dd-MM-yyyy' }}
+                                </td>
 
-            <!-- Sale Type -->
-            <td>
-                {{ item.saleType }}
-            </td>
+                                <!-- Sale Type -->
+                                <td>
+                                    {{ item.saleType }}
+                                </td>
 
-            <!-- Bill Type -->
-            <td>
-                {{ item.billType }}
-            </td>
+                                <!-- Bill Type -->
+                                <td>
+                                    {{ item.billType }}
+                                </td>
 
-            <!-- Customer -->
-            <td>
-                <ngb-highlight [result]="item.customerName" [term]="searchTerm"></ngb-highlight>
-            </td>
+                                <!-- Customer -->
+                                <td>
+                                    <ngb-highlight [result]="item.customerName" [term]="searchTerm"></ngb-highlight>
+                                </td>
 
-            <!-- Billing Name -->
-            <td>
-                {{ item.billingName }}
-            </td>
+                                <!-- Billing Name -->
+                                <td>
+                                    {{ item.billingName }}
+                                </td>
 
-            <!-- Total Amount -->
-            <td>
-                ₹ {{ item.totalAmount }}
-            </td>
+                                <!-- Total Amount -->
+                                <td>
+                                    ₹ {{ item.totalAmount }}
+                                </td>
 
-            <!-- Items Count -->
-            <td>
-                {{ item.details?.length || 0 }}
-            </td>
+                                <!-- Items Count -->
+                                <td>
+                                    {{ item.details?.length || 0 }}
+                                </td>
 
-        </tr>
-        }
+                            </tr>
+                            }
 
-    </tbody>
+                        </tbody>
 
-</table>
+                    </table>
                 </div>
 
                 <!-- PAGINATION -->

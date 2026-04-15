@@ -22,7 +22,7 @@ import { VehicleSaleListChasisResponse } from '../../../ViewModels/VehicleSaleCh
 
 @Component({
   selector: 'app-add-vehicle-sale-bill',
-  imports: [FormsModule, CommonModule, NgbPaginationModule,NgbTooltipModule],
+  imports: [FormsModule, CommonModule, NgbPaginationModule, NgbTooltipModule],
   templateUrl: './add-vehicle-sale-bill.html',
   styleUrl: './add-vehicle-sale-bill.scss',
 })
@@ -98,14 +98,14 @@ export class AddVehicleSaleBill implements OnInit {
     stockDetailNo: '',
     vcu: '',
     accessoryAmount: null,
-      extWarranty: 'N',
-      batteryChemical: '',
-      batteryCapacity: '',
-      batteryMake: '',
-      convertorNo: '',
-      chargerNo: '',
-      controllerNo: '',
-      keyBookNo: '',
+    extWarranty: 'N',
+    batteryChemical: '',
+    batteryCapacity: '',
+    batteryMake: '',
+    convertorNo: '',
+    chargerNo: '',
+    controllerNo: '',
+    keyBookNo: '',
 
     // Sale Info
     saleBillNo: '',
@@ -142,7 +142,7 @@ export class AddVehicleSaleBill implements OnInit {
     exchange: 'N',
 
     // Extra Charges
-      discount: null,
+    discount: null,
     handlingCharges: null,
     hpAmount: null,
 
@@ -167,7 +167,7 @@ export class AddVehicleSaleBill implements OnInit {
   ngOnInit(): void {
     this.fetchLocations();
     this.getFinanciers();
-     this.getParties();
+    this.getParties();
     //this.getNextSaleBillNo();
     this.loadProducts();
     const bill = history.state?.bill;
@@ -185,12 +185,10 @@ export class AddVehicleSaleBill implements OnInit {
   loadBillForEdit(bill: any) {
     this.selectedCustomerId = bill.ledgerId;
 
-  this.loadChasisPricing(() => {
-    // ✅ now list is ready
-    this.model.chassisNo = bill.details?.[0]?.chassisNo;
-  });
-
-    console.log('Editing Bill:', bill);
+    this.loadChasisPricing(() => {
+      // ✅ now list is ready
+      this.model.chassisNo = bill.details?.[0]?.chassisNo;
+    });
 
     this.model.saleDate = bill.saleDate.split('T')[0]; // format date for input
     this.model.financier = bill.financier || '';
@@ -275,7 +273,7 @@ export class AddVehicleSaleBill implements OnInit {
       }
     });
   }
-  
+
   selectReceipt(item: ReceiptEntryModel) {
     this.selectedReceipt = item;
 
@@ -302,7 +300,7 @@ export class AddVehicleSaleBill implements OnInit {
 
         this.receiptList = res || [];
 
-        
+
         this.page = 1;
         this.updatePagination();  // ← THIS WAS MISSING
 
@@ -317,7 +315,7 @@ export class AddVehicleSaleBill implements OnInit {
     this.modalRef.close();
     this.modalRef = null;
     this.receipt = {
-      fromDate: this.getLast7DaysDate(),  // reset to last 7 days
+      fromDate: this.getLast7DaysDate(),
       toDate: this.today,                 // reset to today
       receiptNo: '',
       bookingId: '',
@@ -354,11 +352,11 @@ export class AddVehicleSaleBill implements OnInit {
     this.page = page;
     this.updatePagination();
   }
-  
+
   // Called when a row is clicked
   selectRow(row: ReceiptEntryModel) {
     this.selectedRow = row;
-    
+
   }
 
   // Called when Proceed is clicked
@@ -371,7 +369,7 @@ export class AddVehicleSaleBill implements OnInit {
     }
   }
 
-  
+
   saveVehicleDetailsOnly() {
 
     const payload = {
@@ -402,7 +400,7 @@ export class AddVehicleSaleBill implements OnInit {
 
       totalAmount: this.getTotalAmount(),
 
-      // ✅ REAL DATA FROM TABLE
+      // REAL DATA FROM TABLE
       details: this.vehicleList.map(v => ({
         chassisNo: v.chassisNo,
         itemRate: v.itemRate,
@@ -449,190 +447,79 @@ export class AddVehicleSaleBill implements OnInit {
     };
   }
 
-    
-// addVehicle() {
-//   if (!this.model.chassisNo) {
-//     alert("Please select chassis");
-//     return;
-//   }
+  addVehicle() {
+    if (!this.model.chassisNo) {
+      alert("Please select chassis");
+      return;
+    }
 
-//   // Prevent duplicate chassis
-//   const exists = this.vehicleList.some(
-//     x => x.chassisNo === this.model.chassisNo
-//   );
+    const vehicleData = {
+      chassisNo: this.model.chassisNo,
+      model: this.model.itemCode,
+      colour: this.model.colour,
+      mfgYear: this.model.mfgYear,
 
-//   if (exists) {
-//     alert("Chassis already added");
-//     return;
-//   }
+      rate: this.model.itemRate,
+      regAmt: this.model.regAmount,
+      insAmt: this.model.insAmount,
+      preGstAmt: this.model.preGSTDiscount,
+      amount: this.model.amount,
 
-//   // Push to table
-//   this.vehicleList.push({
-//     chassisNo: this.model.chassisNo,
-//     model: this.model.itemCode,
-//     colour: this.model.colour || '',
-//     mfgYear: this.model.mfgYear,
-//     battery: this.model.battery || '',
-//     convertorNo: this.model.convertorNo || '',
-//     chargerNo: this.model.chargerNo || '',
-//     controllerNo: this.model.controllerNo || '',
-//     keyBookNo: this.model.keyBookNo || '',
-//     kit: this.model.kit || 'N',
+      sgst: this.model.sgst,
+      cgst: this.model.cgst,
+      igst: this.model.igst,
 
-//     rate: this.model.itemRate,
-//     regAmt: this.model.regAmount,
-//     insAmt: this.model.insAmount,
-//     preGstAmt: this.model.preGSTDiscount,
-//     amount: this.model.amount,
+      delivered: this.model.delivered
+    };
 
-//     extWarranty: this.model.extWarranty || 'N',
+    // 🔥 CHECK DUPLICATE (SMART LOGIC)
+    const exists = this.vehicleList.some((x, index) =>
+      x.chassisNo === this.model.chassisNo &&
+      index !== this.editingIndex   // ignore current row when editing
+    );
 
-//     sgst: this.model.sgst,
-//     cgst: this.model.cgst,
-//     igst: this.model.igst,
-//     cess: this.model.cess || 0,
-//     tcs: this.model.tcs || 0,
+    if (exists) {
+      alert("Chassis already exists in the table!");
+      return;
+    }
 
-//     delivered: this.model.delivered || 'N',
+    // ✅ UPDATE MODE
+    if (this.editingIndex !== -1) {
+      this.vehicleList[this.editingIndex] = vehicleData;
+      this.editingIndex = -1;
+    }
+    else {
+      // ✅ ADD MODE
+      this.vehicleList.push(vehicleData);
+    }
 
-//     batteryChemical: this.model.batteryChemical || '',
-//     batteryCapacity: this.model.batteryCapacity || '',
-//     batteryMake: this.model.batteryMake || '',
-//     stockDetailNo: this.model.stockDetailNo || '',
-//     vcu: this.model.vcu || ''
-//   });
-
-//   // Reset form fields after add
-//   this.resetVehicleForm();
-// }
-
-// editVehicle(index: number) {
-
-//     const selected = this.vehicleList[index];
-//     this.model.chassisNo = selected.chassisNo;
-//     this.model.itemRate = selected.itemRate;
-//     this.model.preGSTDiscount = selected.preGstDisc;
-//     this.model.regAmount = selected.regAmt;
-//     this.model.insAmount = selected.insAmt;
-//     this.model.mfgYear = selected.mfgYear;
-//     this.model.delivered = selected.delivered;
-//     this.editingIndex = index;
-//   }
-
-
-// addVehicle() {
-//   if (!this.model.chassisNo) {
-//     alert("Please select chassis");
-//     return;
-//   }
-// const exists = this.vehicleList.some(
-//     x => x.chassisNo === this.model.chassisNo
-//    );
-//   const vehicleData = {
-//     chassisNo: this.model.chassisNo,
-//     model: this.model.itemCode,
-//     colour: this.model.colour,
-//     mfgYear: this.model.mfgYear,
-
-//     rate: this.model.itemRate,
-//     regAmt: this.model.regAmount,
-//     insAmt: this.model.insAmount,
-//     preGstAmt: this.model.preGSTDiscount,
-//     amount: this.model.amount,
-
-//     sgst: this.model.sgst,
-//     cgst: this.model.cgst,
-//     igst: this.model.igst,
-
-//     delivered: this.model.delivered
-//   };
-
-//   // ✅ UPDATE MODE
-//   if (this.editingIndex !== -1) {
-//     this.vehicleList[this.editingIndex] = vehicleData;
-//     this.editingIndex = -1;
-//   }
-//   else {
-//     // ✅ ADD MODE
-//     this.vehicleList.push(vehicleData);
-//   }
-
-//   this.resetVehicleForm();
-// }
-
-addVehicle() {
-  if (!this.model.chassisNo) {
-    alert("Please select chassis");
-    return;
+    this.resetVehicleForm();
   }
 
-  const vehicleData = {
-    chassisNo: this.model.chassisNo,
-    model: this.model.itemCode,
-    colour: this.model.colour,
-    mfgYear: this.model.mfgYear,
+  editVehicle(index: number) {
+    const selected = this.vehicleList[index];
 
-    rate: this.model.itemRate,
-    regAmt: this.model.regAmount,
-    insAmt: this.model.insAmount,
-    preGstAmt: this.model.preGSTDiscount,
-    amount: this.model.amount,
+    this.model.chassisNo = selected.chassisNo;
+    this.model.itemCode = selected.model;
+    this.model.colour = selected.colour;
+    this.model.mfgYear = selected.mfgYear;
 
-    sgst: this.model.sgst,
-    cgst: this.model.cgst,
-    igst: this.model.igst,
+    // ✅ FIXED KEYS
+    this.model.itemRate = selected.rate;
+    this.model.preGSTDiscount = selected.preGstAmt;
+    this.model.regAmount = selected.regAmt;
+    this.model.insAmount = selected.insAmt;
 
-    delivered: this.model.delivered
-  };
+    this.model.amount = selected.amount;
 
-  // 🔥 CHECK DUPLICATE (SMART LOGIC)
-  const exists = this.vehicleList.some((x, index) =>
-    x.chassisNo === this.model.chassisNo &&
-    index !== this.editingIndex   // ignore current row when editing
-  );
+    this.model.sgst = selected.sgst;
+    this.model.cgst = selected.cgst;
+    this.model.igst = selected.igst;
 
-  if (exists) {
-    alert("Chassis already exists in the table!");
-    return;
+    this.model.delivered = selected.delivered;
+
+    this.editingIndex = index;
   }
-
-  // ✅ UPDATE MODE
-  if (this.editingIndex !== -1) {
-    this.vehicleList[this.editingIndex] = vehicleData;
-    this.editingIndex = -1;
-  }
-  else {
-    // ✅ ADD MODE
-    this.vehicleList.push(vehicleData);
-  }
-
-  this.resetVehicleForm();
-}
-
-editVehicle(index: number) {
-  const selected = this.vehicleList[index];
-
-  this.model.chassisNo = selected.chassisNo;
-  this.model.itemCode = selected.model;
-  this.model.colour = selected.colour;
-  this.model.mfgYear = selected.mfgYear;
-
-  // ✅ FIXED KEYS
-  this.model.itemRate = selected.rate;
-  this.model.preGSTDiscount = selected.preGstAmt;
-  this.model.regAmount = selected.regAmt;
-  this.model.insAmount = selected.insAmt;
-
-  this.model.amount = selected.amount;
-
-  this.model.sgst = selected.sgst;
-  this.model.cgst = selected.cgst;
-  this.model.igst = selected.igst;
-
-  this.model.delivered = selected.delivered;
-
-  this.editingIndex = index;
-}
 
   deleteVehicle(index: number) {
 
@@ -682,7 +569,7 @@ editVehicle(index: number) {
       saleDate: new Date(),
 
       saleBillNo: this.model.saleBillNo,
-      isD2d: this.model.isD2D ,
+      isD2d: this.model.isD2D,
       customerType: this.model.customerType,
       location: this.model.location,
       saleType: this.model.saleType,
@@ -725,180 +612,174 @@ editVehicle(index: number) {
     };
 
     console.log(this.buildPayload);
-    
-  }
-getLedgerIdFromName(): number | null {
-  const match = this.parties.find(p =>
-    p.ledgerName?.toLowerCase() === this.model.customerName?.toLowerCase()
-  );
-  return match ? match.id : null;
-}
 
-   openCustomerLedgerAdd() {
-      const modalRef = this.modalService.open(CustomerLedger, {
-        size: 'lg',
-        backdrop: 'static'
-      });
-  
-      modalRef.componentInstance.defaultLedgerType = 'Party';
-  
-      modalRef.result.then((newId) => {
-        if (newId) {
-  
-          // IMPORTANT: subscribe and act AFTER data comes
-          this.receiptEntryService.getLedgerByType('Party').subscribe({
-            next: (res) => {
-              this.parties = res;
-  
-              // Force change detection via new reference
-              this.parties = [...this.parties];
-  
-              //  OPTIONAL: auto-select newly added
-              const added = this.parties.find(f => f.id === newId);
-              if (added) {
-                this.model.customerName = added.ledgerName;
-                this.model.billingName = added.ledgerName;
-              }
+  }
+  getLedgerIdFromName(): number | null {
+    const match = this.parties.find(p =>
+      p.ledgerName?.toLowerCase() === this.model.customerName?.toLowerCase()
+    );
+    return match ? match.id : null;
+  }
+
+  openCustomerLedgerAdd() {
+    const modalRef = this.modalService.open(CustomerLedger, {
+      size: 'lg',
+      backdrop: 'static'
+    });
+
+    modalRef.componentInstance.defaultLedgerType = 'Party';
+
+    modalRef.result.then((newId) => {
+      if (newId) {
+
+        // subscribe and act AFTER data comes
+        this.receiptEntryService.getLedgerByType('Party').subscribe({
+          next: (res) => {
+            this.parties = res;
+
+            // Force change detection via new reference
+            this.parties = [...this.parties];
+
+            //  OPTIONAL: auto-select newly added
+            const added = this.parties.find(f => f.id === newId);
+            if (added) {
+              this.model.customerName = added.ledgerName;
+              this.model.billingName = added.ledgerName;
             }
-          });
-        }
-      }).catch(() => { });
-    }
-
-     getParties() {
-  this.receiptEntryService.getLedgerByType('Party').subscribe({
-    next: (res) => {
-      this.parties = res.filter(p => 
-        p.ledgerType?.toLowerCase() === 'party'
-      );
-    }
-  });
-}
-
-filterParties() {
-  const search = this.model.customerName?.trim().toLowerCase();
-
-  // Reset ID when typing
-  this.selectedCustomerId = null;
-
-  if (!search) {
-    this.filteredParties = [];
-    return;
+          }
+        });
+      }
+    }).catch(() => { });
   }
 
-  this.filteredParties = this.parties.filter(p =>
-    p.ledgerName?.toLowerCase().includes(search)
-  );
-}
-
-selectParty(party: LedgerMaster) {
-  console.log('Selected party:', party);
-  this.model.customerName = party.ledgerName;
-
-  //store ID here
-  this.selectedCustomerId = party.id;
-
-  this.filteredParties = [];
-  this.loadChasisPricing();
-}
-
-
-// loadChasisPricing() {
-//   const dealerCode = this.storageService.getDealerCode();
-//   const ledgerId = this.selectedCustomerId;
-
-//   if (!dealerCode || !ledgerId) return;
-
-//  this.vehicleSaleBillService
-//   .getChasisPricing(dealerCode, ledgerId)
-//   .subscribe({
-//     next: (res: VehicleSaleListChasisResponse[]) => {
-//       this.chassisList = res;
-//     }
-//   });
-// }
-
-loadChasisPricing(callback?: () => void) {
-  const dealerCode = this.storageService.getDealerCode();
-  const ledgerId = this.selectedCustomerId;
-
-  if (!dealerCode || !ledgerId) return;
-
-  this.vehicleSaleBillService
-    .getChasisPricing(dealerCode, ledgerId)
-    .subscribe({
+  getParties() {
+    this.receiptEntryService.getLedgerByType('Party').subscribe({
       next: (res) => {
-        this.chassisList = res;
-
-        if (callback) callback(); // ✅ trigger after load
+        this.parties = res.filter(p =>
+          p.ledgerType?.toLowerCase() === 'party'
+        );
       }
     });
-}
-onSubmitToERP() {
-  const saleBillNo = this.billId; // or wherever you're getting it
-
-  if (!saleBillNo) {
-    alert('Sale Bill No is required');
-    return;
   }
 
-  this.vehicleSaleBillService.sendToERP(saleBillNo).subscribe({
-    next: (res) => {
-      console.log('Success:', res);
-      alert('Sent to ERP successfully ✅');
-    },
-    error: (err) => {
-      console.error('Error:', err);
-      alert('Failed to send ❌');
+  filterParties() {
+    const search = this.model.customerName?.trim().toLowerCase();
+
+    // Reset ID when typing
+    this.selectedCustomerId = null;
+
+    if (!search) {
+      this.filteredParties = [];
+      return;
     }
-  });
-}
-// onChassisChange() {
-//   const selected = this.chassisList.find(
-//     x => x.chassisNo === this.model.chassisNo
-//   );
-//   console.log('Chassis',this.chassisList);
-  
-//   if (selected) {
-//     this.model.itemRate = selected.customerRate; // or dealerRate based on logic
-//     this.model.preGSTDiscount = selected.preGstDis;
-//   }
-// }
 
-onChassisChange(chassisNo?: string) {
-  const selected = this.chassisList.find(
-    x => x.chassisNo === this.model.chassisNo || x.chassisNo === chassisNo
-  );
+    this.filteredParties = this.parties.filter(p =>
+      p.ledgerName?.toLowerCase().includes(search)
+    );
+  }
 
-  if (!selected) return;
+  selectParty(party: LedgerMaster) {
+    this.model.customerName = party.ledgerName;
 
-  // Fill model fields from selected chassis
-  this.model.itemCode = selected.itemCode;
-  this.model.itemRate = selected.customerRate;
-  this.model.preGSTDiscount = selected.preGstDis;
-  this.model.mfgYear = selected.mfgYear;
+    //store ID here
+    this.selectedCustomerId = party.id;
 
-  // Taxes
-  this.model.sgst = selected.sgstAmt;
-  this.model.cgst = selected.cgstAmt;
-  this.model.igst = selected.igstAmt;
+    this.filteredParties = [];
+    this.loadChasisPricing();
+  }
 
-  // Amount calculation
-  this.model.amount =
-    (this.model.itemRate - this.model.preGSTDiscount) +
-    this.model.sgst +
-    this.model.cgst +
-    this.model.igst;
-}
 
-resetVehicleForm() {
-  this.model.chassisNo = '';
-  this.model.itemRate = 0;
-  this.model.preGSTDiscount = 0;
-  this.model.amount = 0;
-  this.model.sgst = 0;
-  this.model.cgst = 0;
-  this.model.igst = 0;
-}
+  loadChasisPricing(callback?: () => void) {
+    this.loader.show();
+    const dealerCode = this.storageService.getDealerCode();
+    const ledgerId = this.selectedCustomerId;
+
+    if (!dealerCode || !ledgerId) return;
+
+    this.vehicleSaleBillService
+      .getChasisPricing(dealerCode, ledgerId)
+      .subscribe({
+        next: (res) => {
+          this.chassisList = res;
+          this.loader.hide();
+          if (callback) callback();
+        },
+        error(err) {
+          this.loader.hide();
+          this.toaster.show('Failed to fetch pricing details of the chassis!', {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          });
+        },
+      });
+  }
+  onSubmitToERP() {
+    this.loader.show();
+    const saleBillNo = this.billId;
+
+    if (!saleBillNo) {
+      this.toaster.show('Sale No is required!', {
+        classname: 'bg-warning text-white',
+        delay: 5000
+      });
+      return;
+    }
+
+    this.vehicleSaleBillService.sendToERP(saleBillNo).subscribe({
+      next: (res) => {
+        this.loader.hide();
+        console.log('Success:', res);
+        this.toaster.show('Successfully pushed to ERP', {
+          classname: 'bg-success text-white',
+          delay: 5000
+        });
+      },
+      error: (err) => {
+        this.toaster.show('Failed to push to ERP', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+      }
+    });
+  }
+
+
+  onChassisChange(chassisNo?: string) {
+    const selected = this.chassisList.find(
+      x => x.chassisNo === this.model.chassisNo || x.chassisNo === chassisNo
+    );
+
+    if (!selected) return;
+    this.loader.show();
+
+    // Fill model fields from selected chassis
+    this.model.itemCode = selected.itemCode;
+    this.model.itemRate = selected.customerRate;
+    this.model.preGSTDiscount = selected.preGstDis;
+    this.model.mfgYear = selected.mfgYear;
+
+    // Taxes
+    this.model.sgst = selected.sgstAmt;
+    this.model.cgst = selected.cgstAmt;
+    this.model.igst = selected.igstAmt;
+
+    // Amount calculation
+    this.model.amount =
+      (this.model.itemRate - this.model.preGSTDiscount) +
+      this.model.sgst +
+      this.model.cgst +
+      this.model.igst;
+    this.loader.hide();
+  }
+
+  resetVehicleForm() {
+    this.model.chassisNo = '';
+    this.model.itemRate = 0;
+    this.model.preGSTDiscount = 0;
+    this.model.amount = 0;
+    this.model.sgst = 0;
+    this.model.cgst = 0;
+    this.model.igst = 0;
+  }
 
 }
