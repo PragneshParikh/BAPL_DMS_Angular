@@ -27,7 +27,7 @@ export class LocationMasterService {
     return this.http.get(this.locationmasterexcelUrl, { responseType: 'blob' });
   }
 
-  getLocationByDealerCode(dealerCode: number): Observable<any> {
+  getLocationByDealerCode(dealerCode: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrldrp}/${dealerCode}`);
   }
 }

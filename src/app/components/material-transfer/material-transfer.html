@@ -1,0 +1,110 @@
+<div id="customer-ledger-list">
+    <!-- Start Breadcrumbs -->
+    <app-breadcrumbs title="Material Transfer List"></app-breadcrumbs>
+    <!-- End Breadcrumbs -->
+
+    <div class="card-body">
+        <div class="page-content p-0">
+            <div class="container-fluid px-1">
+
+                <!-- Table Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div class="text-muted">
+                                Total Record(s): {{ collectionSize }}
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <button class="btn btn-sm btn-primary" (click)="addMaterialTransfer()">
+                                    Add
+                                </button>
+
+                                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'">
+                                    <i class="ri-file-excel-2-line"></i>
+                                </button>
+
+                                <div class="search-box position-relative">
+                                    <input type="text" class="form-control" placeholder="Search..."
+                                        [(ngModel)]="searchTerm" (keyup)="onSearchChange()">
+                                    <i class="ri-search-line search-icon"></i>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover table-bordered mb-0 table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="sort" (click)="onSort('')">
+                                            S.No
+                                        </th>
+                                        <th class="sort" (click)="onSort('')">
+                                            Issue No</th>
+                                        <th class="sort" (click)="onSort('')">
+                                            Issue Date
+                                        </th>
+                                        <th class="sort" (click)="onSort('')">Job No
+                                        </th>
+                                        <th class="sort" (click)="onSort('')">Party Name</th>
+                                        <th class="sort" (click)="onSort('')">Chasis No
+                                        </th>
+                                        <th class="sort" (click)="onSort('')">Reg No
+                                        </th>
+                                        <th class="sort" (click)="onSort('')">Location
+                                        </th>
+                                        <th class="sort" (click)="onSort('')">Prepared By
+                                        </th>
+                                        <th class="sort" (click)="onSort('')">Modified By
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr *ngFor="let material of dataSource; let index = index" class="table-row"
+                                        (click)="onMaterialClick(material)">
+                                        <td>{{ index + 1 }}</td>
+                                        <td>{{ material?.issueNo }}</td>
+                                        <td>{{ material?.issueDate | date }}</td>
+                                        <td>{{ material?.jobNo }}</td>
+                                        <td>{{ material?.partyName }}</td>
+                                        <td>{{ material?.chassisNo }}</td>
+                                        <td>{{ material?.regNo }}</td>
+                                        <td>{{ material?.location }}</td>
+                                        <td>{{ material?.preparedBy }}</td>
+                                        <td>{{ material?.modifiedBy }}</td>
+                                    </tr>
+
+                                    <!-- No Data -->
+                                    <tr *ngIf="!dataSource || dataSource.length === 0">
+                                        <td colspan="10" class="text-center text-muted py-3">
+                                            No Data Available
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <!-- PAGINATION -->
+                        <div class="col-sm-12 col-md-12 mt-2">
+                            <div class="text-md-right float-md-end gridjs-pagination">
+                                <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                                    (pageChange)="onPageChange($event)" [boundaryLinks]="true">
+                                </ngb-pagination>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<router-outlet></router-outlet>

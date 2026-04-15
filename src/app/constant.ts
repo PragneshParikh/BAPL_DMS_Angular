@@ -1,5 +1,3 @@
-import { values } from "lodash";
-
 export enum AccessRoles {
     NoAccess = 1,
     ViewOnly = 2,
@@ -35,6 +33,7 @@ export const BatteryType = [
     { batterytypeidno: 3, value: 'LA' },
     { batterytypeidno: 4, value: 'LFP' }
 ];
+
 export const BatteryVoltage = [
     { batteryVoltageidno: 1, value: '12 Volt' },
     { batteryVoltageidno: 2, value: '24 Volt' },
@@ -79,18 +78,28 @@ export const SaleTypeOptions = [
     { name: 'Cash Sale', value: 'Cash' },
     { name: 'Credit Sale', value: 'Credit' }
 ];
+
 export const BillingTypeOptions = [
     { name: 'Dealer Sale/Institutional', value: 'Dealer Sale/Institutional' },
     { name: 'Counter Sale[Single]', value: 'Counter Sale[single]' }
 ];
+
 export const BillFromOptions = [
     { name: 'Direct Billing', value: 'direct' },
     { name: 'Against Receipt', value: 'receipt' },
     { name: 'Against Delivery', value: 'delivery' }
 ];
+
 export const CashTypeOptions = [
     { name: 'Cash', value: 'Cash' },
     { name: 'Bank Transfer', value: 'Bank' },
     { name: 'Cheque', value: 'Cheque' },
     { name: 'UPI', value: 'UPI' },
 ];
+
+export const IssueTypes = [
+    { name: 'Paid', value: 'paid' },
+    { name: 'U/W', value: 'u/w' },
+    { name: 'FOC', value: 'foc' },
+    { name: 'Goodwill', value: 'goodwill' }
+]

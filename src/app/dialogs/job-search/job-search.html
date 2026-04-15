@@ -1,0 +1,122 @@
+<div id="job-search">
+    <div class="modal-header" style="background-color: #747CA0; padding: 5px;">
+        <h5 class="modal-title" id="varyingcontentModalLabel" style="color: white;">Job Search
+        </h5>
+        <button type="button" class="btn-close" aria-hidden="true" style="color: white;" (click)="close(false)">
+        </button>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <fieldset class="border p-2 mb-3">
+                        <form #jobSearchForm="ngForm" (ngSubmit)="onSubmit(jobSearchForm)">
+                            <!-- Top Row -->
+                            <div class="row mb-2 g-1">
+                                <div class="col-md-2">
+                                    <label class="form-label">Date From </label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="date" class="form-control form-control-sm" name="dateFrom"
+                                            #dateFrom="ngModel" [(ngModel)]="formData.dateFrom" required>
+                                    </div>
+                                    @if (dateFrom.invalid && dateFrom.touched) {
+                                    <small class="text-danger">
+                                        Date From is required
+                                    </small>
+                                    }
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Date To</label>
+                                    <input type="date" class="form-control form-control-sm" name="dateTo"
+                                        [(ngModel)]="formData.dateTo" #dateTo="ngModel" />
+                                    @if (dateTo.invalid && dateTo.touched) {
+                                    <small class="text-danger">
+                                        Date To is required
+                                    </small>
+                                    }
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Job No</label>
+                                    <input type="text" class="form-control form-control-sm" name="jobNo"
+                                        #jobNo="ngModel" [(ngModel)]="formData.jobNo" required>
+                                    @if (jobNo.invalid && jobNo.touched) {
+                                    <small class="text-danger">
+                                        Prefix No is required
+                                    </small>
+                                    }
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Manual Job No</label>
+                                    <input type="text" class="form-control form-control-sm" name="manualJobNo"
+                                        #manualJobNo="ngModel" [(ngModel)]="formData.manualJobNo" required>
+                                    @if (manualJobNo.invalid && manualJobNo.touched) {
+                                    <small class="text-danger">
+                                        Manual Job No is required
+                                    </small>
+                                    }
+                                </div>
+                            </div>
+                        </form>
+                    </fieldset>
+
+                    <!-- Add Button -->
+                    <div class=" row mt-3">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-primary btn-sm float-end" (click)="close(false)">
+                                Cancel
+                            </button>
+                            <button type="submit" [disabled]="jobSearchForm.invalid"
+                                class="btn btn-primary btn-sm float-end me-1" (click)="onSearchJob()">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered mb-0 table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th> Sr.No </th>
+                                    <th> Job Type </th>
+                                    <th> Date </th>
+                                    <th>Job No </th>
+                                    <th> Service Name </th>
+                                    <th> Party Name </th>
+                                    <th> Reg No </th>
+                                    <th> Item Model </th>
+                                    <th> Post Invoice </th>
+                                    <th> Action </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let job of jobList; let index = index" class="table-row">
+                                    <td>{{ index + 1 }}</td>
+                                    <td>{{ job?.jobType }}</td>
+                                    <td>{{ job?.date | date }}</td>
+                                    <td>{{ job?.jobNumber }}</td>
+                                    <td>{{ job?.serviceName }}</td>
+                                    <td>{{ job?.partyName }}</td>
+                                    <td>{{ job?.regNo }}</td>
+                                    <td>{{ job?.itemModel }}</td>
+                                    <td>{{ job?.postInvoice }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                            Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- No Data -->
+                                <tr *ngIf="!jobList || jobList.length === 0">
+                                    <td colspan="10" class="text-center text-muted py-3">
+                                        No Data Available
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div><!-- end card -->
+        </div>
+    </div>

@@ -55,44 +55,44 @@ export class DealerMaster implements OnInit {
 
   loadDealers(): void {
 
-   this.loader.show();
+    this.loader.show();
 
-this.dealerService.getDealers().subscribe({
-  next: (res: DealerApiResponse) => {
+    this.dealerService.getDealers().subscribe({
+      next: (res: DealerApiResponse) => {
 
-    const data = res.data || [];
+        const data = res.data || [];
 
-    this.dealerList = data.map((dealer, index) => ({
-      ...dealer,
-      slNo: index + 1
-    }));
+        this.dealerList = data.map((dealer, index) => ({
+          ...dealer,
+          slNo: index + 1
+        }));
 
-    this.originalDealerList = [...this.dealerList];
+        this.originalDealerList = [...this.dealerList];
 
-    this.refreshPage();
+        this.refreshPage();
 
-  
 
-    this.loader.hide();
-  },
 
-  error: (err) => {
-    console.error(err);
+        this.loader.hide();
+      },
 
-    // ❌ Error toaster
-    this.toaster.show('Failed to load dealers!', {
-      classname: 'bg-danger text-white',
-      delay: 5000
+      error: (err) => {
+        console.error(err);
+
+        // ❌ Error toaster
+        this.toaster.show('Failed to load dealers!', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+
+        this.loader.hide();
+      }
     });
-
-    this.loader.hide();
-  }
-});
   }
 
   /* ================= PAGINATION ================= */
 
- refreshPage(): void {
+  refreshPage(): void {
 
     const start = (this.page - 1) * this.pageSize;
     const end = start + this.pageSize;
@@ -100,7 +100,7 @@ this.dealerService.getDealers().subscribe({
     this.paginatedDealerList = this.dealerList.slice(start, end);
 
   }
- 
+
   /* ================= SORT ================= */
 
   // ================= SORTING =================
@@ -136,17 +136,17 @@ this.dealerService.getDealers().subscribe({
   }
 
   /* ================= MODAL ================= */
-openDealerModal(dealer: DealerMasterViewModel): void {
+  openDealerModal(dealer: DealerMasterViewModel): void {
 
-  this.selectedDealer = { ...dealer }; 
+    this.selectedDealer = { ...dealer };
 
-  this.modalRef = this.modalService.open(this.dealerModal, {
-    windowClass: 'dealer-modal',
-    size: 'xl',
-    scrollable: true
-  });
+    this.modalRef = this.modalService.open(this.dealerModal, {
+      windowClass: 'dealer-modal',
+      size: 'xl',
+      scrollable: true
+    });
 
-}
+  }
   // openDealerModal(dealer: DealerMasterViewModel): void {
 
   //   this.selectedDealer = dealer;
@@ -172,11 +172,7 @@ openDealerModal(dealer: DealerMasterViewModel): void {
   }
 
   printSelected(): void {
-
     const selectedDealers = this.paginatedDealerList.filter(d => d.selected);
-
-    console.log('Selected Dealers:', selectedDealers);
-
   }
 
   /* ================= EXCEL ================= */
@@ -199,7 +195,7 @@ openDealerModal(dealer: DealerMasterViewModel): void {
 
       window.URL.revokeObjectURL(url);
       this.loader.hide();
-      this.toaster.show('Dealer Excel downloaded successfully', { classname: 'bg-success text-light' , delay: 3000 });
+      this.toaster.show('Dealer Excel downloaded successfully', { classname: 'bg-success text-light', delay: 3000 });
     });
 
   }
@@ -243,35 +239,35 @@ openDealerModal(dealer: DealerMasterViewModel): void {
     this.searchSubject.next(this.searchTerm);
 
   }
-updateTradeCertificate() {
-  this.loader.show();
+  updateTradeCertificate() {
+    this.loader.show();
 
-  this.dealerService.updateTradeCertificate(
-    this.selectedDealer.id,
-    this.selectedDealer.tradCert
-  ).subscribe({
-    next: (res: any) => {
-      this.loader.hide();
+    this.dealerService.updateTradeCertificate(
+      this.selectedDealer.id,
+      this.selectedDealer.tradCert
+    ).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
 
-      this.modalRef.close();
+        this.modalRef.close();
 
-      this.loadDealers();
+        this.loadDealers();
 
-      this.toaster.show(
-        'Trade Certificate updated successfully',
-        { classname: 'bg-success text-light', delay: 3000 }
-      );
-    },
-    error: (err) => {
-      this.loader.hide();
-      console.error(err);
+        this.toaster.show(
+          'Trade Certificate updated successfully',
+          { classname: 'bg-success text-light', delay: 3000 }
+        );
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
 
-      this.toaster.show(
-        'Error updating Trade Certificate',
-        { classname: 'bg-danger text-light', delay: 3000 }
-      );
-    }
-  });
-}
+        this.toaster.show(
+          'Error updating Trade Certificate',
+          { classname: 'bg-danger text-light', delay: 3000 }
+        );
+      }
+    });
+  }
 
 }
