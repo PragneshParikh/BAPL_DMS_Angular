@@ -154,19 +154,19 @@
                                 <thead class="table-light sticky-top">
                                     <tr>
                                         <th>ModelName</th>
-                                        <th>ChassisNo.</th>
+                                        <th>ChasisNo.</th>
                                         <th>MotorNo.</th>
                                         <th>BatteryNo.</th>
                                         <th>ChargerNo.</th>
-                                        <th>KeyFobSetQty</th>
-                                        <th>ChargerQty</th>
-                                        <th>MirrorSetQty</th>
-                                        <th>FirstAidKitQty</th>
-                                        <th>ToolkitQty</th>
-                                        <th>OwnersManual</th>
-                                        <th>IgnitionKeySet</th>
-                                        <th>AttributeCard</th>
-                                        <th>ChargingKit</th>
+                                        <th class="qty-header">KeyFobsetQty</th>
+                                        <th class="qty-header">ChargersetQty</th>
+                                        <th class="qty-header">MirrorsetQty</th>
+                                        <th class="qty-header">1stAidKitQty</th>
+                                        <th class="qty-header">ToolkitQty</th>
+                                        <th class="qty-header">OwnerManuals</th>
+                                        <th class="qty-header">IgnitionKeyset</th>
+                                        <th class="qty-header">AttributeCard</th>
+                                        <th class="qty-header">ChargingKit</th>
                                         <th>Insp. Date</th>
                                         <th>VehicleStatus</th>
                                         <th>DamageDetails</th>
@@ -178,38 +178,21 @@
                                 <tbody>
                                     <tr *ngFor="let item of detailList; let i = index">
 
-                                        <td>{{ item.modelName }}</td>
-                                        <td>{{ item.chassisNo }}</td>
-                                        <td>{{ item.motorNo }}</td>
-                                        <td>{{ item.batteryNo }}</td>
-                                        <td>{{ item.chargerNo }}</td>
-                                        <td><input [(ngModel)]="item.keyFobSetQty" class="form-control form-control-sm">
-                                        </td>
-                                        <td><input [(ngModel)]="item.chargerQty" class="form-control form-control-sm">
-                                        </td>
-                                        <td><input [(ngModel)]="item.mirrorSetQty" class="form-control form-control-sm">
-                                        </td>
-                                        <td><input [(ngModel)]="item.firstAidKitQty"
-                                                class="form-control form-control-sm">
-                                        </td>
-                                        <td><input [(ngModel)]="item.toolkitQty" class="form-control form-control-sm">
-                                        </td>
-                                        <td><input [(ngModel)]="item.ownersManual" class="form-control form-control-sm">
-                                        </td>
-                                        <td><input [(ngModel)]="item.ignitionKeySet"
-                                                class="form-control form-control-sm">
-                                        </td>
-                                        <td><input [(ngModel)]="item.attributeCard"
-                                                class="form-control form-control-sm">
-                                        </td>
-                                        <td><input [(ngModel)]="item.chargingKit" class="form-control form-control-sm">
-                                        </td>
-
-                                        <td>
-                                            <input type="date" [(ngModel)]="item.inspectionDate"
-                                                class="form-control form-control-sm">
-                                        </td>
-
+                                        <td class="single-line">{{item.modelName}}</td>
+                                        <td>{{item.chassisNo}}</td>
+                                        <td>{{item.motorNo}}</td>
+                                        <td>{{item.batteryNo}}</td>
+                                        <td>{{item.chargerNo}}</td>
+                                        <td><input [(ngModel)]="item.keyFobSetQty" class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.chargerQty" class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.mirrorSetQty" class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.firstAidKitQty" class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.toolkitQty" class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.ownersManual" class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.ignitionKeySet" class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.attributeCard" class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.chargingKit" class="form-control form-control-sm qty-input"></td>
+                                        <td><input type="date" [(ngModel)]="item.inspectionDate" class="form-control form-control-sm"></td>
                                         <td>
                                             <select class="form-select form-select-sm" [(ngModel)]="item.vehicleStatus"
                                                 class="form-select form-select-sm">
@@ -219,12 +202,8 @@
                                             </select>
                                         </td>
 
-                                        <td><input [(ngModel)]="item.damageDetails"
-                                                class="form-control form-control-sm">
-                                        </td>
-                                        <td><input [(ngModel)]="item.chassisWiseRemarks"
-                                                class="form-control form-control-sm">
-                                        </td>
+                                        <td><input [(ngModel)]="item.damageDetails" class="form-control form-control-sm"></td>
+                                        <td><input [(ngModel)]="item.chassisWiseRemarks" class="form-control form-control-sm"></td>
                                         <!-- FILE -->
                                         <td>
                                             <input type="file" hidden (change)="onFileSelected($event, i)" #fileInput>
@@ -236,7 +215,6 @@
                                             <!-- <img *ngIf="item.preview" [src]="item.preview" width="30" height="30"
                                                     class="ms-1 rounded"> -->
                                         </td>
-
                                     </tr>
 
                                     <tr *ngIf="detailList.length === 0">

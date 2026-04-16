@@ -1,58 +1,58 @@
-            <!--PAGE Title-->
-                    <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
-                        <h5 class="mb-0">Job Card List</h5>
-                    </div>
-            <!--End-->
-            <!-- Filter Card -->
-            <div class="card">
-                <div class="card-body">
-                    <div class="row g-3 align-items-end">
-                        <!-- Date From -->
-                        <div class="col-md-2">
-                            <label class="form-label">Date From</label>
-                            <input type="date" class="form-control form-control-sm" #fromDate>
-                        </div>
+<!--PAGE Title-->
+<div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
+    <h5 class="mb-0">Job Card List</h5>
+</div>
+<!--End-->
+<!-- Filter Card -->
+<div class="card">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <!-- Date From -->
+            <div class="col-md-3">
+                <label class="form-label">Date From</label>
+                <input type="date" class="form-control form-control-sm" #fromDate>
+            </div>
 
-                        <!-- Date To -->
-                        <div class="col-md-2">
-                            <label class="form-label">Date To</label>
-                            <input type="date" class="form-control form-control-sm" #toDate>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-lael">Service Location</label>
-                            <select class="form-select form-select-sm text-truncate"
-                                (change)="onLocationChange($event)">
-                                <option value="">Select Location</option>
-                                <option *ngFor="let loc of locations" [value]="loc.locname">
-                                    {{ loc.locname }}
-                                </option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Job No.</label>
-                            <input type="text" class="form-control form-control-sm" value=""
-                                placeholder="Enter Job No." />
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-lael">Service Type</label>
-                            <select class="form-select form-select-sm text-truncate" (change)="onJobType($event)">
-                                <option value="">Select Job Type</option>
-                                <option *ngFor="let job of JobType" [value]="job.value">
-                                    {{ job.name }}
-                                </option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Customer Name</label>
-                            <input type="text" class="form-control form-control-sm" value=""
-                                placeholder="Enter Customer Name" />
-                        </div>
-                        <div class="col-md-2">
+            <!-- Date To -->
+            <div class="col-md-3">
+                <label class="form-label">Date To</label>
+                <input type="date" class="form-control form-control-sm" #toDate>
+            </div>
+            <div class="col-md-3">
+                <label class="form-lael">Service Location</label>
+                <select class="form-select form-select-sm text-truncate" (change)="onLocationChange($event)">
+                    <option value="">Select Location</option>
+                    <option *ngFor="let loc of locations" [value]="loc.locname">
+                        {{ loc.locname }}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Job No.</label>
+                <input type="text" class="form-control form-control-sm" value="" placeholder="Enter Job No." />
+            </div>
+            <!-- <div class="col-md-3">
+                <label class="form-lael">Service Type</label>
+                <div *ngIf="serviceTypeList.length > 1; else singleType">
+                    <select class="form-select form-select-sm" [(ngModel)]="selectedServiceType">
+
+                        <option value="">Select Service Type</option>
+                        <option *ngFor="let st of serviceTypeList" [ngValue]="st.serviceTypeId">
+                            {{ st.serviceTypeName }}
+                        </option>
+                    </select>
+                </div>
+            </div> -->
+            <div class="col-md-3">
+                <label class="form-label">Customer Name</label>
+                <input type="text" class="form-control form-control-sm" value="" placeholder="Enter Customer Name" />
+            </div>
+            <!-- <div class="col-md-2">
                             <label class="form-label">Mobile No.</label>
                             <input type="text" class="form-control form-control-sm" value=""
                                 placeholder="Enter Mobile No." />
-                        </div>
-                        <div class="col-md-2">
+                        </div> -->
+            <!-- <div class="col-md-2">
                             <label class="form-lael">Job Source</label>
                             <select class="form-select form-select-sm text-truncate" (change)="onJobSource($event)">
                                 <option value="">Select Job Source</option>
@@ -60,106 +60,110 @@
                                     {{ jobsource.name }}
                                 </option>
                             </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Chassis No.</label>
-                            <input type="text" class="form-control form-control-sm" value=""
-                                placeholder="Enter Chassis No." />
-                        </div>
-                        <div class="col-md-2">
+                        </div> -->
+            <div class="col-md-3">
+                <label class="form-label">Chassis No.</label>
+                <select class="form-select form-select-sm" (change)="onChassisChange()" [(ngModel)]="selectedChassis">
+                  <option value="">Select Chassis</option>
+                  <option *ngFor="let item of chassisList" [value]="item.chassisNumber">
+                    {{ item.chassisNumber }}
+                  </option>
+                </select>
+            </div>
+            <!-- <div class="col-md-2">
                             <label class="form-label">Regn. No.</label>
                             <input type="text" class="form-control form-control-sm" value=""
                                 placeholder="Enter Regn. No." />
-                        </div>
-                        <div class="col-md-2">
+                        </div> -->
+            <!-- <div class="col-md-2">
                             <label class="form-lael"> Complaints</label>
                             <select class="form-select form-select-sm text-truncate" (change)="onComplaints($event)">
                                 <option value="">Select Complaint Type</option>
                                 <option value="Only Complaints">Only Complaints</option>
                                 <option value="Complaints with Repeated Job">Complaints with Repeated Job</option>
                             </select>
-                        </div>
-                        <div class="col-md-2">
+                        </div> -->
+            <!-- <div class="col-md-2">
                             <label class="form-lael">View Jobs</label>
                             <select class="form-select form-select-sm text-truncate" (change)="onViewJobs($event)">
                                 <option value="">Select View Jobs</option>
                                 <option value="All">All</option>
                             </select>
-                        </div>
-                        <div class="col-md-2">
+                        </div> -->
+            <!-- <div class="col-md-2">
                             <label class="form-label">Manual job No.</label>
                             <input type="text" class="form-control form-control-sm" value="" />
-                        </div>
-                        <!-- Search Button -->
-                        <div class="col-md-1 d-grid">
-                            <button class="btn btn-sm btn-primary">
-                                Search
-                            </button>
-                        </div>
-                        <!--End search button-->
-                        <!-- Download Excel Button (click)="downloadItemMasterExcel()" -->
-                        <div class="col-md-1 d-grid">
-                            <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'" >
-                                <i class="ri-file-excel-2-line"></i>
-                            </button>
-                        </div>
-                        <!--End Excel button-->
-                        <!-- Add Button-->
-                        <div class="col-md-1 d-grid">
-                            <button class="btn btn-primary btn-sm" (click)="onNavigate()">
-                                Add
-                            </button>
-                        </div>
-                        <!--End add button-->
-                    </div>
-                </div>
+                        </div> -->
+            <!-- Search Button -->
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-sm btn-primary">
+                    Search
+                </button>
             </div>
-            <!--End-->
-
-            <!--Table Card-->
-            <div class="card">
-                <div class="card-body p-0">
-                    <div class="table-responsive table-responsive-sm" style="max-height: 400px; overflow: auto;">
-
-                        <table class="table table-sm table-hover table-bordered mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>SR.No.</th>
-                                    <th>Action</th>
-                                    <th>JobNo/Date</th>
-                                    <th>JobStatus</th>
-                                    <th>ManualJobNo.</th>
-                                    <th>LocationBooking</th>
-                                    <th>JobType/JobSource</th>
-                                    <th>Complaint</th>
-                                    <th>SupervisorName</th>
-                                    <th>Reg/ChassisNo.</th>
-                                    <th>VehicleType</th>
-                                    <th>ServiceHead/Type</th>
-                                    <th>CustomerName/MobileNo</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-
-                                </tr>
-                                <!-- No Data -->
-                                <tr *ngIf="collectionSize === 0">
-                                    <td colspan="9" class="text-center text-muted py-3">
-                                        No Data Available
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <!-- PAGINATION -->
-                    <div class="d-flex justify-content-end p-2">
-                        <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
-                            (pageChange)="pageChange($event)" [boundaryLinks]="true">
-                        </ngb-pagination>
-                    </div>
-                    <!--End Pagination-->
-                </div>
+            <!--End search button-->
+            <!-- Download Excel Button (click)="downloadItemMasterExcel()" -->
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'">
+                    <i class="ri-file-excel-2-line"></i>
+                </button>
             </div>
-            <!--End-->
+            <!--End Excel button-->
+            <!-- Add Button-->
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-primary btn-sm" (click)="onNavigate()">
+                    Add
+                </button>
+            </div>
+            <!--End add button-->
+        </div>
+    </div>
+</div>
+<!--End-->
+
+<!--Table Card-->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive table-responsive-sm" style="max-height: 400px; overflow: auto;">
+
+            <table class="table table-sm table-hover table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>SR.No.</th>
+                        <th>Action</th>
+                        <th>JobNo/Date</th>
+                        <th>JobStatus</th>
+                        <th>ManualJobNo.</th>
+                        <th>LocationBooking</th>
+                        <th>JobType/JobSource</th>
+                        <th>Complaint</th>
+                        <th>SupervisorName</th>
+                        <th>Reg/ChassisNo.</th>
+                        <th>VehicleType</th>
+                        <th>ServiceHead/Type</th>
+                        <th>CustomerName/MobileNo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+
+                    </tr>
+                    <!-- No Data -->
+                    <tr *ngIf="collectionSize === 0">
+                        <td colspan="9" class="text-center text-muted py-3">
+                            No Data Available
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- PAGINATION -->
+        <div class="d-flex justify-content-end p-2">
+            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                (pageChange)="pageChange($event)" [boundaryLinks]="true">
+            </ngb-pagination>
+        </div>
+        <!--End Pagination-->
+    </div>
+</div>
+<!--End-->
 <router-outlet></router-outlet>

@@ -101,7 +101,7 @@
               </div>
               <div class="col-md-4">
                 <label>Vehicle Kms.</label>
-                <input class="form-control form-control-sm" value="0">
+                <input class="form-control form-control-sm" [(ngModel)]="vehicleKms">
               </div>
               <div class="col-md-4">
                 <label>Service Head</label>
@@ -156,47 +156,47 @@
 
               <div class="col-md-3">
                 <label>Job Prefix</label>
-                <input class="form-control form-control-sm" value="0">
+                <input class="form-control form-control-sm" [(ngModel)]="jobPrefix">
               </div>
               <div class="col-md-4">
                 <label>Job In Date</label>
-                <input class="form-control form-control-sm" type="date">
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="jobInDate">
               </div>
               <div class="col-md-3">
                 <label>Job In Time</label>
-                <input class="form-control form-control-sm" type="time">
+                <input type="time" class="form-control form-control-sm" [(ngModel)]="jobInTime">
               </div>
               <div class="col-md-2">
                 <label>Job No.</label>
-                <input class="form-control form-control-sm" value="0">
+                <input class="form-control form-control-sm" [(ngModel)]="jobNo">
               </div>
               <div class="col-md-3">
                 <label>Manual Job No.</label>
-                <input class="form-control form-control-sm" value="0">
+                <input class="form-control form-control-sm" [(ngModel)]="manualJobNo">
               </div>
 
               <div class="col-md-5">
                 <label>Est.Delivery Date</label>
-                <input class="form-control form-control-sm" type="date">
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="estDelDate">
               </div>
               <div class="col-md-4">
                 <label>Est.Delivery Time</label>
-                <input class="form-control form-control-sm" type="time">
+                <input type="time" class="form-control form-control-sm" [(ngModel)]="estDelTime">
               </div>
               <div class="col-md-4">
                 <label class="form-lael">Job Source</label>
-                <select class="form-select form-select-sm" [(ngModel)]="selectedJobSources" (change)="onJobSource()">
+                <select class="form-select form-select-sm" [(ngModel)]="selectedJobSources">
 
                   <option value="">Select Job Source</option>
 
-                  <option *ngFor="let job of jobSourceList" [ngValue]="job.jobSourceId">
-                    {{ job.jobSourceName }}
+                  <option *ngFor="let jobsource of jobSourceList" [ngValue]="jobsource.jobSourceId">
+                    {{ jobsource.jobSourceName }}
                   </option>
                 </select>
               </div>
               <div class="col-md-4">
                 <label>Supervisor/Advisor</label>
-                <select class="form-select form-select-sm">
+                <select class="form-select form-select-sm" [(ngModel)]="supervisor">
                   <option value="">Select Supervisor</option>
                   <option value="Manoj">Manoj</option>
                   <option value="Suraj">Suraj</option>
@@ -205,7 +205,7 @@
               </div>
               <div class="col-md-4">
                 <label>Technician</label>
-                <select class="form-select form-select-sm">
+                <select class="form-select form-select-sm" [(ngModel)]="technician">
                   <option value="">Select Technician</option>
                   <option value="Manoj">Manoj</option>
                   <option value="Suraj">Suraj</option>
@@ -214,15 +214,15 @@
               </div>
               <div class="col-md-3">
                 <label>Job Estimate</label>
-                <input class="form-control form-control-sm" value="0">
+                <input class="form-control form-control-sm" [(ngModel)]="jobEstimate">
               </div>
               <div class="col-md-4">
                 <label>Air Pressure Rear Tyre</label>
-                <input class="form-control form-control-sm" value="0">
+                <input class="form-control form-control-sm" [(ngModel)]="airPressureRear">
               </div>
               <div class="col-md-4">
                 <label>Air Pressure Front Tyre</label>
-                <input class="form-control form-control-sm" value="0">
+                <input class="form-control form-control-sm" [(ngModel)]="airPressureFront">
               </div>
 
             </div>
@@ -230,70 +230,80 @@
 
           <!-- ================= RIGHT SIDE (CUSTOMER DETAILS) ================= -->
           <div class="col-md-6 ps-3">
+
             <h6 class="mb-3">Customer Details</h6>
+
             <div class="row g-3">
+
               <div class="col-md-8">
                 <label>Customer Name</label>
-                <input class="form-control form-control-sm" placeholder="Enter name">
+                <input class="form-control form-control-sm" [(ngModel)]="customerObj.customerName">
               </div>
 
               <div class="col-md-4">
                 <label>Mobile No.</label>
-                <input class="form-control form-control-sm" placeholder="Enter mobile">
+                <input class="form-control form-control-sm" [(ngModel)]="customerObj.customerMobile">
               </div>
+
               <div class="col-md-4">
-                <label>Alternate Mobile No.</label>
-                <input class="form-control form-control-sm" placeholder="Enter mobile">
+                <label>Alternate Mobile</label>
+                <input class="form-control form-control-sm" [(ngModel)]="customerObj.customerAltMobile">
               </div>
+
               <div class="col-md-4">
                 <label>Model Name</label>
-                <input class="form-control form-control-sm">
+                <input class="form-control form-control-sm" [(ngModel)]="modelName">
               </div>
 
               <div class="col-md-4">
                 <label>Chassis No.</label>
-                <input class="form-control form-control-sm">
+                <input class="form-control form-control-sm" [(ngModel)]="selectedChassis">
               </div>
 
               <div class="col-md-4">
                 <label>Reg. No.</label>
-                <input class="form-control form-control-sm">
+                <input class="form-control form-control-sm" [(ngModel)]="registerNo">
               </div>
 
               <div class="col-md-4">
                 <label>Motor No.</label>
-                <input class="form-control form-control-sm">
+                <input class="form-control form-control-sm" [(ngModel)]="motorNo">
               </div>
 
               <div class="col-md-4">
                 <label>Battery No.</label>
-                <input class="form-control form-control-sm">
+                <input class="form-control form-control-sm" [(ngModel)]="batteryNumber">
               </div>
 
               <div class="col-md-4">
                 <label>Sale Date</label>
-                <input class="form-control form-control-sm" type="date">
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="customerObj.saleDate">
               </div>
 
               <div class="col-md-4">
-                <label>Insurance Expiry Date</label>
-                <input class="form-control form-control-sm" type="date">
+                <label>Insurance Expiry</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="customerObj.insuranceExpDate">
               </div>
 
               <div class="col-md-4">
-                <label>Next Service Due Date</label>
-                <input class="form-control form-control-sm" type="date">
+                <label>Next Service Due</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="customerObj.nextServiceDueDate">
               </div>
+
               <div class="col-md-4">
                 <label>RSA Renewal Date</label>
-                <input class="form-control form-control-sm" type="date">
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="customerObj.rsaRenewalDate">
               </div>
+
               <div class="col-md-8">
                 <label>Remarks</label>
-                <textarea class="form-control form-control-sm" rows="5"></textarea>
+                <textarea class="form-control form-control-sm" rows="4" [(ngModel)]="customerObj.remarks"></textarea>
               </div>
+
             </div>
+
           </div>
+
 
         </div>
       </div>
@@ -316,23 +326,23 @@
           </div>
           <div class="col-md-3">
             <label>Battery Voltage at Full Charge(OCV)</label>
-            <input class="form-control form-control-sm" value="2.7 kWh">
+            <input class="form-control form-control-sm" [(ngModel)]="batteryOCV">
           </div>
           <div class="col-md-3">
-            <label>Battery Voltage at Full Charge(CCV)</label>
-            <input class="form-control form-control-sm" value="LFP">
+            <label class="single-line">Battery Voltage at Full Charge(CCV)</label>
+            <input class="form-control form-control-sm" [(ngModel)]="batteryCCV">
           </div>
           <div class="col-md-3">
             <label>Battery Voltage at Discharge</label>
-            <input class="form-control form-control-sm" value="LFP">
+            <input class="form-control form-control-sm" [(ngModel)]="batteryDischarge">
           </div>
           <div class="col-md-3">
             <label>Capacity(AH of Battery)</label>
-            <input class="form-control form-control-sm" value="LFP">
+            <input class="form-control form-control-sm" [(ngModel)]="capacityAH">
           </div>
           <div class="col-md-3">
             <label>Battery Set Voltage</label>
-            <input class="form-control form-control-sm" value="LFP">
+            <input class="form-control form-control-sm" [(ngModel)]="batteryVoltage">
           </div>
           <div class="col-md-3">
             <label>Motor Drawing Current(At No Load)</label>
@@ -340,7 +350,7 @@
           </div>
           <div class="col-md-3">
             <label>Charger Make</label>
-            <input class="form-control form-control-sm" value="Trontek Electronics ltd">
+            <input class="form-control form-control-sm" [(ngModel)]="chargerMake">
           </div>
           <div class="col-md-3">
             <label>Charger No.</label>
@@ -375,22 +385,56 @@
         <div class="row g-3">
           <div class="col-md-3">
             <label>Customer Voice</label>
-            <input class="form-control form-control-sm">
+            <input class="form-control form-control-sm" [(ngModel)]="complaintObj.customerVoice">
           </div>
           <div class="col-md-3">
             <label>Complaint Code</label>
-            <input class="form-control form-control-sm">
+            <input class="form-control form-control-sm" [(ngModel)]="complaintObj.complaintCode">
           </div>
           <div class="col-md-3">
             <label>Complaint Description</label>
-            <input class="form-control form-control-sm">
+            <input class="form-control form-control-sm" [(ngModel)]="complaintObj.complaint">
           </div>
           <div class="col-md-3">
-            <button class="btn btn-primary btn-sm commonbtnAdd">Add</button>
+            <button type="button" class="btn btn-primary btn-sm commonbtnAdd"
+              [disabled]="!complaintObj.customerVoice || !complaintObj.complaint" (click)="addComplaint()">Add</button>
           </div>
         </div>
-        <div class="text-center mt-3 text-muted">
-          Record(s) not found.
+        <div class="mt-3">
+
+          <!-- Table -->
+          <table class="table table-bordered table-sm" *ngIf="complaintList.length > 0">
+            <thead class="table-light">
+              <tr>
+                <th>Sr No</th>
+                <th>Customer Voice</th>
+                <th>Complaint Code</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let item of complaintList; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ item.customerVoice }}</td>
+                <td>{{ item.complaintCode }}</td>
+                <td>{{ item.complaint }}</td>
+
+                <td>
+                  <button class="btn btn-soft-danger btn-sm">
+                    <i class="ri-delete-bin-2-line" (click)="deleteComplaint(i)"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- No Record -->
+          <div class="text-center text-muted" *ngIf="complaintList.length === 0">
+            Record(s) not found.
+          </div>
+
         </div>
       </div>
     </div>
@@ -405,12 +449,13 @@
         <div class="row g-3">
           <div class="col-md-3">
             <label>Observation(s)</label>
-            <textarea class="form-control form-control-sm">
+            <textarea class="form-control form-control-sm" [(ngModel)]="observation" placeholder="Enter observation">
             </textarea>
           </div>
           <div class="col-md-3">
             <label>Supervisor Comment</label>
-            <textarea class="form-control form-control-sm">
+            <textarea class="form-control form-control-sm" rows="3" [(ngModel)]="supervisorComment"
+              placeholder="Enter supervisor comment">
             </textarea>
           </div>
         </div>
@@ -539,7 +584,7 @@
   </div>
   <!-- FOOTER -->
   <div class="card-footer d-flex justify-content-end gap-2">
-    <button class="btn btn-primary btn-sm">Save</button>
+    <button type="button" class="btn btn-primary btn-sm" [disabled]="!validatePdi()"  (click)="saveJobCard()">Save</button>
     <button class="btn btn-primary btn-sm" (click)="openPdiModal(PdiModelChecklist)">PDI Checklist</button>
     <button class="btn btn-light btn-sm">Cancel</button>
   </div>
@@ -555,7 +600,7 @@
 
   <!-- Body (Scrollable) -->
   <div class="modal-body p-0" style="max-height: 70vh; overflow-y: auto;">
-    
+
     <div class="table-responsive">
       <table class="table table-bordered table-sm mb-0">
 
@@ -577,16 +622,14 @@
 
             <td>
               <div class="form-check form-switch d-flex justify-content-center">
-                <input class="form-check-input" type="checkbox"
-                       [(ngModel)]="item.status">
+                <input class="form-check-input" type="checkbox" [checked]="item.isStatus === 1"
+                  (change)="item.isStatus = $event.target.checked ? true : false" [(ngModel)]="item.isStatus">
               </div>
             </td>
 
             <td>
-              <input type="text"
-                     class="form-control form-control-sm"
-                     [(ngModel)]="item.remarks"
-                     placeholder="Enter remarks">
+              <input type="text" class="form-control form-control-sm" [(ngModel)]="item.remarks"
+                placeholder="Enter remarks">
             </td>
           </tr>
         </tbody>

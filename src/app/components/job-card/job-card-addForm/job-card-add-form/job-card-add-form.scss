@@ -21,7 +21,9 @@
 .section-body {
   padding: 15px;
 }
-
+.single-line {
+  white-space: nowrap;
+}
 .btn-add{
   background-color: #747CA0;
   color: white;

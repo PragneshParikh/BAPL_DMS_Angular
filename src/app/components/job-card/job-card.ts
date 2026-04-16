@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { JobType, JobSource } from '../../constant';
 import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterModule } from '@angular/router';
+import { JobCardService } from '../../core/services/job-card-service';
 
 @Component({
   selector: 'app-job-card',
@@ -26,6 +27,7 @@ export class JobCard {
   selectedJobSource: string = '';
   selectedComplaints: string = '';
   selectedViewJobs: string = '';
+  selectedChassis: string = '';
 
   //Pagination
   page = 1;
@@ -33,15 +35,20 @@ export class JobCard {
   collectionSize: number = 0;
   pagedData: any[] = [];
   filteredData: any[] = [];
-
+  serviceTypeList: any;
+  selectedServiceType: string;
+  chassisList: any[] = [];;
+  
 
   constructor(private receiptEntryService: ReceiptEntryService,
     private storageService: StorageService,
+    private jobCardService : JobCardService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
     this.fetchLocations();
+    this.loadChassisList();
   }
 
   //Fetech Dealer Location
@@ -57,6 +64,24 @@ export class JobCard {
       }
     });
   }
+
+  //load chassis number
+    // load Chassis number
+  loadChassisList() {
+    const dealerCode = this.storageService.getDealerCode();
+    this.jobCardService.getAllInspectedChassis(dealerCode).subscribe({
+      next: (res: any) => {
+        console.log(res);
+
+        // a duplicate chassis no remove (optional)
+        this.chassisList = res;
+      },
+      error: (err) => {
+        console.error('Error fetching chassis', err);
+      }
+    });
+  }
+  
   onLocationChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedLocation = target.value;
@@ -87,6 +112,9 @@ export class JobCard {
 
     console.log('Selected Location:', this.selectedViewJobs);
   }
+   onChassisChange() {
+    this.selectedChassis ='';
+   }
 
   //  PAGINATION
   pageChange(page: number) {

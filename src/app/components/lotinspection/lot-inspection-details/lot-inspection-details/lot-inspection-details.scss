@@ -147,3 +147,14 @@ select {
   background-position: right 0.75rem center;
   background-size: 12px;
 }
+.single-line {
+  white-space: nowrap;
+}
+.qty-header {
+  min-width: 5px;   
+}
+.qty-input {
+  width: 50px;   
+  text-align: center;
+  padding: 2px 4px;
+}

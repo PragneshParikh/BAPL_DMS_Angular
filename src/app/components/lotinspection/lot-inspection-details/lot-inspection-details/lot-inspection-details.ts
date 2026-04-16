@@ -186,7 +186,7 @@ export class LotInspectionDetails implements OnInit {
 
     if (invalidRows.length > 0) {
       Swal.fire({
-        icon: 'warning',
+        icon: 'error',
         title: 'Vehicle Status Error',
         text: 'Please select Vehicle Status for all ChassisNo.',
         confirmButtonColor: '#747CA0',
