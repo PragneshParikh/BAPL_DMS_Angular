@@ -401,6 +401,7 @@ const dealerCode = this.storageService.getDealerCode();
     const jobCardHeader = {
       jobtype: this.selectedJobtype || 0,
       dealerCode : dealerCode,
+      invoiceNo:this.invoiceNo,
       chassisno: this.selectedChassis,
       vehiclekms: Number(this.vehicleKms) || 0,
       servicehead: this.selectedServiceHead || 0,
@@ -469,6 +470,7 @@ const dealerCode = this.storageService.getDealerCode();
 
     //  COMPLAINT
     const jobCardComplaint = this.complaintList.map(x => ({
+      dealerCode : dealerCode,
       customerVoice: x.customerVoice,
       complaintCode: x.complaintCode,
       complaint: x.complaint,

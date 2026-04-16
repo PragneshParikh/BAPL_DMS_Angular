@@ -64,10 +64,10 @@
             <div class="col-md-3">
                 <label class="form-label">Chassis No.</label>
                 <select class="form-select form-select-sm" (change)="onChassisChange()" [(ngModel)]="selectedChassis">
-                  <option value="">Select Chassis</option>
-                  <option *ngFor="let item of chassisList" [value]="item.chassisNumber">
-                    {{ item.chassisNumber }}
-                  </option>
+                    <option value="">Select Chassis</option>
+                    <option *ngFor="let item of chassisList" [value]="item.chassisNumber">
+                        {{ item.chassisNumber }}
+                    </option>
                 </select>
             </div>
             <!-- <div class="col-md-2">
@@ -130,26 +130,88 @@
                     <tr>
                         <th>SR.No.</th>
                         <th>Action</th>
-                        <th>JobNo/Date</th>
+                        <th>JobNo / JobDate</th>
                         <th>JobStatus</th>
                         <th>ManualJobNo.</th>
                         <th>LocationBooking</th>
-                        <th>JobType/JobSource</th>
+                        <th>JobType / JobSource</th>
                         <th>Complaint</th>
                         <th>SupervisorName</th>
-                        <th>Reg/ChassisNo.</th>
-                        <th>VehicleType</th>
-                        <th>ServiceHead/Type</th>
-                        <th>CustomerName/MobileNo</th>
+                        <th>Reg / ChassisNo.</th>
+                        <th>VehicleName</th>
+                        <th>ServiceHead / Type</th>
+                        <th>CustomerName / MobileNo</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                    <tr>
+                    <tr *ngFor="let item of jobCardList; let i = index">
+
+                        <!-- SR NO -->
+                        <td>{{ i + 1 }}</td>
+
+                        <!-- ACTION -->
+                        <td>
+                            <button class="btn btn-sm btn-soft-primary"><i class="ri-pencil-fill fs-12"></i></button>
+                            <button class="btn btn-sm btn-soft-danger"><i class="ri-delete-bin-fill fs-12"></i></button>
+                        </td>
+
+                        <!-- JobNo / Date -->
+                        <td>
+                            {{ item.jobNo }} <br>
+                            {{ item.jobInDate | date:'dd-MM-yyyy' }}
+                        </td>
+
+                        <!-- Job Status -->
+                        <td>{{ item.jobStatus }}  <br>
+                            {{ item.invoiceNo }}
+                        </td>
+                        
+
+                        <!-- Manual Job No -->
+                        <td>{{ item.manualJobNo }}</td>
+
+                        <!-- Location -->
+                        <td>{{ item.joblocation }}</td>
+
+                        <!-- JobType / Source -->
+                        <td>
+                            {{ item.jobtype }} <br>
+                            {{ item.jobsource }}
+                        </td>
+
+                        <!-- Complaint -->
+                        <td>{{ item.complaint }}</td>
+
+                        <!-- Supervisor -->
+                        <td>{{ item.supervisor }}</td>
+
+                        <!-- Reg / Chassis -->
+                        <td>
+                            <b>R:</b>{{ item.registerNo }} <br>
+                            <b>C:</b>{{ item.chassisNo }}
+                        </td>
+
+                        <!-- Vehicle Type -->
+                        <td>{{ item.modelName }}</td>
+
+                        <!-- Service Head / Type -->
+                        <td>
+                            {{ item.serviceHead }} <br>
+                            {{ item.serviceType }}
+                        </td>
+
+                        <!-- Customer -->
+                        <td>
+                            {{ item.customerName }} <br>
+                            {{ item.mobileNo }}
+                        </td>
 
                     </tr>
+
                     <!-- No Data -->
-                    <tr *ngIf="collectionSize === 0">
-                        <td colspan="9" class="text-center text-muted py-3">
+                    <tr *ngIf="jobCardList.length === 0">
+                        <td colspan="13" class="text-center text-muted py-3">
                             No Data Available
                         </td>
                     </tr>

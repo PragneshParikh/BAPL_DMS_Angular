@@ -32,6 +32,9 @@ export class JobCardService {
   getPdiChecklist(): Observable<any>{
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetPdiChecklist`)
   }
+  getJobCardList(dealerCode: string): Observable<any>{
+    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetJobCardList?dealerCode=${dealerCode}`); 
+  }
   insertJobCard(data: any) {
   return this.httpClient.post(`${this.baseUrl}/JobCard/SaveJobCardDetails`, data);
 }

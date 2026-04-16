@@ -21,6 +21,7 @@ export class JobCard {
   JobType = JobType;
   JobSource = JobSource;
   locations: LocationName[];
+  jobCardList : any [] =[];
   //dropdown changes
   selectedLocation: string = '';
   selectedJobtype: string = '';
@@ -38,17 +39,18 @@ export class JobCard {
   serviceTypeList: any;
   selectedServiceType: string;
   chassisList: any[] = [];;
-  
+
 
   constructor(private receiptEntryService: ReceiptEntryService,
     private storageService: StorageService,
-    private jobCardService : JobCardService,
+    private jobCardService: JobCardService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
     this.fetchLocations();
     this.loadChassisList();
+    this.loadJobCardList();
   }
 
   //Fetech Dealer Location
@@ -65,8 +67,8 @@ export class JobCard {
     });
   }
 
-  //load chassis number
-    // load Chassis number
+
+  // load Chassis number
   loadChassisList() {
     const dealerCode = this.storageService.getDealerCode();
     this.jobCardService.getAllInspectedChassis(dealerCode).subscribe({
@@ -81,7 +83,23 @@ export class JobCard {
       }
     });
   }
-  
+
+  loadJobCardList() {
+    // this.lodder = true;
+    const dealerCode = this.storageService.getDealerCode();
+
+    this.jobCardService.getJobCardList(dealerCode).subscribe({
+      next: (res) => {
+        this.jobCardList = res;
+       // this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error fetching job cards', err);
+       // this.loading = false;
+      }
+    });
+  }
+
   onLocationChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedLocation = target.value;
@@ -112,9 +130,9 @@ export class JobCard {
 
     console.log('Selected Location:', this.selectedViewJobs);
   }
-   onChassisChange() {
-    this.selectedChassis ='';
-   }
+  onChassisChange() {
+    this.selectedChassis = '';
+  }
 
   //  PAGINATION
   pageChange(page: number) {
