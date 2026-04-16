@@ -18,16 +18,6 @@ export class ReceiptEntryService {
    */
   constructor(private http: HttpClient) { }
 
-  // getReceiptList(searchTerm: string): Observable<any[]> {
-  //   let params = new HttpParams();
-
-  //   if (searchTerm) {
-  //     params = params.set('searchTerm', searchTerm);
-  //   }
-
-  //   return this.http.get<any[]>(`${this.apiUrl}/ReceiptEntry/getAllReceiptList`, { params });
-  // }
-
   getReceiptList(searchTerm: string, fromDate?: Date, toDate?: Date): Observable<any[]> {
   let params = new HttpParams();
 

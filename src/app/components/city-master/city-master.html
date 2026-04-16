@@ -1,0 +1,231 @@
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs title="City Master"></app-breadcrumbs>
+<!-- End Breadcrumbs -->
+
+<div class="row" id="city-master">
+    <div class="col-lg-12">
+        <div class="card">
+
+            <div class="card-body">
+
+                <!-- HEADER -->
+                <div class="card-header">
+                    <div class="d-flex justify-content-end align-items-center">
+
+                        <!--BUTTONS -->
+                        <div class="d-flex gap-2 me-3">
+                            <button class="btn btn-primary btn-sm" (click)="openAddModal()">
+                                Add
+                            </button>
+
+                            <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                                (click)="downloadCityExcel()">
+                                <i class="ri-file-excel-2-line"></i>
+                            </button>
+                        </div>
+
+                        <!-- SEARCH -->
+                        <div class="search-box">
+                            <input type="text" class="form-control search" placeholder="Search..."
+                                [(ngModel)]="searchTerm" (input)="onSearch()" />
+                            <i class="ri-search-line search-icon"></i>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- TABLE -->
+                <div class="card-body">
+
+                    <div class="table-responsive fixed-table" id="cityTable">
+
+                        <table class="table table-bordered table-sm table-striped city-table" style="font-size: 12px;">
+
+                            <!-- HEADER -->
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">Sl No.</th>
+
+                                    <th class="sort" (click)="sort('countryname')"  style="cursor:pointer">
+                                        Country Name
+                                    </th>
+
+                                    <th class="sort" (click)="sort('statename')"  style="cursor:pointer">
+                                        State Name
+                                    </th>
+
+                                    <th class="sort" (click)="sort('cityname')"  style="cursor:pointer">
+                                        City Name
+                                    </th>
+
+                                    <th class="sort" (click)="sort('abbreviation')"  style="cursor:pointer">
+                                        Abbreviation
+                                    </th>
+
+                                    <th class="sort text-center" (click)="sort('active')"  style="cursor:pointer">
+                                        Active
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <!-- BODY -->
+                            <tbody>
+
+                                <!-- NO DATA -->
+                                @if (paginatedList.length === 0) {
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        No data available
+                                    </td>
+                                </tr>
+                                }
+
+                                <!-- DATA -->
+                                @for (item of paginatedList; track $index) {
+                                <tr (click)="goToEdit(item.id)" style="cursor: pointer;">
+
+                                    <!-- SR NO -->
+                                    <td>
+                                        {{ ($index + 1) + ((page - 1) * pageSize) }}
+                                    </td>
+
+                                    <!-- COUNTRY -->
+                                    <td>
+                                        <ngb-highlight [result]="item.countryname || ''" [term]="searchTerm">
+                                        </ngb-highlight>
+                                    </td>
+
+                                    <!-- STATE -->
+                                    <td>
+                                        <ngb-highlight [result]="item.statename || ''" [term]="searchTerm">
+                                        </ngb-highlight>
+                                    </td>
+
+                                    <!-- CITY -->
+                                    <td>
+                                        <ngb-highlight [result]="item.cityname || ''" [term]="searchTerm">
+                                        </ngb-highlight>
+                                    </td>
+
+                                    <!-- ABBREVIATION -->
+                                    <td>
+                                        <ngb-highlight [result]="item.abbreviation || ''" [term]="searchTerm">
+                                        </ngb-highlight>
+                                    </td>
+
+                                    <!-- ACTIVE -->
+                                    <td class="text-center">
+                                        <span class="badge" [ngClass]="item.active ? 'bg-success' : 'bg-secondary'">
+                                            {{ item.active ? 'Yes' : 'No' }}
+                                        </span>
+                                    </td>
+
+                                </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                    <!-- PAGINATION -->
+                    <div class="d-flex justify-content-end mt-3">
+                        <ngb-pagination [collectionSize]="filteredList.length" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="onPageChange($event)">
+                        </ngb-pagination>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<ng-template #RowDataModel let-modal>
+
+    <!-- FORM -->
+    <form>
+
+        <!-- HEADER -->
+        <div class="modal-header city-modal-header bg-primary">
+            <h5 class="modal-title text-white">
+                City Details
+            </h5>
+
+            <button type="button" class="btn-close btn-close-white btn-sm" (click)="modal.dismiss()">
+            </button>
+        </div>
+
+        <!-- BODY -->
+        <div class="modal-body">
+
+            <div class="row">
+
+                <!-- Country -->
+                <div class="col-md-4">
+                    <label class="form-label">Country Name</label>
+                    <input class="form-control form-control-sm" [value]="rowData?.countryname" readonly />
+                </div>
+
+                <!-- State -->
+                <div class="col-md-4">
+                    <label class="form-label">State Name</label>
+                    <input class="form-control form-control-sm" [value]="rowData?.statename" readonly />
+                </div>
+
+                <!-- City -->
+                <div class="col-md-4">
+                    <label class="form-label">City Name</label>
+                    <input class="form-control form-control-sm" [value]="rowData?.cityname" readonly />
+                </div>
+
+                <!-- Abbreviation -->
+                <div class="col-md-4 mt-3">
+                    <label class="form-label">Abbreviation</label>
+                    <input class="form-control form-control-sm" [value]="rowData?.abbreviation" readonly />
+                </div>
+
+                <!-- Active -->
+                <div class="col-md-4 mt-3 d-flex align-items-center">
+
+                    <div class="w-100">
+
+                        <!-- Label (same spacing as others) -->
+                        <label class="form-label d-block">Active</label>
+
+                        <!-- Toggle Row -->
+                        <div class="form-check form-switch d-flex align-items-center gap-2">
+
+                            <!-- Toggle -->
+                            <input class="form-check-input custom-switch-blue" type="checkbox" role="switch"
+                                [checked]="rowData?.active" disabled>
+
+                            <!-- Text -->
+                            <span [ngClass]="rowData?.active ? 'text-primary fw-semibold' : 'text-muted'">
+                                {{ rowData?.active ? 'Active' : 'Inactive' }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="modal-footer">
+
+            <button type="button" class="btn btn-light btn-sm" (click)="modal.close()">
+                Close
+            </button>
+
+        </div>
+
+    </form>
+
+</ng-template>

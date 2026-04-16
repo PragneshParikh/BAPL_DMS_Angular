@@ -1,0 +1,40 @@
+ #cityTable {
+ .table .sort::before {
+        top: 6px;
+    }
+
+    .table .sort::after {
+        top: 0px;
+    }
+}
+.city-table th,
+.city-table td {
+  white-space: nowrap;
+}
+.table-gridjs th.sort {
+  padding-right: 30px;
+}
+.sort
+    {
+        padding-right: 35px; // extra space for icons
+    }
+    .td{
+      font-size:12px;
+    }
+
+    .city-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.sort {
+  position: relative;
+  padding-right: 35px;
+}
+
+.city-table th,
+.city-table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

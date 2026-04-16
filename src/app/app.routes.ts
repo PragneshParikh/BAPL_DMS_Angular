@@ -28,6 +28,8 @@ import { PartsPo } from './components/parts-po/parts-po';
 import { VehicleSaleBill } from './components/vehicle-sale-bill/vehicle-sale-bill';
 import { OemmodelWarranty } from './components/oemmodel-warranty/oemmodel-warranty';
 import { AddOemmodelWarranty } from './components/oemmodel-warranty/add-oemmodel-warranty/add-oemmodel-warranty';
+import { CityMaster } from './components/city-master/city-master';
+import { AddCityMaster } from './components/city-master/add-city-master/add-city-master';
 
 
 export const routes: Routes = [
@@ -83,9 +85,7 @@ export const routes: Routes = [
       { path: 'vehicle-sale-bill', component: VehicleSaleBill, data: [15] },
       { path: 'oemmodel-warranty', component: OemmodelWarranty, data: [19] },
       { path: 'oemmodel-warranty/add', component: AddOemmodelWarranty, data: [19] },
-            { path: 'oemmodel-warranty/edit/:id', component: AddOemmodelWarranty, data: [19] },
-
-
+      { path: 'oemmodel-warranty/edit/:id', component: AddOemmodelWarranty, data: [19] },
       { path: 'customer-ledger', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger-list/customer-ledger-list').then(m => m.CustomerLedgerList) },
       { path: 'customer-ledger/:id', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger').then(m => m.CustomerLedger) },
       { path: 'delivery-certificate', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
@@ -100,8 +100,10 @@ export const routes: Routes = [
       { path: 'prefix', data: [26], loadComponent: () => import('./components/prefix-master/prefix-master').then(m => m.PrefixMaster) },
       { path: 'prefix/:id', data: [26], loadComponent: () => import('./components/prefix-master/prefix-master-details/prefix-master-details').then(m => m.PrefixMasterDetails) },
       { path: 'material-transfer', data: [29], loadComponent: () => import('./components/material-transfer/material-transfer').then(m => m.MaterialTransfer) },
-      { path: 'material-transfer/:id', data: [29], loadComponent: () => import('./components/material-transfer/material-transfer-detail/material-transfer-detail').then(m => m.MaterialTransferDetail) }
-
+      { path: 'material-transfer/:id', data: [29], loadComponent: () => import('./components/material-transfer/material-transfer-detail/material-transfer-detail').then(m => m.MaterialTransferDetail) },
+      { path: 'city-master', component: CityMaster, data: [19] },
+       { path: 'city-master/add', component: AddCityMaster, data: [19] },
+        { path: 'city-master/edit/:id', component: AddCityMaster, data: [19] },
     ]
   }
 ];
