@@ -16,9 +16,28 @@ export class App implements OnInit {
   isLoggedIn = false;
   protected readonly title = signal('BAPL_DMS_Angular');
 
-  constructor(private authService: AuthenticationService) { }
+  constructor(
+    private authService: AuthenticationService,
+    private loader: LoaderService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
+
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        this.loader.show();
+      }
+
+      if (
+        event instanceof NavigationEnd ||
+        event instanceof NavigationCancel ||
+        event instanceof NavigationError
+      ) {
+        this.loader.hide();
+      }
+    });
+
     this.authService.initAuth();
   }
 

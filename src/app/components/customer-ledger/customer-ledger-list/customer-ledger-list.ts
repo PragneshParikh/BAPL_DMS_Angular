@@ -46,7 +46,6 @@ export class CustomerLedgerList implements OnInit {
           this.dataSource = res.data;
           this.collectionSize = res.totalRecords;
         }
-        console.log('ledger : ', this.dataSource);
         this.loader.hide();
       }, error: (err) => {
         console.log(err);

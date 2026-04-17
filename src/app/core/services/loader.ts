@@ -14,17 +14,13 @@ export class LoaderService {
     this.timeout = setTimeout(() => {
       document.body.classList.add('loading');
       this.loading.next(true);
-    }, 200); // show only if slow
-    // document.body.classList.add('loading'); // disable scroll
-    // this.loading.next(true);
+    })
   }
 
   hide() {
     clearTimeout(this.timeout);
     document.body.classList.remove('loading');
     this.loading.next(false);
-    // document.body.classList.remove('loading');
-    // this.loading.next(false);
   }
 
 }
