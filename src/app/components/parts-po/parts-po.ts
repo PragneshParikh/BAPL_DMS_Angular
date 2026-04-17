@@ -5,6 +5,8 @@ import { CommonModule } from '@angular/common';
 import { StorageService } from '../../core/services/storage';
 import { ItemMasterService } from '../../core/services/item-master-service';
 import { PartsPoService } from '../../core/services/parts-po-service';
+import { KitCreationService } from '../../core/services/kit-creation.service';
+import { KitDetailService } from '../../core/services/kit-detail-service';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TRANSACTION_TYPES } from '../../constant';
@@ -24,6 +26,7 @@ export class PartsPo implements OnInit {
   selectedLocation: string = '';
 
   modelList: any[] = [];
+  kitList: any[] = [];
   purchaseDetails: any[] = [];
   pagedPurchaseDetails: any[] = [];
   page = 1;
@@ -74,12 +77,15 @@ export class PartsPo implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private loader: LoaderService,
-    public toaster: ToastService
+    public toaster: ToastService,
+    private kitCreationService: KitCreationService,
+    private kitDetailService: KitDetailService
   ) { }
 
   ngOnInit() {
     this.loadShowroomLocations();
     this.loadItemMasterList();
+    this.loadKitList();
 
     this.route.params.subscribe(params => {
       this.ponumber = params['ponumber'];
@@ -125,9 +131,19 @@ export class PartsPo implements OnInit {
     this.calculateRowTotals();
   }
 
+  onPoTypeChange() {
+    if (this.poType !== 'SSOMSO') {
+      this.isKit = false;
+    }
+  }
+
+  onKitToggleChange() {
+    this.resetCurrentItem();
+  }
+
   loadItemMasterList() {
-    // For Parts, itemType is 1
-    this.itemService.getItems(6, '', 1).subscribe({
+    // For Parts, grpidno is 1, itemType is 2
+    this.itemService.getItems(1, '', 2).subscribe({
       next: (res: any[]) => {
         this.modelList = Array.isArray(res) ? res : [];
       },
@@ -135,9 +151,29 @@ export class PartsPo implements OnInit {
     });
   }
 
+  loadKitList() {
+    // Calling 'paged' with a large pageSize to get all kits for the dropdown
+    this.kitCreationService.getKitByPaged('', 0, 1000).subscribe({
+      next: (res: any) => {
+        const data = Array.isArray(res) ? res : (res?.data || []);
+        // Only show active kits
+        this.kitList = data.filter((k: any) => k.status === true);
+      },
+      error: (err) => console.error('Error loading kits:', err)
+    });
+  }
+
   onModelChange() {
     if (!this.currentItem.partNo) {
       this.resetCurrentItem();
+      return;
+    }
+
+    if (this.isKit) {
+      const selectedKit = this.kitList.find(k => k.id === Number(this.currentItem.partNo) || k.kitName === this.currentItem.partNo);
+      if (selectedKit) {
+        this.currentItem.description = selectedKit.kitName || '';
+      }
       return;
     }
 
@@ -211,39 +247,102 @@ export class PartsPo implements OnInit {
 
   addPurchaseItem() {
     if (!this.currentItem.partNo) {
-      this.toaster.show('Please select a part', { classname: 'bg-danger text-white', delay: 3000 });
+      this.toaster.show(`Please select a ${this.isKit ? 'Kit' : 'part No.'}`, { classname: 'bg-warning text-dark', delay: 3000 });
       return;
     }
 
     this.locationInvalid = !this.selectedLocation;
     this.transactionTypeInvalid = !this.selectedTransactionType;
 
-    if (this.locationInvalid || this.transactionTypeInvalid) {
+    if (this.locationInvalid) {
+      this.toaster.show('Please select a Location first.', { classname: 'bg-warning text-dark', delay: 3000 });
       return;
     }
 
-    const isDuplicate = this.purchaseDetails.some((item, index) =>
-      item.partNo === this.currentItem.partNo && index !== this.editingIndex
-    );
-
-    if (isDuplicate) {
-      this.toaster.show(`Part "${this.currentItem.description}" is already added.`, { classname: 'bg-danger text-white', delay: 5000 });
+    if (this.transactionTypeInvalid) {
+      this.toaster.show('Please select a Transaction Type first.', { classname: 'bg-warning text-dark', delay: 3000 });
       return;
     }
 
-    this.calculateRowTotals();
+    if (this.isKit) {
+      // Fetch kit details and expand them
+      this.loader.show();
+      this.kitDetailService.getKitDetailsByKitHeaderId(this.currentItem.partNo).subscribe({
+        next: (res: any) => {
+          this.loader.hide();
+          const details = Array.isArray(res) ? res : (res?.data || []);
+          
+          if (details.length === 0) {
+            this.toaster.show('No parts found in this kit.', { classname: 'bg-warning text-dark', delay: 3000 });
+            return;
+          }
 
-    const newItem = { ...this.currentItem };
+          details.forEach((det: any) => {
+            const kitItem = {
+              partNo: det.itemName || det.item?.itemcode || det.itemcode || det.itemId,
+              description: det.itemDescription || det.item?.itemdesc || det.description || det.itemName || '',
+              qty: det.quantity || 0,
+              rate: det.item?.ipurrate || det.rate || 0,
+              mrp: det.item?.mrp || 0,
+              amount: 0,
+              taxableAmount: 0,
+              sgstAmt: 0,
+              cgstAmt: 0,
+              igstAmt: 0,
+              rawSgstRate: det.item?.sgst || 0,
+              rawCgstRate: det.item?.cgst || 0,
+              rawIgstRate: det.item?.igst || 0,
+              itemType: det.item?.itemtype || 1,
+              fromKit: true
+            };
 
-    if (this.editingIndex !== null) {
-      this.purchaseDetails[this.editingIndex] = newItem;
-      this.editingIndex = null;
+            // Potential duplicate check per item if needed
+            this.purchaseDetails.push(kitItem);
+          });
+
+          this.resetCurrentItem();
+          this.loadPage();
+          this.toaster.show('Kit expanded successfully.', { classname: 'bg-success text-white', delay: 3000 });
+        },
+        error: (err) => {
+          this.loader.hide();
+          console.error('Error expanding kit:', err);
+          this.toaster.show('Error loading kit details.', { classname: 'bg-danger text-white', delay: 3000 });
+        }
+      });
     } else {
-      this.purchaseDetails.push(newItem);
-    }
+      // Standard Part Addition
+      const isDuplicate = this.purchaseDetails.some((item, index) =>
+        item.partNo === this.currentItem.partNo && index !== this.editingIndex
+      );
 
-    this.resetCurrentItem();
-    this.loadPage();
+      if (isDuplicate) {
+        this.toaster.show(`Part "${this.currentItem.description}" is already added.`, { classname: 'bg-danger text-white', delay: 5000 });
+        return;
+      }
+
+      // Attempt to set a fallback description if still empty
+      if (!this.currentItem.description) {
+          const fallbackModel = this.modelList.find(m => m.itemcode === this.currentItem.partNo);
+          if (fallbackModel) {
+              this.currentItem.description = fallbackModel.itemdesc || fallbackModel.itemname || fallbackModel.Itemname || fallbackModel.description || '';
+          }
+      }
+
+      this.calculateRowTotals();
+
+      const newItem = { ...this.currentItem };
+
+      if (this.editingIndex !== null) {
+        this.purchaseDetails[this.editingIndex] = newItem;
+        this.editingIndex = null;
+      } else {
+        this.purchaseDetails.push(newItem);
+      }
+
+      this.resetCurrentItem();
+      this.loadPage();
+    }
   }
 
   resetCurrentItem() {

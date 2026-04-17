@@ -35,7 +35,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <label class="form-label mb-0 small">Prefix No.</label>
                         <input type="text" class="form-control form-control-sm" [(ngModel)]="prefixNo"
                             placeholder="Prefix">
@@ -45,17 +45,46 @@
                         <label class="form-label mb-0 small">Order No.</label>
                         <input type="text" class="form-control form-control-sm bg-light" [(ngModel)]="orderNo" readonly>
                     </div>
+                    <!-- <div class="col-md-1">
+                        <div class="input-group input-group-sm">
+                            <label class="form-label mb-0 small">OrderType</label>
+                            <select class="form-select form-select-sm" [(ngModel)]="poType">
+                                <option value="">--Select--</option>
+                                <option value="VOR">VOR</option>
+                                <option value="SSOMSO">SSO/MSO</option>
+                            </select>
+                            <button type="button" class="btn btn-outline-secondary bg-primary text-white btn-sm">
+                                <i class="ri-add-line"></i>
+                            </button>
+                        </div>
+                    </div> -->
 
-                    <div class="col-md-1">
-                        <label class="form-label mb-0 small">OrderType</label>
-                        <select class="form-select form-select-sm" [(ngModel)]="poType">
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small d-block">OrderType</label>
+
+                        <div class="d-flex align-items-center gap-1">
+                            <select class="form-select form-select-sm" [(ngModel)]="poType" (change)="onPoTypeChange()">
+                                <option value="">--Select--</option>
+                                <option value="VOR">VOR</option>
+                                <option value="SSOMSO">SSO/MSO</option>
+                            </select>
+                            <button *ngIf="poType === 'VOR'" type="button" class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal" data-bs-target="#vorModal">
+                                <i class="ri-add-line"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Transaction Type</label>
+                        <select class="form-select form-select-sm border-start border-2"
+                            [class.is-invalid]="transactionTypeInvalid" [(ngModel)]="selectedTransactionType">
                             <option value="">--Select--</option>
-                            <option value="VOR">VOR</option>
-                            <option value="SSO">SSO</option>
+                            <option *ngFor="let type of transactionTypeList" [value]="type.type">{{type.name}}</option>
                         </select>
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label mb-0 small">Party</label>
                         <input type="text" class="form-control form-control-sm bg-light" [(ngModel)]="partyName"
                             readonly>
@@ -74,7 +103,7 @@
                         <label class="form-label mb-0 d-block small">Against KIT</label>
                         <div class="form-check form-switch d-inline-block">
                             <input type="checkbox" class="form-check-input" id="isKit" [(ngModel)]="isKit"
-                                [disabled]="isSubmitted">
+                                (change)="onKitToggleChange()" [disabled]="isSubmitted || poType !== 'SSOMSO'">
                             <label class="form-check-label small" for="isKit">{{ isKit ? 'Y' : 'N' }}</label>
                         </div>
                     </div>
@@ -86,10 +115,17 @@
                 <div class="row g-1 mb-2 align-items-end">
                     <div class="col-md-3">
                         <label class="form-label mb-0 small">Part No.</label>
-                        <select class="form-select form-select-sm border-start border-2"
+                        <!-- Models Dropdown -->
+                        <select *ngIf="!isKit" class="form-select form-select-sm border-start border-2"
                             [(ngModel)]="currentItem.partNo" (change)="onModelChange()">
                             <option value="">--Select--</option>
                             <option *ngFor="let item of modelList" [value]="item.itemcode">{{item.itemname}}</option>
+                        </select>
+                        <!-- Kits Dropdown -->
+                        <select *ngIf="isKit" class="form-select form-select-sm border-start border-2"
+                            [(ngModel)]="currentItem.partNo" (change)="onModelChange()">
+                            <option value="">--Select--</option>
+                            <option *ngFor="let kit of kitList" [value]="kit.id">{{kit.kitName}}</option>
                         </select>
                     </div>
 
@@ -99,11 +135,11 @@
                             placeholder="0.00">
                     </div>
 
-                    <!-- <div class="col-md-4">
+                    <div class="col-md-4">
                         <label class="form-label mb-0 small">Part Description</label>
                         <input type="text" class="form-control form-control-sm bg-light"
-                            [value]="currentItem.description" readonly>
-                    </div> -->
+                            [(ngModel)]="currentItem.description" readonly>
+                    </div>
 
                     <div class="col-md-1">
                         <label class="form-label mb-0 small">Qty.</label>
@@ -129,18 +165,9 @@
                     </div>
                     <!-- </div> -->
                     <div class="col-md-1">
-                        <button class="btn btn-sm btn-primary" (click)="addPurchaseItem()">+ Add</button>
+                        <button class="btn btn-sm btn-primary" (click)="addPurchaseItem()">Add</button>
                     </div>
 
-                    <!-- Moved Transaction Type here to clear up first row if needed, or keep it near selection -->
-                    <div class="col-md-2" *ngIf="false"> <!-- Hidden for now to match screenshot sequence -->
-                        <label class="form-label mb-0 small">Transaction Type</label>
-                        <select class="form-select form-select-sm border-start border-2"
-                            [class.is-invalid]="transactionTypeInvalid" [(ngModel)]="selectedTransactionType">
-                            <option value="">--Select--</option>
-                            <option *ngFor="let type of transactionTypeList" [value]="type.type">{{type.name}}</option>
-                        </select>
-                    </div>
                 </div>
 
                 <!-- TABLE -->
@@ -154,8 +181,13 @@
                                 <th>Part Desc.</th>
                                 <th>Qty</th>
                                 <th>Rate</th>
-                                <th>IGST</th>
-                                <th>Amount</th>
+                                <!-- <th>CGST</th>
+                                <th>SGST</th>
+                                <th>IGST</th> -->
+                                <th>(+) SGST Amt.</th>
+                                <th>(+) CGST Amt.</th>
+                                <th>(+) IGST Amt.</th>
+                                <th>Net Amount</th>
                                 <th>MRP</th>
                                 <th>Stock</th>
                             </tr>
@@ -164,29 +196,41 @@
                             <tr *ngFor="let item of pagedPurchaseDetails; let i = index">
                                 <td class="text-center">{{(page - 1) * pageSize + i + 1}}</td>
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-soft-info py-0 px-1 me-1" (click)="editItem(i)"><i
-                                            class="ri-pencil-line"></i></button>
-                                    <button class="btn btn-sm btn-soft-danger py-0 px-1" (click)="deleteItem(i)"><i
-                                            class="ri-delete-bin-line"></i></button>
+                                    <ng-container *ngIf="!item.fromKit; else kitRow">
+                                        <button class="btn btn-sm btn-soft-info py-0 px-1 me-1" (click)="editItem(i)">
+                                            <i class="ri-pencil-line"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-soft-danger py-0 px-1" (click)="deleteItem(i)">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </ng-container>
+                                    <ng-template #kitRow>
+                                        <span
+                                            class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
+                                            <i class="ri-box-3-fill me-1"></i> KIT
+                                        </span>
+                                    </ng-template>
                                 </td>
                                 <td>{{item.partNo}}</td>
                                 <td>{{item.description}}</td>
                                 <td class="text-center">{{item.qty}}</td>
                                 <td class="text-end">{{item.rate | number:'1.2-2'}}</td>
+                                <td class="text-end">{{item.cgstAmt | number:'1.2-2'}}</td>
+                                <td class="text-end">{{item.sgstAmt | number:'1.2-2'}}</td>
                                 <td class="text-end">{{item.igstAmt | number:'1.2-2'}}</td>
                                 <td class="text-end">{{item.amount | number:'1.2-2'}}</td>
                                 <td class="text-end">{{item.mrp | number:'1.2-2'}}</td>
                                 <td class="text-center">0</td>
                             </tr>
                             <!-- Total Row -->
-                            <tr class="fw-bold table-light" *ngIf="purchaseDetails.length > 0">
+                            <!-- <tr class="fw-bold table-light" *ngIf="purchaseDetails.length > 0">
                                 <td colspan="4" class="text-end">Total :</td>
                                 <td class="text-center">{{purchaseDetails.length}}</td>
                                 <td></td>
-                                <td class="text-end">0.00</td> <!-- Sum IGST placeholder -->
-                                <td class="text-end">0.00</td> <!-- Sum Amount placeholder -->
+                                <td class="text-end">0.00</td> 
+                                <td class="text-end">0.00</td>
                                 <td colspan="2"></td>
-                            </tr>
+                            </tr> -->
                         </tbody>
                     </table>
                 </div>
@@ -234,6 +278,63 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- VOR Details Modal -->
+<div class="modal fade" id="vorModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header dealer-modal-header" style="background-color:#747CA0">
+                <h5 class="modal-title text-white">
+                    Parts Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- ================= VOR Info ================= -->
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Job Card No</label>
+                        <input type="text" class="form-control form-control-sm" placeholder="Enter Job Card No">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Chassis No</label>
+                        <input type="text" class="form-control form-control-sm" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Engine No</label>
+                        <input type="text" class="form-control form-control-sm" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Registration No</label>
+                        <input type="text" class="form-control form-control-sm" readonly>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Customer Name</label>
+                        <input type="text" class="form-control form-control-sm" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Contact No</label>
+                        <input type="text" class="form-control form-control-sm" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">VOR Reason</label>
+                        <input type="text" class="form-control form-control-sm" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-sm" data-bs-dismiss="modal">
+                    Ok
+                </button>
+                <button class="btn btn-light btn-sm" data-bs-dismiss="modal">
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
