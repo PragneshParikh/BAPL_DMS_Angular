@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgbHighlight, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbHighlight, NgbModal, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Hsnwisetaxcodeservice } from '../../core/services/hsnwisetaxcodeservice';
 import { AddHsnTaxPayload, HsnTaxFormModel } from '../../ViewModels/HSNWiseTaxcodeModel';
 import { LoaderService } from '../../core/services/loader';
@@ -14,7 +14,8 @@ import { ToastService } from '../../shared/toaster/toast-service';
     CommonModule,
     FormsModule,
     NgbHighlight,
-    NgbPaginationModule
+    NgbPaginationModule,
+    NgbTooltipModule 
   ],
   templateUrl: './hsnwisetaxcode.html',
   styleUrl: './hsnwisetaxcode.scss',

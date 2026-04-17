@@ -72,6 +72,11 @@
     <div class="section-card">
       <div class="section-header" (click)="toggle('job')">
         <h6 class="mb-0">Job Basic Information</h6>
+        <div>
+          Valid till : {{odoReading || 0}} Vehicle Journey. & {{duration || 0}} {{durationType || 0}} |
+          Previous : 0 <br>
+          In Warranty Expired on {{expireWarrentyDate || ''}}
+        </div>
         <i [class]="isOpen.job ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
       </div>
       <div class="section-body" *ngIf="isOpen.job">
@@ -584,7 +589,8 @@
   </div>
   <!-- FOOTER -->
   <div class="card-footer d-flex justify-content-end gap-2">
-    <button type="button" class="btn btn-primary btn-sm" [disabled]="!validatePdi()"  (click)="saveJobCard()">Save</button>
+    <button type="button" class="btn btn-primary btn-sm" [disabled]="!validatePdi()"
+      (click)="saveJobCard()">Save</button>
     <button class="btn btn-primary btn-sm" (click)="openPdiModal(PdiModelChecklist)">PDI Checklist</button>
     <button class="btn btn-light btn-sm">Cancel</button>
   </div>

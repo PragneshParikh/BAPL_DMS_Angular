@@ -74,20 +74,21 @@
                         <!-- Custom Radio Color -->
                         <div class="col-md-3">
                             <label class="form-label d-block">State Flag<span class="text-danger">*</span></label>
-                            
+
                             <div class="d-flex gap-3 align-items-center">
 
                                 <div class="form-check">
-                                    <input class="form-check-input form-check-input-sm" type="radio" name="stateFlag" id="same" value="S"
-                                        [(ngModel)]="formData.stateflag" #stateFlag="ngModel" required>
+                                    <input class="form-check-input form-check-input-sm" type="radio" name="stateFlag"
+                                        id="same" value="S" [(ngModel)]="formData.stateflag" #stateFlag="ngModel"
+                                        required>
                                     <label class="form-check-label" for="same">
                                         Same
                                     </label>
                                 </div>
 
                                 <div class="form-check">
-                                    <input class="form-check-input form-check-input-sm" type="radio" name="stateFlag" id="other" value="O"
-                                        [(ngModel)]="formData.stateflag" required>
+                                    <input class="form-check-input form-check-input-sm" type="radio" name="stateFlag"
+                                        id="other" value="O" [(ngModel)]="formData.stateflag" required>
                                     <label class="form-check-label" for="other">
                                         Other
                                     </label>
@@ -102,7 +103,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Effective Date <span class="text-danger">*</span></label>
-                            
+
                             <input type="date" class="form-control form-control-sm" [(ngModel)]="formData.effectivedate"
                                 name="effectivedate" required #effectiveDateInput="ngModel">
 
@@ -113,7 +114,7 @@
                         </div>
                         <div class="col-md-6 div-btn-add">
                             <button type="submit" class="btn btn-add btn-sm" [disabled]="addHsnwiseATaxForm.invalid">
-                              Save
+                                Save
                             </button>
                         </div>
 
@@ -180,7 +181,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let data of pagedData" style="cursor:pointer">
+                            <tr *ngFor="let data of pagedData" style="cursor:pointer" ngbTooltip="
+                                    HSN: {{data.hsncode}}
+                                    TaxCode: {{data.ataxCode}}
+                                    State: {{data.stateFlag}}
+                                    Date: {{data.effectiveDate | date:'dd-MM-yyyy'}}
+                                    " placement="top" container="body">
                                 <td>{{ data.hsncode }}</td>
                                 <td>{{ data.ataxCode }}</td>
                                 <td>{{ data.stateFlag?.trim() }}</td>

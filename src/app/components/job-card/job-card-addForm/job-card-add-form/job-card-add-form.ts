@@ -67,6 +67,12 @@ export class JobCardAddForm {
   controllerNo: string = '';
   converterNo: string = '';
   motorNo: string = '';
+  odoReading: number=0.0;
+  duration : number=0.0;
+  durationType: string='';
+  expireWarrentyDate:string='';
+   
+
   chargerMake: string = '';
   batteryVoltage: string = '';
   capacityAH: string = '';
@@ -273,7 +279,11 @@ export class JobCardAddForm {
       this.chargerNumber = '',
         this.controllerNo = '',
         this.converterNo = '',
-        this.motorNo = ''
+        this.motorNo = '',
+        this.odoReading =0.00,
+        this.duration =0.00,
+        this.durationType='',
+        this.expireWarrentyDate = ''
       return;
     }
     const selected = this.chassisList.find(
@@ -295,6 +305,10 @@ export class JobCardAddForm {
       this.controllerNo = selected.controllerNo
       this.converterNo = selected.converterNo
       this.chargerNumber = selected.chargerNumber
+      this.odoReading = selected.odoReading
+      this.duration = selected.duration
+      this.durationType =selected.durationType
+      this.expireWarrentyDate=selected.expireWarrentyDate
     }
   }
 
