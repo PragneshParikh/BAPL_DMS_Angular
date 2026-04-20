@@ -52,7 +52,7 @@
                     <div class="col-md-1">
                         <label class="form-label mb-0 small">Prefix No</label>
                         <input type="text" class="form-control form-control-sm" [(ngModel)]="prefixNo"
-                            [readonly]="isSubmitted">
+                            [readonly]="isSubmitted" disabled>
                     </div>
 
                     <div class="col-md-2">
@@ -184,8 +184,8 @@
                         <div class="col-md-1">
                             <label class="form-label mb-0 small">Qty</label>
                             <input type="number" class="form-control form-control-sm text-end" name="qty"
-                                [class.is-invalid]="qtyInvalid"
-                                [(ngModel)]="currentItem.qty" (input)="qtyInvalid = false; calculateRowTotals()" [readonly]="isSubmitted">
+                                [class.is-invalid]="qtyInvalid" [(ngModel)]="currentItem.qty"
+                                (input)="qtyInvalid = false; calculateRowTotals()" [readonly]="isSubmitted">
                         </div>
 
                         <!-- <div class="col-md-1">

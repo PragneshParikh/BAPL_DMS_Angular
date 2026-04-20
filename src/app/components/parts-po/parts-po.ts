@@ -12,6 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { JobCardService } from '../../core/services/job-card-service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -37,7 +38,7 @@ export class PartsPo implements OnInit {
   orderNo: string = '';
   poDate: string = new Date().toISOString();
   remarks: string = '';
-  poType: string = 'Parts';
+  poType: string = '';
   isSubmitted: boolean = false;
   isSaving: boolean = false;
   partyName: string = 'BGAUSS AUTO PRIVATE LIMITED';
@@ -51,6 +52,24 @@ export class PartsPo implements OnInit {
   
   locationInvalid: boolean = false;
   transactionTypeInvalid: boolean = false;
+  partNoInvalid: boolean = false;
+  qtyInvalid: boolean = false;
+  orderTypeInvalid: boolean = false;
+
+  jobCardList: any[] = [];
+  activeJobCards: any[] = [];
+  vorDetails: any = {
+    jobNo: '',
+    chassisNo: '',
+    registerNo: '',
+    engineNo: '',
+    jobType: '',
+    serviceHead: '',
+    serviceType: '',
+    partyName: '',
+    mobileNo: '',
+    modelNo: ''
+  };
 
   currentItem: any = {
     partNo: '',
@@ -79,13 +98,15 @@ export class PartsPo implements OnInit {
     private loader: LoaderService,
     public toaster: ToastService,
     private kitCreationService: KitCreationService,
-    private kitDetailService: KitDetailService
+    private kitDetailService: KitDetailService,
+    private jobCardService: JobCardService
   ) { }
 
   ngOnInit() {
     this.loadShowroomLocations();
     this.loadItemMasterList();
     this.loadKitList();
+    this.loadJobCards();
 
     this.route.params.subscribe(params => {
       this.ponumber = params['ponumber'];
@@ -128,10 +149,12 @@ export class PartsPo implements OnInit {
   }
 
   onLocationChange() {
+    this.locationInvalid = false;
     this.calculateRowTotals();
   }
 
   onPoTypeChange() {
+    this.orderTypeInvalid = false;
     if (this.poType !== 'SSOMSO') {
       this.isKit = false;
     }
@@ -139,6 +162,68 @@ export class PartsPo implements OnInit {
 
   onKitToggleChange() {
     this.resetCurrentItem();
+  }
+
+  loadJobCards() {
+    const dealerCode = this.storageService.getDealerCode();
+    this.jobCardService.getJobCardList(dealerCode).subscribe({
+      next: (res: any) => {
+        this.jobCardList = Array.isArray(res) ? res : (res?.data || []);
+        // Filtering for 'Active' job cards. Usually, this means jobStatus is not 'Closed' or 'Invoiced'.
+        // Based on common patterns in this repo, we'll keep those that are not closed.
+        this.activeJobCards = this.jobCardList.filter((j: any) => 
+          (j.jobStatus || '').toLowerCase() !== 'closed' && 
+          (j.jobStatus || '').toLowerCase() !== 'invoiced'
+        );
+      },
+      error: (err) => console.error('Error loading job cards:', err)
+    });
+  }
+
+  onJobNoChange() {
+    if (!this.vorDetails.jobNo) {
+      this.resetVorDetails();
+      return;
+    }
+
+    const job = this.activeJobCards.find(j => 
+      (j.jobNo || '').toString().trim() === this.vorDetails.jobNo.toString().trim()
+    );
+
+    if (job) {
+      this.vorDetails = {
+        jobNo: job.jobNo,
+        chassisNo: job.chassisNo || '',
+        registerNo: job.registerNo || '',
+        engineNo: job.engineNo || '',
+        jobType: job.jobtype || '',
+        serviceHead: job.serviceHead || '',
+        serviceType: job.serviceType || '',
+        partyName: job.customerName || '',
+        mobileNo: job.mobileNo || '',
+        modelNo: job.modelName || ''
+      };
+    } else {
+      // Keep JobNo but clear other fields if not found in active list
+      const currentNo = this.vorDetails.jobNo;
+      this.resetVorDetails();
+      this.vorDetails.jobNo = currentNo;
+    }
+  }
+
+  resetVorDetails() {
+    this.vorDetails = {
+      jobNo: '',
+      chassisNo: '',
+      registerNo: '',
+      engineNo: '',
+      jobType: '',
+      serviceHead: '',
+      serviceType: '',
+      partyName: '',
+      mobileNo: '',
+      modelNo: ''
+    };
   }
 
   loadItemMasterList() {
@@ -164,6 +249,7 @@ export class PartsPo implements OnInit {
   }
 
   onModelChange() {
+    this.partNoInvalid = false;
     if (!this.currentItem.partNo) {
       this.resetCurrentItem();
       return;
@@ -243,24 +329,20 @@ export class PartsPo implements OnInit {
     }
 
     this.currentItem.amount = this.currentItem.taxableAmount + this.currentItem.sgstAmt + this.currentItem.cgstAmt + this.currentItem.igstAmt;
+    
+    // Reset flags if values are present
+    if (this.currentItem.qty > 0) this.qtyInvalid = false;
+    if (this.selectedTransactionType) this.transactionTypeInvalid = false;
   }
 
   addPurchaseItem() {
-    if (!this.currentItem.partNo) {
-      this.toaster.show(`Please select a ${this.isKit ? 'Kit' : 'part No.'}`, { classname: 'bg-warning text-dark', delay: 3000 });
-      return;
-    }
-
     this.locationInvalid = !this.selectedLocation;
     this.transactionTypeInvalid = !this.selectedTransactionType;
+    this.orderTypeInvalid = !this.poType;
+    this.partNoInvalid = !this.currentItem.partNo;
+    this.qtyInvalid = !this.currentItem.qty || this.currentItem.qty <= 0;
 
-    if (this.locationInvalid) {
-      this.toaster.show('Please select a Location first.', { classname: 'bg-warning text-dark', delay: 3000 });
-      return;
-    }
-
-    if (this.transactionTypeInvalid) {
-      this.toaster.show('Please select a Transaction Type first.', { classname: 'bg-warning text-dark', delay: 3000 });
+    if (this.locationInvalid || this.transactionTypeInvalid || this.orderTypeInvalid || this.partNoInvalid || this.qtyInvalid) {
       return;
     }
 

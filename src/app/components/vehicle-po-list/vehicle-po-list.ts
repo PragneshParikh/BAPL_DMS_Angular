@@ -74,24 +74,33 @@ export class VehiclePoList implements OnInit {
     const flattened: any[] = [];
     let sNo = 1;
     res.forEach(po => {
-      if (po.items && po.items.length > 0) {
-        po.items.forEach((item: any) => {
-          flattened.push({
-            sNo: sNo++,
-            prefixNo: '',
-            purchaseNo: po.poNumber || po.ponumber,
-            date: this.formatDate(po.poDate || po.podate),
-            rawDate: new Date(po.poDate || po.podate),
-            transactionType: po.TransactionType || po.transactionType || '',
-            isSubmitted: po.isSubmitted || po.IsSubmitted || po.Status === 'Submitted' ? 'Submited To Erp' : 'Not Submited To Erp',
-            // partyName: po.customerCode,
-            partyName: "BGAUSS AUTO PRIVATE LIMITED",
-            location: po.LocationName || po.locationName || po.LocName || po.locName || po.LocCode || po.locCode || po.loccode || '',
-            modelName: item.itemCode,
-            color: '',
-            orderQty: item.qty,
-            orderAmount: item.lineAmount?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'
-          });
+      const items = po.items || po.PurchaseOrderDetails || [];
+      if (items.length > 0) {
+        // Calculate totals for all items in the PO
+        let totalQty = 0;
+        let totalAmount = 0;
+        items.forEach((item: any) => {
+          totalQty += Number(item.Qty || item.qty || 0);
+          totalAmount += Number(item.LineAmount || item.lineAmount || 0);
+        });
+
+        const firstItem = items[0];
+        let modelName = firstItem.ItemCode || firstItem.itemCode || '';
+
+        flattened.push({
+          sNo: sNo++,
+          prefixNo: po.PrefixNo || po.prefixNo || '',
+          purchaseNo: po.PONumber || po.poNumber || po.ponumber || '',
+          date: this.formatDate(po.PODate || po.poDate || po.podate),
+          rawDate: new Date(po.PODate || po.poDate || po.podate),
+          transactionType: po.TransactionType || po.transactionType || '',
+          isSubmitted: (po.IsSubmitted || po.isSubmitted || po.Status === 'Submitted' || po.status === true) ? 'Submited To Erp' : 'Not Submited To Erp',
+          partyName: "BGAUSS AUTO PRIVATE LIMITED",
+          location: po.LocationName || po.locationName || po.LocName || po.locName || po.LocCode || po.locCode || po.loccode || '',
+          modelName: modelName,
+          color: '',
+          orderQty: totalQty,
+          orderAmount: totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
         });
       }
     });
