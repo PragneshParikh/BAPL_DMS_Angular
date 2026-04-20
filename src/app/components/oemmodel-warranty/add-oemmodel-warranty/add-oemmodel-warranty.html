@@ -1,0 +1,124 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">
+        {{ isEditMode ? 'Edit OEM Model Warranty' : 'Add OEM Model Warranty' }}
+    </h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+
+                <form #warrantyForm="ngForm" (ngSubmit)="onSubmit(warrantyForm)">
+
+                    <!-- Row 1 -->
+                    <div class="row mb-3">
+
+                        <!-- ✅ FIXED DROPDOWN -->
+                        <div class="col-md-3">
+                            <label>OEM Model <span class="text-danger">*</span></label>
+
+                            <select class="form-select form-select-sm"
+                                    [(ngModel)]="formData.oemmodelId"
+                                    name="oemmodelId"
+                                    (change)="onModelChange()"
+                                    required>
+
+                                <option [ngValue]="null">--Select OEM Model--</option>
+
+                                <option *ngFor="let model of oemModels"
+                                        [ngValue]="model.id">
+                                   {{model.modelName}}
+                                </option>
+
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Effective Date</label>
+                            <input type="date"
+                                   class="form-control form-control-sm"
+                                   [(ngModel)]="formData.effectiveDate"
+                                   name="effectiveDate" [min]="effectiveMinDate">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Odo Reading</label>
+                            <input type="number"
+                                   class="form-control form-control-sm"
+                                   [(ngModel)]="formData.odoreading"
+                                   name="odoreading">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Duration Type</label>
+                            <select class="form-select form-select-sm"
+                                    [(ngModel)]="formData.durationType"
+                                    name="durationType">
+
+                                <option value="">--Select--</option>
+                                <option value="MONTH">Month</option>
+                                <option value="YEAR">Year</option>
+
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- Row 2 -->
+                    <div class="row mb-3">
+
+                        <div class="col-md-3">
+                            <label>Duration</label>
+                            <input type="number"
+                                   class="form-control form-control-sm"
+                                   [(ngModel)]="formData.duration"
+                                   name="duration">
+                        </div>
+
+                        <!--FIXED RADIO -->
+                        <div class="col-md-3">
+                            <label>B2B</label><br>
+
+                            <div class="d-flex gap-3 mt-1">
+                                <label>
+                                    <input type="radio"
+                                           [value]="true"
+                                           [(ngModel)]="formData.isB2b"
+                                           name="isB2b"> Yes
+                                </label>
+
+                                <label>
+                                    <input type="radio"
+                                           [value]="false"
+                                           [(ngModel)]="formData.isB2b"
+                                           name="isB2b"> No
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="row mt-4">
+                        <div class="col-md-12 d-flex justify-content-end gap-2">
+
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                Save
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-light btn-sm"
+                                    (click)="onCancel()">
+                                Close
+                            </button>
+
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>

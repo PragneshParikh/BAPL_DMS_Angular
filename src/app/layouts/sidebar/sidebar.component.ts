@@ -8,36 +8,42 @@ import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { SimplebarAngularModule } from 'simplebar-angular';
-
+import { MenuService } from '../../core/services/menu-service';
+import { BehaviorSubject } from 'rxjs';
+import { RolewiseMenuService } from '../../core/services/rolewisemenu-service';
+import { LoaderService } from '../../core/services/loader';
+import { StorageService } from '../../core/services/storage';
 @Component({
-    selector: 'app-sidebar',
-    templateUrl: './sidebar.component.html',
-    styleUrls: ['./sidebar.component.scss'],
-    imports: [CommonModule, NgbCollapseModule, RouterModule, TranslateModule, SimplebarAngularModule],
-    standalone: true
+  selector: 'app-sidebar',
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['./sidebar.component.scss'],
+  imports: [CommonModule, NgbCollapseModule, RouterModule, TranslateModule, SimplebarAngularModule],
+  standalone: true
 })
 export class SidebarComponent implements OnInit {
 
   menu: any;
   toggle: any = true;
   menuItems: MenuItem[] = [];
+  filteredMenuItems: MenuItem[] = [];
   @ViewChild('sideMenu') sideMenu!: ElementRef;
   @Output() mobileMenuButtonClicked = new EventEmitter();
 
-  constructor(private router: Router, public translate: TranslateService) {
+  constructor(public translate: TranslateService,
+    private menuService: MenuService,
+    private roleWiseMenuService: RolewiseMenuService,
+    private loader: LoaderService,
+    private storageService: StorageService
+  ) {
     translate.setDefaultLang('en');
   }
 
-  ngOnInit(): void {
-    // Menu Items
-    this.menuItems = MENU;
-    this.router.events.subscribe((event) => {
-      if (document.documentElement.getAttribute('data-layout') != "twocolumn") {
-        if (event instanceof NavigationEnd) {
-          this.initActiveMenu();
-        }
-      }
-    });
+  async ngOnInit() {
+
+    await this.getMasterMenu();
+    this.loadRoleWiseMenuRights();
+    // Subscribe to active module for filtering
+    this.menuService.activeModule$.subscribe(module => this.filterMenuByModule(module));
   }
 
   /***
@@ -56,7 +62,7 @@ export class SidebarComponent implements OnInit {
   }
 
   toggleItem(item: any) {
-    this.menuItems.forEach((menuItem: any) => {
+    this.filteredMenuItems.forEach((menuItem: any) => {
 
       if (menuItem == item) {
         menuItem.isCollapsed = !menuItem.isCollapsed
@@ -137,7 +143,7 @@ export class SidebarComponent implements OnInit {
       pathName = pathName.replace('/velzon/angular/master', '');
     }
 
-    const active = this.findMenuItem(pathName, this.menuItems)
+    const active = this.findMenuItem(pathName, this.filteredMenuItems)
     this.toggleItem(active)
     const ul = document.getElementById("navbar-nav");
     if (ul) {
@@ -182,7 +188,7 @@ export class SidebarComponent implements OnInit {
    * @param item menuItem
    */
   hasItems(item: MenuItem) {
-    return item.subItems !== undefined ? item.subItems.length > 0 : false;
+    return Array.isArray(item.subItems) && item.subItems.length > 0;
   }
 
   /**
@@ -205,4 +211,54 @@ export class SidebarComponent implements OnInit {
   SidebarHide() {
     document.body.classList.remove('vertical-sidebar-enable');
   }
+
+  private filterMenuByModule(module: string) {
+    if (!this.menuItems) return;
+
+    const filteredMenu = JSON.parse(JSON.stringify(this.menuItems)) // deep copy
+
+      .map((menu: any) => {
+        if (menu.subItems) {
+          menu.subItems = menu.subItems.filter((sub: any) => {
+            return !sub.module || sub.module.toLowerCase() === module.toLowerCase();
+          });
+        }
+        return menu;
+      });
+
+    this.filteredMenuItems = filteredMenu;
+
+    setTimeout(() => this.initActiveMenu());
+  }
+
+  async getMasterMenu(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.loader.show();
+      this.menuService.getMenu().subscribe({
+        next: (menu: any) => {
+          this.menuItems = menu;
+          resolve(menu);
+          this.loader.hide();
+        }, error: (err) => {
+          console.error('Error fetching menu:', err);
+          reject(err);
+          this.loader.hide();
+        }
+      });
+    });
+  }
+
+  loadRoleWiseMenuRights() {
+    this.loader.show();
+    this.roleWiseMenuService.getByRoleId(null).subscribe({
+      next: (menuRights: any) => {
+        this.storageService.setMenuRights(menuRights);
+        this.loader.hide();
+      }, error: (err) => {
+        console.error('Something went wrong ', err);
+        this.loader.show();
+      }
+    });
+  }
+
 }

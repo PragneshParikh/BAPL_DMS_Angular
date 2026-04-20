@@ -1,0 +1,186 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">Tax Code Master</h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+
+            <div class="card-header">
+                <div class="d-flex justify-content-end align-items-center">
+
+                    <button class="btn btn-primary btn-sm me-2" (click)="openAddModal()">
+                       Add
+                    </button>
+
+                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'" (click)="downloadTaxCodeExcel()">
+                        <i class="ri-file-excel-2-line"></i>
+                    </button>
+
+                    <div class="search-box d-inline-block">
+                        <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm"
+                            (input)="searchTaxCode()" />
+                        <i class="ri-search-line search-icon"></i>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered mb-0 table-sm tax-table">
+                        <thead>
+                            <tr>
+                                <th>S.No.</th>
+                                <th class="sort" [ngClass]="getSortClass('taxcode')" (click)="sort('taxcode')"
+                                    style="cursor:pointer">Tax Code</th>
+                                <th class="sort" [ngClass]="getSortClass('description')" (click)="sort('description')"
+                                    style="cursor:pointer">Description</th>
+                                <th class="sort" [ngClass]="getSortClass('taxRate')" (click)="sort('taxRate')"
+                                    style="cursor:pointer">Tax Rate</th>
+                                <th class="sort" [ngClass]="getSortClass('effectiveDate')"
+                                    (click)="sort('effectiveDate')" style="cursor:pointer">Effective Date</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngIf="pagedTaxCodeList.length === 0">
+                                <td colspan="5" class="text-center">No data available</td>
+                            </tr>
+
+                            <tr *ngFor="let tax of pagedTaxCodeList; let i = index" (click)="openEditModal(tax)"
+                                style="cursor: pointer;">
+                                <td>{{ (page - 1) * pageSize + i + 1 }}</td>
+                                <td><ngb-highlight [result]="tax.taxcode" [term]="searchTerm"></ngb-highlight></td>
+                                <td><ngb-highlight [result]="tax.description" [term]="searchTerm"></ngb-highlight></td>
+                                <td><ngb-highlight [result]="tax.taxRate?.toString()"
+                                        [term]="searchTerm"></ngb-highlight></td>
+                                <td><ngb-highlight [result]="(tax.effectiveDate | date:'dd-MM-yyyy') || ''"
+                                        [term]="searchTerm"></ngb-highlight></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row justify-content-md-between align-items-md-center mt-3">
+                    <div class="col-sm-12 col-md-5">
+                        <div class="dataTables_info mb-2" id="tickets-table_info" role="status" aria-live="polite">
+                            Showing
+                            {{ (page - 1) * pageSize + 1 }} to
+                            {{ (page * pageSize) > totalRecords ? totalRecords : (page * pageSize) }} of {{ totalRecords
+                            }}
+                            entries
+                        </div>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="col-sm-12 col-md-5">
+                        <div class="text-md-right float-md-end gridjs-pagination">
+                            <ngb-pagination [collectionSize]="totalRecords" [(page)]="page" [pageSize]="pageSize"
+                                (pageChange)="refreshPage()" [boundaryLinks]="true">
+                            </ngb-pagination>
+                        </div>
+                    </div>
+                    <!-- End Pagination -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addTaxCodeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header" style="background-color:#747CA0">
+                <h5 class="modal-title text-white">
+                    {{ selectedTaxCode.id === 0 ? 'Add Tax Code' : 'Edit Tax Code' }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Tax Code</label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedTaxCode.taxcode" name="taxcode"
+                            placeholder="Enter Tax Code" required #taxCodeInput="ngModel"
+                            [readonly]="selectedTaxCode.id !== 0">
+
+                        <div *ngIf="taxCodeInput.invalid && (taxCodeInput.touched || formSubmitted)"
+                            class="text-danger mt-1">
+                            Tax Code is required.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Tax Rate</label>
+                        <input type="number" class="form-control" [(ngModel)]="selectedTaxCode.taxRate" name="taxRate"
+                            placeholder="Enter Tax Rate" required #taxRateInput="ngModel">
+
+                        <div *ngIf="taxRateInput.invalid && (taxRateInput.touched || formSubmitted)"
+                            class="text-danger mt-1">
+                            Tax Rate is required.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mt-3">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedTaxCode.description"
+                            name="description" placeholder="Enter Description">
+                    </div>
+
+                    <div class="col-md-6 mt-3">
+                        <label class="form-label">Effective Date</label>
+                        <input type="date" class="form-control" [(ngModel)]="selectedTaxCode.effectiveDate"
+                            name="effectiveDate" [min]="todayDate" required #effectiveDateInput="ngModel">
+
+                        <div *ngIf="effectiveDateInput.invalid && (effectiveDateInput.touched || formSubmitted)"
+                            class="text-danger mt-1">
+                            Effective Date is required.
+                        </div>
+                    </div>
+
+                    <!-- History Table -->
+                    <div class="col-md-12 mt-4" *ngIf="selectedTaxCode.id !== 0 && historyList.length > 0">
+                        <hr class="mb-3">
+                        <h6 class="mb-2">Tax Code History</h6>
+                        <div class="table-responsive">
+                            <table class="table table-gridjs table-striped table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Tax Rate</th>
+                                        <th>Description</th>
+                                        <th>Effective Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let hist of historyList">
+                                        <td>{{ hist.taxRate }}</td>
+                                        <td>{{ hist.description }}</td>
+                                        <td>{{ hist.effectiveDate | date:'dd-MM-yyyy' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                 <button class="btn btn-primary btn-sm"
+                    (click)="formSubmitted = true; taxCodeInput.valid && taxRateInput.valid && effectiveDateInput.valid && addOrUpdateTaxCode()">
+                    {{ selectedTaxCode.id === 0 ? 'Save' : 'Save' }}
+                </button>
+                <button class="btn btn-light btn-sm" data-bs-dismiss="modal">Close</button>
+                <!-- <button class="btn btn-success"
+                    (click)="formSubmitted = true; taxCodeInput.valid && taxRateInput.valid && effectiveDateInput.valid && addOrUpdateTaxCode()">
+                    {{ selectedTaxCode.id === 0 ? 'Save' : 'Add' }}
+                </button> -->
+            </div>
+
+        </div>
+    </div>
+</div>

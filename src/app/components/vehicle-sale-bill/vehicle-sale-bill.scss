@@ -1,0 +1,17 @@
+.sort
+    {
+        padding-right: 35px; // extra space for icons
+    }
+    .td{
+      font-size:12px;
+    }
+    
+    #saleTable {
+ .table .sort::before {
+        top: 6px;
+    }
+
+    .table .sort::after {
+        top: 0px;
+    }
+}

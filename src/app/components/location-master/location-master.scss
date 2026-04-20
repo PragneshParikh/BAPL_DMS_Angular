@@ -1,0 +1,69 @@
+table tbody tr:nth-child(odd) {
+  background-color: #f8f9fa;
+}
+
+table tbody tr:hover {
+  background-color: #eef2f7;
+}
+
+.badge {
+  font-size: 12px;
+}
+
+.badge-active {
+  background: #d1f5ec;
+  color: #10a37f;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-block {
+  background: #ffe1e1;
+  color: #ff5b5b;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dealer-modal-header .modal-title {
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 1055;
+}
+
+.modal-footer {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  z-index: 1055;
+}
+
+.modal-body {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.my-4 {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+select {
+  -webkit-appearance: auto !important;
+  -moz-appearance: auto !important;
+  appearance: auto !important;
+}
+
+table>thead>tr {
+  background-color: #747CA0;
+  color: #ffffff;
+}

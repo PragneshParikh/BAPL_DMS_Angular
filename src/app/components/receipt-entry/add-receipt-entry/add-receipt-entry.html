@@ -1,0 +1,396 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">
+        {{ isEditMode ? 'Edit Receipt Entry' : 'Add Receipt Entry' }}
+    </h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-body">
+
+                                <form #receiptForm="ngForm" (ngSubmit)="onSubmit(receiptForm)">
+                                    <!-- 🔹 Row 1 -->
+                                    <div class="row mb-2">
+                                        <div class="col-md-3">
+                                            <label>
+                                                Location <span class="text-danger">*</span>
+                                            </label>
+                                            <select class="form-select form-select-sm" [(ngModel)]="formData.location"
+                                                name="location" #location="ngModel" required>
+                                                <option value="">Select Location</option>
+                                                <option *ngFor="let loc of locations" [value]="loc.locname">
+                                                    {{ loc.locname }}
+                                                </option>
+                                            </select>
+                                            <div *ngIf="location.invalid && (location.touched || receiptForm.submitted)"
+                                                class="text-danger mt-1">
+                                                Location is required.
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label>Receipt No.</label>
+                                            <input type="text" class="form-control form-control-sm" name="receiptNo"
+                                                [(ngModel)]="receiptNo" readonly>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label>Receipt Date</label>
+                                            <input type="date" class="form-control form-control-sm"
+                                                [(ngModel)]="formData.receiptDate" name="receiptDate">
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label>Sale Type<span class="text-danger">*</span></label>
+                                            <select class="form-select form-select-sm" [(ngModel)]="formData.saleType"
+                                                name="saleType" #saleType="ngModel" required
+                                                (change)="onSaleTypeChange()">
+                                                <option value="">--Select Sale Type--</option>
+                                                <option value="Against Lead">Against Lead</option>
+                                                <option value="Receipt">Receipt</option>
+                                            </select>
+                                            <div *ngIf="saleType.invalid && (saleType.touched || receiptForm.submitted)"
+                                                class="text-danger mt-1">
+                                                Sale Type is required.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 🔹 Row 2 -->
+                                    <div class="row mb-2">
+                                        <div class="col-md-3">
+                                            <label>Booking ID</label>
+                                            <input type="text" class="form-control form-control-sm" name="bookingId"
+                                                [(ngModel)]="formData.bookingId"
+                                                [readonly]="formData.saleType === 'Against Lead'">
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label>Mobile No</label>
+                                            <input type="text" class="form-control form-control-sm" name="mobileNo"
+                                                [(ngModel)]="formData.mobileNo"
+                                                [readonly]="formData.saleType === 'Against Lead'">
+                                        </div>
+
+                                        <!-- <div class="col-md-3">
+                                            <label>Customer Type</label><br>
+                                            <div class="d-flex gap-3 mt-1">
+                                                <label>
+                                                    <input type="radio" value="b2b" name="customerType"
+                                                        [(ngModel)]="formData.customerType"
+                                                        (change)="onCustomerTypeChange()" required>
+                                                    B2B
+                                                </label>
+
+                                                <label>
+                                                    <input type="radio" value="b2c" name="customerType"
+                                                        [(ngModel)]="formData.customerType"
+                                                        (change)="onCustomerTypeChange()" required>
+                                                    B2C
+                                                </label>
+                                            </div>
+                                        </div> -->
+
+
+                                        <div class="col-md-3">
+                                            <label>Customer Type</label><br>
+
+                                            <div class="d-flex gap-3 mt-1">
+
+                                                <!-- <label>
+                                                    <input type="radio" value="b2b" name="customerType"
+                                                        [(ngModel)]="formData.customerType" #customerType="ngModel"
+                                                        (change)="onCustomerTypeChange()" required>
+                                                    B2B
+                                                </label> -->
+
+                                                <label *ngFor="let type of customerTypes">
+                                                    <input type="radio"name="customerTypes"
+                                                        [(ngModel)]="formData.customerTypes" #customerType="ngModel"
+                                                        (change)="onCustomerTypeChange()" required>
+                                                    {{ type.name }}
+                                                </label>
+
+                                            </div>
+
+                                            <!-- <div class="text-danger mt-1"
+                                                *ngIf="customerType.invalid && (customerTypes.touched || receiptForm.submitted)">
+                                                <small>Customer Type is required.</small>
+                                            </div> -->
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Party Name<span class="text-danger">*</span></label>
+                                            <ng-container
+                                                *ngIf="formData.saleType === 'Receipt'; else againstLeadInput">
+                                                <select class="form-select form-select-sm"
+                                                    [(ngModel)]="formData.partyName" name="partyNameInput"
+                                                    #partyName="ngModel" required>
+                                                    <option value="">--Select Party Name--</option>
+                                                    <option *ngFor="let p of filteredParties" [value]="p.ledgerName">
+                                                        {{ p.ledgerName }}
+                                                    </option>
+                                                </select>
+                                                <div class="text-danger mt-1"
+                                                    *ngIf="partyName.invalid && (partyName.touched || receiptForm.submitted)">
+                                                    <small>Party Name is required.</small>
+                                                </div>
+
+                                            </ng-container>
+
+                                            <ng-template #againstLeadInput>
+                                                <input class="form-control form-control-sm"
+                                                    [(ngModel)]="formData.partyName" name="partyNameInput" readonly
+                                                    required>
+                                            </ng-template>
+
+
+                                        </div>
+                                    </div>
+
+                                    <!-- 🔹 Row 3 -->
+                                    <div class="row mb-2">
+                                        <div class="col-md-3">
+                                            <label>Financier</label>
+                                            <div class="d-flex align-items-center">
+                                                <!-- Select -->
+                                                <select class="form-select form-select-sm scrollable-dropdown"
+                                                    [(ngModel)]="formData.financier" name="financier"
+                                                    #financier="ngModel">
+
+                                                    <option class="dropdown-list" value="">--Select Financier--</option>
+
+                                                    <option *ngFor="let f of financiers" [value]="f.ledgerName">
+
+                                                        {{ f.ledgerName }}
+
+                                                    </option>
+
+
+                                                </select>
+
+                                                <!-- Add Button -->
+
+                                                <button type="button" class="btn btn-sm btn-primary"
+                                                    (click)="openCustomerLedgerAdd()"
+                                                    [ngbTooltip]="'Add New Financier'">
+                                                    +
+                                                </button>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label>Sales Executive</label>
+                                            <select class="form-select form-select-sm"
+                                                [(ngModel)]="formData.salesExecutive" name="salesExecutive"
+                                                #salesExecutive="ngModel">
+                                                <option value="">--Select Sales Executive--</option>
+                                                <option value="Alice">Alice</option>
+                                                <option value="Bob">Bob</option>
+                                                <option value="Vishal">Vishal</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label>Product Name<span class="text-danger">*</span></label>
+                                            <select class="form-select form-select-sm"
+                                                (change)="onProductChange($event)" [(ngModel)]="formData.productName"
+                                                name="productName" #productName="ngModel" required>
+                                                <option value="">--Select Product Name--</option>
+                                                <option *ngFor="let prod of products" [value]="prod.itemcode">
+                                                    {{ prod.itemname }}
+                                                </option>
+                                            </select>
+                                            <div class="text-danger mt-1"
+                                                *ngIf="productName.invalid && (productName.touched || receiptForm?.submitted)">
+                                                <small *ngIf="productName.errors?.['required']">
+                                                    Product Name is required.
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label>Product Description</label>
+                                            <input class="form-control form-control-sm"
+                                                [value]="selectedProduct?.itemdesc || ''" readonly>
+                                        </div>
+                                    </div>
+
+                                    <!-- 🔹 Row 4 -->
+                                    <div class="row mb-2">
+                                        <div class="col-md-3">
+                                            <label>Product Color</label>
+                                            <input class="form-control form-control-sm"
+                                                [value]="selectedProduct?.colorName || ''" readonly>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label>Receipt Type<span class="text-danger">*</span></label>
+                                            <select class="form-select form-select-sm"
+                                                [(ngModel)]="formData.receiptType" name="receiptType"
+                                                #receiptType="ngModel" required>
+                                                <option value="">--Select Receipt Type--</option>
+                                                <option value="Cash">Cash</option>
+                                                <option value="Cheque">Cheque</option>
+                                                <option value="UPI payment">UPI Payment</option>
+                                                <option value="Bank transfer">Bank Transfer</option>
+                                            </select>
+                                            <div class="text-danger mt-1"
+                                                *ngIf="receiptType.invalid && (receiptType.touched || receiptForm?.submitted)">
+                                                <small *ngIf="receiptType.errors?.['required']">
+                                                    Receipt Type is required.
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Total Amount<span class="text-danger">*</span></label>
+
+                                            <input type="number" class="form-control form-control-sm"
+                                                [(ngModel)]="formData.totalAmount" name="amount" #amount="ngModel"
+                                                required step="0.01" min="0.01"
+                                                [class.is-invalid]="amount.invalid && (amount.touched || receiptForm.submitted)">
+
+                                            <div class="text-danger mt-1"
+                                                *ngIf="amount.invalid && (amount.touched || receiptForm.submitted)">
+
+                                                <small *ngIf="amount.errors?.['required']">
+                                                    Amount is required.
+                                                </small>
+                                                <small *ngIf="amount.errors?.['min']">
+                                                    Amount is required.
+                                                </small>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3"></div>
+                                    </div>
+
+                                    <!-- 🔹 Row 5 (Final Row) -->
+                                    <div class="row mb-2">
+                                        <div class="col-md-6">
+                                            <label>Ref No.</label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                [(ngModel)]="formData.refNo" name="refNo">
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label>Narration</label>
+                                            <textarea class="form-control form-control-sm" rows="1"
+                                                [(ngModel)]="formData.narration" name="narration"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- 🔹 Button -->
+                                    <div class="row mt-4">
+                                        <div class="col-md-12 d-flex justify-content-end gap-2">
+
+                                            <!-- Add / Update Button -->
+                                            <button type="submit" class="btn btn-primary btn-sm" (click)="onAddClick()">
+                                                Save
+                                            </button>
+                                            <!-- Cancel Button -->
+                                            <button type="button" class="btn btn-light btn-sm" (click)="onCancel()">
+                                                <i class="bi bi-arrow-left"></i> Close
+                                            </button>
+
+
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Lead Search Modal -->
+<ng-template #ReceiptEntryModal let-modal>
+    <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title text-white">Lead Details</h5>
+        <button class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label>Search Type</label>
+                <select class="form-select" [(ngModel)]="searchType">
+                    <option value="Mobile No">Mobile No</option>
+                    <option value="Booking Id">Booking Id</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label>Search Text</label>
+                <input type="text" class="form-control" [(ngModel)]="searchText" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-primary" (click)="searchLead()">Search</button>
+            </div>
+        </div>
+        <div *ngIf="leadResult">
+            <h5 class="text-primary mb-2">Lead Info</h5>
+            <div class="row mb-2">
+                <div class="col-md-4">
+                    <label>Party Name</label>
+                    <input type="text" class="form-control" [value]="leadResult.name" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label>Contact Person</label>
+                    <input type="text" class="form-control" [value]="leadResult.name" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label>Address-1</label>
+                    <input type="text" class="form-control" [value]="leadResult.brancharea" readonly>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4">
+                    <label>Address-2</label>
+                    <input type="text" class="form-control" [value]="leadResult.area" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label>State Name</label>
+                    <input type="text" class="form-control" [value]="leadResult.state" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label>City Name</label>
+                    <input type="text" class="form-control" [value]="leadResult.city" readonly>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4">
+                    <label>Mobile No</label>
+                    <input type="text" class="form-control" [value]="leadResult.mobile" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label>Email</label>
+                    <input type="text" class="form-control" [value]="leadResult.email" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label>PinCode</label>
+                    <input type="text" class="form-control" [value]="leadResult.pincode" readonly>
+                </div>
+            </div>
+            <div class="row mt-3 text-end">
+                <div class="col-md-12">
+                    <button class="btn btn-light btn-sm ms-2" (click)="modal.dismiss()">Close</button>
+                    <button class="btn btn-primary btn-sm" (click)="approveLead(modal)">Accept</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>

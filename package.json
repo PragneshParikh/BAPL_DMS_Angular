@@ -3,9 +3,12 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --configuration=development",
+    "start:prod": "ng serve --configuration=production",
     "build": "ng build",
-    "watch": "ng build --watch --configuration development",
+    "build:dev": "ng build --configuration=development",
+    "build:prod": "ng build --configuration=production",
+    "watch": "ng build --watch --configuration=development",
     "test": "ng test",
     "serve:ssr:BAPL_DMS_Angular": "node dist/BAPL_DMS_Angular/server/server.mjs"
   },
@@ -65,7 +68,7 @@
     "angularx-flatpickr": "^7.3.0",
     "apexcharts": "^3.49.1",
     "axios": "^1.7.2",
-    "bootstrap": "5.3.6",
+    "bootstrap": "^5.3.6",
     "browserslist": "^4.23.1",
     "chart.js": "^4.4.3",
     "echarts": "^5.5.0",

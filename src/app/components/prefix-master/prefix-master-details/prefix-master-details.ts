@@ -1,0 +1,158 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DealerService } from '../../../core/services/dealer-service';
+import { LoaderService } from '../../../core/services/loader';
+import { ToastService } from '../../../shared/toaster/toast-service';
+import { PrefixService } from '../../../core/services/prefix';
+import { StorageService } from '../../../core/services/storage';
+import { Router } from '@angular/router';
+import { PrefixTypes } from '../../../constant';
+
+@Component({
+  selector: 'app-prefix-master-details',
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  templateUrl: './prefix-master-details.html',
+  styleUrl: './prefix-master-details.scss',
+})
+export class PrefixMasterDetails implements OnInit {
+  // prefixTypes = PrefixTypes
+  // lstDealers: any[] = [];
+  lstFinancialYears: string[] = [];
+  sequence = {
+    moduleName: 'Invoice',
+    separator: '/',
+    // dealerCode: '',
+    financialYear: '',
+    prefix: 'INV',
+    padding: 3,
+    nextNo: 0,
+    isActive: true
+  };
+
+  constructor(
+    private toast: ToastService,
+    private prefixService: PrefixService,
+    private storageServie: StorageService,
+    private router: Router
+  ) { }
+
+  ngOnInit() {
+    // this.getDealers();
+
+    this.lstFinancialYears = this.generateFinancialYears();
+
+    this.sequence.financialYear = this.getCurrentFinancialYear();
+  }
+
+  // getDealers() {
+  //   this.loader.show();
+  //   this.dealerService.getDealers().subscribe({
+  //     next: (response) => {
+  //       this.lstDealers = response.data
+  //         .sort((a, b) => a.compname.localeCompare(b.compname));
+
+  //       this.loader.hide();
+  //     },
+  //     error: (error) => {
+  //       this.loader.hide();
+  //       console.error('Error fetching dealers:', error);
+  //       this.toast.show('Something went wrong.', {
+  //         classname: 'bg-danger text-light',
+  //         delay: 5000
+  //       });
+  //     }
+  //   });
+
+  // }
+
+  generateFinancialYears(): string[] {
+    const years: string[] = [];
+    const currentYear = new Date().getFullYear();
+
+    // 5 years before and 5 years after
+    for (let i = -5; i <= 5; i++) {
+      const startYear = currentYear + i;
+      const endYear = startYear + 1;
+      years.push(`${startYear.toString()}-${endYear.toString()}`);
+    }
+    return years;
+  }
+
+  generatePreview() {
+    const length = this.sequence.padding || 4;
+    const masked = '#'.repeat(length);
+    return `${this.sequence.prefix || ''}${this.sequence.separator || ''}${'001'}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${this.sequence.separator || ''}${masked}`;
+    // return `${this.sequence.prefix || ''}${this.sequence.separator || ''}${this.sequence.dealerCode || ''}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${masked}`;
+  }
+
+  previewCount() {
+    const length = this.sequence.padding || 4;
+    const masked = '#'.repeat(length);
+    const value = `${this.sequence.prefix || ''}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${this.sequence.separator || ''}${masked}`;
+    return value.length;
+  }
+
+  saveSequence() {
+    const length = this.sequence.padding || 4;
+    const masked = '#'.repeat(length);
+    const numberSequence: any = {
+      id: 0,
+      // sequenceCode: `${this.sequence.prefix || ''}${this.sequence.dealerCode || ''}${this.sequence.financialYear || ''}`,
+      sequenceCode: `${this.sequence.prefix || ''}${this.sequence.separator || ''}${'DealerCode'}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${this.sequence.separator || ''}${masked}`,
+      sequenceName: this.sequence.moduleName,
+      // format: `${this.sequence.prefix || ''}${this.sequence.dealerCode || ''}${this.sequence.financialYear || ''}${masked}`,
+      format: `${this.sequence.prefix || ''}${this.sequence.separator || ''}${'DealerCode'}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${this.sequence.separator || ''}${masked}`,
+      nextNo: this.sequence.nextNo || 0,
+      increment: 1,
+      // dealerCode: this.sequence.dealerCode,
+      year: this.sequence.financialYear,
+      isActive: this.sequence.isActive,
+      createdBy: this.storageServie.getUserId() || 0,
+      createdDate: new Date()
+    }
+
+    console.log('Saving sequence:', numberSequence);
+
+    this.prefixService.saveSequence(numberSequence).subscribe({
+      next: (response) => {
+        this.backToList();
+        this.toast.show('Sequence saved successfully.', { classname: 'bg-success text-light', delay: 3000 });
+      },
+      error: (error) => {
+        console.error('Error saving sequence:', error);
+        this.toast.show('Failed to save sequence.', { classname: 'bg-danger text-light', delay: 5000 });
+      }
+    });
+  }
+
+  backToList() {
+    this.router.navigate(['/prefix']);
+  }
+
+  getCurrentFinancialYear(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1; // Jan = 0
+
+    let startYear = month >= 4 ? year : year - 1;
+    let endYear = startYear + 1;
+
+    return `${startYear.toString()}-${endYear.toString()}`;
+  }
+
+  prefixInfo() {
+    return `<p class="p-1 text-white text-start">
+          Prefix is generated as:
+          <br>
+          <strong>${this.sequence.prefix || ''}</strong> = Prefix Text
+          <br>
+          <strong>${'001'}</strong> = Dealer Code (3 characters)
+          <br>
+          <strong>${this.sequence.financialYear || ''}</strong> = Financial Year
+          <br>
+          <strong>###</strong> = Number sequence with padding (3 characters)
+        </p>`;
+  }
+
+}

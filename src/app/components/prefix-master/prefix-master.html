@@ -1,0 +1,94 @@
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs title="Prefix Master"></app-breadcrumbs>
+<!-- End Breadcrumbs -->
+
+<div id="prefix-master-list">
+
+    <div class="card-body">
+        <div class="page-content p-0">
+            <div class="container-fluid px-1">
+
+                <!-- Table Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div class="text-muted">
+                                Total Record(s): {{ collectionSize }}
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <button class="btn btn-sm btn-primary" (click)="newPrefix()">
+                                    Add
+                                </button>
+
+                                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'">
+                                    <i class="ri-file-excel-2-line"></i>
+                                </button>
+
+                                <div class="search-box position-relative">
+                                    <input type="text" class="form-control" placeholder="Search..."
+                                        [(ngModel)]="searchTerm" (keyup)="onSearchChange()">
+                                    <i class="ri-search-line search-icon"></i>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover table-bordered mb-0 table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="sort" (click)="onSort('')">
+                                            Module</th>
+                                        <th class="sort" (click)="onSort('')">
+                                            Prefix</th>
+                                        <th class="sort" (click)="onSort('')">
+                                            Next No</th>
+                                        <th class="sort" (click)="onSort('')">
+                                            Dealer</th>
+                                        <th class="sort" (click)="onSort('')">Format</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr *ngFor="let sequence of sequenceList;" class="table-row"
+                                        (click)="onSequenceClick(sequence)">
+                                        <td>{{ sequence?.sequenceName }}</td>
+                                        <td>{{ sequence?.sequenceCode }}</td>
+                                        <td>{{ sequence?.nextNo }}</td>
+                                        <td>{{ sequence?.dealerCode }}</td>
+                                        <td>{{ sequence?.format }}</td>
+                                    </tr>
+
+                                    <!-- No Data -->
+                                    <tr *ngIf="!sequenceList || sequenceList.length === 0">
+                                        <td colspan="6" class="text-center text-muted py-3">
+                                            No Data Available
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <!-- PAGINATION -->
+                        <div class="col-sm-12 col-md-12 mt-2">
+                            <div class="text-md-right float-md-end gridjs-pagination">
+                                <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                                    (pageChange)="onPageChange($event)" [maxSize]="5" [boundaryLinks]="true">
+                                </ngb-pagination>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<router-outlet></router-outlet>

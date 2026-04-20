@@ -1,0 +1,94 @@
+
+/* ================= ACCORDION ================= */
+.accordion-button {
+  padding: 6px 10px !important;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.accordion-body {
+  padding: 8px !important;
+}
+
+/* ================= FORM ================= */
+label {
+  font-size: 11.5px;
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+input,
+select {
+  height: 28px !important;
+  font-size: 12px !important;
+  padding: 2px 6px !important;
+}
+
+/* ================= TABLE ================= */
+.table {
+  margin-bottom: 0;
+}
+
+.table th,
+.table td {
+  padding: 5px !important;
+  vertical-align: middle;
+  font-size: 12px;
+}
+
+/* Header color */
+.table-light > tr > th,
+.table-bgColor > tr > th {
+  background-color: #747ca0;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* ================= ICON ================= */
+.ri-upload-2-line {
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* ================= BUTTON ================= */
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+/* ================= REMOVE EXTRA SPACE ================= */
+.row {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.g-2 > * {
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+
+/* ================= SCROLLABLE DAMAGE TABLE ================= */
+.custom-scroll {
+  max-height: 250px;   // vertical scroll
+  overflow-y: auto;
+  overflow-x: auto;    // horizontal scroll
+  border: 1px solid #e9ebec;
+}
+
+/* Optional: Fix header while scrolling */
+.custom-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Optional: Smooth scrollbar (Chrome) */
+.custom-scroll::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 10px;
+}

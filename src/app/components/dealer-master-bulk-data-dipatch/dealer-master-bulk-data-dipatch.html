@@ -1,0 +1,115 @@
+<div class="table-responsive">
+
+    <!-- TOP CONTROLS -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+
+        <div class="d-flex gap-2">
+
+            <select class="form-select form-select-sm w-auto" [(ngModel)]="selectedMaster">
+                <option value="">Select Master</option>
+                <option>Dealer Master</option>
+                <option>Account Master</option>
+                <option>City Master</option>
+                <option>State Master</option>
+            </select>
+
+            <select class="form-select form-select-sm w-auto" [(ngModel)]="pageSize" (change)="updatePagination()">
+
+                <option [ngValue]="5">5</option>
+                <option [ngValue]="10">10</option>
+                <option [ngValue]="25">25</option>
+                <option [ngValue]="50">50</option>
+
+            </select>
+
+            <button class="btn btn-primary btn-sm" (click)="uploadFile()">
+                Upload
+            </button>
+
+        </div>
+
+    </div>
+
+    <table class="table table-striped dealer-table">
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    <input type="checkbox" (change)="toggleSelectAll($event)">
+                </th>
+
+                <th>Sl No.</th>
+                <th>Company Name</th>
+                <th>Company Code</th>
+                <th>Dealer Code</th>
+                <th>Email</th>
+                <th>State</th>
+                <th>City</th>
+                <th>Mobile</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr *ngFor="let dealer of paginatedDealerList">
+
+                <td>
+                    <input type="checkbox" [(ngModel)]="dealer.selected" (change)="onRowSelect(dealer)">
+                </td>
+
+                <td>{{ dealer.slNo }}</td>
+
+                <td>
+                    <ngb-highlight [result]="dealer.compname" [term]="searchTerm">
+                    </ngb-highlight>
+                </td>
+                <td>{{ dealer.compcode }}</td>
+                <td>{{ dealer.dealercode }}</td>
+                <td>{{ dealer.email }}</td>
+                <td>{{ dealer.state }}</td>
+                <td>{{ dealer.city }}</td>
+                <td>{{ dealer.mobile }}</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <!-- PAGINATION -->
+    <div class="d-flex justify-content-between align-items-center mt-2">
+
+        <div>
+            Showing
+            <strong>{{startRecord}}</strong>
+            to
+            <strong>{{endRecord}}</strong>
+            of
+            <strong>{{dealerList.length}}</strong>
+            entries
+        </div>
+
+        <div class="btn-group">
+
+            <button class="btn btn-sm btn-outline-secondary" (click)="previousPage()" [disabled]="currentPage===1">
+
+                Prev
+
+            </button>
+
+            <button class="btn btn-sm btn-outline-secondary" (click)="nextPage()"
+                [disabled]="endRecord>=dealerList.length">
+
+                Next
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>

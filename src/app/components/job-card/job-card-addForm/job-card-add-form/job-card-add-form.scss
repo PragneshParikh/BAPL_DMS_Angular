@@ -1,0 +1,60 @@
+.section-card {
+  border: 1px solid #e9ebec;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.section-header {
+  padding: 12px 15px;
+  background: #f3f6f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.section-header:hover {
+  background: #e9ebec;
+}
+
+.section-body {
+  padding: 15px;
+}
+.single-line {
+  white-space: nowrap;
+}
+.btn-add{
+  background-color: #747CA0;
+  color: white;
+  margin-bottom: 10px;
+ }
+ .btn-primary{
+  margin-bottom: 10px;
+ }
+ .commonbtnAdd{
+  margin-top: 25px;
+ }
+ .btn-light{
+  margin-bottom: 10px;
+  margin-right: 10px;
+ }
+ .btn-close-white {
+color: white;
+}
+
+ //*Customer details popup CSS*//
+ .modal-header {
+  background-color: #747CA0;
+  position: sticky;
+  top: 0;
+  z-index: 1055;
+}
+.modal-title {
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+}
+.btn-close-white{
+  color: white;
+}

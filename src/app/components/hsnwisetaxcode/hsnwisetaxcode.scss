@@ -1,0 +1,73 @@
+
+#hsnwise-tax-code {
+
+    .table .sort::before {
+        top: 6px;
+    }
+
+    .table .sort::after {
+        top: 0px;
+    }
+}
+
+.table-gridjs th.sort {
+  padding-right: 30px;
+}
+.btn-add{
+  background-color: #747CA0;
+  color: white;
+ }
+
+ .div-btn-add{
+  margin-top: 2.5%;
+ }
+
+.modal-header .modal-title {
+   background-color: #747CA0;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+}
+ 
+/* Fixed header */
+.modal-header {
+   background-color: #747CA0;
+   color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1055;
+}
+
+.btn-close-white {
+color: white;
+}
+ 
+
+/* Fixed footer */
+.modal-footer {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  z-index: 1055;
+}
+ 
+/* Scrollable body */
+.modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+ .card-body .row {
+  overflow: visible;
+}
+select.form-select {
+  width: 100%;
+}
+.my-4{
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.form-switch-lg{
+    padding-left: 3.75rem;
+}

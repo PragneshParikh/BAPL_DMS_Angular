@@ -1,82 +1,120 @@
 import { Component, OnInit, EventEmitter, Output, Inject, ViewChild, TemplateRef, DOCUMENT } from '@angular/core';
 
-import { EventService } from '../../core/services/event.service';
-
 //Logout
-import { environment } from '../../../environments/environment';
 import { AuthenticationService } from '../../core/services/auth.service';
-import { AuthfakeauthenticationService } from '../../core/services/authfake.service';
-import { Router } from '@angular/router';
-import { TokenStorageService } from '../../core/services/token-storage.service';
+import { Router, RouterLink } from '@angular/router';
 
 // Language
 import { CookieService } from 'ngx-cookie-service';
 import { LanguageService } from '../../core/services/language.service';
 import { TranslateService } from '@ngx-translate/core';
-import { allNotification, messages } from './data'
-import { CartModel } from './topbar.model';
-import { cartData } from './data';
 import { NgbDropdownModule, NgbModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SimplebarAngularModule } from 'simplebar-angular';
-
+import { MenuService } from '../../core/services/menu-service';
+import { partsDispatch, saleInvoice } from './data';
+import { map, Observable, of } from 'rxjs';
+import { VehicleDispatchservice } from '../../core/services/vehicle-dispatchservice';
+import { LoaderService } from '../../core/services/loader';
+import { InvoiceDetail } from '../../dialogs/invoice-detail/invoice-detail';
+import { result } from 'lodash';
+import { StorageService } from '../../core/services/storage';
+import { Lotinspectionservice } from '../../core/services/lotinspectionservice';
+import { error } from 'console';
+import { ToastService } from '../../shared/toaster/toast-service';
 @Component({
-    selector: 'app-topbar',
-    templateUrl: './topbar.component.html',
-    styleUrls: ['./topbar.component.scss'],
-    imports:  [CommonModule, NgbNavModule, FormsModule, ReactiveFormsModule, SimplebarAngularModule, NgbDropdownModule],
-    standalone: true
+  selector: 'app-topbar',
+  templateUrl: './topbar.component.html',
+  styleUrls: ['./topbar.component.scss'],
+  imports: [
+    CommonModule,
+    NgbNavModule,
+    FormsModule,
+    ReactiveFormsModule,
+    SimplebarAngularModule,
+    NgbDropdownModule,
+    RouterLink
+  ],
+  standalone: true
 })
 export class TopbarComponent implements OnInit {
-  messages: any
+  partsDispatch: any[] = [];
+  vehicleDispatch: any[] = [];
+  invoiceNotifications: any[] = [];
+  partsNotifications: any[] = [];
+  saleInvoice: any[] = [];
   element: any;
   mode: string | undefined;
   @Output() mobileMenuButtonClicked = new EventEmitter();
-  allnotifications: any
   flagvalue: any;
   valueset: any;
   countryName: any;
   cookieValue: any;
   userData: any;
-  cartData!: CartModel[];
   total = 0;
-  cart_length: any = 0;
   totalNotify: number = 0;
   newNotify: number = 0;
   readNotify: number = 0;
   isDropdownOpen = false;
+  lastLoginDate$: Observable<string>;
   @ViewChild('removenotification') removenotification !: TemplateRef<any>;
   notifyId: any;
+  unReadInwards: number = 0;
+  public selectedOption: string = localStorage.getItem('selectedModule') ? JSON.parse(localStorage.getItem('selectedModule') || '{}') : 'ShowRoom';
+  dealerCode: string = '';
 
-  constructor(@Inject(DOCUMENT) private document: any, private eventService: EventService, public languageService: LanguageService, private modalService: NgbModal,
-    public _cookiesService: CookieService, public translate: TranslateService, private authService: AuthenticationService, private authFackservice: AuthfakeauthenticationService,
-    private router: Router, private TokenStorageService: TokenStorageService) { }
+  menuList: any[] = [];
+  searchResults: any[] = [];
+
+  constructor(
+    @Inject(DOCUMENT) private document: any,
+    public languageService: LanguageService,
+    private modalService: NgbModal,
+    public _cookiesService: CookieService,
+    public translate: TranslateService,
+    private authService: AuthenticationService,
+    private router: Router,
+    private menuService: MenuService,
+    private vehicleDispatchService: VehicleDispatchservice,
+    private loader: LoaderService,
+    private storageService: StorageService,
+    private lotInspectionService: Lotinspectionservice,
+    private toastService: ToastService
+  ) { }
 
   ngOnInit(): void {
-    this.userData = this.TokenStorageService.getUser();
+    this.userData = this.authService.currentUserValue;
     this.element = document.documentElement;
 
-    // Cookies wise Language set
-    this.cookieValue = this._cookiesService.get('lang');
-    const val = this.listLang.filter(x => x.lang === this.cookieValue);
-    this.countryName = val.map(element => element.text);
-    if (val.length === 0) {
-      if (this.flagvalue === undefined) { this.valueset = 'assets/images/flags/us.svg'; }
-    } else {
-      this.flagvalue = val.map(element => element.flag);
-    }
+    this.lastLoginDate$ = of(this.userData.lastLoginDate).pipe(
+      map(dateStr => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+
+        const day = d.getDate().toString().padStart(2, '0');
+        const month = (d.getMonth() + 1).toString().padStart(2, '0');
+        const year = d.getFullYear();
+
+        let hours = d.getHours();
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // 0 → 12 for midnight
+        const hoursStr = hours.toString().padStart(2, '0');
+
+        return `${day}/${month}/${year} ${hoursStr}:${minutes} ${ampm}`;
+      })
+    );
+
+    this.dealerCode = this.storageService.getDealerCode();
+
+    this.getVehicleDispatchNotification();
 
     // Fetch Data
-    this.allnotifications = allNotification;
-
-    this.messages = messages;
-    this.cartData = cartData;
-    this.cart_length = this.cartData.length;
-    this.cartData.forEach((item) => {
-      var item_price = item.quantity * item.price
-      this.total += item_price
-    });
+    this.saleInvoice = saleInvoice;
+    this.partsDispatch = partsDispatch;
   }
 
   /**
@@ -132,48 +170,13 @@ export class TopbarComponent implements OnInit {
     this.modalService.open(content, { centered: true });
   }
 
-  /**
-  * Topbar Light-Dark Mode Change
-  */
-  changeMode(mode: string) {
-    this.mode = mode;
-    this.eventService.broadcast('changeMode', mode);
-
-    switch (mode) {
-      case 'light':
-        document.documentElement.setAttribute('data-bs-theme', "light");
-        break;
-      case 'dark':
-        document.documentElement.setAttribute('data-bs-theme', "dark");
-        break;
-      default:
-        document.documentElement.setAttribute('data-bs-theme', "light");
-        break;
+  onSelectionChange(option: string) {
+    if (option !== this.selectedOption) {
+      this.selectedOption = option;
+      localStorage.setItem('selectedModule', JSON.stringify(option));
+      this.menuService.filterMenu(option);
+      this.router.navigate(['/']);
     }
-  }
-
-  /***
-   * Language Listing
-   */
-  listLang = [
-    { text: 'English', flag: 'assets/images/flags/us.svg', lang: 'en' },
-    { text: 'Española', flag: 'assets/images/flags/spain.svg', lang: 'es' },
-    { text: 'Deutsche', flag: 'assets/images/flags/germany.svg', lang: 'de' },
-    { text: 'Italiana', flag: 'assets/images/flags/italy.svg', lang: 'it' },
-    { text: 'русский', flag: 'assets/images/flags/russia.svg', lang: 'ru' },
-    { text: '中国人', flag: 'assets/images/flags/china.svg', lang: 'ch' },
-    { text: 'français', flag: 'assets/images/flags/french.svg', lang: 'fr' },
-    { text: 'Arabic', flag: 'assets/images/flags/ar.svg', lang: 'ar' },
-  ];
-
-  /***
-   * Language Value Set
-   */
-  setLanguage(text: string, lang: string, flag: string) {
-    this.countryName = text;
-    this.flagvalue = flag;
-    this.cookieValue = lang;
-    this.languageService.setLanguage(lang);
   }
 
   /**
@@ -181,27 +184,17 @@ export class TopbarComponent implements OnInit {
    */
   logout() {
     this.authService.logout();
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/login']);
   }
 
   windowScroll() {
     if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
-      (document.getElementById("back-to-top") as HTMLElement).style.display = "block";
+      // (document.getElementById("back-to-top") as HTMLElement).style.display = "block";
       document.getElementById('page-topbar')?.classList.add('topbar-shadow');
     } else {
-      (document.getElementById("back-to-top") as HTMLElement).style.display = "none";
+      // (document.getElementById("back-to-top") as HTMLElement).style.display = "none";
       document.getElementById('page-topbar')?.classList.remove('topbar-shadow');
     }
-  }
-
-  // Delete Item
-  deleteItem(event: any, id: any) {
-    var price = event.target.closest('.dropdown-item').querySelector('.item_price').innerHTML;
-    var Total_price = this.total - price;
-    this.total = Total_price;
-    this.cart_length = this.cart_length - 1;
-    this.total > 1 ? (document.getElementById("empty-cart") as HTMLElement).style.display = "none" : (document.getElementById("empty-cart") as HTMLElement).style.display = "block";
-    document.getElementById('item_' + id)?.remove();
   }
 
   toggleDropdown(event: Event) {
@@ -213,7 +206,7 @@ export class TopbarComponent implements OnInit {
     }
   }
   // Search Topbar
-  Search() {
+  async Search() {
     var searchOptions = document.getElementById("search-close-options") as HTMLAreaElement;
     var dropdown = document.getElementById("search-dropdown") as HTMLAreaElement;
     var input: any, filter: any, ul: any, li: any, a: any | undefined, i: any, txtValue: any;
@@ -221,25 +214,22 @@ export class TopbarComponent implements OnInit {
     filter = input.value.toUpperCase();
     var inputLength = filter.length;
 
+    if (this.menuList.length === 0) {
+      await this.getMenuList();
+    }
+
+    this.searchResults = this.menuList
+      .flatMap(item => this.searchItemsWithLink(item, filter));
+
     if (inputLength > 0) {
       dropdown.classList.add("show");
       searchOptions.classList.remove("d-none");
-      var inputVal = input.value.toUpperCase();
+      var inputVal = input.value.toLowerCase();
       var notifyItem = document.getElementsByClassName("notify-item");
 
       Array.from(notifyItem).forEach(function (element: any) {
         var notifiTxt = ''
-        if (element.querySelector("h6")) {
-          var spantext = element.getElementsByTagName("span")[0].innerText.toLowerCase()
-          var name = element.querySelector("h6").innerText.toLowerCase()
-          if (name.includes(inputVal)) {
-            notifiTxt = name
-          } else {
-            notifiTxt = spantext
-          }
-        } else if (element.getElementsByTagName("span")) {
-          notifiTxt = element.getElementsByTagName("span")[0].innerText.toLowerCase()
-        }
+        notifiTxt = element.getElementsByTagName("span")[0].innerText.toLowerCase()
         if (notifiTxt)
           element.style.display = notifiTxt.includes(inputVal) ? "block" : "none";
 
@@ -248,6 +238,30 @@ export class TopbarComponent implements OnInit {
       dropdown.classList.remove("show");
       searchOptions.classList.add("d-none");
     }
+  }
+
+  private searchItemsWithLink(item: any, filter: string): any[] {
+    const search = filter.toLowerCase();
+    let results: any[] = [];
+
+    const matches =
+      item.label?.toLowerCase().includes(search) && item.link != null;
+
+    // Include item ONLY if it has link and matches
+    if (matches) {
+      results.push(item);
+    }
+
+    // Traverse subItems
+    if (item.subItems && item.subItems.length > 0) {
+      item.subItems.forEach(sub => {
+        results = results.concat(
+          this.searchItemsWithLink(sub, filter)
+        );
+      });
+    }
+
+    return results;
   }
 
   /**
@@ -264,52 +278,6 @@ export class TopbarComponent implements OnInit {
 
   // Remove Notification
   checkedValGet: any[] = [];
-  onCheckboxChange(event: any, id: any) {
-    this.notifyId = id
-    var result;
-    if (id == '1') {
-      var checkedVal: any[] = [];
-      for (var i = 0; i < this.allnotifications.length; i++) {
-        if (this.allnotifications[i].state == true) {
-          result = this.allnotifications[i].id;
-          checkedVal.push(result);
-        }
-      }
-      this.checkedValGet = checkedVal;
-    } else {
-      var checkedVal: any[] = [];
-      for (var i = 0; i < this.messages.length; i++) {
-        if (this.messages[i].state == true) {
-          result = this.messages[i].id;
-          checkedVal.push(result);
-        }
-      }
-      this.checkedValGet = checkedVal;
-    }
-    checkedVal.length > 0 ? (document.getElementById("notification-actions") as HTMLElement).style.display = 'block' : (document.getElementById("notification-actions") as HTMLElement).style.display = 'none';
-  }
-
-  notificationDelete() {
-    if (this.notifyId == '1') {
-      for (var i = 0; i < this.checkedValGet.length; i++) {
-        for (var j = 0; j < this.allnotifications.length; j++) {
-          if (this.allnotifications[j].id == this.checkedValGet[i]) {
-            this.allnotifications.splice(j, 1)
-          }
-        }
-      }
-    } else {
-      for (var i = 0; i < this.checkedValGet.length; i++) {
-        for (var j = 0; j < this.messages.length; j++) {
-          if (this.messages[j].id == this.checkedValGet[i]) {
-            this.messages.splice(j, 1)
-          }
-        }
-      }
-    }
-    this.calculatenotification()
-    this.modalService.dismissAll();
-  }
 
   calculatenotification() {
     this.totalNotify = 0;
@@ -320,4 +288,109 @@ export class TopbarComponent implements OnInit {
       document.querySelector('.empty-notification-elem')?.classList.remove('d-none')
     }
   }
+  getVehicleDispatchNotification() {
+    this.loader.show();
+    this.vehicleDispatchService.getByVehicleStatus(false, this.dealerCode).subscribe({
+      next: (result) => {
+        this.vehicleDispatch = result;
+
+        // Group by invoice number
+        const groupedInvoices = this.vehicleDispatch.reduce((acc: any, item: any) => {
+          const invoiceNo = item.invoiceNo;
+          if (!acc[invoiceNo]) {
+            acc[invoiceNo] = {
+              invoiceNumber: invoiceNo,
+              invoiceDate: item.invoiceDate,
+              numberOfItems: 0,
+              status: 'Received' // You can adjust this based on your logic
+            };
+          }
+          acc[invoiceNo].numberOfItems += 1;
+          return acc;
+        }, {});
+
+        // Convert grouped object to array
+        this.invoiceNotifications = Object.values(groupedInvoices);
+
+        this.loader.hide();
+      },
+      error: (err) => {
+        console.error(err);
+        this.loader.hide();
+      }
+    });
+  }
+  onClickInvoiceNumber(invoiceData) {
+
+    const modalRef = this.modalService.open(InvoiceDetail, {
+      size: 'xl',      // modal size: 'sm', 'lg', 'xl'
+      backdrop: 'static', // prevent closing by clicking outside
+      keyboard: false    // prevent closing with ESC
+    });
+
+    const invoiceDetails = this.vehicleDispatch.filter(x => x.invoiceNo === invoiceData.invoiceNumber);
+    // Pass data to the modal component
+    modalRef.componentInstance.invoiceDetails = invoiceDetails;
+
+    // Optional: handle modal close or dismiss
+    modalRef.result.then(
+      (result) => {
+        if (result && result.isAccepted) {
+          this.loader.show();
+          this.lotInspectionService.acceptInvoiceHeader(invoiceData.invoiceNumber).subscribe({
+            next: (res) => {
+              this.updateNotificationStatusByInvoice(invoiceData.invoiceNumber);
+              this.loader.hide();
+            },
+            error: (err) => {
+              this.loader.hide();
+              console.error(err);
+            }
+          });
+        }
+      },
+      (reason) => {
+        console.log('Modal dismissed:', reason);
+      }
+    );
+  }
+  updateNotificationStatusByInvoice(invoiceNumber: string) {
+    this.vehicleDispatchService.updateStatusByInvoiceNumber(invoiceNumber).subscribe({
+      next: (res) => {
+        this.toastService.show('Record updated sucessfully', {
+          classname: 'bg-success text-white',
+          delay: 5000
+        });
+
+        this.getVehicleDispatchNotification();
+
+        this.router.navigate(['/lot-inspection-details', invoiceNumber]);
+
+      }, error: (err) => {
+        this.toastService.show('Something went wrong', {
+          classname: 'bg-warning text-white',
+          delay: 5000
+        });
+        console.log(err);
+      }
+    })
+  }
+
+  async getMenuList(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.loader.show();
+      this.menuService.getMenu().subscribe({
+        next: (menu: any) => {
+          this.menuList = menu;
+          resolve(menu);
+          this.loader.hide();
+        }, error: (err) => {
+          console.error('Error fetching menu:', err);
+          reject(err);
+          this.loader.hide();
+        }
+      });
+    });
+  }
+
 }

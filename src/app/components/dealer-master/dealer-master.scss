@@ -1,0 +1,118 @@
+
+#dealerMaster{
+
+    .table .sort::before {
+        top: 6px;
+    }
+
+    .table .sort::after {
+        top: 0px;
+    }
+}
+ .sort
+    {
+      width: 10rem;
+        padding-right: 35px;
+    }
+.dealer-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.dealer-table th,
+.dealer-table td {
+  // white-space: nowrap;
+  // width:max-content ;
+    min-width: 120px;   /* prevents crushing */
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  // width: 200px;
+
+}
+.col-compname,.col-adress1,.col-adress2{
+  width: 20rem;
+}
+
+
+.table-gridjs th.sort {
+  padding-right: 30px;
+}
+
+.section-header {
+  background-color: #747CA0;
+  color: #fff;
+  padding: 8px 15px;
+  font-weight: 600;
+}
+
+.dealer-modal-header {
+  background-color: #747CA0;
+  color: white;
+}
+
+.dealer-modal-header .modal-title {
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Fixed header */
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 1055;
+}
+
+/* Fixed footer */
+.modal-footer {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  z-index: 1055;
+}
+
+/* Scrollable body */
+.modal-body {
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+.dealer-modal-header {
+  background-color: #747CA0;
+  color: #ffffff;
+}
+
+.dealer-modal-header .modal-title {
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Fixed header */
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 1055;
+}
+
+/* Fixed footer */
+.modal-footer {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  z-index: 1055;
+}
+
+/* Scrollable body */
+.modal-body {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.custom-hr {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  color: #000008 !important;
+}

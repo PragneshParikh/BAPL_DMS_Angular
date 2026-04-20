@@ -1,0 +1,433 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">Receipt Entry</h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <!--Filter Part-->
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+
+                    <!-- From Date -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Date From</label>
+                        <input type="text" class="form-control form-control-sm" style="font-size: 8px;" mwlFlatpickr
+                            [(ngModel)]="filter.fromDate" [altInput]="true" [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'"
+                            placeholder="Select date">
+                    </div>
+
+                    <!-- To Date -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Date To</label>
+                        <input type="text" class="form-control form-control-sm" mwlFlatpickr [(ngModel)]="filter.toDate"
+                            [altInput]="true" [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'" placeholder="Select date">
+                    </div>
+
+                    <!-- Receipt No -->
+                    <!-- <div class="col-md-1">
+                        <label class="form-label mb-0 small">Receipt No</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.receiptNo">
+                    </div> -->
+
+                    <!-- Party Name -->
+                    <!-- <div class="col-md-2">
+                        <label class="form-label mb-0 small">Party Name</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.partyName">
+                    </div> -->
+
+                    <!-- Mobile -->
+                    <!-- <div class="col-md-2">
+                        <label class="form-label mb-0 small">Mobile No</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.mobileNo">
+                    </div> -->
+
+                    <!-- Booking -->
+                    <!-- <div class="col-md-1">
+                        <label class="form-label mb-0 small">Booking Id</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.bookingId">
+                    </div> -->
+
+                    <!-- Location -->
+                    <!-- <div class="col-md-2">
+                        <label class="form-label mb-0 small">Location</label>
+                        <select class="form-select form-select-sm text-truncate" [(ngModel)]="filter.location"
+                            (change)="onLocationChange($event)">
+
+                            <option value="">Select Location</option>
+
+                            <option *ngFor="let loc of locations" [value]="loc.locname">
+                                {{ loc.locname }}
+                            </option>
+
+                        </select>
+                    </div> -->
+
+                    <!-- Sale Type -->
+                    <!-- <div class="col-md-2">
+                        <label class="form-label mb-0 small">Transaction Type</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="filter.saleType">
+                            <option value="">Sale Type</option>
+                            <option value="Cash">Cash Sale</option>
+                            <option value="Credit">Credit Sale</option>
+                        </select>
+                    </div> -->
+
+                    <!-- Buttons -->
+                    <div class="col-md-auto ms-auto d-flex align-items-end gap-1">
+                        <button class="btn btn-primary btn-sm" (click)="onSearch()">
+                            Search
+                        </button>
+                        <!-- <button class="btn btn-success btn-sm" (click)="downloadReceiptExcel()">
+                            <i class="ri-file-excel-2-line"></i>
+                        </button>
+                        <button class="btn btn-success btn-sm" (click)="navigateToAddReceiptEntry()">
+                            <i class="ri-add-line me-1"></i>
+                        </button>-->
+                       
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- TABLE CARD -->
+    <div class="card">
+        <div class="card-header">
+
+            <div class="d-flex justify-content-end align-items-center">
+
+                <!-- LEFT SIDE -->
+                <!-- <div class="text-muted">
+                    Total Record(s): {{ filteredReceipts.length }}
+                </div> -->
+
+                <!-- RIGHT SIDE -->
+                <div class="d-flex align-items-center gap-3">
+
+                    <!-- Buttons -->
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" (click)="navigateToAddReceiptEntry()">
+                            Add
+                        </button>
+
+                        <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                            (click)="downloadReceiptExcel()">
+                            <i class="ri-file-excel-2-line"></i>
+                        </button>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="search-box">
+                        <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm"
+                            (input)="onSearchChange()" />
+                        <i class="ri-search-line search-icon"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="table-responsive fixed-table" id="receiptTable">
+
+
+
+                <table class="table table-bordered table-sm table-striped receipt-table" style="font-size: 12px;">
+
+                    <!-- TABLE HEADER -->
+                    <thead>
+                        <tr>
+                            <th>Sl No.</th>
+
+                            <th class="sort" (click)="onSort('receiptNo')" style="cursor:pointer">
+                                Receipt No
+                            </th>
+
+                            <th class="sort" (click)="onSort('receiptDate')" style="cursor:pointer">
+                                Receipt Date
+                            </th>
+
+                            <th class="sort" (click)="onSort('bookingId')" style="cursor:pointer">
+                                Booking ID
+                            </th>
+
+                            <th class="sort" (click)="onSort('refNo')" style="cursor:pointer">
+                                Ref No</th>
+
+
+                            <th class="sort" (click)="onSort('saleType')" style="cursor:pointer">
+                                Sale Type
+                            </th>
+
+                            <th class="sort" (click)="onSort('productCode')" style="cursor:pointer">
+                                Product Name
+                            </th>
+
+                            <th class="sort" (click)="onSort('partyName')" style="cursor:pointer">
+                                Party Name
+                            </th>
+                            <th class="sort" (click)="onSort('location')" style="cursor:pointer">
+                                Location
+                            </th>
+
+                            <th class="sort" (click)="onSort('mobileNo')" style="cursor:pointer">
+                                Mobile
+                            </th>
+                            <!-- <th class="sort" (click)="onSort('location')" style="cursor:pointer">
+                            E-Mail
+                        </th> -->
+
+                            <th class="sort" (click)="onSort('salesExecutive')" style="cursor:pointer">
+                                Sales Executive
+                            </th>
+
+                            <th class="sort" (click)="onSort('financier')" style="cursor:pointer">
+                                Financer
+                            </th>
+
+
+                            <th class="sort" (click)="onSort('narration')" style="cursor:pointer">
+                                Narration
+                            </th>
+
+                            <th class="sort" (click)="onSort('totalAmount')" style="cursor:pointer">
+                                Total Cost
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <!-- TABLE BODY -->
+                    <tbody>
+
+                        @if (paginatedReceipts.length === 0) {
+                        <tr>
+                            <td colspan="17" class="text-center">No data available</td>
+                        </tr>
+                        }
+
+                        @for (item of paginatedReceipts; track $index) {
+
+
+                        <!-- <tr (click)="openEditModal(ReceiptEntryModal, item)" style="cursor: pointer"> -->
+                        <tr (click)="navigateToAddReceiptEntry(item)" style="cursor: pointer">
+                            <td>{{ ($index + 1) + ((page - 1) * pageSize) }}</td>
+
+                            <td>
+                                <ngb-highlight [result]="item.receiptNo" [term]="searchTerm"></ngb-highlight>
+                            </td>
+
+                            <td>
+                                <ngb-highlight [result]="(item.receiptDate | date:'dd/MM/yyyy')" [term]="searchTerm">
+                                </ngb-highlight>
+                            </td>
+
+                            <td>
+                                <ngb-highlight [result]="item.bookingId" [term]="searchTerm">
+                                </ngb-highlight>
+                            </td>
+
+                            <td>
+                                <ngb-highlight [result]="item.refNo" [term]="searchTerm">
+                                </ngb-highlight>
+                            </td>
+
+
+
+                            <td>
+                                <ngb-highlight [result]="item.saleType || ''" [term]="searchTerm">
+                                </ngb-highlight>
+                            </td>
+                            <td>
+                                <ngb-highlight [result]="item.productName" [term]="searchTerm"></ngb-highlight>
+                            </td>
+
+
+                            <td>
+                                <ngb-highlight [result]="item.partyName" [term]="searchTerm"></ngb-highlight>
+                            </td>
+                            <td>
+                                <ngb-highlight [result]="item.location" [term]="searchTerm"></ngb-highlight>
+                            </td>
+                            <td>
+                                <ngb-highlight [result]="item.mobileNo" [term]="searchTerm"></ngb-highlight>
+                            </td>
+                            <!-- <td>
+<ngb-highlight [result]="item.email" [term]="searchTerm"></ngb-highlight>
+</td> -->
+                            <td>
+                                <ngb-highlight [result]="item.salesExecutive" [term]="searchTerm"></ngb-highlight>
+                            </td>
+
+
+                            <td>
+                                <ngb-highlight [result]="item.financier" [term]="searchTerm"></ngb-highlight>
+                            </td>
+
+
+
+
+                            <td>
+                                <ngb-highlight [result]="item.narration" [term]="searchTerm"></ngb-highlight>
+                            </td>
+
+                            <td>
+                                <ngb-highlight [result]="item.totalAmount?.toString() || ''" [term]="searchTerm">
+                                </ngb-highlight>
+                            </td>
+
+                        </tr>
+
+                        }
+
+                    </tbody>
+
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="row mt-3">
+                <div class="col-sm-12 col-md-12">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+
+                        <ngb-pagination [collectionSize]="filteredReceipts.length" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="onPageChange($event)" [boundaryLinks]="true">
+                        </ngb-pagination>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- end col -->
+    <!-- end row -->
+    <ng-template #ReceiptEntryModal let-modal>
+
+        <!-- Header -->
+        <div class="modal-header receipt-modal-header">
+            <h5 class="modal-title">
+                <i class="ri-file-list-3-line me-1"></i>
+                Receipt Details
+            </h5>
+
+            <button class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+        </div>
+
+        <div class="modal-body">
+
+            <!-- Receipt Info -->
+            <h5 class="mb-2 text-primary">Receipt Info</h5>
+
+            <div class="row">
+
+                <div class="col-md-3">
+                    <label class="form-label">Receipt No</label>
+                    <input class="form-control form-control-sm" [value]="selectedReceipt?.receiptNo" readonly>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Receipt Date</label>
+                    <input class="form-control form-control-sm"
+                        [value]="selectedReceipt?.receiptDate | date:'dd/MM/yyyy'" readonly>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Booking ID</label>
+                    <input class="form-control form-control-sm" [value]="selectedReceipt?.bookingId" readonly>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Ref No</label>
+                    <input class="form-control form-control-sm" [value]="selectedReceipt?.refNo" readonly>
+                </div>
+
+            </div>
+
+            <div class="row mt-3">
+
+                <div class="col-md-3">
+                    <label class="form-label">Sale Type</label>
+                    <input class="form-control form-control-sm" [value]="selectedReceipt?.saleType" readonly>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Product</label>
+                    <input class="form-control form-control-sm" [value]="selectedReceipt?.productCode" readonly>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Receipt Type</label>
+                    <input class="form-control form-control-sm" [value]="selectedReceipt?.receiptType" readonly>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Total Amount</label>
+                    <input class="form-control form-control-sm" [value]="selectedReceipt?.totalAmount" readonly>
+                </div>
+
+            </div>
+
+            <hr class="custom-hr">
+
+            <!-- Party Info -->
+            <h5 class="mb-2 text-primary">Party Info</h5>
+
+            <div class="row">
+
+                <div class="col-md-4">
+                    <label class="form-label">Party Name</label>
+                    <input class="form-control form-control-sm" [value]="selectedReceipt?.partyName" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Mobile</label>
+                    <input class="form-control form-control-sm" [value]="selectedReceipt?.mobileNo" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Financier</label>
+                    <input class="form-control form-control-sm" [value]="selectedReceipt?.financier" readonly>
+                </div>
+
+            </div>
+
+            <hr class="custom-hr">
+
+            <!-- Sales Info -->
+            <h5 class="mb-2 text-primary">Sales Info</h5>
+
+            <div class="row">
+
+                <div class="col-md-4">
+                    <label class="form-label">Sales Executive</label>
+                    <input class="form-control form-control-sm" [value]="selectedReceipt?.salesExecutive" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Location</label>
+                    <input class="form-control form-control-sm" [value]="selectedReceipt?.location" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Narration</label>
+                    <input class="form-control form-control-sm" [value]="selectedReceipt?.narration" readonly>
+                </div>
+
+            </div>
+
+
+
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+            <button class="btn btn-danger" (click)="modal.close()">Close</button>
+        </div>
+
+    </ng-template>
+
+    <router-outlet></router-outlet>

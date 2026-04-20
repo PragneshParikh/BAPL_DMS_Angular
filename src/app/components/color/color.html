@@ -1,0 +1,102 @@
+<!-- Start Breadcrumbs -->
+<app-breadcrumbs title="Color Master"></app-breadcrumbs>
+<!-- End Breadcrumbs -->
+
+<div class="row" id="color-master">
+    <div class="col-lg-12">
+        <div class="card">
+
+            <div class="card-body">
+
+                <div class="card-header">
+                    <div class="d-flex justify-content-end align-items-center gap-2">
+
+                        <!-- Download Excel Button -->
+                        <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                            (click)="downloadColorExcel()">
+                            <i class="ri-file-excel-2-line"></i>
+                        </button>
+
+                        <!-- Search Box -->
+                        <div class="search-box">
+                            <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchTerm"
+                                (keyup)="onSearch()">
+                            <i class="ri-search-line search-icon"></i>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th class="sort" data-sort="name" (click)="sortData('srno')" style="width: 7%;">Sr. No.
+                                </th>
+                                <th class="sort" data-sort="colorName" (click)="sortData('colorname')">Color Name</th>
+                                <th class="sort" data-sort="colorCode" (click)="sortData('colorcode')">Color Code</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for ( data of pagedData; track $index) {
+                            <tr (click)="onRowDoubleClick(RowDataModel,data)">
+                                <td class="text-center">
+                                    {{ data.id }}
+                                </td>
+                                <td>
+                                    {{data.colorname}}
+                                </td>
+                                <td>
+                                    {{data.colorcode}}
+                                </td>
+                            </tr>
+                            }
+
+                            <!-- No Data Row -->
+                            <tr *ngIf="pagedData.length === 0">
+                                <td colspan="6" class="text-center">No Data Available</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="col-sm-12 col-md-12">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+                        <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="refreshData()" (pageChange)="onPageChange($event)" [maxSize]="5"
+                            [boundaryLinks]="true">
+                        </ngb-pagination>
+                    </div>
+                </div>
+                <!-- End Pagination -->
+            </div>
+        </div><!-- end card-body -->
+    </div><!-- end card -->
+</div>
+<!-- end col -->
+<!-- end row -->
+
+<!-- Scroll Modal -->
+<ng-template #RowDataModel role="document" let-modal>
+    <div class="modal-header" style="background-color: #747CA0; padding: 5px;">
+        <h5 class="modal-title" id="varyingcontentModalLabel" style="color: white;">Color Details</h5>
+        <button type="button" class="btn-close" aria-hidden="true" style="color: white;"
+            (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+        <form>
+            <div class="mb-3">
+                <label for="customer-name" class="col-form-label">Color Name:</label>
+                <input type="text" class="form-control" id="customer-name" [value]="rowData.colorname" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="customer-name" class="col-form-label">Color Code:</label>
+                <input type="text" class="form-control" id="customer-name" [value]="rowData.colorcode" readonly>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="modal.close('Close click')">Close</button>
+    </div>
+</ng-template>

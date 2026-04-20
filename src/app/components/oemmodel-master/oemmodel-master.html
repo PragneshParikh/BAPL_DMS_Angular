@@ -1,0 +1,304 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">OEM Model List</h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-end align-items-center">
+
+                    <button class="btn btn-primary btn-sm me-2" (click)="openAddModal()">
+                        Add
+                    </button>
+
+                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
+                        (click)="downloadOEMModelExcel()">
+                        <i class="ri-file-excel-2-line"></i>
+                    </button>
+
+                    <div class="search-box d-inline-block">
+                        <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm"
+                            (input)="searchModel()" />
+                        <i class="ri-search-line search-icon"></i>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered mb-0 table-sm tax-table">
+                        <thead>
+                            <tr class="oem-table">
+                                <th class="sort">S.No.</th>
+                                <th class="sort" [ngClass]="getSortClass('modelName')" (click)="sort('modelName')">
+                                    OEM Model Name
+                                </th>
+                                <th class="sort" [ngClass]="getSortClass('modelShortName')"
+                                    (click)="sort('modelShortName')">
+                                    OEM Model Short Name
+                                </th>
+                                <!-- <th class="sort" [ngClass]="getSortClass('id')" (click)="sort('id')">
+                                    Id
+                                </th> -->
+                                <th>Active</th>
+                                <!-- <th>Action</th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let model of pagedModelList; let i=index" (click)="openEditModal(model)"
+                                style="cursor: pointer;">
+                                <td>{{(page-1)*pageSize + i + 1}}</td>
+                                <td>{{model.modelName}}</td>
+                                <td>{{model.modelShortName}}</td>
+                                <!-- <td>{{model.id}}</td> -->
+                                <td>
+
+                                    <span class="badge" [ngClass]="model.isActive ? 'bg-success' : 'bg-danger'">
+                                        {{ model.isActive ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                                <!-- <td>
+                                </td> -->
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <!-- Pagination -->
+                <div class="row mt-3">
+
+                    <div class="col-md-12">
+
+                        <div class="float-end">
+
+                            <ngb-pagination [collectionSize]="totalRecords" [(page)]="page" [pageSize]="pageSize"
+                                (pageChange)="refreshPage()" [boundaryLinks]="true">
+
+                            </ngb-pagination>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- EDIT MODAL -->
+        <div class="modal fade" id="editModelModal" tabindex="-1">
+
+            <div class="modal-dialog">
+
+                <div class="modal-content">
+
+                    <div class="modal-header" style="background:#747CA0">
+                        <h5 class="modal-title text-white">OEM Model Master</h5>
+                        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Model Name</label>
+                                <input class="form-control" [(ngModel)]="selectedModel.modelName" name="editModelName"
+                                    required #editModelName="ngModel">
+
+                                <div *ngIf="editModelName.invalid && (editModelName.touched || formSubmitted)"
+                                    class="text-danger mt-1">
+                                    Model Name is required
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Model Short Name</label>
+                                <input class="form-control" [(ngModel)]="selectedModel.modelShortName"
+                                    name="editModelShortName" required #editModelShortName="ngModel">
+
+                                <div *ngIf="editModelShortName.invalid && (editModelShortName.touched || formSubmitted)"
+                                    class="text-danger mt-1">
+                                    Model Short Name is required
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-12">
+
+                            <div class="form-check form-switch form-switch-lg form-switch-success">
+
+                                <label class="form-label">Active</label>
+
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                    [(ngModel)]="selectedModel.isActive" name="editIsActive">
+
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button class="btn btn-primary btn-sm"
+                                (click)="formSubmitted=true; editModelName.valid && editModelShortName.valid && updateModel()">
+                                Save
+                            </button>
+                            <button class="btn btn-light btn-sm" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+        <!-- ADD MODAL -->
+        <!-- <div class="modal fade" id="addModelModal" tabindex="-1">
+
+            <div class="modal-dialog modal-lg">
+
+                <div class="modal-content">
+
+                    <div class="modal-header" style="background-color:#747CA0">
+
+                        <h5 class="modal-title text-white">
+                            Add OEM Model
+                        </h5>
+
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="row">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Model Name</label>
+
+                                <input type="text" class="form-control" [(ngModel)]="modelName"
+                                    placeholder="Enter Model Name" (keyup.enter)="searchModel()">
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">Model Short Name</label>
+
+                                <input type="text" class="form-control" [(ngModel)]="selectedModel.modelShortName">
+
+                            </div>
+
+                            <div class="col-md-4 mt-3">
+
+                                <div class="form-check form-switch form-switch-lg form-switch-success">
+
+                                    <label class="form-label">Active</label>
+
+                                    <input class="form-check-input" type="checkbox"
+                                        [(ngModel)]="selectedModel.isActive">
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button class="btn btn-danger" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button class="btn btn-success" (click)="addModel()">
+                            Save
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div> -->
+
+        <div class="modal fade" id="addModelModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <!-- Modal Header -->
+                    <div class="modal-header" style="background-color:#747CA0">
+                        <h5 class="modal-title text-white">Add OEM Model</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="modal-body">
+                        <div class="row">
+
+                            <!-- Model Name -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Model Name</label>
+                                <input type="text" class="form-control" [(ngModel)]="selectedModel.modelName"
+                                    name="modelName" placeholder="Enter Model Name" required #modelNameInput="ngModel">
+
+                                <div *ngIf="modelNameInput.invalid && (modelNameInput.touched || formSubmitted)"
+                                    class="text-danger mt-1">
+                                    Model Name is required.
+                                </div>
+                            </div>
+
+                            <!-- Model Short Name -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Model Short Name</label>
+                                <input type="text" class="form-control" [(ngModel)]="selectedModel.modelShortName"
+                                    name="modelShortName" required #modelShortNameInput="ngModel">
+
+                                <div *ngIf="modelShortNameInput.invalid && (modelShortNameInput.touched || formSubmitted)"
+                                    class="text-danger mt-1">
+                                    Model Short Name is required.
+                                </div>
+                            </div>
+
+                            <!-- Active Switch -->
+                            <div class="col-md-12">
+                                <div class="form-check form-switch form-switch-lg form-switch-success">
+                                    <label class="form-label">Active</label>
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="selectedModel.isActive"
+                                        name="isActive">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+
+                        <button class="btn btn-primary btn-sm"
+                            (click)="formSubmitted=true; modelNameInput.valid && modelShortNameInput.valid && addModel()">
+                            Save
+                        </button>
+                        <button class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

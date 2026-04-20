@@ -1,19 +1,16 @@
 import { Injectable } from '@angular/core';
-import { getFirebaseBackend } from '../../authUtils';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { GlobalComponent } from "../../global-component";
-import { Store } from '@ngrx/store';
+import { BehaviorSubject, throwError } from 'rxjs';
 import { User } from '../../store/Authentication/auth.models';
-import { loginFailure, logout } from '../../store/Authentication/authentication.actions';
+import { environment } from '../../../environments/environment';
+import { StorageService } from './storage';
 
-const AUTH_API = GlobalComponent.AUTH_API;
 
 const httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-  };
-  
+};
+
 
 @Injectable({ providedIn: 'root' })
 
@@ -23,43 +20,45 @@ const httpOptions = {
 export class AuthenticationService {
 
     user!: User;
-    currentUserValue: any;
+    private currentUserSubject = new BehaviorSubject<User | null>(null);
+    public currentUser$ = this.currentUserSubject.asObservable();
+    private timeoutId: any;
 
-    private currentUserSubject: BehaviorSubject<User>;
-    // public currentUser: Observable<User>;
+    protected baseUrl = environment.apiUrl;
 
-    constructor(private http: HttpClient, private store: Store) {
-        this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(sessionStorage.getItem('currentUser')!));
-        // this.currentUser = this.currentUserSubject.asObservable();
-     }
+    constructor(
+        private httpClient: HttpClient,
+        private storageService: StorageService
+    ) {
 
-    /**
-     * Performs the register
-     * @param email email
-     * @param password password
-     */
-    register(email: string, first_name: string, password: string) {        
-        // return getFirebaseBackend()!.registerUser(email, password).then((response: any) => {
-        //     const user = response;
-        //     return user;
-        // });
+        const storedUser = storageService.getUser();
+        if (storedUser && storedUser !== 'undefined') {
+            this.currentUserSubject.next(storedUser);
+        }
+    }
 
-        // Register Api
-        return this.http.post(AUTH_API + 'signup', {
-            email,
-            first_name,
-            password,
-          }, httpOptions).pipe(
-            map((response: any) => {
-                const user = response;
-                return user;
-            }),
-            catchError((error: any) => {
-                const errorMessage = 'Login failed'; // Customize the error message as needed
-                this.store.dispatch(loginFailure({ error: errorMessage }));
-                return throwError(errorMessage);
-            })
-        );
+    public get currentUserValue(): User | null {
+        return this.currentUserSubject.value;
+    }
+
+    initAuth(): void {
+        const token = localStorage.getItem('token');
+
+        if (!token) return;
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const expiry = payload.exp * 1000;
+
+            if (expiry <= Date.now()) {
+                this.logout();
+            } else {
+                this.startTokenTimer(token);
+            }
+
+        } catch {
+            this.logout();
+        }
     }
 
     /**
@@ -67,19 +66,24 @@ export class AuthenticationService {
      * @param email email of user
      * @param password password of user
      */
-    login(email: string, password: string) {
-        // return getFirebaseBackend()!.loginUser(email, password).then((response: any) => {
-        //     const user = response;
-        //     return user;
-        // });
+    login(username: string, password: string) {
 
-        return this.http.post(AUTH_API + 'signin', {
-            email,
+        return this.httpClient.post(this.baseUrl + '/auth', {
+            username,
             password
-          }, httpOptions).pipe(
-              map((response: any) => {
-                const user = response;
-                return user;
+        }, httpOptions).pipe(
+            map((response: any) => {
+                if (response.status === 'success') {
+                    const user: any = response;
+
+                    this.storageService.setUser(user);
+                    localStorage.setItem('token', response.token);
+                    this.currentUserSubject.next(user);
+
+                    return response;
+                } else {
+                    return response;
+                }
             }),
             catchError((error: any) => {
                 const errorMessage = 'Login failed'; // Customize the error message as needed
@@ -89,38 +93,93 @@ export class AuthenticationService {
     }
 
     /**
-     * Returns the current user
-     */
-    public currentUser(): any {
-        return getFirebaseBackend()!.getAuthenticatedUser();
-    }
-
-    /**
      * Logout the user
      */
     logout() {
-        this.store.dispatch(logout());
+        // this.store.dispatch(logout());
         // logout the user
         // return getFirebaseBackend()!.logout();
-        sessionStorage.removeItem('currentUser');
-        sessionStorage.removeItem('token');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('token');
+        localStorage.removeItem('selectedModule');
+        localStorage.removeItem('menuRights');
         this.currentUserSubject.next(null!);
+    }
 
-        return of(undefined).pipe(
-        
+    forgotPassword(email: string) {
+        return this.httpClient
+            .post<{ success: boolean; message: string }>(
+                `${this.baseUrl}/auth/forgot-password`,
+                { email }
+            )
+            .pipe(
+                map((response) => {
+                    // If the API returns a valid object, just pass it along
+                    return response;
+                }),
+                catchError((error) => {
+                    console.error('Forgot password API error:', error);
+
+                    // Wrap the error in the same object shape so component code works
+                    const fallback = { success: false, message: 'Password reset failed. Please try again.' };
+                    return throwError(fallback);
+                })
+            );
+    }
+
+    resetPassword(email: string, token: string, password: string, confirmPassword: string) {
+        return this.httpClient.post(this.baseUrl + '/auth/reset-password', { email, token, password, confirmPassword }, httpOptions).pipe(
+            map((response: any) => {
+                return response;
+            }),
+            catchError((error: any) => {
+                const errorMessage = 'Password reset failed'; // Customize the error message as needed
+                return throwError(errorMessage);
+            })
         );
 
     }
 
-    /**
-     * Reset password
-     * @param email email
-     */
-    resetPassword(email: string) {
-        return getFirebaseBackend()!.forgetPassword(email).then((response: any) => {
-            const message = response.data;
-            return message;
-        });
+    getAccessPermission(subMenuId: number) {
+        const permissions = this.storageService.getMenuRights();
+
+        const match = permissions.find((p: any) => p.subMenuId === subMenuId);
+
+        return match.permission;
+    }
+
+    startTokenTimer(token: string): void {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+
+            const expiry = payload.exp * 1000; // convert to milliseconds
+            const now = new Date().getTime();
+
+            const timeout = expiry - now;
+
+            // If already expired
+            if (timeout <= 0) {
+                this.logout();
+                return;
+            }
+
+            console.log(`Token expires in ${Math.floor(timeout / 1000)} seconds`);
+
+            // Clear existing timer
+            if (this.timeoutId) {
+                clearTimeout(this.timeoutId);
+            }
+
+            // Start new timer
+            this.timeoutId = setTimeout(() => {
+                console.log('Token expired → logging out');
+                this.logout();
+            }, timeout);
+
+        } catch (error) {
+            console.error('Invalid JWT token');
+            this.logout();
+        }
     }
 
 }

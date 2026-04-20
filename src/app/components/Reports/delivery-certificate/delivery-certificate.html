@@ -1,0 +1,171 @@
+<div class="a4-page mx-auto bg-white p-5 shadow-sm">
+    <div id="reportContent" class="container">
+
+        <h1 class="text-center">Delivery Certificate</h1>
+
+        <div class="d-flex justify-content-between mb-3">
+            <div>
+                <strong>Date:</strong> {{ currentDate | date:'dd-MM-yyyy' }}
+            </div>
+            <div>
+                <strong>Delivery Certificate:</strong> {{ certificateNo }}
+            </div>
+        </div>
+
+        <p><strong>Model/Variant/Version:</strong> {{ variant }}</p>
+
+        <!-- Invoice Details -->
+        <div class="row mb-2">
+            <div class="col-md-6">
+                <strong class="vehicleInfo">Invoice Number:</strong>
+                1
+            </div>
+
+            <div class="col-md-6">
+                <strong class="vehicleInfo">Invoice Date:</strong>
+                {{ currentDate | date:'dd-MM-yyyy' }}
+            </div>
+        </div>
+
+        <!-- VIN Details -->
+        <div class="row mb-2">
+            <div class="col-md-6">
+                <strong class="vehicleInfo">VIN No.:</strong>
+                {{ vinNo }}
+            </div>
+
+            <div class="col-md-6">
+                <strong class="vehicleInfo">Motor Serial No:</strong>
+                {{ motorSerialNo }}
+            </div>
+        </div>
+
+        <!-- Dealer Info -->
+        <div class="row mb-2">
+            <div class="col-md-6">
+                <strong class="vehicleInfo">Dealer Name:</strong>
+                {{ dealerName }}
+            </div>
+
+            <div class="col-md-6">
+                <strong class="vehicleInfo">Dealer Code:</strong>
+                {{ dealerCode }}
+            </div>
+        </div>
+
+        <!-- Sale Info -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong class="vehicleInfo">Date of Sale:</strong>
+                {{ saleDate | date:'dd-MM-yyyy' }}
+            </div>
+
+            <div class="col-md-6">
+                <strong class="vehicleInfo">Date of Delivery:</strong>
+                {{ deliveryDate | date:'dd-MM-yyyy' }}
+            </div>
+        </div>
+
+        <p>Dear Sir/Madam,</p>
+
+        <p>I, the undersigned, confirm the following:</p>
+
+        <!-- NUMBERED SECTION FIXED -->
+        <div class="mb-2 d-flex">
+            <div class="me-2">1.</div>
+            <div>The dealer/team has physically shown and explained to me in detail the operating controls of the
+                scooter.
+            </div>
+        </div>
+
+        <div class="mb-2 d-flex">
+            <div class="me-2">2.</div>
+            <div>The dealer has handed over the following items along with the vehicle:</div>
+        </div>
+
+        <!-- CHECKLIST -->
+        <ul class="list-unstyled ms-3">
+
+            <li class="mb-2 d-flex align-items-center">
+                <input type="checkbox" class="me-2">
+                <span>Set of 2 keys</span>
+            </li>
+
+            <li class="mb-2 d-flex align-items-center">
+                <input type="checkbox" class="me-2">
+                <span>Key FOB</span>
+            </li>
+
+            <li class="mb-2 d-flex align-items-center">
+                <input type="checkbox" class="me-2">
+                <span>First Aid kit</span>
+            </li>
+
+            <li class="mb-2 d-flex align-items-center">
+                <input type="checkbox" class="me-2">
+                <span>Tool kit along with the eScooter</span>
+            </li>
+
+            <!-- BLANK LINES -->
+            <li class="mb-2 d-flex align-items-center w-25">
+                <input type="checkbox" class="me-2" style="transform: translateY(1px);">
+                <span class="flex-grow-1 border-bottom border-dark" style="height: 18px;"></span>
+            </li>
+
+            <li class="mb-2 d-flex align-items-center w-25">
+                <input type="checkbox" class="me-2" style="transform: translateY(1px);">
+                <span class="flex-grow-1 border-bottom border-dark" style="height: 18px;"></span>
+            </li>
+
+        </ul>
+
+        <!-- MORE NUMBERED POINTS -->
+        <div class="mb-2 d-flex">
+            <div class="me-2">3.</div>
+            <div>The dealer/team has briefed me in detail on the service policy, warranty, and maintenance schedule.
+            </div>
+        </div>
+
+        <div class="mb-2 d-flex">
+            <div class="me-2">4.</div>
+            <div>The vehicle was inspected/test driven by me/my representative and found to be in acceptable condition,
+                free
+                from any operational or visual defects.</div>
+        </div>
+
+        <div class="mb-2 d-flex">
+            <div class="me-2">5.</div>
+            <div>I have been instructed to download the Bgauss customer app and complete registration to access manuals
+                and
+                service coupons.</div>
+        </div>
+
+        <div class="mb-2 d-flex">
+            <div class="me-2">6.</div>
+            <div>I hereby consent to receive communication via SMS, WhatsApp, email, or app.</div>
+        </div>
+
+        <br>
+
+        <p>I understand that warranty claims will be considered only after customer app registration/activation.</p>
+
+        <!-- FOOTER -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <p><strong>Place:</strong> Chennai</p>
+                <p><strong>Date:</strong> {{ currentDate | date:'short' }}</p>
+                <p><strong>Reg. No:</strong> GJ 01 AB 1234</p>
+            </div>
+
+            <div class="col-md-6 text-end">
+                <p><strong>Customer Name & Signature</strong></p>
+                <p>Ajay Patel</p>
+            </div>
+        </div>
+
+        <p class="mt-3"><strong>Note:</strong></p>
+
+    </div>
+
+</div>
+<button class="btn btn-primary mt-3" (click)="printReport()">Print Preview</button>

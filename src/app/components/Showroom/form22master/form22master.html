@@ -1,0 +1,235 @@
+<div>
+    <!-- SEARCH CARD -->
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+        <h4 class="mb-sm-0">Form 22 specification</h4>
+    </div>
+    <!--Add details-->
+    <ng-template #form22Form let-modal>
+        <form #form22Form="ngForm" (ngSubmit)="addForm22Master(form22Form, modal)">
+            <div class="card">
+                <div class="modal-header item-modal-header">
+                    <h5 class="modal-title">Add Form22 Master Details</h5>
+                    <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- OEM Model -->
+                        <div class="col-md-3 dropdown-wrapper">
+                            <label class="form-label">OEM Model Name</label>
+                            <span class="text-danger">*</span>
+                            <select class="form-select form-select-sm" name="oemmodelId"
+                                [(ngModel)]="formData.oemmodelId" required #oemmodelId="ngModel">
+                                <option value="">-- Select Oemmodel name --</option>
+                                <option *ngFor="let o of oemModelList" [ngValue]="o.oemmodelId">
+                                    {{o.oemModelName}}
+                                </option>
+                            </select>
+                            <small class="text-danger"
+                                *ngIf="oemmodelId.invalid && (oemmodelId.touched || form22Form.submitted)">
+                                OEM Model Name is required
+                            </small>
+                        </div>
+                        <!-- Sound Level Horn -->
+                        <div class="col-md-3">
+                            <label class="form-label">Sound Level Horn</label>
+                            <span class="text-danger">*</span>
+                            <input type="text" class="form-control form-control-sm" name="soundLevelHorn"
+                                [(ngModel)]="formData.soundLevelHorn" required #soundLevelHorn="ngModel" />
+                            <small class="text-danger"
+                                *ngIf="soundLevelHorn.invalid && (soundLevelHorn.touched || form22Form.submitted)">
+                                Sound Level Horn is required
+                            </small>
+                        </div>
+                        <!-- Passby Noise Level -->
+                        <div class="col-md-3">
+                            <label class="form-label">Pass by noise level</label>
+                            <span class="text-danger">*</span>
+                            <input type="text" class="form-control form-control-sm" name="passbyNoiseLevel"
+                                [(ngModel)]="formData.passbyNoiseLevel" required #passbyNoiseLevel="ngModel" />
+                            <small class="text-danger"
+                                *ngIf="passbyNoiseLevel.invalid && (passbyNoiseLevel.touched || form22Form.submitted)">
+                                Passby Noise Level is required
+                            </small>
+                        </div>
+                        <!-- Certificate No -->
+                        <div class="col-md-3">
+                            <label class="form-label">Type of Certificate No</label>
+                            <span class="text-danger">*</span>
+                            <input type="text" class="form-control form-control-sm" name="approvalCertificateNo"
+                                [(ngModel)]="formData.approvalCertificateNo" required
+                                #approvalCertificateNo="ngModel" />
+                            <small class="text-danger"
+                                *ngIf="approvalCertificateNo.invalid && (approvalCertificateNo.touched || form22Form.submitted)">
+                                Certificate No is required
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-check form-switch form-switch-sm form-switch-success">
+                            <label class="form-label">IsActive</label>
+                            <input class="form-check-input form-check-input-sm" type="checkbox" name="isActive"
+                                [(ngModel)]="formData.isActive">
+                        </div>
+                    </div>
+                    <div class="col-md-2 div-btn-add">
+                        <button class="btn btn-add btn-sm me-3" [disabled]="form22Form.invalid">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </ng-template>
+    <!--End Add details-->
+</div>
+<!-- view details -->
+<div class="row" id="form22master">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-end align-items-center">
+                    <!-- Add Form22master Button -->
+                    <button class="btn btn-primary btn-sm me-3" (click)="openAddDetails(form22Form,formData)">
+                       Add
+                    </button>
+                    <!-- Download Excel Button -->
+                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'" (click)="downloadForm22MasterExcel()">
+                        <i class="ri-file-excel-2-line"></i>
+                    </button>
+                    <!-- Search Box -->
+                    <div class="search-box">
+                        <input type="text" class="form-control search" placeholder="Search..."
+                            (input)="searchItems($event)" />
+                        <i class="ri-search-line search-icon"></i>
+                    </div>
+                </div>
+            </div>
+            <!-- end card header -->
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered mb-0 table-sm">
+                        <thead class="table-bgColor">
+                            <tr>
+                                <th>Sr No.</th>
+                                <th class="sort" (click)="sort('oemModelName')" data-sort="oemModelName">OEM Model
+                                    Name</th>
+                                <th class="sort" (click)="sort('soundLevelHorn')" data-sort="soundLevelHorn">Sound
+                                    Level Horn</th>
+                                <th class="sort" (click)="sort('passbyNoiseLevel')" data-sort="passbyNoiseLevel">
+                                    Pass by noise level</th>
+                                <th class="sort" (click)="sort('approvalCertificateNo')"
+                                    data-sort="approvalCertificateNo">Type of Certificate No.</th>
+                                <th class="sort" (click)="sort('isActive')" data-sort="itemdesc">Active</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (data of pagedData; track $index) {
+                            <tr (click)="openDetails(From22itemModal,data)" style="cursor:pointer">
+                                <td>
+                                    {{ (page - 1) * pageSize + $index + 1 }}
+                                </td>
+
+                                <td>
+                                    <ngb-highlight [result]="data.oemModelName" [term]="searchTerm"></ngb-highlight>
+                                </td>
+
+                                <td>
+                                    <ngb-highlight [result]="data.soundLevelHorn" [term]="searchTerm"></ngb-highlight>
+                                </td>
+                                <td>
+                                    <ngb-highlight [result]="data.passbyNoiseLevel" [term]="searchTerm"></ngb-highlight>
+                                </td>
+                                <td>
+                                    <ngb-highlight [result]="data.approvalCertificateNo"
+                                        [term]="searchTerm"></ngb-highlight>
+                                </td>
+                                <td>
+                                    <span class="badge" [ngClass]="data.isactive ? 'bg-success' : 'bg-danger'">
+
+                                        {{ data.isactive === true ? 'Yes' : 'No' }}
+
+                                    </span>
+                                    <!-- <ngb-highlight [result]="data.isActive" [term]="searchTerm"></ngb-highlight> -->
+                                </td>
+                            </tr>
+                            }
+                            <!-- No Data Row -->
+                            <tr *ngIf="!pagedData || pagedData.length === 0">
+                                <td colspan="2" class="text-center">No Data Available</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row justify-content-md-between align-items-md-center">
+                    <div class="col-sm-12 col-md-5">
+                        <div class="dataTables_info mb-2" id="tickets-table_info" role="status" aria-live="polite">
+                            <!-- Showing
+              {{service.startIndex}} to
+              {{service.endIndex}} of {{service.totalRecords}}
+              entries -->
+                        </div>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="col-sm-12 col-md-5">
+                        <div class="text-md-right float-md-end gridjs-pagination">
+                            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                                (pageChange)="pageChange($event)">
+                            </ngb-pagination>
+                        </div>
+                    </div>
+                    <!-- End Pagination -->
+                </div>
+            </div><!-- end card-body -->
+        </div><!-- end card -->
+    </div>
+    <!-- end col -->
+</div>
+<!-- end row -->
+<!--Edit details-->
+<ng-template #From22itemModal let-modal>
+    <div class="modal-header item-modal-header">
+        <h5 class="modal-title">
+            Form22 Master Details</h5>
+        <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-3">
+                <label class="form-label">OEM Model Name</label>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedForm22Item.oemmodelId">
+                    <option value="">-- Select Oemmodel name --</option>
+                    <option *ngFor="let o of oemModelList" [ngValue]="o.oemmodelId">
+                        {{o.oemModelName}}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Sound Level Horn</label>
+                <input class="form-control form-control-sm" [value]="selectedForm22Item?.soundLevelHorn">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Pass by noise level</label>
+                <input class="form-control form-control-sm" [value]="selectedForm22Item?.passbyNoiseLevel">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Type of Certificate No.</label>
+                <input class="form-control form-control-sm" [value]="selectedForm22Item?.approvalCertificateNo">
+            </div>
+            <div class="col-md-3">
+                <input class="form-check-input form-check-input-sm" type="checkbox"
+                    [(ngModel)]="selectedForm22Item.isactive">
+                <label class="form-check-label ms-2">
+                    {{ selectedForm22Item.isactive == true ? 'Active' : 'Inactive' }}
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary btn-sm me-3" (click)="updateForm22Master(modal)">Save</button>
+        <button class="btn btn-light btn-sm me-3" (click)="modal.close()">Close</button>
+    </div>
+</ng-template>
+<!--End Edit-->

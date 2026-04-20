@@ -1,0 +1,102 @@
+<div id="invoice-detail-model">
+    <div class="modal-header" style="background-color: #747CA0; padding: 5px;">
+        <h5 class="modal-title" id="varyingcontentModalLabel" style="color: white;">Invoice Details:
+            {{ invoiceDetails[0].invoiceNo }}
+        </h5>
+        <button type="button" class="btn-close" aria-hidden="true" style="color: white;" (click)="close(false)">
+        </button>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="modal-body">
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-gridjs">
+                        <thead>
+                            <tr>
+                                <th>Sr. No. </th>
+                                <th class="sort" (click)="onSort('colrCode')">Vehicle Color Code </th>
+                                <th class="sort" (click)="onSort('chasisNo')">Chasis No Converter </th>
+                                <th class="sort" (click)="onSort('controllerNo')">Charger Controller </th>
+                                <th class="sort" (click)="onSort('batteryIdno')">Battery ID <br>
+                                    Battery No
+                                </th>
+                                <th class="sort" (click)="onSort('')">Chemical Capacity </th>
+                                <th class="sort" (click)="onSort('soundbarSerno')">Soundbar Sr. No.
+                                    <br>
+                                    Immobilizer No
+                                </th>
+                                <th class="sort" (click)="onSort('vcu')">VCU <br>
+                                    Voltage
+                                </th>
+                                <th class="sort" (click)="onSort('fame2Discount')">Fame2 Discount <br>
+                                    Freight <br>
+                                    Insurance
+                                </th>
+                                <th class="sort" (click)="onSort('vinWarranty')">VIN Warranty </th>
+                                <th class="sort" (click)="onSort('motorWarranty')">Motor Warranty </th>
+                                <th class="sort" (click)="onSort('batteryWarranty')">Battery Warranty </th>
+                                <th class="sort" (click)="onSort('chargerWarranty')">Charger Warranty </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (invoice of invoiceDetails; track $index) {
+                            <tr>
+                                <td class="text-center">
+                                    {{ $index + 1}}
+                                </td>
+                                <td>
+                                    {{ invoice. colrCode }}
+                                </td>
+                                <td>
+                                    {{ invoice.chasisNo }}
+                                </td>
+                                <td>
+                                    {{ invoice.controllerNo }}
+                                </td>
+                                <td>
+                                    {{ invoice.batteryIdno }} <br>
+                                    {{ invoice.batteryNo }}
+                                </td>
+                                <td>
+                                    &nbsp;
+                                </td>
+                                <td>
+                                    {{ invoice.soundbarSerno }} <br>
+                                    {{ invoice.immoblizerNo }}
+                                </td>
+                                <td>
+                                    {{ invoice.vcu }} <br>
+                                    {{ invoice.voltage }}
+                                </td>
+                                <td>
+                                    {{ invoice.fame2Discount }} <br>
+                                    {{ invoice.freight }} <br>
+                                    {{ invoice.insurance }}
+                                </td>
+                                <td>
+                                    {{ invoice.vinWarranty }}
+                                </td>
+                                <td>
+                                    {{ invoice. motorWarranty}}
+                                </td>
+                                <td>
+                                    {{ invoice.batteryWarranty }}
+                                </td>
+                                <td>
+                                    {{ invoice.chargerWarranty }}
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-sm btn-danger" (click)="close(false)">Close</button>
+            <button class="btn btn-sm btn-primary" (click)="close(true)">Accept</button>
+        </div>
+    </div><!-- end card-body -->
+</div>

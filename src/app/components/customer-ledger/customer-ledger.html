@@ -1,0 +1,178 @@
+<div *ngIf="!isExternalCall"
+    class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">Customer Ledger</h4>
+</div>
+
+<div *ngIf="isExternalCall" class="card mb-2">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-white">
+            {{ isModify ? 'Edit Customer Ledger' : 'Add Customer Ledger' }}
+        </h5>
+
+        <button *ngIf="activeModal" type="button" class="btn btn-sm btn-light" (click)="backToList()">
+            ✕
+        </button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+
+                <form #customerLedgerForm="ngForm" (ngSubmit)="onSubmit(customerLedgerForm)">
+                    <!-- Top Row -->
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <label class="form-label">Ledger Type</label>
+                            <select class="form-select form-select-sm" name="ledgerType"
+                                [(ngModel)]="formData.ledgerType" required>
+                                <option *ngFor="let lt of ledgerTypes" [value]="lt.value">
+                                    {{ lt.name }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Ledger Code <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" name="ledgerCode"
+                                #ledgerCode="ngModel" [(ngModel)]="formData.ledgerCode" required>
+                            @if (ledgerCode.invalid && ledgerCode.touched) {
+                            <small class="text-danger">
+                                Ledger Code is required
+                            </small>
+                            }
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Ledger Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" name="ledgerName"
+                                #ledgerName="ngModel" [(ngModel)]="formData.ledgerName" required>
+                            @if (ledgerName.invalid && ledgerName.touched) {
+                            <small class="text-danger">
+                                Ledger Name is required
+                            </small>
+                            }
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Gender <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" name="gender" [(ngModel)]="formData.gender"
+                                #gender="ngModel" required>
+                                <option *ngFor="let g of genders" [value]="g.value">
+                                    {{ g.title }}
+                                </option>
+                            </select>
+                            @if (gender.invalid && gender.touched) {
+                            <small class="text-danger">
+                                Gender is required
+                            </small>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Second Row -->
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <label class="form-label">PAN </label>
+                            <input type="text" class="form-control form-control-sm" name="pan" #pan="ngModel"
+                                [(ngModel)]="formData.pan" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
+                                (input)="formData.pan = formData.pan.toUpperCase()">
+
+                            @if (pan.invalid && pan.touched) {
+                            <small class="text-danger">
+                                Invalid PAN format (ABCDE1234F)
+                            </small>
+                            }
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Aadhaar No</label>
+                            <input type="text" class="form-control form-control-sm" name="aadhaar"
+                                [(ngModel)]="formData.aadharNumber" pattern="^[0-9]{12}$" maxlength="12"
+                                #aadhaar="ngModel">
+                            @if (aadhaar.invalid && aadhaar.touched) {
+                            <small class="text-danger">
+                                Aadhaar must be 12 digits
+                            </small>
+                            }
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">GST</label>
+                            <input type="text" class="form-control form-control-sm" name="gst"
+                                [(ngModel)]="formData.gstNo">
+                        </div>
+                    </div>
+
+                    <!-- Third Row -->
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <label class="form-label">Mobile No <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" name="mobile"
+                                [(ngModel)]="formData.mobileNumber" pattern="^[0-9]{10}$" required #mobile="ngModel">
+                            @if (mobile.invalid && mobile.touched) {
+                            <small class="text-danger">
+                                Enter valid 10-digit mobile number
+                            </small>
+                            }
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label"> Email </label>
+                            <input type="text" class="form-control form-control-sm" name="email"
+                                [(ngModel)]="formData.email" [(ngModel)]="formData.email" email #email="ngModel">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label"> DOB </label>
+                            <input type="date" class="form-control form-control-sm" name="dob"
+                                [(ngModel)]="formData.dateOfBirth" #dob="ngModel" />
+                        </div>
+                    </div>
+
+                    <!-- Fourth Row -->
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label class="form-label">Address</label>
+                            <textarea rows="3" class="form-control form-control-sm" name="address"
+                                [(ngModel)]="formData.address">
+                            </textarea>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">State</label>
+                            <select class="form-select form-select-sm" name="state" [(ngModel)]="formData.state">
+                                <option *ngFor="let state of states" [value]="state.stateId">{{ state.stateName }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">City</label>
+                            <select class="form-select form-select-sm" name="city" [(ngModel)]="formData.city">
+                                <option *ngFor="let city of cities" [value]="city.cityId">{{ city.cityName }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">PIN Code</label>
+                            <input type="text" class="form-control form-control-sm" name="pinCode" pattern="^[0-9]{6}$"
+                                #pinCode="ngModel" [(ngModel)]="formData.pin">
+                            @if (pinCode.invalid && pinCode.touched) {
+                            <small class="text-danger">
+                                PIN Code must be 6 digits
+                            </small>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Add Button -->
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+
+                            <button type="button" class="btn btn-primary btn-sm float-end" (click)="backToList()">
+                                Cancel
+                            </button>
+                            <button type="submit" [disabled]="customerLedgerForm.invalid"
+                                class="btn btn-primary btn-sm float-end me-1">
+                                Save
+                            </button>
+
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div><!-- end card -->
+</div>

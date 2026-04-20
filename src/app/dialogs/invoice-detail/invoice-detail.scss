@@ -1,0 +1,38 @@
+#invoice-detail-model {
+    table>thead>tr>th {
+        background-color: #747CA0;
+        color: #ffffff;
+
+    }
+
+    .table th,
+    .table td {
+        white-space: nowrap;
+    }
+
+    .table-gridjs>tbody>tr>td {
+        padding: 5px !important;
+    }
+
+    .modal-header {
+        background-color: #747CA0;
+        color: white;
+    }
+
+    .modal-title {
+        color: white;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    th.sort {
+        vertical-align: middle;
+    }
+
+    th.sort::before,
+th.sort::after {
+    position: absolute;
+    right: 8px;
+}
+
+}

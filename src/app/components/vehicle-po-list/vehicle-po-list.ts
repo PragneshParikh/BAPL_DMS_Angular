@@ -1,0 +1,209 @@
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { VehiclePoListService } from '../../core/services/vehicle-po-list-service';
+import { TRANSACTION_TYPES } from '../../constant';
+import { LoaderService } from '../../core/services/loader';
+
+@Component({
+  selector: 'app-vehicle-po-list',
+  standalone: true,
+  imports: [CommonModule, FormsModule, NgbPaginationModule],
+  templateUrl: './vehicle-po-list.html',
+  styleUrl: './vehicle-po-list.scss',
+})
+export class VehiclePoList implements OnInit {
+  purchaseNo: string = '';
+  dateFrom: string = '';
+  dateTo: string = '';
+  partyName: string = '';
+  transactionType: string = '';
+  isSubmitted: string = '';
+
+  transactionTypeList = TRANSACTION_TYPES;
+
+  purchaseOrders: any[] = [];
+  originalPurchaseOrders: any[] = [];
+  pagedPurchaseOrders: any[] = [];
+
+  page = 1;
+  pageSize = 10;
+  totalRecords = 0;
+
+  constructor(
+    private router: Router,
+    private poListService: VehiclePoListService,
+    private loader: LoaderService
+  ) { }
+
+  ngOnInit() {
+    this.initDefaultDates();
+    this.loadPOList();
+  }
+
+  initDefaultDates() {
+    const to = new Date();
+    const from = new Date();
+    from.setDate(to.getDate() - 7);
+
+    // Format as YYYY-MM-DD for input type="date"
+    this.dateTo = to.toISOString().split('T')[0];
+    this.dateFrom = from.toISOString().split('T')[0];
+  }
+
+  loadPOList() {
+    this.loader.show();
+    this.poListService.getPOList().subscribe({
+      next: (res: any[]) => {
+        this.loader.hide();
+        console.log('PO List res:', res);
+        const flattened = this.flattenPOList(res);
+        this.originalPurchaseOrders = flattened;
+        this.onSearch(); // Apply the default 7-day filter and sorting
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error('Error fetching PO list:', err);
+      }
+    });
+  }
+
+  flattenPOList(res: any[]): any[] {
+    const flattened: any[] = [];
+    let sNo = 1;
+    res.forEach(po => {
+      const items = po.items || po.PurchaseOrderDetails || [];
+      if (items.length > 0) {
+        // Calculate totals for all items in the PO
+        let totalQty = 0;
+        let totalAmount = 0;
+        items.forEach((item: any) => {
+          totalQty += Number(item.Qty || item.qty || 0);
+          totalAmount += Number(item.LineAmount || item.lineAmount || 0);
+        });
+
+        const firstItem = items[0];
+        let modelName = firstItem.ItemCode || firstItem.itemCode || '';
+
+        flattened.push({
+          sNo: sNo++,
+          prefixNo: po.PrefixNo || po.prefixNo || '',
+          purchaseNo: po.PONumber || po.poNumber || po.ponumber || '',
+          date: this.formatDate(po.PODate || po.poDate || po.podate),
+          rawDate: new Date(po.PODate || po.poDate || po.podate),
+          transactionType: po.TransactionType || po.transactionType || '',
+          isSubmitted: (po.IsSubmitted || po.isSubmitted || po.Status === 'Submitted' || po.status === true) ? 'Submited To Erp' : 'Not Submited To Erp',
+          partyName: "BGAUSS AUTO PRIVATE LIMITED",
+          location: po.LocationName || po.locationName || po.LocName || po.locName || po.LocCode || po.locCode || po.loccode || '',
+          modelName: modelName,
+          color: '',
+          orderQty: totalQty,
+          orderAmount: totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        });
+      }
+    });
+    return flattened;
+  }
+
+  formatDate(dateStr: string): string {
+    if (!dateStr) return '';
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-GB').replace(/\//g, '-'); // DD-MM-YYYY
+    } catch {
+      return dateStr;
+    }
+  }
+
+  redirectToCreatePO() {
+    this.router.navigate(['/vehicle-po']);
+  }
+
+  editPO(po: any) {
+    const poNumber = po.purchaseNo || po.PONumber;
+    if (poNumber) {
+      this.router.navigate(['/vehicle-po', poNumber]);
+    }
+  }
+
+  onSearch() {
+    let filtered = this.originalPurchaseOrders;
+
+    if (this.purchaseNo) {
+      filtered = filtered.filter(x => x.purchaseNo?.toLowerCase().includes(this.purchaseNo.toLowerCase()));
+    }
+
+    if (this.partyName) {
+      filtered = filtered.filter(x => x.partyName?.toLowerCase().includes(this.partyName.toLowerCase()));
+    }
+
+    if (this.transactionType) {
+      filtered = filtered.filter(x => x.transactionType === this.transactionType);
+    }
+
+    if (this.isSubmitted) {
+      filtered = filtered.filter(x => x.isSubmitted === this.isSubmitted);
+    }
+
+    if (this.dateFrom && this.dateTo) {
+      const from = new Date(this.dateFrom);
+      from.setHours(0, 0, 0, 0);
+      const to = new Date(this.dateTo);
+      to.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(x => x.rawDate >= from && x.rawDate <= to);
+    }
+
+    this.purchaseOrders = filtered;
+    this.page = 1;
+    this.totalRecords = this.purchaseOrders.length;
+
+    // Maintain sort order after filtering
+    if (this.sortColumn) {
+      this.purchaseOrders.sort((a: any, b: any) => {
+        let valueA = a[this.sortColumn] || '';
+        let valueB = b[this.sortColumn] || '';
+
+        if (valueA < valueB) return this.sortDirection === 'asc' ? -1 : 1;
+        if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    this.loadPage();
+  }
+
+  loadPage() {
+    const start = (this.page - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.pagedPurchaseOrders = this.purchaseOrders.slice(start, end);
+  }
+
+  refreshPage() {
+    this.loadPage();
+  }
+
+  // ================= SORT =================
+  sortColumn = 'rawDate';
+  sortDirection = 'desc';
+
+  sort(column: string) {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+
+    this.onSearch();
+  }
+
+  getSortClass(column: string) {
+    if (this.sortColumn === column) {
+      return this.sortDirection === 'asc' ? 'sort-asc' : 'sort-desc';
+    }
+    return '';
+  }
+}
+

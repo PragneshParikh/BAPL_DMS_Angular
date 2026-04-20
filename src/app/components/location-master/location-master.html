@@ -1,0 +1,271 @@
+<div>
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+        <h4 class="mb-sm-0">Manage Dealer Location</h4>
+    </div>
+    <!-- SEARCH CARD -->
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 dropdown-wrapper">
+                    <label class="form-label">Dealer Name</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="dealerCode"
+                        (ngModelChange)="checkSearchReset()" [disabled]="isDealer">
+                        <option value="">-- Select Dealer --</option>
+                        <option *ngFor="let d of dealerList" [value]="d.dealerCode">
+                            {{d.dealerName}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Location Area</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="locationArea">
+                        <option value="">-- Select Area --</option>
+                        <option *ngFor="let area of locationAreaMaster" [value]="area.id">
+                            {{area.name}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Location Name</label>
+                    <input type="text" class="form-control form-control-sm" [(ngModel)]="locationName"
+                        (input)="checkKeywordReset()" (keyup.enter)="searchLocation()" />
+                </div>
+                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button class="btn btn-primary btn-sm" (click)="searchLocation()">
+                        Search
+                    </button>
+                    <button class="btn btn-primary btn-sm" (click)="resetSearch()">
+                        Reset
+                    </button>
+
+                    <button class="btn btn-success btn-bg btn-sm" [ngbTooltip]="'Export to Excel'"
+                        (click)="downloadLocationExcel()">
+                        <i class="ri-file-excel-2-line"></i>
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- TABLE CARD -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered mb-0 table-sm">
+                    <thead>
+                        <tr style="background-color:#747CA0 !important;color:white">
+                            <th class="sort">S.No</th>
+                            <th class="sort" [ngClass]="getSortClass('locareaidno')" (click)="sort('locareaidno')">
+                                Location Area</th>
+
+                            <th class="sort" [ngClass]="getSortClass('locname')" (click)="sort('locname')">Location Name
+                            </th>
+
+                            <th class="sort" [ngClass]="getSortClass('loccode')" (click)="sort('loccode')">Location Code
+                            </th>
+
+                            <th class="sort" [ngClass]="getSortClass('rrglocationidno')"
+                                (click)="sort('rrglocationidno')">Supplier Code</th>
+
+                            <th class="sort" [ngClass]="getSortClass('dealercode')" (click)="sort('dealercode')">Dealer
+                                Code</th>
+
+                            <th class="sort" [ngClass]="getSortClass('formtype')" (click)="sort('formtype')">Source</th>
+                            <th>Active</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let location of pagedLocationList; let i = index" (click)="openEditModal(location)"
+                            style="cursor:pointer">
+
+                            <td>{{(page-1)*pageSize + i + 1}}</td>
+                            <td>{{getLocationAreaName(location.locareaidno)}}</td>
+                            <td>{{location.locname}}</td>
+                            <td>{{location.loccode}}</td>
+                            <td>{{location.rrglocationidno}}</td>
+                            <td>{{location.dealercode}}</td>
+                            <td>{{location.formtype}}</td>
+                            <td>
+                                <span *ngIf="location.active=='Y'" class="badge bg-success">
+                                    ACTIVE
+                                </span>
+                                <span *ngIf="location.active!='Y'" class="badge bg-danger">
+                                    INACTIVE
+                                </span>
+                            </td>
+                        </tr>
+                        <tr *ngIf="pagedLocationList.length == 0">
+                            <td colspan="8" class="text-center">
+                                No Data Found
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="row justify-content-md-between align-items-md-center mt-2">
+
+                    <div class="col-sm-12 col-md-5">
+                        <div class="dataTables_info">
+                            Showing {{startIndex}} to {{endIndex}} of {{totalRecords}} entries
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12 col-md-5">
+                        <div class="text-md-right float-md-end gridjs-pagination">
+
+                            <ngb-pagination [collectionSize]="totalRecords" [(page)]="page" [pageSize]="pageSize"
+                                (pageChange)="loadPage()">
+                            </ngb-pagination>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT MODAL -->
+
+<div class="modal fade" id="editLocationModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header dealer-modal-header" style="background-color:#747CA0">
+                <h5 class="modal-title text-white">
+                    Location Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- ================= Location Info ================= -->
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Dealer Code</label>
+                        <input type="text" class="form-control form-control-sm"
+                            [(ngModel)]="selectedLocation.dealercode" readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Loc Code</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedLocation.loccode"
+                            readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Location Name</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedLocation.locname"
+                            readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Location Area</label>
+                        <select class="form-control form-control-sm" style="background-color: transparent !important;"
+                            disabled>
+                            [(ngModel)]="selectedLocation.locareaidno" disabled>
+                            <option *ngFor="let area of locationAreaMaster" [value]="area.id">
+                                {{area.name}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Address 1</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedLocation.add1"
+                            readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Address 2</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedLocation.add2"
+                            readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">State</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedLocation.state"
+                            readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">City</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedLocation.city"
+                            readonly>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-2">
+                        <label class="form-label">Is Metro</label><br>
+                        <input type="checkbox" [checked]="selectedLocation.ismetro" disabled>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Pin Code</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedLocation.pincode"
+                            readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">GSTIN No.</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedLocation.gstinno"
+                            readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Email</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedLocation.email"
+                            readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Mobile No</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedLocation.mobileno"
+                            readonly>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-3">
+                        <label class="form-label">TSM Code</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedLocation.tsmcode"
+                            readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Subsidy Code</label>
+                        <input type="text" class="form-control form-control-sm"
+                            [(ngModel)]="selectedLocation.subsidycode" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Supplier Code</label>
+                        <input type="text" class="form-control form-control-sm"
+                            [(ngModel)]="selectedLocation.suppliercode" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Company</label><br>
+                        <input type="checkbox" [checked]="selectedLocation.company" disabled>
+                    </div>
+                </div>
+                <hr class="my-4">
+                <!-- ================= Contact Detail ================= -->
+                <h5 class="mb-2 text-primary">Contact Detail</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label class="form-label">Contact Person Name</label>
+                        <input type="text" class="form-control form-control-sm"
+                            [(ngModel)]="selectedLocation.contpername1" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Mobile No</label>
+                        <input type="text" class="form-control form-control-sm"
+                            [(ngModel)]="selectedLocation.contpermob1" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Email ID</label>
+                        <input type="text" class="form-control form-control-sm"
+                            [(ngModel)]="selectedLocation.contperemail1" readonly>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Parent Code</label>
+                        <input type="text" class="form-control form-control-sm"
+                            [(ngModel)]="selectedLocation.parentcode" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light btn-sm" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

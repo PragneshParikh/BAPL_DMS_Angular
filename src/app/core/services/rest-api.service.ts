@@ -294,22 +294,22 @@ export class restApiService {
     return this.http.delete<void>('/app/application');
   }
 
-    // Job Apikey
-    getApikeyData(): Observable<any[]> {
-      return this.http.get<any[]>('/app/apikey');
-    }
-  
-    addApikeyData(newData: any): Observable<any[]> {
-      return this.http.post<any[]>('/app/apikey', newData);
-    }
-  
-    updateApikeyData(updatedData: any): Observable<any[]> {
-      return this.http.put<any[]>('/app/apikey', updatedData);
-    }
-  
-    deleteApikeyData(): Observable<void> {
-      return this.http.delete<void>('/app/apikey');
-    }
+  // Job Apikey
+  getApikeyData(): Observable<any[]> {
+    return this.http.get<any[]>('/app/apikey');
+  }
+
+  addApikeyData(newData: any): Observable<any[]> {
+    return this.http.post<any[]>('/app/apikey', newData);
+  }
+
+  updateApikeyData(updatedData: any): Observable<any[]> {
+    return this.http.put<any[]>('/app/apikey', updatedData);
+  }
+
+  deleteApikeyData(): Observable<void> {
+    return this.http.delete<void>('/app/apikey');
+  }
 
   /* Support Ticket Rest Api
   */

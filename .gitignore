@@ -41,3 +41,6 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+package-lock.json
+src/environments/environment.prod.ts
+src/environments/environment.ts
