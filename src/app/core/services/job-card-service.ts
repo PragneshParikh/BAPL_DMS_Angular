@@ -61,4 +61,7 @@ export class JobCardService {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetFilteredJobCard`, { params });
   }
 
+  deleteJobCard(id: number) {
+  return this.httpClient.delete(`${this.baseUrl}/JobCard/DeleteJobCard/${id}`);
+}
 }

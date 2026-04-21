@@ -153,7 +153,7 @@
                         <!-- ACTION -->
                         <td>
                             <button class="btn btn-sm btn-soft-primary" (click)="onEdit(item)"><i class="ri-pencil-fill fs-12"></i></button>
-                            <button class="btn btn-sm btn-soft-danger"><i class="ri-delete-bin-fill fs-12"></i></button>
+                            <button class="btn btn-sm btn-soft-danger" *ngIf="currentUserRole === 'SuperAdmin'" (click)="deleteJobCard(item.id)"><i class="ri-delete-bin-fill fs-12"></i></button>
                         </td>
 
                         <!-- JobNo / Date -->

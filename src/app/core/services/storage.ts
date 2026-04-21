@@ -49,4 +49,11 @@ export class StorageService {
         localStorage.removeItem('selectedModule');
         localStorage.removeItem('menuRights');
     }
+    setRole(role: string) {
+        localStorage.setItem('role', role);
+    }
+
+    getRole(): string {
+        return localStorage.getItem('role') || '';
+    }
 }

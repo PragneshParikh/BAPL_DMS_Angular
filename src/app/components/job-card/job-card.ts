@@ -5,10 +5,11 @@ import { StorageService } from '../../core/services/storage';
 import { LocationName } from '../../ViewModels/ReceiptEntryModel';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { JobType, JobSource } from '../../constant';
+import { JobType, JobSource, userRole } from '../../constant';
 import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterModule } from '@angular/router';
 import { JobCardService } from '../../core/services/job-card-service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-job-card',
@@ -31,6 +32,7 @@ export class JobCard {
   selectedComplaints: string = '';
   selectedViewJobs: string = '';
   selectedChassis: string = '';
+  
 
   //Pagination
   page = 1;
@@ -40,7 +42,10 @@ export class JobCard {
   filteredData: any[] = [];
   serviceTypeList: any;
   selectedServiceType: string;
-  chassisList: any[] = [];;
+  chassisList: any[] = [];
+  // userRole: string = ''; when userrole api done then this var use
+  
+  currentUserRole = userRole[0].value;
 
 
   constructor(private receiptEntryService: ReceiptEntryService,
@@ -50,12 +55,14 @@ export class JobCard {
   ) { }
 
   ngOnInit(): void {
+
+    this.setUserRole();
     this.fetchLocations();
     this.loadChassisList();
     this.loadJobCardList();
   }
 
-  
+
 
   //Fetech Dealer Location
   fetchLocations(): void {
@@ -106,9 +113,66 @@ export class JobCard {
   }
 
   onEdit(row: any) {
-  this.router.navigate(['/job-card-addForm/job-card-add-form'], {
-    state: { data: row }
-  });
+    this.router.navigate(['/job-card-addForm/job-card-add-form'], {
+      state: { data: row }
+    });
+  }
+
+  deleteJobCard(id: number) {
+
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You will not be able to recover this Job Card!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+      width: '350px'
+    }).then((result) => {
+
+      if (result.isConfirmed) {
+
+        this.jobCardService.deleteJobCard(id).subscribe({
+          next: (res: any) => {
+
+            Swal.fire({
+              icon: 'success',
+              title: 'Deleted!',
+              text: 'Job Card deleted successfully',
+              width: '350px'
+            });
+
+            //  Refresh list
+            this.loadJobCardList();
+
+          },
+          error: (err) => {
+            console.error(err);
+
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: err?.error || 'Delete failed',
+              width: '300px'
+            });
+          }
+        });
+
+      }
+    });
+  }
+
+setUserRole() {
+  const dealerCode = this.storageService.getDealerCode();
+
+  const superAdminCodes = ['ADMIN001']; // 👈 multiple bhi rakh sakte ho
+
+  const role = superAdminCodes.includes(dealerCode)
+    ? 'SuperAdmin'
+    : 'Dealer';
+
+  this.storageService.setRole(role);
+  this.currentUserRole = role;
 }
 
   onLocationChange(event: Event): void {

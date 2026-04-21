@@ -101,5 +101,14 @@ export const IssueTypes = [
     { id: 1, name: 'Paid' },
     { id: 2, name: 'U/W' },
     { id: 3, name: 'FOC' },
-    { id: 4, name: 'Goodwill' }
+    { id: 4, name: 'Goodwill' },
+    { name: 'Paid', value: 'paid' },
+    { name: 'U/W', value: 'u/w' },
+    { name: 'FOC', value: 'foc' },
+    { name: 'Goodwill', value: 'goodwill' }
+]
+
+export const userRole=[
+    {roleId:1, value:'SuperAdmin'},
+    {roleId:2, value:'Dealer'}
 ]
