@@ -54,3 +54,11 @@
   font-size: 12px;     /* makes it compact */
   z-index: 1000;
 }
+.form-control-sm {
+    min-height: 30px;
+}
+
+.invalid-feedback {
+    font-size: 11px;
+    min-height: 14px; /* keeps spacing even */
+}

@@ -6,29 +6,19 @@
 
 <div class="card">
     <div class="card-header d-flex justify-content-end align-items-center">
-        <!-- <h5 class="mb-0 text-primary">
-            <i class="ri-car-line me-1"></i> Add Vehicle Sale
-        </h5> -->
-
 
         <div class="d-flex justify-content-end gap-2 me-3">
-            <button class="btn btn-primary" (click)="billId ? updateVehicleSaleBill() : saveVehicleDetailsOnly()">
+            <button class="btn btn-primary"
+                (click)="billId ? updateVehicleSaleBill() : saveVehicleDetailsOnly()">
                 Save
             </button>
             <button class="btn btn-primary btn-sm" (click)="onSubmitToERP()">Submit
                 To ERP</button>
-            <!-- <button class="btn btn-success btn-sm">
-                <i class="ri-add-line"></i>
-            </button>
-
-            <button class="btn btn-success btn-sm">
-                <i class="ri-file-excel-2-line"></i>
-            </button> -->
         </div>
     </div>
 
     <div class="card-body">
-        <form #vehicleSaleForm="ngForm" class="vehicle-form">
+        <form #vehicleSaleForm="ngForm" class="vehicle-form" autocomplete="off">
 
             <!-- ================= SALE INFO ================= -->
             <div class="d-flex justify-content-between align-items-center mb-1" data-bs-toggle="collapse"
@@ -70,10 +60,10 @@
                                     {{ loc.locname }}
                                 </option>
                             </select>
-                            <div *ngIf="location.invalid && (location.touched || vehicleSaleForm.submitted)"
+                            <small *ngIf="location.invalid && (location.touched || vehicleSaleForm.submitted)"
                                 class="text-danger mt-1">
                                 Location is required.
-                            </div>
+                            </small>
                         </div>
 
                         <!-- B2B -->
@@ -81,11 +71,11 @@
                             <label class="form-label d-block mb-1 ">Customer Type</label>
                             <div class="btn-group w-auto" role="group">
                                 <input type="radio" class="btn-check" name="saleTypeSwitch" id="b2c" checked
-                                    [(ngModel)]="model.customerType" value="B2C">
+                                    [(ngModel)]="model.customerType" value="B2C" (change)="onCustomerTypeChange()">
                                 <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2c">B2C</label>
 
                                 <input type="radio" class="btn-check" name="saleTypeSwitch" id="b2b"
-                                    [(ngModel)]="model.customerType" value="B2B">
+                                    [(ngModel)]="model.customerType" value="B2B" (change)="onCustomerTypeChange()">
                                 <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2b">B2B</label>
                             </div>
                         </div>
@@ -96,7 +86,7 @@
 
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="d2dSwitch" [(ngModel)]="model.isD2D"
-                                    name="isD2D">
+                                    name="isD2D" (change)="onD2DChange()">
 
                                 <label class="form-check-label" for="d2dSwitch">Enable</label>
                             </div>
@@ -106,24 +96,21 @@
 
                         <div class="col-md-3">
                             <label class="form-label form-label-sm">Sale Type</label>
-                            <select class="form-select form-select-sm" [(ngModel)]="model.saleType" name="saleType"
-                                (change)="onSaleTypeChange()">
+                            <select class="form-select form-select-sm" #saleType="ngModel" [(ngModel)]="model.saleType"
+                                name="saleType" (change)="onSaleTypeChange()" required>
 
-                                <option value="">Select Sale Type</option>
 
                                 <option *ngFor="let item of saleTypeOptions" [value]="item.value">
                                     {{ item.name }}
                                 </option>
 
                             </select>
+                            <small *ngIf="saleType.touched && saleType.invalid" class="text-danger mt-1">
+                                Sale Type is required.
+                            </small>
                         </div>
 
-                        <!-- <div class="col-md-3">
-                            <label class="form-label form-label-sm ">Financier</label>
-                            <select class="form-select form-select-sm" name="financier" [(ngModel)]="model.financier" [disabled]="model.saleType !== 'Credit'">
-                                <option>Select Financier</option>
-                            </select>
-                        </div> -->
+
                         <div class="col-md-3">
                             <label>Financier</label>
                             <div class="d-flex align-items-center">
@@ -137,7 +124,7 @@
                                     </button>
                                     <option class="dropdown-list" value="">Select Financier</option>
 
-                                    <option *ngFor="let f of financiers" [value]="f.ledgerName">
+                                    <option *ngFor="let f of financiers" [value]="f.ledgerName" class="dropdown-list">
 
                                         {{ f.ledgerName }}
 
@@ -146,17 +133,10 @@
 
                                 </select>
 
-                                <!-- Add Button -->
-
-                                <!-- <button type="button" class="btn btn-sm btn-primary"
-                                                    (click)="openCustomerLedgerAdd()"
-                                                    [ngbTooltip]="'Add New Financier'">
-                                                    +
-                                                </button> -->
-                            </div>
+                                </div>
 
                         </div>
-                        <!-- NEW FIELD -->
+                        <!-- CASH FIELD -->
                         <div class="col-md-3">
                             <label class="form-label form-label-sm" for="cashAccount">Cash A/C</label>
                             <select class="form-select form-select-sm" name="cashAccount"
@@ -169,16 +149,7 @@
                             </select>
                         </div>
 
-                        <!-- ================= REMAINING FIELDS (UNCHANGED) ================= -->
-
-                        <!-- <div class="col-md-3">
-                            <label class="form-label form-label-sm" for="billingType">Billing Type</label>
-                            <select class="form-select form-select-sm" name="billingType"
-                                [(ngModel)]="model.billingType">
-                                <option value="">Select Billing Type</option>
-                            </select>
-                        </div> -->
-
+                        <!-- ================= Billing ================= -->
                         <div class="col-md-3">
                             <label class="form-label form-label-sm" for="billingType">Billing Type</label>
 
@@ -187,7 +158,10 @@
 
                                 <option value="">Select Billing Type</option>
 
-                                <option *ngFor="let option of billingTypeOptions" [value]="option.value">
+                                <option *ngFor="let option of billingTypeOptions" [value]="option.value" [disabled]="
+          (model.customerType === 'B2B' && option.value !== 'Dealer Sale/Institutional') ||
+          (model.customerType === 'B2C' && option.value !== 'Counter Sale[single]')
+        ">
                                     {{ option.name }}
                                 </option>
 
@@ -210,62 +184,59 @@
                                 [disabled]="true">
                         </div>
 
-                        <!-- <div class="col-md-3">
-                            <label class="form-label form-label-sm" for="customerName">Customer Name</label>
-                            <input type="text" class="form-control form-control-sm" name="customerName"
-                                [(ngModel)]="model.customerName"> <button type="button" class="btn btn-sm btn-primary"
-                                                    (click)="openCustomerLedgerAdd()"
-                                                    [ngbTooltip]="'Add New Financier'">
-                                                    +
-                                                </button>
-                        </div> -->
-                        <!-- <div class="col-md-3">
-                            <label class="form-label form-label-sm" for="customerName">Customer Name</label>
-
-                            <div class="d-flex">
-                                <input type="text" class="form-control form-control-sm" name="customerName"
-                                    [(ngModel)]="model.customerName" />
-
-                                <button type="button" class="btn btn-sm btn-primary" (click)="openCustomerLedgerAdd()"
-                                    [ngbTooltip]="'Add New Party'">
-                                    +
-                                </button>
-                            </div>
-                        </div> -->
-
 
                         <div class="col-md-3">
-                            <label class="form-label form-label-sm" for="customerName">Customer Name</label>
+                            <label class="form-label form-label-sm">
+                                Customer Name <span class="text-danger">*</span>
+                            </label>
 
+                            <!-- INPUT + BUTTON + DROPDOWN -->
                             <div class="d-flex position-relative">
-                                <input type="text" class="form-control form-control-sm" name="customerName"
-                                    [(ngModel)]="model.customerName" (input)="filterParties()" autocomplete="off" />
 
-                                <button type="button" class="btn btn-sm btn-primary" (click)="openCustomerLedgerAdd()"
-                                    [ngbTooltip]="'Add New Party'">
+                                <input type="text" class="form-control form-control-sm" name="customerName"
+                                    [(ngModel)]="model.customerName" required #customerName="ngModel"
+                                    (input)="filterParties()" 
+                                    [class.is-invalid]="customerName.invalid && (customerName.touched || vehicleSaleForm.submitted)" />
+
+                                <button type="button" class="btn btn-sm btn-primary ms-1"
+                                    (click)="openCustomerLedgerAdd()" [ngbTooltip]="'Add New Party'">
                                     +
                                 </button>
 
-                                <!-- Dropdown -->
+                                <!-- AUTOCOMPLETE DROPDOWN -->
                                 <ul *ngIf="filteredParties.length > 0"
                                     class="list-group position-absolute w-100 small-dropdown"
-                                    style="top: 100%; z-index: 1000; ">
-                                    <li class="list-group-item list-group-item-action" style="padding: 1%;"
+                                    style="top: 100%; z-index: 1000;">
+                                    <li class="list-group-item list-group-item-action"
                                         *ngFor="let party of filteredParties" (click)="selectParty(party)">
                                         {{ party.ledgerName }}
                                     </li>
                                 </ul>
                             </div>
+
+                            <!-- ✅ VALIDATION (OUTSIDE) -->
+                            <small class="invalid-feedback d-block"
+                                *ngIf="customerName.invalid && (customerName.touched || vehicleSaleForm.submitted)">
+                                Customer Name is required.
+                            </small>
+
+                            <!-- NEW VALIDATION -->
+                            <div class="text-danger small"
+                                *ngIf="model.customerName && !isCustomerValid() && (customerName.touched || vehicleSaleForm.submitted)">
+                                Party not found. Please click + to add new party.
+                            </div>
                         </div>
 
-
-
-
-
                         <div class="col-md-3">
-                            <label class="form-label form-label-sm" for="billingName">Billing Name</label>
+                            <label class="form-label form-label-sm" for="billingName">Billing Name<span
+                                    class="text-danger">*</span></label>
                             <input type="text" class="form-control form-control-sm" name="billingName"
-                                [(ngModel)]="model.billingName">
+                                [(ngModel)]="model.billingName" required #billingName="ngModel">
+                            <div><small
+                                    *ngIf="billingName.invalid && (billingName.touched || vehicleSaleForm.submitted)"
+                                    class="text-danger text-small mt-1">
+                                    Billing Name is required.</small>
+                            </div>
                         </div>
 
                         <!-- <div class="col-md-3">
@@ -313,15 +284,6 @@
                                 [(ngModel)]="model.tempRegNo" [disabled]="model.tempRegRequired !== 'yes'">
                         </div>
 
-                        <!-- <div class="col-md-3">
-                            <label class="form-label form-label-sm" for="printType">Print Type</label>
-                            <select class="form-select form-select-sm" id="printType" name="printType"
-                                [(ngModel)]="model.printType">
-                                <option value="">Select Print Type</option>
-                                <option value="onroad">On Road</option>
-                                <option value="exshowroom">Ex Showroom</option>
-                            </select>
-                        </div> -->
 
                     </div>
                 </div>
@@ -348,53 +310,96 @@
                     <!-- ROW 1 -->
                     <div class="row g-2 align-items-end">
 
-                        <!-- <div class="col-md-3">
-                            <label class="form-label-sm mb-1">Chassis No.</label>
-                            <select class="form-select form-select-sm">
-                                <option>Chassis 1</option>
-                            </select>
-                        </div> -->
-
                         <!--Temp-->
                         <div class="col-md-3">
-                            <label class="form-label-sm mb-1">Chassis No.</label>
-                            <!-- <select class="form-select form-select-sm" [(ngModel)]="model.chassisNo" name="chassisNo">
-                                <option>Select Chasis No</option>
-                                <option>P6DEVFMFPBB001927</option>
-                                <option>P6DEVFMEPBB001088</option>
-                                <option>P6DEC12DPEB004412</option>
-                                <option>P6DEC12CPEB019611</option>
-                                <option>P6DEVFMFPBB002060</option>
-                                <option>P6DEVFMFPBC002083</option>
-                            </select> -->
+                            <label class="form-label-sm mb-1">Chassis No.<span class="text-danger">*</span></label>
                             <select [(ngModel)]="model.chassisNo" name="chassisNo" class="form-control form-control-sm"
-                                (change)="onChassisChange()">
-                                <option *ngFor="let c of chassisList" [value]="c.chassisNo">
-                                    {{ c.chassisNo }} - {{ c.itemCode }}
+                                (change)="onChassisChange()" required #chassisNo="ngModel">
+                                <option *ngFor="let c of chassisList" [value]="c.chassisNo"
+                                    [disabled]="isChassisUsed(c.chassisNo) && model.chassisNo !== c.chassisNo">
+
+                                    {{ c.chassisNo }} - {{ c.itemName }} - {{ c.mfgYear }}
                                 </option>
                             </select>
+                            <small *ngIf="chassisNo.invalid && (chassisNo.touched || vehicleSaleForm.submitted)"
+                                class="text-danger mt-1">
+                                Chassis No is required.
+                            </small>
                         </div>
 
                         <div class="col-md-1">
                             <label class="form-label-sm mb-1">Item Rate</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="model.itemRate" name="itemRate" readonly>
+                            <input class="form-control form-control-sm" [(ngModel)]="model.itemRate" name="itemRate"
+                                readonly>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label-sm mb-1">Mfg Year</label>
+                            <input class="form-control form-control-sm" [(ngModel)]="model.mfgYear" name="mfgYear"
+                                readonly>
+
                         </div>
 
                         <div class="col-md-2">
                             <label class="form-label-sm mb-1">Pre Gst Disc.</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="model.preGSTDiscount" name="preGSTDiscount" readonly>
+                            <input class="form-control form-control-sm" [(ngModel)]="model.preGSTDiscount"
+                                name="preGSTDiscount" readonly>
                         </div>
-
+                        <div class="col-md-2">
+                            <label class="form-label-sm mb-1">Regn No<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" #regNo="ngModel"
+                                [(ngModel)]="model.regNo" name="regNo" required>
+                            <small *ngIf="regNo.invalid && (regNo.touched || vehicleSaleForm.submitted)"
+                                class="text-danger text-small mt-1">
+                                Regn No is required.
+                            </small>
+                        </div>
                         <div class="col-md-1">
-                            <label class="form-label-sm mb-1">Reg Amt.</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="model.regAmount" name="regAmount" >
+                            <label class="form-label-sm mb-1">Reg Amt.<span class="text-danger">*</span></label>
+                            <input type="number" class="form-control form-control-sm" #regAmount="ngModel"
+                                [(ngModel)]="model.regAmount" name="regAmount" required>
+                            <small *ngIf="regAmount.invalid && (regAmount.touched || vehicleSaleForm.submitted)"
+                                class="text-danger text-small mt-1">
+                                Regn Amount is required.
+                            </small>
                         </div>
-
+                        <div class="col-md-2">
+                            <label class="form-label-sm mb-1">Ins. No<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" #insNo="ngModel"
+                                [(ngModel)]="model.insNo" name="insNo" required>
+                            <small *ngIf="insNo.invalid && (insNo.touched || vehicleSaleForm.submitted)"
+                                class="text-danger text-small mt-1">
+                                Ins. No is required.
+                            </small>
+                        </div>
                         <div class="col-md-1">
-                            <label class="form-label-sm mb-1">Ins. Amt</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="model.insAmount" name="insAmount" >
+                            <label class="form-label-sm mb-1">Ins. Amt<span class="text-danger">*</span></label>
+                            <input type="number" class="form-control form-control-sm" #insAmount="ngModel"
+                                [(ngModel)]="model.insAmount" name="insAmount" required>
+                            <small class="invalid-feedback "
+                                *ngIf="insAmount.invalid && (insAmount.touched || vehicleSaleForm.submitted)"
+                                class="text-danger text-small mt-1">
+                                Ins. Amount is required.
+                            </small>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label-sm mb-1">Ins Start Date</label>
+                            <input type="date" class="form-control form-control-sm" #insStartDate="ngModel"
+                                [(ngModel)]="model.insStartDate" name="insStartDate " required>
+                            <div *ngIf="insStartDate.invalid && (insStartDate.touched || vehicleSaleForm.submitted)"
+                                class="text-danger text-small mt-1">
+                                Ins Start Date is required.
+                            </div>
                         </div>
 
+                        <div class="col-md-2">
+                            <label class="form-label-sm mb-1">Ins Exp Date</label>
+                            <input type="date" class="form-control form-control-sm" #insExpDate="ngModel"
+                                [(ngModel)]="model.insExpDate" name="insExpDate" required>
+                            <div *ngIf="insExpDate.invalid && (insExpDate.touched || vehicleSaleForm.submitted)"
+                                class="text-danger text-xs mt-1">
+                                Ins Exp Date is required.
+                            </div>
+                        </div>
                         <!-- <div class="col-md-2">
                             <label class="form-label-sm mb-1">Devices</label>
                             <button class="form-control form-control-sm text-start">
@@ -402,11 +407,12 @@
                             </button>
                         </div> -->
 
-                        <div class="col-md-1">
-                            <label class="form-label-sm mb-1" >Mfg Year</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="model.mfgYear" name="mfgYear" readonly>
+                        <!-- <div class="col-md-1">
+                            <label class="form-label-sm mb-1">Mfg Year</label>
+                            <input class="form-control form-control-sm" [(ngModel)]="model.mfgYear" name="mfgYear"
+                                readonly>
 
-                        </div>
+                        </div> -->
 
 
                     </div>
@@ -518,6 +524,8 @@
                         </div> -->
 
                     </div>
+
+
                     <div *ngIf="vehicleList.length > 0" class="mt-3">
 
                         <div class="table-responsive mt-3">
@@ -536,15 +544,19 @@
                                         <th>Controller No</th>
                                         <th>Key/Book No</th>
                                         <th>Kit</th>
-                                        <th>Rate</th>
+                                        <th>ItemRate</th>
                                         <th>Regn Amt</th>
                                         <th>Ins Amt</th>
                                         <th>Pre GST Amt</th>
-                                        <th>Amount</th>
+                                        <th>Taxable Amount</th>
                                         <th>Ext Warranty</th>
-                                        <th>SGST</th>
-                                        <th>CGST</th>
-                                        <th>IGST</th>
+                                        <th>SGST %</th>
+                                        <th>SGST Amnt</th>
+                                        <th>CGST %</th>
+                                        <th>CGST Amnt</th>
+                                        <th>IGST %</th>
+                                        <th>IGST Amnt</th>
+                                        <th>Final Amount</th>
                                         <th>Cess</th>
                                         <th>TCS</th>
                                         <th>Delivered</th>
@@ -558,7 +570,7 @@
 
                                 <tbody>
                                     <tr *ngFor="let row of vehicleList; let i = index">
-
+<!-- <pre>{{ vehicleList | json }}</pre> -->
 
                                         <td>
                                             <button class="btn btn-sm btn-soft-info py-0 px-1 me-1"
@@ -582,7 +594,7 @@
                                         <td>{{ row.convertorNo }}</td>
                                         <td>{{ row.chargerNo }}</td>
                                         <td>{{ row.controllerNo }}</td>
-                                        <td>{{ row.keyBookNo }}</td>
+                                      <td>{{ row.key }}/{{ row.bookNo }}</td>
 
                                         <td>
                                             {{ row.kit }}
@@ -591,16 +603,25 @@
                                         <td>{{ row.rate }}</td>
                                         <td>{{ row.regAmt }}</td>
                                         <td>{{ row.insAmt }}</td>
-                                        <td>{{ row.preGstAmt }}</td>
-                                        <td>{{ row.amount }}</td>
+                                        <td>{{ row.preGstDiscount }}</td>
+                                        <td>{{ row.taxableAmount ?? row.amount}}</td>
 
                                         <td>
                                             {{ row.extWarranty }}
                                         </td>
-
-                                        <td>{{ row.sgst }}</td>
-                                        <td>{{ row.cgst }}</td>
-                                        <td>{{ row.igst }}</td>
+                                        <td>{{ model.isD2D ? 0 : row.sgstPer }}%</td>
+                                        <!-- <td>{{ model.isD2D ? 0 : (row.sgst ?? row.sgstamnt) }}</td>
+                                        <td>{{ model.isD2D ? 0 : row.cgstPer }}%</td>
+                                        <td>{{ model.isD2D ? 0 : (row.cgst ?? row.cgstamnt) }}</td>
+                                        <td>{{ model.isD2D ? 0 : row.igstPer }}%</td>
+                                        <td>{{ model.isD2D ? 0 : (row.igst ?? row.igstamnt) }}</td> -->
+                                       <td>{{ model.isD2D ? 0 : row.sgst }}</td>
+                                        <td>{{ model.isD2D ? 0 : row.cgstPer }}%</td>
+                                        <td>{{ model.isD2D ? 0 : row.cgst  }}</td>
+                                        <td>{{ model.isD2D ? 0 : row.igstPer }}%</td>
+                                        <td>{{ model.isD2D ? 0 : row.igst  }}</td>
+                                       
+                                        <td>{{ row.finalAmount }}</td>
                                         <td>{{ row.cess }}</td>
                                         <td>{{ row.tcs }}</td>
 
@@ -631,12 +652,14 @@
                         <!-- Final Amount -->
                         <div class="col-md-3">
                             <label class="form-label-sm mb-1">Final Amount</label>
-                            <input class="form-control form-control-sm" readonly>
+                            <input class="form-control form-control-sm" [value]="getGrandTotal()"
+                                [(ngModel)]="model.finalAmount" name="finalAmount" readonly>
                         </div>
 
                         <!-- ADD BUTTON HERE -->
                         <div class="col-md-12 d-flex justify-content-end mt-2">
-                            <button class="btn btn-primary btn-sm" type="button" (click)="addVehicle()">
+                            <button class="btn btn-primary btn-sm" type="button" (click)="addVehicle(vehicleSaleForm)"
+                                [disabled]="!isVehicleValid()">
                                 Add
                             </button>
                         </div>
@@ -943,232 +966,6 @@
 
         </form>
 
-        <!-- <div *ngIf="vehicleList.length > 0" class="mt-3">
-
-            <div class="table-responsive mt-3">
-                <table class="table table-sm table-bordered align-middle text-nowrap">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Action</th>
-                            <th>Sr No</th>
-                            <th>Chasis/Engine No</th>
-                            <th>Model</th>
-                            <th>Colour</th>
-                            <th>Mfg Year</th>
-                            <th>Battery</th>
-                            <th>Convertor No</th>
-                            <th>Charger No</th>
-                            <th>Controller No</th>
-                            <th>Key/Book No</th>
-                            <th>Kit</th>
-                            <th>Rate</th>
-                            <th>Regn Amt</th>
-                            <th>Ins Amt</th>
-                            <th>Pre GST Amt</th>
-                            <th>Amount</th>
-                            <th>Ext Warranty</th>
-                            <th>SGST</th>
-                            <th>CGST</th>
-                            <th>IGST</th>
-                            <th>Cess</th>
-                            <th>TCS</th>
-                            <th>Delivered</th>
-                            <th>Battery Chemical</th>
-                            <th>Battery Capacity</th>
-                            <th>Battery Make</th>
-                            <th>Stock Detail No</th>
-                            <th>VCU</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr *ngFor="let row of vehicleList; let i = index">
-
-                        
-                            <td>
-                                <button class="btn btn-sm btn-soft-info py-0 px-1 me-1" (click)="editVehicle(i)"
-                                    [disabled]="isSubmitted">
-                                    <i class="ri-pencil-line"></i>
-                                </button>
-
-                                <button class="btn btn-sm btn-soft-danger py-0 px-1" (click)="deleteVehicle(i)"
-                                    [disabled]="isSubmitted">
-                                    <i class="ri-delete-bin-line"></i>
-                                </button>
-                            </td>
-
-                            <td>{{ i + 1 }}</td>
-
-                            <td>{{ row.chassisNo }}</td>
-                            <td>{{ row.model }}</td>
-                            <td>{{ row.colour }}</td>
-                            <td>{{ row.mfgYear }}</td>
-                            <td>{{ row.battery }}</td>
-                            <td>{{ row.convertorNo }}</td>
-                            <td>{{ row.chargerNo }}</td>
-                            <td>{{ row.controllerNo }}</td>
-                            <td>{{ row.keyBookNo }}</td>
-
-                            <td>
-                                {{ row.kit }}
-                            </td>
-
-                            <td>{{ row.rate }}</td>
-                            <td>{{ row.regAmt }}</td>
-                            <td>{{ row.insAmt }}</td>
-                            <td>{{ row.preGstAmt }}</td>
-                            <td>{{ row.amount }}</td>
-
-                            <td>
-                               {{ row.extWarranty }}
-                            </td>
-
-                            <td>{{ row.sgst }}</td>
-                            <td>{{ row.cgst }}</td>
-                            <td>{{ row.igst }}</td>
-                            <td>{{ row.cess }}</td>
-                            <td>{{ row.tcs }}</td>
-
-                            <td>
-                                {{ row.delivered }}
-                            </td>
-
-                            <td>{{row.batteryChemical}}</td>
-                            <td>{{row.batteryCapacity}}</td>
-                            <td>{{row.batteryMake}}</td>
-                            <td>{{row.stockDetailNo}}</td>
-                            <td>{{row.vcu}}</td>
-
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div> -->
-
     </div>
 
 </div>
-<ng-template #ReceiptEntryModal let-modal>
-    <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title text-white">Receipt Entry Search</h5>
-        <button class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
-    </div>
-
-    <div class="modal-body">
-        <!-- Search Form -->
-        <div class="row g-2 align-items-end mb-3">
-            <div class="col">
-                <label>Date From</label>
-                <input type="date" class="form-control form-control-sm" [(ngModel)]="receipt.fromDate" name="dateFrom">
-            </div>
-
-            <div class="col">
-                <label>Date To</label>
-                <input type="date" class="form-control form-control-sm" [(ngModel)]="receipt.toDate" name="dateTo">
-            </div>
-
-            <div class="col">
-                <label>Receipt No</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="receipt.receiptNo"
-                    name="receiptNo">
-            </div>
-
-            <div class="col">
-                <label>Booking No</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="receipt.bookingId"
-                    name="bookingId">
-            </div>
-
-            <div class="col">
-                <label>Party Name</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="receipt.partyName"
-                    name="partyName">
-            </div>
-
-            <div class="col">
-                <label>Model</label>
-                <select class="form-select form-select-sm" [(ngModel)]="receipt.itemCode" name="itemCode">
-                    <option value="">Select Model</option>
-                    <option *ngFor="let m of products" [value]="m.itemcode">{{ m.itemname }}</option>
-                </select>
-            </div>
-
-            <div class="col-auto">
-                <button class="btn btn-light btn-sm me-2" (click)="clearFilters()">Close</button>
-                <button class="btn btn-primary btn-sm" (click)="searchReceipts()">Search</button>
-            </div>
-        </div>
-
-        <hr class="mb-3" />
-        <!-- Receipt Table Card -->
-        <div class="card">
-
-
-            <div class="card mt-3">
-                <div class="card-body">
-
-                    <div *ngIf="paginatedReceipts.length > 0; else noData">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-striped" style="font-size: 12px;">
-                                <thead>
-                                    <tr>
-                                        <th>Sl No.</th>
-                                        <th>Receipt No</th>
-                                        <th>Date</th>
-                                        <th>Booking</th>
-                                        <th>Party</th>
-                                        <th>Mobile</th>
-                                        <th>Product</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr *ngFor="let item of paginatedReceipts; let i = index" (click)="selectRow(item)"
-                                        [class.table-active]="selectedRow?.id === item.id" style="cursor: pointer;">
-                                        <td>
-                                            <input type="radio" name="selectedRow"
-                                                [checked]="selectedRow?.id === item.id">
-                                            {{ (i + 1) + ((page - 1) * pageSize) }}
-                                        </td>
-                                        <td>{{ item.receiptNo }}</td>
-                                        <td>{{ item.receiptDate | date:'dd/MM/yyyy' }}</td>
-                                        <td>{{ item.bookingId }}</td>
-                                        <td>{{ item.partyName }}</td>
-                                        <td>{{ item.mobileNo }}</td>
-                                        <td>{{ item.productName }}</td>
-                                        <td>{{ item.totalAmount }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Pagination aligned right -->
-                        <div class="d-flex justify-content-end mt-2">
-                            <ngb-pagination [collectionSize]="receiptList.length" [(page)]="page" [pageSize]="pageSize"
-                                (pageChange)="onPageChange($event)">
-                            </ngb-pagination>
-                        </div>
-
-                        <!-- Proceed button below table -->
-                        <div class="mt-2 d-flex justify-content-end gap-2">
-                            <button class="btn btn-primary btn-sm" [disabled]="!selectedRow" (click)="proceed()">
-                                Proceed
-                            </button>
-                            <button class="btn btn-light btn-sm" (click)="clearFilters()">
-                                Close
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- No Data Template -->
-                    <ng-template #noData>
-                        <div class="text-center text-muted" *ngIf="searchClicked">
-                            No data found.
-                        </div>
-                    </ng-template>
-
-                </div>
-            </div>
-        </div>
-    </div>
-</ng-template>

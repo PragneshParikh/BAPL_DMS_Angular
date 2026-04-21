@@ -3,6 +3,7 @@ import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { VehicleSaleChasisRequest, VehicleSaleChasisResponse } from '../../ViewModels/VehicleSaleBill';
+import { VehicleSaleListChasisResponse } from '../../ViewModels/VehicleSaleChasisResponse';
 
 @Injectable({
   providedIn: 'root',
@@ -39,4 +40,12 @@ export class VehicleSaleBillService {
   );
 }
 
+getChassisListPDIOK(dealerCode: string): Observable<VehicleSaleListChasisResponse[]> {
+  return this.http.get<VehicleSaleListChasisResponse[]>(
+    `${this.apiUrl}/VehicleSaleBill/ChassisListPDIOK?dealerCode=${dealerCode}`
+  );
+}
+getVehicleSaleBillById(id: number): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/VehicleSaleBill/${id}`);
+}
 }

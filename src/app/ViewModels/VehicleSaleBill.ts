@@ -73,6 +73,9 @@ export interface VehicleSaleBillResponseViewModel {
   referralName: string;
   billType: string;
   financier?: string;
+  salesExecutive?: string;
+  isD2d: boolean;
+  cashAccount?: string;
   details: VehicleSaleBillDetailVM[];
 }
 
