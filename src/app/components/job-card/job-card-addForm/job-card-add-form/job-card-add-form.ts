@@ -13,6 +13,7 @@ import { icons } from '../../../../core/data';
 import { Console, info } from 'console';
 import { title } from 'process';
 import { text } from 'stream/consumers';
+import { Route, Router } from '@angular/router';
 
 @Component({
   selector: 'app-job-card-add-form',
@@ -67,11 +68,12 @@ export class JobCardAddForm {
   controllerNo: string = '';
   converterNo: string = '';
   motorNo: string = '';
-  odoReading: number=0.0;
-  duration : number=0.0;
-  durationType: string='';
-  expireWarrentyDate:string='';
-   
+  odoReading: number = 0.0;
+  duration: number = 0.0;
+  durationType: string = '';
+  expireWarrentyDate: string = '';
+  chassiseditData: any = null;
+
 
   chargerMake: string = '';
   batteryVoltage: string = '';
@@ -80,6 +82,8 @@ export class JobCardAddForm {
   batteryCCV: string = '';
   batteryOCV: string = '';
   isPdiModalOpen = false;
+  isEditMode = false;
+  editId: number = 0;
 
 
 
@@ -120,9 +124,18 @@ export class JobCardAddForm {
 
   constructor(private storageService: StorageService,
     private receiptEntryService: ReceiptEntryService,
-    private jobCardService: JobCardService, private modalService: NgbModal) { }
+    private router : Router,
+    private jobCardService: JobCardService,
+     private modalService: NgbModal) { }
 
   ngOnInit(): void {
+    const data = history.state.data;
+
+    if (data) {
+      this.isEditMode = true;
+      this.chassiseditData = data;
+      this.patchEditData(data);
+    }
     this.fetchLocations();
     this.loadJobTypes();
     this.loadChassisList();
@@ -137,6 +150,18 @@ export class JobCardAddForm {
       next: (data: any[]) => {
         // only Workshop (id = 2)
         this.locations = data.filter(x => x.locareadidNo === 2);
+        // EDIT MODE FIX
+      if (this.isEditMode && this.chassiseditData) {
+        // backend value assign
+        this.selectedLocation = this.chassiseditData.jobCardHeader.serviceloc;
+        // OPTIONAL (safe match)
+        const match = this.locations.find(
+          x => x.locname === this.selectedLocation
+        );
+        if (match) {
+          this.selectedLocation = match.locname;
+        }
+      }
         //console.log("Workshop Locations", this.locations);
       },
       error: (err) => {
@@ -145,17 +170,34 @@ export class JobCardAddForm {
     });
   }
   // load job type 
+  // loadJobTypes() {
+  //   this.selectedJobtype = '';
+  //   this.jobCardService.getJobType().subscribe({
+  //     next: (res) => {
+  //       //console.log(res);
+  //       this.jobTypeList = res.map((x: any) => ({
+  //         jobTypeId: x.jobTypeId,
+  //         jobtypeName: (x.jobtypeName || '').trim()
+  //       }));
+
+  //     },
+  //     error: (err) => {
+  //       console.error('Error fetching job types', err);
+  //     }
+  //   });
+  // }
   loadJobTypes() {
     this.selectedJobtype = '';
     this.jobCardService.getJobType().subscribe({
       next: (res) => {
-        console.log(res);
+        this.jobTypeList = res;
 
-        this.jobTypeList = res.map((x: any) => ({
-          jobTypeId: x.jobTypeId,
-          jobtypeName: (x.jobtypeName || '').trim()
-        }));
+        if (this.isEditMode) {
+          this.selectedJobtype = this.chassiseditData.jobCardHeader.jobtype;
 
+          //  IMPORTANT FIX
+          this.onJobType(true);
+        }
       },
       error: (err) => {
         console.error('Error fetching job types', err);
@@ -163,52 +205,89 @@ export class JobCardAddForm {
     });
   }
   //load job Source 
+  // loadJobSorces() {
+  //   this.selectedJobSources = '';
+  //   this.jobCardService.getJobSource().subscribe({
+  //     next: (res) => {
+  //       //console.log(res);
+
+  //       this.jobSourceList = res.map((x: any) => ({
+  //         jobSourceId: x.jobSourceId,
+  //         jobSourceName: (x.jobSourceName || '').trim()
+  //       }));
+
+  //     },
+  //     error: (err) => {
+  //       console.error('Error fetching job types', err);
+  //     }
+  //   });
+  // }
   loadJobSorces() {
     this.selectedJobSources = '';
     this.jobCardService.getJobSource().subscribe({
-      next: (res) => {
-        console.log(res);
+      next :(res) => {
+      this.jobSourceList = res;
 
-        this.jobSourceList = res.map((x: any) => ({
-          jobSourceId: x.jobSourceId,
-          jobSourceName: (x.jobSourceName || '').trim()
-        }));
-
-      },
-      error: (err) => {
-        console.error('Error fetching job types', err);
+      if (this.isEditMode) {
+        this.selectedJobSources = this.chassiseditData.jobCardHeader.jobSource;
+      }
+    },
+    error: (err) => {
+       console.error('Error fetching job types', err);
       }
     });
   }
   // load Chassis number
+  // loadChassisList() {
+  //   const dealerCode = this.storageService.getDealerCode();
+  //   this.jobCardService.getAllInspectedChassis(dealerCode).subscribe({
+  //     next: (res: any) => {
+  //       console.log(res);
+
+  //       // a duplicate chassis no remove (optional)
+  //       this.chassisList = res;
+  //       if (this.isEditMode && this.chassiseditData) {
+  //         this.patchEditData(this.chassiseditData);
+  //       }
+  //     },
+  //     error: (err) => {
+  //       console.error('Error fetching chassis', err);
+  //     }
+  //   });
+  // }
   loadChassisList() {
     const dealerCode = this.storageService.getDealerCode();
-    this.jobCardService.getAllInspectedChassis(dealerCode).subscribe({
-      next: (res: any) => {
-        console.log(res);
 
-        // a duplicate chassis no remove (optional)
-        this.chassisList = res;
-      },
-      error: (err) => {
-        console.error('Error fetching chassis', err);
+    this.jobCardService.getAllInspectedChassis(dealerCode).subscribe(res => {
+      this.chassisList = res;
+
+      if (this.isEditMode && this.chassiseditData) {
+        this.selectedChassis = this.chassiseditData.jobCardHeader.chassisno;
+
+        setTimeout(() => {
+          this.onChassisChange();
+        }, 0);
       }
+      
     });
   }
-
   // load pdi checklist
+  // loadPdiData() {
+  //   this.jobCardService.getPdiChecklist().subscribe({
+  //     next: (res) => {
+  //       this.pdiCheckList = res;   //  HERE
+  //       console.log(this.pdiCheckList);
+  //     },
+  //     error: (err) => {
+  //       console.error(err);
+  //     }
+  //   });
+  // }
   loadPdiData() {
-    this.jobCardService.getPdiChecklist().subscribe({
-      next: (res) => {
-        this.pdiCheckList = res;   //  HERE
-        console.log(this.pdiCheckList);
-      },
-      error: (err) => {
-        console.error(err);
-      }
+    this.jobCardService.getPdiChecklist().subscribe(res => {
+      this.pdiCheckList = res;
     });
   }
-
   toggle(section: string) {
     Object.keys(this.isOpen).forEach(key => {
       this.isOpen[key] = false;
@@ -223,39 +302,77 @@ export class JobCardAddForm {
 
     console.log('Selected Location:', this.selectedLocation);
   }
-  onJobType() {
+  // onJobType() {
 
-    const jobTypeId = this.selectedJobtype;
+  //   const jobTypeId = this.selectedJobtype;
 
-    this.jobCardService.getServiceHead(jobTypeId).subscribe(res => {
+  //   this.jobCardService.getServiceHead(jobTypeId).subscribe(res => {
+  //     this.serviceHeadList = res;
+
+  //     // Reset
+  //     if (!this.isEditMode) {
+  //       this.selectedServiceHead = '';
+  //       this.serviceTypeList = [];
+  //       this.selectedServiceType = '';
+  //     }
+
+  //     if (this.isEditMode) {
+  //       this.loadServiceType(this.selectedServiceHead);
+  //     }
+  //     else {
+  //       // normal flow
+  //       if (this.serviceHeadList.length === 1) {
+  //         this.selectedServiceHead = this.serviceHeadList[0].serviceHeadId;
+  //         this.loadServiceType(this.selectedServiceHead);
+  //       }
+  //     }
+  //   });
+  // }
+  onJobType(isEdit = false) {
+
+    this.jobCardService.getServiceHead(this.selectedJobtype).subscribe(res => {
+
       this.serviceHeadList = res;
 
-      // Reset
-      this.selectedServiceHead = '';
-      this.serviceTypeList = [];
-      this.selectedServiceType = '';
+      if (isEdit) {
+        this.selectedServiceHead = this.chassiseditData.jobCardHeader.servicehead;
 
-      //  AUTO SELECT if only 1
-      if (this.serviceHeadList.length === 1) {
-        this.selectedServiceHead = this.serviceHeadList[0].serviceHeadId;
-
-        // directly load service type
-        this.loadServiceType(this.selectedServiceHead);
+        //  load service type for edit
+        this.loadServiceType(this.selectedServiceHead, true);
+      } else {
+        this.selectedServiceHead = '';
+        this.serviceTypeList = [];
+        this.selectedServiceType = '';
       }
     });
   }
   onServiceHeadChange() {
     this.loadServiceType(this.selectedServiceHead);
   }
-  loadServiceType(serviceHeadId: number) {
+  // loadServiceType(serviceHeadId: number) {
+  //   this.jobCardService.getServiceType(serviceHeadId).subscribe(res => {
+  //     this.serviceTypeList = res;
+
+  //     if (!this.isEditMode) {
+  //       this.selectedServiceType = '';
+  //     }
+
+  //     //  AUTO SELECT if only 1
+  //     if (!this.isEditMode && this.serviceTypeList.length === 1) {
+  //       this.selectedServiceType = this.serviceTypeList[0].serviceTypeId;
+  //     }
+  //   });
+  // }
+  loadServiceType(serviceHeadId: number, isEdit = false) {
+
     this.jobCardService.getServiceType(serviceHeadId).subscribe(res => {
+
       this.serviceTypeList = res;
 
-      this.selectedServiceType = '';
-
-      //  AUTO SELECT if only 1
-      if (this.serviceTypeList.length === 1) {
-        this.selectedServiceType = this.serviceTypeList[0].serviceTypeId;
+      if (isEdit) {
+        this.selectedServiceType = this.chassiseditData.jobCardHeader.servicetype;
+      } else {
+        this.selectedServiceType = '';
       }
     });
   }
@@ -263,86 +380,136 @@ export class JobCardAddForm {
     this.selectedServiceType = '';
   }
 
-  onChassisChange() {
-    if (!this.selectedChassis || this.selectedChassis === '') {
-      this.invoiceNo = '';
-      this.couponNo = '';
-      this.customerObj.customerName = '';
-      this.customerObj.customerMobile = '';
-      this.customerObj.customerAltMobile = '';
-      this.modelName = '';
-      this.registerNo = '';
-      this.batteryCapacity = '';
-      this.batteryChemestry = '';
-      this.batteryMake = '';
-      this.batteryNumber = '';
-      this.chargerNumber = '',
-        this.controllerNo = '',
-        this.converterNo = '',
-        this.motorNo = '',
-        this.odoReading =0.00,
-        this.duration =0.00,
-        this.durationType='',
-        this.expireWarrentyDate = ''
-      return;
-    }
-    const selected = this.chassisList.find(
-      x => x.chassisNumber === this.selectedChassis
-    );
-    if (selected) {
-      this.invoiceNo = selected.invoiceNo;
-      this.couponNo = this.selectedChassis.slice(-13);
-      this.customerObj.customerName = selected.customerName;
-      this.customerObj.customerMobile = selected.customerMobile;
-      this.customerObj.customerAltMobile = selected.customerAltMobile;
-      this.modelName = selected.modelName;
-      this.registerNo = selected.registerNo;
-      this.batteryCapacity = selected.batteryCapacity;
-      this.batteryMake = selected.batteryMake
-      this.batteryChemestry = selected.batteryChemestry
-      this.batteryNumber = selected.batteryNumber
-      this.motorNo = selected.motorNo
-      this.controllerNo = selected.controllerNo
-      this.converterNo = selected.converterNo
-      this.chargerNumber = selected.chargerNumber
-      this.odoReading = selected.odoReading
-      this.duration = selected.duration
-      this.durationType =selected.durationType
-      this.expireWarrentyDate=selected.expireWarrentyDate
-    }
-  }
+  // onChassisChange() {
+
+  //   if (!this.selectedChassis || this.selectedChassis === '') {
+  //     // reset code same
+  //     return;
+  //   }
+
+  //   const selected = this.chassisList.find(
+  //     x => x.chassisNumber === this.selectedChassis
+  //   );
+
+  //   if (selected) {
+
+  //     // ONLY FILL IF NOT EDIT MODE
+  //     if (!this.isEditMode) {
+  //       this.invoiceNo = selected.invoiceNo;
+  //       this.couponNo = this.selectedChassis.slice(-13);
+
+  //       this.customerObj.customerName = selected.customerName;
+  //       this.customerObj.customerMobile = selected.customerMobile;
+  //       this.customerObj.customerAltMobile = selected.customerAltMobile;
+
+  //       this.modelName = selected.modelName;
+  //       this.registerNo = selected.registerNo;
+
+  //       this.batteryCapacity = selected.batteryCapacity;
+  //       this.batteryMake = selected.batteryMake;
+  //       this.batteryChemestry = selected.batteryChemestry;
+  //       this.batteryNumber = selected.batteryNumber;
+
+  //       this.motorNo = selected.motorNo;
+  //       this.controllerNo = selected.controllerNo;
+  //       this.converterNo = selected.converterNo;
+  //       this.chargerNumber = selected.chargerNumber;
+
+  //       this.odoReading = selected.odoReading;
+  //       this.duration = selected.duration;
+  //       this.durationType = selected.durationType;
+  //       this.expireWarrentyDate = selected.expireWarrentyDate;
+  //     }
+  //   }
+  // }
 
   // onJobSource() {
   //   const jobSourceId=this.selectedJobSources
   //   this.selectedJobSources = '';
   // }
+ onChassisChange() {
+
+  if (!this.selectedChassis) return;
+
+  const selected = this.chassisList.find(
+    x => x.chassisNumber == this.selectedChassis   //  use ==
+  );
+
+  if (!selected) return;
+
+  // ALWAYS FILL (EDIT + ADD)
+  this.invoiceNo = selected.invoiceNo;
+  this.couponNo = this.selectedChassis.slice(-13);
+
+  this.customerObj.customerName = selected.customerName;
+  this.customerObj.customerMobile = selected.customerMobile;
+  this.customerObj.customerAltMobile = selected.customerAltMobile;
+
+  this.modelName = selected.modelName;
+  this.registerNo = selected.registerNo;
+
+  this.batteryCapacity = selected.batteryCapacity;
+  this.batteryMake = selected.batteryMake;
+  this.batteryChemestry = selected.batteryChemestry;
+  this.batteryNumber = selected.batteryNumber;
+
+  this.motorNo = selected.motorNo;
+  this.controllerNo = selected.controllerNo;
+  this.converterNo = selected.converterNo;
+  this.chargerNumber = selected.chargerNumber;
+
+  this.odoReading = selected.odoReading;
+  this.duration = selected.duration;
+  this.durationType = selected.durationType;
+  this.expireWarrentyDate = selected.expireWarrentyDate;
+}
 
   // PDiChecklist popup
   openPdiModal(content: any) {
 
-    if (!this.selectedChassis || this.selectedChassis.trim() === '') {
-      Swal.fire({
-        icon: 'warning',
-        title: '',
-        text: 'Please select chassis number before opening PDI checklist',
-        width: '300px'
-      });
-      return;
-    }
+  if (!this.selectedChassis || this.selectedChassis.trim() === '') {
+    Swal.fire({
+      icon: 'warning',
+      text: 'Please select chassis number before opening PDI checklist',
+      width: '300px'
+    });
+    return;
+  }
 
+  //  EDIT MODE → data preserve
+  if (this.isEditMode && this.chassiseditData?.pdiChecklistChassiWise?.length) {
+
+    const savedPdi = this.chassiseditData.pdiChecklistChassiWise;
+
+    this.pdiCheckList = this.pdiCheckList.map(item => {
+
+      const match = savedPdi.find(
+        (x: any) => x.pdichecklistMasterId === item.id
+      );
+
+      return {
+        ...item,
+        isStatus: match ? match.isStatus : true,
+        remarks: match ? match.remarks : ''
+      };
+    });
+
+  } else {
+    //  ADD MODE → default
     this.pdiCheckList = this.pdiCheckList.map(x => ({
       ...x,
       isStatus: true,
       remarks: ''
     }));
-
-    this.modalService.open(content, {
-      size: 'xl',
-      centered: true,
-      backdrop: 'static',
-      keyboard: false
-    });
   }
+
+  this.modalService.open(content, {
+    size: 'xl',
+    centered: true,
+    backdrop: 'static',
+    keyboard: false
+  });
+}
   validatePdi(): boolean {
     return this.pdiCheckList.every(x =>
       x.isStatus !== null && x.isStatus !== undefined && x.remarks && x.remarks.trim() !== ''
@@ -403,6 +570,7 @@ export class JobCardAddForm {
 
     this.modalService.dismissAll();
   }
+  //insert jobcard
   saveJobCard() {
 
     //  VALIDATION (recommended)
@@ -410,12 +578,13 @@ export class JobCardAddForm {
       Swal.fire('Error', 'Please complete PDI first', 'error');
       return;
     }
-const dealerCode = this.storageService.getDealerCode();
+    const dealerCode = this.storageService.getDealerCode();
     //  HEADER
     const jobCardHeader = {
+      id: this.isEditMode ? this.editId : 0,
       jobtype: this.selectedJobtype || 0,
-      dealerCode : dealerCode,
-      invoiceNo:this.invoiceNo,
+      dealerCode: dealerCode,
+      invoiceNo: this.invoiceNo,
       chassisno: this.selectedChassis,
       vehiclekms: Number(this.vehicleKms) || 0,
       servicehead: this.selectedServiceHead || 0,
@@ -438,12 +607,13 @@ const dealerCode = this.storageService.getDealerCode();
       observation: this.observation || "",
       supervisorComment: this.supervisorComment || "",
       isPdiSuccess: true,
-      createdBy: 'Admin'
+      createdBy: 'Admin',
+      updatedBy: dealerCode
     };
 
     // BATTERY
     const jobCardBattery = {
-      dealerCode : dealerCode,
+      dealerCode: dealerCode,
       batteryMake: this.batteryMake,
       batterySerialNo: this.batteryNumber,
       batteryOcv: this.batteryOCV,
@@ -458,7 +628,8 @@ const dealerCode = this.storageService.getDealerCode();
       controllerNo: this.controllerNo,
       batteryChemical: this.batteryChemestry,
       batteryCapacity: this.batteryCapacity,
-      createdBy: 'Admin'
+      createdBy: 'Admin',
+      updatedBy: dealerCode
     };
 
     //  CUSTOMER
@@ -479,16 +650,18 @@ const dealerCode = this.storageService.getDealerCode();
 
       remarks: this.customerObj.remarks || null,
 
-      createdBy: 'Admin'
+      createdBy: 'Admin',
+      updatedBy: dealerCode
     };
 
     //  COMPLAINT
     const jobCardComplaint = this.complaintList.map(x => ({
-      dealerCode : dealerCode,
+      dealerCode: dealerCode,
       customerVoice: x.customerVoice,
       complaintCode: x.complaintCode,
       complaint: x.complaint,
-      createdBy: 'Admin'
+      createdBy: 'Admin',
+      updatedBy: dealerCode
     }));
 
     //  PDI (USE STORED DATA )
@@ -498,120 +671,211 @@ const dealerCode = this.storageService.getDealerCode();
       pdichecklistMasterId: x.id,
       isStatus: x.isStatus,   // use normalized value
       remarks: x.remarks,
-      createdBy: 'Admin'
+      createdBy: 'Admin',
+      updatedBy: dealerCode
     }));
     console.log("in save methodthis.pdiCheckList", JobCardpdiChecklist)
     //  FINAL PAYLOAD
     const payload = {
-      
-        jobCardHeader,
-        jobCardBattery,
-        jobCardCustomer,
-        jobCardComplaint,
-        pdiChecklistChassiWise : JobCardpdiChecklist
+
+      jobCardHeader,
+      jobCardBattery,
+      jobCardCustomer,
+      jobCardComplaint,
+      pdiChecklistChassiWise: JobCardpdiChecklist
     };
 
     console.log("FINAL PAYLOAD", payload);
 
     //  API CALL
-    this.jobCardService.insertJobCard(payload).subscribe({
-      next: (res: any) => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Saved Successfully',
-          text: 'Job Card Created',
-          width: '500px'
-        });
+    const apiCall = this.isEditMode
+    ? this.jobCardService.updateJobCard(payload)
+    : this.jobCardService.insertJobCard(payload);
 
-        console.log("Inserted JobCard ID:", res);
+  apiCall.subscribe({
+    next: (res: any) => {
 
-        this.resetForm();
-      },
-      error: (err) => {
-        console.error("ERROR", err);
+      Swal.fire({
+      icon: 'success',
+      title: this.isEditMode ? 'Updated Successfully' : 'Saved Successfully',
+      text: this.isEditMode ? 'Job Card Updated' : 'Job Card Created',
+      width: '400px'
+    }).then(() => {
 
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Something went wrong',
-          width: '300px'
-        });
-      }
+      //  NAVIGATE AFTER CLICK OK
+      this.router.navigate(['/job-card']); 
+
     });
+
+      this.resetForm();
+      this.isEditMode = false;
+    },
+    error: (err) => {
+      console.error(err);
+      Swal.fire('Error', 'Something went wrong', 'error');
+    }
+  });
+  }
+
+  // edit jobcard
+  patchEditData(data: any) {
+    console.log("EDIT DATA", data);
+
+    // ================= HEADER =================
+    this.selectedJobtype = data.jobCardHeader.jobtype;
+    this.selectedServiceHead = data.jobCardHeader.servicehead;
+    this.selectedServiceType = data.jobCardHeader.servicetype;
+    this.selectedJobSources = data.jobCardHeader.jobSource;
+
+    this.selectedChassis = data.jobCardHeader.chassisno;
+    this.vehicleKms = data.jobCardHeader.vehiclekms;
+    this.selectedLocation = data.jobCardHeader.serviceloc;
+
+    this.couponNo = data.jobCardHeader.couponno;
+    this.jobPrefix = data.jobCardHeader.jobprefix;
+    this.jobInDate = data.jobCardHeader.jobinDate;
+    this.jobInTime = data.jobCardHeader.jobinTime;
+    this.jobNo = data.jobCardHeader.jobNo;
+    this.manualJobNo = data.jobCardHeader.manualjobNo;
+    this.estDelDate = data.jobCardHeader.estdelDate;
+    this.estDelTime = data.jobCardHeader.estdelTime;
+
+    this.supervisor = data.jobCardHeader.supervisor;
+    this.technician = data.jobCardHeader.technician;
+    this.jobEstimate = data.jobCardHeader.jobestmate;
+
+    this.airPressureRear = data.jobCardHeader.airpressureRearTyre;
+    this.airPressureFront = data.jobCardHeader.airpressurefrontTyre;
+
+    this.observation = data.jobCardHeader.observation;
+    this.supervisorComment = data.jobCardHeader.supervisorComment;
+
+    // ================= CUSTOMER =================
+    this.customerObj = {
+      customerName: data.jobCardCustomer?.customerName || '',
+      customerMobile: data.jobCardCustomer?.customerMobile || '',
+      customerAltMobile: data.jobCardCustomer?.customerAltMobile || '',
+      modelName: data.jobCardCustomer?.modelName || '',
+      chassisNo: data.jobCardCustomer?.chassisNo || '',
+      registerNo: data.jobCardCustomer?.registerNo || '',
+      motorNo: data.jobCardCustomer?.motorNo || '',
+      batteryNo: data.jobCardCustomer?.batteryNo || '',
+      saleDate: data.jobCardCustomer?.saleDate || '',
+      insuranceExpDate: data.jobCardCustomer?.insuranceExpDate || '',
+      nextServiceDueDate: data.jobCardCustomer?.nextserviceDueDate || '',
+      rsaRenewalDate: data.jobCardCustomer?.rsarenewalDate || '',
+      remarks: data.jobCardCustomer?.remarks || ''
+    };
+
+    // ================= BATTERY =================
+    this.batteryMake = data.jobCardBattery?.batteryMake;
+    this.batteryNumber = data.jobCardBattery?.batterySerialNo;
+    this.batteryOCV = data.jobCardBattery?.batteryOcv;
+    this.batteryCCV = data.jobCardBattery?.batteryCcv;
+    this.batteryDischarge = data.jobCardBattery?.batteryDischarge;
+    this.capacityAH = data.jobCardBattery?.batteryCapacityAh;
+    this.batteryVoltage = data.jobCardBattery?.batteryVoltage;
+
+    this.chargerMake = data.jobCardBattery?.chargerMake;
+    this.chargerNumber = data.jobCardBattery?.chargerNo;
+    this.converterNo = data.jobCardBattery?.converterNo;
+    this.controllerNo = data.jobCardBattery?.controllerNo;
+
+    this.batteryChemestry = data.jobCardBattery?.batteryChemical;
+    this.batteryCapacity = data.jobCardBattery?.batteryCapacity;
+
+    // ================= COMPLAINT =================
+    this.complaintList = data.jobCardComplaint || [];
+
+    // ================= PDI =================
+    this.pdiCheckList = data.pdiChecklistChassiWise.map((x: any) => ({
+      id: x.pdichecklistMasterId,
+      isStatus: x.isStatus,
+      remarks: x.remarks
+    }));
+
+
+    this.isPdiSaved = true; // important
+    this.isEditMode = true;
+    this.editId = data.jobCardHeader.id;
+
+    setTimeout(() => {
+      this.onChassisChange();
+    }, 300);
   }
   resetForm() {
     // HEADER
-  this.selectedJobtype = null;
-  this.selectedJobSources = null;
-  this.selectedServiceHead = null;
-  this.selectedServiceType = null;
-  this.selectedLocation = '';
-  this.selectedChassis = '';
+    this.selectedJobtype = null;
+    this.selectedJobSources = null;
+    this.selectedServiceHead = null;
+    this.selectedServiceType = null;
+    this.selectedLocation = '';
+    this.selectedChassis = '';
 
-  this.invoiceNo = '';
-  this.couponNo = '';
-  this.vehicleKms = 0;
-  this.jobPrefix = '';
-  this.jobInDate = '';
-  this.jobInTime = '';
-  this.jobNo = 0;
-  this.manualJobNo = 0;
-  this.estDelDate = '';
-  this.estDelTime = '';
-  this.supervisor = '';
-  this.technician = '';
-  this.jobEstimate = 0;
-  this.airPressureRear = 0;
-  this.airPressureFront = 0;
-  this.observation = '';
-  this.supervisorComment = '';
+    this.invoiceNo = '';
+    this.couponNo = '';
+    this.vehicleKms = 0;
+    this.jobPrefix = '';
+    this.jobInDate = '';
+    this.jobInTime = '';
+    this.jobNo = 0;
+    this.manualJobNo = 0;
+    this.estDelDate = '';
+    this.estDelTime = '';
+    this.supervisor = '';
+    this.technician = '';
+    this.jobEstimate = 0;
+    this.airPressureRear = 0;
+    this.airPressureFront = 0;
+    this.observation = '';
+    this.supervisorComment = '';
 
-  // BATTERY
-  this.batteryNumber = '';
-  this.batteryCapacity = '';
-  this.batteryChemestry = '';
-  this.batteryMake = '';
-  this.chargerNumber = '';
-  this.controllerNo = '';
-  this.converterNo = '';
-  this.motorNo = '';
-  this.chargerMake = '';
-  this.batteryVoltage = '';
-  this.capacityAH = '';
-  this.batteryDischarge = '';
-  this.batteryCCV = '';
-  this.batteryOCV = '';
+    // BATTERY
+    this.batteryNumber = '';
+    this.batteryCapacity = '';
+    this.batteryChemestry = '';
+    this.batteryMake = '';
+    this.chargerNumber = '';
+    this.controllerNo = '';
+    this.converterNo = '';
+    this.motorNo = '';
+    this.chargerMake = '';
+    this.batteryVoltage = '';
+    this.capacityAH = '';
+    this.batteryDischarge = '';
+    this.batteryCCV = '';
+    this.batteryOCV = '';
 
-  // CUSTOMER
-  this.customerObj = {
-    customerName: '',
-    customerMobile: '',
-    customerAltMobile: '',
-    modelName: '',
-    chassisNo: '',
-    registerNo: '',
-    motorNo: '',
-    batteryNo: '',
-    saleDate: "",
-    insuranceExpDate: "",
-    nextServiceDueDate: "",
-    rsaRenewalDate: "",
-    remarks: ''
-  };
+    // CUSTOMER
+    this.customerObj = {
+      customerName: '',
+      customerMobile: '',
+      customerAltMobile: '',
+      modelName: '',
+      chassisNo: '',
+      registerNo: '',
+      motorNo: '',
+      batteryNo: '',
+      saleDate: "",
+      insuranceExpDate: "",
+      nextServiceDueDate: "",
+      rsaRenewalDate: "",
+      remarks: ''
+    };
 
-  // COMPLAINT
-  this.complaintList = [];
-  this.complaintObj = {
-    customerVoice: '',
-    complaintCode: '',
-    complaint: ''
-  };
+    // COMPLAINT
+    this.complaintList = [];
+    this.complaintObj = {
+      customerVoice: '',
+      complaintCode: '',
+      complaint: ''
+    };
 
-  // PDI
-  this.isPdiSaved = false;
+    // PDI
+    this.isPdiSaved = false;
 
-  // IMPORTANT: reload PDI checklist (not empty)
-  this.loadPdiData();
+    // IMPORTANT: reload PDI checklist (not empty)
+    this.loadPdiData();
   }
 }
 

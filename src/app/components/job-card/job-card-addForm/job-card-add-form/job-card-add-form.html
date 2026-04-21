@@ -143,9 +143,12 @@
               </div>
               <div class="col-md-4">
                 <label class="form-lael">Service Location</label>
-                <select class="form-select form-select-sm text-truncate" (change)="onLocationChange($event)">
+                <select class="form-select form-select-sm text-truncate" [(ngModel)]="selectedLocation"
+                  (change)="onLocationChange($event)">
+
                   <option value="">Select Location</option>
-                  <option *ngFor="let loc of locations" [value]="loc.locname">
+
+                  <option *ngFor="let loc of locations" [ngValue]="loc.locname">
                     {{ loc.locname }}
                   </option>
 

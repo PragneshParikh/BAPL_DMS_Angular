@@ -21,7 +21,9 @@ export class JobCard {
   JobType = JobType;
   JobSource = JobSource;
   locations: LocationName[];
-  jobCardList : any [] =[];
+  jobCardList: any[] = [];
+  jobCardId: number = 0;
+  isEditMode = false;
   //dropdown changes
   selectedLocation: string = '';
   selectedJobtype: string = '';
@@ -52,6 +54,8 @@ export class JobCard {
     this.loadChassisList();
     this.loadJobCardList();
   }
+
+  
 
   //Fetech Dealer Location
   fetchLocations(): void {
@@ -91,14 +95,21 @@ export class JobCard {
     this.jobCardService.getJobCardList(dealerCode).subscribe({
       next: (res) => {
         this.jobCardList = res;
-       // this.loading = false;
+        console.log("listing : ", res)
+        // this.loading = false;
       },
       error: (err) => {
         console.error('Error fetching job cards', err);
-       // this.loading = false;
+        // this.loading = false;
       }
     });
   }
+
+  onEdit(row: any) {
+  this.router.navigate(['/job-card-addForm/job-card-add-form'], {
+    state: { data: row }
+  });
+}
 
   onLocationChange(event: Event): void {
     const target = event.target as HTMLSelectElement;

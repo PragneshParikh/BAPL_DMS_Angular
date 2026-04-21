@@ -152,27 +152,27 @@
 
                         <!-- ACTION -->
                         <td>
-                            <button class="btn btn-sm btn-soft-primary"><i class="ri-pencil-fill fs-12"></i></button>
+                            <button class="btn btn-sm btn-soft-primary" (click)="onEdit(item)"><i class="ri-pencil-fill fs-12"></i></button>
                             <button class="btn btn-sm btn-soft-danger"><i class="ri-delete-bin-fill fs-12"></i></button>
                         </td>
 
                         <!-- JobNo / Date -->
                         <td>
-                            {{ item.jobNo }} <br>
-                            {{ item.jobInDate | date:'dd-MM-yyyy' }}
+                            {{ item.jobCardHeader.jobNo }} <br>
+                            {{ item.jobCardHeader.jobinDate | date:'dd-MM-yyyy' }}
                         </td>
 
                         <!-- Job Status -->
                         <td>{{ item.jobStatus }}  <br>
-                            {{ item.invoiceNo }}
+                            {{ item.jobCardHeader.invoiceNo }}
                         </td>
                         
 
                         <!-- Manual Job No -->
-                        <td>{{ item.manualJobNo }}</td>
+                        <td>{{ item.jobCardHeader.manualjobNo }}</td>
 
                         <!-- Location -->
-                        <td>{{ item.joblocation }}</td>
+                        <td>{{ item.jobCardHeader.serviceloc }}</td>
 
                         <!-- JobType / Source -->
                         <td>
@@ -184,16 +184,16 @@
                         <td>{{ item.complaint }}</td>
 
                         <!-- Supervisor -->
-                        <td>{{ item.supervisor }}</td>
+                        <td>{{ item.jobCardHeader.supervisor }}</td>
 
                         <!-- Reg / Chassis -->
                         <td>
-                            <b>R:</b>{{ item.registerNo }} <br>
-                            <b>C:</b>{{ item.chassisNo }}
+                            <b>R:</b>{{ item.jobCardCustomer.registerNo }} <br>
+                            <b>C:</b>{{ item.jobCardCustomer.chassisNo }}
                         </td>
 
                         <!-- Vehicle Type -->
-                        <td>{{ item.modelName }}</td>
+                        <td>{{ item.jobCardCustomer.modelName }}</td>
 
                         <!-- Service Head / Type -->
                         <td>
@@ -203,8 +203,8 @@
 
                         <!-- Customer -->
                         <td>
-                            {{ item.customerName }} <br>
-                            {{ item.mobileNo }}
+                            {{ item.jobCardCustomer.customerName }} <br>
+                            {{ item.jobCardCustomer.customerMobile }}
                         </td>
 
                     </tr>

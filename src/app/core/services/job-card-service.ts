@@ -37,5 +37,8 @@ export class JobCardService {
   }
   insertJobCard(data: any) {
   return this.httpClient.post(`${this.baseUrl}/JobCard/SaveJobCardDetails`, data);
-}
+  }
+  updateJobCard(data: any){
+    return this.httpClient.put(`${this.baseUrl}/JobCard/UpdateJobCardDetails`,data);
+  }
 }
