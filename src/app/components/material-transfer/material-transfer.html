@@ -43,26 +43,26 @@
                             <table class="table table-hover table-bordered mb-0 table-sm">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="sort" (click)="onSort('')">
+                                        <th class="sort text-nowrap" (click)="onSort('')">
                                             S.No
                                         </th>
-                                        <th class="sort" (click)="onSort('')">
+                                        <th class="sort text-nowrap" (click)="onSort('')">
                                             Issue No</th>
-                                        <th class="sort" (click)="onSort('')">
+                                        <th class="sort text-nowrap" (click)="onSort('')">
                                             Issue Date
                                         </th>
-                                        <th class="sort" (click)="onSort('')">Job No
+                                        <th class="sort text-nowrap" (click)="onSort('')">Job No
                                         </th>
-                                        <th class="sort" (click)="onSort('')">Party Name</th>
-                                        <th class="sort" (click)="onSort('')">Chasis No
+                                        <th class="sort text-nowrap" (click)="onSort('')">Party Name</th>
+                                        <th class="sort text-nowrap" (click)="onSort('')">Chasis No
                                         </th>
-                                        <th class="sort" (click)="onSort('')">Reg No
+                                        <th class="sort text-nowrap" (click)="onSort('')">Reg No
                                         </th>
-                                        <th class="sort" (click)="onSort('')">Location
+                                        <th class="sort text-nowrap" (click)="onSort('')">Location
                                         </th>
-                                        <th class="sort" (click)="onSort('')">Prepared By
+                                        <th class="sort text-nowrap" (click)="onSort('')">Prepared By
                                         </th>
-                                        <th class="sort" (click)="onSort('')">Modified By
+                                        <th class="sort text-nowrap" (click)="onSort('')">Modified By
                                         </th>
                                     </tr>
                                 </thead>
@@ -70,14 +70,14 @@
                                 <tbody>
                                     <tr *ngFor="let material of dataSource; let index = index" class="table-row"
                                         (click)="onMaterialClick(material)">
-                                        <td>{{ index + 1 }}</td>
-                                        <td>{{ material?.issueNo }}</td>
-                                        <td>{{ material?.issueDate | date }}</td>
+                                        <td>{{ material?.srNo }}</td>
+                                        <td>{{ material?.id }}</td>
+                                        <td>{{ material?.jobinDate | date }}</td>
                                         <td>{{ material?.jobNo }}</td>
-                                        <td>{{ material?.partyName }}</td>
-                                        <td>{{ material?.chassisNo }}</td>
-                                        <td>{{ material?.regNo }}</td>
-                                        <td>{{ material?.location }}</td>
+                                        <td>{{ material?.customerName }}</td>
+                                        <td>{{ material?.chassisno }}</td>
+                                        <td>{{ material?.registerNo }}</td>
+                                        <td>{{ material?.serviceloc }}</td>
                                         <td>{{ material?.preparedBy }}</td>
                                         <td>{{ material?.modifiedBy }}</td>
                                     </tr>

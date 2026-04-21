@@ -12,12 +12,13 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { IssueTypes } from '../../../constant';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 import { StorageService } from '../../../core/services/storage';
-import { number } from 'echarts';
-import { error } from 'console';
+import { JobCardService } from '../../../core/services/job-card-service';
+import { GetTechnicianNamePipe } from '../../../core/pipes/get-technician-name-pipe';
+import { GetIssueTypeNamePipe } from '../../../core/pipes/get-issue-type-name-pipe';
 
 @Component({
   selector: 'app-material-transfer-detail',
-  imports: [SharedModule, FormsModule, ReactiveFormsModule, CommonModule],
+  imports: [SharedModule, FormsModule, ReactiveFormsModule, CommonModule, GetTechnicianNamePipe, GetIssueTypeNamePipe],
   templateUrl: './material-transfer-detail.html',
   styleUrl: './material-transfer-detail.scss',
 })
@@ -78,7 +79,7 @@ export class MaterialTransferDetail implements OnInit {
     //#endregion
   }
 
-  private materialTransferId: number = 0;
+  private jobId: number = 0;
   itemList: any[] = [];
   items: any[] = [];
   lstLocation: any[] = [];
@@ -95,23 +96,22 @@ export class MaterialTransferDetail implements OnInit {
     private materialTransferService: MaterialTransferService,
     private itemmasterService: ItemMasterService,
     private locationService: LocationMasterService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private jobCardService: JobCardService
   ) {
     this.router.params.subscribe(params => {
-      this.materialTransferId = Number(params['id']);
+      this.jobId = Number(params['id']);
     });
     this.dealerCode = this.storageService.getDealerCode();
   }
 
   ngOnInit() {
-    if (this.materialTransferId === 0) {
+    if (this.jobId === 0) {
       this.getMaterialIssueId();
-    } else {
-      // Logic to fetch and populate material transfer details based on materialTransferId
     }
     this.getItemList();
     this.getLocationList();
-    this.getMaterialTransferList(10);
+    this.getMaterialTransferList(this.jobId);
   }
 
   getMaterialIssueId() {
@@ -208,7 +208,6 @@ export class MaterialTransferDetail implements OnInit {
       this.materialTransferService.update(lstModified).subscribe({
         next: (result) => {
           this.loader.hide();
-          console.log(result);
           this.toast.show("Record inserted sucessfully.", {
             classname: 'bg-success text-white',
             delay: 5000
@@ -285,16 +284,11 @@ export class MaterialTransferDetail implements OnInit {
       keyboard: false
     });
 
-    // const invoiceDetails = this.vehicleDispatch.filter(x => x.invoiceNo === invoiceData.invoiceNumber);
-    // Pass data to the modal component
-    // modalRef.componentInstance.invoiceDetails = invoiceDetails;
-
-    // Optional: handle modal close or dismiss
     modalRef.result.then(
       (result) => {
         if (result && result.isAccepted) {
           // this.loader.show();
-          // this.Job.acceptInvoiceHeader(invoiceData.invoiceNumber).subscribe({
+          // this.jobCardService.(invoiceData.invoiceNumber).subscribe({
           //   next: (res) => {
           //     this.updateNotificationStatusByInvoice(invoiceData.invoiceNumber);
           //     this.loader.hide();
@@ -304,7 +298,8 @@ export class MaterialTransferDetail implements OnInit {
           //     console.error(err);
           //   }
           // });
-          console.log('Implement API call to accept job with data:');
+          alert('on select jobid');
+          console.log('Implement API call to accept job with data:', result);
         }
       },
       (reason) => {
@@ -375,7 +370,6 @@ export class MaterialTransferDetail implements OnInit {
   }
 
   editItem(row: any) {
-    console.log(row);
     this.newItem = {
       id: row.id,
       jobId: row.jobId,
@@ -420,14 +414,26 @@ export class MaterialTransferDetail implements OnInit {
     row.status = 'Deleted';
   }
 
+  getTotalQty(): number {
+    return this.items
+      .filter(item => item.status !== 'Deleted')
+      .reduce((sum, item) => sum + (item.quantity || 0), 0);
+  }
+
+  getTotalAmount(): number {
+    return this.items
+      .filter(item => item.status !== 'Deleted')
+      .reduce((sum, item) => sum + (item.amount || 0), 0);
+  }
+
 }
 
 export const TechnicianList = [
-  { name: 'Technician Rajesh', value: 1 },
-  { name: 'Technician Amit', value: '2' },
-  { name: 'Technician Suresh', value: 3 },
-  { name: 'Technician Rakesh', value: 4 },
-  { name: 'Technician Manoj', value: 5 },
-  { name: 'Technician Mitesh', value: 6 },
-  { name: 'Technician Manish', value: 7 }
+  { id: 1, name: 'Technician Rajesh' },
+  { id: '2', name: 'Technician Amit' },
+  { id: 3, name: 'Technician Suresh' },
+  { id: 4, name: 'Technician Rakesh' },
+  { id: 5, name: 'Technician Manoj' },
+  { id: 6, name: 'Technician Mitesh' },
+  { id: 7, name: 'Technician Manish' }
 ]

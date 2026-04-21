@@ -98,8 +98,8 @@ export const CashTypeOptions = [
 ];
 
 export const IssueTypes = [
-    { name: 'Paid', value: 'paid' },
-    { name: 'U/W', value: 'u/w' },
-    { name: 'FOC', value: 'foc' },
-    { name: 'Goodwill', value: 'goodwill' }
+    { id: 1, name: 'Paid' },
+    { id: 2, name: 'U/W' },
+    { id: 3, name: 'FOC' },
+    { id: 4, name: 'Goodwill' }
 ]

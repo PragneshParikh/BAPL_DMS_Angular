@@ -45,5 +45,8 @@ export class StorageService {
 
     clear() {
         localStorage.removeItem('currentUser');
+        localStorage.removeItem('token');
+        localStorage.removeItem('selectedModule');
+        localStorage.removeItem('menuRights');
     }
 }
