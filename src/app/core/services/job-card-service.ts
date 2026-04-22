@@ -43,6 +43,10 @@ export class JobCardService {
     return this.httpClient.post(`${this.baseUrl}/JobCard/SaveJobCardDetails`, data);
   }
 
+  deleteJobCard(id: number) {
+    return this.httpClient.delete(`${this.baseUrl}/JobCard/DeleteJobCard/${id}`);
+  }
+
   updateJobCard(data: any) {
     return this.httpClient.put(`${this.baseUrl}/JobCard/UpdateJobCardDetails`, data);
   }
@@ -61,7 +65,8 @@ export class JobCardService {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetFilteredJobCard`, { params });
   }
 
-  deleteJobCard(id: number) {
-  return this.httpClient.delete(`${this.baseUrl}/JobCard/DeleteJobCard/${id}`);
-}
+  getJobCardById(id: number): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardById?Id=${id}`);
+  }
+
 }
