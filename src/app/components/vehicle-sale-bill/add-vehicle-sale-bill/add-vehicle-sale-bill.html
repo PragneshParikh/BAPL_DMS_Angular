@@ -7,168 +7,193 @@
 <div class="card">
     <div class="card-header d-flex justify-content-end align-items-center">
 
-        <div class="d-flex justify-content-end gap-2 me-3">
-            <button class="btn btn-primary"
+        <div class="d-flex justify-content-end gap-1 me-3">
+            <button class="btn btn-sm btn-primary" [disabled]="!canSave() || isErpLocked"
                 (click)="billId ? updateVehicleSaleBill() : saveVehicleDetailsOnly()">
                 Save
             </button>
-            <button class="btn btn-primary btn-sm" (click)="onSubmitToERP()">Submit
-                To ERP</button>
+            <button class="btn btn-sm btn-primary btn-sm" (click)="onSubmitToERP()"
+                [disabled]="isErpLocked || billId == null">
+                Submit To ERP
+            </button>
+            <button class="btn btn-light btn-sm" (click)="redirectToSaleList()">Close</button>
+
         </div>
     </div>
 
     <div class="card-body">
         <form #vehicleSaleForm="ngForm" class="vehicle-form" autocomplete="off">
 
-            <!-- ================= SALE INFO ================= -->
-            <div class="d-flex justify-content-between align-items-center mb-1" data-bs-toggle="collapse"
-                data-bs-target="#saleInfo" aria-expanded="true" style="cursor: pointer;">
+            <fieldset [disabled]="isErpLocked">
 
-                <h5 class="fs-14 text-primary mb-0">
-                    <i class="ri-information-line me-1"></i>Sale Info
-                </h5>
+                <!-- ================= SALE INFO ================= -->
+                <div class="d-flex justify-content-between align-items-center mb-1" data-bs-toggle="collapse"
+                    data-bs-target="#saleInfo" aria-expanded="true" style="cursor: pointer;">
 
-                <i class="ri-arrow-down-s-line"></i>
-            </div>
+                    <h5 class="fs-14 text-primary mb-0">
+                        <i class="ri-information-line me-1"></i>Sale Info
+                    </h5>
 
-            <div class="collapse show" id="saleInfo">
-                <div class="card card-body">
-                    <div class="row g-1">
+                    <i class="ri-arrow-down-s-line"></i>
+                </div>
 
-                        <!-- ================= ROW 1 ================= -->
+                <div class="collapse show" id="saleInfo">
+                    <div class="card card-body">
+                        <div class="row g-1">
 
-                        <div class="col-md-2">
-                            <label>Sale Date</label>
-                            <input type="date" class="form-control form-control-sm" [(ngModel)]="model.saleDate"
-                                name="saleDate" readonly>
-                        </div>
+                            <!-- ================= ROW 1 ================= -->
 
-                        <div class="col-md-2">
-                            <label class="form-label form-label-sm">Sale Bill No</label>
-                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.saleBillNo"
-                                name="saleBillNo" readonly>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>
-                                Location <span class="text-danger">*</span>
-                            </label>
-                            <select class="form-select form-select-sm" [(ngModel)]="model.location" name="location"
-                                #location="ngModel" required>
-                                <option value="">Select Location</option>
-                                <option *ngFor="let loc of locations" [value]="loc.locname">
-                                    {{ loc.locname }}
-                                </option>
-                            </select>
-                            <small *ngIf="location.invalid && (location.touched || vehicleSaleForm.submitted)"
-                                class="text-danger mt-1">
-                                Location is required.
-                            </small>
-                        </div>
-
-                        <!-- B2B -->
-                        <div class="col-md-2">
-                            <label class="form-label d-block mb-1 ">Customer Type</label>
-                            <div class="btn-group w-auto" role="group">
-                                <input type="radio" class="btn-check" name="saleTypeSwitch" id="b2c" checked
-                                    [(ngModel)]="model.customerType" value="B2C" (change)="onCustomerTypeChange()">
-                                <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2c">B2C</label>
-
-                                <input type="radio" class="btn-check" name="saleTypeSwitch" id="b2b"
-                                    [(ngModel)]="model.customerType" value="B2B" (change)="onCustomerTypeChange()">
-                                <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2b">B2B</label>
+                            <div class="col-md-2">
+                                <label>Sale Date</label>
+                                <input type="date" class="form-control form-control-sm" [(ngModel)]="model.saleDate"
+                                    name="saleDate" readonly>
                             </div>
-                        </div>
 
-                        <!-- D2D -->
-                        <div class="col-md-2">
-                            <label class="form-label d-block">D2D</label>
-
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="d2dSwitch" [(ngModel)]="model.isD2D"
-                                    name="isD2D" (change)="onD2DChange()">
-
-                                <label class="form-check-label" for="d2dSwitch">Enable</label>
+                            <div class="col-md-2">
+                                <label class="form-label form-label-sm">Sale Bill No</label>
+                                <input type="text" class="form-control form-control-sm" [(ngModel)]="model.saleBillNo"
+                                    name="saleBillNo" readonly>
                             </div>
-                        </div>
 
-                        <!-- ================= ROW 2 ================= -->
+                            <div class="col-md-3">
+                                <label>
+                                    Location <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select form-select-sm" [(ngModel)]="model.location" name="location"
+                                    #location="ngModel" required>
+                                    <option value="">Select Location</option>
+                                    <option *ngFor="let loc of locations" [value]="loc.locname">
+                                        {{ loc.locname }}
+                                    </option>
+                                </select>
+                                <small *ngIf="location.invalid && (location.touched || vehicleSaleForm.submitted)"
+                                    class="text-danger mt-1">
+                                    Location is required.
+                                </small>
+                            </div>
 
-                        <div class="col-md-3">
-                            <label class="form-label form-label-sm">Sale Type</label>
-                            <select class="form-select form-select-sm" #saleType="ngModel" [(ngModel)]="model.saleType"
-                                name="saleType" (change)="onSaleTypeChange()" required>
+                            <!-- B2B -->
+                            <div class="col-md-2">
+                                <label class="form-label d-block mb-1 ">Customer Type</label>
+                                <div class="btn-group w-auto" role="group">
+                                    <input type="radio" class="btn-check" name="saleTypeSwitch" id="b2c" checked
+                                        [(ngModel)]="model.customerType" value="B2C" (change)="onCustomerTypeChange()">
+                                    <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2c">B2C</label>
+
+                                    <input type="radio" class="btn-check" name="saleTypeSwitch" id="b2b"
+                                        [(ngModel)]="model.customerType" value="B2B" (change)="onCustomerTypeChange()">
+                                    <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2b">B2B</label>
+                                </div>
+                            </div>
+
+                            <!-- D2D -->
+                            <div class="col-md-2">
+                                <label class="form-label d-block">D2D</label>
+
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="d2dSwitch"
+                                        [(ngModel)]="model.isD2D" name="isD2D" (change)="onD2DChange()">
+
+                                    <label class="form-check-label" for="d2dSwitch">Enable</label>
+                                </div>
+                            </div>
+
+                            <!-- ================= ROW 2 ================= -->
+
+                            <div class="col-md-3">
+                                <label class="form-label form-label-sm">Sale Type</label>
+                                <select class="form-select form-select-sm" #saleType="ngModel"
+                                    [(ngModel)]="model.saleType" name="saleType" (change)="onSaleTypeChange()" required>
 
 
-                                <option *ngFor="let item of saleTypeOptions" [value]="item.value">
-                                    {{ item.name }}
-                                </option>
-
-                            </select>
-                            <small *ngIf="saleType.touched && saleType.invalid" class="text-danger mt-1">
-                                Sale Type is required.
-                            </small>
-                        </div>
-
-
-                        <div class="col-md-3">
-                            <label>Financier</label>
-                            <div class="d-flex align-items-center">
-                                <!-- Select -->
-                                <select class="form-select form-select-sm scrollable-dropdown"
-                                    [(ngModel)]="model.financier" name="financier" #financier="ngModel"
-                                    [disabled]="model.saleType !== 'Credit'">
-                                    <button type="button" class="btn btn-sm btn-primary"
-                                        (click)="openCustomerLedgerAdd()" [ngbTooltip]="'Add New Party'">
-                                        +
-                                    </button>
-                                    <option class="dropdown-list" value="">Select Financier</option>
-
-                                    <option *ngFor="let f of financiers" [value]="f.ledgerName" class="dropdown-list">
-
-                                        {{ f.ledgerName }}
-
+                                    <option *ngFor="let item of saleTypeOptions" [value]="item.value">
+                                        {{ item.name }}
                                     </option>
 
-
                                 </select>
+                                <small *ngIf="saleType.touched && saleType.invalid" class="text-danger mt-1">
+                                    Sale Type is required.
+                                </small>
+                            </div>
+
+
+                            <div class="col-md-3">
+                                <label>Financier<span *ngIf="model.saleType === 'Credit'" class="text-danger">*</span>
+                                </label>
+                                <div class="d-flex align-items-center">
+                                    <!-- Select -->
+                                    <select class="form-select form-select-sm scrollable-dropdown"
+                                        [(ngModel)]="model.financier" name="financier" #financier="ngModel"
+                                        [disabled]="model.saleType !== 'Credit'"
+                                        [required]="model.saleType === 'Credit'">
+                                        <button type="button" class="btn btn-sm btn-primary"
+                                            (click)="openCustomerLedgerAdd()" [ngbTooltip]="'Add New Party'">
+                                            +
+                                        </button>
+                                        <option class="dropdown-list" value="">Select Financier</option>
+
+                                        <option *ngFor="let f of financiers" [value]="f.ledgerName"
+                                            class="dropdown-list">
+
+                                            {{ f.ledgerName }}
+
+                                        </option>
+
+
+                                    </select>
+
+
+                                </div>
+                                <small *ngIf="financier.invalid && (financier.touched || vehicleSaleForm.submitted)"
+                                    class="text-danger">
+                                    Financier is required.
+                                </small>
+
+                                </div>
+                                <!-- CASH FIELD -->
+                                <div class="col-md-3">
+                                    <label class="form-label form-label-sm" for="cashAccount">Cash A/C<span
+                                            *ngIf="model.saleType === 'Cash'" class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select form-select-sm" name="cashAccount"
+                                        [(ngModel)]="model.cashAccount" #cashAccount="ngModel"
+                                        [required]="model.saleType === 'Cash'" [disabled]="model.saleType !== 'Cash'"
+                                        [required]="model.saleType === 'Cash'">
+                                        <option value="">Select Cash A/C</option>
+                                        <option *ngFor="let option of CashTypeOptions" [value]="option.value">
+                                            {{ option.name }}
+                                        </option>
+
+                                    </select>
+                                    <small
+                                        *ngIf="cashAccount.invalid && (cashAccount.touched || vehicleSaleForm.submitted)"
+                                        class="text-danger">
+                                        Cash A/C is required.
+                                    </small>
 
                                 </div>
 
-                        </div>
-                        <!-- CASH FIELD -->
-                        <div class="col-md-3">
-                            <label class="form-label form-label-sm" for="cashAccount">Cash A/C</label>
-                            <select class="form-select form-select-sm" name="cashAccount"
-                                [(ngModel)]="model.cashAccount" [disabled]="model.saleType !== 'Cash'">
-                                <option value="">Select Cash A/C</option>
-                                <option *ngFor="let option of CashTypeOptions" [value]="option.value">
-                                    {{ option.name }}
-                                </option>
+                                <!-- ================= Billing ================= -->
+                                <div class="col-md-3">
+                                    <label class="form-label form-label-sm" for="billingType">Billing Type</label>
 
-                            </select>
-                        </div>
+                                    <select class="form-select form-select-sm" name="billingType"
+                                        [(ngModel)]="model.billingType">
 
-                        <!-- ================= Billing ================= -->
-                        <div class="col-md-3">
-                            <label class="form-label form-label-sm" for="billingType">Billing Type</label>
+                                        <option value="">Select Billing Type</option>
 
-                            <select class="form-select form-select-sm" name="billingType"
-                                [(ngModel)]="model.billingType">
-
-                                <option value="">Select Billing Type</option>
-
-                                <option *ngFor="let option of billingTypeOptions" [value]="option.value" [disabled]="
+                                        <option *ngFor="let option of billingTypeOptions" [value]="option.value"
+                                            [disabled]="
           (model.customerType === 'B2B' && option.value !== 'Dealer Sale/Institutional') ||
           (model.customerType === 'B2C' && option.value !== 'Counter Sale[single]')
         ">
-                                    {{ option.name }}
-                                </option>
+                                            {{ option.name }}
+                                        </option>
 
-                            </select>
-                        </div>
+                                    </select>
+                                </div>
 
-                        <!-- <div class="col-md-3">
+                                <!-- <div class="col-md-3">
                             <label class="form-label form-label-sm" for="billFrom">Bill From</label>
                             <select class="form-select form-select-sm" name="billFrom" [(ngModel)]="model.billFrom"
                                 (change)="onBillFromChange($event)">
@@ -178,68 +203,68 @@
                                 </option>
                             </select>
                         </div> -->
-                        <div class="col-md-3">
-                            <label class="form-label form-label-sm">Bill From</label>
-                            <input type="text" class="form-control form-control-sm" [value]="'Direct Billing'"
-                                [disabled]="true">
-                        </div>
+                                <div class="col-md-3">
+                                    <label class="form-label form-label-sm">Bill From</label>
+                                    <input type="text" class="form-control form-control-sm" [value]="'Direct Billing'"
+                                        [disabled]="true">
+                                </div>
 
 
-                        <div class="col-md-3">
-                            <label class="form-label form-label-sm">
-                                Customer Name <span class="text-danger">*</span>
-                            </label>
+                                <div class="col-md-3">
+                                    <label class="form-label form-label-sm">
+                                        Customer Name <span class="text-danger">*</span>
+                                    </label>
 
-                            <!-- INPUT + BUTTON + DROPDOWN -->
-                            <div class="d-flex position-relative">
+                                    <!-- INPUT + BUTTON + DROPDOWN -->
+                                    <div class="d-flex position-relative">
 
-                                <input type="text" class="form-control form-control-sm" name="customerName"
-                                    [(ngModel)]="model.customerName" required #customerName="ngModel"
-                                    (input)="filterParties()" 
-                                    [class.is-invalid]="customerName.invalid && (customerName.touched || vehicleSaleForm.submitted)" />
+                                        <input type="text" class="form-control form-control-sm" name="customerName"
+                                            [(ngModel)]="model.customerName" required #customerName="ngModel"
+                                            (input)="filterParties()"
+                                            [class.is-invalid]="customerName.invalid && (customerName.touched || vehicleSaleForm.submitted)" />
 
-                                <button type="button" class="btn btn-sm btn-primary ms-1"
-                                    (click)="openCustomerLedgerAdd()" [ngbTooltip]="'Add New Party'">
-                                    +
-                                </button>
+                                        <button type="button" class="btn btn-sm btn-primary ms-1"
+                                            (click)="openCustomerLedgerAdd()" [ngbTooltip]="'Add New Party'">
+                                            +
+                                        </button>
 
-                                <!-- AUTOCOMPLETE DROPDOWN -->
-                                <ul *ngIf="filteredParties.length > 0"
-                                    class="list-group position-absolute w-100 small-dropdown"
-                                    style="top: 100%; z-index: 1000;">
-                                    <li class="list-group-item list-group-item-action"
-                                        *ngFor="let party of filteredParties" (click)="selectParty(party)">
-                                        {{ party.ledgerName }}
-                                    </li>
-                                </ul>
-                            </div>
+                                        <!-- AUTOCOMPLETE DROPDOWN -->
+                                        <ul *ngIf="filteredParties.length > 0"
+                                            class="list-group position-absolute w-100 small-dropdown"
+                                            style="top: 100%; z-index: 1000;">
+                                            <li class="list-group-item list-group-item-action"
+                                                *ngFor="let party of filteredParties" (click)="selectParty(party)">
+                                                {{ party.ledgerName }}
+                                            </li>
+                                        </ul>
+                                    </div>
 
-                            <!-- ✅ VALIDATION (OUTSIDE) -->
-                            <small class="invalid-feedback d-block"
-                                *ngIf="customerName.invalid && (customerName.touched || vehicleSaleForm.submitted)">
-                                Customer Name is required.
-                            </small>
+                                    <!--   VALIDATION (OUTSIDE) -->
+                                    <small class="invalid-feedback d-block"
+                                        *ngIf="customerName.invalid && (customerName.touched || vehicleSaleForm.submitted)">
+                                        Customer Name is required.
+                                    </small>
 
-                            <!-- NEW VALIDATION -->
-                            <div class="text-danger small"
-                                *ngIf="model.customerName && !isCustomerValid() && (customerName.touched || vehicleSaleForm.submitted)">
-                                Party not found. Please click + to add new party.
-                            </div>
-                        </div>
+                                    <!-- NEW VALIDATION -->
+                                    <div class="text-danger small"
+                                        *ngIf="model.customerName && !isCustomerValid() && (customerName.touched || vehicleSaleForm.submitted)">
+                                        Party not found. Please click + to add new party.
+                                    </div>
+                                </div>
 
-                        <div class="col-md-3">
-                            <label class="form-label form-label-sm" for="billingName">Billing Name<span
-                                    class="text-danger">*</span></label>
-                            <input type="text" class="form-control form-control-sm" name="billingName"
-                                [(ngModel)]="model.billingName" required #billingName="ngModel">
-                            <div><small
-                                    *ngIf="billingName.invalid && (billingName.touched || vehicleSaleForm.submitted)"
-                                    class="text-danger text-small mt-1">
-                                    Billing Name is required.</small>
-                            </div>
-                        </div>
+                                <div class="col-md-3">
+                                    <label class="form-label form-label-sm" for="billingName">Billing Name<span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" name="billingName"
+                                        [(ngModel)]="model.billingName" required #billingName="ngModel">
+                                    <div><small
+                                            *ngIf="billingName.invalid && (billingName.touched || vehicleSaleForm.submitted)"
+                                            class="text-danger text-small mt-1">
+                                            Billing Name is required.</small>
+                                    </div>
+                                </div>
 
-                        <!-- <div class="col-md-3">
+                                <!-- <div class="col-md-3">
                             <label class="form-label form-label-sm" for="billFrom">Bill From</label>
                             <select class="form-select form-select-sm" name="billFrom" [(ngModel)]="model.billFrom">
                                 <option value="">Select Bill From</option>
@@ -247,167 +272,172 @@
                         </div> -->
 
 
-                        <div class="col-md-3">
-                            <label class="form-label form-label-sm" for="salesExecutive">Sales Executive</label>
-                            <select class="form-select form-select-sm" name="salesExecutive"
-                                [(ngModel)]="model.salesExecutive">
-                                <option value="">Select Sales Executive</option>
-                                <option value="Alice">Alice</option>
-                                <option value="Bob">Bob</option>
-                                <option value="Vishal">Vishal</option>
-                            </select>
-                        </div>
+                                <div class="col-md-3">
+                                    <label class="form-label form-label-sm" for="salesExecutive">Sales Executive</label>
+                                    <select class="form-select form-select-sm" name="salesExecutive"
+                                        [(ngModel)]="model.salesExecutive">
+                                        <option value="">Select Sales Executive</option>
+                                        <option value="Alice">Alice</option>
+                                        <option value="Bob">Bob</option>
+                                        <option value="Vishal">Vishal</option>
+                                    </select>
+                                </div>
 
-                        <div class="col-md-3">
-                            <label class="form-label form-label-sm">Temporary Registration Required</label>
-                            <select class="form-select form-select-sm" name="tempRegRequired"
-                                [(ngModel)]="model.tempRegRequired">
-                                <option value="">Select</option>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
-                            </select>
-                        </div>
+                                <div class="col-md-3">
+                                    <label class="form-label form-label-sm">Temporary Registration Required</label>
+                                    <select class="form-select form-select-sm" name="tempRegRequired"
+                                        [(ngModel)]="model.tempRegRequired">
+                                        <option value="">Select</option>
+                                        <option value="yes">Yes</option>
+                                        <option value="no">No</option>
+                                    </select>
+                                </div>
 
-                        <div class="col-md-3 d-none" id="tempRegNoField">
-                            <label class="form-label form-label-sm" for="tempRegNo">Temporary Registration No</label>
-                            <input type="text" class="form-control form-control-sm" id="tempRegNo" name="tempRegNo"
-                                [(ngModel)]="model.tempRegNo">
-                        </div>
-                        <!-- <div class="col-md-3">
+                                <div class="col-md-3 d-none" id="tempRegNoField">
+                                    <label class="form-label form-label-sm" for="tempRegNo">Temporary Registration
+                                        No</label>
+                                    <input type="text" class="form-control form-control-sm" id="tempRegNo"
+                                        name="tempRegNo" [(ngModel)]="model.tempRegNo">
+                                </div>
+                                <!-- <div class="col-md-3">
                             <label class="form-label form-label-sm" for="bookingId">Booking ID</label>
                             <input type="text" class="form-control form-control-sm" id="bookingId" name="bookingId"
                                 [(ngModel)]="model.bookingId" readonly>
                         </div> -->
-                        <div class="col-md-3">
-                            <label class="form-label form-label-sm" for="tempRegNo">Temporary Registration No</label>
-                            <input type="text" class="form-control form-control-sm" id="tempRegNo" name="tempRegNo"
-                                [(ngModel)]="model.tempRegNo" [disabled]="model.tempRegRequired !== 'yes'">
+                                <div class="col-md-3">
+                                    <label class="form-label form-label-sm" for="tempRegNo">Temporary Registration
+                                        No</label>
+                                    <input type="text" class="form-control form-control-sm" id="tempRegNo"
+                                        name="tempRegNo" [(ngModel)]="model.tempRegNo"
+                                        [disabled]="model.tempRegRequired !== 'yes'">
+                                </div>
+
+
+                            </div>
                         </div>
-
-
                     </div>
-                </div>
-            </div>
 
-            <!-- ================= VEHICLE DETAILS ================= -->
+                    <!-- ================= VEHICLE DETAILS ================= -->
 
-            <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
-                data-bs-toggle="collapse" data-bs-target="#vehicleDetails" aria-expanded="false"
-                style="cursor: pointer;">
+                    <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
+                        data-bs-toggle="collapse" data-bs-target="#vehicleDetails" aria-expanded="true"
+                        style="cursor: pointer;">
 
-                <div class="d-flex align-items-center gap-2">
-                    <i class="ri-car-line text-primary"></i>
-                    <h6 class="mb-0 fw-semibold text-primary">Vehicle Details</h6>
-                </div>
-
-                <i class="ri-arrow-down-s-line transition-icon"></i>
-            </div>
-
-
-            <div id="vehicleDetails" class="collapse">
-                <div class="card card-body border-0 shadow-sm p-3">
-
-                    <!-- ROW 1 -->
-                    <div class="row g-2 align-items-end">
-
-                        <!--Temp-->
-                        <div class="col-md-3">
-                            <label class="form-label-sm mb-1">Chassis No.<span class="text-danger">*</span></label>
-                            <select [(ngModel)]="model.chassisNo" name="chassisNo" class="form-control form-control-sm"
-                                (change)="onChassisChange()" required #chassisNo="ngModel">
-                                <option *ngFor="let c of chassisList" [value]="c.chassisNo"
-                                    [disabled]="isChassisUsed(c.chassisNo) && model.chassisNo !== c.chassisNo">
-
-                                    {{ c.chassisNo }} - {{ c.itemName }} - {{ c.mfgYear }}
-                                </option>
-                            </select>
-                            <small *ngIf="chassisNo.invalid && (chassisNo.touched || vehicleSaleForm.submitted)"
-                                class="text-danger mt-1">
-                                Chassis No is required.
-                            </small>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="ri-car-line text-primary"></i>
+                            <h6 class="mb-0 fw-semibold text-primary">Vehicle Details</h6>
                         </div>
 
-                        <div class="col-md-1">
-                            <label class="form-label-sm mb-1">Item Rate</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="model.itemRate" name="itemRate"
-                                readonly>
-                        </div>
-                        <div class="col-md-1">
-                            <label class="form-label-sm mb-1">Mfg Year</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="model.mfgYear" name="mfgYear"
-                                readonly>
+                        <i class="ri-arrow-down-s-line transition-icon"></i>
+                    </div>
 
-                        </div>
 
-                        <div class="col-md-2">
-                            <label class="form-label-sm mb-1">Pre Gst Disc.</label>
-                            <input class="form-control form-control-sm" [(ngModel)]="model.preGSTDiscount"
-                                name="preGSTDiscount" readonly>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label-sm mb-1">Regn No<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control form-control-sm" #regNo="ngModel"
-                                [(ngModel)]="model.regNo" name="regNo" required>
-                            <small *ngIf="regNo.invalid && (regNo.touched || vehicleSaleForm.submitted)"
-                                class="text-danger text-small mt-1">
-                                Regn No is required.
-                            </small>
-                        </div>
-                        <div class="col-md-1">
-                            <label class="form-label-sm mb-1">Reg Amt.<span class="text-danger">*</span></label>
-                            <input type="number" class="form-control form-control-sm" #regAmount="ngModel"
-                                [(ngModel)]="model.regAmount" name="regAmount" required>
-                            <small *ngIf="regAmount.invalid && (regAmount.touched || vehicleSaleForm.submitted)"
-                                class="text-danger text-small mt-1">
-                                Regn Amount is required.
-                            </small>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label-sm mb-1">Ins. No<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control form-control-sm" #insNo="ngModel"
-                                [(ngModel)]="model.insNo" name="insNo" required>
-                            <small *ngIf="insNo.invalid && (insNo.touched || vehicleSaleForm.submitted)"
-                                class="text-danger text-small mt-1">
-                                Ins. No is required.
-                            </small>
-                        </div>
-                        <div class="col-md-1">
-                            <label class="form-label-sm mb-1">Ins. Amt<span class="text-danger">*</span></label>
-                            <input type="number" class="form-control form-control-sm" #insAmount="ngModel"
-                                [(ngModel)]="model.insAmount" name="insAmount" required>
-                            <small class="invalid-feedback "
-                                *ngIf="insAmount.invalid && (insAmount.touched || vehicleSaleForm.submitted)"
-                                class="text-danger text-small mt-1">
-                                Ins. Amount is required.
-                            </small>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label-sm mb-1">Ins Start Date</label>
-                            <input type="date" class="form-control form-control-sm" #insStartDate="ngModel"
-                                [(ngModel)]="model.insStartDate" name="insStartDate " required>
-                            <div *ngIf="insStartDate.invalid && (insStartDate.touched || vehicleSaleForm.submitted)"
-                                class="text-danger text-small mt-1">
-                                Ins Start Date is required.
-                            </div>
-                        </div>
+                    <div id="vehicleDetails" class="collapse show">
+                        <div class="card card-body border-0 shadow-sm p-3">
 
-                        <div class="col-md-2">
-                            <label class="form-label-sm mb-1">Ins Exp Date</label>
-                            <input type="date" class="form-control form-control-sm" #insExpDate="ngModel"
-                                [(ngModel)]="model.insExpDate" name="insExpDate" required>
-                            <div *ngIf="insExpDate.invalid && (insExpDate.touched || vehicleSaleForm.submitted)"
-                                class="text-danger text-xs mt-1">
-                                Ins Exp Date is required.
-                            </div>
-                        </div>
-                        <!-- <div class="col-md-2">
+                            <!-- ROW 1 -->
+                            <div class="row g-2 align-items-end">
+
+                                <!--Temp-->
+                                <div class="col-md-3">
+                                    <label class="form-label-sm mb-1">Chassis No.<span
+                                            class="text-danger">*</span></label>
+                                    <select [(ngModel)]="model.chassisNo" name="chassisNo"
+                                        class="form-control form-control-sm" [disabled]="billId != null"
+                                        (change)="onChassisChange()" required #chassisNo="ngModel">
+                                        <option *ngFor="let c of chassisList" [value]="c.chassisNo"
+                                            [disabled]="isChassisUsed(c.chassisNo) && model.chassisNo !== c.chassisNo">
+
+                                            {{ c.chassisNo }} - {{ c.itemName }} - {{ c.mfgYear }}
+                                        </option>
+                                    </select>
+                                    <small *ngIf="chassisNo.invalid && (chassisNo.touched || vehicleSaleForm.submitted)"
+                                        class="text-danger mt-1">
+                                        Chassis No is required.
+                                    </small>
+                                </div>
+
+                                <div class="col-md-1">
+                                    <label class="form-label-sm mb-1">Item Rate</label>
+                                    <input class="form-control form-control-sm" [(ngModel)]="model.itemRate"
+                                        name="itemRate" readonly>
+                                </div>
+                                <div class="col-md-1">
+                                    <label class="form-label-sm mb-1">Mfg Year</label>
+                                    <input class="form-control form-control-sm" [(ngModel)]="model.mfgYear"
+                                        name="mfgYear" readonly>
+
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label-sm mb-1">Pre Gst Disc.</label>
+                                    <input class="form-control form-control-sm" [(ngModel)]="model.preGSTDiscount"
+                                        name="preGSTDiscount" readonly>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label-sm mb-1">Regn No<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" #regNo="ngModel"
+                                        [(ngModel)]="model.regNo" name="regNo" required>
+                                    <small *ngIf="regNo.invalid && (regNo.touched || vehicleSaleForm.submitted)"
+                                        class="text-danger text-small mt-1">
+                                        Regn No is required.
+                                    </small>
+                                </div>
+                                <div class="col-md-1">
+                                    <label class="form-label-sm mb-1">Reg Amt.<span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control form-control-sm" #regAmount="ngModel"
+                                        [(ngModel)]="model.regAmount" name="regAmount" required>
+                                    <small *ngIf="regAmount.invalid && (regAmount.touched || vehicleSaleForm.submitted)"
+                                        class="text-danger text-small mt-1">
+                                        Regn Amount is required.
+                                    </small>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label-sm mb-1">Ins. No<span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" #insNo="ngModel"
+                                        [(ngModel)]="model.insNo" name="insNo" required>
+                                    <small *ngIf="insNo.invalid && (insNo.touched || vehicleSaleForm.submitted)"
+                                        class="text-danger text-small mt-1">
+                                        Ins. No is required.
+                                    </small>
+                                </div>
+                                <div class="col-md-1">
+                                    <label class="form-label-sm mb-1">Ins. Amt<span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control form-control-sm" #insAmount="ngModel"
+                                        [(ngModel)]="model.insAmount" name="insAmount" required>
+                                    <small class="invalid-feedback "
+                                        *ngIf="insAmount.invalid && (insAmount.touched || vehicleSaleForm.submitted)"
+                                        class="text-danger text-small mt-1">
+                                        Ins. Amount is required.
+                                    </small>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label-sm mb-1">Ins Start Date</label>
+                                    <input type="date" class="form-control form-control-sm" #insStartDate="ngModel"
+                                        [(ngModel)]="model.insStartDate" name="insStartDate " required>
+                                    <div *ngIf="insStartDate.invalid && (insStartDate.touched || vehicleSaleForm.submitted)"
+                                        class="text-danger text-small mt-1">
+                                        Ins Start Date is required.
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label-sm mb-1">Ins Exp Date</label>
+                                    <input type="date" class="form-control form-control-sm" #insExpDate="ngModel"
+                                        [(ngModel)]="model.insExpDate" name="insExpDate" required>
+                                    <div *ngIf="insExpDate.invalid && (insExpDate.touched || vehicleSaleForm.submitted)"
+                                        class="text-danger text-xs mt-1">
+                                        Ins Exp Date is required.
+                                    </div>
+                                </div>
+                                <!-- <div class="col-md-2">
                             <label class="form-label-sm mb-1">Devices</label>
                             <button class="form-control form-control-sm text-start">
                                 Select Devices
                             </button>
                         </div> -->
 
-                        <!-- <div class="col-md-1">
+                                <!-- <div class="col-md-1">
                             <label class="form-label-sm mb-1">Mfg Year</label>
                             <input class="form-control form-control-sm" [(ngModel)]="model.mfgYear" name="mfgYear"
                                 readonly>
@@ -415,16 +445,16 @@
                         </div> -->
 
 
-                    </div>
+                            </div>
 
-                    <!-- ROW 2 (FIXED SPACING) -->
-                    <div class="row g-2 mt-2 align-items-end">
+                            <!-- ROW 2 (FIXED SPACING) -->
+                            <div class="row g-2 mt-2 align-items-end">
 
-                        <!-- SWITCHES (reduced width) -->
-                        <div class="col-md-3">
-                            <div class="d-flex align-items-center gap-2">
+                                <!-- SWITCHES (reduced width) -->
+                                <div class="col-md-3">
+                                    <div class="d-flex align-items-center gap-2">
 
-                                <!-- <div>
+                                        <!-- <div>
                                     <small class="text-muted d-block">Kit</small>
                                     <div class="btn-group btn-group-sm">
                                         <button class="btn btn-outline-primary active px-2 py-0">Y</button>
@@ -432,7 +462,7 @@
                                     </div>
                                 </div> -->
 
-                                <!-- <div>
+                                        <!-- <div>
                                     <small class="text-muted d-block">Kit</small>
 
                                     <div class="btn-group btn-group-sm">
@@ -448,7 +478,7 @@
                                     </div>
                                 </div> -->
 
-                                <!-- <div>
+                                        <!-- <div>
                                     <small class="text-muted d-block">Delivered</small>
                                     <div class="btn-group btn-group-sm">
                                         <button class="btn btn-outline-primary active px-2 py-0">Y</button>
@@ -464,25 +494,27 @@
                                     </div>
                                 </div> -->
 
-                                <div>
-                                    <small class="text-muted d-block">Delivered</small>
-                                    <div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-outline-primary px-2 py-0"
-                                            [class.active]="model.delivered === 'Y'" (click)="model.delivered = 'Y'">
-                                            Y
-                                        </button>
+                                        <div>
+                                            <small class="text-muted d-block">Delivered</small>
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" class="btn btn-outline-primary px-2 py-0"
+                                                    [class.active]="model.delivered === 'Y'"
+                                                    (click)="model.delivered = 'Y'">
+                                                    Y
+                                                </button>
 
-                                        <button type="button" class="btn btn-outline-primary px-2 py-0"
-                                            [class.active]="model.delivered === 'N'" (click)="model.delivered = 'N'">
-                                            N
-                                        </button>
-                                    </div>
-                                </div>
+                                                <button type="button" class="btn btn-outline-primary px-2 py-0"
+                                                    [class.active]="model.delivered === 'N'"
+                                                    (click)="model.delivered = 'N'">
+                                                    N
+                                                </button>
+                                            </div>
+                                        </div>
 
 
 
 
-                                <!-- <div>
+                                        <!-- <div>
                                     <small class="text-muted d-block">Exchange</small>
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-outline-primary px-2 py-0"
@@ -497,12 +529,12 @@
                                     </div>
                                 </div> -->
 
-                            </div>
+                                    </div>
 
-                        </div>
+                                </div>
 
-                        <!-- Segment -->
-                        <!-- <div class="col-md-3">
+                                <!-- Segment -->
+                                <!-- <div class="col-md-3">
                             <label class="form-label-sm mb-1">Segment</label>
                             <select class="form-select form-select-sm">
                                 <option>Select</option>
@@ -523,444 +555,451 @@
                             </select>
                         </div> -->
 
-                    </div>
+                            </div>
 
 
-                    <div *ngIf="vehicleList.length > 0" class="mt-3">
+                            <div *ngIf="vehicleList.length > 0" class="mt-3">
 
-                        <div class="table-responsive mt-3">
-                            <table class="table table-sm table-bordered align-middle text-nowrap">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Action</th>
-                                        <th>Sr No</th>
-                                        <th>Chasis/Engine No</th>
-                                        <th>Model</th>
-                                        <th>Colour</th>
-                                        <th>Mfg Year</th>
-                                        <th>Battery</th>
-                                        <th>Convertor No</th>
-                                        <th>Charger No</th>
-                                        <th>Controller No</th>
-                                        <th>Key/Book No</th>
-                                        <th>Kit</th>
-                                        <th>ItemRate</th>
-                                        <th>Regn Amt</th>
-                                        <th>Ins Amt</th>
-                                        <th>Pre GST Amt</th>
-                                        <th>Taxable Amount</th>
-                                        <th>Ext Warranty</th>
-                                        <th>SGST %</th>
-                                        <th>SGST Amnt</th>
-                                        <th>CGST %</th>
-                                        <th>CGST Amnt</th>
-                                        <th>IGST %</th>
-                                        <th>IGST Amnt</th>
-                                        <th>Final Amount</th>
-                                        <th>Cess</th>
-                                        <th>TCS</th>
-                                        <th>Delivered</th>
-                                        <th>Battery Chemical</th>
-                                        <th>Battery Capacity</th>
-                                        <th>Battery Make</th>
-                                        <th>Stock Detail No</th>
-                                        <th>VCU</th>
-                                    </tr>
-                                </thead>
+                                <div class="table-responsive mt-3">
+                                    <table class="table table-sm table-bordered align-middle text-nowrap">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Action</th>
+                                                <th>Sr No</th>
+                                                <th>Chasis/Engine No</th>
+                                                <th>Model</th>
+                                                <th>Colour</th>
+                                                <th>Mfg Year</th>
+                                                <th>Battery</th>
+                                                <th>Convertor No</th>
+                                                <th>Charger No</th>
+                                                <th>Controller No</th>
+                                                <th>Key/Book No</th>
+                                                <th>Kit</th>
+                                                <th>ItemRate</th>
+                                                <th>Regn Amt</th>
+                                                <th>Ins Amt</th>
+                                                <th>Pre GST Amt</th>
+                                                <th>Taxable Amount</th>
+                                                <th>Ext Warranty</th>
+                                                <th>SGST %</th>
+                                                <th>SGST Amnt</th>
+                                                <th>CGST %</th>
+                                                <th>CGST Amnt</th>
+                                                <th>IGST %</th>
+                                                <th>IGST Amnt</th>
+                                                <th>Final Amount</th>
+                                                <th>Cess</th>
+                                                <th>TCS</th>
+                                                <th>Delivered</th>
+                                                <th>Battery Chemical</th>
+                                                <th>Battery Capacity</th>
+                                                <th>Battery Make</th>
+                                                <th>Stock Detail No</th>
+                                                <th>VCU</th>
+                                            </tr>
+                                        </thead>
 
-                                <tbody>
-                                    <tr *ngFor="let row of vehicleList; let i = index">
-<!-- <pre>{{ vehicleList | json }}</pre> -->
+                                        <tbody>
+                                            <tr *ngFor="let row of vehicleList; let i = index">
+                                                <!-- <pre>{{ vehicleList | json }}</pre> -->
 
-                                        <td>
-                                            <button class="btn btn-sm btn-soft-info py-0 px-1 me-1"
-                                                (click)="editVehicle(i)" [disabled]="isSubmitted">
-                                                <i class="ri-pencil-line"></i>
-                                            </button>
+                                                <td>
+                                                    <button class="btn btn-sm btn-soft-info py-0 px-1 me-1"
+                                                        (click)="editVehicle(i)" [disabled]="isSubmitted">
+                                                        <i class="ri-pencil-line"></i>
+                                                    </button>
 
-                                            <button class="btn btn-sm btn-soft-danger py-0 px-1"
-                                                (click)="deleteVehicle(i)" [disabled]="isSubmitted">
-                                                <i class="ri-delete-bin-line"></i>
-                                            </button>
-                                        </td>
+                                                    <button class="btn btn-sm btn-soft-danger py-0 px-1"
+                                                        (click)="deleteVehicle(i)" [disabled]="isSubmitted">
+                                                        <i class="ri-delete-bin-line"></i>
+                                                    </button>
+                                                </td>
 
-                                        <td>{{ i + 1 }}</td>
+                                                <td>{{ i + 1 }}</td>
 
-                                        <td>{{ row.chassisNo }}</td>
-                                        <td>{{ row.modelName  }}</td>
-                                        <td>{{ row.colour }}</td>
-                                        <td>{{ row.mfgYear }}</td>
-                                        <td>{{ row.battery }}</td>
-                                        <td>{{ row.convertorNo }}</td>
-                                        <td>{{ row.chargerNo }}</td>
-                                        <td>{{ row.controllerNo }}</td>
-                                      <td>{{ row.key }}/{{ row.bookNo }}</td>
+                                                <td>{{ row.chassisNo }}</td>
+                                                <td>{{ row.modelName }}</td>
+                                                <td>{{ row.colour }}</td>
+                                                <td>{{ row.mfgYear }}</td>
+                                                <td>{{ row.battery }}</td>
+                                                <td>{{ row.convertorNo }}</td>
+                                                <td>{{ row.chargerNo }}</td>
+                                                <td>{{ row.controllerNo }}</td>
+                                                <td>{{ row.key }}/{{ row.bookNo }}</td>
 
-                                        <td>
-                                            {{ row.kit }}
-                                        </td>
+                                                <td>
+                                                    {{ row.kit }}
+                                                </td>
 
-                                        <td>{{ row.rate }}</td>
-                                        <td>{{ row.regAmt }}</td>
-                                        <td>{{ row.insAmt }}</td>
-                                        <td>{{ row.preGstDiscount }}</td>
-                                        <td>{{ row.taxableAmount ?? row.amount}}</td>
+                                                <td>{{ row.rate }}</td>
+                                                <td>{{ row.regAmt }}</td>
+                                                <td>{{ row.insAmt }}</td>
+                                                <td>{{ row.preGstDiscount }}</td>
+                                                <td>{{ row.taxableAmount ?? row.amount}}</td>
 
-                                        <td>
-                                            {{ row.extWarranty }}
-                                        </td>
-                                        <td>{{ model.isD2D ? 0 : row.sgstPer }}%</td>
-                                        <!-- <td>{{ model.isD2D ? 0 : (row.sgst ?? row.sgstamnt) }}</td>
+                                                <td>
+                                                    {{ row.extWarranty }}
+                                                </td>
+                                                <td>{{ model.isD2D ? 0 : row.sgstPer }}%</td>
+                                                <!-- <td>{{ model.isD2D ? 0 : (row.sgst ?? row.sgstamnt) }}</td>
                                         <td>{{ model.isD2D ? 0 : row.cgstPer }}%</td>
                                         <td>{{ model.isD2D ? 0 : (row.cgst ?? row.cgstamnt) }}</td>
                                         <td>{{ model.isD2D ? 0 : row.igstPer }}%</td>
                                         <td>{{ model.isD2D ? 0 : (row.igst ?? row.igstamnt) }}</td> -->
-                                       <td>{{ model.isD2D ? 0 : row.sgst }}</td>
-                                        <td>{{ model.isD2D ? 0 : row.cgstPer }}%</td>
-                                        <td>{{ model.isD2D ? 0 : row.cgst  }}</td>
-                                        <td>{{ model.isD2D ? 0 : row.igstPer }}%</td>
-                                        <td>{{ model.isD2D ? 0 : row.igst  }}</td>
-                                       
-                                        <td>{{ row.finalAmount }}</td>
-                                        <td>{{ row.cess }}</td>
-                                        <td>{{ row.tcs }}</td>
+                                                <td>{{ model.isD2D ? 0 : row.sgst }}</td>
+                                                <td>{{ model.isD2D ? 0 : row.cgstPer }}%</td>
+                                                <td>{{ model.isD2D ? 0 : row.cgst }}</td>
+                                                <td>{{ model.isD2D ? 0 : row.igstPer }}%</td>
+                                                <td>{{ model.isD2D ? 0 : row.igst }}</td>
 
-                                        <td>
-                                            {{ row.delivered }}
-                                        </td>
+                                                <td>{{ row.finalAmount }}</td>
+                                                <td>{{ row.cess }}</td>
+                                                <td>{{ row.tcs }}</td>
 
-                                        <td>{{row.batteryChemical}}</td>
-                                        <td>{{row.batteryCapacity}}</td>
-                                        <td>{{row.batteryMake}}</td>
-                                        <td>{{row.stockDetailNo}}</td>
-                                        <td>{{row.vcu}}</td>
+                                                <td>
+                                                    {{ row.delivered }}
+                                                </td>
 
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <!-- ROW 3 (NEW FIELDS) -->
-                    <div class="row g-2 mt-2 align-items-end">
+                                                <td>{{row.batteryChemical}}</td>
+                                                <td>{{row.batteryCapacity}}</td>
+                                                <td>{{row.batteryMake}}</td>
+                                                <td>{{row.stockDetailNo}}</td>
+                                                <td>{{row.vcu}}</td>
 
-                        <!-- Narration -->
-                        <div class="col-md-9">
-                            <label class="form-label-sm mb-1">Narration</label>
-                            <input class="form-control form-control-sm">
-                        </div>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- ROW 3 (NEW FIELDS) -->
+                            <div class="row g-2 mt-2 align-items-end">
 
-                        <!-- Final Amount -->
-                        <div class="col-md-3">
-                            <label class="form-label-sm mb-1">Final Amount</label>
-                            <input class="form-control form-control-sm" [value]="getGrandTotal()"
-                                [(ngModel)]="model.finalAmount" name="finalAmount" readonly>
-                        </div>
+                                <!-- Narration -->
+                                <div class="col-md-9">
+                                    <label class="form-label-sm mb-1">Narration</label>
+                                    <input class="form-control form-control-sm">
+                                </div>
 
-                        <!-- ADD BUTTON HERE -->
-                        <div class="col-md-12 d-flex justify-content-end mt-2">
-                            <button class="btn btn-primary btn-sm" type="button" (click)="addVehicle(vehicleSaleForm)"
-                                [disabled]="!isVehicleValid()">
-                                Add
-                            </button>
-                        </div>
+                                <!-- Final Amount -->
+                                <div class="col-md-3">
+                                    <label class="form-label-sm mb-1">Final Amount</label>
+                                    <input class="form-control form-control-sm" [value]="getGrandTotal()"
+                                        [(ngModel)]="model.finalAmount" name="finalAmount" readonly>
+                                </div>
 
-                    </div>
+                                <!-- ADD BUTTON HERE -->
+                                <div class="col-md-12 d-flex justify-content-end mt-2">
+                                    <button class="btn btn-primary btn-sm" type="button"
+                                        (click)="addVehicle(vehicleSaleForm)"
+                                        [disabled]="!isVehicleValid() || isErpLocked">
+                                        Add
+                                    </button>
+                                </div>
 
-                </div>
-            </div>
+                            </div>
 
-
-
-
-            <!-- =================EXTRA CHARGES ================= -->
-            <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
-                data-bs-toggle="collapse" data-bs-target="#extraCharges" aria-expanded="false" style="cursor: pointer;">
-
-                <div class="d-flex align-items-center gap-2">
-                    <i class="ri-money-rupee-circle-line text-primary"></i>
-                    <h6 class="mb-0 fw-semibold text-primary">Extra Charges</h6>
-                </div>
-
-                <i class="ri-arrow-down-s-line transition-icon"></i>
-
-            </div>
-
-            <div id="extraCharges" class="collapse">
-
-                <!-- ROW 1 -->
-                <div class="row g-2">
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Accessory Bill No</label>
-                        <input type="text" class="form-control form-control-sm">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Accessory Amount</label>
-                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.accessoryAmount"
-                            name="accessoryAmount">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Discount Type</label>
-                        <select class="form-select form-select-sm">
-                            <option>Select</option>
-                            <option>Percentage</option>
-                            <option>Amount</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Post Gst Disc. Amt</label>
-                        <input type="number" class="form-control form-control-sm">
-                    </div>
-
-                </div>
-
-                <!-- ROW 2 -->
-                <div class="row g-2 mt-1">
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">GoodLife Amnt.</label>
-                        <input type="number" class="form-control form-control-sm">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Number Plate Amnt</label>
-                        <input type="number" class="form-control form-control-sm">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Handeling Charges</label>
-                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.handlingCharges"
-                            name="handlingCharges">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Smart Card Amnt</label>
-                        <input type="number" class="form-control form-control-sm">
-                    </div>
-
-                </div>
-
-                <!-- ROW 3 -->
-                <div class="row g-2 mt-1">
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Est.Kit Amnt</label>
-                        <input type="number" class="form-control form-control-sm">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">HP Amount</label>
-                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.hpAmount"
-                            name="hpAmount">
-                    </div>
-
-                    <!-- SWITCH -->
-                    <div class="col-md-3">
-                        <label class="form-label-sm d-block">Extended Warranty</label>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary active px-2 py-0">Yes</button>
-                            <button class="btn btn-outline-primary px-2 py-0">No</button>
                         </div>
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Warranty Amount</label>
-                        <input type="number" class="form-control form-control-sm" readonly>
+
+
+
+                    <!-- =================EXTRA CHARGES ================= -->
+                    <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
+                        data-bs-toggle="collapse" data-bs-target="#extraCharges" aria-expanded="false"
+                        style="cursor: pointer;">
+
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="ri-money-rupee-circle-line text-primary"></i>
+                            <h6 class="mb-0 fw-semibold text-primary">Extra Charges</h6>
+                        </div>
+
+                        <i class="ri-arrow-down-s-line transition-icon"></i>
+
                     </div>
 
-                </div>
+                    <div id="extraCharges" class="collapse">
 
-                <!-- ROW 4 -->
-                <div class="row g-2 mt-1">
+                        <!-- ROW 1 -->
+                        <div class="row g-2">
 
-                    <div class="col-md-3">
-                        <label class="form-label-sm">FameII Incentive Amnt</label>
-                        <input type="number" class="form-control form-control-sm">
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Accessory Bill No</label>
+                                <input type="text" class="form-control form-control-sm">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Accessory Amount</label>
+                                <input type="number" class="form-control form-control-sm"
+                                    [(ngModel)]="model.accessoryAmount" name="accessoryAmount">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Discount Type</label>
+                                <select class="form-select form-select-sm">
+                                    <option>Select</option>
+                                    <option>Percentage</option>
+                                    <option>Amount</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Post Gst Disc. Amt</label>
+                                <input type="number" class="form-control form-control-sm">
+                            </div>
+
+                        </div>
+
+                        <!-- ROW 2 -->
+                        <div class="row g-2 mt-1">
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">GoodLife Amnt.</label>
+                                <input type="number" class="form-control form-control-sm">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Number Plate Amnt</label>
+                                <input type="number" class="form-control form-control-sm">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Handeling Charges</label>
+                                <input type="number" class="form-control form-control-sm"
+                                    [(ngModel)]="model.handlingCharges" name="handlingCharges">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Smart Card Amnt</label>
+                                <input type="number" class="form-control form-control-sm">
+                            </div>
+
+                        </div>
+
+                        <!-- ROW 3 -->
+                        <div class="row g-2 mt-1">
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Est.Kit Amnt</label>
+                                <input type="number" class="form-control form-control-sm">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">HP Amount</label>
+                                <input type="number" class="form-control form-control-sm" [(ngModel)]="model.hpAmount"
+                                    name="hpAmount">
+                            </div>
+
+                            <!-- SWITCH -->
+                            <div class="col-md-3">
+                                <label class="form-label-sm d-block">Extended Warranty</label>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary active px-2 py-0">Yes</button>
+                                    <button class="btn btn-outline-primary px-2 py-0">No</button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Warranty Amount</label>
+                                <input type="number" class="form-control form-control-sm" readonly>
+                            </div>
+
+                        </div>
+
+                        <!-- ROW 4 -->
+                        <div class="row g-2 mt-1">
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">FameII Incentive Amnt</label>
+                                <input type="number" class="form-control form-control-sm">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Satate Subsidy Amnt</label>
+                                <input type="number" class="form-control form-control-sm">
+                            </div>
+
+                        </div>
+
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Satate Subsidy Amnt</label>
-                        <input type="number" class="form-control form-control-sm">
+
+                    <!-- ================= ACCESSORIES ================= -->
+
+                    <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
+                        data-bs-toggle="collapse" data-bs-target="#billDetails" aria-expanded="false"
+                        style="cursor: pointer;">
+
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="ri-file-list-3-line text-primary"></i>
+                            <h6 class="mb-0 fw-semibold text-primary">Accessories Billing</h6>
+                        </div>
+
+                        <i class="ri-arrow-down-s-line transition-icon"></i>
+
                     </div>
 
-                </div>
+                    <div id="billDetails" class="collapse">
 
-            </div>
+                        <!-- ROW 1 (Readonly Info) -->
+                        <div class="row g-2">
 
+                            <div class="col-md-2">
+                                <label class="form-label-sm">Bill No</label>
+                                <input class="form-control form-control-sm" readonly>
+                            </div>
 
-            <!-- ================= ACCESSORIES ================= -->
+                            <div class="col-md-2">
+                                <label class="form-label-sm">Bill date</label>
+                                <input type="date" class="form-control form-control-sm" readonly>
+                            </div>
 
-            <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
-                data-bs-toggle="collapse" data-bs-target="#billDetails" aria-expanded="false" style="cursor: pointer;">
+                            <div class="col-md-2">
+                                <label class="form-label-sm">Location</label>
+                                <input class="form-control form-control-sm" readonly>
+                            </div>
 
-                <div class="d-flex align-items-center gap-2">
-                    <i class="ri-file-list-3-line text-primary"></i>
-                    <h6 class="mb-0 fw-semibold text-primary">Accessories Billing</h6>
-                </div>
+                            <div class="col-md-2">
+                                <label class="form-label-sm">BillType</label>
+                                <input class="form-control form-control-sm" readonly>
+                            </div>
 
-                <i class="ri-arrow-down-s-line transition-icon"></i>
+                            <div class="col-md-2">
+                                <label class="form-label-sm">Party Name</label>
+                                <input class="form-control form-control-sm" readonly>
+                            </div>
 
-            </div>
+                            <div class="col-md-2">
+                                <label class="form-label-sm">PartyState</label>
+                                <input class="form-control form-control-sm" readonly>
+                            </div>
 
-            <div id="billDetails" class="collapse">
+                        </div>
 
-                <!-- ROW 1 (Readonly Info) -->
-                <div class="row g-2">
+                        <!-- ROW 2 (Editable Inputs) -->
+                        <div class="row g-2 mt-1">
 
-                    <div class="col-md-2">
-                        <label class="form-label-sm">Bill No</label>
-                        <input class="form-control form-control-sm" readonly>
+                            <div class="col-md-2">
+                                <label class="form-label-sm">Item Name</label>
+                                <input class="form-control form-control-sm">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label-sm">Description</label>
+                                <input class="form-control form-control-sm">
+                            </div>
+
+                            <div class="col-md-1">
+                                <label class="form-label-sm">Qty</label>
+                                <input type="number" class="form-control form-control-sm">
+                            </div>
+
+                            <div class="col-md-1">
+                                <label class="form-label-sm">Rate</label>
+                                <input type="number" class="form-control form-control-sm">
+                            </div>
+
+                            <div class="col-md-1">
+                                <label class="form-label-sm">Discount</label>
+                                <input type="number" class="form-control form-control-sm">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label-sm">Discount Type</label>
+                                <select class="form-select form-select-sm">
+                                    <option>Select</option>
+                                    <option>Percentage</option>
+                                    <option>Amount</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Device No</label>
+                                <input class="form-control form-control-sm">
+                            </div>
+
+                        </div>
+
+                        <!-- ROW 3 -->
+                        <div class="row g-2 mt-1">
+
+                            <div class="col-md-2">
+                                <label class="form-label-sm">GST%</label>
+                                <input type="number" class="form-control form-control-sm">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Total Amt</label>
+                                <input type="number" class="form-control form-control-sm">
+                            </div>
+
+                        </div>
+
                     </div>
 
-                    <div class="col-md-2">
-                        <label class="form-label-sm">Bill date</label>
-                        <input type="date" class="form-control form-control-sm" readonly>
+                    <!-- ================= REFERRAL ================= -->
+
+                    <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
+                        data-bs-toggle="collapse" data-bs-target="#referral" aria-expanded="false"
+                        style="cursor: pointer;">
+
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="ri-user-star-line text-primary"></i>
+                            <h6 class="mb-0 fw-semibold text-primary">Referral Details</h6>
+                        </div>
+
+                        <i class="ri-arrow-down-s-line transition-icon"></i>
+
                     </div>
 
-                    <div class="col-md-2">
-                        <label class="form-label-sm">Location</label>
-                        <input class="form-control form-control-sm" readonly>
+                    <div id="referral" class="collapse">
+
+                        <!-- ROW 1 -->
+                        <div class="row g-2">
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Referral Name</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="model.referralName"
+                                    name="referralName">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Mobile</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="model.referralMobile"
+                                    name="referralMobile">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Email</label>
+                                <input type="email" class="form-control form-control-sm"
+                                    [(ngModel)]="model.referralEmail" name="referralEmail">
+                            </div>
+
+                            <!-- NEW FIELD -->
+                            <div class="col-md-3">
+                                <label class="form-label-sm">Referral Point</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="model.referralPoint"
+                                    name="referralPoint">
+                            </div>
+
+                        </div>
+
+                        <!-- ROW 2 -->
+                        <div class="row g-2 mt-1">
+
+                            <div class="col-md-12">
+                                <label class="form-label-sm">Referral Remarks</label>
+                                <textarea class="form-control form-control-sm" rows="2"
+                                    [(ngModel)]="model.referralRemarks" name="referralRemarks"></textarea>
+                            </div>
+
+                        </div>
+
                     </div>
 
-                    <div class="col-md-2">
-                        <label class="form-label-sm">BillType</label>
-                        <input class="form-control form-control-sm" readonly>
-                    </div>
 
-                    <div class="col-md-2">
-                        <label class="form-label-sm">Party Name</label>
-                        <input class="form-control form-control-sm" readonly>
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label-sm">PartyState</label>
-                        <input class="form-control form-control-sm" readonly>
-                    </div>
-
-                </div>
-
-                <!-- ROW 2 (Editable Inputs) -->
-                <div class="row g-2 mt-1">
-
-                    <div class="col-md-2">
-                        <label class="form-label-sm">Item Name</label>
-                        <input class="form-control form-control-sm">
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label-sm">Description</label>
-                        <input class="form-control form-control-sm">
-                    </div>
-
-                    <div class="col-md-1">
-                        <label class="form-label-sm">Qty</label>
-                        <input type="number" class="form-control form-control-sm">
-                    </div>
-
-                    <div class="col-md-1">
-                        <label class="form-label-sm">Rate</label>
-                        <input type="number" class="form-control form-control-sm">
-                    </div>
-
-                    <div class="col-md-1">
-                        <label class="form-label-sm">Discount</label>
-                        <input type="number" class="form-control form-control-sm">
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label-sm">Discount Type</label>
-                        <select class="form-select form-select-sm">
-                            <option>Select</option>
-                            <option>Percentage</option>
-                            <option>Amount</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Device No</label>
-                        <input class="form-control form-control-sm">
-                    </div>
-
-                </div>
-
-                <!-- ROW 3 -->
-                <div class="row g-2 mt-1">
-
-                    <div class="col-md-2">
-                        <label class="form-label-sm">GST%</label>
-                        <input type="number" class="form-control form-control-sm">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Total Amt</label>
-                        <input type="number" class="form-control form-control-sm">
-                    </div>
-
-                </div>
-
-            </div>
-
-            <!-- ================= REFERRAL ================= -->
-
-            <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
-                data-bs-toggle="collapse" data-bs-target="#referral" aria-expanded="false" style="cursor: pointer;">
-
-                <div class="d-flex align-items-center gap-2">
-                    <i class="ri-user-star-line text-primary"></i>
-                    <h6 class="mb-0 fw-semibold text-primary">Referral Details</h6>
-                </div>
-
-                <i class="ri-arrow-down-s-line transition-icon"></i>
-
-            </div>
-
-            <div id="referral" class="collapse">
-
-                <!-- ROW 1 -->
-                <div class="row g-2">
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Referral Name</label>
-                        <input class="form-control form-control-sm" [(ngModel)]="model.referralName"
-                            name="referralName">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Mobile</label>
-                        <input class="form-control form-control-sm" [(ngModel)]="model.referralMobile"
-                            name="referralMobile">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Email</label>
-                        <input type="email" class="form-control form-control-sm" [(ngModel)]="model.referralEmail"
-                            name="referralEmail">
-                    </div>
-
-                    <!-- NEW FIELD -->
-                    <div class="col-md-3">
-                        <label class="form-label-sm">Referral Point</label>
-                        <input class="form-control form-control-sm" [(ngModel)]="model.referralPoint"
-                            name="referralPoint">
-                    </div>
-
-                </div>
-
-                <!-- ROW 2 -->
-                <div class="row g-2 mt-1">
-
-                    <div class="col-md-12">
-                        <label class="form-label-sm">Referral Remarks</label>
-                        <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="model.referralRemarks"
-                            name="referralRemarks"></textarea>
-                    </div>
-
-                </div>
-
-            </div>
+            </fieldset>
 
 
 

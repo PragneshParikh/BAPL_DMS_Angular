@@ -35,6 +35,8 @@ export class AddVehicleSaleBill implements OnInit {
   searchClicked: boolean;
   selectedCustomerId: number;
   chassisList: VehicleSaleListChasisResponse[] = [];
+  erpStatus: any;
+  isErpLocked: boolean;
 
   /**
    *
@@ -122,8 +124,7 @@ export class AddVehicleSaleBill implements OnInit {
     exchange: 'N',
     narration: '',
     insStartDate: this.today,
-    insExpDate: this.getNextYearDate(this.today),
-
+insExpDate: this.getPreviousDate(this.today),
 
 
     // Extra Charges
@@ -168,7 +169,6 @@ export class AddVehicleSaleBill implements OnInit {
     this.getFinanciers();
     this.getParties();
     const bill = history.state?.bill;
-    console.log('bill', bill);
 
     if (bill) {
       this.billId = bill.id;
@@ -191,8 +191,6 @@ export class AddVehicleSaleBill implements OnInit {
 
 
   loadBillForEdit(bill: any) {
-    console.log(bill, "jhdji");
-
     //  Header fields
     this.model.saleBillNo = bill.saleBillNo;
     this.model.saleDate = bill.saleDate ? bill.saleDate.split('T')[0] : '';
@@ -259,29 +257,27 @@ export class AddVehicleSaleBill implements OnInit {
 
 
     this.model.finalAmount = this.getGrandTotal();
+    this.editVehicle(0); // load first vehicle to form for easy editing
   }
   loadChassisList() {
-    console.log("dask");
-
     const dealerCode = this.storageService.getDealerCode();
     this.vehicleSaleBillService.getChassisListPDIOK(dealerCode)
       .subscribe({
         next: (res) => {
           this.chassisList = res;
-          console.log('Chassis List:', res);
         },
         error: (err) => {
-          // console.error(err);
           this.toaster.show('Failed to load chassis list', { classname: 'bg-danger text-white', delay: 5000 });
         }
       });
   }
   getBillById(id: number) {
-    console.log();
-
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
-        console.log('API DATA:', res);
+        this.erpStatus = res.erpStatus || '';
+        
+        this.isErpLocked = this.erpStatus.toLowerCase() == 'PushedToERP'.toLowerCase();
+        
         this.loadBillForEdit(res);
       },
       error: (err) => {
@@ -296,7 +292,6 @@ export class AddVehicleSaleBill implements OnInit {
 
     this.locationService.getLocationByDealerCode(dealerCode).subscribe({
       next: (data: any[]) => {
-        console.log('API Response:', data);
         this.locations = data;
 
         if (this.locations.length > 0 && !this.billId) {
@@ -355,8 +350,6 @@ export class AddVehicleSaleBill implements OnInit {
   saveVehicleDetailsOnly() {
     const payload = this.buildPayload();
 
-    console.log('ADD PAYLOAD:', payload);
-
     this.vehicleSaleBillService.createVehicleSaleBill(payload).subscribe({
       next: () => {
         this.toaster.show('Vehicle Details Saved', {
@@ -383,7 +376,6 @@ export class AddVehicleSaleBill implements OnInit {
   }
 
   addVehicle(form: NgForm) {
-    console.log(this.vehicleList, "wdsa");
 
     if (
       this.model.billingType === 'Counter Sale[single]' &&
@@ -458,7 +450,7 @@ export class AddVehicleSaleBill implements OnInit {
 
       delivered: this.model.delivered,
 
-      finalAmount: finalAmount
+     finalAmount: finalAmount
     };
 
     this.model.finalAmount = this.getGrandTotal();;
@@ -468,6 +460,7 @@ export class AddVehicleSaleBill implements OnInit {
     } else {
       this.vehicleList.push(vehicle);
     }
+    this.model.finalAmount = this.getGrandTotal();
     if (this.vehicleSaleForm?.controls) {
       const fieldsToReset = ['chassisNo', 'regNo', 'insNo'];
 
@@ -491,7 +484,6 @@ export class AddVehicleSaleBill implements OnInit {
 
 
   editVehicle(index: number) {
-    console.log(this.vehicleList[index], "list");
 
     const selected = this.vehicleList[index];
 
@@ -606,7 +598,6 @@ export class AddVehicleSaleBill implements OnInit {
   }
   updateVehicleSaleBill() {
     const payload = this.buildPayload();
-    console.log('Update Payload:', payload);
 
     if (!this.billId) {
       this.toaster.show('Invalid Bill ID', { classname: 'bg-danger text-light', delay: 3000 });
@@ -625,7 +616,6 @@ export class AddVehicleSaleBill implements OnInit {
     });
   }
   buildPayload() {
-    console.log("heid");
 
     return {
       saleDate: new Date(),
@@ -714,8 +704,6 @@ export class AddVehicleSaleBill implements OnInit {
       }))
     };
 
-    console.log(this.buildPayload);
-
   }
   getLedgerIdFromName(): number | null {
     const match = this.parties.find(p =>
@@ -795,11 +783,9 @@ export class AddVehicleSaleBill implements OnInit {
   selectParty(party: LedgerMaster) {
     this.model.customerName = party.ledgerName;
 
-    //store ID here
     this.selectedCustomerId = party.id;
 
     this.filteredParties = [];
-    // this.loadChasisPricing();
   }
 
 
@@ -819,7 +805,7 @@ export class AddVehicleSaleBill implements OnInit {
     this.vehicleSaleBillService.sendToERP(saleBillNo).subscribe({
       next: (res) => {
         this.loader.hide();
-        console.log('Success:', res);
+        this.redirectToSaleList();
         this.toaster.show('Successfully pushed to ERP', {
           classname: 'bg-success text-white',
           delay: 5000
@@ -941,4 +927,27 @@ export class AddVehicleSaleBill implements OnInit {
       this.model.insAmount !== undefined
     );
   }
+
+ isSaleInfoValid(): boolean {
+  return !!(
+    this.model.location &&
+    this.model.saleType &&
+    this.model.customerName &&
+    this.isCustomerValid() &&
+    this.model.billingName
+
+  );
+}
+
+canSave(): boolean {
+  return this.isSaleInfoValid() && this.vehicleList.length > 0;
+}
+redirectToSaleList(){
+  this.router.navigate(['/vehicle-sale-bill']);
+}
+getPreviousDate(dateString: string): string {
+  const date = new Date(dateString);
+  date.setDate(date.getDate() - 1); // subtract 1 day
+  return date.toISOString().split('T')[0];
+}
 }

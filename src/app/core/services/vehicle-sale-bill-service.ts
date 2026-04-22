@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { VehicleSaleChasisRequest, VehicleSaleChasisResponse } from '../../ViewModels/VehicleSaleBill';
 import { VehicleSaleListChasisResponse } from '../../ViewModels/VehicleSaleChasisResponse';
@@ -21,9 +21,30 @@ export class VehicleSaleBillService {
   createVehicleSaleBill(data: any) {
     return this.http.post(`${this.apiUrl}/VehicleSaleBill`, data);
   }
-  getAllVehicleSaleBills(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/VehicleSaleBill`);
+  // getAllVehicleSaleBills(): Observable<any[]> {
+  //   return this.http.get<any[]>(`${this.apiUrl}/VehicleSaleBill`);
+  // }
+
+ getAllVehicleSaleBills(search?: string, fromDate?: Date, toDate?: Date, erpStatus?: string): Observable<any[]> {
+  let params = new HttpParams();
+
+  if (search) {
+    params = params.set('search', search);
   }
+
+  if (fromDate) {
+    params = params.set('fromDate', fromDate.toISOString());
+  }
+
+  if (toDate) {
+    params = params.set('toDate', toDate.toISOString());
+  }
+  if (erpStatus) {
+    params = params.set('erpStatus', erpStatus);
+  }
+
+  return this.http.get<any[]>(`${this.apiUrl}/VehicleSaleBill`, { params });
+}
   updateVehicleSaleBill(id: number, data: any) {
   return this.http.put(`${this.apiUrl}/VehicleSaleBill/${id}`, data);
 }

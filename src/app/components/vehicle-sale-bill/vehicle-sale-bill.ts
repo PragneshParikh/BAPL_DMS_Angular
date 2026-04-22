@@ -9,6 +9,8 @@ import { Router, RouterOutlet } from '@angular/router';
 import { log } from 'console';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { debounceTime, Subject } from 'rxjs';
+import {  ErpOptions } from '../../constant';
 
 @Component({
   selector: 'app-vehicle-sale-bill',
@@ -29,8 +31,12 @@ export class VehicleSaleBill {
   filteredBills: VehicleSaleBillResponseViewModel[] = [];
   paginatedBills: VehicleSaleBillResponseViewModel[] = [];
   selectedBill: VehicleSaleBillResponseViewModel | null = null;
-  searchTerm: string = '';
+  ErpOptions = ErpOptions;
+
   sortDirection: { [key: string]: boolean } = {};
+  searchText: string = '';
+  // fromDate?: Date;
+  // toDate?: Date;
 
   page = 1;
   pageSize = 10;
@@ -38,63 +44,69 @@ export class VehicleSaleBill {
 
   filter: any = {
     fromDate: null,
-    toDate: null
+    toDate: null,
+    erpStatus: "Pending"
   };
+  searchChanged: Subject<string> = new Subject();
 
   constructor(private service: VehicleSaleBillService,
     private router: Router,
     private loader: LoaderService,
     private toaster: ToastService) { }
-
+    
   ngOnInit() {
+     const today = new Date();
+     const sevenDaysBefore = new Date(today);
+     sevenDaysBefore.setDate(today.getDate() - 7);
+  this.filter.fromDate = sevenDaysBefore;
+this.filter.toDate = today; 
+    this.searchChanged.pipe(debounceTime(400)).subscribe(() => {
+      this.loadData();
+    });
+
     this.loadData();
   }
 
+
   loadData() {
     this.loader.show();
+    this.page = 1;
 
-    this.service.getAllVehicleSaleBills().subscribe({
-      next: (res) => {
-        this.vehicleBills = res;
-        this.filteredBills = [...this.vehicleBills];
-        this.updatePagination();
-        this.loader.hide();
-      },
 
-      error: (err) => {
-        this.loader.hide();
+    const from = this.filter.fromDate ? new Date(this.filter.fromDate) : undefined;
 
-        this.toaster.show('Failed to fetch list', {
-          classname: 'bg-warning text-white',
-          delay: 5000
-        });
+    const to = this.filter.toDate ? new Date(this.filter.toDate) : undefined;
+    const erpStatus = this.filter.erpStatus ? this.filter.erpStatus : undefined;
 
-        console.error(err);
-      }
-    });
+    this.service.getAllVehicleSaleBills(this.searchText, from, to, erpStatus)
+      .subscribe({
+        next: (res) => {
+          this.vehicleBills = res;
+          this.filteredBills = [...this.vehicleBills];
+          this.updatePagination();
+          this.loader.hide();
+        },
+        error: (err) => {
+          this.loader.hide();
+
+          this.toaster.show('Failed to fetch list', {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          });
+
+          console.error(err);
+        }
+      });
   }
-
   // SEARCH
   onSearchChange() {
-    const term = this.searchTerm.toLowerCase();
-
-    this.filteredBills = this.vehicleBills.filter(x =>
-      x.saleBillNo.toLowerCase().includes(term) ||
-      x.customerName.toLowerCase().includes(term)
-    );
-
-    this.page = 1;
-    this.updatePagination();
+    this.searchChanged.next(this.searchText);
   }
 
   // FILTER BUTTON
   onSearch() {
-    this.filteredBills = this.vehicleBills.filter(x => {
-      return true; // add date filter if needed
-    });
+    this.loadData(); // call API with date filters
 
-    this.page = 1;
-    this.updatePagination();
   }
 
   // PAGINATION
@@ -153,8 +165,6 @@ export class VehicleSaleBill {
     this.router.navigate(['/vehicle-sale-bill/add']);
   }
   viewDetails(item: any) {
-    console.log(item);
-
     this.router.navigate(['/vehicle-sale-bill/edit/' + item.id], {
       state: { bill: item }
     });

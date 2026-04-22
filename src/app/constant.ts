@@ -112,3 +112,9 @@ export const userRole=[
     {roleId:1, value:'SuperAdmin'},
     {roleId:2, value:'Dealer'}
 ]
+
+export const ErpOptions = [
+    { name: 'Submitted to ERP', value: 'PushedToERP' },
+    { name: 'Pending ERP Submission', value: 'Pending' },
+    
+];
