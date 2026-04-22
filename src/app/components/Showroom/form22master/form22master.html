@@ -92,10 +92,11 @@
                 <div class="d-flex justify-content-end align-items-center">
                     <!-- Add Form22master Button -->
                     <button class="btn btn-primary btn-sm me-3" (click)="openAddDetails(form22Form,formData)">
-                       Add
+                        Add
                     </button>
                     <!-- Download Excel Button -->
-                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'" (click)="downloadForm22MasterExcel()">
+                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
+                        (click)="downloadForm22MasterExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
                     <!-- Search Box -->
@@ -120,7 +121,7 @@
                                 <th class="sort" (click)="sort('passbyNoiseLevel')" data-sort="passbyNoiseLevel">
                                     Pass by noise level</th>
                                 <th class="sort" (click)="sort('approvalCertificateNo')"
-                                    data-sort="approvalCertificateNo">Type of Certificate No.</th>
+                                    data-sort="approvalCertificateNo">Type Approval Certificate No</th>
                                 <th class="sort" (click)="sort('isActive')" data-sort="itemdesc">Active</th>
                             </tr>
                         </thead>
@@ -215,7 +216,7 @@
                 <input class="form-control form-control-sm" [value]="selectedForm22Item?.passbyNoiseLevel">
             </div>
             <div class="col-md-3">
-                <label class="form-label">Type of Certificate No.</label>
+                <label class="form-label">Type Approval Certificate No</label>
                 <input class="form-control form-control-sm" [value]="selectedForm22Item?.approvalCertificateNo">
             </div>
             <div class="col-md-3">

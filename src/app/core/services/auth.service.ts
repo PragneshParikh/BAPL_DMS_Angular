@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
-import { BehaviorSubject, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { User } from '../../store/Authentication/auth.models';
 import { environment } from '../../../environments/environment';
 import { StorageService } from './storage';
@@ -180,6 +180,10 @@ export class AuthenticationService {
             console.error('Invalid JWT token');
             this.logout();
         }
+    }
+
+    getUserList(): Observable<any> {
+        return this.httpClient.get(`${this.baseUrl}/auth`);
     }
 
 }
