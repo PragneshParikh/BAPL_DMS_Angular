@@ -43,9 +43,6 @@ export class JobCardService {
     return this.httpClient.post(`${this.baseUrl}/JobCard/SaveJobCardDetails`, data);
   }
 
-  deleteJobCard(id: number) {
-    return this.httpClient.delete(`${this.baseUrl}/JobCard/DeleteJobCard/${id}`);
-  }
 
   updateJobCard(data: any) {
     return this.httpClient.put(`${this.baseUrl}/JobCard/UpdateJobCardDetails`, data);
