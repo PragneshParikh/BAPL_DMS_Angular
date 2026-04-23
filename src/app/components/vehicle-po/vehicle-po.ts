@@ -11,6 +11,7 @@ import { TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import Swal from 'sweetalert2';
+import { LedgerMaster } from '../../core/services/ledger-master';
 export interface PurchaseOrderItemViewModel {
   ItemCode: string;
   Qty: number;
@@ -24,6 +25,7 @@ export interface PurchaseOrderViewModel {
   TransactionType?: string;
   Remarks?: string;
   LocCode?: string;
+  LedgerCode?: string;
   Items: PurchaseOrderItemViewModel[];
 }
 
@@ -64,9 +66,12 @@ export class VehiclePO implements OnInit {
   transactionTypeList = TRANSACTION_TYPES;
   selectedTransactionType: string = '';
   globalSubsidy: number = 0;
+  ledgerList: any[] = [];
+  selectedLedgerCode: string = '';
   locationInvalid: boolean = false;
   transactionTypeInvalid: boolean = false;
   qtyInvalid: boolean = false;
+  ledgerInvalid: boolean = false;
 
   currentItem: any = {
     modelNo: '',
@@ -96,13 +101,15 @@ export class VehiclePO implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private loader: LoaderService,
-    public toaster: ToastService
+    public toaster: ToastService,
+    private ledgerService: LedgerMaster
   ) { }
 
   ngOnInit() {
     this.loadShowroomLocations();
     this.loadItemMasterList();
     this.fetchGlobalSubsidy();
+    this.loadLedgerList();
 
     this.route.params.subscribe(params => {
       this.ponumber = params['ponumber'];
@@ -110,8 +117,18 @@ export class VehiclePO implements OnInit {
         this.loadPODetails(this.ponumber);
       } else {
         this.generateNewOrderNo();
+        // For new PO: apply default ledger (list may already be loaded)
+        this.applyDefaultLedger();
       }
     });
+  }
+
+  applyDefaultLedger() {
+    // If ledger list is already fetched, select the first one
+    if (this.ledgerList.length > 0 && !this.selectedLedgerCode) {
+      this.selectedLedgerCode = this.ledgerList[0].ledgerCode;
+    }
+    // If not yet fetched, the loadLedgerList callback will handle it
   }
 
   fetchGlobalSubsidy() {
@@ -149,6 +166,10 @@ export class VehiclePO implements OnInit {
           this.selectedLocation = res.LocCode || res.locCode || res.loccode || this.selectedLocation;
           this.prefixNo = res.PrefixNo || res.prefixNo || '';
           this.selectedTransactionType = res.TransactionType || res.transactionType || '';
+          this.selectedLedgerCode = res.LedgerCode || res.ledgerCode || res.ledgercode || '';
+          if (!this.selectedLedgerCode) {
+            this.applyDefaultLedger();
+          }
 
           const itemsArr = res.Items || res.items || res.purchaseOrderDetails || res.PurchaseOrderDetails || [];
           console.log('Items found in response:', itemsArr);
@@ -655,6 +676,45 @@ export class VehiclePO implements OnInit {
     return hasCurrentSubsidy || hasListSubsidy;
   }
 
+  get totalQty(): number {
+    return this.purchaseDetails.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
+  }
+
+  get totalDisc(): number {
+    return this.purchaseDetails.reduce((sum, item) => sum + (Number(item.discAmt) || 0), 0);
+  }
+
+  get totalSgst(): number {
+    return this.purchaseDetails.reduce((sum, item) => sum + (Number(item.sgstAmt) || 0), 0);
+  }
+
+  get totalCgst(): number {
+    return this.purchaseDetails.reduce((sum, item) => sum + (Number(item.cgstAmt) || 0), 0);
+  }
+
+  get totalIgst(): number {
+    return this.purchaseDetails.reduce((sum, item) => sum + (Number(item.igstAmt) || 0), 0);
+  }
+
+  get totalNetAmount(): number {
+    return this.purchaseDetails.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  }
+
+  loadLedgerList() {
+    this.ledgerService.getCompanyLedgers().subscribe({
+      next: (res: any) => {
+        this.ledgerList = res || [];
+        // Auto-select first item for new POs or if nothing is stored yet
+        if (!this.selectedLedgerCode && this.ledgerList.length > 0) {
+          this.selectedLedgerCode = this.ledgerList[0].ledgerCode;
+        }
+      },
+      error: (err) => {
+        console.error('Error loading ledgers:', err);
+      }
+    });
+  }
+
   onSave() {
     if (this.purchaseDetails.length === 0) {
       this.toaster.show('Please add at least one item to the purchase details.', { classname: 'bg-danger text-white', delay: 3000 });
@@ -664,8 +724,9 @@ export class VehiclePO implements OnInit {
     // Header validation
     this.locationInvalid = !this.selectedLocation;
     this.transactionTypeInvalid = !this.selectedTransactionType;
+    this.ledgerInvalid = !this.selectedLedgerCode;
 
-    if (this.locationInvalid || this.transactionTypeInvalid) {
+    if (this.locationInvalid || this.transactionTypeInvalid || this.ledgerInvalid) {
       return;
     }
 
@@ -679,10 +740,11 @@ export class VehiclePO implements OnInit {
       PONumber: this.orderNo,
       PODate: this.poDate,
       POType: this.poType,
-      CustomerCode: dealerCode || this.selectedLocation,
+      CustomerCode: dealerCode || '',
       TransactionType: this.selectedTransactionType,
       Remarks: this.remarks,
       LocCode: this.selectedLocation,
+      LedgerCode: this.selectedLedgerCode,
       Items: this.purchaseDetails.map((item, index) => ({
         ItemCode: item.modelNo,
         Qty: item.qty,

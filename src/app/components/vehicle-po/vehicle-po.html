@@ -72,8 +72,13 @@
                     </div>
                     <div class="col-md-2">
                         <label class="form-label mb-0 small">Party Name</label>
-                        <input type="text" class="form-control form-control-sm border-start border-2"
-                            [(ngModel)]="partyName" [readonly]="isSubmitted">
+                        <select class="form-select form-select-sm border-start border-2"
+                            [class.is-invalid]="ledgerInvalid" [(ngModel)]="selectedLedgerCode"
+                            (change)="ledgerInvalid = false" [disabled]="true">
+                            <option *ngFor="let ledger of ledgerList" [value]="ledger.ledgerCode">
+                                {{ledger.ledgerName}}
+                            </option>
+                        </select>
                     </div>
 
                     <div class="col-md-2 d-flex gap-1 align-items-end">
@@ -329,6 +334,19 @@
                                         <td>{{selectedTransactionType}}</td> -->
                                     </tr>
                                 </tbody>
+                                <tfoot *ngIf="purchaseDetails.length > 0">
+                                    <tr style="background-color: #f8f9fa; font-weight: 600; border-top: 2px solid #dee2e6;">
+                                        <td colspan="5" class="text-end pe-3 text-dark">Total</td>
+                                        <td class="text-center text-dark">{{totalQty}}</td>
+                                        <td class="text-end text-dark"></td>
+                                        <td class="text-end text-dark">{{totalDisc | number:'1.2-2'}}</td>
+                                        <td class="text-end text-dark">{{totalSgst | number:'1.2-2'}}</td>
+                                        <td class="text-end text-dark">{{totalCgst | number:'1.2-2'}}</td>
+                                        <td class="text-end text-dark">{{totalIgst | number:'1.2-2'}}</td>
+                                        <td class="text-end text-dark">{{totalNetAmount | number:'1.2-2'}}</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     </div>

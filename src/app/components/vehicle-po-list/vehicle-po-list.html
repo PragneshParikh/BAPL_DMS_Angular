@@ -31,13 +31,13 @@
                         <option *ngFor="let type of transactionTypeList" [value]="type.type">{{type.name}}</option>
                     </select>
                 </div> -->
-                <div class="col-md-2">
+                <!-- <div class="col-md-2">
                     <label class="form-label">Party Name</label>
                     <select class="form-select" [(ngModel)]="partyName">
                         <option value="">--Select--</option>
                         <option value="BGAUSS AUTO PRIVATE LIMITED">BGAUSS AUTO PRIVATE LIMITED</option>
                     </select>
-                </div>
+                </div> -->
                 <div class="col-md-2">
                     <label class="form-label">Submitted To Erp</label>
                     <select class="form-select" [(ngModel)]="isSubmitted">
@@ -89,7 +89,7 @@
                             <th class="sort" [ngClass]="getSortClass('modelName')" (click)="sort('modelName')">Model
                                 Name</th>
                             <!-- <th>Color</th> -->
-                            <th>Order Qty</th>
+                            <!-- <th>Order Qty</th> -->
                             <th>Order Amount</th>
                         </tr>
                     </thead>
@@ -106,7 +106,7 @@
                             <td>{{po.location}}</td>
                             <td>{{po.modelName}}</td>
                             <!-- <td>{{po.color}}</td> -->
-                            <td>{{po.orderQty}}</td>
+                            <!-- <td>{{po.orderQty}}</td> -->
                             <td>{{po.orderAmount}}</td>
                         </tr>
                         <tr *ngIf="pagedPurchaseOrders.length == 0">
