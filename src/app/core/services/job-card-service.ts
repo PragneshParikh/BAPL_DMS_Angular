@@ -69,4 +69,12 @@ export class JobCardService {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardById?Id=${id}`);
   }
 
+  deleteJobCard(id: number) {
+    return this.httpClient.delete(`${this.baseUrl}/JobCard/DeleteJobCard/${id}`);
+  }
+
+  searchJobCard(payload: any){
+    return this.httpClient.post<any[]>(`${this.baseUrl}/JobCard/SearchJobCard/`,payload)
+  }
+
 }

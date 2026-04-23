@@ -10,6 +10,7 @@ import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstra
 import { Router, RouterModule } from '@angular/router';
 import { JobCardService } from '../../core/services/job-card-service';
 import Swal from 'sweetalert2';
+import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
 
 @Component({
   selector: 'app-job-card',
@@ -32,7 +33,8 @@ export class JobCard {
   selectedComplaints: string = '';
   selectedViewJobs: string = '';
   selectedChassis: string = '';
-  
+  searchTimeout: any;
+
 
   //Pagination
   page = 1;
@@ -44,7 +46,7 @@ export class JobCard {
   selectedServiceType: string;
   chassisList: any[] = [];
   // userRole: string = ''; when userrole api done then this var use
-  
+
   currentUserRole = userRole[0].value;
 
 
@@ -54,6 +56,15 @@ export class JobCard {
     private router: Router
   ) { }
 
+  searchModel: JobCardSearchModel = {
+    dealerCode: '',
+    fromDate: '',
+    toDate: '',
+    serviceLocation: '',
+    jobNo: null,
+    customerName: '',
+    chassisNo: ''
+  };
   ngOnInit(): void {
 
     this.setUserRole();
@@ -161,19 +172,25 @@ export class JobCard {
       }
     });
   }
+  onSearchChange() {
+    clearTimeout(this.searchTimeout);
 
-setUserRole() {
-  const dealerCode = this.storageService.getDealerCode();
+    this.searchTimeout = setTimeout(() => {
+      this.search();
+    }, 500); // 500ms delay
+  }
+  setUserRole() {
+    const dealerCode = this.storageService.getDealerCode();
 
-  const superAdminCodes = ['ADMIN001']; // 👈 multiple bhi rakh sakte ho
+    const superAdminCodes = ['ADMIN001']; // 👈 multiple bhi rakh sakte ho
 
-  const role = superAdminCodes.includes(dealerCode)
-    ? 'SuperAdmin'
-    : 'Dealer';
+    const role = superAdminCodes.includes(dealerCode)
+      ? 'SuperAdmin'
+      : 'Dealer';
 
-  this.storageService.setRole(role);
-  this.currentUserRole = role;
-}
+    this.storageService.setRole(role);
+    this.currentUserRole = role;
+  }
 
   onLocationChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
@@ -208,7 +225,23 @@ setUserRole() {
   onChassisChange() {
     this.selectedChassis = '';
   }
+  search() {
 
+    const payload = {
+      dealerCode: this.storageService.getDealerCode(),
+      fromDate: this.searchModel.fromDate || null,
+      toDate: this.searchModel.toDate || null,
+      serviceLocation: this.searchModel.serviceLocation || null,
+      jobNo: this.searchModel.jobNo ? Number(this.searchModel.jobNo) : null,
+      customerName: this.searchModel.customerName || null,
+      chassisNo: this.searchModel.chassisNo || null
+    };
+
+    this.jobCardService.searchJobCard(payload).subscribe(res => {
+      this.jobCardList = res;
+    });
+  }
+  
   //  PAGINATION
   pageChange(page: number) {
     this.page = page;
@@ -222,6 +255,7 @@ setUserRole() {
 
     this.pagedData = this.filteredData.slice(start, end);
   }
+
   //Navigate Job Card Add form
   onNavigate() {
     this.router.navigate(['/job-card-addForm', 'test']);

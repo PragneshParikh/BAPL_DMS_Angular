@@ -10,17 +10,20 @@
             <!-- Date From -->
             <div class="col-md-3">
                 <label class="form-label">Date From</label>
-                <input type="date" class="form-control form-control-sm" #fromDate>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="searchModel.fromDate"
+                    (change)="search()">
             </div>
 
             <!-- Date To -->
             <div class="col-md-3">
                 <label class="form-label">Date To</label>
-                <input type="date" class="form-control form-control-sm" #toDate>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="searchModel.toDate"
+                    (change)="search()">
             </div>
             <div class="col-md-3">
-                <label class="form-lael">Service Location</label>
-                <select class="form-select form-select-sm text-truncate" (change)="onLocationChange($event)">
+                <label class="form-label">Service Location</label>
+                <select class="form-select form-select-sm text-truncate" [(ngModel)]="searchModel.serviceLocation"
+                    (change)="search()">
                     <option value="">Select Location</option>
                     <option *ngFor="let loc of locations" [value]="loc.locname">
                         {{ loc.locname }}
@@ -29,7 +32,8 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label">Job No.</label>
-                <input type="text" class="form-control form-control-sm" value="" placeholder="Enter Job No." />
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="searchModel.jobNo"
+                    (ngModelChange)="onSearchChange()" placeholder="Enter Job No." />
             </div>
             <!-- <div class="col-md-3">
                 <label class="form-lael">Service Type</label>
@@ -45,7 +49,8 @@
             </div> -->
             <div class="col-md-3">
                 <label class="form-label">Customer Name</label>
-                <input type="text" class="form-control form-control-sm" value="" placeholder="Enter Customer Name" />
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="searchModel.customerName"
+                    (ngModelChange)="onSearchChange()" placeholder="Enter Customer Name" />
             </div>
             <!-- <div class="col-md-2">
                             <label class="form-label">Mobile No.</label>
@@ -63,7 +68,7 @@
                         </div> -->
             <div class="col-md-3">
                 <label class="form-label">Chassis No.</label>
-                <select class="form-select form-select-sm" (change)="onChassisChange()" [(ngModel)]="selectedChassis">
+                <select class="form-select form-select-sm" (change)="search()" [(ngModel)]="searchModel.chassisNo">
                     <option value="">Select Chassis</option>
                     <option *ngFor="let item of chassisList" [value]="item.chassisNumber">
                         {{ item.chassisNumber }}
@@ -96,7 +101,7 @@
                         </div> -->
             <!-- Search Button -->
             <div class="col-md-1 d-grid">
-                <button class="btn btn-sm btn-primary">
+                <button class="btn btn-sm btn-primary" (click)="search()">
                     Search
                 </button>
             </div>
@@ -152,8 +157,12 @@
 
                         <!-- ACTION -->
                         <td>
-                            <button class="btn btn-sm btn-soft-primary" (click)="onEdit(item)"><i class="ri-pencil-fill fs-12"></i></button>
-                            <button class="btn btn-sm btn-soft-danger" *ngIf="currentUserRole === 'SuperAdmin'" (click)="deleteJobCard(item.id)"><i class="ri-delete-bin-fill fs-12"></i></button>
+                            <button class="btn btn-sm btn-soft-primary" (click)="onEdit(item)"><i
+                                    class="ri-pencil-fill fs-12"></i></button>
+                            <button class="btn btn-sm btn-soft-danger" [disabled]="currentUserRole !== 'SuperAdmin'"
+                                title="Only SuperAdmin can delete" (click)="deleteJobCard(item.id)">
+                                <i class="ri-delete-bin-fill fs-12"></i>
+                            </button>
                         </td>
 
                         <!-- JobNo / Date -->
@@ -163,10 +172,10 @@
                         </td>
 
                         <!-- Job Status -->
-                        <td>{{ item.jobStatus }}  <br>
+                        <td>{{ item.jobStatus }} <br>
                             {{ item.jobCardHeader.invoiceNo }}
                         </td>
-                        
+
 
                         <!-- Manual Job No -->
                         <td>{{ item.jobCardHeader.manualjobNo }}</td>
