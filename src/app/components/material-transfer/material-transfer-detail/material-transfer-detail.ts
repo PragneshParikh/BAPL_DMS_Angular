@@ -127,7 +127,7 @@ export class MaterialTransferDetail implements OnInit {
 
   getItemList() {
     this.loader.show();
-    this.itemmasterService.getItems(1).subscribe({
+    this.itemmasterService.fetchItemsByHsnTaxAndGroupId(1).subscribe({
       next: (res) => {
         this.loader.hide();
         this.itemList = res;
@@ -287,25 +287,35 @@ export class MaterialTransferDetail implements OnInit {
     modalRef.result.then(
       (result) => {
         if (result && result.isAccepted) {
-          // this.loader.show();
-          // this.jobCardService.(invoiceData.invoiceNumber).subscribe({
-          //   next: (res) => {
-          //     this.updateNotificationStatusByInvoice(invoiceData.invoiceNumber);
-          //     this.loader.hide();
-          //   },
-          //   error: (err) => {
-          //     this.loader.hide();
-          //     console.error(err);
-          //   }
-          // });
-          alert('on select jobid');
-          console.log('Implement API call to accept job with data:', result);
+          this.jobId = result.jobDetail.id;
+          this.getMaterialTransferList(result.jobDetail.id);
+          this.getJobCardById(result.jobDetail.id);
         }
       },
       (reason) => {
         console.log('Modal dismissed:', reason);
       }
     );
+  }
+
+  getJobCardById(id: number) {
+    this.jobCardService.getJobCardById(id).subscribe({
+      next: (res) => {
+        this.formData = {
+          prefix: res.jobprefix,
+          issueNumber: res.id,
+          jobNo: res.jobNo,
+          OdoMeter: res.vehiclekms,
+          date: res.jobinDate,
+          technician: res.technician,
+          location: res.serviceloc,
+        }
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+      }
+    });
   }
 
   resetNewItem() {
