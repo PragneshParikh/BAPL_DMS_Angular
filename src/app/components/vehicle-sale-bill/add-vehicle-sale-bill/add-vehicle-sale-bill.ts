@@ -4,29 +4,28 @@ import { StorageService } from '../../../core/services/storage';
 import { LocationName, ReceiptEntryModel } from '../../../ViewModels/ReceiptEntryModel';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 import { CommonModule } from '@angular/common';
-import { BillFromOptions, BillingTypeOptions, CashTypeOptions, SaleTypeOptions } from '../../../constant';
+import { BillFromOptions, BillingTypeOptions, CashTypeOptions, ERP_STATUS, SaleTypeOptions } from '../../../constant';
 import { ReceiptEntryService } from '../../../core/services/receipt-entry-service';
 import { LedgerMaster } from '../../../ViewModels/LedgerMasterViewModel';
 import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
-import { NgbModal, NgbModalRef, NgbPaginationModule, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { ItemMasterService } from '../../../core/services/item-master-service';
+import { NgbDropdown, NgbDropdownModule, NgbModal, NgbModalModule, NgbModalRef, NgbPaginationModule, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { LoaderService } from '../../../core/services/loader';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 import { CustomerLedger } from '../../customer-ledger/customer-ledger';
 import { VehicleSaleListChasisResponse } from '../../../ViewModels/VehicleSaleChasisResponse';
-import { log } from 'console';
+import { VehicleRegistrationdetails } from '../../../dialogs/vehicle-registrationdetails/vehicle-registrationdetails';
 
 
 @Component({
   selector: 'app-add-vehicle-sale-bill',
-  imports: [FormsModule, CommonModule, NgbPaginationModule, NgbTooltipModule],
+  imports: [FormsModule, CommonModule, NgbPaginationModule, NgbTooltipModule,
+     VehicleRegistrationdetails,NgbModalModule,NgbDropdownModule],
   templateUrl: './add-vehicle-sale-bill.html',
   styleUrl: './add-vehicle-sale-bill.scss',
 })
 export class AddVehicleSaleBill implements OnInit {
-//  @ViewChild('ReceiptEntryModal') receiptEntryModal!: TemplateRef<any>;
   @ViewChild('vehicleSaleForm') vehicleSaleForm!: NgForm;
   form!: FormGroup;
   nextSaleNo: string;
@@ -69,7 +68,7 @@ export class AddVehicleSaleBill implements OnInit {
   financiers: LedgerMaster[] = [];
   parties: LedgerMaster[] = [];
   filteredParties: LedgerMaster[] = [];
-
+  ERP_STATUS = ERP_STATUS;
   today = new Date().toISOString().split('T')[0];
   model = {
     itemCode: '',
@@ -90,6 +89,7 @@ export class AddVehicleSaleBill implements OnInit {
     // Sale Info
     saleBillNo: '',
     saleDate: this.today,
+    customerSaleDate: null,
     location: '',
     saleType: 'Credit',
     customerType: 'B2C',
@@ -124,7 +124,7 @@ export class AddVehicleSaleBill implements OnInit {
     exchange: 'N',
     narration: '',
     insStartDate: this.today,
-insExpDate: this.getPreviousDate(this.today),
+    insExpDate: this.getInsuranceExpiryDate(this.today),
 
 
     // Extra Charges
@@ -156,7 +156,8 @@ insExpDate: this.getPreviousDate(this.today),
     tcs: 0,
     finalAmount: 0,
     key: '',
-    book: ''
+    book: '',
+    erpstatus: ''
 
   };
 
@@ -191,6 +192,8 @@ insExpDate: this.getPreviousDate(this.today),
 
 
   loadBillForEdit(bill: any) {
+    console.log(bill, "sd");
+
     //  Header fields
     this.model.saleBillNo = bill.saleBillNo;
     this.model.saleDate = bill.saleDate ? bill.saleDate.split('T')[0] : '';
@@ -211,7 +214,7 @@ insExpDate: this.getPreviousDate(this.today),
     this.vehicleList = bill.details.map((d: any) => ({
 
       chassisNo: d.chassisNo,
-      model: d.itemName || '',
+      model: d.itemName || d.modelName || '',
       colour: d.colour || '',
       mfgYear: d.mfgYear || '',
       insNo: d.insNo || '',
@@ -252,40 +255,61 @@ insExpDate: this.getPreviousDate(this.today),
       cess: d.cess || 0,
       tcs: d.tcs || 0,
 
-      finalAmount: d.finalAmount
+      finalAmount: d.finalAmount,
+      saleDate: d.saleDate
+
     }));
+  this.mergeBillChassisIntoDropdown();
 
 
     this.model.finalAmount = this.getGrandTotal();
-    this.editVehicle(0); // load first vehicle to form for easy editing
   }
-  loadChassisList() {
+ 
+
+
+  loadChassisList(callback?: () => void) {
     const dealerCode = this.storageService.getDealerCode();
+
     this.vehicleSaleBillService.getChassisListPDIOK(dealerCode)
       .subscribe({
         next: (res) => {
           this.chassisList = res;
+          console.log('Chassis API Response:', res); 
+
+          if (callback) callback(); 
         },
-        error: (err) => {
-          this.toaster.show('Failed to load chassis list', { classname: 'bg-danger text-white', delay: 5000 });
+        error: () => {
+          this.toaster.show('Failed to load chassis list', {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          });
         }
       });
   }
-  getBillById(id: number) {
+
+
+   getBillById(id: number) {
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
+        console.log('Bill Data:', res);
+
         this.erpStatus = res.erpStatus || '';
+        this.isErpLocked =
+        this.erpStatus.toLowerCase() === 'pushedtoerp';
         
-        this.isErpLocked = this.erpStatus.toLowerCase() == 'PushedToERP'.toLowerCase();
-        
-        this.loadBillForEdit(res);
+        // Load chassis FIRST, then bind bill
+        this.loadChassisList(() => {
+          this.loadBillForEdit(res);
+          if(this.erpStatus=='Alloted' && this.vehicleList.some(v=>v.regNo ==''&& v.insNo=='' || (v.regAmt === 0 || v.insAmt === 0))) {
+            this.openRegistrationModal();
+          }
+        });
       },
       error: (err) => {
         console.error(err);
       }
     });
   }
-
 
   fetchLocations(): void {
     const dealerCode: any = this.storageService.getDealerCode();
@@ -336,7 +360,7 @@ insExpDate: this.getPreviousDate(this.today),
       this.modalRef = null; // reset reference
     }
   }
- 
+
 
   isCustomerValid(): boolean {
     if (!this.model.customerName) return false;
@@ -345,10 +369,11 @@ insExpDate: this.getPreviousDate(this.today),
       p => p.ledgerName.toLowerCase() === this.model.customerName.toLowerCase()
     );
   }
-  
+
 
   saveVehicleDetailsOnly() {
     const payload = this.buildPayload();
+    console.log('Payload for Vehicle Details Only:', payload);
 
     this.vehicleSaleBillService.createVehicleSaleBill(payload).subscribe({
       next: () => {
@@ -391,9 +416,10 @@ insExpDate: this.getPreviousDate(this.today),
 
     const taxable = this.calculateAmount();
 
-    const gstTotal = this.model.isD2D
-      ? 0
-      : (this.model.sgst + this.model.cgst + this.model.igst);
+    // const gstTotal = this.model.isD2D
+    //   ? 0
+    //   : (this.model.sgst + this.model.cgst + this.model.igst);
+    const gstTotal = this.model.sgst + this.model.cgst + this.model.igst; 
 
     const finalAmount =
       taxable +
@@ -404,9 +430,9 @@ insExpDate: this.getPreviousDate(this.today),
       (this.model.regAmount || 0);
 
     const vehicle = {
+      id: this.editingIndex > -1 ? this.vehicleList[this.editingIndex].id : undefined,
       chassisNo: this.model.chassisNo,
 
-      //    IMPORTANT
       modelName: this.model.itemName || '',
 
       colour: this.model.colour,
@@ -449,8 +475,9 @@ insExpDate: this.getPreviousDate(this.today),
       vcu: this.model.vcu || '',
 
       delivered: this.model.delivered,
+      customerSaleDate: this.model.customerSaleDate,
 
-     finalAmount: finalAmount
+      finalAmount: finalAmount
     };
 
     this.model.finalAmount = this.getGrandTotal();;
@@ -483,45 +510,28 @@ insExpDate: this.getPreviousDate(this.today),
   }
 
 
-  editVehicle(index: number) {
+  editVehicle(dataRow: any) {
 
-    const selected = this.vehicleList[index];
-
-    this.editingIndex = index;
-
-    // ✅ Always clone (avoid reference issues)
-    //this.model = { ...selected };
-
+    const selected = dataRow;
+    console.log(selected, "sele");
     this.model.chassisNo = selected.chassisNo;
-    this.model.itemName = selected.modelName || '';
+    this.model.itemName = selected.modelName || selected.model || '';
     this.model.itemRate = selected.rate ?? 0;
     this.model.preGSTDiscount = selected.preGstDiscount || 0;
 
-    // ==============================
-    // FIXED FIELD MAPPING
-    // ==============================
-
     this.model.itemCode = selected.model;
-    this.model.itemName = selected.modelName || '';
-
     this.model.itemRate = selected.rate ?? 0;
     this.model.preGSTDiscount = selected.preGstDiscount || 0;
 
     this.model.regAmount = selected.regAmt ?? 0;
     this.model.insAmount = selected.insAmt ?? 0;
 
-    // ==============================
-    // TAX FIELDS (IMPORTANT FIX)
-    // ==============================
     this.model.amount = selected.amount ?? 0;
     this.model.sgst = selected.sgst ?? 0;
     this.model.cgst = selected.cgst ?? 0;
     this.model.igst = selected.igst ?? 0;
 
-    // ==============================
-    // VEHICLE DETAILS
-    // ==============================
-    this.model.chassisNo = selected.chassisNo;
+
     this.model.colour = selected.colour;
     this.model.mfgYear = selected.mfgYear;
 
@@ -544,9 +554,10 @@ insExpDate: this.getPreviousDate(this.today),
     this.model.batteryCapacity = selected.batteryCapacity || '';
     this.model.batteryMake = selected.batteryMake || '';
 
-    // ==============================
-    // DATES (SAFE FORMAT)
-    // ==============================
+    this.model.customerSaleDate = selected.customerSaleDate;
+
+  
+    // DATES
     this.model.insStartDate = selected.insStartDate
       ? selected.insStartDate.split('T')[0]
       : '';
@@ -555,15 +566,11 @@ insExpDate: this.getPreviousDate(this.today),
       ? selected.insExpDate.split('T')[0]
       : '';
 
-    // ==============================
     // DELIVERY FLAG
-    // ==============================
     this.model.delivered = selected.delivered || 'N';
 
-    // ==============================
-    // 🔥 IMPORTANT: RECALCULATE TAX
-    // ==============================
-    this.calculateTaxes();
+   this.calculateVehicleAmounts();
+this.model.finalAmount = this.getGrandTotal();
   }
 
   deleteVehicle(index: number) {
@@ -607,7 +614,7 @@ insExpDate: this.getPreviousDate(this.today),
     this.vehicleSaleBillService.updateVehicleSaleBill(this.billId, payload).subscribe({
       next: () => {
         this.toaster.show('Updated Successfully', { classname: 'bg-success text-light', delay: 3000 });
-        this.router.navigate(['/vehicle-sale-bill']);
+        // this.router.navigate(['/vehicle-sale-bill']);
       },
       error: (err) => {
         console.error(err);
@@ -645,10 +652,13 @@ insExpDate: this.getPreviousDate(this.today),
       refEmail: '',
       refPoint: 0,
       refRemarks: '',
+      erpStatus: !this.billId ? ERP_STATUS.ALLOTED : '',
+
 
       totalAmount: this.model.finalAmount,
 
       details: this.vehicleList.map(v => ({
+        id: v.id || 0,
         ChassisNo: v.chassisNo,
 
         ItemRate: Number(v.rate) || 0,
@@ -679,7 +689,7 @@ insExpDate: this.getPreviousDate(this.today),
         InsStartDate: v.insStartDate || null,
         InsExpDate: v.insExpDate || null,
 
-        ModelName: v.modelName || '',
+        ModelName: v.modelName || v.itemName || '',
         Colour: v.colour || '',
         itemCode: v.itemCode || '',
         Battery: v.battery || '',
@@ -700,7 +710,8 @@ insExpDate: this.getPreviousDate(this.today),
         Vcu: v.vcu || '',
 
         FinalAmount: Number(v.finalAmount) || 0,
-        IsAgainstExchange: v.exchange === 'Y'
+        IsAgainstExchange: v.exchange === 'Y',
+        customerSaleDate: v.customerSaleDate || null
       }))
     };
 
@@ -834,7 +845,7 @@ insExpDate: this.getPreviousDate(this.today),
     this.model.colour = selected.itemColor;
     this.model.itemName = selected.itemName;
     this.model.mfgYear = selected.mfgYear;
-
+    this.model.customerSaleDate = selected.customerSaleDate;
     this.model.preGSTDiscount = selected.preGstDisc;
 
     // Battery & parts
@@ -885,7 +896,7 @@ insExpDate: this.getPreviousDate(this.today),
     this.model.igst = (baseAmount * (this.model.igstPer || 0)) / 100;
   }
 
- 
+
   resetVehicleForm() {
     this.model.chassisNo = '';
     this.model.itemRate = 0;
@@ -904,7 +915,6 @@ insExpDate: this.getPreviousDate(this.today),
     this.model.regAmount = 0;
     this.model.insNo = '';
     this.model.insAmount = 0;
-
   }
 
   resetSelectedFields() {
@@ -915,39 +925,174 @@ insExpDate: this.getPreviousDate(this.today),
     this.model.insNo = '';
     this.model.insAmount = 0;
   }
+
   
-  isVehicleValid(): boolean {
+  isSaleInfoValid(): boolean {
     return !!(
-      this.model.chassisNo &&
-      this.model.regNo &&
-      this.model.regAmount !== null &&
-      this.model.regAmount !== undefined &&
-      this.model.insNo &&
-      this.model.insAmount !== null &&
-      this.model.insAmount !== undefined
+      this.model.location &&
+      this.model.saleType &&
+      this.model.customerName &&
+      this.isCustomerValid() &&
+      this.model.billingName
+
     );
   }
 
- isSaleInfoValid(): boolean {
-  return !!(
-    this.model.location &&
-    this.model.saleType &&
-    this.model.customerName &&
-    this.isCustomerValid() &&
-    this.model.billingName
+  canSave(): boolean {
+    return this.isSaleInfoValid() && this.vehicleList.length > 0;
+  }
+  redirectToSaleList() {
+    this.router.navigate(['/vehicle-sale-bill']);
+  }
+  getInsuranceExpiryDate(dateString: string): string {
+    const date = new Date(dateString);
 
+    date.setFullYear(date.getFullYear() + 1);
+    date.setDate(date.getDate() - 1);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+
+ openRegistrationModal() {
+  const modalRef = this.modalService.open(VehicleRegistrationdetails, { size: 'xl' });
+
+  modalRef.componentInstance.vehicleList = this.vehicleList;
+
+  modalRef.result.then((updatedList) => {
+    if (updatedList) {
+
+      this.vehicleList = [...updatedList];
+
+      //recalculate per-row finalAmount
+      this.calculateVehicleAmounts();
+
+      //grand total will include reg + ins
+      this.model.finalAmount = this.getGrandTotal();
+
+      if (this.billId) {
+        this.updateVehicleSaleBill();
+      }
+    }
+  });
+}
+isRegistrationComplete(): boolean {
+  if (!this.vehicleList || this.vehicleList.length === 0) return false;
+
+  return this.vehicleList.every(v =>
+    v.regNo &&
+    v.insNo &&
+    v.insStartDate &&
+    v.insExpDate
   );
 }
 
-canSave(): boolean {
-  return this.isSaleInfoValid() && this.vehicleList.length > 0;
+//for edit chassis
+mergeBillChassisIntoDropdown() {
+  if (!this.vehicleList?.length) return;
+
+  this.vehicleList.forEach(v => {
+    const exists = this.chassisList.some(c => c.chassisNo === v.chassisNo);
+
+    if (!exists) {
+      this.chassisList.push({
+        chassisNo: v.chassisNo,
+        itemCode: '',
+        itemName: v.modelName,
+        itemColor: v.colour,
+        mfgYear: v.mfgYear,
+        customerSaleDate: null,
+        preGstDisc: 0,
+        batteryNo: '',
+        converterNo: '',
+        chargerNo: '',
+        controllerNo: '',
+        keyNo: '',
+        bookNo: '',
+        batteryChemical: '',
+        batteryCapacity: '',
+        batteryMake: '',
+        stockNo: '',
+        sgstPer: 0,
+        cgstPer: 0,
+        igstPer: 0,
+        dealerPrice: 0,
+        customerPrice: 0
+      } as any);
+    }
+  });
 }
-redirectToSaleList(){
-  this.router.navigate(['/vehicle-sale-bill']);
+
+calculateVehicleAmounts() {
+  this.vehicleList = this.vehicleList.map(v => {
+
+    const taxable =
+      (v.rate || 0) - (v.preGstDiscount || 0);
+
+    const gst =
+      (v.sgst || 0) +
+      (v.cgst || 0) +
+      (v.igst || 0);
+
+    const finalAmount =
+      taxable +
+      gst +
+      (v.cess || 0) +
+      (v.tcs || 0) +
+      (v.regAmt || 0) +        // REGISTRATION ADDED
+      (v.insAmt || 0);         //  INSURANCE ADDED
+
+    return {
+      ...v,
+      finalAmount
+    };
+  });
 }
-getPreviousDate(dateString: string): string {
-  const date = new Date(dateString);
-  date.setDate(date.getDate() - 1); // subtract 1 day
-  return date.toISOString().split('T')[0];
+
+
+printLastSaved() {
+  console.log('Print Last Saved');
+}
+
+printInvoice() {
+  console.log('Print Invoice');
+}
+
+printSaleLetter() {
+  console.log('Print Sale Letter');
+}
+
+printDeliverySlip() {
+  console.log('Print Delivery Slip');
+}
+
+printForm22() {
+  console.log('Print Form 22');
+}
+
+printDeliveryChecklist() {
+  console.log('Print Delivery Checklist');
+}
+
+//temporary implementation--will modify once we have delivery certificate API ready
+printDeliveryCertificate() {
+  this.router.navigate(['/delivery-certificate'], {
+    state: {
+      data: {
+        certificateNo: this.model.saleBillNo,
+        variant: this.vehicleList[0]?.model|| this.vehicleList[0]?.itemName,
+        vinNo: this.vehicleList[0]?.chassisNo,
+        motorSerialNo: this.vehicleList[0]?.motorNo || this.vehicleList[0]?.itemName || '',
+        dealerName: this.model.customerName,
+        dealerCode:this.storageService.getDealerCode(),
+        saleDate: this.model.saleDate,
+        deliveryDate: new Date()
+      }
+    }
+  });
 }
 }

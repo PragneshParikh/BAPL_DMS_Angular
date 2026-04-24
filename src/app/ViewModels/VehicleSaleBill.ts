@@ -45,6 +45,7 @@ export interface SaleModel {
 }
 
 export interface VehicleSaleBillDetailVM {
+  id: number;
   chassisNo: string;
   itemRate: number;
   preGstDiscount: number;
@@ -76,6 +77,7 @@ export interface VehicleSaleBillResponseViewModel {
   salesExecutive?: string;
   isD2d: boolean;
   cashAccount?: string;
+  erpStatus?: string;
   details: VehicleSaleBillDetailVM[];
 }
 

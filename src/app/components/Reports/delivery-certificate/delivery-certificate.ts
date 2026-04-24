@@ -18,6 +18,21 @@ export class DeliveryCertificate {
   saleDate: Date = this.currentDate;
   deliveryDate: Date = this.currentDate;
 
+ngOnInit() {
+const stateData = history.state?.data;
+
+    if (stateData) {
+      this.certificateNo = stateData.certificateNo;
+      this.variant = stateData.variant;
+      this.vinNo = stateData.vinNo;
+      this.motorSerialNo = stateData.motorSerialNo;
+      this.dealerName = stateData.dealerName;
+      this.dealerCode = stateData.dealerCode;
+      this.saleDate = new Date(stateData.saleDate);
+      this.deliveryDate = new Date(stateData.deliveryDate);
+    }
+  }
+
   printReport() {
     const printContents = document.getElementById('reportContent')?.innerHTML;
     if (!printContents) return;
