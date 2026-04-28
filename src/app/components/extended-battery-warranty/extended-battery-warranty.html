@@ -1,0 +1,211 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">Extended Warranty Scheme</h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+
+                <form #warrantySchemeForm="ngForm" (ngSubmit)="onSubmit(warrantySchemeForm)">
+                    <div>
+                        <!-- First Row -->
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Scheme Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" name="schemeName"
+                                    #schemeName="ngModel" [(ngModel)]="formData.schemeName" required>
+                                @if (schemeName.invalid && schemeName.touched) {
+                                <small class="text-danger">
+                                    Scheme Name is required
+                                </small>
+                                }
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label"> OEM Model <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm" name="oemModel" #oemModel="ngModel"
+                                    [(ngModel)]="formData.oemmodelId" (change)="onOEMModelChange($event)">
+                                    <option *ngFor="let oemModel of oemModelsList" [value]="oemModel.id">
+                                        {{ oemModel.modelName }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label"> Rate Type <span class="text-danger">*</span> </label>
+                                <select class="form-select form-select-sm" name="rateType"
+                                    [(ngModel)]="formData.rateType" #rateType="ngModel" required>
+                                    <option *ngFor="let rateType of rateTypes" [value]="rateType.id">
+                                        {{ rateType.title }}
+                                    </option>
+                                </select>
+                                @if (rateType.invalid && rateType.touched) {
+                                <small class="text-danger">
+                                    Rate Type is Required
+                                </small>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Second Row -->
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <label class="form-label">Duration <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control form-control-sm" name="duration"
+                                    #duration="ngModel" [(ngModel)]="formData.duration" required>
+                                @if (duration.invalid && duration.touched) {
+                                <small class="text-danger">
+                                    Duration is required
+                                </small>
+                                }
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Duration Type <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm" name="durationType"
+                                    [(ngModel)]="formData.durationType" #durationType="ngModel" required>
+                                    <option *ngFor="let durationType of durationTypes" [value]="durationType.id">
+                                        {{ durationType.title }}
+                                    </option>
+                                </select>
+                                @if (durationType.invalid && durationType.touched) {
+                                <small class="text-danger">
+                                    Duration Type is required
+                                </small>
+                                }
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Upto Kms <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" name="Kms" #Kms="ngModel"
+                                    [(ngModel)]="formData.Kms" required>
+                                @if (Kms.invalid && Kms.touched) {
+                                <small class="text-danger">
+                                    Kms is required
+                                </small>
+                                }
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Dealer Price <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" name="dealerPrice"
+                                    #dealerPrice="ngModel" [(ngModel)]="formData.dealerPrice" required>
+                                @if (dealerPrice.invalid && dealerPrice.touched) {
+                                <small class="text-danger">
+                                    Dealer price is Required
+                                </small>
+                                }
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">End User Price <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" name="customerPrice"
+                                    [(ngModel)]="formData.customerPrice" required #customerPrice="ngModel" required>
+                                @if (customerPrice.invalid && customerPrice.touched) {
+                                <small class="text-danger">
+                                    User Price is required
+                                </small>
+                                }
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label"> Discount Amount </label>
+                                <input type="text" class="form-control form-control-sm" name="discountAmount"
+                                    [(ngModel)]="formData.discountAmount" #discountAmount="ngModel">
+                            </div>
+                        </div>
+
+                        <!-- Third Row -->
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <label class="form-label"> GST % </label>
+                                <input type="text" class="form-control form-control-sm" name="gstPercentage"
+                                    [(ngModel)]="formData.gstPercentage" #gstPercentage="ngModel" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Purchase Validity</label>
+                                <input type="text" class="form-control form-control-sm" name="purchaseValidity"
+                                    [(ngModel)]="formData.purchaseValidity" #purchaseValidity="ngModel">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Invoice Date From <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control form-control-sm" name="fromDate"
+                                    #fromDate="ngModel" [(ngModel)]="formData.fromDate" required>
+                                @if (fromDate.invalid && fromDate.touched) {
+                                <small class="text-danger">
+                                    From Date is required
+                                </small>
+                                }
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Invoice Date To</label>
+                                <input type="date" class="form-control form-control-sm" name="toDate" #toDate="ngModel"
+                                    [(ngModel)]="formData.toDate">
+                            </div>
+                            <div class="col-md-2">
+                                <label>Active</label><br>
+                                <div class="form-check form-switch mt-1">
+                                    <input class="form-check-input" type="checkbox" [(ngModel)]="formData.isActive"
+                                        name="isActive">
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <hr>
+
+                    <div>
+                        <!-- Item List -->
+                        <div class="page-content p-0">
+                            <div class="container-fluid p-0">
+
+                                <!-- Table Card -->
+                                <div class="card">
+                                    <div class="table-responsive overflow-auto" style="max-height: calc(70vh - 120px);">
+                                        <table class="table table-sm table-hover table-bordered mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th> Sr.No </th>
+                                                    <th> Model Name </th>
+                                                    <th> Product Name </th>
+                                                    <th> Warranty Scheme Name </th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                <tr *ngFor="let item of items; let i = index;" class="table-row">
+                                                    <td> {{ i + 1 }}</td>
+                                                    <td> {{ item?.itemname }} </td>
+                                                    <td> {{ item?.itemcode }}</td>
+                                                    <td> {{ formData.schemeName }} </td>
+                                                </tr>
+
+                                                <!-- No Data -->
+                                                <tr *ngIf="!items || items.length === 0">
+                                                    <td colspan="4" class="text-center text-muted py-3">
+                                                        No Data Available
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-primary btn-sm float-end" (click)="backToList()">
+                                Cancel
+                            </button>
+                            <button type="submit" [disabled]="warrantySchemeForm.invalid"
+                                class="btn btn-primary btn-sm float-end me-1">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div><!-- end card -->
+</div>
