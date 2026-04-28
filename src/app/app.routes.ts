@@ -107,11 +107,9 @@ export const routes: Routes = [
       { path: 'city-master/add', component: AddCityMaster, data: [19] },
       { path: 'city-master/edit/:id', component: AddCityMaster, data: [19] },
       { path: 'extended-battery-warranty', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty-list/extended-battery-warranty-list').then(m => m.ExtendedBatteryWarrantyList) },
-      { path: 'extended-battery-warranty/:id', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty').then(m => m.ExtendedBatteryWarranty) }
-       { path: 'city-master/add', component: AddCityMaster, data: [19] },
-        { path: 'city-master/edit/:id', component: AddCityMaster, data: [19] },
-        { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
-          {path:'add-vehicle-sale-bill/performaInvoice/:saleBillNo',component:PerformaInvoice,data :[23]}
+      { path: 'extended-battery-warranty/:id', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty').then(m => m.ExtendedBatteryWarranty) },
+      { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
+      { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] }
     ]
   }
 ];

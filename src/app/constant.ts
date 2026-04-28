@@ -114,10 +114,10 @@ export const userRole = [
     { roleId: 2, value: 'Dealer' }
 ]
 
-export const ErpOptions = [
-    { name: 'Submitted to ERP', value: 'PushedToERP' },
-    { name: 'Pending ERP Submission', value: 'Pending' }
-];
+// export const ErpOptions = [
+//     { name: 'Submitted to ERP', value: 'PushedToERP' },
+//     { name: 'Pending ERP Submission', value: 'Pending' }
+// ];
 
 export const RateTypes = [
     { id: 1, title: 'Single' },
@@ -127,22 +127,18 @@ export const RateTypes = [
 export const DurationTypes = [
     { id: 1, title: 'Month' },
     { id: 2, title: 'Year' }
-// export const ErpOptions = [
-//     { name: 'Submitted to ERP', value: 'PushedToERP' },
-//     { name: 'Pending ERP Submission', value: 'Pending' },
-    
-// ];
+];
 
- export const ERP_STATUS = {
-  PUSHED: 'PushedToERP',
-  PENDING: 'Pending',
-  ALLOTED: 'Alloted'
+export const ERP_STATUS = {
+    PUSHED: 'PushedToERP',
+    PENDING: 'Pending',
+    ALLOTED: 'Alloted'
 } as const;
 
 export const ErpOptions = [
-  { name: 'Submitted to ERP', value: ERP_STATUS.PUSHED },
-  { name: 'Pending ERP Submission', value: ERP_STATUS.PENDING },
-  { name: 'Alloted', value: ERP_STATUS.ALLOTED }
+    { name: 'Submitted to ERP', value: ERP_STATUS.PUSHED },
+    { name: 'Pending ERP Submission', value: ERP_STATUS.PENDING },
+    { name: 'Alloted', value: ERP_STATUS.ALLOTED }
 ];
 
 export const OemmodelServiceSeq = [
