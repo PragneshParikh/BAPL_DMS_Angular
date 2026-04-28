@@ -69,4 +69,14 @@ getChassisListPDIOK(dealerCode: string): Observable<VehicleSaleListChasisRespons
 getVehicleSaleBillById(id: number): Observable<any> {
   return this.http.get<any>(`${this.apiUrl}/VehicleSaleBill/${id}`);
 }
+
+
+//To be modified when SaleBill is created
+
+confirmInvoice(saleBillNo: string) {
+  return this.http.put<boolean>(
+    `${this.apiUrl}/VehicleSaleBill/ConfirmInvoice?saleBillNo=${saleBillNo}`,
+    null   // ✅ no body
+  );
+}
 }

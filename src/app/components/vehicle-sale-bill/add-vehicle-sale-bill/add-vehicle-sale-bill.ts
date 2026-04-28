@@ -16,6 +16,7 @@ import { Router } from '@angular/router';
 import { CustomerLedger } from '../../customer-ledger/customer-ledger';
 import { VehicleSaleListChasisResponse } from '../../../ViewModels/VehicleSaleChasisResponse';
 import { VehicleRegistrationdetails } from '../../../dialogs/vehicle-registrationdetails/vehicle-registrationdetails';
+import { VehicleSaleBillResponseViewModel } from '../../../ViewModels/VehicleSaleBill';
 
 
 @Component({
@@ -36,6 +37,7 @@ export class AddVehicleSaleBill implements OnInit {
   chassisList: VehicleSaleListChasisResponse[] = [];
   erpStatus: any;
   isErpLocked: boolean;
+  isInvoiced: boolean;
 
   /**
    *
@@ -56,7 +58,6 @@ export class AddVehicleSaleBill implements OnInit {
   vehicleList: any[] = [];
   editingIndex: number = -1;
   billId: number | null = null;
-
   isSubmitted: boolean = false;
   page = 1;
   pageSize = 10;
@@ -296,6 +297,7 @@ export class AddVehicleSaleBill implements OnInit {
         this.erpStatus = res.erpStatus || '';
         this.isErpLocked =
         this.erpStatus.toLowerCase() === 'pushedtoerp';
+        this.isInvoiced = this.erpStatus.toLowerCase() === 'invoiced';
         
         // Load chassis FIRST, then bind bill
         this.loadChassisList(() => {
@@ -652,7 +654,7 @@ this.model.finalAmount = this.getGrandTotal();
       refEmail: '',
       refPoint: 0,
       refRemarks: '',
-      erpStatus: !this.billId ? ERP_STATUS.ALLOTED : '',
+      erpStatus: !this.billId ? ERP_STATUS.PENDING : '',
 
 
       totalAmount: this.model.finalAmount,
@@ -1092,6 +1094,22 @@ printDeliveryCertificate() {
         saleDate: this.model.saleDate,
         deliveryDate: new Date()
       }
+    }
+  });
+}
+
+navigateToPerformaInvoice() {
+  this.router.navigate(['add-vehicle-sale-bill/performaInvoice', this.model.saleBillNo]);
+}
+
+//To be modified later based on API response
+connfirmInvoiceGeneration(){
+  this.vehicleSaleBillService.confirmInvoice(this.model.saleBillNo).subscribe({
+    next:()=>{
+      this.toaster.show('Invoice Generated Successfully', { classname: 'bg-success text-light', delay: 3000 });
+    },
+    error:()=>{
+      this.toaster.show('Failed to Generate Invoice', { classname: 'bg-danger text-light', delay: 3000 });
     }
   });
 }

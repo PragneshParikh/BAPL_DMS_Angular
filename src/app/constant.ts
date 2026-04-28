@@ -119,7 +119,7 @@ export const userRole=[
     
 // ];
 
-export const ERP_STATUS = {
+ export const ERP_STATUS = {
   PUSHED: 'PushedToERP',
   PENDING: 'Pending',
   ALLOTED: 'Alloted'

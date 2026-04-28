@@ -31,6 +31,7 @@ import { AddOemmodelWarranty } from './components/oemmodel-warranty/add-oemmodel
 import { CityMaster } from './components/city-master/city-master';
 import { AddCityMaster } from './components/city-master/add-city-master/add-city-master';
 import { ModelwiseServiceSchedule } from './components/modelwise-service-schedule/modelwise-service-schedule';
+import { PerformaInvoice } from './components/Reports/performa-invoice/performa-invoice';
 
 
 export const routes: Routes = [
@@ -105,7 +106,8 @@ export const routes: Routes = [
       { path: 'city-master', component: CityMaster, data: [19] },
        { path: 'city-master/add', component: AddCityMaster, data: [19] },
         { path: 'city-master/edit/:id', component: AddCityMaster, data: [19] },
-        { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] }
+        { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
+          {path:'add-vehicle-sale-bill/performaInvoice/:saleBillNo',component:PerformaInvoice,data :[23]}
     ]
   }
 ];
