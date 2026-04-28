@@ -1,0 +1,189 @@
+<div class="modal-header bg-primary text-white">
+  <h5 class="modal-title text-white">Registration Details</h5>
+  <button class="btn-close" (click)="close()"></button>
+</div>
+
+<form #registrationDetailsForm="ngForm"
+      (ngSubmit)="updateVehicleSaleBill()">
+      <fieldset [disabled]="!selectedRow">
+
+
+  <div class="modal-body">
+    <div class="row">
+
+
+      <div class="col-md-3">
+        <label>Chassis No </label>
+        <input class="form-control form-control-sm"
+               [(ngModel)]="model.chassisNo"
+               name="chassisNo"
+               readonly>
+      </div>
+
+      <div class="col-md-3">
+        <label>Regn No <span class="text-danger">*</span></label>
+        <input class="form-control form-control-sm"
+               [(ngModel)]="model.regNo"
+               name="regNo"
+               required>
+      </div>
+
+        <div class="col-md-3">
+
+          <label class="form-label">Reg Amount <span class="text-danger">*</span></label>
+
+          <input type="number"
+
+                 class="form-control form-control-sm"
+
+                 [(ngModel)]="model.regAmount"
+
+                 name="regAmount"
+
+                 #regAmount="ngModel"
+
+                 required>
+
+        </div>
+
+
+
+        <div class="col-md-3">
+
+          <label class="form-label">Insurance No <span class="text-danger">*</span></label>
+
+          <input class="form-control form-control-sm"
+
+                 [(ngModel)]="model.insNo"
+
+                 name="insNo"
+
+                 #insNo="ngModel"
+
+                 required>
+
+        </div>
+
+
+
+        <div class="col-md-3">
+
+          <label class="form-label">Insurance Amount <span class="text-danger">*</span></label>
+
+          <input type="number"
+
+                 class="form-control form-control-sm"
+
+                 [(ngModel)]="model.insAmount"
+
+                 name="insAmount"
+
+                 #insAmount="ngModel"
+
+                 required>
+
+        </div>
+
+
+
+        <div class="col-md-3 mt-2">
+
+          <label class="form-label">Ins Start Date <span class="text-danger">*</span></label>
+
+          <input type="date"
+
+                 class="form-control form-control-sm"
+
+                 [(ngModel)]="model.insStartDate"
+
+                 name="insStartDate"
+
+                 #insStartDate="ngModel"
+
+                 required>
+
+        </div>
+
+
+
+        <div class="col-md-3 mt-2">
+
+          <label class="form-label">Ins Exp Date <span class="text-danger">*</span></label>
+
+          <input type="date"
+
+                 class="form-control form-control-sm"
+
+                 [(ngModel)]="model.insExpDate"
+
+                 name="insExpDate"
+
+                 #insExpDate="ngModel"
+
+                 required>
+
+        </div>
+      
+    </div>
+
+    <div class="text-danger mt-2"
+         *ngIf="registrationDetailsForm.invalid && registrationDetailsForm.submitted">
+      Please fill all required fields.
+    </div>
+  </div>
+  </fieldset>
+   <hr>
+<div class="text-muted text-center" *ngIf="!selectedRow">
+  Select any row to start editing.
+</div>
+  <table class="table table-bordered table-sm">
+    <thead>
+      <tr>
+        
+        <th>Action</th>
+        <th>Chassis No</th>
+        <th>Reg No</th>
+        <th>Reg Amt</th>
+        <th>Ins No</th>
+        <th>Ins Amt</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let row of vehicleList; let i = index">
+
+        <td>
+          <button class="btn btn-sm btn-primary" type="button"
+                  (click)="editRow(row)">
+            <i class="ri-pencil-line"></i>
+          </button>
+        </td>
+
+        <td>{{ row.chassisNo }}</td>
+        <td>{{ row.regNo }}</td>
+        <td>{{ row.regAmt }}</td>
+        <td>{{ row.insNo }}</td>
+        <td>{{ row.insAmt }}</td>
+
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="modal-footer">
+    <button type="submit"
+            class="btn btn-primary btn-sm"
+            (click)="saveRow()"
+            [disabled]="registrationDetailsForm.invalid">
+      Save
+    </button>
+
+    <button type="button"
+            class="btn btn-light btn-sm"
+            (click)="close()"
+           >
+      Close
+    </button>
+  </div>
+
+
+</form>

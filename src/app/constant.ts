@@ -8,6 +8,7 @@ export enum AccessRoles {
 export const Gender = [
     { title: 'Male', value: 'male' },
     { title: 'Female', value: 'female' },
+    { title: 'Other', value: 'other' },
 ]
 
 export const TRANSACTION_TYPES = [
@@ -64,7 +65,8 @@ export const LedgerTypes = [
     { name: 'Financier', value: 'Financier' },
     { name: 'Institutional', value: 'Institutional' },
     { name: 'Insurance', value: 'Insurance' },
-    { name: 'Party', value: 'Party' }
+    { name: 'Party', value: 'Party' },
+    { name: 'Supplier', value: 'Supplier' }
 ]
 
 export const PrefixTypes = [
@@ -125,4 +127,34 @@ export const RateTypes = [
 export const DurationTypes = [
     { id: 1, title: 'Month' },
     { id: 2, title: 'Year' }
+// export const ErpOptions = [
+//     { name: 'Submitted to ERP', value: 'PushedToERP' },
+//     { name: 'Pending ERP Submission', value: 'Pending' },
+    
+// ];
+
+ export const ERP_STATUS = {
+  PUSHED: 'PushedToERP',
+  PENDING: 'Pending',
+  ALLOTED: 'Alloted'
+} as const;
+
+export const ErpOptions = [
+  { name: 'Submitted to ERP', value: ERP_STATUS.PUSHED },
+  { name: 'Pending ERP Submission', value: ERP_STATUS.PENDING },
+  { name: 'Alloted', value: ERP_STATUS.ALLOTED }
+];
+
+export const OemmodelServiceSeq = [
+    { Id: 1, value: '1st Service' },
+    { Id: 2, value: '2nd Service' },
+    { Id: 3, value: '3rd Service' },
+    { Id: 4, value: '4th Service' },
+    { Id: 5, value: '5th Service' },
+    { Id: 6, value: '6th Service' }
+]
+
+export const OemmodelServiceFrom = [
+    { Id: 1, value: 'Date of Purchase' },
+    { Id: 2, value: 'Date of Sale' }
 ]

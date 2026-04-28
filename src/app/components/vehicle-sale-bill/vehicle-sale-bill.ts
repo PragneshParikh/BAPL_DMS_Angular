@@ -35,9 +35,6 @@ export class VehicleSaleBill {
 
   sortDirection: { [key: string]: boolean } = {};
   searchText: string = '';
-  // fromDate?: Date;
-  // toDate?: Date;
-
   page = 1;
   pageSize = 10;
   sortField: string = '';
@@ -45,7 +42,7 @@ export class VehicleSaleBill {
   filter: any = {
     fromDate: null,
     toDate: null,
-    erpStatus: "Pending"
+    erpStatus: ""
   };
   searchChanged: Subject<string> = new Subject();
 
@@ -136,7 +133,7 @@ this.filter.toDate = today;
       let valA: any;
       let valB: any;
 
-      // ✅ handle computed column
+      // handle computed column
       if (field === 'totalItems') {
         valA = a.details?.length || 0;
         valB = b.details?.length || 0;
@@ -146,11 +143,11 @@ this.filter.toDate = today;
         valB = b[field];
       }
 
-      // ✅ handle null/undefined
+      // handle null/undefined
       if (valA == null) valA = '';
       if (valB == null) valB = '';
 
-      // ✅ numeric vs string handling
+      // numeric vs string handling
       if (typeof valA === 'number' && typeof valB === 'number') {
         return (valA - valB) * dir;
       }
@@ -169,4 +166,9 @@ this.filter.toDate = today;
       state: { bill: item }
     });
   }
+
+  getErpStatusName(value: string | undefined): string {
+  return ErpOptions.find(x => x.value === value)?.name || '';
+}
+
 }

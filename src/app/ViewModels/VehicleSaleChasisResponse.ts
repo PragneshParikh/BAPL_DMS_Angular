@@ -116,4 +116,5 @@
 
   stockDetailsNo?: string;
   vcu?: string;
+  customerSaleDate?: Date;
 }
