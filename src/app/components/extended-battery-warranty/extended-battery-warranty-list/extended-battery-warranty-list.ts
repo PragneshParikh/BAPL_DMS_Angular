@@ -1,0 +1,121 @@
+import { Component, OnInit } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import { SharedModule } from '../../../shared/shared.module';
+import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ExtendedBatteryWarrantyService } from '../../../core/services/extended-battery-warranty';
+import { LoaderService } from '../../../core/services/loader';
+import { ToastService } from '../../../shared/toaster/toast-service';
+import { DurationTypes, RateTypes } from '../../../constant';
+import { GetDurationTypePipe } from '../../../core/pipes/get-duration-type-pipe';
+import { GetRateTypePipe } from '../../../core/pipes/get-rate-type-pipe';
+
+@Component({
+  selector: 'app-extended-battery-warranty-list',
+  imports: [
+    SharedModule,
+    RouterOutlet,
+    NgbTooltipModule,
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    NgbPaginationModule,
+    GetDurationTypePipe,
+    GetRateTypePipe
+  ],
+  templateUrl: './extended-battery-warranty-list.html',
+  styleUrl: './extended-battery-warranty-list.scss',
+})
+export class ExtendedBatteryWarrantyList implements OnInit {
+  durationTypes = DurationTypes;
+  rateTypes = RateTypes;
+
+  searchTerm: string = '';
+
+  dataSource: any[] = [];
+
+  page = 1;
+  pageSize = 10;
+  collectionSize = 0;
+
+  //#region sorting variables
+  sortColumn: string = 'schemeName';
+  sortDirection: boolean = true; // false for ascending, true for descending
+  //#endregion
+
+  constructor(
+    private router: Router,
+    private extendedBatteryWarrantyServie: ExtendedBatteryWarrantyService,
+    private loader: LoaderService,
+    private toast: ToastService
+  ) { }
+
+  ngOnInit(): void {
+    this.getExtendedBatteryWarrantyList();
+  }
+
+  getExtendedBatteryWarrantyList() {
+    this.loader.show();
+    this.extendedBatteryWarrantyServie.getByPaged(this.searchTerm, this.page - 1, this.pageSize).subscribe({
+      next: (res) => {
+        this.loader.hide();
+        this.dataSource = res.data
+        this.collectionSize = res.totalRecords
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);;
+        this.toast.show('Something went wrong.', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    })
+  }
+
+  newScheme() {
+    this.router.navigate(['/extended-battery-warranty', 0]);
+  }
+
+  onSearchChange() {
+    this.page = 1; // Reset to first page on new search
+    this.getExtendedBatteryWarrantyList();
+  }
+
+  onSort(column: string) {
+
+    if (this.sortColumn !== column) {
+      // new column clicked → default ascending
+      this.sortColumn = column;
+      this.sortDirection = false; // false = ascending
+    } else {
+      // same column clicked → toggle
+      this.sortDirection = !this.sortDirection;
+    }
+
+    // Sort the full dataSource
+    this.dataSource.sort((a: any, b: any) => {
+      let valueA = a[column] ?? '';
+      let valueB = b[column] ?? '';
+
+      if (typeof valueA === 'string') valueA = valueA.toLowerCase();
+      if (typeof valueB === 'string') valueB = valueB.toLowerCase();
+
+      if (valueA < valueB) return this.sortDirection ? 1 : -1;
+      if (valueA > valueB) return this.sortDirection ? -1 : 1;
+      return 0;
+    });
+
+    // Reset to first page to show sorted items
+    this.page = 1;
+    this.getExtendedBatteryWarrantyList();
+  }
+
+  onSchemeClick(scheme: any) {
+    this.router.navigate(['/extended-battery-warranty', scheme.id]);
+  }
+
+  onPageChange(page: number) {
+    this.page = page;
+    this.getExtendedBatteryWarrantyList();
+  }
+
+}

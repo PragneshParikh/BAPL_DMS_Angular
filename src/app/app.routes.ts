@@ -102,8 +102,10 @@ export const routes: Routes = [
       { path: 'material-transfer', data: [29], loadComponent: () => import('./components/material-transfer/material-transfer').then(m => m.MaterialTransfer) },
       { path: 'material-transfer/:id', data: [29], loadComponent: () => import('./components/material-transfer/material-transfer-detail/material-transfer-detail').then(m => m.MaterialTransferDetail) },
       { path: 'city-master', component: CityMaster, data: [19] },
-       { path: 'city-master/add', component: AddCityMaster, data: [19] },
-        { path: 'city-master/edit/:id', component: AddCityMaster, data: [19] },
+      { path: 'city-master/add', component: AddCityMaster, data: [19] },
+      { path: 'city-master/edit/:id', component: AddCityMaster, data: [19] },
+      { path: 'extended-battery-warranty', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty-list/extended-battery-warranty-list').then(m => m.ExtendedBatteryWarrantyList) },
+      { path: 'extended-battery-warranty/:id', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty').then(m => m.ExtendedBatteryWarranty) }
     ]
   }
 ];

@@ -73,7 +73,6 @@ export const PrefixTypes = [
     { name: 'Quotation', value: 'Quotation' }
 ]
 
-
 export const SaleTypeOptions = [
     { name: 'Cash Sale', value: 'Cash' },
     { name: 'Credit Sale', value: 'Credit' }
@@ -108,13 +107,22 @@ export const IssueTypes = [
     { name: 'Goodwill', value: 'goodwill' }
 ]
 
-export const userRole=[
-    {roleId:1, value:'SuperAdmin'},
-    {roleId:2, value:'Dealer'}
+export const userRole = [
+    { roleId: 1, value: 'SuperAdmin' },
+    { roleId: 2, value: 'Dealer' }
 ]
 
 export const ErpOptions = [
     { name: 'Submitted to ERP', value: 'PushedToERP' },
-    { name: 'Pending ERP Submission', value: 'Pending' },
-    
+    { name: 'Pending ERP Submission', value: 'Pending' }
 ];
+
+export const RateTypes = [
+    { id: 1, title: 'Single' },
+    // { id: 2, title: 'Multi' }
+]
+
+export const DurationTypes = [
+    { id: 1, title: 'Month' },
+    { id: 2, title: 'Year' }
+]
