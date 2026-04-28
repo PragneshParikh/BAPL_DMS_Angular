@@ -130,3 +130,17 @@ export const ErpOptions = [
   { name: 'Pending ERP Submission', value: ERP_STATUS.PENDING },
   { name: 'Alloted', value: ERP_STATUS.ALLOTED }
 ];
+
+export const OemmodelServiceSeq = [
+    { Id: 1, value: '1st Service' },
+    { Id: 2, value: '2nd Service' },
+    { Id: 3, value: '3rd Service' },
+    { Id: 4, value: '4th Service' },
+    { Id: 5, value: '5th Service' },
+    { Id: 6, value: '6th Service' }
+]
+
+export const OemmodelServiceFrom = [
+    { Id: 1, value: 'Date of Purchase' },
+    { Id: 2, value: 'Date of Sale' }
+]

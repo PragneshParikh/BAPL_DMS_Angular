@@ -1,0 +1,309 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">Model Wise Service Schedule List</h4>
+</div>
+
+<!-- view details -->
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card">
+      <!--  SEARCH SECTION -->
+      <div class="card-body border-bottom">
+
+        <div class="row g-2 align-items-end">
+
+          <!-- Model -->
+          <div class="col-md-3">
+            <label class="form-label">OemModel Name</label>
+            <select class="form-select form-select-sm" [(ngModel)]="searchModelId" (ngModelChange)="onSearchChange()"
+              name="searchModelId">
+              <option value="">Select Model</option>
+              <option *ngFor="let o of oemModelList" [value]="o.oemmodelId">
+                {{o.oemModelName}}
+              </option>
+            </select>
+          </div>
+
+          <!-- Effective Date -->
+          <div class="col-md-3">
+            <label class="form-label">Effective Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="searchDate"
+              (ngModelChange)="onSearchChange()" name="searchDate">
+          </div>
+
+          <!-- Buttons -->
+          <div class="col-md-3">
+            <button class="btn btn-primary btn-sm me-2" (click)="search()">
+              <i class="ri-search-line"></i>
+            </button>
+            <button class="btn btn-primary btn-sm" (click)="openAddModal()" data-bs-toggle="modal"
+              data-bs-target="#serviceScheduleModal">
+              <i class="ri-add-line"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE SECTION -->
+      <div class="card-body">
+
+        <div class="table-responsive">
+
+          <table class="table table-bordered table-sm align-middle text-nowrap">
+
+            <thead class="table-light">
+              <tr>
+                <th>Sr. No.</th>
+                <th>OEMModel Name</th>
+                <th>Days From</th>
+                <th>Days To</th>
+                <th>ODO From</th>
+                <th>ODO To</th>
+                <th>Service From</th>
+                <th>Service Head</th>
+                <th>Service Type</th>
+                <th>Effective Date</th>
+                <!-- <th class="text-center">Action</th> -->
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr *ngFor="let item of scheduleList">
+
+                <td>{{item.srNo}}</td>
+                <td>{{item.modelName}}</td>
+                <td>{{item.daysFrom}}</td>
+                <td>{{item.daysTo}}</td>
+                <td>{{item.journeyFrom}}</td>
+                <td>{{item.journeyTo}}</td>
+                <td>{{item.serviceFrom == 2 ? 'Date of Sale':'Date of Purchase'}}</td>
+                <td>{{item.serviceHeadName || item.serviceHead}}</td>
+                <td>{{item.serviceTypeName || item.serviceType}}</td>
+                <td>{{item.effectiveDate | date:'dd-MM-yyyy'}}</td>
+
+                <!-- <td class="text-center">
+                  <button class="btn btn-sm btn-soft-sm btn-soft-primary me-1" (click)="edit(item)">
+                    <i class="ri-pencil-line"></i>
+                  </button>
+                </td> -->
+
+              </tr>
+
+              <tr *ngIf="scheduleList.length === 0">
+                <td colspan="10" class="text-center text-muted">
+                  No data found
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end view -->
+<!-- Add modelwise serviceschedule-->
+<div class="modal fade" id="serviceScheduleModal" tabindex="-1" aria-hidden="true">
+
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <!-- HEADER -->
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="ri-car-line me-2"></i>
+          Model Wise Service Schedule
+        </h5>
+
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+        </button>
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+
+        <!-- YOUR FORM START -->
+        <form #modelwiseserviceschedule="ngForm" (ngSubmit)="save(modelwiseserviceschedule)">
+
+          <!-- Top Filters -->
+          <div class="row mb-3">
+
+            <!-- OEM MODEL -->
+            <div class="col-md-3">
+              <label>OEM Model Name <span class="text-danger">*</span></label>
+
+              <select class="form-select form-select-sm" name="oemmodelId" [(ngModel)]="SelectedoemmodelId"
+                (ngModelChange)="onModelChange()" required #oemmodelIdRef="ngModel">
+
+                <option [ngValue]="null">Select OEMModel</option>
+
+                <option *ngFor="let o of oemModelList" [ngValue]="o.oemmodelId">
+                  {{o.oemModelName}}
+                </option>
+
+              </select>
+
+              <small class="text-danger"
+                *ngIf="oemmodelIdRef.invalid && (oemmodelIdRef.touched || modelwiseserviceschedule.submitted)">
+                Required
+              </small>
+            </div>
+
+            <!-- NO OF SERVICE -->
+            <div class="col-md-2">
+              <label>No of Services</label>
+
+              <input type="number" class="form-control form-control-sm" name="noOfServices" [(ngModel)]="noOfServices"
+                (ngModelChange)="generateRows()" required>
+            </div>
+
+            <!-- DATE -->
+            <div class="col-md-2">
+              <label>Effective Date</label>
+
+              <input type="date" class="form-control form-control-sm" [(ngModel)]="effectiveDate" name="effectiveDate"
+                required>
+            </div>
+
+          </div>
+
+          <!-- TABLE + RIGHT SECTION -->
+          <div class="row">
+
+            <!-- LEFT TABLE -->
+            <div class="col-md-8">
+              <div class="table-responsive border rounded">
+
+                <table class="table table-bordered table-sm">
+
+                  <thead class="table-light">
+                    <tr>
+                      <th>Sr No</th>
+                      <th>Days From</th>
+                      <th>Days To</th>
+                      <th>KM From</th>
+                      <th>KM To</th>
+                      <th>Service From</th>
+                      <th>Service Head</th>
+                      <th>Service Type</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr *ngFor="let row of serviceRows; let i = index">
+
+                      <td>{{row.serviceName}}</td>
+
+                      <td>
+                        <input type="number" [(ngModel)]="row.daysFrom" name="daysFrom{{i}}"
+                          class="form-control form-control-sm" required>
+                      </td>
+
+                      <td>
+                        <input type="number" [(ngModel)]="row.daysTo" name="daysTo{{i}}"
+                          class="form-control form-control-sm" required>
+                      </td>
+
+                      <td>
+                        <input type="number" [(ngModel)]="row.kmFrom" name="kmFrom{{i}}"
+                          class="form-control form-control-sm" required>
+                      </td>
+
+                      <td>
+                        <input type="number" [(ngModel)]="row.kmTo" name="kmTo{{i}}"
+                          class="form-control form-control-sm" required>
+                      </td>
+
+                      <td>
+                        <select class="form-select form-select-sm" [(ngModel)]="row.serviceFrom" name="serviceFrom{{i}}"
+                          required>
+                          <option value="">Select</option>
+                          <option *ngFor="let s of servicefromList" [value]="s.Id">
+                            {{s.value}}
+                          </option>
+                        </select>
+                      </td>
+
+                      <td>
+                        <select class="form-select form-select-sm" [(ngModel)]="row.serviceHeadId"
+                          name="serviceHead{{i}}" (change)="onServiceheadchanging(row)" required>
+                          <option value="">Select</option>
+                          <option *ngFor="let sh of serviceheadlist" [ngValue]="sh.serviceHeadId">
+                            {{sh.serviceHeadName}}
+                          </option>
+                        </select>
+                      </td>
+
+                      <td>
+                        <select class="form-select form-select-sm" [(ngModel)]="row.serviceTypeId"
+                          name="serviceType{{i}}" required>
+                          <option value="">Select</option>
+                          <option *ngFor="let st of row.serviceTypeList" [value]="st.serviceTypeId">
+                            {{st.serviceTypeName}}
+                          </option>
+                        </select>
+                      </td>
+
+                    </tr>
+                    <tr *ngIf="serviceRows.length === 0">
+                      <td colspan="10" class="text-center text-muted">
+                        No data found
+                      </td>
+                    </tr>
+                  </tbody>
+
+                </table>
+
+              </div>
+            </div>
+
+            <!-- RIGHT CHECKBOX -->
+            <div class="col-md-4">
+
+              <label>Select Model Variant</label>
+
+              <div class="border p-2 rounded" style="height: 250px; overflow-y: auto;">
+
+                <div *ngIf="modelvarientList?.length > 0; else noData">
+
+                  <div *ngFor="let m of modelvarientList; let i = index">
+
+                    <input type="checkbox" [(ngModel)]="m.selected" name="variant_{{i}}"
+                      (change)="onVariantChange(m, $event)">
+
+                    {{m.modelVarientName || m.modelName}}
+
+                  </div>
+
+                </div>
+
+                <ng-template #noData>
+                  <div class="text-center text-muted mt-3">
+                    No model variant found
+                  </div>
+                </ng-template>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- FOOTER -->
+          <div class="text-end mt-3">
+            <button type="submit" class="btn btn-primary btn-sm" [disabled]="modelwiseserviceschedule.invalid">
+              <i class="ri-save-line"></i> Save
+            </button>
+
+            <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">
+              Cancel
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</div>
