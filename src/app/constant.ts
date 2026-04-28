@@ -8,6 +8,7 @@ export enum AccessRoles {
 export const Gender = [
     { title: 'Male', value: 'male' },
     { title: 'Female', value: 'female' },
+    { title: 'Other', value: 'other' },
 ]
 
 export const TRANSACTION_TYPES = [
@@ -64,7 +65,8 @@ export const LedgerTypes = [
     { name: 'Financier', value: 'Financier' },
     { name: 'Institutional', value: 'Institutional' },
     { name: 'Insurance', value: 'Insurance' },
-    { name: 'Party', value: 'Party' }
+    { name: 'Party', value: 'Party' },
+    { name: 'Supplier', value: 'Supplier' }
 ]
 
 export const PrefixTypes = [

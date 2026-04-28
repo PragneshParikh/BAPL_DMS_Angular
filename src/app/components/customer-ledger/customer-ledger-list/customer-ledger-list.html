@@ -60,7 +60,7 @@
 
                                 <tbody>
                                     <tr *ngFor="let customer of dataSource; trackBy: trackByCustomer" class="table-row"
-                                        (click)="onCustomerClick(customer)">
+                                        (dblclick)="onCustomerClick(customer)">
                                         <td>{{ customer?.ledgerType }}</td>
                                         <td>{{ customer?.ledgerName }}</td>
                                         <td>{{ customer?.mobileNumber }}</td>
