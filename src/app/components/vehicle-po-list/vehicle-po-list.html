@@ -91,6 +91,8 @@
                             <!-- <th>Color</th> -->
                             <!-- <th>Order Qty</th> -->
                             <th>Order Amount</th>
+                            <th class="sort" [ngClass]="getSortClass('isSubmitted')" (click)="sort('isSubmitted')">
+                                IsSubmittedToErp</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -108,9 +110,20 @@
                             <!-- <td>{{po.color}}</td> -->
                             <!-- <td>{{po.orderQty}}</td> -->
                             <td>{{po.orderAmount}}</td>
+                            <!-- <td>
+                                <span class="badge" [ngClass]="po.isSubmitted === 'Submited To Erp' ? 'bg-success' : 'bg-danger'">
+                                    {{ po.isSubmitted === 'Submited To Erp' ? 'Yes' : 'No' }}
+                                </span>
+                            </td> -->
+                            <td class="text-center">
+                                <span class="badge"
+                                    [ngClass]="po.isSubmitted === 'Submited To Erp' ? 'bg-success' : 'bg-danger'">
+                                    {{ po.isSubmitted === 'Submited To Erp' ? 'Yes' : 'No' }}
+                                </span>
+                            </td>
                         </tr>
                         <tr *ngIf="pagedPurchaseOrders.length == 0">
-                            <td colspan="12" class="text-center p-3">No Records Found</td>
+                            <td colspan="13" class="text-center p-3">No Records Found</td>
                         </tr>
                     </tbody>
                 </table>
