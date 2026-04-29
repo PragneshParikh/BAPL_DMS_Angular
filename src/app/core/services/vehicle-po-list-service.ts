@@ -14,4 +14,11 @@ export class VehiclePoListService {
   getPOList(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/PurchaseOrder/Polist`);
   }
+
+  downloadPurchaseOrderExcel(filters: any): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/PurchaseOrder/DownloadPurchaseOrderExcel`, {
+      params: filters,
+      responseType: 'blob'
+    });
+  }
 }
