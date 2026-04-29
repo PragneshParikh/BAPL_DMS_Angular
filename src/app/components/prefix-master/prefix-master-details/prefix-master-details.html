@@ -4,10 +4,11 @@
     </div>
 
     <div class="card-body">
-        <div class="row g-3">
+        <form #prefixMasterForm="ngForm" (ngSubmit)="onSubmit(prefixMasterForm)">
+            <div class="row g-3">
 
-            <!-- Module -->
-            <!-- <div class="col-md-3">
+                <!-- Module -->
+                <!-- <div class="col-md-3">
                 <label class="form-label">Module</label>
                 <select class="form-select form-select-sm" [(ngModel)]="sequence.moduleName">
                     <option *ngFor="let pt of prefixTypes" [value]="pt.value">
@@ -15,20 +16,39 @@
                     </option>
                 </select>
             </div> -->
-            <div class="col-md-3">
-                <label class="form-label">Module</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="sequence.moduleName" readonly>
-            </div>
+                <div class="col-md-3">
+                    <label class="form-label">Module</label>
+                    <!-- <input type="text" class="form-control form-control-sm" [(ngModel)]="sequence.moduleName" readonly> -->
+                    <select class="form-select form-select-sm" [(ngModel)]="sequence.moduleName" name="moduleName"
+                        #moduleName="ngModel" (change)="checkDuplicate()" required>
+                        <option *ngFor="let module of lstModules" [value]="module.name">
+                            {{ module.moduleName }}
+                        </option>
+                    </select>
+                    @if (moduleName.invalid && moduleName.touched ) {
+                    <small class="text-danger">
+                        Module name is required
+                    </small>
+                    }
+                    <div *ngIf="isDuplicate" class="text-danger">
+                        Duplicate entry exists for selected Module and Financial Year
+                    </div>
+                </div>
 
-            <!-- Prefix -->
-            <div class="col-md-3">
-                <label class="form-label">Prefix</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="sequence.prefix"
-                    placeholder="e.g. INV">
-            </div>
+                <!-- Prefix -->
+                <div class="col-md-3">
+                    <label class="form-label">Prefix</label>
+                    <input type="text" class="form-control form-control-sm" [(ngModel)]="sequence.prefix"
+                        placeholder="e.g. INV" name="prefixText" #prefixText="ngModel" required>
+                    @if (prefixText.invalid && prefixText.touched ) {
+                    <small class="text-danger">
+                        Prefix is required
+                    </small>
+                    }
+                </div>
 
-            <!-- Dealer -->
-            <!-- <div class="col-md-3">
+                <!-- Dealer -->
+                <!-- <div class="col-md-3">
                 <label class="form-label">Dealer</label>
                 <select class="form-select form-select-sm" [(ngModel)]="sequence.dealerCode">
                     <option *ngFor="let dealer of lstDealers" [value]="dealer.dealercode">
@@ -37,76 +57,90 @@
                 </select>
             </div> -->
 
-            <!-- Financial Year -->
-            <div class="col-md-3">
-                <label class="form-label">Financial Year</label>
-                <select class="form-select form-select-sm" [(ngModel)]="sequence.financialYear">
-                    <option *ngFor="let fy of lstFinancialYears" [value]="fy">
-                        {{ fy }}
-                    </option>
-                </select>
+                <!-- Financial Year -->
+                <div class="col-md-3">
+                    <label class="form-label">Financial Year</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="sequence.financialYear"
+                        name="financial_year" #financial_year="ngModel" (change)="checkDuplicate()" required>
+                        <option *ngFor="let fy of lstFinancialYears" [value]="fy">
+                            {{ fy }}
+                        </option>
+                    </select>
+                    @if (financial_year.invalid && financial_year.touched ) {
+                    <small class="text-danger">
+                        Year is required
+                    </small>
+                    }
+                    <div *ngIf="isDuplicate" class="text-danger">
+                        Duplicate entry exists for selected Module and Financial Year
+                    </div>
+                </div>
+
             </div>
 
-        </div>
+            <div class="row g-3">
 
-        <div class="row g-3">
+                <!-- Padding -->
+                <div class="col-md-3">
+                    <label class="form-label">Number Length (Padding)</label>
+                    <input type="number" class="form-control form-control-sm" [(ngModel)]="sequence.padding"
+                        name="numberLength" #numberLength="ngModel" readonly>
+                </div>
 
-            <!-- Padding -->
-            <div class="col-md-3">
-                <label class="form-label">Number Length (Padding)</label>
-                <input type="number" class="form-control form-control-sm" [(ngModel)]="sequence.padding">
+                <!-- Next Number -->
+                <div class="col-md-3">
+                    <label class="form-label">Next Number</label>
+                    <input type="number" class="form-control form-control-sm" [(ngModel)]="sequence.nextNo"
+                        name="nextNo" #nextNo="ngModel" readonly>
+                </div>
+
+                <!-- Separator -->
+                <div class="col-md-3">
+                    <label class="form-label">Separator</label>
+                    <input type="text" class="form-control form-control-sm" [(ngModel)]="sequence.separator"
+                        name="separator" #separator="ngModel" readonly>
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label><br>
+                    <div class="form-check form-switch d-inline-block">
+                        <input type="checkbox" class="form-check-input form-check-lg" name="status" #status="ngModel"
+                            [(ngModel)]="sequence.isActive">
+                        <label class="form-check-label small" for="status">{{ sequence.isActive === true ?
+                            'Active' :'InActive' }}</label>
+                    </div>
+                </div>
+
             </div>
 
-            <!-- Next Number -->
-            <div class="col-md-3">
-                <label class="form-label">Next Number</label>
-                <input type="number" class="form-control form-control-sm" [(ngModel)]="sequence.nextNo" readonly>
-            </div>
+            <div class="row g-3">
+                <!-- Preview -->
+                <div class="col-md-3">
+                    <label class="form-label">Preview</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control form-control-sm" [value]="generatePreview()" readonly>
+                        <span class="input-group-text bg-primary text-white info-wrapper">
+                            <i class="ri-information-line"></i>
+                            <div class="info-card shadow">
+                                <p class="mb-0" [innerHTML]="prefixInfo()"></p>
+                            </div>
+                        </span>
+                    </div>
+                </div>
 
-            <!-- Separator -->
-            <div class="col-md-3">
-                <label class="form-label">Separator</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="sequence.separator" readonly>
-            </div>
-
-            <!-- Status -->
-            <div class="col-md-3">
-                <label class="form-label">&nbsp;</label><br>
-                <div class="form-check form-switch d-inline-block">
-                    <input type="checkbox" class="form-check-input form-check-lg" name="status" #status="ngModel"
-                        [(ngModel)]="sequence.isActive">
-                    <label class="form-check-label small" for="status">{{ sequence.isActive === true ?
-                        'Active' :'InActive' }}</label>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label><br>
+                    <label class="form-label">Count : {{ previewCount() }}</label>
                 </div>
             </div>
-
-        </div>
-
-        <div class="row g-3">
-            <!-- Preview -->
-            <div class="col-md-3">
-                <label class="form-label">Preview</label>
-                <div class="input-group input-group-sm">
-                    <input type="text" class="form-control form-control-sm" [value]="generatePreview()" readonly>
-                    <span class="input-group-text bg-primary text-white info-wrapper">
-                        <i class="ri-information-line"></i>
-                        <div class="info-card shadow">
-                            <p class="mb-0" [innerHTML]="prefixInfo()"></p>
-                        </div>
-                    </span>
-                </div>
+            <div class="card-footer text-end mt-2">
+                <button type="submit" class="btn btn-primary btn-sm"
+                    [disabled]="prefixMasterForm.invalid || isDuplicate">Save</button>
+                <button type="button" class="btn btn-danger btn-sm ms-2" (click)="backToList()">Cancel</button>
             </div>
-
-            <div class="col-md-3">
-                <label class="form-label">&nbsp;</label><br>
-                <label class="form-label">Count : {{ previewCount() }}</label>
-            </div>
-        </div>
-
+        </form>
     </div>
 
-    <div class="card-footer text-end">
-        <button class="btn btn-primary btn-sm" (click)="saveSequence()">Save</button>
-        <button class="btn btn-danger btn-sm ms-2" (click)="backToList()">Cancel</button>
-    </div>
+
 </div>

@@ -154,3 +154,12 @@ export const OemmodelServiceFrom = [
     { Id: 1, value: 'Date of Purchase' },
     { Id: 2, value: 'Date of Sale' }
 ]
+
+export const ModuleTypes = [
+    { name: 'counter_bill', moduleName: 'Counter Bill' },
+    { name: 'free_service_claim_invoice', moduleName: 'Free Service Claim Invoice' },
+    { name: 'warranty_claim_invoice', moduleName: 'Warranty Claim Invoice' },
+    { name: 'free_service_claim', moduleName: 'Free Service Claim' },
+    { name: 'CIR_investigation', moduleName: 'CIR Investigation' },
+    { name: 'purchase_order', moduleName: 'Purchase Order' }
+]
