@@ -66,12 +66,10 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-2">
-                        <div class="form-check form-switch form-switch-sm form-switch-success">
-                            <label class="form-label">IsActive</label>
-                            <input class="form-check-input form-check-input-sm" type="checkbox" name="isActive"
-                                [(ngModel)]="formData.isActive">
-                        </div>
+                    <div class="col-md-2 form-check form-switch form-switch-sm form-switch-success">
+                        <label class="form-label">IsActive</label>
+                        <input class="form-check-input form-check-input-sm" type="checkbox" name="isActive"
+                            [(ngModel)]="formData.isActive">
                     </div>
                     <div class="col-md-2 div-btn-add">
                         <button class="btn btn-add btn-sm me-3" [disabled]="form22Form.invalid">
@@ -92,10 +90,11 @@
                 <div class="d-flex justify-content-end align-items-center">
                     <!-- Add Form22master Button -->
                     <button class="btn btn-primary btn-sm me-3" (click)="openAddDetails(form22Form,formData)">
-                       Add
+                        Add
                     </button>
                     <!-- Download Excel Button -->
-                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'" (click)="downloadForm22MasterExcel()">
+                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
+                        (click)="downloadForm22MasterExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
                     <!-- Search Box -->
