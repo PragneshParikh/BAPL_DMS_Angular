@@ -70,8 +70,8 @@
                 Open Registration
             </button>
 
-             <button *ngIf="!isErpLocked && billId && !isInvoiced" class="btn btn-sm btn-primary" (click)="navigateToPerformaInvoice()">
-               Genearate Performa Invoice
+             <button *ngIf="!isErpLocked && billId && !isInvoiced && erpStatus !== 'Reserved'" class="btn btn-sm btn-primary" (click)="navigateToPerformaInvoice()">
+               Genearate Proforma Invoice
             </button>
              <button *ngIf="!isErpLocked && billId && !isInvoiced &&  isRegistrationComplete()" class="btn btn-sm btn-primary" (click)="connfirmInvoiceGeneration()">
                Genearate Invoice

@@ -6,6 +6,7 @@ import { DealerMasterViewModel } from '../../../ViewModels/Dealer/DealerMasterVi
 import { log } from 'console';
 import { PerformaInvoiceService } from '../../../core/services/performa-invoice-service';
 import { ActivatedRoute } from '@angular/router';
+import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
 
 @Component({
   selector: 'app-performa-invoice',
@@ -25,13 +26,15 @@ export class PerformaInvoice  implements OnInit {
   deliveryDate: Date = this.currentDate;
   dealer: DealerMasterViewModel | null = null;
   saleBillNo: string;
+  saleBill: any;
 /**
  *
  */
 constructor(private storageService:StorageService,
   private dealerService:DealerService,
 private performaInvoiceService:PerformaInvoiceService,
-private route: ActivatedRoute,) {
+private route: ActivatedRoute,
+private vehicleSaleBillService: VehicleSaleBillService) {
 }
 
 
@@ -39,6 +42,11 @@ private route: ActivatedRoute,) {
   ngOnInit() {
     this.getDealerDetails();
       this.saleBillNo = this.route.snapshot.paramMap.get('saleBillNo') || '';
+      console.log(this.saleBillNo);
+      
+      if (this.saleBillNo) {
+        this.getBillById(parseInt(this.saleBillNo));
+      }
 
   }
 getDealerDetails(){
@@ -83,12 +91,24 @@ getDealerDetails(){
   }
 
   savePerformaInvoice() {
-    this.performaInvoiceService.generatePerformaInvoice({ vehicleSaleBillNo: this.saleBillNo }).subscribe(response => {
+    this.performaInvoiceService.generatePerformaInvoice({ vehicleSaleBillNo: this.saleBillNo }).
+    subscribe(response => {
       console.log('Performa Invoice generated successfully:', response);
-      // Handle success (e.g., show a success message, navigate to another page, etc.)
     }, error => {
       console.error('Error generating Performa Invoice:', error);
-      // Handle error (e.g., show an error message)
+    });
+  }
+
+
+  getBillById(id: number) {
+    this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
+      next: (res) => {
+        console.log('Vehicle Sale Bill Details:', res);
+        this.saleBill= res;
+      },
+      error: (err) => {
+        console.error(err);
+      }
     });
   }
 }

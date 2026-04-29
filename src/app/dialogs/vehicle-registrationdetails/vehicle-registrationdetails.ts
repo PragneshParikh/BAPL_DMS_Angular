@@ -87,4 +87,19 @@ saveRow() {
 
   this.editChassisNo = null;
 }
+addRow() {
+  if (!this.selectedRow) return;
+
+  // update selected row immediately (temporary UI update)
+  this.selectedRow.chassisNo = this.model.chassisNo;
+  this.selectedRow.regNo = this.model.regNo;
+  this.selectedRow.regAmt = this.model.regAmount;
+  this.selectedRow.insNo = this.model.insNo;
+  this.selectedRow.insAmt = this.model.insAmount;
+  this.selectedRow.insStartDate = this.model.insStartDate;
+  this.selectedRow.insExpDate = this.model.insExpDate;
+
+  // optional: clear selection after update
+  this.selectedRow = null;
+}
 }

@@ -33,7 +33,7 @@
   <div class="row mb-2">
     <div class="col-6">
       <strong>Invoice No:</strong> <br>
-      <strong>Payment Mode:</strong> -
+      <strong>Payment Mode:</strong> -{{ saleBill?.saleType || 'N/A' }}
     </div>
     <div class="col-6 text-end">
       <strong>Invoice Date:</strong> {{ currentDate | date:'dd-MM-yyyy' }}<br>
