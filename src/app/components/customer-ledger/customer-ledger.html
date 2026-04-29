@@ -32,10 +32,12 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Ledger Code <span class="text-danger">*</span></label>
+                            <label class="form-label">Ledger Code <span class="text-danger"
+                                    *ngIf="!isLedgerCodeOptional()">*</span></label>
                             <input type="text" class="form-control form-control-sm" name="ledgerCode"
-                                #ledgerCode="ngModel" [(ngModel)]="formData.ledgerCode" required>
-                            @if (ledgerCode.invalid && ledgerCode.touched) {
+                                #ledgerCode="ngModel" [(ngModel)]="formData.ledgerCode"
+                                [required]="!isLedgerCodeOptional()">
+                            @if (ledgerCode.invalid && ledgerCode.touched && !isLedgerCodeOptional()) {
                             <small class="text-danger">
                                 Ledger Code is required
                             </small>
@@ -52,9 +54,10 @@
                             }
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Gender <span class="text-danger">*</span></label>
+                            <label class="form-label">Gender <span class="text-danger"
+                                    *ngIf="formData.ledgerType === 'Party'">*</span></label>
                             <select class="form-select form-select-sm" name="gender" [(ngModel)]="formData.gender"
-                                #gender="ngModel" required>
+                                #gender="ngModel" [required]="formData.ledgerType === 'Party'">
                                 <option *ngFor="let g of genders" [value]="g.value">
                                     {{ g.title }}
                                 </option>
@@ -104,7 +107,8 @@
                         <div class="col-md-3">
                             <label class="form-label">Mobile No <span class="text-danger">*</span></label>
                             <input type="text" class="form-control form-control-sm" name="mobile"
-                                [(ngModel)]="formData.mobileNumber" pattern="^[0-9]{10}$" required #mobile="ngModel">
+                                [(ngModel)]="formData.mobileNumber" maxlength="10" inputmode="numeric"
+                                (input)="sanitizeMobile($event)" #mobile="ngModel" required>
                             @if (mobile.invalid && mobile.touched) {
                             <small class="text-danger">
                                 Enter valid 10-digit mobile number
@@ -114,7 +118,13 @@
                         <div class="col-md-3">
                             <label class="form-label"> Email </label>
                             <input type="text" class="form-control form-control-sm" name="email"
-                                [(ngModel)]="formData.email" [(ngModel)]="formData.email" email #email="ngModel">
+                                [(ngModel)]="formData.email" pattern="^[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                                #email="ngModel">
+                            @if (email.invalid && email.touched && formData.email) {
+                            <small class="text-danger">
+                                Enter a valid email address
+                            </small>
+                            }
                         </div>
                         <div class="col-md-3">
                             <label class="form-label"> DOB </label>
@@ -133,7 +143,8 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">State</label>
-                            <select class="form-select form-select-sm" name="state" [(ngModel)]="formData.state">
+                            <select class="form-select form-select-sm" name="state" [(ngModel)]="formData.state"
+                                (change)="onStateChange($event)">
                                 <option *ngFor="let state of states" [value]="state.stateId">{{ state.stateName }}
                                 </option>
                             </select>
@@ -153,6 +164,33 @@
                                 PIN Code must be 6 digits
                             </small>
                             }
+                        </div>
+                    </div>
+
+                    <!-- Fifth Row -->
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <label class="form-label">Created By</label>
+                            <input type="text" class="form-control form-control-sm" name="createdBy"
+                                #createdBy="ngModel" [ngModel]="formData.createdBy | getUserNameById: lstUsers"
+                                readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Created DateTime</label>
+                            <input type="text" class="form-control form-control-sm" name="createdDate"
+                                #createdDate="ngModel" [ngModel]="formData.createdDate | date:'dd-MM-yyyy hh:mm:ss a'"
+                                readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Updated By</label>
+                            <input type="text" class="form-control form-control-sm" name="updateBy" #updateBy="ngModel"
+                                [ngModel]="formData.updatedBy | getUserNameById: lstUsers" readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Updated DateTime</label>
+                            <input type="text" class="form-control form-control-sm" name="updatedDate"
+                                #updatedDate="ngModel" [ngModel]="formData.updatedDate | date:'dd-MM-yyyy hh:mm:ss a'"
+                                readonly>
                         </div>
                     </div>
 

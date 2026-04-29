@@ -8,6 +8,7 @@ export enum AccessRoles {
 export const Gender = [
     { title: 'Male', value: 'male' },
     { title: 'Female', value: 'female' },
+    { title: 'Other', value: 'other' },
 ]
 
 export const TRANSACTION_TYPES = [
@@ -64,7 +65,8 @@ export const LedgerTypes = [
     { name: 'Financier', value: 'Financier' },
     { name: 'Institutional', value: 'Institutional' },
     { name: 'Insurance', value: 'Insurance' },
-    { name: 'Party', value: 'Party' }
+    { name: 'Party', value: 'Party' },
+    { name: 'Supplier', value: 'Supplier' }
 ]
 
 export const PrefixTypes = [
@@ -72,7 +74,6 @@ export const PrefixTypes = [
     { name: 'Purchase Order', value: 'Purchase Order' },
     { name: 'Quotation', value: 'Quotation' }
 ]
-
 
 export const SaleTypeOptions = [
     { name: 'Cash Sale', value: 'Cash' },
@@ -126,6 +127,17 @@ export const ErpOptions = [
     { name: 'Invoiced', value: 'Invoiced' },
     { name: 'Reserved', value: 'Reserved' },
     { name: 'Invalid', value: 'Invalid' }
+//     { name: 'Pending ERP Submission', value: 'Pending' }
+ ];
+
+export const RateTypes = [
+    { id: 1, title: 'Single' },
+    // { id: 2, title: 'Multi' }
+]
+
+export const DurationTypes = [
+    { id: 1, title: 'Month' },
+    { id: 2, title: 'Year' }
 ];
 
 export const OemmodelServiceSeq = [
