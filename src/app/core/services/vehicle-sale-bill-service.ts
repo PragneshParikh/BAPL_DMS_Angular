@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { VehicleSaleChasisRequest, VehicleSaleChasisResponse } from '../../ViewModels/VehicleSaleBill';
+import { UpdateSaleDetailsVM, VehicleSaleChasisRequest, VehicleSaleChasisResponse } from '../../ViewModels/VehicleSaleBill';
 import { VehicleSaleListChasisResponse } from '../../ViewModels/VehicleSaleChasisResponse';
 
 @Injectable({
@@ -76,7 +76,21 @@ getVehicleSaleBillById(id: number): Observable<any> {
 confirmInvoice(saleBillNo: string) {
   return this.http.put<boolean>(
     `${this.apiUrl}/VehicleSaleBill/ConfirmInvoice?saleBillNo=${saleBillNo}`,
-    null   // ✅ no body
+    null  
   );
 }
+
+updateRegistrationAndReserveChassis(
+    saleBillNo: string,
+    details: UpdateSaleDetailsVM[]
+  ): Observable<any> {
+
+    const params = new HttpParams().set('saleBillNo', saleBillNo);
+
+    return this.http.put(
+      `${this.apiUrl}/VehicleSaleBill/UpdateRegistrationAndReserveChassis`,
+      details,
+      { params }
+    );
+  }
 }

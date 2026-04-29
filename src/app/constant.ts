@@ -108,27 +108,24 @@ export const IssueTypes = [
     { name: 'Goodwill', value: 'goodwill' }
 ]
 
-export const userRole=[
-    {roleId:1, value:'SuperAdmin'},
-    {roleId:2, value:'Dealer'}
+export const userRole = [
+    { roleId: 1, value: 'SuperAdmin' },
+    { roleId: 2, value: 'Dealer' }
 ]
 
 // export const ErpOptions = [
 //     { name: 'Submitted to ERP', value: 'PushedToERP' },
 //     { name: 'Pending ERP Submission', value: 'Pending' },
-    
+
 // ];
 
- export const ERP_STATUS = {
-  PUSHED: 'PushedToERP',
-  PENDING: 'Pending',
-  ALLOTED: 'Alloted'
-} as const;
-
 export const ErpOptions = [
-  { name: 'Submitted to ERP', value: ERP_STATUS.PUSHED },
-  { name: 'Pending ERP Submission', value: ERP_STATUS.PENDING },
-  { name: 'Alloted', value: ERP_STATUS.ALLOTED }
+    { name: 'Submitted to ERP', value: 'PushedToERP' },
+    { name: 'Pending', value: 'Pending' },
+    { name: 'Alloted', value: 'Alloted' },
+    { name: 'Invoiced', value: 'Invoiced' },
+    { name: 'Reserved', value: 'Reserved' },
+    { name: 'Invalid', value: 'Invalid' }
 ];
 
 export const OemmodelServiceSeq = [
