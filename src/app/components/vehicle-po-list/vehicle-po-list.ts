@@ -2,15 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { VehiclePoListService } from '../../core/services/vehicle-po-list-service';
 import { TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
+import { ToastService } from '../../shared/toaster/toast-service';
 
 @Component({
   selector: 'app-vehicle-po-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbPaginationModule],
+  imports: [CommonModule, FormsModule, NgbPaginationModule, NgbTooltipModule],
   templateUrl: './vehicle-po-list.html',
   styleUrl: './vehicle-po-list.scss',
 })
@@ -35,7 +36,8 @@ export class VehiclePoList implements OnInit {
   constructor(
     private router: Router,
     private poListService: VehiclePoListService,
-    private loader: LoaderService
+    private loader: LoaderService,
+    private toastr: ToastService
   ) { }
 
   ngOnInit() {
@@ -204,6 +206,39 @@ export class VehiclePoList implements OnInit {
       return this.sortDirection === 'asc' ? 'sort-asc' : 'sort-desc';
     }
     return '';
+  }
+
+  downloadPurchaseOrderExcel() {
+    this.loader.show();
+    const filters = {
+      purchaseNo: this.purchaseNo,
+      dateFrom: this.dateFrom,
+      dateTo: this.dateTo,
+      transactionType: this.transactionType,
+      isSubmitted: this.isSubmitted
+    };
+
+    this.poListService.downloadPurchaseOrderExcel(filters).subscribe({
+      next: (response: Blob) => {
+        this.loader.hide();
+        const blob = new Blob([response], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'VehiclePurchaseOrders.xlsx';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.toastr.show('Excel downloaded successfully', { classname: 'bg-success text-white', delay: 5000 });
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error('Excel Download Error:', err);
+        this.toastr.show('Excel download failed', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
   }
 }
 

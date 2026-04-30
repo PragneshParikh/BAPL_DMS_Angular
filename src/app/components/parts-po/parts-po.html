@@ -304,7 +304,7 @@
                         <input type="text" class="form-control form-control-sm" placeholder="Enter Job Card No" 
                             [(ngModel)]="vorDetails.jobNo" (input)="onJobNoChange()" list="activeJobNoList">
                         <datalist id="activeJobNoList">
-                            <option *ngFor="let j of activeJobCards" [value]="j.jobNo">{{j.customerName}}</option>
+                            <option *ngFor="let j of activeJobCards" [value]="j.jobCardHeader?.jobNo">{{j.jobCardCustomer?.customerName}}</option>
                         </datalist>
                     </div>
                     <div class="col-md-3">
