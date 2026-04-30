@@ -8,6 +8,7 @@ export enum AccessRoles {
 export const Gender = [
     { title: 'Male', value: 'male' },
     { title: 'Female', value: 'female' },
+    { title: 'Other', value: 'other' },
 ]
 
 export const TRANSACTION_TYPES = [
@@ -64,7 +65,8 @@ export const LedgerTypes = [
     { name: 'Financier', value: 'Financier' },
     { name: 'Institutional', value: 'Institutional' },
     { name: 'Insurance', value: 'Insurance' },
-    { name: 'Party', value: 'Party' }
+    { name: 'Party', value: 'Party' },
+    { name: 'Supplier', value: 'Supplier' }
 ]
 
 export const PrefixTypes = [
@@ -72,7 +74,6 @@ export const PrefixTypes = [
     { name: 'Purchase Order', value: 'Purchase Order' },
     { name: 'Quotation', value: 'Quotation' }
 ]
-
 
 export const SaleTypeOptions = [
     { name: 'Cash Sale', value: 'Cash' },
@@ -108,27 +109,35 @@ export const IssueTypes = [
     { name: 'Goodwill', value: 'goodwill' }
 ]
 
-export const userRole=[
-    {roleId:1, value:'SuperAdmin'},
-    {roleId:2, value:'Dealer'}
+export const userRole = [
+    { roleId: 1, value: 'SuperAdmin' },
+    { roleId: 2, value: 'Dealer' }
 ]
 
 // export const ErpOptions = [
 //     { name: 'Submitted to ERP', value: 'PushedToERP' },
 //     { name: 'Pending ERP Submission', value: 'Pending' },
-    
+
 // ];
 
-export const ERP_STATUS = {
-  PUSHED: 'PushedToERP',
-  PENDING: 'Pending',
-  ALLOTED: 'Alloted'
-} as const;
-
 export const ErpOptions = [
-  { name: 'Submitted to ERP', value: ERP_STATUS.PUSHED },
-  { name: 'Pending ERP Submission', value: ERP_STATUS.PENDING },
-  { name: 'Alloted', value: ERP_STATUS.ALLOTED }
+    { name: 'Submitted to ERP', value: 'PushedToERP' },
+    { name: 'Pending', value: 'Pending' },
+    { name: 'Alloted', value: 'Alloted' },
+    { name: 'Invoiced', value: 'Invoiced' },
+    { name: 'Reserved', value: 'Reserved' },
+    { name: 'Invalid', value: 'Invalid' }
+//     { name: 'Pending ERP Submission', value: 'Pending' }
+ ];
+
+export const RateTypes = [
+    { id: 1, title: 'Single' },
+    // { id: 2, title: 'Multi' }
+]
+
+export const DurationTypes = [
+    { id: 1, title: 'Month' },
+    { id: 2, title: 'Year' }
 ];
 
 export const OemmodelServiceSeq = [
@@ -143,4 +152,13 @@ export const OemmodelServiceSeq = [
 export const OemmodelServiceFrom = [
     { Id: 1, value: 'Date of Purchase' },
     { Id: 2, value: 'Date of Sale' }
+]
+
+export const ModuleTypes = [
+    { name: 'counter_bill', moduleName: 'Counter Bill' },
+    { name: 'free_service_claim_invoice', moduleName: 'Free Service Claim Invoice' },
+    { name: 'warranty_claim_invoice', moduleName: 'Warranty Claim Invoice' },
+    { name: 'free_service_claim', moduleName: 'Free Service Claim' },
+    { name: 'CIR_investigation', moduleName: 'CIR Investigation' },
+    { name: 'purchase_order', moduleName: 'Purchase Order' }
 ]

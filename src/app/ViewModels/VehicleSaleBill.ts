@@ -99,3 +99,10 @@ export interface VehicleSaleChasisResponse {
   igstAmt: number;
   mfgYear: number;
 }
+
+export interface UpdateSaleDetailsVM {
+ ChassisNo :string;
+ RegisterNo : string;
+ SaleDate :Date;
+ InsuranceExpDate: Date; 
+}

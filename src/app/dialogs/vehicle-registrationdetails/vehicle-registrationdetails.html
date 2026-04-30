@@ -125,7 +125,10 @@
         </div>
       
     </div>
-
+<div class="d-flex justify-content-end mb-2">
+  <button class="btn btn-primary btn-sm" type="button" (click)="addRow()">
+  </button>
+</div>
     <div class="text-danger mt-2"
          *ngIf="registrationDetailsForm.invalid && registrationDetailsForm.submitted">
       Please fill all required fields.

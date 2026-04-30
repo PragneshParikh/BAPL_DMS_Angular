@@ -4,7 +4,7 @@ import { StorageService } from '../../../core/services/storage';
 import { LocationName, ReceiptEntryModel } from '../../../ViewModels/ReceiptEntryModel';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 import { CommonModule } from '@angular/common';
-import { BillFromOptions, BillingTypeOptions, CashTypeOptions, ERP_STATUS, SaleTypeOptions } from '../../../constant';
+import { BillFromOptions, BillingTypeOptions, CashTypeOptions, ErpOptions, SaleTypeOptions } from '../../../constant';
 import { ReceiptEntryService } from '../../../core/services/receipt-entry-service';
 import { LedgerMaster } from '../../../ViewModels/LedgerMasterViewModel';
 import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
@@ -16,6 +16,8 @@ import { Router } from '@angular/router';
 import { CustomerLedger } from '../../customer-ledger/customer-ledger';
 import { VehicleSaleListChasisResponse } from '../../../ViewModels/VehicleSaleChasisResponse';
 import { VehicleRegistrationdetails } from '../../../dialogs/vehicle-registrationdetails/vehicle-registrationdetails';
+import { VehicleSaleBillResponseViewModel } from '../../../ViewModels/VehicleSaleBill';
+import { text } from 'stream/consumers';
 
 
 @Component({
@@ -36,6 +38,7 @@ export class AddVehicleSaleBill implements OnInit {
   chassisList: VehicleSaleListChasisResponse[] = [];
   erpStatus: any;
   isErpLocked: boolean;
+  isInvoiced: boolean;
 
   /**
    *
@@ -56,7 +59,6 @@ export class AddVehicleSaleBill implements OnInit {
   vehicleList: any[] = [];
   editingIndex: number = -1;
   billId: number | null = null;
-
   isSubmitted: boolean = false;
   page = 1;
   pageSize = 10;
@@ -68,7 +70,7 @@ export class AddVehicleSaleBill implements OnInit {
   financiers: LedgerMaster[] = [];
   parties: LedgerMaster[] = [];
   filteredParties: LedgerMaster[] = [];
-  ERP_STATUS = ERP_STATUS;
+  ERP_STATUS = ErpOptions;
   today = new Date().toISOString().split('T')[0];
   model = {
     itemCode: '',
@@ -214,7 +216,7 @@ export class AddVehicleSaleBill implements OnInit {
     this.vehicleList = bill.details.map((d: any) => ({
 
       chassisNo: d.chassisNo,
-      model: d.itemName || d.modelName || '',
+      modelName: d.itemName || d.modelName || '',
       colour: d.colour || '',
       mfgYear: d.mfgYear || '',
       insNo: d.insNo || '',
@@ -296,6 +298,15 @@ export class AddVehicleSaleBill implements OnInit {
         this.erpStatus = res.erpStatus || '';
         this.isErpLocked =
         this.erpStatus.toLowerCase() === 'pushedtoerp';
+        if(this,this.erpStatus.toLowerCase() === 'invalid') {
+          this.toaster.show('The chassis alocated with this bill has been sold out.Please realocate the chassis and try again.',
+            {
+              classname: 'bg-warning text-white',
+              delay: 10000
+            }
+          );
+        }
+        this.isInvoiced = this.erpStatus.toLowerCase() === 'invoiced';
         
         // Load chassis FIRST, then bind bill
         this.loadChassisList(() => {
@@ -623,6 +634,7 @@ this.model.finalAmount = this.getGrandTotal();
     });
   }
   buildPayload() {
+console.log(this.vehicleList,"Vehicle List");
 
     return {
       saleDate: new Date(),
@@ -652,7 +664,8 @@ this.model.finalAmount = this.getGrandTotal();
       refEmail: '',
       refPoint: 0,
       refRemarks: '',
-      erpStatus: !this.billId ? ERP_STATUS.ALLOTED : '',
+      erpStatus: !this.billId ? 'Pending' : '',
+      dealerCode:this.storageService.getDealerCode(),
 
 
       totalAmount: this.model.finalAmount,
@@ -689,7 +702,7 @@ this.model.finalAmount = this.getGrandTotal();
         InsStartDate: v.insStartDate || null,
         InsExpDate: v.insExpDate || null,
 
-        ModelName: v.modelName || v.itemName || '',
+        ModelName: v.modelName || v.itemName || v.model || '',
         Colour: v.colour || '',
         itemCode: v.itemCode || '',
         Battery: v.battery || '',
@@ -1092,6 +1105,24 @@ printDeliveryCertificate() {
         saleDate: this.model.saleDate,
         deliveryDate: new Date()
       }
+    }
+  });
+}
+
+navigateToPerformaInvoice() {
+  this.model.erpstatus = 'Alloted';
+  this.updateVehicleSaleBill();
+  this.router.navigate(['add-vehicle-sale-bill/performaInvoice', this.model.saleBillNo]);
+}
+
+//To be modified later based on API response
+connfirmInvoiceGeneration(){
+  this.vehicleSaleBillService.confirmInvoice(this.model.saleBillNo).subscribe({
+    next:()=>{
+      this.toaster.show('Invoice Generated Successfully', { classname: 'bg-success text-light', delay: 3000 });
+    },
+    error:()=>{
+      this.toaster.show('Failed to Generate Invoice', { classname: 'bg-danger text-light', delay: 3000 });
     }
   });
 }

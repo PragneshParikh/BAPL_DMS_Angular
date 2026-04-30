@@ -8,46 +8,36 @@ import { environment } from '../../../environments/environment';
 })
 export class OemmodelMasterService {
 
-  // API Base URL
-  // private apiUrl = `${environment.apiUrl}/OEMModelMaster`;
-  private apiUrl = environment.apiUrl;
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 
   // Get All OEM Models
   getAllOEMModels(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/OEMModelMaster/GetAllOEMModels`);
+    return this.http.get(`${this.baseUrl}/OEMModelMaster/GetAllOEMModels`);
   }
 
   // Save / Insert OEM Model
   AddOEMModel(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/OEMModelMaster/AddOEMModel`, data);
+    return this.http.post(`${this.baseUrl}/OEMModelMaster/AddOEMModel`, data);
   }
-
-  // // Update OEM Model
-  // updateOEMModel(data: any): Observable<any> {
-  //   return this.http.put(`${this.apiUrl}/UpdateOEMModel`, data);
-  // }
 
   // Delete OEM Model
   deleteOEMModel(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/OEMModelMaster/DeleteOEMModel/${id}`);
+    return this.http.delete(`${this.baseUrl}/OEMModelMaster/DeleteOEMModel/${id}`);
   }
 
   // Excel Download
   downloadOEMModelExcel(): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/OEMModelMaster/downloadOEMModelExcel`, {
-      responseType: 'blob'
-    });
+    return this.http.get(`${this.baseUrl}/OEMModelMaster/downloadOEMModelExcel`, { responseType: 'blob' });
   }
+
   updateOEMModel(data: any) {
+    return this.http.put(`${this.baseUrl}/OEMModelMaster/UpdateOEMModel`, data, { responseType: 'text' });
+  }
 
-    return this.http.put(
-      `${this.apiUrl}/OEMModelMaster/UpdateOEMModel`,
-      data,
-      { responseType: 'text' }
-    );
-
+  getOEMModelByStatus(status: boolean): Observable<any> {
+    return this.http.get(`${this.baseUrl}/OEMModelMaster/GetOEMModelByStatus/${status}`);
   }
 
 

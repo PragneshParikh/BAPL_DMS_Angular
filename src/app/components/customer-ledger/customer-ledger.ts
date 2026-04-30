@@ -1,6 +1,5 @@
 import { Component, Input, OnInit, Optional } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { error } from 'console';
 import { LedgerMaster } from '../../core/services/ledger-master';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoaderService } from '../../core/services/loader';
@@ -11,15 +10,18 @@ import { CommonModule } from '@angular/common';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { CityService } from '../../core/services/city';
 import { StateService } from '../../core/services/state';
-
+import { StorageService } from '../../core/services/storage';
+import { AuthenticationService } from '../../core/services/auth.service';
+import { GetUserNameByIdPipe } from '../../core/pipe/get-user-name-by-id-pipe';
 
 @Component({
   selector: 'app-customer-ledger',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, GetUserNameByIdPipe],
   templateUrl: './customer-ledger.html',
   styleUrl: './customer-ledger.scss',
 })
 export class CustomerLedger {
+  optionalLedgerTypes = ['Party', 'Institution', 'Financier', 'Insurance'];
   genders = Gender
   ledgerTypes = LedgerTypes;
   formData = {
@@ -36,17 +38,21 @@ export class CustomerLedger {
     state: '',
     pin: '',
     email: '',
-    gender: '',
+    gender: 'female',
     dateOfBirth: '',
     createdBy: '1',
-    createdDate: new Date()
+    createdDate: new Date(),
+    updatedBy: null,
+    updatedDate: null
   };
 
   public isModify = false;
   isExternalCall: boolean;
 
+  _cities: any[] = [];
   cities: any[] = [];
   states: any[] = [];
+  lstUsers: any[] = [];
 
   constructor(
     private ledgerService: LedgerMaster,
@@ -56,6 +62,8 @@ export class CustomerLedger {
     private router: Router,
     private cityService: CityService,
     private stateService: StateService,
+    private storageService: StorageService,
+    private authService: AuthenticationService,
     @Optional() public activeModal: NgbActiveModal
   ) {
     this.activatedRoute.paramMap.subscribe(params => {
@@ -65,12 +73,14 @@ export class CustomerLedger {
         this.getCustomerLedgerDetails(id);
       }
     });
+    this.formData.createdBy = this.storageService.getDealerCode();
   }
   @Input() ledgerId!: number;
   @Input() defaultLedgerType: string = '';
 
   ngOnInit() {
 
+    this.getUserList();
     this.getCity();
     this.getState();
 
@@ -99,7 +109,7 @@ export class CustomerLedger {
   }
 
   getCustomerLedgerDetails(id: any) {
-    // this.loader.show();
+    this.loader.show();
     this.ledgerService.getLedgerById(id).subscribe({
       next: (res) => {
         this.formData = {
@@ -119,7 +129,9 @@ export class CustomerLedger {
           gender: res.gender,
           dateOfBirth: res.dateOfBirth,
           createdBy: res.createdBy,
-          createdDate: res.createdDate
+          createdDate: res.createdDate,
+          updatedBy: res.updatedBy,
+          updatedDate: res.updatedDate,
         }
         this.loader.hide();
       }, error: (err) => {
@@ -129,6 +141,17 @@ export class CustomerLedger {
           classname: 'bg-danger text-white',
           delay: 5000
         });
+      }
+    });
+  }
+
+  getUserList() {
+    this.authService.getUserList().subscribe({
+      next: (res) => {
+        this.lstUsers = res;
+      },
+      error: (err) => {
+        console.error(err);
       }
     });
   }
@@ -156,6 +179,7 @@ export class CustomerLedger {
           if (this.activeModal) {
             this.activeModal.close(newId);
           }
+          this.router.navigate(['/customer-ledger']);
         },
         error: (err) => {
           console.error(err);
@@ -187,7 +211,7 @@ export class CustomerLedger {
   getCity() {
     this.cityService.get().subscribe({
       next: (res) => {
-        this.cities = res;
+        this._cities = res;
       },
       error: (err) => {
 
@@ -204,6 +228,26 @@ export class CustomerLedger {
 
       }
     });
+  }
+
+  isLedgerCodeOptional(): boolean {
+    return this.optionalLedgerTypes.includes(this.formData.ledgerType);
+  }
+
+  sanitizeMobile(event: any) {
+    let value = event.target.value;
+
+    value = value.replace(/[^0-9]/g, '');
+
+    value = value.slice(0, 10);
+
+    event.target.value = value;
+    this.formData.mobileNumber = value;
+  }
+
+  onStateChange(event: any) {
+    const selectedStateId = event.target.value;
+    this.cities = this._cities.filter(x => x.stateId === Number(selectedStateId));
   }
 
 

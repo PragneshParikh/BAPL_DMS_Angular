@@ -59,7 +59,7 @@
                                 <tbody>
                                     <tr *ngFor="let sequence of sequenceList;" class="table-row"
                                         (click)="onSequenceClick(sequence)">
-                                        <td>{{ sequence?.sequenceName }}</td>
+                                        <td>{{ sequence?.sequenceName | getPrefixModuleName: lstModule }}</td>
                                         <td>{{ sequence?.sequenceCode }}</td>
                                         <td>{{ sequence?.nextNo }}</td>
                                         <td>{{ sequence?.dealerCode }}</td>
