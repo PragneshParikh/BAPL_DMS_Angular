@@ -1,0 +1,34 @@
+.table-bgColor  > tr>th{
+    background-color: #747CA0;
+    color: #ffff;
+}
+table th {
+  white-space: nowrap;
+}
+.modal-header{
+  background-color: #747CA0;  
+}
+.modal-title{
+  color: #ffff;
+}
+.btn-close-white {
+color: white;
+}
+.form-switch .form-check-input {
+    width: 2em;
+    margin-left: -2.5em;
+    background-position: left center;
+    border-radius: 2em;
+    transition: background-position 0.15s ease-in-out;
+    margin-top: 35px;
+}
+.form-label-isactive{
+  width: 2em;
+    
+    background-position: left center;
+    border-radius: 2em;
+    transition: background-position 0.15s ease-in-out;
+    margin-top: 35px;
+}
+
+

@@ -187,21 +187,21 @@ export class PartsPo implements OnInit {
     }
 
     const job = this.activeJobCards.find(j => 
-      (j.jobNo || '').toString().trim() === this.vorDetails.jobNo.toString().trim()
+      (j.jobCardHeader?.jobNo || '').toString().trim() === this.vorDetails.jobNo.toString().trim()
     );
 
     if (job) {
       this.vorDetails = {
-        jobNo: job.jobNo,
-        chassisNo: job.chassisNo || '',
-        registerNo: job.registerNo || '',
-        engineNo: job.engineNo || '',
+        jobNo: job.jobCardHeader?.jobNo,
+        chassisNo: job.jobCardCustomer?.chassisNo || '',
+        registerNo: job.jobCardCustomer?.registerNo || '',
+        engineNo: job.jobCardCustomer?.engineNo || '',
         jobType: job.jobtype || '',
         serviceHead: job.serviceHead || '',
         serviceType: job.serviceType || '',
-        partyName: job.customerName || '',
-        mobileNo: job.mobileNo || '',
-        modelNo: job.modelName || ''
+        partyName: job.jobCardCustomer?.customerName || '',
+        mobileNo: job.jobCardCustomer?.customerMobile || '',
+        modelNo: job.jobCardCustomer?.modelName || ''
       };
     } else {
       // Keep JobNo but clear other fields if not found in active list
@@ -259,6 +259,42 @@ export class PartsPo implements OnInit {
       const selectedKit = this.kitList.find(k => k.id === Number(this.currentItem.partNo) || k.kitName === this.currentItem.partNo);
       if (selectedKit) {
         this.currentItem.description = selectedKit.kitName || '';
+        this.currentItem.qty = 1; // Default kit qty to 1
+
+        this.loader.show();
+        this.kitDetailService.getKitDetailsByKitHeaderId(this.currentItem.partNo).subscribe({
+          next: (res: any) => {
+            this.loader.hide();
+            const details = Array.isArray(res) ? res : (res?.data || []);
+            let totalRate = 0;
+            
+            details.forEach((det: any) => {
+              const qty = det.quantity || 0;
+              let rate = det.item?.ipurrate || det.rate || 0;
+              
+              // Fallback to Item Master if rate is missing
+              if (!rate || rate === 0) {
+                const itemCode = det.item?.itemcode || det.itemcode || det.itemName;
+                const masterItem = this.modelList.find(m => 
+                  m.id === det.itemId || 
+                  (m.itemcode || '').trim().toUpperCase() === (itemCode || '').trim().toUpperCase()
+                );
+                if (masterItem) {
+                  rate = Number(masterItem.ipurrate || masterItem.Ipurrate || 0);
+                }
+              }
+              
+              totalRate += (qty * rate);
+            });
+
+            this.currentItem.rate = totalRate;
+            this.calculateRowTotals();
+          },
+          error: (err) => {
+            this.loader.hide();
+            console.error('Error fetching kit details for rate calculation', err);
+          }
+        });
       }
       return;
     }
@@ -392,6 +428,11 @@ export class PartsPo implements OnInit {
     }
 
     if (this.isKit) {
+      if (this.currentItem.qty > 1) {
+        this.toaster.show('Only 1 kit can be purchased at a time.', { classname: 'bg-danger text-white', delay: 3000 });
+        return;
+      }
+
       // Fetch kit details and expand them
       this.loader.show();
       this.kitDetailService.getKitDetailsByKitHeaderId(this.currentItem.partNo).subscribe({
@@ -404,12 +445,35 @@ export class PartsPo implements OnInit {
             return;
           }
 
+          const kitItems: any[] = [];
+          const zeroParts: string[] = [];
+
           details.forEach((det: any) => {
             const rawSgst = det.item?.sgst || 0;
             const rawCgst = det.item?.cgst || 0;
             const rawIgst = det.item?.igst || 0;
             const qty = det.quantity || 0;
-            const rate = det.item?.ipurrate || det.rate || 0;
+
+            let rate = det.item?.ipurrate || det.rate || 0;
+            // Fallback to Item Master if rate is missing
+            if (!rate || rate === 0) {
+              const itemCode = det.item?.itemcode || det.itemcode || det.itemName;
+              const masterItem = this.modelList.find(m =>
+                m.id === det.itemId ||
+                (m.itemcode || '').trim().toUpperCase() === (itemCode || '').trim().toUpperCase()
+              );
+              if (masterItem) {
+                rate = Number(masterItem.ipurrate || masterItem.Ipurrate || 0);
+              }
+            }
+
+            const partDesc = det.itemDescription || det.item?.itemdesc || det.itemName || 'Unknown';
+
+            // Collect parts with zero rate for validation
+            if (!rate || rate === 0) {
+              zeroParts.push(partDesc);
+            }
+
             const taxable = qty * rate;
 
             // Determine interstate flag from selected location/transaction type
@@ -436,9 +500,9 @@ export class PartsPo implements OnInit {
               }
             }
 
-            const kitItem = {
+            kitItems.push({
               partNo: det.itemName || det.item?.itemcode || det.itemcode || det.itemId,
-              description: det.itemDescription || det.item?.itemdesc || det.description || det.itemName || '',
+              description: partDesc,
               qty: qty,
               rate: rate,
               mrp: det.item?.mrp || 0,
@@ -452,10 +516,16 @@ export class PartsPo implements OnInit {
               rawIgstRate: rawIgst,
               itemType: det.item?.itemtype || 1,
               fromKit: true
-            };
-
-            this.purchaseDetails.push(kitItem);
+            });
           });
+
+          // Block if any kit item has zero rate
+          if (zeroParts.length > 0) {
+            this.toaster.show(`Rate is 0 for: ${zeroParts.join(', ')}. Kit not added.`, { classname: 'bg-danger text-white', delay: 6000 });
+            return;
+          }
+
+          kitItems.forEach(k => this.purchaseDetails.push(k));
 
           this.resetCurrentItem();
           this.loadPage();
