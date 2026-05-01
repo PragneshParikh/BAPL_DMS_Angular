@@ -85,7 +85,7 @@
                         <div class="w-100">
                             <label class="form-label mb-0 small">Party Balance</label>
                             <div class="input-group input-group-sm">
-                                <input type="text" class="form-control" value="0.00">
+                                <input type="text" class="form-control" value="0.00" [disabled]="true">
                                 <span class="input-group-text">0.00</span>
                             </div>
                         </div>
@@ -97,8 +97,7 @@
                         <label class="form-label mb-0 small">Transaction Type</label>
                         <select class="form-select form-select-sm border-start border-2"
                             [class.is-invalid]="transactionTypeInvalid" [(ngModel)]="selectedTransactionType"
-                            (change)="transactionTypeInvalid = false" [disabled]="isSubmitted">
-                            <option value="">--Select--</option>
+                            (change)="onChangeTransactionType($event)" [disabled]="isSubmitted">
                             <option *ngFor="let type of transactionTypeList" [value]="type.type">
                                 {{type.name}}
                             </option>
@@ -335,7 +334,8 @@
                                     </tr>
                                 </tbody>
                                 <tfoot *ngIf="purchaseDetails.length > 0">
-                                    <tr style="background-color: #f8f9fa; font-weight: 600; border-top: 2px solid #dee2e6;">
+                                    <tr
+                                        style="background-color: #f8f9fa; font-weight: 600; border-top: 2px solid #dee2e6;">
                                         <td colspan="5" class="text-end pe-3 text-dark">Total</td>
                                         <td class="text-center text-dark">{{totalQty}}</td>
                                         <td class="text-end text-dark"></td>

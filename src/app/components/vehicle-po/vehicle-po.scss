@@ -3,5 +3,21 @@ table>thead>tr>th {
   color: #ffffff;
 }
 
+::ng-deep{
 
+    .swal-compact .swal2-icon {
+      width: 30px !important;
+      height: 30px !important;
+      margin: 5px auto !important; 
+      border-width: 2px !important;
 
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .swal-compact .swal2-icon-content {
+      font-size: 14px !important; 
+      line-height: 1 !important;
+    }
+}

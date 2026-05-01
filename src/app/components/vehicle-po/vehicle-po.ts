@@ -807,4 +807,42 @@ export class VehiclePO implements OnInit {
   redirectToCreatePOList() {
     this.router.navigate(['/vehicle-po-list']);
   }
+
+  onChangeTransactionType(event: any) {
+    if (!event) return;
+
+    const newValue = event.target.value;
+    if (newValue === 'B2B') {
+      this.openConfirmationDialog(event);
+    } else {
+
+    }
+  }
+
+  openConfirmationDialog(event: any) {
+    Swal.fire({
+      title: 'Are you sure you want to make the order for B2B?',
+      text: '',
+      icon: 'warning',
+      width: '320px',
+      padding: '1rem',
+      confirmButtonText: 'Yes',
+      buttonsStyling: false,
+      allowOutsideClick: false,
+      showCancelButton: true,
+      showCloseButton: false,
+      customClass: {
+        popup: 'swal-compact',
+        title: 'fs-6',          // smaller title
+        htmlContainer: 'fs-7',  // smaller text
+        confirmButton: 'btn btn-sm btn-primary me-2',
+        cancelButton: 'btn btn-sm btn-danger'
+      }
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        event.target.value = '';
+      }
+    });
+  }
+
 }
