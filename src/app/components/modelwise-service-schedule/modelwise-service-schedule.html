@@ -68,7 +68,7 @@
 
             <tbody>
 
-              <tr *ngFor="let item of scheduleList">
+              <tr *ngFor="let item of pagedList">
 
                 <td>{{item.srNo}}</td>
                 <td>{{item.modelName}}</td>
@@ -96,6 +96,17 @@
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="row justify-content-md-center align-items-md-center">
+          <!-- Pagination -->
+          <div class="col-sm-12 col-md-12">
+            <div class="text-md-right float-md-end gridjs-pagination">
+              <ngb-pagination [(page)]="page" [pageSize]="pageSize" [collectionSize]="collectionSize" (pageChange)="pageChange($event)">
+              </ngb-pagination>
+              
+            </div>
+          </div>
+          <!-- End Pagination -->
         </div>
       </div>
     </div>
