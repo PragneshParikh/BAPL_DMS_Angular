@@ -24,10 +24,7 @@
                         <div class="mb-3">
                             <label class="form-label mb-0">API Unique</label>
                             <select class="form-select form-select-sm mb-3" [(ngModel)]="selectedEndPoint">
-                                <option selected>Open this select menu</option>
-                                <option value="color">Color</option>
-                                <option value="dealermaster">Dealer</option>
-                                <option value="hsncodemaster">HSNCodeMaster</option>
+                                <option *ngFor="let api of apiUniques" [value]="api.value">{{api.name}}</option>
                             </select>
                         </div>
                     </div>
