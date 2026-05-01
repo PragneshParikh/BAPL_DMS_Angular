@@ -8,15 +8,27 @@ import { PrefixService } from '../../core/services/prefix';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
 import { StorageService } from '../../core/services/storage';
+import { ModuleTypes } from '../../constant';
+import { GetPrefixModuleNamePipe } from '../../core/pipes/get-prefix-module-name-pipe';
 
 @Component({
   selector: 'app-prefix-master',
-  imports: [RouterOutlet, CommonModule, NgbPaginationModule, NgbTooltipModule, ReactiveFormsModule, FormsModule, SharedModule, RouterOutlet],
+  imports: [
+    RouterOutlet,
+    CommonModule,
+    NgbPaginationModule,
+    NgbTooltipModule,
+    ReactiveFormsModule,
+    FormsModule,
+    SharedModule,
+    RouterOutlet,
+    GetPrefixModuleNamePipe
+  ],
   templateUrl: './prefix-master.html',
   styleUrl: './prefix-master.scss',
 })
 export class PrefixMaster implements OnInit {
-
+  lstModule = ModuleTypes;
   public searchTerm: string = '';
   sequenceList: any[] = [];
 
@@ -47,7 +59,8 @@ export class PrefixMaster implements OnInit {
   }
 
   onSearchChange() {
-
+    this.page = 1
+    this.loadSequences();
   }
 
   onSort(column: string) {

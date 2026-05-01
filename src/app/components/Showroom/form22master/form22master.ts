@@ -189,6 +189,7 @@ export class Form22master implements OnInit {
           });
 
           this.loader.hide();
+          this.loadForm22Items();
           setTimeout(() => {
             modal.close();   // this will close popup
           }, 1000); // 1 sec delay

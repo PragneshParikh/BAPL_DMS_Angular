@@ -32,6 +32,7 @@ import { CityMaster } from './components/city-master/city-master';
 import { AddCityMaster } from './components/city-master/add-city-master/add-city-master';
 import { ModelwiseServiceSchedule } from './components/modelwise-service-schedule/modelwise-service-schedule';
 import { PdiChecklistmaster } from './components/pdi-checklistmaster/pdi-checklistmaster';
+import { PerformaInvoice } from './components/Reports/performa-invoice/performa-invoice';
 
 
 export const routes: Routes = [
@@ -109,6 +110,12 @@ export const routes: Routes = [
         { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
         { path: 'pdiChecklistmaster', component: PdiChecklistmaster, data: [36] }
 
+      { path: 'city-master/add', component: AddCityMaster, data: [19] },
+      { path: 'city-master/edit/:id', component: AddCityMaster, data: [19] },
+      { path: 'extended-battery-warranty', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty-list/extended-battery-warranty-list').then(m => m.ExtendedBatteryWarrantyList) },
+      { path: 'extended-battery-warranty/:id', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty').then(m => m.ExtendedBatteryWarranty) },
+      { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
+      { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] }
     ]
   }
 ];

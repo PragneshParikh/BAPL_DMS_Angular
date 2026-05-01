@@ -69,7 +69,7 @@ export class JobSearch {
       error: (err) => {
         this.loader.hide();
         console.error(err);
-        this.toast.show('Something went wrong.', { className: 'bg-danger text-white', delay: 5000 });
+        this.toast.show('Something went wrong.', { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
   }

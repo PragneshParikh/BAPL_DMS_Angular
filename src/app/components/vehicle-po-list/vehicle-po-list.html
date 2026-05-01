@@ -59,8 +59,12 @@
                     <button class="btn btn-primary btn-sm me-1" (click)="onSearch()">
                         <i class="align-bottom me-1"></i> Search
                     </button>
+
                     <button class="btn btn-primary btn-sm ms-2" (click)="redirectToCreatePO()">
                         <i class="align-bottom me-1"></i> Add
+                    </button>
+                     <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'" (click)="downloadPurchaseOrderExcel()">
+                        <i class="ri-file-excel-2-line"></i>
                     </button>
                 </div>
             </div>
@@ -86,8 +90,8 @@
                             <th class="sort" [ngClass]="getSortClass('partyName')" (click)="sort('partyName')">Party
                                 Name</th>
                             <th>Location</th>
-                            <th class="sort" [ngClass]="getSortClass('modelName')" (click)="sort('modelName')">Model
-                                Name</th>
+                            <!-- <th class="sort" [ngClass]="getSortClass('modelName')" (click)="sort('modelName')">Model
+                                Name</th> -->
                             <!-- <th>Color</th> -->
                             <!-- <th>Order Qty</th> -->
                             <th>Order Amount</th>
@@ -106,7 +110,7 @@
                             <!-- <td>{{po.isSupplier}}</td> -->
                             <td>{{po.partyName}}</td>
                             <td>{{po.location}}</td>
-                            <td>{{po.modelName}}</td>
+                            <!-- <td>{{po.modelName}}</td> -->
                             <!-- <td>{{po.color}}</td> -->
                             <!-- <td>{{po.orderQty}}</td> -->
                             <td>{{po.orderAmount}}</td>

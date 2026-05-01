@@ -1,0 +1,204 @@
+<div class="a4-page mx-auto bg-white p-4 shadow-sm" id="reportContent">
+
+  <!-- HEADER -->
+  <div class="text-center border-bottom pb-2 mb-2">
+  <h4 class="mb-0 fw-bold">{{ dealer?.compname }}</h4>
+
+  <small *ngIf="dealer">
+    {{ dealer?.adress1 }}<br>
+    {{ dealer?.adress2 }}<br>
+
+    {{ dealer?.city }} - {{ dealer?.pin }}<br>
+    {{ dealer?.state }}<br>
+
+    <span *ngIf="dealer?.mobile">
+      Phone: {{ dealer?.mobile }}
+    </span>
+
+    <span *ngIf="dealer?.email">
+      | Email: {{ dealer?.email }}
+    </span>
+
+    <br>
+
+    <span >
+      GSTIN: {{ dealer?.compgstinNo }}
+    </span>
+  </small>
+</div>
+
+  <h5 class="text-center fw-bold border-bottom pb-1">Performa Invoice</h5>
+
+  <!-- TOP INFO -->
+  <div class="row mb-2">
+    <div class="col-6">
+      <strong>Invoice No:</strong> <br>
+      <strong>Payment Mode:</strong> -{{ saleBill?.saleType || 'N/A' }}
+    </div>
+    <div class="col-6 text-end">
+      <strong>Invoice Date:</strong> {{ currentDate | date:'dd-MM-yyyy' }}<br>
+      <strong>Service Type:</strong> Accidental
+    </div>
+  </div>
+
+  <!-- DETAILS -->
+ <div class="row border p-2 mb-2">
+
+  <!-- INSURANCE -->
+  <div class="col-6 pe-2 border-end">
+    <div class="fw-bold mb-1">Insurance Details</div>
+
+    <div class="row">
+      <div class="col-5 text-muted">Company</div>
+      <div class="col-7">ICICI Lombard</div>
+    </div>
+
+    <div class="row">
+      <div class="col-5 text-muted">GSTIN</div>
+      <div class="col-7">07AAACI7904G1ZP</div>
+    </div>
+
+    <div class="row">
+      <div class="col-5 text-muted">Location</div>
+      <div class="col-7">New Delhi</div>
+    </div>
+  </div>
+
+  <!-- VEHICLE -->
+  <div class="col-6 ps-2">
+    <div class="fw-bold mb-1">Vehicle Details</div>
+
+    <div class="row">
+      <div class="col-5 text-muted">Model</div>
+      <div class="col-7">{{ variant }}</div>
+    </div>
+
+    <div class="row">
+      <div class="col-5 text-muted">Reg No</div>
+      <div class="col-7">GJ05UA1274</div>
+    </div>
+
+    <div class="row">
+      <div class="col-5 text-muted">VIN</div>
+      <div class="col-7">{{ vinNo }}</div>
+    </div>
+
+    <div class="row">
+      <div class="col-5 text-muted">Engine</div>
+      <div class="col-7">{{ motorSerialNo }}</div>
+    </div>
+
+  </div>
+
+</div>
+
+  <!-- PARTY -->
+  <div class="border p-2 mb-2">
+    <strong>Party Details</strong><br>
+    Rana Brijal Nareshkumar<br>
+    8866183929<br>
+    Surat, Gujarat
+  </div>
+
+  <!-- TABLE -->
+  <table class="table table-bordered text-sm">
+    <thead class="table-light">
+      <tr>
+        <th>Sr</th>
+        <th>Description</th>
+        <th>HSN</th>
+        <th>Rate</th>
+        <th>Qty</th>
+        <th>Taxable</th>
+        <th>GST</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <!-- PARTS -->
+      <tr class="fw-bold">
+        <td colspan="8">Parts</td>
+      </tr>
+
+      <tr>
+        <td>1</td>
+        <td>Brake Lever Assembly</td>
+        <td>87141090</td>
+        <td>910.17</td>
+        <td>1</td>
+        <td>910.17</td>
+        <td>163.83</td>
+        <td>1073.99</td>
+      </tr>
+
+      <tr>
+        <td>2</td>
+        <td>Cover Bottom</td>
+        <td>87141090</td>
+        <td>578.81</td>
+        <td>1</td>
+        <td>578.81</td>
+        <td>104.18</td>
+        <td>683.00</td>
+      </tr>
+
+      <!-- SUBTOTAL -->
+      <tr class="fw-bold">
+        <td colspan="5" class="text-end">Sub Total Parts</td>
+        <td>2383.05</td>
+        <td>428.94</td>
+        <td>2812.00</td>
+      </tr>
+
+      <!-- LABOUR -->
+      <tr class="fw-bold">
+        <td colspan="8">Labour</td>
+      </tr>
+
+      <tr>
+        <td>3</td>
+        <td>Brake Lever Replacement</td>
+        <td>998729</td>
+        <td>240</td>
+        <td>1</td>
+        <td>240</td>
+        <td>43.2</td>
+        <td>283.2</td>
+      </tr>
+
+      <tr class="fw-bold">
+        <td colspan="5" class="text-end">Sub Total Labour</td>
+        <td>260</td>
+        <td>46.8</td>
+        <td>306.8</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- TOTAL -->
+  <div class="row mt-3">
+    <div class="col-6">
+      <strong>Amount in words:</strong><br>
+      Three Thousand One Hundred Nineteen Only
+    </div>
+
+    <div class="col-6 text-end">
+      <p>Discount: 0.00</p>
+      <p>Round Off: 0.20</p>
+      <h5 class="fw-bold">Total: ₹ 3,119.00</h5>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="row mt-5">
+    <div class="col-6">Customer Signature</div>
+    <div class="col-6 text-end">Authorized Signatory</div>
+  </div>
+
+  <p class="text-center mt-3">THANKS VISIT AGAIN</p>
+ <button class=" btn btn-primary " (click)="savePerformaInvoice()">
+               
+                Confirm
+            </button>
+</div>

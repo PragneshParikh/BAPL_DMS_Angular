@@ -27,4 +27,8 @@ export class PrefixService {
   saveSequence(sequence: any) {
     return this.httpClient.post(`${this.baseUrl}/prefix`, sequence);
   }
+
+  saveSequenceForDealers(sequence: any) {
+    return this.httpClient.post(`${this.baseUrl}/prefix/AddPrefixForDealers`, sequence);
+  }
 }
