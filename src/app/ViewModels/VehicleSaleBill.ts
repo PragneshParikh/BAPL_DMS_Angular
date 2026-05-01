@@ -45,6 +45,7 @@ export interface SaleModel {
 }
 
 export interface VehicleSaleBillDetailVM {
+  id: number;
   chassisNo: string;
   itemRate: number;
   preGstDiscount: number;
@@ -73,6 +74,10 @@ export interface VehicleSaleBillResponseViewModel {
   referralName: string;
   billType: string;
   financier?: string;
+  salesExecutive?: string;
+  isD2d: boolean;
+  cashAccount?: string;
+  erpStatus?: string;
   details: VehicleSaleBillDetailVM[];
 }
 
@@ -93,4 +98,11 @@ export interface VehicleSaleChasisResponse {
   igstPer: number;
   igstAmt: number;
   mfgYear: number;
+}
+
+export interface UpdateSaleDetailsVM {
+ ChassisNo :string;
+ RegisterNo : string;
+ SaleDate :Date;
+ InsuranceExpDate: Date; 
 }

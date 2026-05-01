@@ -54,3 +54,19 @@
   font-size: 12px;     /* makes it compact */
   z-index: 1000;
 }
+.form-control-sm {
+    min-height: 30px;
+}
+
+.invalid-feedback {
+    font-size: 11px;
+    min-height: 14px; /* keeps spacing even */
+}
+.dropdown-item {
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.dropdown-item:hover {
+  background-color: #f1f5f9;
+}

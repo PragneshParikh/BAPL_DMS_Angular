@@ -47,4 +47,12 @@ export class ItemMasterService {
     return this.http.get<any>(`${this.baseUrl}/ItemMaster/GetPurchaseDetailsWithHsnTaxByModelNo/${modelNo}`);
   }
 
+  fetchItemsByHsnTaxAndGroupId(groupId: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/ItemMaster/GetItemsWithHsnTaxGroupId?groupId=${groupId}`);
+  }
+
+  getItemsByOEMModel(id: Number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/ItemMaster/GetItemsByOEMModel/${id}`)
+  }
+
 }

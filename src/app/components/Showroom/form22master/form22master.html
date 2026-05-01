@@ -53,7 +53,7 @@
                         </div>
                         <!-- Certificate No -->
                         <div class="col-md-3">
-                            <label class="form-label">Type of Certificate No</label>
+                            <label class="form-label">Type Approval Certificate No.</label>
                             <span class="text-danger">*</span>
                             <input type="text" class="form-control form-control-sm" name="approvalCertificateNo"
                                 [(ngModel)]="formData.approvalCertificateNo" required
@@ -66,12 +66,10 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-2">
-                        <div class="form-check form-switch form-switch-sm form-switch-success">
-                            <label class="form-label">IsActive</label>
-                            <input class="form-check-input form-check-input-sm" type="checkbox" name="isActive"
-                                [(ngModel)]="formData.isActive">
-                        </div>
+                    <div class="col-md-2 form-check form-switch form-switch-sm form-switch-success">
+                        <label class="form-label">IsActive</label>
+                        <input class="form-check-input form-check-input-sm" type="checkbox" name="isActive"
+                            [(ngModel)]="formData.isActive">
                     </div>
                     <div class="col-md-2 div-btn-add">
                         <button class="btn btn-add btn-sm me-3" [disabled]="form22Form.invalid">

@@ -11,9 +11,6 @@ export interface City {
   tierLevel?: number | null;
   abbreviation?: string | null;
   isActive?: boolean | null;
-
-//   ledgerMasters: any[]; // you can strongly type later
-//   state?: State | null;
 }
 
 export interface CityTableModel {

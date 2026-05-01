@@ -15,6 +15,10 @@ export class LedgerMaster {
     return this.httpClient.get(`${this.baseUrl}/ledger-master`)
   }
 
+  getCompanyLedgers(): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/ledger-master/companies`)
+  }
+
   getLedgerByPaged(searchTerm: string = null, pageIndex: number, pageSize: number): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/ledger-master/paged?searchTerm=${searchTerm}&pageIndex=${pageIndex}&pageSize=${pageSize}`);
   }

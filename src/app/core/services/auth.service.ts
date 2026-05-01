@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { User } from '../../store/Authentication/auth.models';
 import { environment } from '../../../environments/environment';
 import { StorageService } from './storage';
+import { Router } from '@angular/router';
 
 
 const httpOptions = {
@@ -28,7 +29,9 @@ export class AuthenticationService {
 
     constructor(
         private httpClient: HttpClient,
-        private storageService: StorageService
+        private storageService: StorageService,
+        private ngZone: NgZone,
+        private router: Router,
     ) {
 
         const storedUser = storageService.getUser();
@@ -41,25 +44,25 @@ export class AuthenticationService {
         return this.currentUserSubject.value;
     }
 
-    initAuth(): void {
-        const token = localStorage.getItem('token');
+    // initAuth(): void {
+    //     const token = localStorage.getItem('token');
 
-        if (!token) return;
+    //     if (!token) return;
 
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const expiry = payload.exp * 1000;
+    //     try {
+    //         const payload = JSON.parse(atob(token.split('.')[1]));
+    //         const expiry = payload.exp * 1000;
 
-            if (expiry <= Date.now()) {
-                this.logout();
-            } else {
-                this.startTokenTimer(token);
-            }
+    //         if (expiry <= Date.now()) {
+    //             this.logout();
+    //         } else {
+    //             this.startTokenTimer(token);
+    //         }
 
-        } catch {
-            this.logout();
-        }
-    }
+    //     } catch {
+    //         this.logout();
+    //     }
+    // }
 
     /**
      * Performs the auth
@@ -104,6 +107,10 @@ export class AuthenticationService {
         localStorage.removeItem('selectedModule');
         localStorage.removeItem('menuRights');
         this.currentUserSubject.next(null!);
+
+        this.ngZone.run(() => {
+            this.router.navigate(['/login']);
+        });
     }
 
     forgotPassword(email: string) {

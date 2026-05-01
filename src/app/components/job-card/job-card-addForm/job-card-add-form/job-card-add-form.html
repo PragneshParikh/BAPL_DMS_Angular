@@ -86,7 +86,8 @@
             <div class="row g-2">
               <div class="col-md-4">
                 <label>Job Type</label>
-                <select class="form-select form-select-sm" [(ngModel)]="selectedJobtype" (change)="onJobType()">
+                <select class="form-select form-select-sm" [(ngModel)]="selectedJobtype"
+                  (change)="onJobType(); validateWarranty()">
 
                   <option value="">Select Job Type</option>
 
@@ -97,16 +98,20 @@
               </div>
               <div class="col-md-4">
                 <label>Select Chassis</label>
-                <select class="form-select form-select-sm" (change)="onChassisChange()" [(ngModel)]="selectedChassis">
+                <select *ngIf="!isEditMode" class="form-select form-select-sm" (change)="onChassisChange()"
+                  [(ngModel)]="selectedChassis">
                   <option value="">Select Chassis</option>
                   <option *ngFor="let item of chassisList" [value]="item.chassisNumber">
                     {{ item.chassisNumber }}
                   </option>
                 </select>
+                <input *ngIf="isEditMode" type="text" class="form-control form-control-sm bg-light"
+                  [value]="selectedChassis" readonly>
               </div>
               <div class="col-md-4">
                 <label>Vehicle Kms.</label>
-                <input class="form-control form-control-sm" [(ngModel)]="vehicleKms">
+                <input class="form-control form-control-sm" [(ngModel)]="vehicleKms"
+                  (ngModelChange)="validateWarranty()">
               </div>
               <div class="col-md-4">
                 <label>Service Head</label>
@@ -143,9 +148,12 @@
               </div>
               <div class="col-md-4">
                 <label class="form-lael">Service Location</label>
-                <select class="form-select form-select-sm text-truncate" (change)="onLocationChange($event)">
+                <select class="form-select form-select-sm text-truncate" [(ngModel)]="selectedLocation"
+                  (change)="onLocationChange($event)">
+
                   <option value="">Select Location</option>
-                  <option *ngFor="let loc of locations" [value]="loc.locname">
+
+                  <option *ngFor="let loc of locations" [ngValue]="loc.locname">
                     {{ loc.locname }}
                   </option>
 

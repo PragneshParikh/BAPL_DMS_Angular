@@ -1,0 +1,146 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">PDI CheckList Master List</h4>
+</div>
+
+<!-- view details -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <!--  SEARCH SECTION -->
+            <div class="card-body border-bottom">
+
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">PDI Check Name</label>
+                        <input type="text" class="form-control form-control-sm" name="searchPdicheck"
+                            [(ngModel)]="searchText" (keyup)="onSearch()">
+                        <!-- [(ngModel)]="searchPdiCheckname" (ngModelChange)="onSearchChange()" -->
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary btn-sm me-2">
+                            <i class="ri-search-line"></i>
+                        </button>
+                        <!-- (click)="search()" -->
+                        <button class="btn btn-primary btn-sm" (click)="openAddpdiChecklist()" data-bs-toggle="modal"
+                            data-bs-target="#pdiChecklistmasterModal">
+                            <i class="ri-add-line"></i>
+                        </button>
+                        <!--   -->
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-sm align-middle text-nowrap">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sr. No.</th>
+                                <th>Bill No</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of checklistList let i = index">
+                                <td>{{i + 1}}</td>
+                                <td>{{item.checklistName}}</td>
+                                <td>{{item.isActive ? 'Yes' : 'No'}}</td>
+                                <td> <button class="btn btn-sm btn-soft-sm btn-soft-primary me-1" data-bs-toggle="modal"
+                                        data-bs-target="#pdiChecklistmasterModal" (click)="openEdit(item)">
+                                        <i class="ri-pencil-line"></i>
+                                    </button>
+                                    <!-- (click)="edit(item)" -->
+                                    <button class="btn btn-sm btn-soft-sm btn-soft-danger me-1"
+                                        (click)="deletePdiCheclistMaster(item.id)">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr *ngIf="checklistList.length === 0">
+
+                                <td colspan="10" class="text-center text-muted">
+                                    No data found
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row justify-content-md-center align-items-md-center">
+                    <!-- Pagination -->
+                    <div class="col-sm-12 col-md-12">
+                        <div class="text-md-right float-md-end gridjs-pagination">
+                            <ngb-pagination [(page)]="page" [pageSize]="pageSize" [collectionSize]="collectionSize">
+                            </ngb-pagination>
+                            <!--  (pageChange)="pageChange($event)" -->
+                        </div>
+                    </div>
+                    <!-- End Pagination -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End View -->
+
+<!--Add Pdi Checklist master-->
+<div class="modal fade" id="pdiChecklistmasterModal" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <!-- HEADER -->
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="ri-car-line me-2"></i>
+                    {{ isEditMode ? 'Edit PDI Check List' : 'Add PDI Check List' }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body">
+
+                <!-- YOUR FORM START -->
+                <form #pdichecklistmaster="ngForm" (ngSubmit)="savePdiChecklistmaster(pdichecklistmaster)">
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label>Check List</label>
+                            <input type="text" class="form-control form-control-sm" name="checklistName"
+                                [(ngModel)]="PdiChecklistmastermodel.checklistName" required>
+                        </div>
+                        <!-- <div class="col-md-3">
+                            <label>Description</label>
+                            <input type="text" class="form-control form-control-sm" name="description"
+                                [(ngModel)]="PdiChecklistmastermodel.description">
+                        </div> -->
+                        <div class="col-md-4 form-check form-switch form-switch-sm form-switch-success">
+
+                            <input class="form-check-input form-check-input-sm" type="checkbox" id="isActive"
+                                name="isActive" [(ngModel)]="PdiChecklistmastermodel.isActive">
+
+                            <label class="form-check-label ms-2" for="isActive">
+                                Is Active
+                            </label>
+
+                        </div>
+                    </div>
+                    <!-- FOOTER -->
+                    <div class="text-end mt-3">
+                        <button type="submit" class="btn btn-primary btn-sm" [disabled]="pdichecklistmaster.invalid">
+                            <i class="ri-save-line"></i>
+                            {{ isEditMode ? 'Update' : 'Save' }}
+                        </button>
+
+                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

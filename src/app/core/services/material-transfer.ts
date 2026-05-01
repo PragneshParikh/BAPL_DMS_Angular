@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, retryWhen } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +10,10 @@ export class MaterialTransferService {
   private baseUrl = environment.apiUrl;
 
   constructor(private httpClient: HttpClient) { }
+
+  getByDealer(dealerCode: any, pageIndex: number, pageSize: number): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/material-transfer/GetByDealerPaged?dealerCode=${dealerCode}&pageIndex=${pageIndex}&pageSize=${pageSize}`);
+  }
 
   getMaterialIssueId() {
     return this.httpClient.get<any>(`${this.baseUrl}/material-transfer/issue-id`);

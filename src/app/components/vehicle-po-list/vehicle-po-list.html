@@ -31,13 +31,13 @@
                         <option *ngFor="let type of transactionTypeList" [value]="type.type">{{type.name}}</option>
                     </select>
                 </div> -->
-                <div class="col-md-2">
+                <!-- <div class="col-md-2">
                     <label class="form-label">Party Name</label>
                     <select class="form-select" [(ngModel)]="partyName">
                         <option value="">--Select--</option>
                         <option value="BGAUSS AUTO PRIVATE LIMITED">BGAUSS AUTO PRIVATE LIMITED</option>
                     </select>
-                </div>
+                </div> -->
                 <div class="col-md-2">
                     <label class="form-label">Submitted To Erp</label>
                     <select class="form-select" [(ngModel)]="isSubmitted">
@@ -59,8 +59,12 @@
                     <button class="btn btn-primary btn-sm me-1" (click)="onSearch()">
                         <i class="align-bottom me-1"></i> Search
                     </button>
+
                     <button class="btn btn-primary btn-sm ms-2" (click)="redirectToCreatePO()">
                         <i class="align-bottom me-1"></i> Add
+                    </button>
+                     <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'" (click)="downloadPurchaseOrderExcel()">
+                        <i class="ri-file-excel-2-line"></i>
                     </button>
                 </div>
             </div>
@@ -86,11 +90,13 @@
                             <th class="sort" [ngClass]="getSortClass('partyName')" (click)="sort('partyName')">Party
                                 Name</th>
                             <th>Location</th>
-                            <th class="sort" [ngClass]="getSortClass('modelName')" (click)="sort('modelName')">Model
-                                Name</th>
+                            <!-- <th class="sort" [ngClass]="getSortClass('modelName')" (click)="sort('modelName')">Model
+                                Name</th> -->
                             <!-- <th>Color</th> -->
-                            <th>Order Qty</th>
+                            <!-- <th>Order Qty</th> -->
                             <th>Order Amount</th>
+                            <th class="sort" [ngClass]="getSortClass('isSubmitted')" (click)="sort('isSubmitted')">
+                                IsSubmittedToErp</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -104,13 +110,24 @@
                             <!-- <td>{{po.isSupplier}}</td> -->
                             <td>{{po.partyName}}</td>
                             <td>{{po.location}}</td>
-                            <td>{{po.modelName}}</td>
+                            <!-- <td>{{po.modelName}}</td> -->
                             <!-- <td>{{po.color}}</td> -->
-                            <td>{{po.orderQty}}</td>
+                            <!-- <td>{{po.orderQty}}</td> -->
                             <td>{{po.orderAmount}}</td>
+                            <!-- <td>
+                                <span class="badge" [ngClass]="po.isSubmitted === 'Submited To Erp' ? 'bg-success' : 'bg-danger'">
+                                    {{ po.isSubmitted === 'Submited To Erp' ? 'Yes' : 'No' }}
+                                </span>
+                            </td> -->
+                            <td class="text-center">
+                                <span class="badge"
+                                    [ngClass]="po.isSubmitted === 'Submited To Erp' ? 'bg-success' : 'bg-danger'">
+                                    {{ po.isSubmitted === 'Submited To Erp' ? 'Yes' : 'No' }}
+                                </span>
+                            </td>
                         </tr>
                         <tr *ngIf="pagedPurchaseOrders.length == 0">
-                            <td colspan="12" class="text-center p-3">No Records Found</td>
+                            <td colspan="13" class="text-center p-3">No Records Found</td>
                         </tr>
                     </tbody>
                 </table>

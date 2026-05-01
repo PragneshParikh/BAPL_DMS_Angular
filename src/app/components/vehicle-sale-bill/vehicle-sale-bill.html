@@ -25,6 +25,16 @@
                             [altInput]="true" [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'">
                     </div>
 
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">ERP Status</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="filter.erpStatus">
+                            <option value="">All</option>
+                            <option *ngFor="let s of ErpOptions" [value]="s.value">
+                                {{ s.name }}
+                            </option>
+                        </select>
+                    </div>
+
                     <!-- SEARCH BUTTON -->
                     <div class="col-md-auto ms-auto d-flex align-items-end gap-1">
                         <button class="btn btn-primary btn-sm" (click)="onSearch()">
@@ -64,7 +74,7 @@
                         <!-- Search -->
                         <div class="search-box">
                             <input type="text" class="form-control search" placeholder="Search..."
-                                [(ngModel)]="searchTerm" (input)="onSearchChange()" />
+                                [(ngModel)]="searchText" (input)="onSearchChange()" />
                             <i class="ri-search-line search-icon"></i>
                         </div>
 
@@ -85,6 +95,7 @@
                             <tr>
                                 <th>Sl No.</th>
                                 <th class="sort" (click)="onSort('saleBillNo')" style="cursor:pointer">Sale Bill No</th>
+                                <th class="sort" (click)="onSort('status')" style="cursor:pointer">Status</th>
                                 <th class="sort" (click)="onSort('location')" style="cursor:pointer">Location</th>
                                 <th class="sort" (click)="onSort('saleDate')" style="cursor:pointer">Sale Date</th>
                                 <th class="sort" (click)="onSort('saleType')" style="cursor:pointer">Sale Type</th>
@@ -120,12 +131,17 @@
 
                                 <!-- Sale Bill No -->
                                 <td>
-                                    <ngb-highlight [result]="item.saleBillNo" [term]="searchTerm"></ngb-highlight>
+                                    <ngb-highlight [result]="item.saleBillNo" [term]="searchText"></ngb-highlight>
+                                </td>
+
+                                <td>
+                                    <ngb-highlight [result]="getErpStatusName(item.erpStatus)" [term]="searchText">
+                                    </ngb-highlight>
                                 </td>
 
                                 <!-- Location -->
                                 <td>
-                                    <ngb-highlight [result]="item.location" [term]="searchTerm"></ngb-highlight>
+                                    <ngb-highlight [result]="item.location" [term]="searchText"></ngb-highlight>
                                 </td>
 
                                 <!-- Sale Date -->
@@ -145,7 +161,7 @@
 
                                 <!-- Customer -->
                                 <td>
-                                    <ngb-highlight [result]="item.customerName" [term]="searchTerm"></ngb-highlight>
+                                    <ngb-highlight [result]="item.customerName" [term]="searchText"></ngb-highlight>
                                 </td>
 
                                 <!-- Billing Name -->

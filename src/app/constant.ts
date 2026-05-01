@@ -75,7 +75,6 @@ export const PrefixTypes = [
     { name: 'Quotation', value: 'Quotation' }
 ]
 
-
 export const SaleTypeOptions = [
     { name: 'Cash Sale', value: 'Cash' },
     { name: 'Credit Sale', value: 'Credit' }
@@ -100,8 +99,66 @@ export const CashTypeOptions = [
 ];
 
 export const IssueTypes = [
+    { id: 1, name: 'Paid' },
+    { id: 2, name: 'U/W' },
+    { id: 3, name: 'FOC' },
+    { id: 4, name: 'Goodwill' },
     { name: 'Paid', value: 'paid' },
     { name: 'U/W', value: 'u/w' },
     { name: 'FOC', value: 'foc' },
     { name: 'Goodwill', value: 'goodwill' }
+]
+
+export const userRole = [
+    { roleId: 1, value: 'SuperAdmin' },
+    { roleId: 2, value: 'Dealer' }
+]
+
+// export const ErpOptions = [
+//     { name: 'Submitted to ERP', value: 'PushedToERP' },
+//     { name: 'Pending ERP Submission', value: 'Pending' },
+
+// ];
+
+export const ErpOptions = [
+    { name: 'Submitted to ERP', value: 'PushedToERP' },
+    { name: 'Pending', value: 'Pending' },
+    { name: 'Alloted', value: 'Alloted' },
+    { name: 'Invoiced', value: 'Invoiced' },
+    { name: 'Reserved', value: 'Reserved' },
+    { name: 'Invalid', value: 'Invalid' }
+//     { name: 'Pending ERP Submission', value: 'Pending' }
+ ];
+
+export const RateTypes = [
+    { id: 1, title: 'Single' },
+    // { id: 2, title: 'Multi' }
+]
+
+export const DurationTypes = [
+    { id: 1, title: 'Month' },
+    { id: 2, title: 'Year' }
+];
+
+export const OemmodelServiceSeq = [
+    { Id: 1, value: '1st Service' },
+    { Id: 2, value: '2nd Service' },
+    { Id: 3, value: '3rd Service' },
+    { Id: 4, value: '4th Service' },
+    { Id: 5, value: '5th Service' },
+    { Id: 6, value: '6th Service' }
+]
+
+export const OemmodelServiceFrom = [
+    { Id: 1, value: 'Date of Purchase' },
+    { Id: 2, value: 'Date of Sale' }
+]
+
+export const ModuleTypes = [
+    { name: 'counter_bill', moduleName: 'Counter Bill' },
+    { name: 'free_service_claim_invoice', moduleName: 'Free Service Claim Invoice' },
+    { name: 'warranty_claim_invoice', moduleName: 'Warranty Claim Invoice' },
+    { name: 'free_service_claim', moduleName: 'Free Service Claim' },
+    { name: 'CIR_investigation', moduleName: 'CIR Investigation' },
+    { name: 'purchase_order', moduleName: 'Purchase Order' }
 ]

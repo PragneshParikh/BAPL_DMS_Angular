@@ -1,10 +1,12 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, HostListener, OnInit, signal } from '@angular/core';
 import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
 import { AuthenticationService } from './core/services/auth.service';
 import { ToastsContainer } from './shared/toaster/toasts-container.component';
 import { CommonModule } from '@angular/common';
 import { Loader } from './components/loader/loader';
 import { LoaderService } from './core/services/loader';
+import { TimeoutService } from './core/services/timeout';
+import { StorageService } from './core/services/storage';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +21,9 @@ export class App implements OnInit {
   constructor(
     private authService: AuthenticationService,
     private loader: LoaderService,
-    private router: Router
+    private router: Router,
+    private timeoutService: TimeoutService,
+    private storageService: StorageService
   ) { }
 
   ngOnInit(): void {
@@ -38,7 +42,15 @@ export class App implements OnInit {
       }
     });
 
-    this.authService.initAuth();
+    this.timeoutService.startWatching(() => this.authService.logout());
+
+    // this.authService.initAuth();
+
   }
+
+  // @HostListener('window:beforeunload')
+  // handleUnload() {
+  //   this.storageService.clear();
+  // }
 
 }

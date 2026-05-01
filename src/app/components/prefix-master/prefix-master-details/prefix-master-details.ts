@@ -7,7 +7,8 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { PrefixService } from '../../../core/services/prefix';
 import { StorageService } from '../../../core/services/storage';
 import { Router } from '@angular/router';
-import { PrefixTypes } from '../../../constant';
+import { ModuleTypes } from '../../../constant';
+import { delay } from 'lodash';
 
 @Component({
   selector: 'app-prefix-master-details',
@@ -16,33 +17,54 @@ import { PrefixTypes } from '../../../constant';
   styleUrl: './prefix-master-details.scss',
 })
 export class PrefixMasterDetails implements OnInit {
+  lstModules = ModuleTypes;
   // prefixTypes = PrefixTypes
   // lstDealers: any[] = [];
   lstFinancialYears: string[] = [];
   sequence = {
-    moduleName: 'Invoice',
+    moduleName: '',
     separator: '/',
-    // dealerCode: '',
     financialYear: '',
-    prefix: 'INV',
+    prefix: '',
     padding: 3,
-    nextNo: 0,
+    nextNo: 1,
+    increment: 1,
     isActive: true
   };
+
+  isDuplicate = false;
+  sequenceList: any = [];
 
   constructor(
     private toast: ToastService,
     private prefixService: PrefixService,
     private storageServie: StorageService,
-    private router: Router
+    private router: Router,
+    private loader: LoaderService
   ) { }
 
   ngOnInit() {
     // this.getDealers();
+    this.getSequenceList();
 
     this.lstFinancialYears = this.generateFinancialYears();
 
     this.sequence.financialYear = this.getCurrentFinancialYear();
+  }
+
+  getSequenceList() {
+    this.loader.show();
+    this.prefixService.get().subscribe({
+      next: (res) => {
+        this.sequenceList = res;
+        this.loader.hide();
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toast.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 })
+      }
+    })
   }
 
   // getDealers() {
@@ -70,12 +92,15 @@ export class PrefixMasterDetails implements OnInit {
     const years: string[] = [];
     const currentYear = new Date().getFullYear();
 
-    // 5 years before and 5 years after
     for (let i = -5; i <= 5; i++) {
       const startYear = currentYear + i;
       const endYear = startYear + 1;
-      years.push(`${startYear.toString()}-${endYear.toString()}`);
+
+      years.push(
+        `${startYear.toString().slice(-2)}-${endYear.toString().slice(-2)}`
+      );
     }
+
     return years;
   }
 
@@ -93,15 +118,16 @@ export class PrefixMasterDetails implements OnInit {
     return value.length;
   }
 
-  saveSequence() {
+  onSubmit(form: any) {
+
+    if (form.invalid) return;
+
     const length = this.sequence.padding || 4;
     const masked = '#'.repeat(length);
     const numberSequence: any = {
       id: 0,
-      // sequenceCode: `${this.sequence.prefix || ''}${this.sequence.dealerCode || ''}${this.sequence.financialYear || ''}`,
       sequenceCode: `${this.sequence.prefix || ''}${this.sequence.separator || ''}${'DealerCode'}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${this.sequence.separator || ''}${masked}`,
       sequenceName: this.sequence.moduleName,
-      // format: `${this.sequence.prefix || ''}${this.sequence.dealerCode || ''}${this.sequence.financialYear || ''}${masked}`,
       format: `${this.sequence.prefix || ''}${this.sequence.separator || ''}${'DealerCode'}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${this.sequence.separator || ''}${masked}`,
       nextNo: this.sequence.nextNo || 0,
       increment: 1,
@@ -112,14 +138,15 @@ export class PrefixMasterDetails implements OnInit {
       createdDate: new Date()
     }
 
-    console.log('Saving sequence:', numberSequence);
-
-    this.prefixService.saveSequence(numberSequence).subscribe({
+    this.loader.show();
+    this.prefixService.saveSequenceForDealers(numberSequence).subscribe({
       next: (response) => {
         this.backToList();
+        this.loader.hide();
         this.toast.show('Sequence saved successfully.', { classname: 'bg-success text-light', delay: 3000 });
       },
       error: (error) => {
+        this.loader.hide();
         console.error('Error saving sequence:', error);
         this.toast.show('Failed to save sequence.', { classname: 'bg-danger text-light', delay: 5000 });
       }
@@ -153,6 +180,20 @@ export class PrefixMasterDetails implements OnInit {
           <br>
           <strong>###</strong> = Number sequence with padding (3 characters)
         </p>`;
+  }
+
+  checkDuplicate() {
+    if (!this.sequence.moduleName || !this.sequence.financialYear) {
+      this.isDuplicate = false;
+      return;
+    }
+
+    const exists = this.sequenceList.some(x =>
+      x.sequenceName === this.sequence.moduleName &&
+      x.year === this.sequence.financialYear
+    );
+
+    this.isDuplicate = exists;
   }
 
 }

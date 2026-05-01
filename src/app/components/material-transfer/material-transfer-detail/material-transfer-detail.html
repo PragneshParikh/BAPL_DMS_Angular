@@ -15,7 +15,7 @@
                                 <div class="col-md-2">
                                     <label class="form-label">Prefix No</label>
                                     <input type="text" class="form-control form-control-sm" name="prefix"
-                                        #prefix="ngModel" [(ngModel)]="formData.prefix" required>
+                                        #prefix="ngModel" [(ngModel)]="formData.prefix" required [disabled]="true">
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Issue Number</label>
@@ -26,7 +26,7 @@
                                     <label class="form-label">Job No (ODO {{ formData.OdoMeter }}) </label>
                                     <div class="input-group input-group-sm">
                                         <input type="text" class="form-control form-control-sm" name="jobNo"
-                                            #jobNo="ngModel" [(ngModel)]="formData.jobNo" required>
+                                            #jobNo="ngModel" [(ngModel)]="formData.jobNo" required readonly>
                                         <button type="button" class="btn btn-outline-secondary bg-primary text-white"
                                             (click)="openJobSearch()">
                                             <i class="ri-file-line"></i>
@@ -36,20 +36,20 @@
                                 <div class="col-md-2">
                                     <label class="form-label">Date</label>
                                     <input type="date" class="form-control form-control-sm" name="date"
-                                        [(ngModel)]="formData.date" #date="ngModel" />
+                                        [(ngModel)]="formData.date" #date="ngModel" [disabled]="true" />
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Technician</label>
                                     <select class="form-select form-select-sm" name="technician"
-                                        [(ngModel)]="formData.technician">
-                                        <option *ngFor="let tech of lstTechnician" [value]="tech.value"> {{ tech.name }}
+                                        [(ngModel)]="formData.technician" [disabled]="true">
+                                        <option *ngFor="let tech of lstTechnician" [value]="tech.id"> {{ tech.name }}
                                         </option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Location</label>
                                     <select class="form-select form-select-sm" name="location"
-                                        [(ngModel)]="formData.location">
+                                        [(ngModel)]="formData.location" [disabled]="true">
                                         <option *ngFor="let loc of lstLocation" [value]="loc.loccode">{{ loc.locname }}
                                         </option>
                                     </select>
@@ -122,7 +122,7 @@
                                     <label class="form-label">Technician</label>
                                     <select class="form-select form-select-sm" name="technician" #technician="ngModel"
                                         [(ngModel)]="newItem.technician">
-                                        <option *ngFor="let tech of lstTechnician" [value]="tech.value">{{ tech.name }}
+                                        <option *ngFor="let tech of lstTechnician" [value]="tech.id">{{ tech.name }}
                                         </option>
                                     </select>
                                 </div>
@@ -135,7 +135,7 @@
                                     <label class="form-label">Issue Type</label>
                                     <select class="form-select form-select-sm" name="issueType" #issueType="ngModel"
                                         [(ngModel)]="newItem.issueType">
-                                        <option *ngFor="let issue of issueTypes" [value]="issue.value">
+                                        <option *ngFor="let issue of issueTypes" [value]="issue.id">
                                             {{ issue.name }}
                                         </option>
                                     </select>
@@ -212,11 +212,11 @@
                                     <td>{{ item.quantity }}</td>
                                     <td>{{ item.itemRate }}</td>
                                     <td>{{ item.stock }}</td>
-                                    <td>{{ item.issueType }}</td>
+                                    <td>{{ item.issueType | getIssueTypeName: issueTypes }}</td>
                                     <td>{{ item.issueSubType }}</td>
                                     <td>{{ item.inwardsrno }}</td>
                                     <td>{{ item.issuesrno }}</td>
-                                    <td>{{ item.technician }}</td>
+                                    <td>{{ item.technician | getTechnicianName: lstTechnician }}</td>
                                     <td>{{ item.amount }}</td>
                                     <td>{{ item.mrp }}</td>
                                     <td>{{ item.wav }}</td>
@@ -237,6 +237,18 @@
                                 </tr>
 
                             </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="4" class="text-end"><strong>Total</strong></td>
+                                    <td>{{ getTotalQty() }}</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td colspan="4"></td>
+                                    <td></td>
+                                    <td>{{ getTotalAmount() }}</td>
+                                    <td colspan="12"></td>
+                                </tr>
+                            </tfoot>
 
                         </table>
                     </div>

@@ -98,7 +98,7 @@ export class AddOemmodelWarranty implements OnInit {
   // EDIT LOAD
   // =========================
   getById(): void {
-   // this.loader.show();
+    this.loader.show();
 
     this.service.getById(this.id).subscribe({
       next: (res) => {
