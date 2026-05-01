@@ -9,11 +9,12 @@ import { Router } from '@angular/router';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { delay } from 'lodash';
 import Swal from 'sweetalert2';
+import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-modelwise-service-schedule',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,NgbPagination],
   templateUrl: './modelwise-service-schedule.html',
   styleUrl: './modelwise-service-schedule.scss',
 })
@@ -43,6 +44,12 @@ export class ModelwiseServiceSchedule {
   modelvarientList: any[] = [];
   isEditMode: boolean = false;
   editId: number = 0;
+  //pagination
+  page: number = 1;
+  pageSize: number = 10;
+  collectionSize: number = 0;
+
+  pagedList: any[] = [];
 
 
   ngOnInit() {
@@ -294,10 +301,23 @@ export class ModelwiseServiceSchedule {
       .subscribe({
         next: (res: any) => {
           this.scheduleList = res;
+          this.collectionSize = res.length;
+
+          this.refreshPagedData();
         },
         error: err => console.error(err)
       });
   }
+  refreshPagedData() {
+  const start = (this.page - 1) * this.pageSize;
+  const end = start + this.pageSize;
+
+  this.pagedList = this.scheduleList.slice(start, end);
+}
+pageChange(page: number) {
+  this.page = page;
+  this.refreshPagedData();
+}
   edit(item: any) {
 
     this.isEditMode = true;
@@ -356,6 +376,7 @@ export class ModelwiseServiceSchedule {
         error: err => console.error(err)
       });
   }
+
   resetForm() {
     this.SelectedoemmodelId = null;
     this.noOfServices = 0;
