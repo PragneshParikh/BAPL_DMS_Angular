@@ -43,7 +43,7 @@
             </thead>
             <tbody>
 
-              <tr *ngFor="let data of pagedData; let i = index" (click)="openDetails(itemModal,data)"
+              <tr *ngFor="let data of pagedData; let i = index" (dblclick)="openDetails(itemModal,data)"
                 style="cursor:pointer">
 
                 <td>
@@ -183,7 +183,7 @@
         <label class="form-label">UOM</label>
         <input class="form-control form-control-sm" [value]="'PCS'" readonly>
       </div>
-      
+
       <div class="col-md-2">
         <label class="form-label">HSN Code</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.hsncode" readonly>
@@ -236,7 +236,7 @@
         <label class="form-label">OEM MRP</label>
         <input class="form-control form-control-sm" [value]="'0.00'" readonly>
       </div>
-       <div class="col-md-2">
+      <div class="col-md-2">
         <label class="form-label">Purchase Rate</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.ipurrate" readonly>
       </div>
@@ -244,11 +244,11 @@
         <label class="form-label">Sale Rate</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.custprice" readonly>
       </div>
-     <div class="col-md-2">
+      <div class="col-md-2">
         <label class="form-label">Margin %</label>
         <input class="form-control form-control-sm" [value]="'0.00'" readonly>
       </div>
-       <div class="col-md-2">
+      <div class="col-md-2">
         <label class="form-label">Part Labr</label>
         <input class="form-control form-control-sm" [value]="'0.00'" readonly>
       </div>
@@ -264,7 +264,7 @@
         <label class="form-label">Min Order QTY</label>
         <input class="form-control form-control-sm" [value]="'1.00'" readonly>
       </div>
-       <div class="col-md-2">
+      <div class="col-md-2">
         <label class="form-label">Warranty Period</label>
         <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
@@ -272,7 +272,7 @@
         <label class="form-label">Month/Year</label>
         <input class="form-control form-control-sm" [value]="'Month'" readonly>
       </div>
-       <div class="col-md-2">
+      <div class="col-md-2">
         <label class="form-label">Warranty Kms.</label>
         <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
@@ -319,9 +319,9 @@
           <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
         </div>
       </div>
-      
-        
-      
+
+
+
       <!-- end checkbox -->
     </div>
   </div>

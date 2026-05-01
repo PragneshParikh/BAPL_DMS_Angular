@@ -2,30 +2,30 @@
 
   <!-- HEADER -->
   <div class="text-center border-bottom pb-2 mb-2">
-  <h4 class="mb-0 fw-bold">{{ dealer?.compname }}</h4>
+    <h4 class="mb-0 fw-bold">{{ dealer?.compname }}</h4>
 
-  <small *ngIf="dealer">
-    {{ dealer?.adress1 }}<br>
-    {{ dealer?.adress2 }}<br>
+    <small *ngIf="dealer">
+      {{ dealer?.adress1 }}<br>
+      {{ dealer?.adress2 }}<br>
 
-    {{ dealer?.city }} - {{ dealer?.pin }}<br>
-    {{ dealer?.state }}<br>
+      {{ dealer?.city }} - {{ dealer?.pin }}<br>
+      {{ dealer?.state }}<br>
 
-    <span *ngIf="dealer?.mobile">
-      Phone: {{ dealer?.mobile }}
-    </span>
+      <span *ngIf="dealer?.mobile">
+        Phone: {{ dealer?.mobile }}
+      </span>
 
-    <span *ngIf="dealer?.email">
-      | Email: {{ dealer?.email }}
-    </span>
+      <span *ngIf="dealer?.email">
+        | Email: {{ dealer?.email }}
+      </span>
 
-    <br>
+      <br>
 
-    <span >
-      GSTIN: {{ dealer?.compgstinNo }}
-    </span>
-  </small>
-</div>
+      <span>
+        GSTIN: {{ dealer?.compgstinNo }}
+      </span>
+    </small>
+  </div>
 
   <h5 class="text-center fw-bold border-bottom pb-1">Performa Invoice</h5>
 
@@ -42,55 +42,55 @@
   </div>
 
   <!-- DETAILS -->
- <div class="row border p-2 mb-2">
+  <div class="row border p-2 mb-2">
 
-  <!-- INSURANCE -->
-  <div class="col-6 pe-2 border-end">
-    <div class="fw-bold mb-1">Insurance Details</div>
+    <!-- INSURANCE -->
+    <div class="col-6 pe-2 border-end">
+      <div class="fw-bold mb-1">Insurance Details</div>
 
-    <div class="row">
-      <div class="col-5 text-muted">Company</div>
-      <div class="col-7">ICICI Lombard</div>
+      <div class="row">
+        <div class="col-5 text-muted">Company</div>
+        <div class="col-7">ICICI Lombard</div>
+      </div>
+
+      <div class="row">
+        <div class="col-5 text-muted">GSTIN</div>
+        <div class="col-7">07AAACI7904G1ZP</div>
+      </div>
+
+      <div class="row">
+        <div class="col-5 text-muted">Location</div>
+        <div class="col-7">New Delhi</div>
+      </div>
     </div>
 
-    <div class="row">
-      <div class="col-5 text-muted">GSTIN</div>
-      <div class="col-7">07AAACI7904G1ZP</div>
+    <!-- VEHICLE -->
+    <div class="col-6 ps-2">
+      <div class="fw-bold mb-1">Vehicle Details</div>
+
+      <div class="row">
+        <div class="col-5 text-muted">Model</div>
+        <div class="col-7">{{ variant }}</div>
+      </div>
+
+      <div class="row">
+        <div class="col-5 text-muted">Reg No</div>
+        <div class="col-7">GJ05UA1274</div>
+      </div>
+
+      <div class="row">
+        <div class="col-5 text-muted">VIN</div>
+        <div class="col-7">{{ vinNo }}</div>
+      </div>
+
+      <div class="row">
+        <div class="col-5 text-muted">Engine</div>
+        <div class="col-7">{{ motorSerialNo }}</div>
+      </div>
+
     </div>
 
-    <div class="row">
-      <div class="col-5 text-muted">Location</div>
-      <div class="col-7">New Delhi</div>
-    </div>
   </div>
-
-  <!-- VEHICLE -->
-  <div class="col-6 ps-2">
-    <div class="fw-bold mb-1">Vehicle Details</div>
-
-    <div class="row">
-      <div class="col-5 text-muted">Model</div>
-      <div class="col-7">{{ variant }}</div>
-    </div>
-
-    <div class="row">
-      <div class="col-5 text-muted">Reg No</div>
-      <div class="col-7">GJ05UA1274</div>
-    </div>
-
-    <div class="row">
-      <div class="col-5 text-muted">VIN</div>
-      <div class="col-7">{{ vinNo }}</div>
-    </div>
-
-    <div class="row">
-      <div class="col-5 text-muted">Engine</div>
-      <div class="col-7">{{ motorSerialNo }}</div>
-    </div>
-
-  </div>
-
-</div>
 
   <!-- PARTY -->
   <div class="border p-2 mb-2">
@@ -197,8 +197,8 @@
   </div>
 
   <p class="text-center mt-3">THANKS VISIT AGAIN</p>
- <button class=" btn btn-primary " (click)="savePerformaInvoice()">
-               
-                Confirm
-            </button>
+  <button class=" btn btn-primary " (click)="savePerformaInvoice()">
+
+    Confirm
+  </button>
 </div>

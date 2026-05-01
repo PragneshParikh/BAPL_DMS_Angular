@@ -28,7 +28,7 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-sm">
+                    <table class="table table-sm table-bordered align-middle text-nowrap table-hover">
                         <thead>
                             <tr>
                                 <th class="sort" data-sort="name" (click)="sortData('srno')" style="width: 7%;">Sr. No.
@@ -39,7 +39,7 @@
                         </thead>
                         <tbody>
                             @for ( data of pagedData; track $index) {
-                            <tr (click)="onRowDoubleClick(RowDataModel,data)">
+                            <tr (dblclick)="onRowDoubleClick(RowDataModel,data)">
                                 <td class="text-center">
                                     {{ data.id }}
                                 </td>
