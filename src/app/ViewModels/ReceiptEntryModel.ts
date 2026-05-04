@@ -5,7 +5,7 @@ export interface ReceiptEntryModel {
 
   receiptNo: string;
 
-  receiptDate: string; 
+  receiptDate: string;
 
   saleType?: string;
 
@@ -66,7 +66,7 @@ export interface ReceiptEntryAddViewModel {
   financier?: string;
   productCode: string;
   salesExecutive?: string;
-    businessType?: string;
+  businessType?: string;
 
   receiptType?: string;
   mobileNo?: string;
@@ -91,8 +91,8 @@ export interface ReceiptEntryEditModel {
   productName?: string;
   productColor?: string;
   productDescription?: string;
-    businessType?: string;
- salesExecutive?: string;
+  businessType?: string;
+  salesExecutive?: string;
   receiptType?: string;
   refNo?: string;
   narration?: string;

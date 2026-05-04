@@ -3,112 +3,153 @@ import { Component, OnInit } from '@angular/core';
 import { StorageService } from '../../../core/services/storage';
 import { DealerService } from '../../../core/services/dealer-service';
 import { DealerMasterViewModel } from '../../../ViewModels/Dealer/DealerMasterViewModel';
-import { log } from 'console';
 import { PerformaInvoiceService } from '../../../core/services/performa-invoice-service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
+import { LedgerMaster } from '../../../core/services/ledger-master';
+import { CurrencyService } from '../../../core/services/currency-service';
 
 @Component({
   selector: 'app-performa-invoice',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './performa-invoice.html',
   styleUrl: './performa-invoice.scss',
 })
-export class PerformaInvoice  implements OnInit {
- currentDate: Date = new Date();
-  certificateNo: string = 'DEC12PBA012844';
-  variant: string = 'BGauss C12i MAX 2.0 Brooklyn Black';
-  vinNo: string = 'P6DEC12PBA012844';
-  motorSerialNo: string = 'w3435332';
-  dealerName: string = 'RRG Test Dealer Motors';
-  dealerCode: string = 'CUS9999';
-  saleDate: Date = this.currentDate;
-  deliveryDate: Date = this.currentDate;
+export class PerformaInvoice implements OnInit {
+
+  currentDate: Date = new Date();
+
   dealer: DealerMasterViewModel | null = null;
-  saleBillNo: string;
+  saleBillId: string = '';
   saleBill: any;
-/**
- *
- */
-constructor(private storageService:StorageService,
-  private dealerService:DealerService,
-private performaInvoiceService:PerformaInvoiceService,
-private route: ActivatedRoute,
-private vehicleSaleBillService: VehicleSaleBillService) {
-}
+  CustomerLedger: any;
 
+  amounts = {
+    taxable: 0,
+    cgst: 0,
+    cgstPercent: 0,
+    sgstPercent: 0,
+    igstPercent: 0,
+    sgst: 0,
+    igst: 0,
+    exShowroom: 0,
+    discount: 0,
+    total: 0
+  };
+  inWords: string;
 
+  constructor(
+    private storageService: StorageService,
+    private dealerService: DealerService,
+    private performaInvoiceService: PerformaInvoiceService,
+    private route: ActivatedRoute,
+    private vehicleSaleBillService: VehicleSaleBillService,
+    private router: Router,
+    private ledgerService: LedgerMaster,
+    private currencyService: CurrencyService
+  ) {}
 
   ngOnInit() {
     this.getDealerDetails();
-      this.saleBillNo = this.route.snapshot.paramMap.get('saleBillNo') || '';
-      console.log(this.saleBillNo);
-      
-      if (this.saleBillNo) {
-        this.getBillById(parseInt(this.saleBillNo));
-      }
 
-  }
-getDealerDetails(){
-  const dealerCode= this.storageService.getDealerCode();
-  console.log('Dealer Code from storage:', dealerCode);
-  this.dealerService.getDealers(dealerCode).subscribe((response:any)=>{
-    if(response){
-      console.log(response);
-      
-      this.dealer =  response.data[0];
-      console.log('Dealer Details:', this.dealer);
+    this.saleBillId = this.route.snapshot.paramMap.get('saleBillNo') || '';
+
+    if (this.saleBillId) {
+      this.getBillById(parseInt(this.saleBillId));
     }
+  }
+
+  // ✅ CALCULATE FOR MULTIPLE ROWS
+  calculateAmounts() {
+  const details = this.saleBill?.details || [];
+
+  this.amounts.taxable = 0;
+  this.amounts.cgst = 0;
+  this.amounts.sgst = 0;
+  this.amounts.igst = 0;
+  this.amounts.discount = 0;
+  this.amounts.total = 0;
+
+  details.forEach((item: any) => {
+    this.amounts.taxable += item.itemRate || 0;
+
+    this.amounts.cgst += item.cgstamnt || 0;
+    this.amounts.sgst += item.sgstamnt || 0;
+    this.amounts.igst += item.igstamnt || 0;
+
+    this.amounts.cgstPercent = item.cgstper || 0;
+    this.amounts.sgstPercent = item.sgstper || 0;
+    this.amounts.igstPercent = item.igstper || 0;
+
+    this.amounts.discount += item.preGstDiscount || 0;
+
+    // ✅ Use finalAmount directly (already calculated in backend)
+    this.amounts.total += item.finalAmount || 0;
   });
+
+  // Ex-showroom = taxable + taxes
+  this.amounts.exShowroom =
+    this.amounts.taxable +
+    this.amounts.cgst +
+    this.amounts.sgst +
+    this.amounts.igst;
+    this.convert();
 }
- printReport() {
-    const printContents = document.getElementById('reportContent')?.innerHTML;
-    if (!printContents) return;
 
-    const popupWindow = window.open('', '_blank', 'width=900,height=700');
-    if (!popupWindow) return;
+  getDealerDetails() {
+    const dealerCode = this.storageService.getDealerCode();
 
-    popupWindow.document.open();
-    popupWindow.document.write(`
-      <html>
-        <head>
-          <title>Print Preview</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid black; padding: 5px; text-align: left; }
-            h1 { text-align: center; }
-          </style>
-        </head>
-        <body>
-          ${printContents}
-        </body>
-      </html>
-    `);
-    popupWindow.document.close();
-    popupWindow.focus();
+    this.dealerService.getDealers(dealerCode).subscribe((res: any) => {
+      console.log(res, "Dealer Response");
+      this.dealer = res?.data?.[0] || null;
+    });
+  }
 
+ getBillById(id: number) {
+  this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
+    next: (res) => {
+      this.saleBill = res;
+      console.log(res, "Sale Bill Response");
+      this.calculateAmounts();
+
+      if (this.saleBill?.ledgerId) {
+        console.log(this.saleBill.ledgerId);
+
+        this.ledgerService.getLedgerById(this.saleBill.ledgerId).subscribe({
+          next: (ledgerRes) => {
+            this.CustomerLedger = ledgerRes;
+            console.log(ledgerRes, "Ledger inside");
+          },
+          error: (err) => console.error(err)
+        });
+      }
+    },
+    error: (err) => console.error(err)
+  });
+
+  
+}
+
+  printReport() {
+    setTimeout(() => window.print(), 300);
   }
 
   savePerformaInvoice() {
-    this.performaInvoiceService.generatePerformaInvoice({ vehicleSaleBillNo: this.saleBillNo }).
-    subscribe(response => {
-      console.log('Performa Invoice generated successfully:', response);
-    }, error => {
-      console.error('Error generating Performa Invoice:', error);
+    this.performaInvoiceService.generatePerformaInvoice({
+      vehicleSaleBillNo: this.saleBill.saleBillNo,
+    }).subscribe({
+      next: () => this.router.navigate(['/proforma-invoice']),
+      error: (err) => console.error(err)
     });
   }
+  get taxType() {
+  const item = this.saleBill?.details?.[0];
+  if (!item) return '';
 
-
-  getBillById(id: number) {
-    this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
-      next: (res) => {
-        console.log('Vehicle Sale Bill Details:', res);
-        this.saleBill= res;
-      },
-      error: (err) => {
-        console.error(err);
-      }
-    });
+  return item.igstPer > 0 ? 'IGST' : 'GST';
+}
+convert() {
+    this.inWords = this.currencyService.convertToWords(this.amounts.total);
   }
 }

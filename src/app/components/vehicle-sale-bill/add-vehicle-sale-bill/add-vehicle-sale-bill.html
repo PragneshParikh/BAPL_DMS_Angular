@@ -77,7 +77,7 @@
                Genearate Invoice
             </button>
             <button class="btn btn-sm btn-primary" (click)="onSubmitToERP()"
-                *ngIf="!isErpLocked && billId && isRegistrationComplete()">
+                *ngIf="isInvoiced && !isErpLocked">
                 Submit To ERP
             </button>
             <button class="btn btn-light btn-sm" (click)="redirectToSaleList()">Close</button>
@@ -503,7 +503,7 @@
                                             <th>ItemRate</th>
                                             <th>Regn Amt</th>
                                             <th>Ins Amt</th>
-                                            <th>Pre GST Amt</th>
+                                            <th>Pre GST Disc.</th>
                                             <th>Taxable Amount</th>
                                             <th>Ext Warranty</th>
                                             <th>SGST %</th>
@@ -565,12 +565,12 @@
                                             <td>
                                                 {{ row.extWarranty }}
                                             </td>
-                                            <td>{{ model.isD2D ? 0 : row.sgstPer }}%</td>
-                                            <td>{{ model.isD2D ? 0 : row.sgst }}</td>
-                                            <td>{{ model.isD2D ? 0 : row.cgstPer }}%</td>
-                                            <td>{{ model.isD2D ? 0 : row.cgst }}</td>
-                                            <td>{{ model.isD2D ? 0 : row.igstPer }}%</td>
-                                            <td>{{ model.isD2D ? 0 : row.igst }}</td>
+                                            <td>{{ row.sgstPer }}%</td>
+                                            <td>{{row.sgst }}</td>
+                                            <td>{{row.cgstPer }}%</td>
+                                            <td>{{ row.cgst }}</td>
+                                            <td>{{ row.igstPer }}%</td>
+                                            <td>{{ row.igst }}</td>
 
                                             <td>{{ row.finalAmount }}</td>
                                             <td>{{ row.cess }}</td>
@@ -611,11 +611,16 @@
                             <div class="col-md-12 d-flex justify-content-end mt-2">
                                 <button class="btn btn-primary btn-sm" type="button"
                                     (click)="addVehicle(vehicleSaleForm)"
-                                    [disabled]="isErpLocked ||(model.customerType==='B2C' && vehicleList?.length > 0) ">
+                                    [disabled]="isErpLocked ||
+                                    !isCustomerValid() 
+                                    ||    !model.chassisNo 
+                                    ||(model.customerType==='B2C' && vehicleList?.length > 0) ">
                                     Add
                                 </button>
                             </div>
-
+<div *ngIf="!isCustomerValid()" class="text-danger mt-1">
+  Please select a valid customer before choosing chassis.
+</div>
                         </div>
 
                     </div>
