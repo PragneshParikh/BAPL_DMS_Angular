@@ -14,6 +14,8 @@ import { Console, info } from 'console';
 import { title } from 'process';
 import { text } from 'stream/consumers';
 import { Route, Router } from '@angular/router';
+import { ToastService } from '../../../../shared/toaster/toast-service';
+import { delay } from 'lodash';
 
 @Component({
   selector: 'app-job-card-add-form',
@@ -33,6 +35,7 @@ export class JobCardAddForm {
   pdiCheckList: any[] = [];
   complaintList: any[] = [];
   jobCardDetailsView: any[] = []
+  serviceHistoryList: any[] = []
 
 
   selectedJobtype: any;
@@ -126,6 +129,7 @@ export class JobCardAddForm {
     private receiptEntryService: ReceiptEntryService,
     private router: Router,
     private jobCardService: JobCardService,
+    public toastr: ToastService,
     private modalService: NgbModal) { }
 
   ngOnInit(): void {
@@ -169,23 +173,7 @@ export class JobCardAddForm {
       }
     });
   }
-  // load job type 
-  // loadJobTypes() {
-  //   this.selectedJobtype = '';
-  //   this.jobCardService.getJobType().subscribe({
-  //     next: (res) => {
-  //       //console.log(res);
-  //       this.jobTypeList = res.map((x: any) => ({
-  //         jobTypeId: x.jobTypeId,
-  //         jobtypeName: (x.jobtypeName || '').trim()
-  //       }));
 
-  //     },
-  //     error: (err) => {
-  //       console.error('Error fetching job types', err);
-  //     }
-  //   });
-  // }
   loadJobTypes() {
     this.selectedJobtype = '';
     this.jobCardService.getJobType().subscribe({
@@ -204,24 +192,32 @@ export class JobCardAddForm {
       }
     });
   }
-  //load job Source 
-  // loadJobSorces() {
-  //   this.selectedJobSources = '';
-  //   this.jobCardService.getJobSource().subscribe({
-  //     next: (res) => {
-  //       //console.log(res);
+  loadServiceHistory(chassisNo: string) {
+    debugger
 
-  //       this.jobSourceList = res.map((x: any) => ({
-  //         jobSourceId: x.jobSourceId,
-  //         jobSourceName: (x.jobSourceName || '').trim()
-  //       }));
+    this.jobCardService.getJobCardServiceHistory(chassisNo).subscribe({
+      next: (res: any) => {
+console.log("servicehistory",res)
+        if (!res || res.length === 0) {
+            
+          this.toastr.show('This chassis number is not sold History not available', {
+            classname: 'bg-danger text-white',
+            delay: 2000
+          });
 
-  //     },
-  //     error: (err) => {
-  //       console.error('Error fetching job types', err);
-  //     }
-  //   });
-  // }
+          this.serviceHistoryList = []; // clear table
+          return;
+        }
+
+        this.serviceHistoryList = res;
+      },
+
+      error: (err) => {
+        this.toastr.show("Something went wrong");
+        console.error(err);
+      }
+    });
+  }
   loadJobSorces() {
     this.selectedJobSources = '';
     this.jobCardService.getJobSource().subscribe({
@@ -237,24 +233,7 @@ export class JobCardAddForm {
       }
     });
   }
-  // load Chassis number
-  // loadChassisList() {
-  //   const dealerCode = this.storageService.getDealerCode();
-  //   this.jobCardService.getAllInspectedChassis(dealerCode).subscribe({
-  //     next: (res: any) => {
-  //       console.log(res);
 
-  //       // a duplicate chassis no remove (optional)
-  //       this.chassisList = res;
-  //       if (this.isEditMode && this.chassiseditData) {
-  //         this.patchEditData(this.chassiseditData);
-  //       }
-  //     },
-  //     error: (err) => {
-  //       console.error('Error fetching chassis', err);
-  //     }
-  //   });
-  // }
   loadChassisList() {
     const dealerCode = this.storageService.getDealerCode();
 
@@ -271,18 +250,7 @@ export class JobCardAddForm {
 
     });
   }
-  // load pdi checklist
-  // loadPdiData() {
-  //   this.jobCardService.getPdiChecklist().subscribe({
-  //     next: (res) => {
-  //       this.pdiCheckList = res;   //  HERE
-  //       console.log(this.pdiCheckList);
-  //     },
-  //     error: (err) => {
-  //       console.error(err);
-  //     }
-  //   });
-  // }
+
   loadPdiData() {
     this.jobCardService.getPdiChecklist().subscribe(res => {
       this.pdiCheckList = res;
@@ -302,32 +270,7 @@ export class JobCardAddForm {
 
     console.log('Selected Location:', this.selectedLocation);
   }
-  // onJobType() {
 
-  //   const jobTypeId = this.selectedJobtype;
-
-  //   this.jobCardService.getServiceHead(jobTypeId).subscribe(res => {
-  //     this.serviceHeadList = res;
-
-  //     // Reset
-  //     if (!this.isEditMode) {
-  //       this.selectedServiceHead = '';
-  //       this.serviceTypeList = [];
-  //       this.selectedServiceType = '';
-  //     }
-
-  //     if (this.isEditMode) {
-  //       this.loadServiceType(this.selectedServiceHead);
-  //     }
-  //     else {
-  //       // normal flow
-  //       if (this.serviceHeadList.length === 1) {
-  //         this.selectedServiceHead = this.serviceHeadList[0].serviceHeadId;
-  //         this.loadServiceType(this.selectedServiceHead);
-  //       }
-  //     }
-  //   });
-  // }
   onJobType(isEdit = false) {
 
     this.jobCardService.getServiceHead(this.selectedJobtype).subscribe(res => {
@@ -349,20 +292,7 @@ export class JobCardAddForm {
   onServiceHeadChange() {
     this.loadServiceType(this.selectedServiceHead);
   }
-  // loadServiceType(serviceHeadId: number) {
-  //   this.jobCardService.getServiceType(serviceHeadId).subscribe(res => {
-  //     this.serviceTypeList = res;
 
-  //     if (!this.isEditMode) {
-  //       this.selectedServiceType = '';
-  //     }
-
-  //     //  AUTO SELECT if only 1
-  //     if (!this.isEditMode && this.serviceTypeList.length === 1) {
-  //       this.selectedServiceType = this.serviceTypeList[0].serviceTypeId;
-  //     }
-  //   });
-  // }
   loadServiceType(serviceHeadId: number, isEdit = false) {
 
     this.jobCardService.getServiceType(serviceHeadId).subscribe(res => {
@@ -380,56 +310,11 @@ export class JobCardAddForm {
     this.selectedServiceType = '';
   }
 
-  // onChassisChange() {
 
-  //   if (!this.selectedChassis || this.selectedChassis === '') {
-  //     // reset code same
-  //     return;
-  //   }
-
-  //   const selected = this.chassisList.find(
-  //     x => x.chassisNumber === this.selectedChassis
-  //   );
-
-  //   if (selected) {
-
-  //     // ONLY FILL IF NOT EDIT MODE
-  //     if (!this.isEditMode) {
-  //       this.invoiceNo = selected.invoiceNo;
-  //       this.couponNo = this.selectedChassis.slice(-13);
-
-  //       this.customerObj.customerName = selected.customerName;
-  //       this.customerObj.customerMobile = selected.customerMobile;
-  //       this.customerObj.customerAltMobile = selected.customerAltMobile;
-
-  //       this.modelName = selected.modelName;
-  //       this.registerNo = selected.registerNo;
-
-  //       this.batteryCapacity = selected.batteryCapacity;
-  //       this.batteryMake = selected.batteryMake;
-  //       this.batteryChemestry = selected.batteryChemestry;
-  //       this.batteryNumber = selected.batteryNumber;
-
-  //       this.motorNo = selected.motorNo;
-  //       this.controllerNo = selected.controllerNo;
-  //       this.converterNo = selected.converterNo;
-  //       this.chargerNumber = selected.chargerNumber;
-
-  //       this.odoReading = selected.odoReading;
-  //       this.duration = selected.duration;
-  //       this.durationType = selected.durationType;
-  //       this.expireWarrentyDate = selected.expireWarrentyDate;
-  //     }
-  //   }
-  // }
-
-  // onJobSource() {
-  //   const jobSourceId=this.selectedJobSources
-  //   this.selectedJobSources = '';
-  // }
   onChassisChange() {
 
     if (!this.selectedChassis) return;
+    this.loadServiceHistory(this.selectedChassis);
 
     const selected = this.chassisList.find(
       x => x.chassisNumber == this.selectedChassis   //  use ==

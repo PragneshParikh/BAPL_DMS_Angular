@@ -127,8 +127,8 @@ export const ErpOptions = [
     { name: 'Invoiced', value: 'Invoiced' },
     { name: 'Reserved', value: 'Reserved' },
     { name: 'Invalid', value: 'Invalid' }
-//     { name: 'Pending ERP Submission', value: 'Pending' }
- ];
+    //     { name: 'Pending ERP Submission', value: 'Pending' }
+];
 
 export const RateTypes = [
     { id: 1, title: 'Single' },
@@ -152,4 +152,24 @@ export const OemmodelServiceSeq = [
 export const OemmodelServiceFrom = [
     { Id: 1, value: 'Date of Purchase' },
     { Id: 2, value: 'Date of Sale' }
+]
+
+export const ModuleTypes = [
+    { name: 'counter_bill', moduleName: 'Counter Bill' },
+    { name: 'free_service_claim_invoice', moduleName: 'Free Service Claim Invoice' },
+    { name: 'warranty_claim_invoice', moduleName: 'Warranty Claim Invoice' },
+    { name: 'free_service_claim', moduleName: 'Free Service Claim' },
+    { name: 'CIR_investigation', moduleName: 'CIR Investigation' },
+    { name: 'purchase_order', moduleName: 'Purchase Order' }
+]
+
+export const APIUniqueList = [
+    { value: 'color', name: 'Color' },
+    { value: 'dealermaster', name: 'Dealer' },
+    { value: 'hsncodemaster', name: 'HSNCodeMaster' },
+    { value: 'vehicledispatch', name: 'Vehicle Inward' },
+    { value: 'purchaseorder', name: 'Purchase Order' },
+    { value: 'locationmaster', name: 'Location Master' },
+    { value: 'dealermaster', name: 'Dealer Master' },
+    { value: 'itemmaster', name: 'Item Master' }
 ]

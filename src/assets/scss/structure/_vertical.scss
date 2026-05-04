@@ -186,7 +186,7 @@
 
     .btn-vertical-sm-hover {
         color: var(--#{$prefix}secondary-color);
-        display: none;
+        display: inline-block;
     }
 }
 
