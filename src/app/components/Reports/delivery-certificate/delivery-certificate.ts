@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
+import { error, log } from 'console';
+import { DealerService } from '../../../core/services/dealer-service';
+import { StorageService } from '../../../core/services/storage';
+import { DealerMasterViewModel } from '../../../ViewModels/Dealer/DealerMasterViewModel';
+import { resolve } from 'path';
+import { reject } from 'lodash';
 
 @Component({
   selector: 'app-delivery-certificate',
@@ -17,22 +25,71 @@ export class DeliveryCertificate {
   dealerCode: string = 'CUS9999';
   saleDate: Date = this.currentDate;
   deliveryDate: Date = this.currentDate;
+  saleBillId: string;
+  saleBill: any;
+  dealer: DealerMasterViewModel | null = null;
+  regNo: string = 'AP09CD1234';
+  customerName: string = 'John Doe';
 
-ngOnInit() {
-const stateData = history.state?.data;
+  /**
+   *
+   */
+  constructor(private route: ActivatedRoute,
+    private vehicleSaleBillService: VehicleSaleBillService,
+    private storageService: StorageService,
+    private dealerService: DealerService) { }
 
-    if (stateData) {
-      this.certificateNo = stateData.certificateNo;
-      this.variant = stateData.variant;
-      this.vinNo = stateData.vinNo;
-      this.motorSerialNo = stateData.motorSerialNo;
-      this.dealerName = stateData.dealerName;
-      this.dealerCode = stateData.dealerCode;
-      this.saleDate = new Date(stateData.saleDate);
-      this.deliveryDate = new Date(stateData.deliveryDate);
+
+  async ngOnInit() {
+    this.saleBillId = this.route.snapshot.paramMap.get('id') || '';
+    console.log("sale bill id", this.saleBillId);
+    if (this.saleBillId) {
+      await this.getDealerDetails();
+      this.getBillById(parseInt(this.saleBillId));
     }
   }
+  getDealerDetails(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const dealerCode = this.storageService.getDealerCode();
 
+      this.dealerService.getDealers(dealerCode).subscribe((res: any) => {
+        console.log(res, "Dealer Response");
+        this.dealer = res?.data?.[0] || null;
+        resolve(true);
+      }, error => {
+        reject(false);
+      });
+    });
+  }
+
+  getBillById(id: number) {
+    this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
+      next: (res) => {
+        this.saleBill = res;
+        if (res) {
+          console.log("sale bill details", res);
+          this.currentDate = this.currentDate;
+          this.certificateNo = res.saleBillNo;
+          this.variant = res.details[0].modelName;
+          this.vinNo = res.details[0].chassisNo;
+          this.motorSerialNo = res.details[0].motorNo
+          this.dealerName = this.dealer?.compname || '';
+          this.dealerCode = res.dealerCode;
+          this.saleDate = res.saleDate;
+          this.deliveryDate = this.currentDate;
+          this.saleBillId = '';
+          this.saleBill = {};
+          this.regNo = res.details[0].regNo;
+          this.customerName = res.customerName;
+
+        }
+
+      },
+      error: (err) => console.error(err)
+    });
+
+
+  }
   printReport() {
     const printContents = document.getElementById('reportContent')?.innerHTML;
     if (!printContents) return;

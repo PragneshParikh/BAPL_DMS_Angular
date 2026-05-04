@@ -1,0 +1,255 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">Proforma Invoice</h4>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+
+                <form #proformaForm="ngForm">
+
+                    <!-- 🔹 Top Section -->
+                    <div class="row g-2 mb-2">
+
+                        <div class="col-md-2">
+                            <label>Date</label>
+                            <input type="date" class="form-control form-control-sm"
+                                [(ngModel)]="formData.date" name="date">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Location</label>
+                            <select class="form-select form-select-sm"
+                                [(ngModel)]="formData.location" name="location">
+                                <option value="">--Select--</option>
+                            </select>
+                        </div>
+
+                        
+                        <div class="col-md-2">
+                            <label>Proforma No.</label>
+                            <input type="text" class="form-control form-control-sm"
+                                [(ngModel)]="formData.proformaNo" name="proformaNo" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Bill Type</label><br>
+                            <div class="d-flex gap-2 mt-1">
+                                <label><input type="radio" value="Cash"
+                                        [(ngModel)]="formData.billType" name="billType"> Cash</label>
+                                <label><input type="radio" value="Credit"
+                                        [(ngModel)]="formData.billType" name="billType"> Credit</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Cash Account</label>
+                            <select class="form-select form-select-sm"
+                                [(ngModel)]="formData.cashAccount" name="cashAccount">
+                                <option value="">--Select--</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- 🔹 Party Section -->
+                    <div class="row g-2 mb-2">
+
+                        <div class="col-md-3">
+                            <label>Party Name</label>
+                            <input class="form-control form-control-sm"
+                                [(ngModel)]="formData.partyName" name="partyName">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Mobile Number</label>
+                            <input class="form-control form-control-sm"
+                                [(ngModel)]="formData.mobile" name="mobile">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Party State</label>
+                            <input class="form-control form-control-sm"
+                                [(ngModel)]="formData.state" name="state">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Scheme</label>
+                            <select class="form-select form-select-sm"
+                                [(ngModel)]="formData.scheme" name="scheme">
+                                <option value="">--Select--</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- 🔹 Vehicle Section -->
+                    <div class="row g-2 mb-3">
+
+                        <div class="col-md-2">
+                            <label>Job No.</label>
+                            <input class="form-control form-control-sm"
+                                [(ngModel)]="formData.jobNo" name="jobNo">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Reg No.</label>
+                            <input class="form-control form-control-sm"
+                                [(ngModel)]="formData.regNo" name="regNo">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Model</label>
+                            <input class="form-control form-control-sm"
+                                [(ngModel)]="formData.model" name="model">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>ODO</label>
+                            <input class="form-control form-control-sm"
+                                [(ngModel)]="formData.odo" name="odo">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Category</label>
+                            <input class="form-control form-control-sm"
+                                [(ngModel)]="formData.category" name="category">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Technician</label>
+                            <select class="form-select form-select-sm"
+                                [(ngModel)]="formData.technician" name="technician">
+                                <option value="">--Select--</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- 🔹 Item Entry -->
+                    <div class="border rounded p-2 mb-3">
+                        <div class="row g-2 align-items-end">
+
+                            <div class="col-md-2">
+                                <label>Type</label>
+                                <select class="form-select form-select-sm"
+                                    [(ngModel)]="item.type" name="type">
+                                    <option value="Part">Part</option>
+                                    <option value="Labour">Labour</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Description</label>
+                                <input class="form-control form-control-sm"
+                                    [(ngModel)]="item.description" name="description">
+                            </div>
+
+                            <div class="col-md-1">
+                                <label>Qty</label>
+                                <input type="number" class="form-control form-control-sm"
+                                    [(ngModel)]="item.qty" name="qty">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label>Rate</label>
+                                <input type="number" class="form-control form-control-sm"
+                                    [(ngModel)]="item.rate" name="rate">
+                            </div>
+
+                            <div class="col-md-1">
+                                <label>Disc</label>
+                                <input type="number" class="form-control form-control-sm"
+                                    [(ngModel)]="item.discount" name="discount">
+                            </div>
+
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-primary btn-sm w-100"
+                                    (click)="addItem()">Add</button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 🔹 Table -->
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Qty</th>
+                                    <th>Rate</th>
+                                    <th>Discount</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let i of items; let idx = index">
+                                    <td>{{ idx + 1 }}</td>
+                                    <td>{{ i.type }}</td>
+                                    <td>{{ i.description }}</td>
+                                    <td>{{ i.qty }}</td>
+                                    <td>{{ i.rate }}</td>
+                                    <td>{{ i.discount }}</td>
+                                    <td>{{ i.amount }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 🔹 Totals -->
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <label>Remarks</label>
+                            <textarea class="form-control form-control-sm"
+                                [(ngModel)]="formData.remarks" name="remarks"></textarea>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="row g-2">
+
+                                <div class="col-md-6">
+                                    <label>Taxable Amount</label>
+                                    <input class="form-control form-control-sm"
+                                        [(ngModel)]="formData.taxable" name="taxable" readonly>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label>Net Amount</label>
+                                    <input class="form-control form-control-sm"
+                                        [(ngModel)]="formData.net" name="net" readonly>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label>Received</label>
+                                    <input class="form-control form-control-sm"
+                                        [(ngModel)]="formData.received" name="received">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label>Balance</label>
+                                    <input class="form-control form-control-sm"
+                                        [(ngModel)]="formData.balance" name="balance" readonly>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- 🔹 Buttons -->
+                    <div class="text-end mt-3">
+                        <button class="btn btn-primary btn-sm">Save</button>
+                        <button class="btn btn-light btn-sm ms-2">Cancel</button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>

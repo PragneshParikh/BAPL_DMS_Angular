@@ -55,15 +55,15 @@ export class VehicleSaleBillService {
     });
   }
 
-  getChasisPricing(dealerCode: string, ledgerId: number) {
-  return this.http.get<any>(
-    `${this.apiUrl}/VehicleSaleBill/GetChasisPricing?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
-  );
-}
+//   getChasisPricing(dealerCode: string, ledgerId: number) {
+//   return this.http.get<any>(
+//     `${this.apiUrl}/VehicleSaleBill/GetChasisPricing?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
+//   );
+// }
 
-getChassisListPDIOK(dealerCode: string): Observable<VehicleSaleListChasisResponse[]> {
+getChassisListPDIOK(dealerCode: string, ledgerId: number): Observable<VehicleSaleListChasisResponse[]> {
   return this.http.get<VehicleSaleListChasisResponse[]>(
-    `${this.apiUrl}/VehicleSaleBill/ChassisListPDIOK?dealerCode=${dealerCode}`
+    `${this.apiUrl}/VehicleSaleBill/ChassisListPDIOK?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
   );
 }
 getVehicleSaleBillById(id: number): Observable<any> {

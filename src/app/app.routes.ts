@@ -32,6 +32,7 @@ import { CityMaster } from './components/city-master/city-master';
 import { AddCityMaster } from './components/city-master/add-city-master/add-city-master';
 import { ModelwiseServiceSchedule } from './components/modelwise-service-schedule/modelwise-service-schedule';
 import { PerformaInvoice } from './components/Reports/performa-invoice/performa-invoice';
+import { ProformaInvoice } from './components/proforma-invoice/proforma-invoice';
 
 
 export const routes: Routes = [
@@ -91,6 +92,7 @@ export const routes: Routes = [
       { path: 'customer-ledger', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger-list/customer-ledger-list').then(m => m.CustomerLedgerList) },
       { path: 'customer-ledger/:id', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger').then(m => m.CustomerLedger) },
       { path: 'delivery-certificate', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
+      { path: 'add-vehicle-sale-bill/delivery-certificate/:id', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
       { path: 'job-card', component: JobCard, data: [23] },
       { path: 'job-card-addForm/:test', component: JobCardAddForm, data: [23] },
       { path: 'vehicle-po', component: VehiclePO, data: [17] },
@@ -109,7 +111,8 @@ export const routes: Routes = [
       { path: 'extended-battery-warranty', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty-list/extended-battery-warranty-list').then(m => m.ExtendedBatteryWarrantyList) },
       { path: 'extended-battery-warranty/:id', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty').then(m => m.ExtendedBatteryWarranty) },
       { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
-      { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] }
+      { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
+      {path: 'proforma-invoice', component: ProformaInvoice, data: [23] },
     ]
   }
 ];
