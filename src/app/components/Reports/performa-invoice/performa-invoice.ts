@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { StorageService } from '../../../core/services/storage';
 import { DealerService } from '../../../core/services/dealer-service';
 import { DealerMasterViewModel } from '../../../ViewModels/Dealer/DealerMasterViewModel';
-import { PerformaInvoiceService } from '../../../core/services/performa-invoice-service';
+import { ProformaInvoiceService } from '../../../core/services/proforma-invoice-service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
 import { LedgerMaster } from '../../../core/services/ledger-master';
@@ -38,11 +38,12 @@ export class PerformaInvoice implements OnInit {
     total: 0
   };
   inWords: string;
+  isInvoiced: boolean;
 
   constructor(
     private storageService: StorageService,
     private dealerService: DealerService,
-    private performaInvoiceService: PerformaInvoiceService,
+    private proformaInvoiceService: ProformaInvoiceService,
     private route: ActivatedRoute,
     private vehicleSaleBillService: VehicleSaleBillService,
     private router: Router,
@@ -60,7 +61,7 @@ export class PerformaInvoice implements OnInit {
     }
   }
 
-  // ✅ CALCULATE FOR MULTIPLE ROWS
+  // CALCULATE FOR MULTIPLE ROWS
   calculateAmounts() {
   const details = this.saleBill?.details || [];
 
@@ -84,7 +85,7 @@ export class PerformaInvoice implements OnInit {
 
     this.amounts.discount += item.preGstDiscount || 0;
 
-    // ✅ Use finalAmount directly (already calculated in backend)
+    //  Use finalAmount directly (already calculated in backend)
     this.amounts.total += item.finalAmount || 0;
   });
 
@@ -110,6 +111,10 @@ export class PerformaInvoice implements OnInit {
   this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
     next: (res) => {
       this.saleBill = res;
+      if(this.saleBill.erpStatus == "Invoiced")
+      {
+       this.isInvoiced=true;
+      }
       console.log(res, "Sale Bill Response");
       this.calculateAmounts();
 
@@ -136,7 +141,7 @@ export class PerformaInvoice implements OnInit {
   }
 
   savePerformaInvoice() {
-    this.performaInvoiceService.generatePerformaInvoice({
+    this.proformaInvoiceService.generatePerformaInvoice({
       vehicleSaleBillNo: this.saleBill.saleBillNo,
     }).subscribe({
       next: () => this.router.navigate(['/proforma-invoice']),

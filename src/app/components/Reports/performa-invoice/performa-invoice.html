@@ -16,7 +16,9 @@
     </div>
 
 <div class="text-center border-bottom pb-1">
-      <h6 class="mb-0 fw-bold text-uppercase">PROFORMA INVOICE</h6></div>
+      <h6 class="mb-0 fw-bold text-uppercase">
+  {{ isInvoiced ? 'TAX INVOICE' : 'PERFORMA INVOICE' }}
+</h6></div>
     <!-- CUSTOMER DETAILS -->
     <table class="w-100 small custom-table mt-1">
   <tr>
@@ -29,15 +31,15 @@
     <td width="32%">: {{ saleBill?.customerName || '-' }}</td>
 
     <!-- RIGHT SIDE (pushed right) -->
-    <td width="22%" class="label ps-4">Proforma Invoice No</td>
-    <td width="28%">: PR-{{ saleBill?.saleBillNo || '-' }}</td>
+    <td width="22%" class="label ps-4">{{ isInvoiced ? 'Invoice No' : 'Proforma Invoice No' }}</td>
+    <td width="28%">:  {{ isInvoiced ? 'IN-' : 'PR-' }}{{ saleBill?.saleBillNo || '-' }}</td>
   </tr>
 
   <tr>
     <td class="label">Mobile No</td>
     <td>: {{ CustomerLedger?.mobileNumber || '-' }}</td>
 
-    <td class="label ps-4">Proforma Invoice Date</td>
+    <td class="label ps-4"> {{ isInvoiced ? 'Invoice Date' : 'Proforma Invoice Date' }}</td>
     <td>: {{ saleBill?.saleDate | date:'dd-MM-yyyy' }}</td>
   </tr>
 
@@ -144,7 +146,7 @@
         <td class="text-end">({{ amounts.discount | number:'1.2-2' }})</td>
       </tr>
       <tr>
-        <td><b>Proforma Invoice Total</b></td>
+        <td><b> {{ isInvoiced ? 'Invoice Total' : 'Proforma Invoice Total' }}</b></td>
         <td class="text-end"><b>{{ amounts.total | number:'1.2-2' }}</b></td>
       </tr>
     </table>
