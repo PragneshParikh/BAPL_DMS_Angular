@@ -1,0 +1,579 @@
+<div class="container-fluid">
+
+    <!-- Header -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center text-white">
+            <h5 class="mb-sm-0">PCR/CIR</h5>
+            <h5 class="mb-sm-0">Job No. 420</h5>
+
+            <button class="btn btn-light btn-sm">
+                <i class="ri-history-line"></i> Service History
+            </button>
+        </div>
+
+        <div class="card-body">
+
+            <!-- Accordion Start -->
+            <div class="accordion" id="ffirAccordion">
+
+                <!-- BASIC INFO -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingBasic">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapseBasic">
+                            Basic Information
+                        </button>
+                    </h2>
+
+                    <div id="collapseBasic" class="accordion-collapse collapse show">
+                        <div class="accordion-body">
+
+                            <div class="row g-2">
+
+                                <div class="col-md-3">
+                                    <label>Prefix</label>
+                                    <input type="text" class="form-control form-control-sm" value="CUS0379/26-27/"
+                                        readonly>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>CIR No.</label>
+                                    <input type="text" class="form-control form-control-sm" readonly>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>CIR Date</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Customer Name</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Purpose of CIR</label>
+                                    <select class="form-select form-select-sm">
+                                        <option value="0">Select Item</option>
+                                        <option value="1">For Warranty Approval</option>
+                                        <option value="2">For Information</option>
+                                        <option value="3">For Technical Assistance</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Location</label>
+                                    <select class="form-select form-select-sm text-truncate"
+                                        [(ngModel)]="selectedLocation" (change)="onLocationChange($event)">
+
+                                        <option value="">Select Location</option>
+
+                                        <option *ngFor="let loc of locations" [ngValue]="loc.locname">
+                                            {{ loc.locname }}
+                                        </option>
+
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Chassis No.</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Reg. No.</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Vehicle Sales Date</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Failure Date</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Report Title</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Report Prepared by</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Vehicle Model</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Vehicle Journey</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>No. of passengers</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Main Part Affected</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Type of Road Surface</label>
+                                    <select name="RoadSurface" id="ddlRoadSurface" class="form-select form-select-sm">
+                                        <option value="0">--- Select Item ---</option>
+                                        <option value="8">National Highway/ Four lane roads</option>
+                                        <option value="9">City roads/ State highways/ 2 Lane roads with slight
+                                            undulation/
+                                            Pot holes</option>
+                                        <option value="10">Single lane/ Roads with heavy undulation/ Pot holes/ Bumps
+                                        </option>
+                                        <option value="11">Kutcha Road : Unpaved road</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Field Condition</label>
+                                    <select class="form-select form-select-sm">
+                                        <option>Select</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Industry</label>
+                                    <select class="form-select form-select-sm">
+                                        <option>--- Select Industry ---</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Repeat Failure?</label>
+                                    <div class="btn-group w-50">
+                                        <input type="radio" class="btn-check btn-check-sm" name="repeat" id="rN"
+                                            checked>
+                                        <label class="btn btn-outline-secondary" for="rN">N</label>
+
+                                        <input type="radio" class="btn-check btn-check-sm" name="repeat" id="rY">
+                                        <label class="btn btn-outline-secondary" for="rY">Y</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Chassis Modified?</label>
+                                    <div class="btn-group w-50">
+                                        <input type="radio" class="btn-check btn-check-sm" name="chassis" id="cN"
+                                            checked>
+                                        <label class="btn btn-outline-secondary" for="cN">N</label>
+
+                                        <input type="radio" class="btn-check btn-check-sm" name="chassis" id="cY">
+                                        <label class="btn btn-outline-secondary" for="cY">Y</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <label>Remarks</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+                                <!-- Table -->
+                                <div class="table-responsive mt-3">
+                                    <table class="table table-sm table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Customer Voice</th>
+                                                <th>Complaint Code</th>
+                                                <th>Complaint Description</th>
+                                                <th>Dealer Observation</th>
+                                                <th>Action Taken</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>VEHICLE GETTING OFF AT 40% SOC</td>
+                                                <td>Battery not responding</td>
+                                                <td>Battery not responding</td>
+                                                <td>CHECK WITH OTHER BATTERY WORKING OK</td>
+                                                <td>NEED TO SEND FOR REPAIR U/W</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Failure Parts -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingVehicle">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapseVehicle">
+                            Failure Parts
+                        </button>
+                    </h2>
+
+                    <div id="collapseVehicle" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+
+                            <div class="row g-3">
+
+                                <div class="col-md-3">
+                                    <label>Failure Parts(Description:)</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Issue Type</label>
+                                    <select class="form-select form-select-sm">
+                                        <option>Labour</option>
+                                        <option>U/W</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Qty</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Rate</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Complaint Code(Description :)</label>
+                                    <input type="text" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-1">
+                                    <label>Add</label>
+                                    <button class="btn btn-sm btn-primary">
+                                        <i class="ri-add-line">Add</i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Radio Filters -->
+                            <div class="mt-3">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="type" checked>
+                                    <label class="form-check-label">Part</label>
+                                </div>
+
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="type">
+                                    <label class="form-check-label">Accessory</label>
+                                </div>
+
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="type">
+                                    <label class="form-check-label">Oil</label>
+                                </div>
+
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="type">
+                                    <label class="form-check-label">Labour</label>
+                                </div>
+                            </div>
+
+                            <!-- Table -->
+                            <div class="table-responsive mt-3">
+                                <table class="table table-bordered align-middle text-nowrap">
+
+                                    <thead class="table-light text-center">
+                                        <tr>
+                                            <th>Action</th>
+                                            <th>S.No.</th>
+                                            <th>Failure Parts<br>Failure Desc</th>
+                                            <th>Item Type<br>Issue Type</th>
+                                            <th>Qty<br>Rate</th>
+                                            <th>GST %<br>GST Amnt</th>
+                                            <th>Total Amnt</th>
+                                            <th>Complain Code<br>Complain Desc</th>
+                                            <th>Approved Qty<br>Approved Per (%)<br>Approved Amount</th>
+                                            <th>Status<br>Remark</th>
+                                            <th>Upload</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        <!-- Row 1 -->
+                                        <tr class="table-danger">
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-danger">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            </td>
+
+                                            <td class="text-center">1.</td>
+
+                                            <td>
+                                                WLPVFMEM0160<br>
+                                                BATTERY 51.2V 45Ah 2.3kWh-Replacement
+                                            </td>
+
+                                            <td>
+                                                Labour<br>U/W
+                                            </td>
+
+                                            <td class="text-end">
+                                                1<br>10.00
+                                            </td>
+
+                                            <td class="text-end">
+                                                18.00<br>01.80
+                                            </td>
+
+                                            <td class="text-end">11.80</td>
+
+                                            <td></td>
+
+                                            <td></td>
+
+                                            <td></td>
+                                            <td><input type="file" #fileInput>
+
+                                                <i class="ri-upload-2-line text-primary" style="cursor:pointer"
+                                                    (click)="fileInput.click()"></i>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Row 2 -->
+                                        <tr class="table-info">
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-danger">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            </td>
+
+                                            <td class="text-center">2.</td>
+
+                                            <td>
+                                                22DZ410050AS<br>
+                                                BATTERY 51.2V 45Ah 2.3kWh
+                                            </td>
+
+                                            <td>
+                                                Parts<br>U/W
+                                            </td>
+
+                                            <td class="text-end">
+                                                1<br>29,745.04
+                                            </td>
+
+                                            <td class="text-end">
+                                                18.00<br>5,354.11
+                                            </td>
+
+                                            <td class="text-end">35,099.15</td>
+
+                                            <td>
+                                                Battery not responding<br>
+                                                Battery not responding
+                                            </td>
+
+                                            <td></td>
+
+                                            <td></td>
+                                            <td>
+                                                <input type="file" #fileInput>
+
+                                                <i class="ri-upload-2-line text-primary" style="cursor:pointer"
+                                                    (click)="fileInput.click()"></i>
+
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job History -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFailure">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapseFailure">
+                            Job History
+                        </button>
+                    </h2>
+
+                    <div id="collapseFailure" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered align-middle text-nowrap">
+
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>S.No.</th>
+                                                <th>Job Card No</th>
+                                                <th>Date</th>
+                                                <th>Vehicle Journey</th>
+                                                <th>Observation</th>
+                                                <th>Service Head</th>
+                                                <th>Service Type</th>
+                                                <th>Remarks</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+
+                                            <!-- Row 1 -->
+                                            <tr>
+                                                <td class="text-center">1.</td>
+                                                <td>106</td>
+                                                <td>10-17-2025</td>
+                                                <td>0</td>
+                                                <td>0</td>
+                                                <td>PDI</td>
+                                                <td>PDI</td>
+                                                <td>Test</td>
+                                            </tr>
+
+                                            <!-- Row 2 -->
+                                            <tr>
+                                                <td class="text-center">2.</td>
+                                                <td>244</td>
+                                                <td>11-27-2025</td>
+                                                <td>498</td>
+                                                <td>
+                                                    1st free service and general check up rear suspension hard issue
+                                                    both brake set
+                                                </td>
+                                                <td>Free Service</td>
+                                                <td>1st Free Service</td>
+                                                <td>Test</td>
+                                            </tr>
+
+                                            <!-- Row 3 -->
+                                            <tr>
+                                                <td class="text-center">3.</td>
+                                                <td>420</td>
+                                                <td>04-27-2026</td>
+                                                <td>3825</td>
+                                                <td>VEHICLE GETTING OFF AT 40% SOC</td>
+                                                <td>Major Repair</td>
+                                                <td>Battery Repair / Replacement</td>
+                                                <td>Test</td>
+                                            </tr>
+
+                                        </tbody>
+
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Detailed Observation-->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingBasic">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapseBasic">
+                            DETAILED OBSERVATIONS
+                        </button>
+                    </h2>
+
+                    <div id="collapseSetailed
+                    observation" class="accordion-collapse collapse show">
+                        <div class="accordion-body">
+
+                            <div class="card-body p-0">
+
+                                <div class="table-responsive">
+                                    <table class="table table-bordered align-middle mb-0">
+
+                                        <tbody>
+
+                                            <!-- Row 1 -->
+                                            <tr>
+                                                <td style="width: 50%;">
+                                                    Detailed Observations on complaint and the Failed Parts:
+                                                </td>
+                                                <td>
+                                                    <textarea class="form-control form-control-sm">
+                                                        VEHICLE GETTING OFF AT 40% SOC
+                                                    </textarea>
+                                                </td>
+                                            </tr>
+
+                                            <!-- Row 2 -->
+                                            <tr>
+                                                <td>Root cause of the failure</td>
+                                                <td>
+                                                    <textarea class="form-control form-control-sm">
+                                                            CHECK WITHE OTHER BATTERY WORKING OK
+                                                    </textarea>
+                                                </td>
+                                            </tr>
+
+                                            <!-- Row 3 -->
+                                            <tr>
+                                                <td>Corrective action taken</td>
+                                                <td>
+                                                    <textarea class="form-control form-control-sm">
+                                                            NEED TO SEND FOR REPAIR U/W
+                                                    </textarea>
+                                                </td>
+                                            </tr>
+
+                                            <!-- Row 4 -->
+                                            <tr>
+                                                <td>
+                                                    Any Local solution or Suggestion from the field for Prevention/Quick
+                                                    resolution of the complaint
+                                                </td>
+                                                <td>
+                                                    <textarea class="form-control form-control-sm">N/A</textarea>
+                                                </td>
+                                            </tr>
+
+                                            <!-- Row 5 -->
+                                            <tr>
+                                                <td>Present Status of the Vehicle</td>
+                                                <td>
+                                                    <select class="form-select form-select-sm">
+                                                        <option>Complaint Resolved</option>
+                                                        <option>Pending</option>
+                                                        <option>In Progress</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <!-- Row 6 -->
+                                            <tr>
+                                                <td>If vehicle off road, Reason is</td>
+                                                <td>
+                                                    <textarea class="form-control form-control-sm">N/A</textarea>
+                                                </td>
+                                            </tr>
+
+
+                                        </tbody>
+
+                                    </table>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Accordion End -->
+
+                <!-- Footer Buttons -->
+                <div class="mt-3 d-flex justify-content-between">
+
+                    <div>
+                        <button class="btn btn-primary btn-sm">Open Estimate on Save</button>
+                    </div>
+
+                    <div>
+                        <button class="btn btn-primary btn-sm">Save</button>
+                        <button class="btn btn-light btn-sm">Cancel</button>
+                        <button class="btn btn-primary btn-sm">Submit to ERP</button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>

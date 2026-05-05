@@ -28,12 +28,13 @@ export class JobCard {
   isEditMode = false;
   //dropdown changes
   selectedLocation: string = '';
-  selectedJobtype: string = '';
+  selectedJobtype: any;
   selectedJobSource: string = '';
   selectedComplaints: string = '';
   selectedViewJobs: string = '';
   selectedChassis: string = '';
   searchTimeout: any;
+  jobTypeId: number = 0;
 
 
   //Pagination
@@ -93,7 +94,8 @@ export class JobCard {
   // load Chassis number
   loadChassisList() {
     const dealerCode = this.storageService.getDealerCode();
-    this.jobCardService.getAllInspectedChassis(dealerCode).subscribe({
+    this.jobTypeId = this.selectedJobtype;
+    this.jobCardService.getAllInspectedChassis(dealerCode,this.jobTypeId).subscribe({
       next: (res: any) => {
         console.log(res);
 
@@ -241,7 +243,7 @@ export class JobCard {
       this.jobCardList = res;
     });
   }
-  
+
   //  PAGINATION
   pageChange(page: number) {
     this.page = page;

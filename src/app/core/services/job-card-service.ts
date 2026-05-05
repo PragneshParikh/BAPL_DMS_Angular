@@ -23,8 +23,10 @@ export class JobCardService {
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetServiceType?serviceHeadId=${serviceHeadId}`);
   }
 
-  getAllInspectedChassis(dealerCode: string): Observable<any> {
-    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetAllInspectedChassis?dealerCode=${dealerCode}`);
+  getAllInspectedChassis(dealerCode: string, jobTypeId:number): Observable<any> {
+    debugger;
+    if (!jobTypeId) jobTypeId = 0; 
+    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetAllInspectedChassis?dealerCode=${dealerCode}&jobTypeId=${jobTypeId}`);
   }
 
   getJobSource(): Observable<any> {

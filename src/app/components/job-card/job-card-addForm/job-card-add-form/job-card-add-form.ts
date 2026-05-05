@@ -36,7 +36,7 @@ export class JobCardAddForm {
   complaintList: any[] = [];
   jobCardDetailsView: any[] = []
   serviceHistoryList: any[] = []
-
+  jobTypeId: number = 0
 
   selectedJobtype: any;
   selectedJobSources: any;
@@ -197,9 +197,9 @@ export class JobCardAddForm {
 
     this.jobCardService.getJobCardServiceHistory(chassisNo).subscribe({
       next: (res: any) => {
-console.log("servicehistory",res)
+        console.log("servicehistory", res)
         if (!res || res.length === 0) {
-            
+
           this.toastr.show('This chassis number is not sold History not available', {
             classname: 'bg-danger text-white',
             delay: 2000
@@ -235,9 +235,11 @@ console.log("servicehistory",res)
   }
 
   loadChassisList() {
+    debugger
     const dealerCode = this.storageService.getDealerCode();
+    this.jobTypeId = this.selectedJobtype
 
-    this.jobCardService.getAllInspectedChassis(dealerCode).subscribe(res => {
+    this.jobCardService.getAllInspectedChassis(dealerCode, this.jobTypeId).subscribe(res => {
       this.chassisList = res;
 
       if (this.isEditMode && this.chassiseditData) {
@@ -272,6 +274,18 @@ console.log("servicehistory",res)
   }
 
   onJobType(isEdit = false) {
+
+    if (!this.selectedJobtype) return;   // 👈 IMPORTANT
+
+    const dealerCode = this.storageService.getDealerCode();
+
+    this.jobCardService
+      .getAllInspectedChassis(dealerCode, this.selectedJobtype)
+      .subscribe(res => {
+        this.chassisList = res;
+      });
+
+
 
     this.jobCardService.getServiceHead(this.selectedJobtype).subscribe(res => {
 
