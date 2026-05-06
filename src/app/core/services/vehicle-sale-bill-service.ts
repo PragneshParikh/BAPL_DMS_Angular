@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UpdateSaleDetailsVM, VehicleSaleChasisRequest, VehicleSaleChasisResponse } from '../../ViewModels/VehicleSaleBill';
 import { VehicleSaleListChasisResponse } from '../../ViewModels/VehicleSaleChasisResponse';
+import { Form22SlipViewModel } from '../../ViewModels/Form22SlipViewModel';
 
 @Injectable({
   providedIn: 'root',
@@ -93,4 +94,15 @@ updateRegistrationAndReserveChassis(
       { params }
     );
   }
+
+
+  getForm22(chassisNo: string): Observable<Form22SlipViewModel> {
+    const params = new HttpParams().set('chassisNo', chassisNo);
+
+    return this.http.get<Form22SlipViewModel>(
+      `${this.apiUrl}/VehicleSaleBill/Form22`,
+      { params }
+    );
+  }
+
 }

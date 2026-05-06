@@ -1,95 +1,120 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ProformaInvoiceService } from '../../core/services/proforma-invoice-service';
+import { NgbPaginationModule, NgbHighlight } from '@ng-bootstrap/ng-bootstrap';
+import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-proforma-invoice',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NgbPaginationModule, 
+    NgbHighlight,FlatpickrModule,RouterOutlet],
   templateUrl: './proforma-invoice.html',
   styleUrl: './proforma-invoice.scss',
+  providers:[FlatpickrDefaults]
 })
-export class ProformaInvoice {
+export class ProformaInvoice implements OnInit {
 
-  // 🔹 Main Form Data
-  formData: any = {
-    date: '',
-    location: '',
-    prefix: '',
-    proformaNo: '1',
-    billType: 'Cash',
-    cashAccount: '',
+  invoices: any[] = [];
+  filteredInvoices: any[] = [];
+  paginatedInvoices: any[] = [];
 
-    partyName: '',
-    mobile: '',
-    state: '',
-    scheme: '',
+  searchTerm: string = '';
 
-    jobNo: '',
-    regNo: '',
-    model: '',
-    odo: '',
-    category: '',
-    technician: '',
+  page = 1;
+  pageSize = 10;
 
-    remarks: '',
-
-    taxable: 0,
-    net: 0,
-    received: 0,
-    balance: 0
+  filter = {
+    fromDate: null,
+    toDate: null,
+    documentNo: '',
+    customerName: ''
   };
 
-  // 🔹 Current Item Entry
-  item: any = {
-    type: 'Part',
-    description: '',
-    qty: 0,
-    rate: 0,
-    discount: 0
-  };
+  constructor(private invoiceService: ProformaInvoiceService) {}
 
-  // 🔹 Item List
-  items: any[] = [];
+  ngOnInit() {
+    this.loadInvoices();
+  }
 
-  // ✅ Add Item
-  addItem() {
-    if (!this.item.description || this.item.qty <= 0) return;
+  //    API CALL
+  loadInvoices() {
+    this.invoiceService.getAll().subscribe({
+      next: (res: any) => {
+        this.invoices = res;
+        this.filteredInvoices = res;
+        this.updatePagination();
+      },
+      error: (err) => {
+ console.log(err);                 // full object
+    console.log(err.error);           // API response
+    console.log(err.error?.message);  
+      }
+    });
+  }
 
-    const amount =
-      (this.item.qty * this.item.rate) - this.item.discount;
+  //    FILTER BUTTON
+  onSearch() {
+    this.filteredInvoices = this.invoices.filter(x =>
+      (!this.filter.documentNo || x.documentNo?.includes(this.filter.documentNo)) &&
+      (!this.filter.customerName || x.customerName?.toLowerCase().includes(this.filter.customerName.toLowerCase()))
+    );
+    this.page = 1;
+    this.updatePagination();
+  }
 
-    this.items.push({
-      ...this.item,
-      amount
+  //    GLOBAL SEARCH
+  onSearchChange() {
+    const term = this.searchTerm.toLowerCase();
+
+    this.filteredInvoices = this.invoices.filter(x =>
+      Object.values(x).some(val =>
+        val?.toString().toLowerCase().includes(term)
+      )
+    );
+
+    this.page = 1;
+    this.updatePagination();
+  }
+
+  //    SORTING
+  onSort(field: string) {
+    this.filteredInvoices.sort((a, b) => {
+      const valA = a[field] ?? '';
+      const valB = b[field] ?? '';
+      return valA > valB ? 1 : -1;
     });
 
-    this.calculateTotals();
-
-    // reset item row
-    this.item = {
-      type: 'Part',
-      description: '',
-      qty: 0,
-      rate: 0,
-      discount: 0
-    };
+    this.updatePagination();
   }
 
-  // ✅ Calculate Totals
-  calculateTotals() {
-    const total = this.items.reduce((sum, i) => sum + i.amount, 0);
-
-    this.formData.taxable = total;
-    this.formData.net = total;
-
-    this.calculateBalance();
+  //    PAGINATION
+  updatePagination() {
+    const start = (this.page - 1) * this.pageSize;
+    this.paginatedInvoices = this.filteredInvoices.slice(start, start + this.pageSize);
   }
 
-  // ✅ Balance Calculation
-  calculateBalance() {
-    this.formData.balance =
-      this.formData.net - (this.formData.received || 0);
+  onPageChange(page: number) {
+    this.page = page;
+    this.updatePagination();
   }
 
+  //    ROW CLICK
+  editInvoice(item: any) {
+    console.log('Edit invoice', item);
+    // TODO: navigate to edit page
+  }
+
+  //    ADD BUTTON
+  navigateToAddInvoice() {
+    console.log('Navigate to add invoice');
+    // TODO: router navigation
+  }
+
+  //    EXPORT
+  exportExcel() {
+    console.log('Export to Excel');
+    // TODO: implement export
+  }
 }

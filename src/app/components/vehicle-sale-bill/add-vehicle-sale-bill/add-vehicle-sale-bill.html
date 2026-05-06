@@ -370,7 +370,9 @@
 
                     <i class="ri-arrow-down-s-line transition-icon"></i>
                 </div>
-
+<div *ngIf="!isCustomerValid()" class="text-danger mt-1">
+  Please select a valid customer before choosing chassis.
+</div>
 
                 <div id="vehicleDetails" class="collapse show">
                     <div class="card card-body border-0 shadow-sm p-3">
@@ -618,9 +620,7 @@
                                     Add
                                 </button>
                             </div>
-<div *ngIf="!isCustomerValid()" class="text-danger mt-1">
-  Please select a valid customer before choosing chassis.
-</div>
+
                         </div>
 
                     </div>

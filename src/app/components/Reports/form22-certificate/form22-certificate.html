@@ -1,0 +1,100 @@
+<div class="a4-page mx-auto bg-white p-4 shadow-sm" id="reportContent">
+
+    <!-- HEADER -->
+    <div class="text-center mb-3">
+        <h5 class="fw-bold">BGAUSS AUTO PRIVATE LIMITED</h5>
+        <div class="d-flex justify-content-end">
+
+            <strong>RTO's Copy</strong>
+        </div>
+    </div>
+
+    <!-- FORM TITLE -->
+    <div class="text-center mb-3">
+        <h6 class="fw-bold">FORM 22</h6>
+        <strong>[See Rules 47(1)(g), 115, 124(2) and 127]</strong>
+        <p class="fw-bold mt-2">
+            INITIAL CERTIFICATE OF COMPLIANCE WITH POLLUTION STANDARDS,<br>
+            SAFETY STANDARDS OF COMPONENTS AND ROAD-WORTHINESS
+        </p>
+        <small>
+            (To be issued by the manufacturer or registered E-rickshaw or<br>
+            E-cart Association(in case of E-rickshaw or E-Cart))
+        </small>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <p style="font-size: 13px;">
+        It is certified that the following vehicle complies with the emission values, including mass emission norms and
+        noise standards
+        including the noise levels under the provisions of the Motor Vehicles Act, 1988 and rules made thereunder as
+        specified below.
+    </p>
+
+    <!-- DETAILS TABLE -->
+    <table class="table table-borderless table-sm">
+        <tbody>
+
+            <tr>
+                <td style="width: 60%;">1. Type Approval certificate no.</td>
+                <td>:<strong> {{ form22Data.typeApprovalCertNo }}</strong></td>
+            </tr>
+
+            <tr>
+                <td>2. Brand name of the vehicle</td>
+                <td>: <strong>{{ form22Data.brandName }}</strong></td>
+            </tr>
+
+            <tr>
+                <td>3. Chassis number</td>
+                <td>: <strong>{{ form22Data.chassisNo }}</strong></td>
+            </tr>
+
+            <tr>
+                <td>4. Engine number / motor number</td>
+                <td>: <strong>{{ form22Data.motorNo }}</strong></td>
+            </tr>
+
+            <tr>
+                <td>(In case of battery operated vehicles)</td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td>5. Emission Norms applicable</td>
+                <td>: <strong> Battery Operated Vehicle (BOV)</strong></td>
+            </tr>
+
+            <tr>
+                <td>
+                    6. The emission, sound level for horn and pass by noise values
+                    of the above vehicle model, obtained during Type Approval as per CMVR 1989:
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td class="ps-4">i. Emission</td>
+                <td>: -</td>
+            </tr>
+
+            <tr>
+                <td class="ps-4">7. Sound Level Horn</td>
+                <td>: <strong>{{ form22Data.soundLevelHorn }}</strong></td>
+            </tr>
+
+            <tr>
+                <td class="ps-4">8. Pass by noise level</td>
+                <td>:<strong>  {{ form22Data.noiseLevel }}</strong></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <!-- SIGNATURE -->
+    <div class="text-end mt-5">
+        <p class="mb-0 fw-bold">BGAUSS AUTO PVT. LTD.</p>
+        <p class="mb-0">Authorized Signatory</p>
+    </div>
+    <hr class="border-1 text-black opacity-100">
+</div>

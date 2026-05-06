@@ -34,6 +34,7 @@ import { ModelwiseServiceSchedule } from './components/modelwise-service-schedul
 import { PdiChecklistmaster } from './components/pdi-checklistmaster/pdi-checklistmaster';
 import { PerformaInvoice } from './components/Reports/performa-invoice/performa-invoice';
 import { ProformaInvoice } from './components/proforma-invoice/proforma-invoice';
+import { Form22Certificate } from './components/Reports/form22-certificate/form22-certificate';
 
 
 export const routes: Routes = [
@@ -115,7 +116,8 @@ export const routes: Routes = [
       { path: 'extended-battery-warranty/:id', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty').then(m => m.ExtendedBatteryWarranty) },
       { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
-      { path: 'proforma-invoice', component: ProformaInvoice, data: [23] }
+      { path: 'proforma-invoice', component: ProformaInvoice, data: [23] },
+       { path: 'form22-certificate/:chassisNo', component: Form22Certificate, data: [23] }
     ]
   }
 ];

@@ -312,7 +312,7 @@ this.selectedCustomerId = res.ledgerId;
         // Load chassis FIRST, then bind bill
         this.loadChassisList(() => {
           this.loadBillForEdit(res);
-          if (this.erpStatus == 'Alloted' && this.vehicleList.some(v => v.regNo == '' && v.insNo == '' || (v.regAmt === 0 || v.insAmt === 0))) {
+          if ((this.erpStatus == 'Alloted' || this.erpStatus == 'Pending') && this.vehicleList.some(v => v.regNo == '' && v.insNo == '' || (v.regAmt === 0 || v.insAmt === 0))) {
             this.openRegistrationModal();
           }
         });
@@ -862,7 +862,7 @@ this.selectedCustomerId = res.ledgerId;
         delay: 3000
       });
 
-      this.model.chassisNo = ''; // reset selection
+      this.model.chassisNo = ''; 
       return;
     }
 
@@ -979,7 +979,7 @@ this.selectedCustomerId = res.ledgerId;
     this.isCustomerValid() &&
     !!this.model.billingName;
 
-  // ✅ Conditional validation
+  //  Conditional validation
   if (this.model.saleType === 'Credit') {
     return isBasicValid && !!this.model.financier;
   }
@@ -1112,7 +1112,7 @@ this.selectedCustomerId = res.ledgerId;
   }
 
   printInvoice() {
-    console.log('Print Invoice');
+    this.router.navigate(['add-vehicle-sale-bill/performaInvoice', this.billId]);
   }
 
   printSaleLetter() {
@@ -1124,8 +1124,12 @@ this.selectedCustomerId = res.ledgerId;
   }
 
   printForm22() {
-    console.log('Print Form 22');
-  }
+  if (!this.vehicleList.length) return;
+
+  const chassisNo = this.vehicleList[0].chassisNo;
+
+  this.router.navigate(['form22-certificate', chassisNo]);
+}
 
   printDeliveryChecklist() {
     console.log('Print Delivery Checklist');
@@ -1134,20 +1138,7 @@ this.selectedCustomerId = res.ledgerId;
   //temporary implementation--will modify once we have delivery certificate API ready
   printDeliveryCertificate() {
     this.router.navigate(['add-vehicle-sale-bill/delivery-certificate',this.billId]);
-    // , {
-    //   state: {
-    //     data: {
-    //       certificateNo: this.model.saleBillNo,
-    //       variant: this.vehicleList[0]?.model || this.vehicleList[0]?.itemName,
-    //       vinNo: this.vehicleList[0]?.chassisNo,
-    //       motorSerialNo: this.vehicleList[0]?.motorNo || this.vehicleList[0]?.itemName || '',
-    //       dealerName: this.model.customerName,
-    //       dealerCode: this.storageService.getDealerCode(),
-    //       saleDate: this.model.saleDate,
-    //       deliveryDate: new Date()
-    //     }
-    //   }
-    // });
+   
   }
 
   navigateToPerformaInvoice() {
@@ -1160,8 +1151,17 @@ this.selectedCustomerId = res.ledgerId;
   connfirmInvoiceGeneration() {
     this.isInvoiced = true;
     this.vehicleSaleBillService.confirmInvoice(this.model.saleBillNo).subscribe({
-      next: () => {
-        this.toaster.show('Invoice Generated Successfully', { classname: 'bg-success text-light', delay: 3000 });
+      next: (res) => {
+        if(res === true)
+        {
+
+          this.toaster.show('Invoice Generated Successfully', { classname: 'bg-success text-light', delay: 3000 });
+
+        }
+        else{
+           this.toaster.show('Failed to Generate Invoice', { classname: 'bg-danger text-light', delay: 3000 });
+           this.isInvoiced = false;
+        }
       },
       error: () => {
         this.isInvoiced = false;
