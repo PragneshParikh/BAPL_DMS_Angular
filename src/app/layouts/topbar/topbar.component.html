@@ -152,7 +152,6 @@
                                                                         <span>Status: &nbsp; {{ item.status }}</span>
                                                                     </p>
                                                                 </div>
-
                                                             </div>
                                                         </div>
                                                         <div class="dropdown-divider"></div>
@@ -170,14 +169,6 @@
                                                             </div>
                                                         </div>
                                                         }
-                                                        <!-- @if(vehicleDispatch?.length > 0){
-                                                        <div class="my-3 text-center">
-                                                            <button type="button"
-                                                                class="btn btn-soft-success waves-effect waves-light">View
-                                                                All Notifications <i
-                                                                    class="ri-arrow-right-line align-middle"></i></button>
-                                                        </div>
-                                                        } -->
                                                     </div>
                                                 </ngx-simplebar>
                                             </div>
@@ -192,38 +183,38 @@
                                                 role="tabpanel">
                                                 <ngx-simplebar style="max-height: 300px;">
                                                     <div class="pe-2">
-                                                        @for(message of partsDispatch;track $index){
-                                                        <div class="text-reset notification-item d-block dropdown-item">
-                                                            <div class="d-flex">
-                                                                <img src="{{message.avatar}}"
-                                                                    class="me-3 rounded-circle avatar-xs"
-                                                                    alt="user-pic">
-                                                                <div class="flex-grow-1">
+                                                        @for(item of partsNotifications; track $index){
+                                                        <div
+                                                            class="text-reset notification-item d-block dropdown-item position-relative">
+                                                            <div class=" d-flex">
+                                                                <div class="flex-grow-1"
+                                                                    (click)="onClickPartNumber(item)">
                                                                     <a href="javascript:void(0);"
                                                                         class="stretched-link">
                                                                         <h6 class="mt-0 mb-1 fs-13 fw-semibold">
-                                                                            {{message.name}}</h6>
+                                                                            Invoice No: &nbsp; {{ item.invoiceNumber }}
+                                                                        </h6>
                                                                     </a>
-                                                                    <div class="fs-13 text-muted">
-                                                                        <p class="mb-1">{{message.message}}</p>
+                                                                    <div class="fs-13 text-muted mb-0">
+                                                                        <p>No of Items:&nbsp;
+                                                                            {{ item.numberOfItems }}
+                                                                        </p>
                                                                     </div>
                                                                     <p
                                                                         class="mb-0 fs-11 fw-medium text-uppercase text-muted">
-                                                                        <span><i class="mdi mdi-clock-outline"></i>
-                                                                            {{message.time_ago}}</span>
+                                                                        <span>Invoice Date: &nbsp; {{ item.invoiceDate |
+                                                                            date: "MM/dd/yyyy"
+                                                                            }}</span>
                                                                     </p>
-                                                                </div>
-                                                                <div class="px-2 fs-15">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        value="{{message.id}}"
-                                                                        [(ngModel)]="message.state"
-                                                                        id="{{message.checkboxId}}">
-                                                                    <label class="form-check-label"
-                                                                        for="{{message.checkboxId}}"></label>
+                                                                    <p
+                                                                        class="mb-0 fs-11 fw-medium text-uppercase text-muted">
+                                                                        <span>Status: &nbsp; {{ item.status }}</span>
+                                                                    </p>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        }@empty {
+                                                        <div class="dropdown-divider"></div>
+                                                        } @empty{
                                                         <div class="tab-pane p-4" id="alerts-tab" role="tabpanel"
                                                             aria-labelledby="alerts-tab">
                                                             <div class="w-25 w-sm-50 pt-3 mx-auto">
@@ -237,17 +228,7 @@
                                                             </div>
                                                         </div>
                                                         }
-                                                        @if(partsDispatch?.length > 0){
-                                                        <div class="my-3 text-center">
-                                                            <button type="button"
-                                                                class="btn btn-soft-success waves-effect waves-light">View
-                                                                All Messages <i
-                                                                    class="ri-arrow-right-line align-middle"></i></button>
-                                                        </div>
-                                                        }
                                                     </div>
-
-
                                                 </ngx-simplebar>
                                             </div>
                                         </ng-template>
