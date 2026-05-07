@@ -41,7 +41,7 @@ export const routes: Routes = [
   { path: 'reset-password', loadComponent: () => import('./components/account/reset-password/reset-password').then(m => m.ResetPassword) },
   {
     path: '', component: LayoutComponent,
-    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     children: [
 
       // SHOWROOM MODULE
