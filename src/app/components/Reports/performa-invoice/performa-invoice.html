@@ -149,6 +149,84 @@
         <td><b> {{ isInvoiced ? 'Invoice Total' : 'Proforma Invoice Total' }}</b></td>
         <td class="text-end"><b>{{ amounts.total | number:'1.2-2' }}</b></td>
       </tr>
+
+ <!-- ON ROAD SECTION -->
+
+  <ng-container *ngIf="invoiceType === 'onroad'">
+
+    <tr>
+      <td>
+        <b>Registration Amount</b>
+      </td>
+
+      <td class="text-end">
+        {{ registrationAmount | number:'1.2-2' }}
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <b>Insurance Amount</b>
+      </td>
+
+      <td class="text-end">
+        {{ insuranceAmount | number:'1.2-2' }}
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <b>Pre GST Discount</b>
+      </td>
+
+      <td class="text-end">
+        ({{ preGstDiscount | number:'1.2-2' }})
+      </td>
+    </tr>
+
+  </ng-container>
+
+  <!-- GRAND TOTAL -->
+
+  <tr>
+
+    <td>
+
+      <b>
+
+        {{
+
+          invoiceType === 'onroad'
+            ? 'On Road Total'
+            : (
+                isInvoiced
+                  ? 'Invoice Total'
+                  : 'Proforma Invoice Total'
+              )
+
+        }}
+
+      </b>
+
+    </td>
+
+    <td class="text-end">
+
+      <b>
+
+        {{
+
+          invoiceType === 'onroad'
+            ? (onRoadTotal | number:'1.2-2')
+            : (amounts.total | number:'1.2-2')
+
+        }}
+
+      </b>
+
+    </td>
+
+
     </table>
 
     <div class="dashed"></div>
