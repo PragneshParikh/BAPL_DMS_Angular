@@ -259,7 +259,8 @@ export class AddVehicleSaleBill implements OnInit {
       tcs: d.tcs || 0,
 
       finalAmount: d.finalAmount,
-      saleDate: d.saleDate
+      saleDate: d.saleDate,
+      motorNo:d.motorNo
 
     }));
     this.mergeBillChassisIntoDropdown();
@@ -1111,17 +1112,52 @@ this.selectedCustomerId = res.ledgerId;
     console.log('Print Last Saved');
   }
 
-  printInvoice() {
-    this.router.navigate(['add-vehicle-sale-bill/performaInvoice', this.billId]);
-  }
+ printExShowroomInvoice() {
 
+  this.router.navigate(
+    ['add-vehicle-sale-bill/performaInvoice', this.billId],
+    {
+      queryParams: {
+        type: 'ex'
+      }
+    }
+  );
+
+}
+
+printOnRoadInvoice() {
+
+  this.router.navigate(
+    ['add-vehicle-sale-bill/performaInvoice', this.billId],
+    {
+      queryParams: {
+        type: 'onroad'
+      }
+    }
+  );
+
+}
   printSaleLetter() {
-    console.log('Print Sale Letter');
+    this.router.navigate(['sale-Letter', this.billId]);
   }
 
   printDeliverySlip() {
-    console.log('Print Delivery Slip');
-  }
+  if (!this.vehicleList.length) return;
+
+  const vehicle = this.vehicleList[0]; //
+console.log(vehicle.motorNo,"dsa");
+
+  this.router.navigate(['/delivery-slip'], {
+
+    queryParams: {
+      partyName: this.model.customerName,
+      modelName: vehicle.modelName,
+      chassisNo: vehicle.chassisNo,
+      motorNo: vehicle.motorNo, 
+      regNo: vehicle.regNo
+    }
+  });
+}
 
   printForm22() {
   if (!this.vehicleList.length) return;
@@ -1132,7 +1168,7 @@ this.selectedCustomerId = res.ledgerId;
 }
 
   printDeliveryChecklist() {
-    console.log('Print Delivery Checklist');
+   this.router.navigate(['/delivery-checkList']);
   }
 
   //temporary implementation--will modify once we have delivery certificate API ready

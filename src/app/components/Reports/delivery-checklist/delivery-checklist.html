@@ -1,0 +1,75 @@
+<div class="a4-page mx-auto bg-white p-4 shadow-sm">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold">BGAUSS VEHICLE DELIVERY CHECKLIST FOR DEALER</h5>
+        <div><strong>Date:</strong> {{ currentDate | date:'dd-MM-yyyy' }}</div>
+    </div>
+
+    <!-- TABLE -->
+    <table class="table table-borderless checklist-table">
+        <tbody>
+
+            <tr>
+                <td>1. Has the PDI been completed & test trial taken? Is vehicle static and dynamic performance OK?</td>
+                <td class="check-col"><input type="checkbox"></td>
+            </tr>
+
+            <tr>
+                <td>2. Has the Battery been fully charged? and Tyre Pressure as per norms?</td>
+                <td class="check-col"><input type="checkbox"></td>
+            </tr>
+
+            <tr>
+                <td>3. Has the coupon book been duly filled & Coupon serial no. kept on record in the sales register and update to DMS?</td>
+                <td class="check-col"><input type="checkbox"></td>
+            </tr>
+
+            <tr>
+                <td>4. Has the Delivery Certificate (DC) from the coupon and DMS been filled (DMS DC should be signed and uploaded to DMS/Coupon DC to be filled, signed removed and filed in dealer records.)</td>
+                <td class="check-col"><input type="checkbox"></td>
+            </tr>
+
+            <tr>
+                <td colspan="2"><strong>5. Have you educated the customer on all below aspects:</strong></td>
+            </tr>
+
+            <tr>
+                <td class="ps-4">a. Physically shown and explained in details operating controls of the eScooter to the customer.</td>
+                <td class="check-col"><input type="checkbox"></td>
+            </tr>
+
+            <tr>
+                <td class="ps-4">b. Briefed customer in details on policy of services, warranty and maintenance schedule.</td>
+                <td class="check-col"><input type="checkbox"></td>
+            </tr>
+
+            <tr>
+                <td class="ps-4">c. Inform about recommended tyre pressure, charger operation and tips to take care of the vehicle & battery .</td>
+                <td class="check-col"><input type="checkbox"></td>
+            </tr>
+
+            <tr>
+                <td class="ps-4">d. Customer or his representative inspect/ test drive the scooter at the time of delivery and he should confirm it is free from any operational/visual defects.</td>
+                <td class="check-col"><input type="checkbox"></td>
+            </tr>
+
+            <tr>
+                <td class="ps-4">e. The dealer should handover 2 keys along with 2 key fobs, first aid kit and tool kit along with the eScooter.</td>
+                <td class="check-col"><input type="checkbox"></td>
+            </tr>
+
+            <tr>
+                <td class="ps-4">f. Customer should be assisted in downloading the mobile customer app and complete the registration process on his mobile with registered mobile number.</td>
+                <td class="check-col"><input type="checkbox"></td>
+            </tr>
+
+            <tr>
+                <td class="ps-4">g. Delivery certificate from thee DMS, should be printed and signed off.This gets printed along with the invoice and is the second page.</td>
+                <td class="check-col"><input type="checkbox"></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+</div>
