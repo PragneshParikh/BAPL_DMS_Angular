@@ -1,11 +1,6 @@
 <div>
     <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
         <h4 class="mb-sm-0">Vehicle Purchase Order</h4>
-        <div class="page-title-right">
-            <!-- <button class="btn btn-success btn-sm" (click)="redirectToCreatePO()">
-                <i class="ri-add-line align-bottom me-1"></i> Add New
-            </button> -->
-        </div>
     </div>
 
     <!-- SEARCH CARD -->
@@ -63,11 +58,12 @@
                     <button class="btn btn-primary btn-sm ms-2" (click)="redirectToCreatePO()">
                         <i class="align-bottom me-1"></i> Add
                     </button>
-                     <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'" (click)="downloadPurchaseOrderExcel()">
+                    <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'"
+                        (click)="downloadPurchaseOrderExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -76,7 +72,7 @@
         <div class="card-body">
             <!-- <p>Total Record(s): {{totalRecords}}</p> -->
             <div class="table-responsive border rounded">
-                <table class="table table-bordered table-striped align-middle table-nowrap mb-0 table-sm">
+                <table class="table table-bordered table-hover table-striped align-middle table-nowrap mb-0 table-sm">
                     <thead>
                         <tr style="background-color:#747CA0 !important;color:white; cursor: pointer;">
                             <th>S.No</th>
@@ -100,7 +96,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let po of pagedPurchaseOrders; let i=index" (click)="editPO(po)"
+                        <tr *ngFor="let po of pagedPurchaseOrders; let i=index" (dblclick)="editPO(po)"
                             style="cursor: pointer;" class="hover-row">
                             <td>{{ (page - 1) * pageSize + i + 1 }}.</td>
                             <!-- <td>{{po.prefixNo}}</td> -->
@@ -134,15 +130,14 @@
             </div>
 
             <!-- Pagination -->
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <div class="float-end">
-                        <ngb-pagination [collectionSize]="purchaseOrders.length" [(page)]="page" [pageSize]="pageSize"
-                            (pageChange)="refreshPage()" [boundaryLinks]="true">
-                        </ngb-pagination>
-                    </div>
+            <div class="col-sm-12 col-md-12">
+                <div class="text-md-right float-md-end gridjs-pagination">
+                    <ngb-pagination [collectionSize]="purchaseOrders.length" [(page)]="page" [pageSize]="pageSize"
+                        (pageChange)="refreshPage()" [boundaryLinks]="true">
+                    </ngb-pagination>
                 </div>
             </div>
+            <!-- End Pagination -->
 
         </div>
     </div>

@@ -103,22 +103,16 @@ export const IssueTypes = [
     { id: 2, name: 'U/W' },
     { id: 3, name: 'FOC' },
     { id: 4, name: 'Goodwill' },
-    { name: 'Paid', value: 'paid' },
-    { name: 'U/W', value: 'u/w' },
-    { name: 'FOC', value: 'foc' },
-    { name: 'Goodwill', value: 'goodwill' }
+    // { name: 'Paid', value: 'paid' },
+    // { name: 'U/W', value: 'u/w' },
+    // { name: 'FOC', value: 'foc' },
+    // { name: 'Goodwill', value: 'goodwill' }
 ]
 
 export const userRole = [
     { roleId: 1, value: 'SuperAdmin' },
     { roleId: 2, value: 'Dealer' }
 ]
-
-// export const ErpOptions = [
-//     { name: 'Submitted to ERP', value: 'PushedToERP' },
-//     { name: 'Pending ERP Submission', value: 'Pending' },
-
-// ];
 
 export const ErpOptions = [
     { name: 'Submitted to ERP', value: 'PushedToERP' },
@@ -127,8 +121,8 @@ export const ErpOptions = [
     { name: 'Invoiced', value: 'Invoiced' },
     { name: 'Reserved', value: 'Reserved' },
     { name: 'Invalid', value: 'Invalid' }
-//     { name: 'Pending ERP Submission', value: 'Pending' }
- ];
+    //     { name: 'Pending ERP Submission', value: 'Pending' }
+];
 
 export const RateTypes = [
     { id: 1, title: 'Single' },
@@ -161,4 +155,20 @@ export const ModuleTypes = [
     { name: 'free_service_claim', moduleName: 'Free Service Claim' },
     { name: 'CIR_investigation', moduleName: 'CIR Investigation' },
     { name: 'purchase_order', moduleName: 'Purchase Order' }
+]
+
+export const APIUniqueList = [
+    { value: 'color', name: 'Color' },
+    { value: 'dealermaster', name: 'Dealer' },
+    { value: 'hsncodemaster', name: 'HSNCodeMaster' },
+    { value: 'vehicledispatch', name: 'Vehicle Inward' },
+    { value: 'purchaseorder', name: 'Purchase Order' },
+    { value: 'locationmaster', name: 'Location Master' },
+    { value: 'dealermaster', name: 'Dealer Master' },
+    { value: 'itemmaster', name: 'Item Master' }
+]
+
+export const PO_STATUSES = [
+    { name: 'Submitted To ERP', value: 'Submited To ERP' },
+    { name: 'Not Submitted To ERP', value: 'Not Submited To ERP' }
 ]

@@ -74,4 +74,8 @@ export class JobCardService {
     return this.httpClient.post<any[]>(`${this.baseUrl}/JobCard/SearchJobCard/`,payload)
   }
 
+  getJobCardServiceHistory(chassisNo:string){
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetServiceHistory/${chassisNo}`)
+  }
+
 }

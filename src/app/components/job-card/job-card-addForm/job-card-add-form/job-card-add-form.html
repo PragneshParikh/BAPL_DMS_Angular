@@ -15,6 +15,7 @@
 
           <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
             <table class="table table-bordered table-sm mb-0">
+
               <thead class="table-light">
                 <tr>
                   <th>Sr.No</th>
@@ -27,17 +28,42 @@
                   <th>Claim Date</th>
                 </tr>
               </thead>
+
               <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>Manoj</td>
-                  <td>1st free service</td>
-                  <td>1</td>
-                  <td>01/04/2026</td>
-                  <td><span class="badge bg-success">Availed</span></td>
-                  <td>DealerName</td>
-                  <td>ClaimDate</td>
+
+                <!--  Dynamic Data -->
+                <tr *ngFor="let item of serviceHistoryList; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ item.serviceHead }}</td>
+                  <td>{{ item.serviceType }}</td>
+                  <td>{{ item.serviceseq }}</td>
+
+                  <!-- Date Format -->
+                  <td>{{ item.dueDate | date:'dd/MM/yyyy' }}</td>
+
+                  <!-- Status Badge -->
+                  <td>
+                    <span class="badge" [ngClass]="{
+              'bg-primary':item.serviceStatus === 'Pending',       
+              'bg-success': item.serviceStatus === 'Availed',
+              'bg-warning text-dark': item.serviceStatus === 'Due',
+              'bg-danger': item.serviceStatus === 'Overdue'
+            }">
+                      {{ item.serviceStatus }}
+                    </span>
+                  </td>
+
+                  <td>{{ item.dealerName }}</td>
+                  <td>{{ item.claimDate | date:'dd/MM/yyyy' }}</td>
                 </tr>
+
+                <!--  No Data -->
+                <tr *ngIf="serviceHistoryList.length === 0">
+                  <td colspan="8" class="text-center text-muted">
+                    No service history available
+                  </td>
+                </tr>
+
               </tbody>
             </table>
           </div>

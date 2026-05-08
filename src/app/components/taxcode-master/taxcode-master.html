@@ -10,10 +10,11 @@
                 <div class="d-flex justify-content-end align-items-center">
 
                     <button class="btn btn-primary btn-sm me-2" (click)="openAddModal()">
-                       Add
+                        Add
                     </button>
 
-                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'" (click)="downloadTaxCodeExcel()">
+                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
+                        (click)="downloadTaxCodeExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
 
@@ -28,7 +29,7 @@
 
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered mb-0 table-sm tax-table">
+                    <table class="table table-sm table-hover table-bordered mb-0">
                         <thead>
                             <tr>
                                 <th>S.No.</th>
@@ -48,7 +49,7 @@
                                 <td colspan="5" class="text-center">No data available</td>
                             </tr>
 
-                            <tr *ngFor="let tax of pagedTaxCodeList; let i = index" (click)="openEditModal(tax)"
+                            <tr *ngFor="let tax of pagedTaxCodeList; let i = index" (dblclick)="openEditModal(tax)"
                                 style="cursor: pointer;">
                                 <td>{{ (page - 1) * pageSize + i + 1 }}</td>
                                 <td><ngb-highlight [result]="tax.taxcode" [term]="searchTerm"></ngb-highlight></td>
@@ -170,7 +171,7 @@
             </div>
 
             <div class="modal-footer">
-                 <button class="btn btn-primary btn-sm"
+                <button class="btn btn-primary btn-sm"
                     (click)="formSubmitted = true; taxCodeInput.valid && taxRateInput.valid && effectiveDateInput.valid && addOrUpdateTaxCode()">
                     {{ selectedTaxCode.id === 0 ? 'Save' : 'Save' }}
                 </button>

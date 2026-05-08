@@ -12,6 +12,8 @@ import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import Swal from 'sweetalert2';
 import { LedgerMaster } from '../../core/services/ledger-master';
+import { error } from 'console';
+import { PrefixService } from '../../core/services/prefix';
 export interface PurchaseOrderItemViewModel {
   ItemCode: string;
   Qty: number;
@@ -92,6 +94,7 @@ export class VehiclePO implements OnInit {
     rawSubsidy: 0,
     itemType: 0
   };
+  dealerCode: string = '';
 
   constructor(
     private locationService: LocationMasterService,
@@ -102,8 +105,11 @@ export class VehiclePO implements OnInit {
     private router: Router,
     private loader: LoaderService,
     public toaster: ToastService,
-    private ledgerService: LedgerMaster
-  ) { }
+    private ledgerService: LedgerMaster,
+    private prefixService: PrefixService
+  ) {
+    this.dealerCode = this.storageService.getDealerCode();
+  }
 
   ngOnInit() {
     this.loadShowroomLocations();
@@ -143,7 +149,18 @@ export class VehiclePO implements OnInit {
 
   generateNewOrderNo() {
     // this.orderNo = 'P0-7'; // Logic for new order number
-    this.orderNo = 'TEMP-' + Date.now();
+    // this.orderNo = 'TEMP-' + Date.now();
+    this.loader.show();
+    this.prefixService.getPrefixByDealerByModule(this.dealerCode, 'purchase_order').subscribe({
+      next: (res: string) => {
+        this.loader.hide();
+        this.orderNo = res;
+      }, error: (err) => {
+        this.loader.hide();
+        console.error('Error fetching prefix:', err);
+        this.toaster.show('Could not generate order number. Please check the console for more info.', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
   }
 
   loadPODetails(poNumber: string) {
@@ -807,4 +824,43 @@ export class VehiclePO implements OnInit {
   redirectToCreatePOList() {
     this.router.navigate(['/vehicle-po-list']);
   }
+
+  onChangeTransactionType(event: any) {
+    if (!event) return;
+
+    const newValue = event.target.value;
+    if (newValue === 'B2B') {
+      this.openConfirmationDialog(event);
+    } else {
+
+    }
+  }
+
+  openConfirmationDialog(event: any) {
+    Swal.fire({
+      title: 'Are you sure you want to make the order for B2B?',
+      text: '',
+      icon: 'warning',
+      width: '320px',
+      padding: '1rem',
+      confirmButtonText: 'Yes',
+      buttonsStyling: false,
+      allowOutsideClick: false,
+      showCancelButton: true,
+      showCloseButton: false,
+      customClass: {
+        popup: 'swal-compact',
+        title: 'fs-6',          // smaller title
+        htmlContainer: 'fs-7',  // smaller text
+        confirmButton: 'btn btn-sm btn-primary me-2',
+        cancelButton: 'btn btn-sm btn-danger'
+      }
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        event.target.value = '';
+        this.selectedTransactionType = '';
+      }
+    });
+  }
+
 }

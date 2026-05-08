@@ -75,8 +75,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let location of pagedLocationList; let i = index" (click)="openEditModal(location)"
-                            style="cursor:pointer">
+                        <tr *ngFor="let location of pagedLocationList; let i = index"
+                            (dblclick)="openEditModal(location)" style="cursor:pointer">
 
                             <td>{{(page-1)*pageSize + i + 1}}</td>
                             <td>{{getLocationAreaName(location.locareaidno)}}</td>

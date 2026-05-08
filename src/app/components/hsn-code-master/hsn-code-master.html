@@ -38,14 +38,17 @@
 
                 <div class="table-responsive fixed-table">
 
-                    <table class="table table-hover hsn-table table-bordered mb-0 table-sm"style="font-size: 12px;">
+                    <table class="table table-hover hsn-table table-bordered mb-0 table-sm" style="font-size: 12px;">
 
                         <thead>
                             <tr>
                                 <th style="width: 4%;">Sl No.</th>
-                                <th style="width: 100px;" class="sort col-code" (click)="onSort('hsncode')" style="cursor:pointer">HSN Code</th>
-                                <th style="width: auto;" class="sort col-desc" (click)="onSort('description')" style="cursor:pointer">Description</th>
-                                <th style="width: 60px;" class="sort col-type" (click)="onSort('type')" style="cursor:pointer">Type</th>
+                                <th style="width: 100px;" class="sort col-code" (click)="onSort('hsncode')"
+                                    style="cursor:pointer">HSN Code</th>
+                                <th style="width: auto;" class="sort col-desc" (click)="onSort('description')"
+                                    style="cursor:pointer">Description</th>
+                                <th style="width: 60px;" class="sort col-type" (click)="onSort('type')"
+                                    style="cursor:pointer">Type</th>
                             </tr>
                         </thead>
 
@@ -60,7 +63,7 @@
                             }
 
                             @for (hsn of paginatedHsnCodes; track $index) {
-                            <tr (click)="openEditModal(hsn)" style="cursor:pointer">
+                            <tr (dblclick)="openEditModal(hsn)" style="cursor:pointer">
 
                                 <td>
                                     {{ (page - 1) * pageSize + $index + 1 }}
@@ -72,7 +75,7 @@
 
                                 <td>
                                     <!-- <div class="truncate-column"> -->
-                                        <ngb-highlight [result]="hsn.description" [term]="searchTerm"></ngb-highlight>
+                                    <ngb-highlight [result]="hsn.description" [term]="searchTerm"></ngb-highlight>
                                     <!-- </div> -->
                                 </td>
 

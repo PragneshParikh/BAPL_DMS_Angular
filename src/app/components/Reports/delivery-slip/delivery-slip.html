@@ -1,0 +1,120 @@
+<div class="a4-page mx-auto bg-white p-4 shadow-sm">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between">
+
+        <!-- LEFT: DEALER INFO -->
+        <div>
+            <h4 class="fw-bold mb-1">{{dealer.compname}}</h4>
+            <div>{{dealer.adress1}}</div>
+            <div>{{dealer.adress2}}</div>
+            <div>{{dealer.city}}-{{dealer.state}}-{{dealer.pin}}</div>
+            <div>Phone No. : {{dealer.mobile}}</div>
+            <div>Email : {{dealer.email}}</div>
+            <div>GSTIN No.: {{dealer.compgstinNo}}</div>
+            <div>Dealer Code :{{dealer.dealercode}}</div>
+        </div>
+
+        <!-- RIGHT: LOGO -->
+        <!-- <div class="text-end">
+            <img src="assets/bgauss-logo.png" alt="BGAUSS" style="height:60px;">
+        </div> -->
+
+    </div>
+
+    <!-- TITLE -->
+    <h4 class="text-center mt-3 mb-2">DELIVERY SLIP</h4>
+    <hr>
+
+    <!-- BODY -->
+    <div class="mb-2">
+        From <strong>{{partyName}}</strong>
+    </div>
+
+    <div class="mb-2">
+        I hereby confirm having taken delivery of one
+        <strong>{{modelName}}</strong>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col-md-6">
+            Chasis No. <strong>{{chassisNo}}</strong>
+        </div>
+        <div class="col-md-6">
+            Engine No. <strong>{{motorNo}}</strong>
+        </div>
+    </div>
+
+    <div class="mb-2">
+        Reg. No.<strong>{{regNo}}</strong>
+    </div>
+
+    <div class="mb-3">
+        is good order and condition. The entire risk of the above vehicle in all respects borne by me from this Date
+    </div>
+
+    <hr>
+
+    <!-- DOCUMENTS TABLE -->
+    <div class="mb-2">
+        The Following Documents have also been received by me
+    </div>
+
+    <table class="table table-borderless doc-table">
+        <thead>
+            <tr>
+                <th style="width:80%"> </th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1. Vehicle Invoice</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>2. Accessories Bill</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>3. Free Service coupon with warranty certificate</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>4. Operation and Maintenance Manual</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>5. Tools kit</td>
+                <td><strong></strong></td>
+            </tr>
+            <tr>
+                <td>6. Battery Gaurantee card</td>
+                <td><strong></strong></td>
+            </tr>
+            <tr>
+                <td>7. Others</td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <!-- SIGNATURE SECTION -->
+    <div class="d-flex justify-content-between mt-4">
+        <div>Customer Signature</div>
+        <div><strong>For {{dealer.compname}}</strong></div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-5">
+        <div></div>
+        <div>Authorized Signatory</div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="text-center mt-3">
+        THANKS VISIT AGAIN
+    </div>
+
+</div>

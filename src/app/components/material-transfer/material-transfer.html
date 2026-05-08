@@ -69,7 +69,7 @@
 
                                 <tbody>
                                     <tr *ngFor="let material of dataSource; let index = index" class="table-row"
-                                        (click)="onMaterialClick(material)">
+                                        (dblclick)="onMaterialClick(material)">
                                         <td>{{ material?.srNo }}</td>
                                         <td>{{ material?.id }}</td>
                                         <td>{{ material?.jobinDate | date }}</td>

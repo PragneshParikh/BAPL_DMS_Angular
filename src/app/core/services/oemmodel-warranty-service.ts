@@ -26,22 +26,22 @@ export class OemmodelWarrantyService {
   return this.http.get<any[]>(`${this.apiUrl}/oemmodelwarranty`, { params });
 }
 
-  // ✅ GET BY ID
+  //   GET BY ID
   getById(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/OEMModelWarranty/${id}`);
   }
 
-  // ✅ CREATE
+  //   CREATE
   create(data: OemModelWarranty): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/OEMModelWarranty`, data);
   }
 
-  // ✅ UPDATE
+  // UPDATE
   update(id: number, data: OemModelWarranty): Observable<any> {
     return this.http.put(`${this.apiUrl}/OEMModelWarranty/${id}`, data);
   }
 
-  // ✅ DELETE
+  //  DELETE
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/OEMModelWarranty/${id}`);
   }
