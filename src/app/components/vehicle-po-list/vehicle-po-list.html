@@ -6,141 +6,121 @@
     <!-- SEARCH CARD -->
     <div class="card">
         <div class="card-body">
-            <div class="row g-2 align-items-end">
-                <form>
+            <form #poFilterForm="ngForm" (ngSubmit)="onSearch()">
+                <div class="row g-2 align-items-end">
                     <div class="col-md-2">
                         <label class="form-label">Purchase No</label>
-                        <input type="text" class="form-control" placeholder="Enter No." [(ngModel)]="purchaseNo">
+                        <input type="text" class="form-control form-control-sm" placeholder="Enter No."
+                            [(ngModel)]="purchaseNo" name="purchaseNo">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Date from</label>
-                        <input type="date" class="form-control" [(ngModel)]="dateFrom">
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateFrom" name="dateFrom">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Date to</label>
-                        <input type="date" class="form-control" [(ngModel)]="dateTo">
+                        <input type="date" class="form-control form-control-sm " [(ngModel)]="dateTo" name="dateTo">
                     </div>
-                    <!-- <div class="col-md-2">
-                    <label class="form-label">Transaction Type</label>
-                    <select class="form-select" [(ngModel)]="transactionType">
-                        <option value="">--Select--</option>
-                        <option *ngFor="let type of transactionTypeList" [value]="type.type">{{type.name}}</option>
-                    </select>
-                </div> -->
-                    <!-- <div class="col-md-2">
-                    <label class="form-label">Party Name</label>
-                    <select class="form-select" [(ngModel)]="partyName">
-                        <option value="">--Select--</option>
-                        <option value="BGAUSS AUTO PRIVATE LIMITED">BGAUSS AUTO PRIVATE LIMITED</option>
-                    </select>
-                </div> -->
                     <div class="col-md-2">
                         <label class="form-label">Submitted To Erp</label>
-                        <select class="form-select" [(ngModel)]="isSubmitted">
-                            <option value="">--Select--</option>
-                            <option value="Submited To Erp">Submitted To Erp</option>
-                            <option value="Not Submited To Erp">Not Submitted To Erp</option>
+                        <select class="form-select form-select-sm" [(ngModel)]="isSubmitted" name="isSubmitted">
+                            <option *ngFor="let status of poStatuses" [value]="status.value">
+                                {{status.name}}
+                            </option>
                         </select>
                     </div>
-                    <!-- <div class="col-md-2 mt-2">
-                    <label class="form-label">Per Page Records</label>
-                    <select class="form-select border-start border-2" [(ngModel)]="pageSize" (change)="refreshPage()">
-                        <option [ngValue]="10">10</option>
-                        <option [ngValue]="25">25</option>
-                        <option [ngValue]="50">50</option>
-                        <option [ngValue]="100">100</option>
-                    </select>
-                </div> -->
-                    <div class="col-md-2 mt-2 text-end">
-                        <button class="btn btn-primary btn-sm me-1" (click)="onSearch()">
+                    <div class="col-md-3 mt-2">
+                        <button type="submit" class="btn btn-primary btn-sm me-1">
                             <i class="align-bottom me-1"></i> Search
                         </button>
-
-                        <button class="btn btn-primary btn-sm ms-2" (click)="redirectToCreatePO()">
+                        <button type="button" class="btn btn-primary btn-sm ms-2" (click)="redirectToCreatePO()">
                             <i class="align-bottom me-1"></i> Add
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm ms-2" (click)="resetFilters()">
+                            <i class="align-bottom me-1"></i> Reset
                         </button>
                         <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'"
                             (click)="downloadPurchaseOrderExcel()">
                             <i class="ri-file-excel-2-line"></i>
                         </button>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <!-- TABLE CARD -->
-        <div class="card mt-4">
-            <div class="card-body">
-                <!-- <p>Total Record(s): {{totalRecords}}</p> -->
-                <div class="table-responsive border rounded">
-                    <table
-                        class="table table-bordered table-hover table-striped align-middle table-nowrap mb-0 table-sm">
-                        <thead>
-                            <tr style="background-color:#747CA0 !important;color:white; cursor: pointer;">
-                                <th>S.No</th>
-                                <!-- <th>Prefix No</th> -->
-                                <th class="sort" [ngClass]="getSortClass('purchaseNo')" (click)="sort('purchaseNo')">
-                                    Purchase No</th>
-                                <th class="sort" [ngClass]="getSortClass('date')" (click)="sort('date')">Date</th>
-                                <th class="sort" [ngClass]="getSortClass('transactionType')"
-                                    (click)="sort('transactionType')">Trans Type</th>
-                                <!-- <th>Is Supplier</th> -->
-                                <th class="sort" [ngClass]="getSortClass('partyName')" (click)="sort('partyName')">Party
-                                    Name</th>
-                                <th>Location</th>
-                                <!-- <th class="sort" [ngClass]="getSortClass('modelName')" (click)="sort('modelName')">Model
+    <!-- TABLE CARD -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <!-- <p>Total Record(s): {{totalRecords}}</p> -->
+            <div class="table-responsive border rounded">
+                <table class="table table-bordered table-hover table-striped align-middle table-nowrap mb-0 table-sm">
+                    <thead>
+                        <tr style="background-color:#747CA0 !important;color:white; cursor: pointer;">
+                            <th>S.No</th>
+                            <!-- <th>Prefix No</th> -->
+                            <th class="sort" [ngClass]="getSortClass('purchaseNo')" (click)="sort('purchaseNo')">
+                                Purchase No</th>
+                            <th class="sort" [ngClass]="getSortClass('date')" (click)="sort('date')">Date</th>
+                            <th class="sort" [ngClass]="getSortClass('transactionType')"
+                                (click)="sort('transactionType')">Trans Type</th>
+                            <!-- <th>Is Supplier</th> -->
+                            <th class="sort" [ngClass]="getSortClass('partyName')" (click)="sort('partyName')">Party
+                                Name</th>
+                            <th>Location</th>
+                            <!-- <th class="sort" [ngClass]="getSortClass('modelName')" (click)="sort('modelName')">Model
                                 Name</th> -->
-                                <!-- <th>Color</th> -->
-                                <!-- <th>Order Qty</th> -->
-                                <th>Order Amount</th>
-                                <th class="sort" [ngClass]="getSortClass('isSubmitted')" (click)="sort('isSubmitted')">
-                                    IsSubmittedToErp</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let po of pagedPurchaseOrders; let i=index" (dblclick)="editPO(po)"
-                                style="cursor: pointer;" class="hover-row">
-                                <td>{{ (page - 1) * pageSize + i + 1 }}.</td>
-                                <!-- <td>{{po.prefixNo}}</td> -->
-                                <td>{{po.purchaseNo}}</td>
-                                <td>{{po.date}}</td>
-                                <td>{{po.transactionType}}</td>
-                                <!-- <td>{{po.isSupplier}}</td> -->
-                                <td>{{po.partyName}}</td>
-                                <td>{{po.location}}</td>
-                                <!-- <td>{{po.modelName}}</td> -->
-                                <!-- <td>{{po.color}}</td> -->
-                                <!-- <td>{{po.orderQty}}</td> -->
-                                <td>{{po.orderAmount}}</td>
-                                <!-- <td>
+                            <!-- <th>Color</th> -->
+                            <!-- <th>Order Qty</th> -->
+                            <th>Order Amount</th>
+                            <th class="sort" [ngClass]="getSortClass('isSubmitted')" (click)="sort('isSubmitted')">
+                                IsSubmittedToErp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let po of pagedPurchaseOrders; let i=index" (click)="editPO(po)"
+                            style="cursor: pointer;" class="hover-row">
+                            <td>{{ (page - 1) * pageSize + i + 1 }}.</td>
+                            <!-- <td>{{po.prefixNo}}</td> -->
+                            <td>{{po.purchaseNo}}</td>
+                            <td>{{po.date}}</td>
+                            <td>{{po.transactionType}}</td>
+                            <!-- <td>{{po.isSupplier}}</td> -->
+                            <td>{{po.partyName}}</td>
+                            <td>{{po.location}}</td>
+                            <!-- <td>{{po.modelName}}</td> -->
+                            <!-- <td>{{po.color}}</td> -->
+                            <!-- <td>{{po.orderQty}}</td> -->
+                            <td>{{po.orderAmount}}</td>
+                            <!-- <td>
                                 <span class="badge" [ngClass]="po.isSubmitted === 'Submited To Erp' ? 'bg-success' : 'bg-danger'">
                                     {{ po.isSubmitted === 'Submited To Erp' ? 'Yes' : 'No' }}
                                 </span>
                             </td> -->
-                                <td class="text-center">
-                                    <span class="badge"
-                                        [ngClass]="po.isSubmitted === 'Submited To Erp' ? 'bg-success' : 'bg-danger'">
-                                        {{ po.isSubmitted === 'Submited To Erp' ? 'Yes' : 'No' }}
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr *ngIf="pagedPurchaseOrders.length == 0">
-                                <td colspan="13" class="text-center p-3">No Records Found</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div class="col-sm-12 col-md-12">
-                    <div class="text-md-right float-md-end gridjs-pagination">
-                        <ngb-pagination [collectionSize]="purchaseOrders.length" [(page)]="page" [pageSize]="pageSize"
-                            (pageChange)="refreshPage()" [boundaryLinks]="true">
-                        </ngb-pagination>
-                    </div>
-                </div>
-                <!-- End Pagination -->
-
+                            <td class="text-center">
+                                <span class="badge"
+                                    [ngClass]="po.isSubmitted === 'Submited To Erp' ? 'bg-success' : 'bg-danger'">
+                                    {{ po.isSubmitted === 'Submited To Erp' ? 'Yes' : 'No' }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr *ngIf="pagedPurchaseOrders.length == 0">
+                            <td colspan="13" class="text-center p-3">No Records Found</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
+
+            <!-- Pagination -->
+            <div class="col-sm-12 col-md-12">
+                <div class="text-md-right float-md-end gridjs-pagination">
+                    <ngb-pagination [collectionSize]="purchaseOrders.length" [(page)]="page" [pageSize]="pageSize"
+                        (pageChange)="refreshPage()" [boundaryLinks]="true">
+                    </ngb-pagination>
+                </div>
+            </div>
+            <!-- End Pagination -->
+
         </div>
     </div>
+</div>
