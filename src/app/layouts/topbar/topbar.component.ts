@@ -8,7 +8,7 @@ import { Router, RouterLink } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { LanguageService } from '../../core/services/language.service';
 import { TranslateService } from '@ngx-translate/core';
-import { NgbDropdownModule, NgbModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbModal, NgbNavModule, NgbAccordionItem } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SimplebarAngularModule } from 'simplebar-angular';
@@ -33,13 +33,15 @@ import { PartsInwardservice } from '../../core/services/partsinwardservice';
     ReactiveFormsModule,
     SimplebarAngularModule,
     NgbDropdownModule,
-    RouterLink
+    RouterLink,
+    NgbAccordionItem
   ],
   standalone: true
 })
 export class TopbarComponent implements OnInit {
   partsInward: any[] = [];
-  vehicleDispatch: any[] = [];
+  vehicleInward: any[] = [];
+  d2dNotificationList: any[] = [];
   invoiceNotifications: any[] = [];
   partsNotifications: any[] = [];
   saleInvoice: any[] = [];
@@ -292,10 +294,10 @@ export class TopbarComponent implements OnInit {
     this.loader.show();
     this.vehicleInwardService.getByVehicleStatus(false, this.dealerCode).subscribe({
       next: (result) => {
-        this.vehicleDispatch = result;
+        this.vehicleInward = result;
 
         // Group by invoice number
-        const groupedInvoices = this.vehicleDispatch.reduce((acc: any, item: any) => {
+        const groupedInvoices = this.vehicleInward.reduce((acc: any, item: any) => {
           const invoiceNo = item.invoiceNo;
           if (!acc[invoiceNo]) {
             acc[invoiceNo] = {
@@ -363,7 +365,7 @@ export class TopbarComponent implements OnInit {
       keyboard: false    // prevent closing with ESC
     });
 
-    const invoiceDetails = this.vehicleDispatch.filter(x => x.invoiceNo === invoiceData.invoiceNumber);
+    const invoiceDetails = this.vehicleInward.filter(x => x.invoiceNo === invoiceData.invoiceNumber);
     // Pass data to the modal component
     modalRef.componentInstance.invoiceDetails = invoiceDetails;
     modalRef.componentInstance.sourceType = 'vehicle';

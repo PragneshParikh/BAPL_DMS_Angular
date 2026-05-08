@@ -105,10 +105,10 @@
                                     <div class="col">
                                         <h6 class="m-0 fs-16 fw-semibold text-white"> Notifications </h6>
                                     </div>
-                                    <div class="col-auto dropdown-tabs">
+                                    <!-- <div class="col-auto dropdown-tabs">
                                         <span class="badge bg-light text-body fs-13"> {{invoiceNotifications?.length}}
-                                            New</span>
-                                    </div>
+                                        </span>
+                                    </div> -->
                                 </div>
                             </div>
 
@@ -117,7 +117,9 @@
                                     class="nav nav-tabs dropdown-tabs nav-tabs-custom" id="notificationItemsTab">
                                     <li [ngbNavItem]="1">
                                         <a ngbNavLink>
-                                            Sell Invoice
+                                            Sell Invoice &nbsp; <span
+                                                class="badge bg-light text-body fs-13">{{invoiceNotifications?.length}}
+                                            </span>
                                         </a>
                                         <ng-template ngbNavContent>
                                             <div class="tab-pane fade show active py-2 ps-2" id="all-noti-tab"
@@ -176,7 +178,9 @@
                                     </li>
                                     <li [ngbNavItem]="2">
                                         <a ngbNavLink>
-                                            Part Invoice
+                                            Part Invoice &nbsp;
+                                            <span class="badge bg-light text-body fs-13">
+                                                {{partsNotifications?.length}}</span>
                                         </a>
                                         <ng-template ngbNavContent>
                                             <div class="tab-pane fade show active py-2 ps-2" id="all-noti-tab"
@@ -235,7 +239,9 @@
                                     </li>
                                     <li [ngbNavItem]="3">
                                         <a ngbNavLink>
-                                            D2D
+                                            D2D &nbsp; <span
+                                                class="badge bg-light text-body fs-13">{{d2dNotificationList.length}}
+                                            </span>
                                         </a>
                                         <ng-template ngbNavContent>
                                             <div class="tab-pane p-4" id="alerts-tab" role="tabpanel"
