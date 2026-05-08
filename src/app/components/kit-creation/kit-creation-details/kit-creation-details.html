@@ -93,7 +93,7 @@
 
                         <tbody>
                             <tr *ngFor="let kit of kitDetails; let i = index" class="table-row"
-                                (click)="onItemClick(kit, i)">
+                                (dblclick)="onItemClick(kit, i)">
                                 <td>{{ i + 1 }}</td>
                                 <td>{{ kit?.itemName }}</td>
                                 <td>{{ kit?.quantity }}</td>

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { StorageService } from '../../../core/services/storage';
 import { DealerService } from '../../../core/services/dealer-service';
 import { DealerMasterViewModel } from '../../../ViewModels/Dealer/DealerMasterViewModel';
-import { PerformaInvoiceService } from '../../../core/services/performa-invoice-service';
+import { ProformaInvoiceService } from '../../../core/services/proforma-invoice-service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
 import { LedgerMaster } from '../../../core/services/ledger-master';
@@ -25,6 +25,13 @@ export class PerformaInvoice implements OnInit {
   saleBill: any;
   CustomerLedger: any;
 
+  invoiceType: string = 'ex';
+
+  registrationAmount: number = 0;
+  insuranceAmount: number = 0;
+  preGstDiscount: number = 0;
+  onRoadTotal: number = 0;
+
   amounts = {
     taxable: 0,
     cgst: 0,
@@ -38,11 +45,12 @@ export class PerformaInvoice implements OnInit {
     total: 0
   };
   inWords: string;
+  isInvoiced: boolean;
 
   constructor(
     private storageService: StorageService,
     private dealerService: DealerService,
-    private performaInvoiceService: PerformaInvoiceService,
+    private proformaInvoiceService: ProformaInvoiceService,
     private route: ActivatedRoute,
     private vehicleSaleBillService: VehicleSaleBillService,
     private router: Router,
@@ -55,12 +63,15 @@ export class PerformaInvoice implements OnInit {
 
     this.saleBillId = this.route.snapshot.paramMap.get('saleBillNo') || '';
 
+    this.route.queryParams.subscribe(params => {
+      this.invoiceType = params['type'] || 'ex';
+    });
     if (this.saleBillId) {
       this.getBillById(parseInt(this.saleBillId));
     }
   }
 
-  // ✅ CALCULATE FOR MULTIPLE ROWS
+  // CALCULATE FOR MULTIPLE ROWS
   calculateAmounts() {
   const details = this.saleBill?.details || [];
 
@@ -70,6 +81,10 @@ export class PerformaInvoice implements OnInit {
   this.amounts.igst = 0;
   this.amounts.discount = 0;
   this.amounts.total = 0;
+
+   this.registrationAmount = 0;
+    this.insuranceAmount = 0;
+    this.preGstDiscount = 0;
 
   details.forEach((item: any) => {
     this.amounts.taxable += item.itemRate || 0;
@@ -84,8 +99,16 @@ export class PerformaInvoice implements OnInit {
 
     this.amounts.discount += item.preGstDiscount || 0;
 
-    // ✅ Use finalAmount directly (already calculated in backend)
+    //  Use finalAmount directly (already calculated in backend)
     this.amounts.total += item.finalAmount || 0;
+
+    this.preGstDiscount += item.preGstDiscount || 0;
+
+      this.registrationAmount += item.regAmount || 0;
+
+      this.insuranceAmount += item.insuranceAmount || 0;
+
+      this.amounts.total += item.finalAmount || 0;
   });
 
   // Ex-showroom = taxable + taxes
@@ -94,6 +117,13 @@ export class PerformaInvoice implements OnInit {
     this.amounts.cgst +
     this.amounts.sgst +
     this.amounts.igst;
+    this.convert();
+
+     this.onRoadTotal =
+      this.amounts.total +
+      this.registrationAmount +
+      this.insuranceAmount;
+
     this.convert();
 }
 
@@ -110,6 +140,10 @@ export class PerformaInvoice implements OnInit {
   this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
     next: (res) => {
       this.saleBill = res;
+      if(this.saleBill.erpStatus == "Invoiced")
+      {
+       this.isInvoiced=true;
+      }
       console.log(res, "Sale Bill Response");
       this.calculateAmounts();
 
@@ -136,7 +170,7 @@ export class PerformaInvoice implements OnInit {
   }
 
   savePerformaInvoice() {
-    this.performaInvoiceService.generatePerformaInvoice({
+    this.proformaInvoiceService.generatePerformaInvoice({
       vehicleSaleBillNo: this.saleBill.saleBillNo,
     }).subscribe({
       next: () => this.router.navigate(['/proforma-invoice']),
@@ -149,7 +183,20 @@ export class PerformaInvoice implements OnInit {
 
   return item.igstPer > 0 ? 'IGST' : 'GST';
 }
+// convert() {
+//     this.inWords = this.currencyService.convertToWords(this.amounts.total);
+//   }
+
 convert() {
-    this.inWords = this.currencyService.convertToWords(this.amounts.total);
+
+    const amount =
+      this.invoiceType === 'onroad'
+        ? this.onRoadTotal
+        : this.amounts.total;
+
+    this.inWords =
+      this.currencyService.convertToWords(amount);
+
   }
+
 }

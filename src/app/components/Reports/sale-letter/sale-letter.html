@@ -1,0 +1,154 @@
+<div class="a4-page mx-auto bg-white p-4 shadow-sm sale-certificate-page">
+
+    <!-- HEADER -->
+    <div class="text-center mb-4">
+        <div class="small-text">Form No. 21</div>
+        <div class="fw-bold small-text">[ See Rule 47(a) and (d) ]</div>
+        <h2 class="fw-bold mb-0">SALE CERTIFICATE</h2>
+    </div>
+
+    <!-- TOP SECTION -->
+    <div class="d-flex justify-content-between align-items-start mb-5">
+
+        <!-- LEFT -->
+        <div class="small-font">
+            <strong>The Regional Transport Office / Regional Licensing Authority</strong><br>
+            {{dealer?.state}}
+        </div>
+
+        <!-- RIGHT -->
+        <!-- <div>
+            <img src="assets/bgauss-logo.png" alt="BGAUSS" class="logo-img">
+        </div> -->
+
+    </div>
+
+    <!-- DELIVERY TEXT -->
+    <div class="mb-3 small-font">
+        Certified that
+        <strong>{{saleBill.details[0].modelName}}</strong>
+        has been delivered by us vide Bill No:
+        <strong>{{saleBill.saleBillNo}}</strong>
+    </div>
+
+    <!-- CUSTOMER DETAILS -->
+    <div class="border border-dark p-2 mb-1">
+
+        <div class="d-flex justify-content-between">
+
+            <!-- LEFT -->
+            <table class="table table-borderless table-sm mb-0 small-font w-75">
+                <tbody>
+
+                    <tr>
+                        <td class="label-col"><strong>Sold to</strong></td>
+                        <td>: {{CustomerLedger.ledgerName}}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label-col"><strong>Contact Person</strong></td>
+                        <td>: {{CustomerLedger.ledgerName}}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label-col"><strong>Address</strong></td>
+                        <td>
+                            : {{CustomerLedger?.address}}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="label-col"><strong>Mobile No.</strong></td>
+                        <td>: {{CustomerLedger?.mobileNumber}}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label-col"><strong>City</strong></td>
+                        <td>: {{CustomerLedger?.cityName}}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label-col"><strong>State</strong></td>
+                        <td>: {{CustomerLedger?.stateName}}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label-col"><strong>Pincode</strong></td>
+                        <td>: {{CustomerLedger?.pin}}</td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+            <!-- RIGHT -->
+            <div class="small-font text-end pe-2 pt-1">
+                <strong>Dated On:</strong>
+                {{ today | date:'dd-MM-yyyy' }}
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- VEHICLE DETAILS -->
+    <div class="border border-dark p-2 vehicle-box">
+
+        <table class="table table-borderless table-sm mb-0 small-font">
+            <tbody>
+
+                <tr>
+                    <td class="vehicle-label">1. Chassis No.</td>
+                    <td>{{saleBill.details[0].chassisNo}}</td>
+                </tr>
+
+                <tr>
+                    <td class="vehicle-label">2. Engine No.</td>
+                    <td>{{saleBill.details[0].motorNo}}</td>
+                </tr>
+
+                <tr>
+                    <td class="vehicle-label">3. Year of Manufacture</td>
+                    <td>{{saleBill.details[0].mfgYear}}</td>
+                </tr>
+
+                <tr>
+                    <td class="vehicle-label">
+                        4. Maximum axle weight and number and description of tyre
+                    </td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <td class="vehicle-label">(A). Front Axle</td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <td class="vehicle-label">(B). Rear Axle</td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <td class="vehicle-label">5. Colour or Colours of Body</td>
+                    <td>{{saleBill.details[0].colour}}</td>
+                </tr>
+
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- SIGNATURE -->
+    <div class="text-end signature-section">
+
+        <div class="for-text" style="font-size: 12px;">
+            For
+        </div>
+
+        <div class="signature-line">
+            Authorized Signatory and Date
+        </div>
+
+    </div>
+
+</div>

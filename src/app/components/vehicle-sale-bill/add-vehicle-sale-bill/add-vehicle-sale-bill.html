@@ -17,38 +17,43 @@
             <ul ngbDropdownMenu class="dropdown-menu">
 
                 <li>
-                    <a class="dropdown-item" (click)="printInvoice()">
-                        <i class="ri-printer-line me-2"></i> Print Invoice
+                    <a class="dropdown-item" (click)="printExShowroomInvoice()">
+                        <i class="ri-printer-line me-2"></i> Print Ex-Showroom Invoice
+                    </a>
+                </li>
+                 <li>
+                    <a class="dropdown-item" (click)="printOnRoadInvoice()">
+                        <i class="ri-printer-line me-2"></i> Print On Road Invoice
                     </a>
                 </li>
 
                 <li>
                     <a class="dropdown-item" (click)="printDeliverySlip()">
-                        <i class="ri-file-list-3-line me-2"></i> Print Delivery Slip
+                        <i class="ri-printer-line me-2"></i> Print Delivery Slip
                     </a>
                 </li>
 
                 <li>
                     <a class="dropdown-item" (click)="printSaleLetter()">
-                        <i class="ri-mail-line me-2"></i> Sale Letter
+                       <i class="ri-printer-line me-2"></i> Print Sale Letter
                     </a>
                 </li>
 
                 <li>
                     <a class="dropdown-item" (click)="printForm22()">
-                        <i class="ri-file-text-line me-2"></i> Print Form 22
+                       <i class="ri-printer-line me-2"></i> Print Form 22
                     </a>
                 </li>
 
                 <li>
                     <a class="dropdown-item" (click)="printDeliveryChecklist()">
-                        Delivery Check List
+                      <i class="ri-printer-line me-2"></i> Print Delivery Check List
                     </a>
                 </li>
 
                 <li>
                     <a class="dropdown-item" (click)="printDeliveryCertificate()">
-                        Delivery Certificate
+                      <i class="ri-printer-line me-2"></i> Print Delivery Certificate
                     </a>
                 </li>
 
@@ -370,7 +375,9 @@
 
                     <i class="ri-arrow-down-s-line transition-icon"></i>
                 </div>
-
+<div *ngIf="!isCustomerValid()" class="text-danger mt-1">
+  Please select a valid customer before choosing chassis.
+</div>
 
                 <div id="vehicleDetails" class="collapse show">
                     <div class="card card-body border-0 shadow-sm p-3">
@@ -618,9 +625,7 @@
                                     Add
                                 </button>
                             </div>
-<div *ngIf="!isCustomerValid()" class="text-danger mt-1">
-  Please select a valid customer before choosing chassis.
-</div>
+
                         </div>
 
                     </div>

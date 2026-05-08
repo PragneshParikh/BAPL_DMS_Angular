@@ -46,23 +46,23 @@
                                 <tr>
                                     <th style="width: 50px;">Sl No.</th>
 
-                                    <th class="sort" (click)="sort('countryname')"  style="cursor:pointer">
+                                    <th class="sort" (click)="sort('countryname')" style="cursor:pointer">
                                         Country Name
                                     </th>
 
-                                    <th class="sort" (click)="sort('statename')"  style="cursor:pointer">
+                                    <th class="sort" (click)="sort('statename')" style="cursor:pointer">
                                         State Name
                                     </th>
 
-                                    <th class="sort" (click)="sort('cityname')"  style="cursor:pointer">
+                                    <th class="sort" (click)="sort('cityname')" style="cursor:pointer">
                                         City Name
                                     </th>
 
-                                    <th class="sort" (click)="sort('abbreviation')"  style="cursor:pointer">
+                                    <th class="sort" (click)="sort('abbreviation')" style="cursor:pointer">
                                         Abbreviation
                                     </th>
 
-                                    <th class="sort text-center" (click)="sort('active')"  style="cursor:pointer">
+                                    <th class="sort text-center" (click)="sort('active')" style="cursor:pointer">
                                         Active
                                     </th>
                                 </tr>
@@ -82,7 +82,7 @@
 
                                 <!-- DATA -->
                                 @for (item of paginatedList; track $index) {
-                                <tr (click)="goToEdit(item.id)" style="cursor: pointer;">
+                                <tr (dblclick)="goToEdit(item.id)" style="cursor: pointer;">
 
                                     <!-- SR NO -->
                                     <td>

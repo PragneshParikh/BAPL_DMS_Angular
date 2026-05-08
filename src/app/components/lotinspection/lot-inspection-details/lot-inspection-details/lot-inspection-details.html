@@ -183,16 +183,26 @@
                                         <td>{{item.motorNo}}</td>
                                         <td>{{item.batteryNo}}</td>
                                         <td>{{item.chargerNo}}</td>
-                                        <td><input [(ngModel)]="item.keyFobSetQty" class="form-control form-control-sm qty-input"></td>
-                                        <td><input [(ngModel)]="item.chargerQty" class="form-control form-control-sm qty-input"></td>
-                                        <td><input [(ngModel)]="item.mirrorSetQty" class="form-control form-control-sm qty-input"></td>
-                                        <td><input [(ngModel)]="item.firstAidKitQty" class="form-control form-control-sm qty-input"></td>
-                                        <td><input [(ngModel)]="item.toolkitQty" class="form-control form-control-sm qty-input"></td>
-                                        <td><input [(ngModel)]="item.ownersManual" class="form-control form-control-sm qty-input"></td>
-                                        <td><input [(ngModel)]="item.ignitionKeySet" class="form-control form-control-sm qty-input"></td>
-                                        <td><input [(ngModel)]="item.attributeCard" class="form-control form-control-sm qty-input"></td>
-                                        <td><input [(ngModel)]="item.chargingKit" class="form-control form-control-sm qty-input"></td>
-                                        <td><input type="date" [(ngModel)]="item.inspectionDate" class="form-control form-control-sm"></td>
+                                        <td><input [(ngModel)]="item.keyFobSetQty"
+                                                class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.chargerQty"
+                                                class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.mirrorSetQty"
+                                                class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.firstAidKitQty"
+                                                class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.toolkitQty"
+                                                class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.ownersManual"
+                                                class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.ignitionKeySet"
+                                                class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.attributeCard"
+                                                class="form-control form-control-sm qty-input"></td>
+                                        <td><input [(ngModel)]="item.chargingKit"
+                                                class="form-control form-control-sm qty-input"></td>
+                                        <td><input type="date" [(ngModel)]="item.inspectionDate"
+                                                class="form-control form-control-sm"></td>
                                         <td>
                                             <select class="form-select form-select-sm" [(ngModel)]="item.vehicleStatus"
                                                 class="form-select form-select-sm">
@@ -202,8 +212,10 @@
                                             </select>
                                         </td>
 
-                                        <td><input [(ngModel)]="item.damageDetails" class="form-control form-control-sm"></td>
-                                        <td><input [(ngModel)]="item.chassisWiseRemarks" class="form-control form-control-sm"></td>
+                                        <td><input [(ngModel)]="item.damageDetails"
+                                                class="form-control form-control-sm"></td>
+                                        <td><input [(ngModel)]="item.chassisWiseRemarks"
+                                                class="form-control form-control-sm"></td>
                                         <!-- FILE -->
                                         <td>
                                             <input type="file" hidden (change)="onFileSelected($event, i)" #fileInput>

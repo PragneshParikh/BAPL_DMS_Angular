@@ -6,44 +6,62 @@
     <!-- SEARCH CARD -->
     <div class="card">
         <div class="card-body">
-            <form #poFilterForm="ngForm" (ngSubmit)="onSearch()">
-                <div class="row g-2 align-items-end">
-                    <div class="col-md-2">
-                        <label class="form-label">Purchase No</label>
-                        <input type="text" class="form-control form-control-sm" placeholder="Enter No."
-                            [(ngModel)]="purchaseNo" name="purchaseNo">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Date from</label>
-                        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateFrom" name="dateFrom">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Date to</label>
-                        <input type="date" class="form-control form-control-sm " [(ngModel)]="dateTo" name="dateTo">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Submitted To Erp</label>
-                        <select class="form-select form-select-sm" [(ngModel)]="isSubmitted" name="isSubmitted">
-                            <option *ngFor="let status of poStatuses" [value]="status.value">
-                                {{status.name}}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 mt-2">
-                        <button type="submit" class="btn btn-primary btn-sm me-1">
-                            <i class="align-bottom me-1"></i> Search
-                        </button>
-                        <button type="button" class="btn btn-primary btn-sm ms-2" (click)="redirectToCreatePO()">
-                            <i class="align-bottom me-1"></i> Add
-                        </button>
-                        <button type="button" class="btn btn-primary btn-sm ms-2" (click)="resetFilters()">
-                            <i class="align-bottom me-1"></i> Reset
-                        </button>
-                        <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'"
-                            (click)="downloadPurchaseOrderExcel()">
-                            <i class="ri-file-excel-2-line"></i>
-                        </button>
-                    </div>
+            <div class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label">Purchase No</label>
+                    <input type="text" class="form-control" placeholder="Enter No." [(ngModel)]="purchaseNo">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Date from</label>
+                    <input type="date" class="form-control" [(ngModel)]="dateFrom">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Date to</label>
+                    <input type="date" class="form-control" [(ngModel)]="dateTo">
+                </div>
+                <!-- <div class="col-md-2">
+                    <label class="form-label">Transaction Type</label>
+                    <select class="form-select" [(ngModel)]="transactionType">
+                        <option value="">--Select--</option>
+                        <option *ngFor="let type of transactionTypeList" [value]="type.type">{{type.name}}</option>
+                    </select>
+                </div> -->
+                <!-- <div class="col-md-2">
+                    <label class="form-label">Party Name</label>
+                    <select class="form-select" [(ngModel)]="partyName">
+                        <option value="">--Select--</option>
+                        <option value="BGAUSS AUTO PRIVATE LIMITED">BGAUSS AUTO PRIVATE LIMITED</option>
+                    </select>
+                </div> -->
+                <div class="col-md-2">
+                    <label class="form-label">Submitted To Erp</label>
+                    <select class="form-select" [(ngModel)]="isSubmitted">
+                        <option value="">--Select--</option>
+                        <option value="Submited To Erp">Submitted To Erp</option>
+                        <option value="Not Submited To Erp">Not Submitted To Erp</option>
+                    </select>
+                </div>
+                <!-- <div class="col-md-2 mt-2">
+                    <label class="form-label">Per Page Records</label>
+                    <select class="form-select border-start border-2" [(ngModel)]="pageSize" (change)="refreshPage()">
+                        <option [ngValue]="10">10</option>
+                        <option [ngValue]="25">25</option>
+                        <option [ngValue]="50">50</option>
+                        <option [ngValue]="100">100</option>
+                    </select>
+                </div> -->
+                <div class="col-md-2 mt-2 text-end">
+                    <button class="btn btn-primary btn-sm me-1" (click)="onSearch()">
+                        <i class="align-bottom me-1"></i> Search
+                    </button>
+
+                    <button class="btn btn-primary btn-sm ms-2" (click)="redirectToCreatePO()">
+                        <i class="align-bottom me-1"></i> Add
+                    </button>
+                    <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'"
+                        (click)="downloadPurchaseOrderExcel()">
+                        <i class="ri-file-excel-2-line"></i>
+                    </button>
                 </div>
             </form>
         </div>
@@ -78,7 +96,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let po of pagedPurchaseOrders; let i=index" (click)="editPO(po)"
+                        <tr *ngFor="let po of pagedPurchaseOrders; let i=index" (dblclick)="editPO(po)"
                             style="cursor: pointer;" class="hover-row">
                             <td>{{ (page - 1) * pageSize + i + 1 }}.</td>
                             <!-- <td>{{po.prefixNo}}</td> -->
