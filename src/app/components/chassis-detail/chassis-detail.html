@@ -1,0 +1,40 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">Chassis Search</h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <form #chassisSearcchForm="ngForm">
+                    <!-- Top Row -->
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <label class="form-label">Vehicle Model</label>
+                            <!-- <select class="form-select form-select-sm" name="vehicleModel" required>
+                                <option *ngFor="let lt of ledgerTypes" [value]="lt.value">
+                                    {{ lt.name }}
+                                </option>
+                            </select> -->
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Search Chassis</label>
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="chassisNo"
+                                name="searchChassis">
+                        </div>
+                    </div>
+
+                    <!-- Add Button -->
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-primary btn-sm float-end me-1">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div><!-- end card -->
+</div>

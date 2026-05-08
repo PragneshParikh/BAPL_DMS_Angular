@@ -60,7 +60,7 @@
                                 required #taxCode="ngModel" name="taxCode" (change)="onTaxChange()">
                                 <option [ngValue]="null">-- Select TaxCode --</option>
                                 <option *ngFor="let t of taxList" [ngValue]="t">
-                                    {{ t.taxCode }}
+                                    ta {{ t.taxCode }}
                                 </option>
                             </select>
 
@@ -154,7 +154,7 @@
                         </thead>
                         <tbody>
                             <!-- Data Rows -->
-                            <tr *ngFor="let data of pagedData" (click)="openDetails(ViewAgreegateModal, data)"
+                            <tr *ngFor="let data of pagedData" (dblclick)="openDetails(ViewAgreegateModal, data)"
                                 style="cursor:pointer">
                                 <td>{{ data.ataxCode }}</td>
                                 <td>{{ data.description }}</td>

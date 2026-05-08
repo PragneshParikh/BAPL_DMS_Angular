@@ -30,18 +30,19 @@
                         <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.effectiveDateTo">
                     </div> -->
 
-                     <div class="col-md-2">
+                    <div class="col-md-2">
                         <label class="form-label mb-0 small">Effective Date From</label>
                         <input type="text" class="form-control form-control-sm" style="font-size: 8px;" mwlFlatpickr
-                            [(ngModel)]="filter.effectiveDateFrom" [altInput]="true" [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'"
-                            placeholder="Select date">
+                            [(ngModel)]="filter.effectiveDateFrom" [altInput]="true" [altFormat]="'d-m-Y'"
+                            [dateFormat]="'Y-m-d'" placeholder="Select date">
                     </div>
 
                     <!-- To Date -->
                     <div class="col-md-2">
                         <label class="form-label mb-0 small">Effective Date To</label>
-                        <input type="text" class="form-control form-control-sm" mwlFlatpickr [(ngModel)]="filter.effectiveDateTo"
-                            [altInput]="true" [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'" placeholder="Select date">
+                        <input type="text" class="form-control form-control-sm" mwlFlatpickr
+                            [(ngModel)]="filter.effectiveDateTo" [altInput]="true" [altFormat]="'d-m-Y'"
+                            [dateFormat]="'Y-m-d'" placeholder="Select date">
                     </div>
 
 
@@ -68,42 +69,42 @@
 
         <!-- TABLE CARD -->
         <div class="card">
-             <div class="card-header">
+            <div class="card-header">
 
-            <div class="d-flex justify-content-end align-items-center">
+                <div class="d-flex justify-content-end align-items-center">
 
-                <!-- LEFT SIDE -->
-                <!-- <div class="text-muted">
+                    <!-- LEFT SIDE -->
+                    <!-- <div class="text-muted">
                     Total Record(s): {{ filteredReceipts.length }}
                 </div> -->
 
-                <!-- RIGHT SIDE -->
-                <div class="d-flex align-items-center gap-3">
+                    <!-- RIGHT SIDE -->
+                    <div class="d-flex align-items-center gap-3">
 
-                    <!-- Buttons -->
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-primary btn-sm" (click)="addNew()">
-                            Add
-                        </button>
+                        <!-- Buttons -->
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary btn-sm" (click)="addNew()">
+                                Add
+                            </button>
 
-                        <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
-                          (click)="downloadExcel()" >
-                            <i class="ri-file-excel-2-line"></i>
-                        </button>
-                    </div>
+                            <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                                (click)="downloadExcel()">
+                                <i class="ri-file-excel-2-line"></i>
+                            </button>
+                        </div>
 
-                    <!-- Search -->
-                    <div class="search-box">
-                        <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm"
-                            (input)="onSearchChange()" />
-                        <i class="ri-search-line search-icon"></i>
+                        <!-- Search -->
+                        <div class="search-box">
+                            <input type="text" class="form-control search" placeholder="Search..."
+                                [(ngModel)]="searchTerm" (input)="onSearchChange()" />
+                            <i class="ri-search-line search-icon"></i>
+                        </div>
+
                     </div>
 
                 </div>
 
             </div>
-
-        </div>
 
             <div class="card-body">
 
@@ -152,7 +153,7 @@
                             }
 
                             @for (item of paginatedList; track $index) {
-                            <tr (click)="edit(item)" style="cursor: pointer;">
+                            <tr (dblclick)="edit(item)" style="cursor: pointer;">
 
                                 <td>{{ ($index + 1) + ((page - 1) * pageSize) }}</td>
 

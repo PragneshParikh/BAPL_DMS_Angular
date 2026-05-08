@@ -15,7 +15,7 @@ export class AuthGuard {
         private storageService: StorageService
     ) { }
 
-    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+    canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
         const currentUser = this.authService.currentUserValue;
 
         if (!currentUser) {
@@ -34,38 +34,21 @@ export class AuthGuard {
         try {
             menuRights = this.storageService.getMenuRights();
         } catch (e) {
-            console.error('Invalid menuRights in localStorage');
+            console.error('Invalid menuRights in storage');
             this.router.navigate(['/login']);
             return false;
         }
 
-        const findRoute = (routes: any[], url: string): any | null => {
-            for (const r of routes) {
-                const fullPath = '/' + r.path;
-                if (url.startsWith(fullPath)) {
-                    return r;
-                }
-                if (r.children && r.children.length) {
-                    const childMatch = findRoute(r.children, url);
-                    if (childMatch) return childMatch;
-                }
-            }
-            return null;
-        };
+        const subMenuId = route.data[0];
 
-        const matchingRoute = findRoute(this.router.config, requestedUrl);
-
-        if (!matchingRoute) {
+        if (!subMenuId) {
             this.router.navigate(['/']);
             return false;
         }
 
-        const routePermissions: number[] = matchingRoute.data || [];
+        const right = menuRights.find(r => r.subMenuId === subMenuId);
 
-        const hasAccess = routePermissions.length === 0 ||
-            routePermissions.some(p =>
-                menuRights.some(m => m.permission === p)
-            );
+        const hasAccess = right && right.permission > 0;
 
         if (!hasAccess) {
             this.router.navigate(['/']);

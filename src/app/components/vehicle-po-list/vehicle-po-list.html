@@ -63,7 +63,8 @@
                     <button class="btn btn-primary btn-sm ms-2" (click)="redirectToCreatePO()">
                         <i class="align-bottom me-1"></i> Add
                     </button>
-                     <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'" (click)="downloadPurchaseOrderExcel()">
+                    <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'"
+                        (click)="downloadPurchaseOrderExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
                 </div>
@@ -100,7 +101,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let po of pagedPurchaseOrders; let i=index" (click)="editPO(po)"
+                        <tr *ngFor="let po of pagedPurchaseOrders; let i=index" (dblclick)="editPO(po)"
                             style="cursor: pointer;" class="hover-row">
                             <td>{{ (page - 1) * pageSize + i + 1 }}.</td>
                             <!-- <td>{{po.prefixNo}}</td> -->

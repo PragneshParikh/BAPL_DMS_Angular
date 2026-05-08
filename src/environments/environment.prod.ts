@@ -1,14 +1,4 @@
 export const environment = {
   production: true,
-  defaultauth: 'fakebackend',
-  firebaseConfig: {
-    apiKey: '',
-    authDomain: '',
-    databaseURL: '',
-    projectId: '',
-    storageBucket: '',
-    messagingSenderId: '',
-    appId: '',
-    measurementId: ''
-  }
+  apiUrl: 'https://bapldmsai-e6f0hzhmg4achue9.centralindia-01.azurewebsites.net/api'
 };
