@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { VehiclePoListService } from '../../core/services/vehicle-po-list-service';
-import { TRANSACTION_TYPES } from '../../constant';
+import { PO_STATUSES, TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 
@@ -16,6 +16,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
   styleUrl: './vehicle-po-list.scss',
 })
 export class VehiclePoList implements OnInit {
+  poStatuses = PO_STATUSES;
   purchaseNo: string = '';
   dateFrom: string = '';
   dateTo: string = '';
@@ -239,6 +240,15 @@ export class VehiclePoList implements OnInit {
         this.toastr.show('Excel download failed', { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
+  }
+
+  resetFilters() {
+    this.purchaseNo = '';
+    this.partyName = '';
+    this.transactionType = '';
+    this.isSubmitted = '';
+    this.initDefaultDates();
+    this.onSearch();
   }
 }
 

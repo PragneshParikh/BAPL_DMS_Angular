@@ -10,11 +10,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SimplebarAngularModule } from 'simplebar-angular';
 
 @Component({
-    selector: 'app-rightsidebar',
-    templateUrl: './rightsidebar.component.html',
-    styleUrls: ['./rightsidebar.component.scss'],
-    imports: [CommonModule,FormsModule, ReactiveFormsModule, SimplebarAngularModule],
-    standalone: true
+  selector: 'app-rightsidebar',
+  templateUrl: './rightsidebar.component.html',
+  styleUrls: ['./rightsidebar.component.scss'],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, SimplebarAngularModule],
+  standalone: true
 })
 
 /**

@@ -1,0 +1,74 @@
+<div class="container-fluid mt-3">
+  <div class="card">
+
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">Dealer Wise Stock Report</h4>
+      <button class="btn btn-dark btn-sm" (click)="printReport()">
+        Print
+      </button>
+    </div>
+
+    <div class="card-body">
+
+      <!-- LOADING -->
+      <div *ngIf="isLoading" class="loading-section">
+        Loading...
+      </div>
+
+      <!-- NO DATA -->
+      <div *ngIf="!isLoading && dealerWiseReports.length === 0" class="no-data">
+        No data found.
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-responsive" *ngIf="!isLoading && dealerWiseReports.length > 0">
+        <table class="table table-bordered">
+
+          <thead class="table-dark">
+            <tr>
+              <th>Sr. No</th>
+              <th>Dealer Name</th>
+              <th>Dealer Code</th>
+              <th>Model</th>
+              <th>Colour</th>
+              <th>Total Qty</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <ng-container *ngFor="let dealer of dealerWiseReports; let di = index">
+
+              <!-- Detail Rows -->
+              <tr *ngFor="let item of dealer.items; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ dealer.dealerName }}</td>
+                <td>{{ dealer.dealerCode }}</td>
+                <td>{{ item.model }}</td>
+                <td>{{ item.colour }}</td>
+                <td>{{ item.totalQty }}</td>
+              </tr>
+
+              <!-- Dealer Sub Total Row -->
+              <tr class="table-warning fw-bold">
+                <td colspan="5" class="text-end">
+                  {{ dealer.dealerName }} — Sub Total
+                </td>
+                <td>{{ dealer.totalQty }}</td>
+              </tr>
+
+            </ng-container>
+
+            <!-- Grand Total Row -->
+            <tr class="table-danger fw-bold">
+              <td colspan="5" class="text-end">GRAND TOTAL</td>
+              <td>{{ grandTotal }}</td>
+            </tr>
+
+          </tbody>
+
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>

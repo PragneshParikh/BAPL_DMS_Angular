@@ -33,6 +33,12 @@ import { AddCityMaster } from './components/city-master/add-city-master/add-city
 import { ModelwiseServiceSchedule } from './components/modelwise-service-schedule/modelwise-service-schedule';
 import { PdiChecklistmaster } from './components/pdi-checklistmaster/pdi-checklistmaster';
 import { PerformaInvoice } from './components/Reports/performa-invoice/performa-invoice';
+import { ProformaInvoice } from './components/proforma-invoice/proforma-invoice';
+import { Form22Certificate } from './components/Reports/form22-certificate/form22-certificate';
+import { DeliveryChecklist } from './components/Reports/delivery-checklist/delivery-checklist';
+import { DeliverySlip } from './components/Reports/delivery-slip/delivery-slip';
+import { SaleLetter } from './components/Reports/sale-letter/sale-letter';
+
 
 
 export const routes: Routes = [
@@ -80,18 +86,20 @@ export const routes: Routes = [
       { path: 'hsnwisetaxcode', component: Hsnwisetaxcode, data: [16] },
       { path: 'lotinspection', component: Lotinspection, data: [18] },
       { path: 'lot-inspection-details/:invoiceNo', component: LotInspectionDetails, data: [18] },
-      { path: 'receipt-entry', component: ReceiptEntry, data: [15] },
-      { path: 'receipt-entry/add', component: AddReceiptEntry, data: [15] },
-      { path: 'receipt-entry/edit/:id', component: AddReceiptEntry, data: [15] },
-      { path: 'vehicle-sale-bill/edit/:id', component: AddVehicleSaleBill, data: [15] },
-      { path: 'vehicle-sale-bill/add', component: AddVehicleSaleBill, data: [15] },
-      { path: 'vehicle-sale-bill', component: VehicleSaleBill, data: [15] },
-      { path: 'oemmodel-warranty', component: OemmodelWarranty, data: [19] },
-      { path: 'oemmodel-warranty/add', component: AddOemmodelWarranty, data: [19] },
-      { path: 'oemmodel-warranty/edit/:id', component: AddOemmodelWarranty, data: [19] },
+      { path: 'receipt-entry', component: ReceiptEntry, data: [19] },
+      { path: 'receipt-entry/add', component: AddReceiptEntry, data: [19] },
+      { path: 'receipt-entry/edit/:id', component: AddReceiptEntry, data: [19] },
+      { path: 'vehicle-sale-bill/edit/:id', component: AddVehicleSaleBill, data: [27] },
+      { path: 'vehicle-sale-bill/add', component: AddVehicleSaleBill, data: [27] },
+      { path: 'vehicle-sale-bill', component: VehicleSaleBill, data: [27] },
+      { path: 'oemmodel-warranty', component: OemmodelWarranty, data: [34] },
+      { path: 'oemmodel-warranty/add', component: AddOemmodelWarranty, data: [34] },
+      { path: 'oemmodel-warranty/edit/:id', component: AddOemmodelWarranty, data: [34] },
       { path: 'customer-ledger', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger-list/customer-ledger-list').then(m => m.CustomerLedgerList) },
       { path: 'customer-ledger/:id', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger').then(m => m.CustomerLedger) },
       { path: 'delivery-certificate', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
+      { path: 'stock-report', data: [40], loadComponent: () => import('./components/stock-reports/stock-report').then(m => m.StockReportComponent) },
+      { path: 'add-vehicle-sale-bill/delivery-certificate/:id', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
       { path: 'job-card', component: JobCard, data: [23] },
       { path: 'job-card-addForm/:test', component: JobCardAddForm, data: [23] },
       { path: 'vehicle-po', component: VehiclePO, data: [17] },
@@ -113,6 +121,13 @@ export const routes: Routes = [
       { path: 'extended-battery-warranty/:id', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty').then(m => m.ExtendedBatteryWarranty) },
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
       { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-detail/chassis-detail').then(m => m.ChassisDetail) }
+      { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
+      { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [22] },
+      { path: 'proforma-invoice', component: ProformaInvoice, data: [22] },
+      { path: 'form22-certificate/:chassisNo', component: Form22Certificate, data: [22] },
+      {path:'delivery-checkList',component:DeliveryChecklist,data:[22]},
+      {path:'delivery-slip',component:DeliverySlip,data:[22]},
+       {path:'sale-Letter/:saleBillNo',component:SaleLetter,data:[22]}
     ]
   }
 ];

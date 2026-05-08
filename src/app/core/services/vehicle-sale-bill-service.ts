@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UpdateSaleDetailsVM, VehicleSaleChasisRequest, VehicleSaleChasisResponse } from '../../ViewModels/VehicleSaleBill';
 import { VehicleSaleListChasisResponse } from '../../ViewModels/VehicleSaleChasisResponse';
+import { Form22SlipViewModel } from '../../ViewModels/Form22SlipViewModel';
 
 @Injectable({
   providedIn: 'root',
@@ -55,15 +56,15 @@ export class VehicleSaleBillService {
     });
   }
 
-  getChasisPricing(dealerCode: string, ledgerId: number) {
-  return this.http.get<any>(
-    `${this.apiUrl}/VehicleSaleBill/GetChasisPricing?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
-  );
-}
+//   getChasisPricing(dealerCode: string, ledgerId: number) {
+//   return this.http.get<any>(
+//     `${this.apiUrl}/VehicleSaleBill/GetChasisPricing?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
+//   );
+// }
 
-getChassisListPDIOK(dealerCode: string): Observable<VehicleSaleListChasisResponse[]> {
+getChassisListPDIOK(dealerCode: string, ledgerId: number): Observable<VehicleSaleListChasisResponse[]> {
   return this.http.get<VehicleSaleListChasisResponse[]>(
-    `${this.apiUrl}/VehicleSaleBill/ChassisListPDIOK?dealerCode=${dealerCode}`
+    `${this.apiUrl}/VehicleSaleBill/ChassisListPDIOK?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
   );
 }
 getVehicleSaleBillById(id: number): Observable<any> {
@@ -93,4 +94,15 @@ updateRegistrationAndReserveChassis(
       { params }
     );
   }
+
+
+  getForm22(chassisNo: string): Observable<Form22SlipViewModel> {
+    const params = new HttpParams().set('chassisNo', chassisNo);
+
+    return this.http.get<Form22SlipViewModel>(
+      `${this.apiUrl}/VehicleSaleBill/Form22`,
+      { params }
+    );
+  }
+
 }

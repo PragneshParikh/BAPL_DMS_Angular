@@ -1,4 +1,19 @@
-<div class="a4-page mx-auto bg-white p-4 shadow-sm" id="reportContent">
+<div class="a4-page mx-auto bg-white p-3">
+  <div id="reportContent">
+
+    <!-- HEADER -->
+    <div class="text-center border-bottom pb-1">
+      <h6 class="mb-0 fw-bold text-uppercase">{{ dealer?.compname }}</h6>
+
+      <div class="small">
+        {{ dealer?.adress1 }} {{ dealer?.adress2 }}<br>
+        {{ dealer?.city }} - {{ dealer?.pin }} - {{ dealer?.state }}-        Phone No.: {{ dealer?.mobile }}<br>
+        Email: {{ dealer?.email }}<br>
+        GSTIN No.: {{ dealer?.compgstinNo }}<br>
+        PAN No.: {{ dealer?.pan }}<br>
+        Trade Certificate No.: {{ dealer?.tradCert }}
+      </div>
+    </div>
 
   <!-- HEADER -->
   <div class="text-center border-bottom pb-2 mb-2">
@@ -26,20 +41,169 @@
       </span>
     </small>
   </div>
+<div class="text-center border-bottom pb-1">
+      <h6 class="mb-0 fw-bold text-uppercase">
+  {{ isInvoiced ? 'TAX INVOICE' : 'PERFORMA INVOICE' }}
+</h6></div>
+    <!-- CUSTOMER DETAILS -->
+    <table class="w-100 small custom-table mt-1">
+  <tr>
+    <td colspan="4"><b>Customer Details</b></td>
+  </tr>
 
-  <h5 class="text-center fw-bold border-bottom pb-1">Performa Invoice</h5>
+  <tr>
+    <!-- LEFT SIDE -->
+    <td width="18%" class="label">Party Name</td>
+    <td width="32%">: {{ saleBill?.customerName || '-' }}</td>
 
-  <!-- TOP INFO -->
-  <div class="row mb-2">
-    <div class="col-6">
-      <strong>Invoice No:</strong> <br>
-      <strong>Payment Mode:</strong> -{{ saleBill?.saleType || 'N/A' }}
-    </div>
-    <div class="col-6 text-end">
-      <strong>Invoice Date:</strong> {{ currentDate | date:'dd-MM-yyyy' }}<br>
-      <strong>Service Type:</strong> Accidental
-    </div>
-  </div>
+    <!-- RIGHT SIDE (pushed right) -->
+    <td width="22%" class="label ps-4">{{ isInvoiced ? 'Invoice No' : 'Proforma Invoice No' }}</td>
+    <td width="28%">:  {{ isInvoiced ? 'IN-' : 'PR-' }}{{ saleBill?.saleBillNo || '-' }}</td>
+  </tr>
+
+  <tr>
+    <td class="label">Mobile No</td>
+    <td>: {{ CustomerLedger?.mobileNumber || '-' }}</td>
+
+    <td class="label ps-4"> {{ isInvoiced ? 'Invoice Date' : 'Proforma Invoice Date' }}</td>
+    <td>: {{ saleBill?.saleDate | date:'dd-MM-yyyy' }}</td>
+  </tr>
+
+  <tr>
+    <td class="label">Email</td>
+    <td>: {{ CustomerLedger?.eMail || '-' }}</td>
+
+    <td class="label ps-4">Bill Type</td>
+    <td>: {{ saleBill?.billType || '-' }}</td>
+  </tr>
+
+  <tr>
+    <td class="label">Address</td>
+    <td>: {{ CustomerLedger?.address || '-' }}</td>
+
+    <td class="label ps-4">Sale Type</td>
+    <td>: {{ saleBill?.saleType || '-' }}</td>
+  </tr>
+
+  <tr>
+    <td class="label">State</td>
+    <td>: {{ CustomerLedger?.stateName || 'N/A' }}</td>
+
+    <td class="label ps-4">Customer Type</td>
+    <td>: {{ saleBill?.customerType || '-' }}</td>
+  </tr>
+
+  <tr>
+    <td class="label">Country</td>
+    <td>: India</td>
+
+    <td class="label ps-4">Financier</td>
+    <td>: {{ saleBill?.financier || '-' }}</td>
+  </tr>
+</table>
+
+    <!-- VEHICLE TABLE -->
+    <table class="table table-bordered small mt-2">
+      <thead>
+        <tr>
+          <th>S.No.</th>
+          <th>Model</th>
+          <th>Product Code</th>
+          <th>Color</th>
+          <th>HSN</th>
+          <th>Chassis No</th>
+          <th>Motor No</th>
+          <th class="text-end">Amount</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let item of saleBill?.details; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ item.modelName || '-' }}</td>
+          <td>{{ item.itemCode || '-' }}</td>
+          <td>{{ item.colour || '-' }}</td>
+          <td>{{item.hsnCode}}</td>
+          <td>{{ item.chassisNo || '-' }}</td>
+          <td>{{ item.motorNo || '-' }}</td>
+          <td class="text-end">{{ item.itemRate | number:'1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="dashed"></div>
+
+    <!-- TAX -->
+    <table class="small w-100">
+      <tr>
+        <td>Taxable Price</td>
+        <td class="text-end">{{ amounts.taxable | number:'1.2-2' }}</td>
+      </tr>
+
+      <ng-container *ngIf="amounts.igst === 0; else igstBlock">
+        <tr>
+          <td>CGST@{{ amounts.cgstPercent }}%</td>
+          <td class="text-end">{{ amounts.cgst | number:'1.2-2' }}</td>
+        </tr>
+        <tr>
+          <td>SGST@{{ amounts.sgstPercent }}%</td>
+          <td class="text-end">{{ amounts.sgst | number:'1.2-2' }}</td>
+        </tr>
+      </ng-container>
+
+      <ng-template #igstBlock>
+        <tr>
+          <td>IGST@{{ amounts.igstPercent }}%</td>
+          <td class="text-end">{{ amounts.igst | number:'1.2-2' }}</td>
+        </tr>
+      </ng-template>
+    </table>
+
+    <div class="dashed"></div>
+
+    <!-- TOTAL -->
+    <table class="small w-100">
+      <tr>
+        <td><b>Ex-Showroom Price</b></td>
+        <td class="text-end"><b>{{ amounts.exShowroom | number:'1.2-2' }}</b></td>
+      </tr>
+      <tr>
+        <td><b>Total Discount</b></td>
+        <td class="text-end">({{ amounts.discount | number:'1.2-2' }})</td>
+      </tr>
+      <tr>
+        <td><b> {{ isInvoiced ? 'Invoice Total' : 'Proforma Invoice Total' }}</b></td>
+        <td class="text-end"><b>{{ amounts.total | number:'1.2-2' }}</b></td>
+      </tr>
+
+ <!-- ON ROAD SECTION -->
+
+  <ng-container *ngIf="invoiceType === 'onroad'">
+
+    <tr>
+      <td>
+        <b>Registration Amount</b>
+      </td>
+
+      <td class="text-end">
+        {{ registrationAmount | number:'1.2-2' }}
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <b>Insurance Amount</b>
+      </td>
+
+      <td class="text-end">
+        {{ insuranceAmount | number:'1.2-2' }}
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <b>Pre GST Discount</b>
+      </td>
 
   <!-- DETAILS -->
   <div class="row border p-2 mb-2">
@@ -89,8 +253,36 @@
       </div>
 
     </div>
+      <td class="text-end">
+        ({{ preGstDiscount | number:'1.2-2' }})
+      </td>
+    </tr>
 
-  </div>
+  </ng-container>
+
+  <!-- GRAND TOTAL -->
+
+  <tr>
+
+    <td>
+
+      <b>
+
+        {{
+
+          invoiceType === 'onroad'
+            ? 'On Road Total'
+            : (
+                isInvoiced
+                  ? 'Invoice Total'
+                  : 'Proforma Invoice Total'
+              )
+
+        }}
+
+      </b>
+
+    </td>
 
   <!-- PARTY -->
   <div class="border p-2 mb-2">
@@ -99,106 +291,116 @@
     8866183929<br>
     Surat, Gujarat
   </div>
+    <td class="text-end">
 
-  <!-- TABLE -->
-  <table class="table table-bordered text-sm">
-    <thead class="table-light">
+      <b>
+
+        {{
+
+          invoiceType === 'onroad'
+            ? (onRoadTotal | number:'1.2-2')
+            : (amounts.total | number:'1.2-2')
+
+        }}
+
+      </b>
+
+    </td>
+
+
+    </table>
+
+    <div class="dashed"></div>
+
+    <!-- AMOUNT IN WORDS -->
+    <table class="small w-100">
       <tr>
-        <th>Sr</th>
-        <th>Description</th>
-        <th>HSN</th>
-        <th>Rate</th>
-        <th>Qty</th>
-        <th>Taxable</th>
-        <th>GST</th>
-        <th>Total</th>
+        <td><b>Amount in words</b> :</td>
+        <td><b>{{ inWords || '-' }}</b></td>
       </tr>
-    </thead>
+    </table>
 
-    <tbody>
-      <!-- PARTS -->
-      <tr class="fw-bold">
-        <td colspan="8">Parts</td>
-      </tr>
+    <div class="dashed"></div>
 
-      <tr>
-        <td>1</td>
-        <td>Brake Lever Assembly</td>
-        <td>87141090</td>
-        <td>910.17</td>
-        <td>1</td>
-        <td>910.17</td>
-        <td>163.83</td>
-        <td>1073.99</td>
-      </tr>
+    <!-- BATTERY DETAILS -->
+    <table class="table table-bordered small">
+      <thead>
+        <tr>
+          <th>Battery Sr. No.</th>
+          <th>Chemistry</th>
+          <th>Capacity</th>
+          <th>Make</th>
+          <th>Coupon No.</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of saleBill?.details">
+          <td>{{ item.battery || '-' }}</td>
+          <td>{{ item.batteryChemistry || 'LFP' }}</td>
+          <td>{{ item.batteryCapacity || '-' }}</td>
+          <td>{{ item.batteryMake || '-' }}</td>
+          <td>{{ item.couponNo || 'NA' }}</td>
+        </tr>
+      </tbody>
+    </table>
 
-      <tr>
-        <td>2</td>
-        <td>Cover Bottom</td>
-        <td>87141090</td>
-        <td>578.81</td>
-        <td>1</td>
-        <td>578.81</td>
-        <td>104.18</td>
-        <td>683.00</td>
-      </tr>
+    <!-- CHARGER DETAILS -->
+    <table class="table table-bordered small">
+      <thead>
+        <tr>
+          <th>Charger No.</th>
+          <th>VCU</th>
+          <th>Controller No.</th>
+          <th>Mfg. Year</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of saleBill?.details">
+          <td>{{ item.chargerNo || '-' }}</td>
+          <td>{{ item.vcu || '-' }}</td>
+          <td>{{ item.controllerNo || '-' }}</td>
+          <td>{{ item.mfgYear || '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
 
-      <!-- SUBTOTAL -->
-      <tr class="fw-bold">
-        <td colspan="5" class="text-end">Sub Total Parts</td>
-        <td>2383.05</td>
-        <td>428.94</td>
-        <td>2812.00</td>
-      </tr>
-
-      <!-- LABOUR -->
-      <tr class="fw-bold">
-        <td colspan="8">Labour</td>
-      </tr>
-
-      <tr>
-        <td>3</td>
-        <td>Brake Lever Replacement</td>
-        <td>998729</td>
-        <td>240</td>
-        <td>1</td>
-        <td>240</td>
-        <td>43.2</td>
-        <td>283.2</td>
-      </tr>
-
-      <tr class="fw-bold">
-        <td colspan="5" class="text-end">Sub Total Labour</td>
-        <td>260</td>
-        <td>46.8</td>
-        <td>306.8</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- TOTAL -->
-  <div class="row mt-3">
-    <div class="col-6">
-      <strong>Amount in words:</strong><br>
-      Three Thousand One Hundred Nineteen Only
+    <!-- TERMS -->
+    <div class="small mt-2">
+      <b>Terms & Conditions</b>
+      <ol class="mb-1">
+        <li>Goods once sold will not be taken back.</li>
+        <li>Subject to respective jurisdiction only.</li>
+        <li>E & OE.</li>
+        <li>RTO, Accessories & other charges will be additional.</li>
+      </ol>
     </div>
 
-    <div class="col-6 text-end">
-      <p>Discount: 0.00</p>
-      <p>Round Off: 0.20</p>
-      <h5 class="fw-bold">Total: ₹ 3,119.00</h5>
+    <!-- ACKNOWLEDGEMENT -->
+    <div class="small mt-2">
+      <b>Acknowledgement</b><br>
+      Received Vehicle (with above Vin Number) in good condition along with this invoice.
+      The details have been verified and found satisfactory.
     </div>
-  </div>
 
-  <!-- FOOTER -->
-  <div class="row mt-5">
-    <div class="col-6">Customer Signature</div>
-    <div class="col-6 text-end">Authorized Signatory</div>
-  </div>
+    <div class="dashed"></div>
+
+    <!-- SIGNATURE -->
+    <div class="row mt-5 small">
+      <div class="col-6"><strong>Customer Signature</strong></div>
+      <div class="col-6 text-end">
+       <strong>For {{ dealer?.compname }}</strong><br><br>
+        <strong>Authorized Signatory</strong>
+      </div>
+    </div>
+
+    <div class="text-center mt-3 small">
+      <strong>THANK YOU</strong>
+    </div>
 
   <p class="text-center mt-3">THANKS VISIT AGAIN</p>
   <button class=" btn btn-primary " (click)="savePerformaInvoice()">
 
     Confirm
   </button>
+  </div>
 </div>
