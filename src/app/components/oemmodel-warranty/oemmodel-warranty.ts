@@ -86,7 +86,7 @@ formatDate(date: Date): string {
 
  onSearch(): void {
   this.page = 1;
-  this.loadData(); // ✅ CALL API
+  this.loadData(); // CALL API
 }
 
  onSearchChange(): void {
@@ -136,7 +136,7 @@ sort(field: keyof OemModelWarranty): void {
   this.updatePagination();
 }
 
-  // ✅ Pagination
+  // Pagination
   updatePagination(): void {
     const start = (this.page - 1) * this.pageSize;
     this.paginatedList = this.filteredList.slice(start, start + this.pageSize);
@@ -147,7 +147,7 @@ sort(field: keyof OemModelWarranty): void {
     this.updatePagination();
   }
 
-   // ✅ Delete
+   //  Delete
   delete(id: number): void {
     if (!confirm('Are you sure you want to delete?')) return;
 

@@ -47,31 +47,4 @@
     display:inline-block;
      width: 120px;
   }
-
-}
-
-.custom-table td {
-  border: none !important;
-  padding: 3px 6px;
-  vertical-align: top;
-}
-
-.custom-table .label {
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-table th {
-  font-size: 10px !important;   /* make header text small */
-  padding: 2px 4px !important;  /* reduce spacing */
-  white-space: nowrap;          /* prevent line break */
-  vertical-align: middle;
-}
-
-table td {
-  padding: 2px 4px !important;  /* compact rows */
-}
-
-.table {
-  margin-bottom: 4px !important;
 }

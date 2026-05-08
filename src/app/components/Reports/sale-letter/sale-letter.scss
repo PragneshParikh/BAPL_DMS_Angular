@@ -1,0 +1,92 @@
+.a4-page {
+    max-width: 800px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.doc-table td, .doc-table th {
+    padding: 4px 8px;
+}
+
+hr {
+    border-top: 1px solid #000;
+}
+
+@media print {
+    .a4-page {
+        box-shadow: none;
+    }
+}
+
+.sale-certificate-page {
+    width: 210mm;
+    min-height: 297mm;
+    font-family: Arial, sans-serif;
+    color: #000;
+    font-size: 11px;
+}
+
+.small-text {
+    font-size: 11px;
+    line-height: 1.2;
+}
+
+.small-font {
+    font-size: 11px;
+}
+
+.logo-img {
+    height: 42px;
+}
+
+.label-col {
+    width: 150px;
+    white-space: nowrap;
+}
+
+.vehicle-label {
+    width: 60%;
+}
+
+.vehicle-box {
+    min-height: 230px;
+}
+
+.table td {
+    padding: 3px 6px !important;
+    vertical-align: top;
+}
+
+.signature-section {
+    margin-top: 80px;
+}
+
+.for-text {
+    margin-bottom: 50px;
+    font-size: 18px;
+}
+
+.signature-line {
+    display: inline-block;
+    border-top: 1px solid #000;
+    padding-top: 4px;
+    width: 220px;
+    text-align: center;
+    font-size: 11px;
+}
+
+@media print {
+
+    body {
+        background: #fff;
+    }
+
+    .a4-page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        box-shadow: none !important;
+    }
+
+}
