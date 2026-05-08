@@ -1,0 +1,11 @@
+.toggle-icon {
+  padding: 6px;
+  border-radius: 6px;
+  background-color: transparent;
+  transition: all 0.3s ease;
+  font-size: 28px; 
+}
+
+.toggle-icon.active {
+  color: #fff;
+}

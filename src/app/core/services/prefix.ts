@@ -31,4 +31,8 @@ export class PrefixService {
   saveSequenceForDealers(sequence: any) {
     return this.httpClient.post(`${this.baseUrl}/prefix/AddPrefixForDealers`, sequence);
   }
+
+  getPrefixByDealerByModule(dealerCode: string, module: string): Observable<string> {
+    return this.httpClient.get(`${this.baseUrl}/prefix/${dealerCode}/modules/${module}`, { responseType: 'text' });
+  }
 }
