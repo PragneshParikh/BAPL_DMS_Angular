@@ -1,3 +1,4 @@
+// src/app/ViewModels/models/stock-report.model.ts
 export interface StockReport {
   dealerName: string;
   dealerCode: string;
