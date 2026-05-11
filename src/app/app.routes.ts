@@ -38,7 +38,7 @@ import { Form22Certificate } from './components/Reports/form22-certificate/form2
 import { DeliveryChecklist } from './components/Reports/delivery-checklist/delivery-checklist';
 import { DeliverySlip } from './components/Reports/delivery-slip/delivery-slip';
 import { SaleLetter } from './components/Reports/sale-letter/sale-letter';
-
+import { WorkInProgress } from './components/work-in-progress/work-in-progress';
 
 
 export const routes: Routes = [
@@ -121,13 +121,12 @@ export const routes: Routes = [
       { path: 'extended-battery-warranty/:id', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty').then(m => m.ExtendedBatteryWarranty) },
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
       { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-detail/chassis-detail').then(m => m.ChassisDetail) },
-      { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
-      { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [22] },
       { path: 'proforma-invoice', component: ProformaInvoice, data: [22] },
       { path: 'form22-certificate/:chassisNo', component: Form22Certificate, data: [22] },
       { path: 'delivery-checkList', component: DeliveryChecklist, data: [22] },
       { path: 'delivery-slip', component: DeliverySlip, data: [22] },
-      { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] }
+      { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] },
+      { path: '**', component: WorkInProgress }
     ]
   }
 ];
