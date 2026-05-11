@@ -7,7 +7,7 @@
 
       <div class="small">
         {{ dealer?.adress1 }} {{ dealer?.adress2 }}<br>
-        {{ dealer?.city }} - {{ dealer?.pin }} - {{ dealer?.state }}-        Phone No.: {{ dealer?.mobile }}<br>
+        {{ dealer?.city }} - {{ dealer?.pin }} - {{ dealer?.state }}- Phone No.: {{ dealer?.mobile }}<br>
         Email: {{ dealer?.email }}<br>
         GSTIN No.: {{ dealer?.compgstinNo }}<br>
         PAN No.: {{ dealer?.pan }}<br>
@@ -15,92 +15,67 @@
       </div>
     </div>
 
-  <!-- HEADER -->
-  <div class="text-center border-bottom pb-2 mb-2">
-    <h4 class="mb-0 fw-bold">{{ dealer?.compname }}</h4>
-
-    <small *ngIf="dealer">
-      {{ dealer?.adress1 }}<br>
-      {{ dealer?.adress2 }}<br>
-
-      {{ dealer?.city }} - {{ dealer?.pin }}<br>
-      {{ dealer?.state }}<br>
-
-      <span *ngIf="dealer?.mobile">
-        Phone: {{ dealer?.mobile }}
-      </span>
-
-      <span *ngIf="dealer?.email">
-        | Email: {{ dealer?.email }}
-      </span>
-
-      <br>
-
-      <span>
-        GSTIN: {{ dealer?.compgstinNo }}
-      </span>
-    </small>
-  </div>
-<div class="text-center border-bottom pb-1">
+    <div class="text-center border-bottom pb-1">
       <h6 class="mb-0 fw-bold text-uppercase">
-  {{ isInvoiced ? 'TAX INVOICE' : 'PERFORMA INVOICE' }}
-</h6></div>
+        {{ isInvoiced ? 'TAX INVOICE' : 'PERFORMA INVOICE' }}
+      </h6>
+    </div>
     <!-- CUSTOMER DETAILS -->
     <table class="w-100 small custom-table mt-1">
-  <tr>
-    <td colspan="4"><b>Customer Details</b></td>
-  </tr>
+      <tr>
+        <td colspan="4"><b>Customer Details</b></td>
+      </tr>
 
-  <tr>
-    <!-- LEFT SIDE -->
-    <td width="18%" class="label">Party Name</td>
-    <td width="32%">: {{ saleBill?.customerName || '-' }}</td>
+      <tr>
+        <!-- LEFT SIDE -->
+        <td width="18%" class="label">Party Name</td>
+        <td width="32%">: {{ saleBill?.customerName || '-' }}</td>
 
-    <!-- RIGHT SIDE (pushed right) -->
-    <td width="22%" class="label ps-4">{{ isInvoiced ? 'Invoice No' : 'Proforma Invoice No' }}</td>
-    <td width="28%">:  {{ isInvoiced ? 'IN-' : 'PR-' }}{{ saleBill?.saleBillNo || '-' }}</td>
-  </tr>
+        <!-- RIGHT SIDE (pushed right) -->
+        <td width="22%" class="label ps-4">{{ isInvoiced ? 'Invoice No' : 'Proforma Invoice No' }}</td>
+        <td width="28%">: {{ isInvoiced ? 'IN-' : 'PR-' }}{{ saleBill?.saleBillNo || '-' }}</td>
+      </tr>
 
-  <tr>
-    <td class="label">Mobile No</td>
-    <td>: {{ CustomerLedger?.mobileNumber || '-' }}</td>
+      <tr>
+        <td class="label">Mobile No</td>
+        <td>: {{ CustomerLedger?.mobileNumber || '-' }}</td>
 
-    <td class="label ps-4"> {{ isInvoiced ? 'Invoice Date' : 'Proforma Invoice Date' }}</td>
-    <td>: {{ saleBill?.saleDate | date:'dd-MM-yyyy' }}</td>
-  </tr>
+        <td class="label ps-4"> {{ isInvoiced ? 'Invoice Date' : 'Proforma Invoice Date' }}</td>
+        <td>: {{ saleBill?.saleDate | date:'dd-MM-yyyy' }}</td>
+      </tr>
 
-  <tr>
-    <td class="label">Email</td>
-    <td>: {{ CustomerLedger?.eMail || '-' }}</td>
+      <tr>
+        <td class="label">Email</td>
+        <td>: {{ CustomerLedger?.eMail || '-' }}</td>
 
-    <td class="label ps-4">Bill Type</td>
-    <td>: {{ saleBill?.billType || '-' }}</td>
-  </tr>
+        <td class="label ps-4">Bill Type</td>
+        <td>: {{ saleBill?.billType || '-' }}</td>
+      </tr>
 
-  <tr>
-    <td class="label">Address</td>
-    <td>: {{ CustomerLedger?.address || '-' }}</td>
+      <tr>
+        <td class="label">Address</td>
+        <td>: {{ CustomerLedger?.address || '-' }}</td>
 
-    <td class="label ps-4">Sale Type</td>
-    <td>: {{ saleBill?.saleType || '-' }}</td>
-  </tr>
+        <td class="label ps-4">Sale Type</td>
+        <td>: {{ saleBill?.saleType || '-' }}</td>
+      </tr>
 
-  <tr>
-    <td class="label">State</td>
-    <td>: {{ CustomerLedger?.stateName || 'N/A' }}</td>
+      <tr>
+        <td class="label">State</td>
+        <td>: {{ CustomerLedger?.stateName || 'N/A' }}</td>
 
-    <td class="label ps-4">Customer Type</td>
-    <td>: {{ saleBill?.customerType || '-' }}</td>
-  </tr>
+        <td class="label ps-4">Customer Type</td>
+        <td>: {{ saleBill?.customerType || '-' }}</td>
+      </tr>
 
-  <tr>
-    <td class="label">Country</td>
-    <td>: India</td>
+      <tr>
+        <td class="label">Country</td>
+        <td>: India</td>
 
-    <td class="label ps-4">Financier</td>
-    <td>: {{ saleBill?.financier || '-' }}</td>
-  </tr>
-</table>
+        <td class="label ps-4">Financier</td>
+        <td>: {{ saleBill?.financier || '-' }}</td>
+      </tr>
+    </table>
 
     <!-- VEHICLE TABLE -->
     <table class="table table-bordered small mt-2">
@@ -168,144 +143,89 @@
         <td class="text-end"><b>{{ amounts.exShowroom | number:'1.2-2' }}</b></td>
       </tr>
       <tr>
-        <td><b>Total Discount</b></td>
+        <td><b>Less PM E-DRIVE Incentive from Govt. of India</b></td>
         <td class="text-end">({{ amounts.discount | number:'1.2-2' }})</td>
       </tr>
-      <tr>
+      <!-- <tr>
         <td><b> {{ isInvoiced ? 'Invoice Total' : 'Proforma Invoice Total' }}</b></td>
         <td class="text-end"><b>{{ amounts.total | number:'1.2-2' }}</b></td>
-      </tr>
+      </tr> -->
 
- <!-- ON ROAD SECTION -->
+      <!-- ON ROAD SECTION -->
 
-  <ng-container *ngIf="invoiceType === 'onroad'">
+      <ng-container *ngIf="invoiceType === 'onroad'">
 
-    <tr>
-      <td>
-        <b>Registration Amount</b>
-      </td>
+        <tr>
+          <td>
+            Reg. Amount
+          </td>
 
-      <td class="text-end">
-        {{ registrationAmount | number:'1.2-2' }}
-      </td>
-    </tr>
+          <td class="text-end">
+            {{ registrationAmount | number:'1.2-2' }}
+          </td>
+        </tr>
 
-    <tr>
-      <td>
-        <b>Insurance Amount</b>
-      </td>
+        <tr>
+          <td>
+            Ins. Amount
+          </td>
 
-      <td class="text-end">
-        {{ insuranceAmount | number:'1.2-2' }}
-      </td>
-    </tr>
+          <td class="text-end">
+            {{ insuranceAmount | number:'1.2-2' }}
+          </td>
+        </tr>
 
-    <tr>
-      <td>
-        <b>Pre GST Discount</b>
-      </td>
+        <tr>
+          <td>
+            <b>Pre GST Discount</b>
+          </td>
 
-  <!-- DETAILS -->
-  <div class="row border p-2 mb-2">
+          <td class="text-end">
+            ({{ preGstDiscount | number:'1.2-2' }})
+          </td>
+        </tr>
 
-    <!-- INSURANCE -->
-    <div class="col-6 pe-2 border-end">
-      <div class="fw-bold mb-1">Insurance Details</div>
+      </ng-container>
 
-      <div class="row">
-        <div class="col-5 text-muted">Company</div>
-        <div class="col-7">ICICI Lombard</div>
-      </div>
+      <!-- GRAND TOTAL -->
 
-      <div class="row">
-        <div class="col-5 text-muted">GSTIN</div>
-        <div class="col-7">07AAACI7904G1ZP</div>
-      </div>
+      <tr>
 
-      <div class="row">
-        <div class="col-5 text-muted">Location</div>
-        <div class="col-7">New Delhi</div>
-      </div>
-    </div>
+        <td>
 
-    <!-- VEHICLE -->
-    <div class="col-6 ps-2">
-      <div class="fw-bold mb-1">Vehicle Details</div>
+          <b>
 
-      <div class="row">
-        <div class="col-5 text-muted">Model</div>
-        <div class="col-7">{{ variant }}</div>
-      </div>
+            {{
 
-      <div class="row">
-        <div class="col-5 text-muted">Reg No</div>
-        <div class="col-7">GJ05UA1274</div>
-      </div>
-
-      <div class="row">
-        <div class="col-5 text-muted">VIN</div>
-        <div class="col-7">{{ vinNo }}</div>
-      </div>
-
-      <div class="row">
-        <div class="col-5 text-muted">Engine</div>
-        <div class="col-7">{{ motorSerialNo }}</div>
-      </div>
-
-    </div>
-      <td class="text-end">
-        ({{ preGstDiscount | number:'1.2-2' }})
-      </td>
-    </tr>
-
-  </ng-container>
-
-  <!-- GRAND TOTAL -->
-
-  <tr>
-
-    <td>
-
-      <b>
-
-        {{
-
-          invoiceType === 'onroad'
+            invoiceType === 'onroad'
             ? 'On Road Total'
             : (
-                isInvoiced
-                  ? 'Invoice Total'
-                  : 'Proforma Invoice Total'
-              )
+            isInvoiced
+            ? 'Invoice Total'
+            : 'Proforma Invoice Total'
+            )
 
-        }}
+            }}
 
-      </b>
+          </b>
 
-    </td>
+        </td>
 
-  <!-- PARTY -->
-  <div class="border p-2 mb-2">
-    <strong>Party Details</strong><br>
-    Rana Brijal Nareshkumar<br>
-    8866183929<br>
-    Surat, Gujarat
-  </div>
-    <td class="text-end">
+        <td class="text-end">
 
-      <b>
+          <b>
 
-        {{
+            {{
 
-          invoiceType === 'onroad'
+            invoiceType === 'onroad'
             ? (onRoadTotal | number:'1.2-2')
             : (amounts.total | number:'1.2-2')
 
-        }}
+            }}
 
-      </b>
+          </b>
 
-    </td>
+        </td>
 
 
     </table>
@@ -377,7 +297,8 @@
 
     <!-- ACKNOWLEDGEMENT -->
     <div class="small mt-2">
-      <b>Acknowledgement</b><br>
+      <b>Acknowledgement</b>
+
       Received Vehicle (with above Vin Number) in good condition along with this invoice.
       The details have been verified and found satisfactory.
     </div>
@@ -388,7 +309,9 @@
     <div class="row mt-5 small">
       <div class="col-6"><strong>Customer Signature</strong></div>
       <div class="col-6 text-end">
-       <strong>For {{ dealer?.compname }}</strong><br><br>
+        <strong>For {{ dealer?.compname }}</strong>
+
+
         <strong>Authorized Signatory</strong>
       </div>
     </div>
@@ -397,10 +320,5 @@
       <strong>THANK YOU</strong>
     </div>
 
-  <p class="text-center mt-3">THANKS VISIT AGAIN</p>
-  <button class=" btn btn-primary " (click)="savePerformaInvoice()">
-
-    Confirm
-  </button>
   </div>
 </div>
