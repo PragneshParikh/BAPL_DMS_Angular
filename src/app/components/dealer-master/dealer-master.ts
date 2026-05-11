@@ -160,17 +160,7 @@ export class DealerMaster implements OnInit {
     });
 
   }
-  // openDealerModal(dealer: DealerMasterViewModel): void {
-
-  //   this.selectedDealer = dealer;
-
-  //   this.modalService.open(this.dealerModal, {
-  //     windowClass: 'dealer-modal',
-  //     size: 'xl',
-  //     scrollable: true
-  //   });
-
-  // }
+ 
 
   /* ================= SELECT ================= */
 

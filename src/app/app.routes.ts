@@ -49,25 +49,9 @@ export const routes: Routes = [
     path: '', component: LayoutComponent,
     canActivateChild: [AuthGuard],
     children: [
-
-      // SHOWROOM MODULE
-      {
-        path: 'showroom',
-        children: [
-          { path: 'itemmaster-fg', component: ItemmasterFG, data: [6] },
-          { path: 'form22master', component: Form22master, data: [10] }
-        ]
-      },
-
-      // WORKSHOP MODULE
-      {
-        path: 'workshop',
-        children: [
-          { path: 'item-master', component: ItemMaster, data: [5] }
-        ]
-      },
-
-      // MASTER MODULE (COMMON)
+      { path: 'showroom/itemmaster-fg', component: ItemmasterFG, data: [6] },
+      { path: 'showroom/form22master', component: Form22master, data: [10] },
+      { path: 'workshop/item-master', component: ItemMaster, data: [5] },
       { path: 'dealer-master', component: DealerMaster, data: [4] },
       { path: 'dealer-account-master', component: DealerAccountMaster, data: [4] },
       { path: 'upload', component: DealerMasterBulkDataDipatch, data: [] },
