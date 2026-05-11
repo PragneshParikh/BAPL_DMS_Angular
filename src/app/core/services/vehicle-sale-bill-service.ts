@@ -105,4 +105,22 @@ updateRegistrationAndReserveChassis(
     );
   }
 
+  downloadExcel(fromDate?: Date, toDate?: Date) {
+     let params = new HttpParams();
+
+   if (fromDate) {
+    params = params.set('fromDate', fromDate.toISOString());
+  }
+
+  if (toDate) {
+    params = params.set('toDate', toDate.toISOString());
+  }
+  
+  return this.http.get(
+    `${this.apiUrl}/VehicleSaleBill/download`,
+    {params:params,
+      responseType: 'blob' }
+  );
+}
+
 }

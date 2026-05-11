@@ -278,7 +278,7 @@
 
                                     <input type="text" class="form-control form-control-sm" name="customerName"
                                         [(ngModel)]="model.customerName" required #customerName="ngModel"
-                                        (input)="filterParties()"
+                                        (input)="filterParties()" 
                                         [class.is-invalid]="customerName.invalid && (customerName.touched || vehicleSaleForm.submitted)" />
 
                                     <button type="button" class="btn btn-sm btn-primary ms-1"
@@ -512,7 +512,7 @@
                                             <th>Ins Amt</th>
                                             <th>Pre GST Disc.</th>
                                             <th>Taxable Amount</th>
-                                            <th>Ext Warranty</th>
+                                            <!-- <th>Ext Warranty</th> -->
                                             <th>SGST %</th>
                                             <th>SGST Amnt</th>
                                             <th>CGST %</th>
@@ -526,7 +526,7 @@
                                             <th>Battery Chemical</th>
                                             <th>Battery Capacity</th>
                                             <th>Battery Make</th>
-                                            <th>Stock Detail No</th>
+                                            <!-- <th>Stock Detail No</th> -->
                                             <th>VCU</th>
                                         </tr>
                                     </thead>
@@ -570,7 +570,7 @@
                                             <td>{{ row.taxableAmount ?? row.amount}}</td>
 
                                             <td>
-                                                {{ row.extWarranty }}
+                                                <!-- {{ row.extWarranty }} -->
                                             </td>
                                             <td>{{ row.sgstPer }}%</td>
                                             <td>{{row.sgst }}</td>
@@ -590,7 +590,7 @@
                                             <td>{{row.batteryChemical}}</td>
                                             <td>{{row.batteryCapacity}}</td>
                                             <td>{{row.batteryMake}}</td>
-                                            <td>{{row.stockDetailNo}}</td>
+                                            <!-- <td>{{row.stockDetailNo}}</td> -->
                                             <td>{{row.vcu}}</td>
 
                                         </tr>
@@ -694,7 +694,7 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label-sm">Handeling Charges</label>
+                            <label class="form-label-sm">Handling Charges</label>
                             <input type="number" class="form-control form-control-sm"
                                 [(ngModel)]="model.handlingCharges" name="handlingCharges">
                         </div>
@@ -745,7 +745,7 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label-sm">Satate Subsidy Amnt</label>
+                            <label class="form-label-sm">State Subsidy Amnt</label>
                             <input type="number" class="form-control form-control-sm">
                         </div>
 

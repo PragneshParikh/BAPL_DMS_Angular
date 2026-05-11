@@ -10,7 +10,7 @@ import { log } from 'console';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { debounceTime, Subject } from 'rxjs';
-import {  ErpOptions } from '../../constant';
+import { ErpOptions } from '../../constant';
 
 @Component({
   selector: 'app-vehicle-sale-bill',
@@ -50,13 +50,13 @@ export class VehicleSaleBill {
     private router: Router,
     private loader: LoaderService,
     private toaster: ToastService) { }
-    
+
   ngOnInit() {
-     const today = new Date();
-     const sevenDaysBefore = new Date(today);
-     sevenDaysBefore.setDate(today.getDate() - 7);
-  this.filter.fromDate = sevenDaysBefore;
-this.filter.toDate = today; 
+    const today = new Date();
+    const sevenDaysBefore = new Date(today);
+    sevenDaysBefore.setDate(today.getDate() - 7);
+    this.filter.fromDate = sevenDaysBefore;
+    this.filter.toDate = today;
     this.searchChanged.pipe(debounceTime(400)).subscribe(() => {
       this.loadData();
     });
@@ -168,7 +168,51 @@ this.filter.toDate = today;
   }
 
   getErpStatusName(value: string | undefined): string {
-  return ErpOptions.find(x => x.value === value)?.name || '';
+    return ErpOptions.find(x => x.value === value)?.name || '';
+  }
+
+  downloadDealerExcel(): void {
+
+  const from = this.filter.fromDate
+    ? new Date(this.filter.fromDate)
+    : undefined;
+
+  const to = this.filter.toDate
+    ? new Date(this.filter.toDate)
+    : undefined;
+
+  this.loader.show();
+
+  this.service.downloadExcel(from, to).subscribe({
+    next: (data: Blob) => {
+
+      const blob = new Blob([data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'SaleBillList.xlsx';
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+
+      this.loader.hide();
+
+      this.toaster.show(
+        'Dealer Excel downloaded successfully',
+        {
+          classname: 'bg-success text-light',
+          delay: 3000
+        }
+      );
+    },
+    error: () => {
+      this.loader.hide();
+    }
+  });
 }
 
 }

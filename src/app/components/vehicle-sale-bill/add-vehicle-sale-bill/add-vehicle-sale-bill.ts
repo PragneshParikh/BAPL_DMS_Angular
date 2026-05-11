@@ -813,6 +813,7 @@ this.selectedCustomerId = res.ledgerId;
 
   selectParty(party: LedgerMaster) {
     this.model.customerName = party.ledgerName;
+    this.model.billingName =this.model.customerName;
     this.selectedCustomerId = party.id;
     this.filteredParties = [];
     this.chassisList = [];
@@ -1205,4 +1206,8 @@ console.log(vehicle.motorNo,"dsa");
       }
     });
   }
+  // onCustomerNameChange()
+  // {
+  //   this.model.billingName =this.model.customerName;
+  // }
 }
