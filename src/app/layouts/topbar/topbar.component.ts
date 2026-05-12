@@ -62,7 +62,7 @@ export class TopbarComponent implements OnInit {
   @ViewChild('removenotification') removenotification !: TemplateRef<any>;
   notifyId: any;
   unReadInwards: number = 0;
-  public selectedOption: string = localStorage.getItem('selectedModule') ? JSON.parse(localStorage.getItem('selectedModule') || '{}') : 'ShowRoom';
+  public selectedOption: string = 'ShowRoom';
   dealerCode: string = '';
 
   menuList: any[] = [];
@@ -175,7 +175,7 @@ export class TopbarComponent implements OnInit {
   onSelectionChange(option: string) {
     if (option !== this.selectedOption) {
       this.selectedOption = option;
-      localStorage.setItem('selectedModule', JSON.stringify(option));
+      this.storageService.setSelectedModule(option);
       this.menuService.filterMenu(option);
       this.router.navigate(['/']);
     }

@@ -110,8 +110,8 @@ export const routes: Routes = [
       { path: 'form22-certificate/:chassisNo', component: Form22Certificate, data: [22] },
       { path: 'delivery-checkList', component: DeliveryChecklist, data: [22] },
       { path: 'delivery-slip', component: DeliverySlip, data: [22] },
-      { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] },
-      { path: '**', component: WorkInProgress }
+      { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] }
     ]
-  }
+  },
+  { path: '**', component: WorkInProgress }
 ];

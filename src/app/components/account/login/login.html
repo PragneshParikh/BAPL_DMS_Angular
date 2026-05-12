@@ -1,122 +1,94 @@
-<div class="auth-page-wrapper pt-5">
-    <!-- auth page bg -->
-    <div class="auth-one-bg-position auth-one-bg" id="auth-particles">
-        <div class="bg-overlay"></div>
+<div class="container-fluid vh-100">
+    <div class="row h-100">
 
-        <div class="shape">
-            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink"
-                viewBox="0 0 1440 120">
-                <path d="M 0,36 C 144,53.6 432,123.2 720,124 C 1008,124.8 1296,56.8 1440,40L1440 140L0 140z"></path>
-            </svg>
-        </div>
-    </div>
-
-    <!-- auth page content -->
-    <div class="auth-page-content">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="text-center mt-sm-5 mb-4 text-white-50">
-                        <div>
-                            <h1 class="text-primary text-white fs-1">Dealer Management System</h1>
-                        </div>
-                    </div>
-                </div>
+        <!-- Left: Background -->
+        <div class="col-lg-7 d-none d-lg-flex position-relative p-0 justify-content-center align-items-center"
+            style="background-color: white;">
+            <div class="h-100 w-100 d-flex justify-content-center align-items-center">
+                <img src="assets/images/bgauss_login_logo.jpeg" alt="Shape" class="img-fluid">
             </div>
-            <!-- end row -->
+        </div>
 
-            <div class="row justify-content-center">
-                <div class="col-md-8 col-lg-6 col-xl-5">
-                    <div class="card mt-4 card-bg-fill">
+        <!-- Right: Login Form -->
+        <div class="col-lg-5 d-flex align-items-center justify-content-center" style="background-color: #09a993;">
+            <div class="w-75">
+                <div class="text-center mb-4">
+                    <h1 class="text-primary" style="font-size: 35px; color: white !important;">Dealer Management System
+                    </h1>
+                </div>
 
-                        <div class="card-body p-4">
-                            <div class="text-center mt-2">
-                                <h5 class="text-primary">Welcome Back !</h5>
-                                <p class="text-muted">Sign in to continue.</p>
+                <div class="card custom-shadow rounded-4 card-bg-fill">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <h5 class="text-primary">Welcome Back!</h5>
+                            <p class="text-muted">Sign in to continue.</p>
+                        </div>
+
+                        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+                            <div class="mb-3">
+                                <label class="form-label" for="username">Username</label>
+                                <input type="text" class="form-control" id="username" formControlName="username"
+                                    [ngClass]="{ 'is-invalid': submitted && f['username'].errors }"
+                                    placeholder="Enter your username">
+                                @if (submitted && f['username'].errors) {
+                                <div class="invalid-feedback">
+                                    @if(f['username'].errors['required']){
+                                    <div>Username is required</div>}
+                                </div>
+                                }
                             </div>
-                            <div class="p-2 mt-4">
-                                <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
-                                    <div class="mb-3">
-                                        <label class="form-label" for="username">Username</label>
-                                        <input type="text" class="form-control" id="username" formControlName="username"
-                                            [ngClass]="{ 'is-invalid': submitted && f['username'].errors }"
-                                            placeholder="Enter your username">
-                                        @if (submitted && f['username'].errors) {
-                                        <div class="invalid-feedback">
-                                            @if(f['username'].errors['required']){
-                                            <div>Username is required</div>}
-                                        </div>
+                            <div class="mb-3">
+                                <div class="float-end">
+                                    <a routerLink="/forgot-password" class="text-muted">Forgot password?</a>
+                                </div>
+                                <label class="form-label" for="password-input">Password</label>
+                                <div class="position-relative auth-pass-inputgroup mb-3">
+                                    <input [type]="fieldTextType ? 'text' : 'password'" class="form-control pe-5"
+                                        placeholder="Enter password" id="password-input" formControlName="password"
+                                        [ngClass]="{ 'is-invalid': submitted && f['password'].errors }">
+                                    <button
+                                        class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted"
+                                        type="button" id="password-addon"><i class="mdi align-middle" [ngClass]="{'mdi-eye-off-outline': !fieldTextType, 'mdi-eye-outline': fieldTextType
+                                          }" (click)="toggleFieldTextType()"></i></button>
+                                    @if (submitted && f['password'].errors) {
+                                    <div class="invalid-feedback">
+                                        @if(f['password'].errors['required']){
+                                        <span>Password is required</span>
                                         }
                                     </div>
-
-                                    <div class="mb-3">
-                                        <div class="float-end">
-                                            <a routerLink="/forgot-password" class="text-muted">Forgot password?</a>
-                                        </div>
-                                        <label class="form-label" for="password-input">Password</label>
-                                        <div class="position-relative auth-pass-inputgroup mb-3">
-                                            <input [type]="fieldTextType ? 'text' : 'password'"
-                                                class="form-control pe-5" placeholder="Enter password"
-                                                id="password-input" formControlName="password"
-                                                [ngClass]="{ 'is-invalid': submitted && f['password'].errors }">
-                                            <button
-                                                class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted"
-                                                type="button" id="password-addon"><i class="mdi align-middle" [ngClass]="{'mdi-eye-off-outline': !fieldTextType, 'mdi-eye-outline': fieldTextType
-                                          }" (click)="toggleFieldTextType()"></i></button>
-                                            @if (submitted && f['password'].errors) {
-                                            <div class="invalid-feedback">
-                                                @if(f['password'].errors['required']){
-                                                <span>Password is required</span>
-                                                }
-                                            </div>
-                                            }
-                                        </div>
-                                    </div>
-
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value=""
-                                            id="auth-remember-check">
-                                        <label class="form-check-label" for="auth-remember-check">Remember me</label>
-                                    </div>
-
-                                    <div class="mt-4">
-                                        <button class="btn btn-success w-100" type="submit" [disabled]="isLoading">
-                                            <span *ngIf="!isLoading">Sign In</span>
-                                            <span *ngIf="isLoading">
-                                                <span class="spinner-border spinner-border-sm me-2" role="status"
-                                                    aria-hidden="true"></span>
-                                                Signing In...
-                                            </span>
-                                        </button>
-                                    </div>
-
-                                </form>
+                                    }
+                                </div>
                             </div>
-                        </div>
-                        <!-- end card body -->
-                    </div>
-                    <!-- end card -->
 
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="auth-remember-check">
+                                <label class="form-check-label" for="auth-remember-check">Remember me</label>
+                            </div>
+
+                            <div class="mt-4">
+                                <button class="btn btn-success w-100" type="submit" [disabled]="isLoading">
+                                    <span *ngIf="!isLoading">Sign In</span>
+                                    <span *ngIf="isLoading">
+                                        <span class="spinner-border spinner-border-sm me-2" role="status"
+                                            aria-hidden="true"></span>
+                                        Signing In...
+                                    </span>
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
                 </div>
+
+                <!-- Footer -->
+                <footer class="text-center mt-4 text-muted " style="color: white !important;">
+                    &copy; {{year}} BGauss Auto Pvt. Ltd.
+                </footer>
             </div>
-            <!-- end row -->
         </div>
-        <!-- end container -->
+
     </div>
-    <!-- end auth page content -->
-
-    <!-- footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="text-center">
-                        <p class="mb-0 text-muted">&copy; {{year}} BGauss Auto Pvt. Ltd.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-    <!-- end Footer -->
 </div>
