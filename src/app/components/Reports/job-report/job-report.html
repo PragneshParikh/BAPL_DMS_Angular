@@ -1,330 +1,347 @@
-<div class="job-report-container">
-  <!-- Header -->
-  <div class="report-header">
-    <h2>Job Card Report</h2>
-    <p class="report-subtitle">Dealer-Wise Job Card Analysis & Summary</p>
-  </div>
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">Job Card Report</h4>
+</div>
 
-  <!-- Summary Statistics -->
-  <div class="summary-stats" *ngIf="summaryStats">
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-briefcase"></i>
+<div class="row g-3">
+  <div class="col-12" *ngIf="summaryStats">
+    <div class="row g-3">
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-muted text-uppercase fw-semibold mb-1">Total Jobs</p>
+            <h5 class="mb-0">{{ summaryStats.totalJobs }}</h5>
+          </div>
+        </div>
       </div>
-      <div class="stat-content">
-        <p class="stat-label">Total Jobs</p>
-        <p class="stat-value">{{ summaryStats.totalJobs }}</p>
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-muted text-uppercase fw-semibold mb-1">Total Revenue</p>
+            <h5 class="mb-0">{{ formatCurrency(summaryStats.totalRevenue) }}</h5>
+          </div>
+        </div>
       </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-rupee-sign"></i>
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-muted text-uppercase fw-semibold mb-1">Total Taxes</p>
+            <h5 class="mb-0">{{ formatCurrency(summaryStats.totalTaxes) }}</h5>
+          </div>
+        </div>
       </div>
-      <div class="stat-content">
-        <p class="stat-label">Total Revenue</p>
-        <p class="stat-value">{{ formatCurrency(summaryStats.totalRevenue) }}</p>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-percent"></i>
-      </div>
-      <div class="stat-content">
-        <p class="stat-label">Total Taxes</p>
-        <p class="stat-value">{{ formatCurrency(summaryStats.totalTaxes) }}</p>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-calculator"></i>
-      </div>
-      <div class="stat-content">
-        <p class="stat-label">Average Job Value</p>
-        <p class="stat-value">{{ formatCurrency(summaryStats.averageJobValue) }}</p>
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-muted text-uppercase fw-semibold mb-1">Average Job Value</p>
+            <h5 class="mb-0">{{ formatCurrency(summaryStats.averageJobValue) }}</h5>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Filter Section -->
-  <div class="filter-section">
-    <form [formGroup]="filterForm" class="filter-form">
-      <div class="filter-row">
-        <!-- REPLACE the dealer code filter-group with this: -->
-        <div class="filter-group">
-          <label>Dealer Name</label>
-          <select formControlName="dealerCode" class="form-control">
-            <option value="">-- All Dealers --</option>
-            <option
-              *ngFor="let dealer of dealerList"
-              [value]="dealer.dealerCode">
-              {{ dealer.dealerName }}
-            </option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>From Date</label>
-          <input 
-            type="date" 
-            formControlName="fromDate" 
-            class="form-control">
-        </div>
-
-        <div class="filter-group">
-          <label>To Date</label>
-          <input 
-            type="date" 
-            formControlName="toDate" 
-            class="form-control">
-        </div>
-
-        <div class="filter-group">
-          <label>Service Location</label>
-          <input 
-            type="text" 
-            formControlName="serviceLocation" 
-            class="form-control" 
-            placeholder="Enter location">
-        </div>
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Filters</h5>
       </div>
+      <div class="card-body">
+        <form [formGroup]="filterForm">
+          <div class="row g-2">
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Dealer Name</label>
+              <select formControlName="dealerCode" class="form-select form-select-sm">
+                <option value="">-- All Dealers --</option>
+                <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
+                  {{ dealer.dealerName }}
+                </option>
+              </select>
+            </div>
 
-      <div class="filter-row">
-        <div class="filter-group">
-          <label>Job No.</label>
-          <input 
-            type="number" 
-            formControlName="jobNo" 
-            class="form-control" 
-            placeholder="Enter job number">
-        </div>
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">From Date</label>
+              <input type="date" formControlName="fromDate" class="form-control form-control-sm">
+            </div>
 
-        <div class="filter-group">
-          <label>Party Name</label>
-          <input 
-            type="text" 
-            formControlName="partyName" 
-            class="form-control" 
-            placeholder="Enter customer name">
-        </div>
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">To Date</label>
+              <input type="date" formControlName="toDate" class="form-control form-control-sm">
+            </div>
 
-        <div class="filter-group">
-          <label>Chassis No.</label>
-          <input 
-            type="text" 
-            formControlName="chassisNo" 
-            class="form-control" 
-            placeholder="Enter chassis number">
-        </div>
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Service Location</label>
+              <input
+                type="text"
+                formControlName="serviceLocation"
+                class="form-control form-control-sm"
+                placeholder="Enter location">
+            </div>
 
-        <div class="filter-group">
-          <label>Reg No.</label>
-          <input 
-            type="text" 
-            formControlName="regNo" 
-            class="form-control" 
-            placeholder="Enter registration number">
-        </div>
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Job No.</label>
+              <input
+                type="number"
+                formControlName="jobNo"
+                class="form-control form-control-sm"
+                placeholder="Enter job number">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Party Name</label>
+              <input
+                type="text"
+                formControlName="partyName"
+                class="form-control form-control-sm"
+                placeholder="Enter customer name">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Chassis No.</label>
+              <input
+                type="text"
+                formControlName="chassisNo"
+                class="form-control form-control-sm"
+                placeholder="Enter chassis number">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Reg No.</label>
+              <input
+                type="text"
+                formControlName="regNo"
+                class="form-control form-control-sm"
+                placeholder="Enter registration number">
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn btn-primary btn-sm" (click)="onSearch()">
+              <i class="fas fa-search me-1"></i>Search
+            </button>
+            <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">
+              <i class="fas fa-redo me-1"></i>Reset
+            </button>
+            <button type="button" class="btn btn-info btn-sm text-white" (click)="toggleDealerWiseView()">
+              <i class="fas fa-chart-bar me-1"></i>{{ isDealerWiseView ? 'Table View' : 'Summary View' }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-success btn-sm"
+              (click)="exportToExcel()"
+              aria-label="Export to Excel">
+              <i class="ri-file-excel-2-line align-bottom"></i>
+            </button>
+          </div>
+        </form>
       </div>
-
-      <div class="filter-actions">
-        <button type="button" class="btn btn-primary" (click)="onSearch()">
-          <i class="fas fa-search"></i> Search
-        </button>
-        <button type="button" class="btn btn-secondary" (click)="onReset()">
-          <i class="fas fa-redo"></i> Reset
-        </button>
-        <button type="button" class="btn btn-info" (click)="toggleDealerWiseView()">
-          <i class="fas fa-chart-bar"></i> {{ isDealerWiseView ? 'Table View' : 'Summary View' }}
-        </button>
-        <button type="button" class="btn btn-success" (click)="exportToExcel()">
-          <i class="fas fa-download"></i> Export to Excel
-        </button>
-      </div>
-    </form>
+    </div>
   </div>
 
-  <!-- Loading Spinner -->
-  <div class="loading-spinner" *ngIf="isLoading">
-    <div class="spinner"></div>
-    <p>Loading report data...</p>
+  <div class="col-12" *ngIf="isLoading">
+    <div class="card">
+      <div class="card-body text-center py-5">
+        <div class="spinner-border text-primary mb-3" role="status" aria-hidden="true"></div>
+        <p class="text-muted fw-semibold mb-0">Loading report data...</p>
+      </div>
+    </div>
   </div>
 
-  <!-- Dealer Wise Summary View -->
-  <div class="dealer-wise-section" *ngIf="isDealerWiseView && !isLoading">
-    <h3>Dealer Wise Summary</h3>
-    <div class="dealer-summary-list">
-      <div class="dealer-card" *ngFor="let dealer of dealerWiseData">
-        <div class="dealer-header" (click)="expandDealer(dealer.dealerCode)">
-          <div class="dealer-info">
-            <h4>{{ dealer.dealerCode }} - {{ dealer.dealerName }}</h4>
-            <p class="dealer-stats">
-              Jobs: <strong>{{ dealer.totalJobs }}</strong> | 
-              Total: <strong>{{ formatCurrency(dealer.grandTotal) }}</strong>
+  <div class="col-12" *ngIf="isDealerWiseView && !isLoading">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Dealer Wise Summary</h5>
+      </div>
+      <div class="card-body">
+        <div class="text-center text-muted fw-semibold py-4" *ngIf="dealerWiseData.length === 0">
+          No dealer records found. Please adjust your filters and try again.
+        </div>
+
+        <div class="row g-3" *ngIf="dealerWiseData.length > 0">
+          <div class="col-12" *ngFor="let dealer of dealerWiseData">
+            <div class="card shadow-none">
+              <div class="card-header d-flex justify-content-between align-items-center bg-light"
+                (click)="expandDealer(dealer.dealerCode)">
+                <div>
+                  <h6 class="mb-1 fw-semibold">{{ dealer.dealerCode }} - {{ dealer.dealerName }}</h6>
+                  <p class="mb-0 text-muted small">
+                    Jobs: <strong>{{ dealer.totalJobs }}</strong> |
+                    Total: <strong>{{ formatCurrency(dealer.grandTotal) }}</strong>
+                  </p>
+                </div>
+                <span class="btn btn-light btn-sm border">
+                  <i class="fas"
+                    [ngClass]="{ 'fa-chevron-up': expandedDealerCode === dealer.dealerCode, 'fa-chevron-down': expandedDealerCode !== dealer.dealerCode }"></i>
+                </span>
+              </div>
+
+              <div class="card-body p-0" *ngIf="expandedDealerCode === dealer.dealerCode">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-sm mb-0">
+                    <tbody>
+                      <tr>
+                        <th>Total Spares</th>
+                        <td class="text-end">{{ formatCurrency(dealer.totalSpares) }}</td>
+                      </tr>
+                      <tr>
+                        <th>Total Labour</th>
+                        <td class="text-end">{{ formatCurrency(dealer.totalLabour) }}</td>
+                      </tr>
+                      <tr>
+                        <th>Taxable Amount</th>
+                        <td class="text-end">{{ formatCurrency(dealer.totalTaxable) }}</td>
+                      </tr>
+                      <tr>
+                        <th>SGST (9%)</th>
+                        <td class="text-end">{{ formatCurrency(dealer.totalSGST) }}</td>
+                      </tr>
+                      <tr>
+                        <th>CGST (9%)</th>
+                        <td class="text-end">{{ formatCurrency(dealer.totalCGST) }}</td>
+                      </tr>
+                      <tr class="table-warning fw-bold">
+                        <th>Grand Total</th>
+                        <td class="text-end">{{ formatCurrency(dealer.grandTotal) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12" *ngIf="!isDealerWiseView && !isLoading">
+    <div class="card">
+      <div class="card-body">
+        <div class="text-center p-4" *ngIf="reportData.length === 0">
+          No records found. Please adjust your filters and try again.
+        </div>
+
+        <div class="table-responsive" *ngIf="reportData.length > 0">
+          <table class="table table-bordered table-striped table-sm">
+            <thead class="table-light">
+              <tr>
+                <th class="sortable" (click)="onSort('srNo')">
+                  Sr.No
+                  <i class="fas"
+                    [ngClass]="{ 'fa-sort-up': sortColumn === 'srNo' && sortDirection === 'asc', 'fa-sort-down': sortColumn === 'srNo' && sortDirection === 'desc', 'fa-sort': sortColumn !== 'srNo' }"></i>
+                </th>
+                <th class="sortable" (click)="onSort('invoiceNo')">
+                  Invoice No.
+                  <i class="fas"
+                    [ngClass]="{ 'fa-sort-up': sortColumn === 'invoiceNo' && sortDirection === 'asc', 'fa-sort-down': sortColumn === 'invoiceNo' && sortDirection === 'desc', 'fa-sort': sortColumn !== 'invoiceNo' }"></i>
+                </th>
+                <th class="sortable" (click)="onSort('invoiceDate')">
+                  Invoice Date
+                  <i class="fas"
+                    [ngClass]="{ 'fa-sort-up': sortColumn === 'invoiceDate' && sortDirection === 'asc', 'fa-sort-down': sortColumn === 'invoiceDate' && sortDirection === 'desc', 'fa-sort': sortColumn !== 'invoiceDate' }"></i>
+                </th>
+                <th class="sortable" (click)="onSort('jobNo')">
+                  Job No.
+                  <i class="fas"
+                    [ngClass]="{ 'fa-sort-up': sortColumn === 'jobNo' && sortDirection === 'asc', 'fa-sort-down': sortColumn === 'jobNo' && sortDirection === 'desc', 'fa-sort': sortColumn !== 'jobNo' }"></i>
+                </th>
+                <th>Party Name</th>
+                <th>Mobile No.</th>
+                <th>Reg No.</th>
+                <th>Mechanic Name</th>
+                <th>Invoice Type</th>
+                <th>Invoice Mode</th>
+                <th class="text-end">Spares</th>
+                <th class="text-end">ACSR</th>
+                <th class="text-end">Oil</th>
+                <th class="text-end">Labour</th>
+                <th class="text-end">Outside Work</th>
+                <th class="text-end">Taxable</th>
+                <th class="text-end">SGST</th>
+                <th class="text-end">CGST</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of reportData">
+                <td>{{ item.srNo }}</td>
+                <td>{{ item.invoiceNo }}</td>
+                <td>{{ formatDate(item.invoiceDate) }}</td>
+                <td>{{ item.jobNo }}</td>
+                <td>{{ item.partyName }}</td>
+                <td>{{ item.partyMobileNo }}</td>
+                <td>{{ item.regNo }}</td>
+                <td>{{ item.mechanicName }}</td>
+                <td>{{ item.invoiceType }}</td>
+                <td>{{ item.invoiceMode }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.sparesAmount) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.acsrAmount) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.oilAmount) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.labourAmount) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.outsideWorkAmount) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.taxableAmount) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.sgstAmount) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.cgstAmount) }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="table-warning fw-bold">
+                <td colspan="10" class="text-end">TOTAL</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(totalSpares) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(totalAcsr) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(totalOil) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(totalLabour) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(totalOutsideWork) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(totalTaxable) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(totalSGST) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(totalCGST) }}</td>
+              </tr>
+              <tr class="table-secondary fw-bold">
+                <td colspan="17" class="text-end">GRAND TOTAL</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(grandTotal) }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="row mt-3" *ngIf="reportData.length > 0">
+          <div class="col-md-6 d-flex align-items-center mb-2 mb-md-0">
+            <p class="text-muted mb-0">
+              Showing {{ (pageIndex - 1) * pageSize + 1 }} to {{ Math.min(pageIndex * pageSize, totalRecords) }} of {{ totalRecords }} records
             </p>
           </div>
-          <div class="expand-icon">
-            <i class="fas" [ngClass]="{ 'fa-chevron-up': expandedDealerCode === dealer.dealerCode, 'fa-chevron-down': expandedDealerCode !== dealer.dealerCode }"></i>
+
+          <div class="col-md-6 d-flex justify-content-md-end">
+            <div class="d-flex align-items-center flex-wrap gap-2">
+              <button
+                class="btn btn-outline-primary btn-sm"
+                [disabled]="pageIndex === 1"
+                (click)="firstPage()">
+                <i class="fas fa-chevron-left me-1"></i>First
+              </button>
+              <button
+                class="btn btn-outline-primary btn-sm"
+                [disabled]="pageIndex === 1"
+                (click)="previousPage()">
+                <i class="fas fa-chevron-left me-1"></i>Previous
+              </button>
+
+              <span class="badge bg-light text-dark border px-3 py-2">Page {{ pageIndex }}</span>
+
+              <button
+                class="btn btn-outline-primary btn-sm"
+                [disabled]="pageIndex * pageSize >= totalRecords"
+                (click)="nextPage()">
+                Next<i class="fas fa-chevron-right ms-1"></i>
+              </button>
+              <button
+                class="btn btn-outline-primary btn-sm"
+                [disabled]="pageIndex * pageSize >= totalRecords"
+                (click)="lastPage()">
+                Last<i class="fas fa-chevron-right ms-1"></i>
+              </button>
+            </div>
           </div>
         </div>
-
-        <div class="dealer-details" *ngIf="expandedDealerCode === dealer.dealerCode">
-          <div class="detail-row">
-            <span class="detail-label">Total Spares:</span>
-            <span class="detail-value">{{ formatCurrency(dealer.totalSpares) }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Total Labour:</span>
-            <span class="detail-value">{{ formatCurrency(dealer.totalLabour) }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Taxable Amount:</span>
-            <span class="detail-value">{{ formatCurrency(dealer.totalTaxable) }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">SGST (9%):</span>
-            <span class="detail-value">{{ formatCurrency(dealer.totalSGST) }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">CGST (9%):</span>
-            <span class="detail-value">{{ formatCurrency(dealer.totalCGST) }}</span>
-          </div>
-          <div class="detail-row total">
-            <span class="detail-label">Grand Total:</span>
-            <span class="detail-value">{{ formatCurrency(dealer.grandTotal) }}</span>
-          </div>
-        </div>
       </div>
     </div>
-  </div>
-
-  <!-- Table View -->
-  <div class="table-section" *ngIf="!isDealerWiseView && !isLoading">
-    <div class="table-wrapper">
-      <table class="report-table">
-        <thead>
-          <tr>
-            <th class="sortable" (click)="onSort('srNo')">
-              Sr.No <i class="fas" [ngClass]="{ 'fa-sort-up': sortColumn === 'srNo' && sortDirection === 'asc', 'fa-sort-down': sortColumn === 'srNo' && sortDirection === 'desc', 'fa-sort': sortColumn !== 'srNo' }"></i>
-            </th>
-            <th class="sortable" (click)="onSort('invoiceNo')">
-              Invoice No. <i class="fas" [ngClass]="{ 'fa-sort-up': sortColumn === 'invoiceNo' && sortDirection === 'asc', 'fa-sort-down': sortColumn === 'invoiceNo' && sortDirection === 'desc', 'fa-sort': sortColumn !== 'invoiceNo' }"></i>
-            </th>
-            <th class="sortable" (click)="onSort('invoiceDate')">
-              Invoice Date <i class="fas" [ngClass]="{ 'fa-sort-up': sortColumn === 'invoiceDate' && sortDirection === 'asc', 'fa-sort-down': sortColumn === 'invoiceDate' && sortDirection === 'desc', 'fa-sort': sortColumn !== 'invoiceDate' }"></i>
-            </th>
-            <th class="sortable" (click)="onSort('jobNo')">
-              Job No. <i class="fas" [ngClass]="{ 'fa-sort-up': sortColumn === 'jobNo' && sortDirection === 'asc', 'fa-sort-down': sortColumn === 'jobNo' && sortDirection === 'desc', 'fa-sort': sortColumn !== 'jobNo' }"></i>
-            </th>
-            <th>Party Name</th>
-            <th>Mobile No.</th>
-            <th>Reg No.</th>
-            <th>Mechanic Name</th>
-            <th>Invoice Type</th>
-            <th>Invoice Mode</th>
-            <th class="amount-col">Spares</th>
-            <th class="amount-col">ACSR</th>
-            <th class="amount-col">Oil</th>
-            <th class="amount-col">Labour</th>
-            <th class="amount-col">Outside Work</th>
-            <th class="amount-col">Taxable</th>
-            <th class="amount-col">SGST</th>
-            <th class="amount-col">CGST</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of reportData; let idx = index" [ngClass]="{ 'alternate-row': idx % 2 === 1 }">
-            <td>{{ item.srNo }}</td>
-            <td>{{ item.invoiceNo }}</td>
-            <td>{{ formatDate(item.invoiceDate) }}</td>
-            <td>{{ item.jobNo }}</td>
-            <td>{{ item.partyName }}</td>
-            <td>{{ item.partyMobileNo }}</td>
-            <td>{{ item.regNo }}</td>
-            <td>{{ item.mechanicName }}</td>
-            <td>{{ item.invoiceType }}</td>
-            <td>{{ item.invoiceMode }}</td>
-            <td class="amount-cell">{{ formatCurrency(item.sparesAmount) }}</td>
-            <td class="amount-cell">{{ formatCurrency(item.acsrAmount) }}</td>
-            <td class="amount-cell">{{ formatCurrency(item.oilAmount) }}</td>
-            <td class="amount-cell">{{ formatCurrency(item.labourAmount) }}</td>
-            <td class="amount-cell">{{ formatCurrency(item.outsideWorkAmount) }}</td>
-            <td class="amount-cell">{{ formatCurrency(item.taxableAmount) }}</td>
-            <td class="amount-cell">{{ formatCurrency(item.sgstAmount) }}</td>
-            <td class="amount-cell">{{ formatCurrency(item.cgstAmount) }}</td>
-          </tr>
-        </tbody>
-        <tfoot>
-          <tr class="total-row">
-            <td colspan="10" class="total-label">TOTAL</td>
-            <td class="amount-cell total-value">{{ formatCurrency(totalSpares) }}</td>
-            <td class="amount-cell total-value">{{ formatCurrency(totalAcsr) }}</td>
-            <td class="amount-cell total-value">{{ formatCurrency(totalOil) }}</td>
-            <td class="amount-cell total-value">{{ formatCurrency(totalLabour) }}</td>
-            <td class="amount-cell total-value">{{ formatCurrency(totalOutsideWork) }}</td>
-            <td class="amount-cell total-value">{{ formatCurrency(totalTaxable) }}</td>
-            <td class="amount-cell total-value">{{ formatCurrency(totalSGST) }}</td>
-            <td class="amount-cell total-value">{{ formatCurrency(totalCGST) }}</td>
-          </tr>
-          <tr class="grand-total-row">
-            <td colspan="17" class="grand-total-label">GRAND TOTAL</td>
-            <td class="amount-cell grand-total-value">{{ formatCurrency(grandTotal) }}</td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination-section">
-      <div class="pagination-info">
-        <p>Showing {{ (pageIndex - 1) * pageSize + 1 }} to {{ Math.min(pageIndex * pageSize, totalRecords) }} of {{ totalRecords }} records</p>
-      </div>
-      <div class="pagination-controls">
-        <button 
-          class="btn btn-sm btn-outline" 
-          [disabled]="pageIndex === 1"
-          (click)="firstPage()">
-          <i class="fas fa-chevron-left"></i> First
-        </button>
-        <button 
-          class="btn btn-sm btn-outline"
-          [disabled]="pageIndex === 1"
-          (click)= "previousPage()">
-          <i class="fas fa-chevron-left"></i> Previous
-        </button>
-        
-        <span class="page-display">Page {{ pageIndex }}</span>
-        
-        <button 
-          class="btn btn-sm btn-outline"
-          [disabled]="pageIndex * pageSize >= totalRecords"
-          (click)="nextPage()">
-          Next <i class="fas fa-chevron-right"></i>
-        </button>
-        <button 
-          class="btn btn-sm btn-outline"
-          [disabled]="pageIndex * pageSize >= totalRecords"
-          (click)="lastPage()">
-          Last <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- No Data Message -->
-  <div class="no-data" *ngIf="!isLoading && reportData.length === 0 && !isDealerWiseView">
-    <div class="no-data-icon">
-      <i class="fas fa-inbox"></i>
-    </div>
-    <p>No records found. Please adjust your filters and try again.</p>
-  </div>
-
-  <!-- No Data Message for Dealer Wise -->
-  <div class="no-data" *ngIf="!isLoading && dealerWiseData.length === 0 && isDealerWiseView">
-    <div class="no-data-icon">
-      <i class="fas fa-inbox"></i>
-    </div>
-    <p>No dealer records found. Please adjust your filters and try again.</p>
   </div>
 </div>

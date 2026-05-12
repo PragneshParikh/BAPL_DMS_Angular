@@ -7,8 +7,7 @@ import { StockReport, DealerStockGroup } from '../../ViewModels/models/stock-rep
   selector: 'app-stock-report',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './stock-report.html',
-  styleUrls: ['./stock-report.scss']
+  templateUrl: './stock-report.html'
 })
 export class StockReportComponent implements OnInit {
 

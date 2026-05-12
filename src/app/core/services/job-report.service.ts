@@ -1,7 +1,7 @@
 // src/app/core/services/job-report.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable , map} from 'rxjs';
+import { Observable, map} from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 // ==================== INTERFACES ====================
@@ -90,7 +90,6 @@ export interface DealerDropdownItem {
   dealerCode: string;
   dealerName: string;
 }
-
 // ==================== SERVICE ====================
 
 @Injectable({
@@ -109,13 +108,15 @@ export class JobReportService {
       filter
     );
   }
-  getDealerDropdown(): Observable<DealerDropdownItem[]> {
-    return this.http.get<{ success: boolean; data: DealerDropdownItem[] }>(
-      `${environment.apiUrl}/DealerMaster/getDealerDropdown`
-    ).pipe(
-      map(response => response.data)
-    );
-  }
+
+  // Add this method inside JobReportService class:
+    getDealerDropdown(): Observable<DealerDropdownItem[]> {
+      return this.http.get<{ success: boolean; data: DealerDropdownItem[] }>(
+        `${environment.apiUrl}/DealerMaster/getDealerDropdown`
+      ).pipe(
+        map(response => response.data)
+      );
+    }
   /** GET /api/Report/job-card/dealer-wise — dealer summary */
   getDealerWiseJobReportAsync(
     dealerCode?: string,
@@ -164,4 +165,6 @@ export class JobReportService {
       { params }
     );
   }
+
+  
 }
