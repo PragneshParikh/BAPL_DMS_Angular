@@ -10,21 +10,14 @@ import { environment } from '../../../environments/environment';
 
 
 import { StockReport }
-from './models/stock-report.model';
-
-import { DealerStockGroup }
-from './models/dealer-stock-group.model';
-
-import { ColourStockGroup }
-from './models/colour-stock-group.model';
+from '../../ViewModels/models/stock-report.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StockReportService {
 
-  private apiUrl =
-    `${environment.apiUrl}/StockReport`;
+  private apiUrl = `${environment.apiUrl}/Report`;
 
   constructor(
     private http: HttpClient

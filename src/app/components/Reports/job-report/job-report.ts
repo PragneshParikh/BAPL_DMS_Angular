@@ -1,0 +1,354 @@
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { JobReportService, JobReportViewModel, JobReportPagedResponse, JobReportFilterModel, DealerWiseJobReportSummary, JobReportSummaryStats, DealerDropdownItem } from '../../../core/services/job-report.service';
+import { Subject, takeUntil } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators
+} from '@angular/forms';
+
+@Component({
+  selector: 'app-job-report',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  templateUrl: './job-report.html',
+  styleUrls: ['./job-report.scss']
+})
+
+
+export class JobReportComponent implements OnInit, OnDestroy {
+
+  filterForm!: FormGroup;
+  reportData: JobReportViewModel[] = [];
+  dealerWiseData: DealerWiseJobReportSummary[] = [];
+  summaryStats: JobReportSummaryStats | null = null;
+  dealerList: DealerDropdownItem[] = [];  // ✅ added
+  Math = Math;
+
+  pageIndex = 1;
+  pageSize = 20;
+  totalRecords = 0;
+  pageSizeOptions = [100];
+
+  totalSpares = 0;
+  totalAcsr = 0;
+  totalOil = 0;
+  totalLabour = 0;
+  totalOutsideWork = 0;
+  totalTaxable = 0;
+  totalSGST = 0;
+  totalCGST = 0;
+  grandTotal = 0;
+
+  isLoading = false;
+  isDealerWiseView = false;
+  expandedDealerCode: string | null = null;
+  sortColumn = 'invoiceDate';
+  sortDirection: 'asc' | 'desc' = 'desc';
+
+  displayColumns: string[] = [
+    'srNo', 'invoiceNo', 'invoiceDate', 'jobNo', 'partyName',
+    'partyMobileNo', 'regNo', 'mechanicName', 'invoiceType', 'invoiceMode',
+    'sparesAmount', 'acsrAmount', 'oilAmount', 'labourAmount',
+    'outsideWorkAmount', 'taxableAmount', 'sgstAmount', 'cgstAmount'
+  ];
+
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private fb: FormBuilder,
+    private jobReportService: JobReportService
+  ) {
+    this.filterForm = this.fb.group({
+      dealerCode: [''],           // stores dealerCode, but shown as dealerName in dropdown
+      fromDate: ['', Validators.required],
+      toDate: ['', Validators.required],
+      serviceLocation: [''],
+      jobNo: [null],
+      partyName: [''],
+      chassisNo: [''],
+      regNo: ['']
+    });
+  }
+
+  ngOnInit(): void {
+    this.initializeFormWithDefaultDates();
+    this.loadDealerDropdown();   // ✅ load dealers before report
+    this.loadReport();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ==================== INITIALIZATION ====================
+
+  private initializeFormWithDefaultDates(): void {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    this.filterForm.patchValue({
+      fromDate: this.formatDateForInput(firstDayOfMonth),
+      toDate: this.formatDateForInput(today)
+    });
+  }
+
+  private formatDateForInput(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
+  // ==================== DEALER DROPDOWN ====================
+
+  loadDealerDropdown(): void {
+    this.jobReportService.getDealerDropdown()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: DealerDropdownItem[]) => {
+          this.dealerList = data;
+        },
+        error: (error) => {
+          console.error('Error loading dealer dropdown:', error);
+        }
+      });
+  }
+
+  // ==================== DATA LOADING ====================
+
+  loadReport(): void {
+    if (this.filterForm.invalid) return;
+
+    this.isLoading = true;
+    const filter = this.buildFilterModel();
+
+    this.jobReportService.getJobReportAsync(filter)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: JobReportPagedResponse) => {
+          this.handleReportResponse(response);
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading report:', error);
+          this.isLoading = false;
+        }
+      });
+  }
+
+  loadDealerWiseReport(): void {
+    this.isLoading = true;
+    const dealerCode = this.filterForm.get('dealerCode')?.value;
+    const fromDate = this.parseDate(this.filterForm.get('fromDate')?.value);
+    const toDate = this.parseDate(this.filterForm.get('toDate')?.value);
+
+    this.jobReportService.getDealerWiseJobReportAsync(dealerCode, fromDate, toDate)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: DealerWiseJobReportSummary[]) => {
+          this.dealerWiseData = response;
+          this.isDealerWiseView = true;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading dealer wise report:', error);
+          this.isLoading = false;
+        }
+      });
+  }
+
+  loadSummaryStats(): void {
+    const dealerCode = this.filterForm.get('dealerCode')?.value;
+    const fromDate = this.parseDate(this.filterForm.get('fromDate')?.value);
+    const toDate = this.parseDate(this.filterForm.get('toDate')?.value);
+    if (!dealerCode) return;
+
+    this.jobReportService.getJobReportSummaryStats(dealerCode, fromDate, toDate)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: JobReportSummaryStats) => { this.summaryStats = response; },
+        error: (error) => console.error('Error loading summary stats:', error)
+      });
+  }
+
+  private handleReportResponse(response: JobReportPagedResponse): void {
+    this.reportData = response.data;
+    this.totalRecords = response.totalRecords;
+    this.pageIndex = response.pageIndex;
+    this.pageSize = response.pageSize;
+    this.totalSpares = response.totalSpares;
+    this.totalAcsr = response.totalAcsr;
+    this.totalOil = response.totalOil;
+    this.totalLabour = response.totalLabour;
+    this.totalOutsideWork = response.totalOutsideWork;
+    this.totalTaxable = response.totalTaxable;
+    this.totalSGST = response.totalSGST;
+    this.totalCGST = response.totalCGST;
+    this.grandTotal = response.grandTotal;
+  }
+
+  // ==================== FILTERING & SEARCH ====================
+
+  onSearch(): void {
+    this.pageIndex = 1;
+    this.loadReport();
+  }
+
+  onReset(): void {
+    this.filterForm.reset();
+    this.initializeFormWithDefaultDates();
+    this.pageIndex = 1;
+    this.loadReport();
+  }
+
+  onPageChange(event: any): void {
+    this.pageIndex = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+    this.loadReport();
+  }
+
+  // ==================== SORTING ====================
+
+  onSort(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.sortData();
+  }
+
+  private sortData(): void {
+    this.reportData.sort((a, b) => {
+      const aValue = (a as any)[this.sortColumn];
+      const bValue = (b as any)[this.sortColumn];
+      if (aValue < bValue) return this.sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return this.sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  private camelToSnakeCase(str: string): string {
+    return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+  }
+
+  // ==================== VIEW MODES ====================
+
+  toggleDealerWiseView(): void {
+    this.isDealerWiseView = !this.isDealerWiseView;
+    if (this.isDealerWiseView) this.loadDealerWiseReport();
+  }
+
+  expandDealer(dealerCode: string): void {
+    this.expandedDealerCode = this.expandedDealerCode === dealerCode ? null : dealerCode;
+  }
+
+  getDealerJobs(dealerCode: string): JobReportViewModel[] {
+    const dealer = this.dealerWiseData.find(d => d.dealerCode === dealerCode);
+    return dealer ? dealer.jobDetails : [];
+  }
+
+  // ==================== EXPORT ====================
+
+  exportToExcel(): void {
+    const dealerCode = this.filterForm.get('dealerCode')?.value;
+    const fromDate = this.parseDate(this.filterForm.get('fromDate')?.value);
+    const toDate = this.parseDate(this.filterForm.get('toDate')?.value);
+
+    if (!dealerCode) {
+      console.error('Please select a dealer');
+      return;
+    }
+
+    this.jobReportService.exportJobCardReport(dealerCode, fromDate, toDate)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => this.generateExcel(data),
+        error: (error) => console.error('Error exporting report:', error)
+      });
+  }
+
+  private generateExcel(data: JobReportViewModel[]): void {
+    const headers = [
+      'Sr.No', 'Invoice No.', 'Invoice Date', 'Job No.', 'Party Name',
+      'Party Mobile No.', 'Reg No.', 'Mechanic Name', 'Invoice Type',
+      'Invoice Mode', 'Spares Amount', 'ACSR Amount', 'Oil Amount',
+      'Labour Amount', 'Outside Work Amount', 'Taxable Amount',
+      'SGST Amount', 'CGST Amount'
+    ];
+    const csvData = [
+      headers,
+      ...data.map(row => [
+        row.srNo, row.invoiceNo,
+        new Date(row.invoiceDate).toLocaleDateString(),
+        row.jobNo, row.partyName, row.partyMobileNo, row.regNo,
+        row.mechanicName, row.invoiceType, row.invoiceMode,
+        row.sparesAmount, row.acsrAmount, row.oilAmount, row.labourAmount,
+        row.outsideWorkAmount, row.taxableAmount, row.sgstAmount, row.cgstAmount
+      ]),
+      ['', 'TOTAL', '', '', '', '', '', '', '', '',
+        this.totalSpares, this.totalAcsr, this.totalOil, this.totalLabour,
+        this.totalOutsideWork, this.totalTaxable, this.totalSGST, this.totalCGST]
+    ];
+    const csvString = csvData.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `job-report-${new Date().getTime()}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  // ==================== PAGINATION ====================
+
+  firstPage(): void {
+    if (this.pageIndex > 1) { this.pageIndex = 1; this.loadReport(); }
+  }
+
+  previousPage(): void {
+    if (this.pageIndex > 1) { this.pageIndex--; this.loadReport(); }
+  }
+
+  nextPage(): void {
+    if (this.pageIndex * this.pageSize < this.totalRecords) { this.pageIndex++; this.loadReport(); }
+  }
+
+  lastPage(): void {
+    const totalPages = Math.ceil(this.totalRecords / this.pageSize);
+    if (this.pageIndex < totalPages) { this.pageIndex = totalPages; this.loadReport(); }
+  }
+
+  // ==================== UTILITIES ====================
+
+  private buildFilterModel(): JobReportFilterModel {
+    return {
+      dealerCode: this.filterForm.get('dealerCode')?.value || null,
+      fromDate: this.parseDate(this.filterForm.get('fromDate')?.value),
+      toDate: this.parseDate(this.filterForm.get('toDate')?.value),
+      serviceLocation: this.filterForm.get('serviceLocation')?.value,
+      jobNo: this.filterForm.get('jobNo')?.value,
+      partyName: this.filterForm.get('partyName')?.value,
+      chassisNo: this.filterForm.get('chassisNo')?.value,
+      regNo: this.filterForm.get('regNo')?.value,
+      pageIndex: this.pageIndex,
+      pageSize: this.pageSize
+    };
+  }
+
+  private parseDate(dateString: string): Date | undefined {
+    return dateString ? new Date(dateString) : undefined;
+  }
+
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency', currency: 'INR', minimumFractionDigits: 2
+    }).format(value);
+  }
+
+  formatDate(date: Date | string): string {
+    return new Date(date).toLocaleDateString('en-IN');
+  }
+}
