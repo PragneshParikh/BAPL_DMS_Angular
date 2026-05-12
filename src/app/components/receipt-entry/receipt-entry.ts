@@ -46,6 +46,7 @@ export class ReceiptEntry implements OnInit {
 
 
   searchSubject = new Subject<string>();
+  isSuperAdmin: boolean;
   constructor(
     private receiptEntryService: ReceiptEntryService,
     private loader: LoaderService,
@@ -56,6 +57,12 @@ export class ReceiptEntry implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.isSuperAdmin=this.storageService.getRole().toLowerCase() === 'superadmin';
+    if(!this.isSuperAdmin)
+      {
+        this.filter.dealerCode = this.storageService.getDealerCode();
+
+    }
      const today = new Date();
      const sevenDaysBefore = new Date(today);
      sevenDaysBefore.setDate(today.getDate() - 7);
@@ -102,7 +109,13 @@ this.filter.toDate = today;
   }
 
     loadReceiptEntries(): void {
+      console.log(this.isSuperAdmin);
+      
       this.loader.show();
+      if(!this.isSuperAdmin)
+      {
+          this.filter.dealerCode =this.storageService.getDealerCode();
+      }
     const cleanFilter = this.cleanFilter(this.filter);
 
     this.receiptEntryService.getReceiptEntryList(cleanFilter)
@@ -253,19 +266,29 @@ downloadReceiptExcel(): void {
 }
 
  setupSearch() {
-  this.searchSubject.pipe(
-  debounceTime(300),
-  switchMap(search => {
-    this.loader.show();
 
-    return this.receiptEntryService.getReceiptList(
-      search || '',
-      this.filter.fromDate,
-      this.filter.toDate
-    );
-  })
+  this.searchSubject.pipe(
+    debounceTime(300),
+    switchMap(search => {
+
+      this.loader.show();
+
+      let dealerCode = '';
+
+      if (!this.isSuperAdmin) {
+        dealerCode = this.storageService.getDealerCode();
+      }
+
+      return this.receiptEntryService.getReceiptList(
+        search || '',
+        this.filter.fromDate,
+        this.filter.toDate,
+        dealerCode
+      );
+    })
   ).subscribe({
     next: (data) => {
+
       this.receiptEntries = data || [];
       this.filteredReceipts = [...this.receiptEntries];
 
@@ -274,7 +297,9 @@ downloadReceiptExcel(): void {
 
       this.loader.hide();
     },
+
     error: (err) => {
+
       this.loader.hide();
       console.error('Error fetching receipts', err);
     }

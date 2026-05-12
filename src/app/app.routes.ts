@@ -38,7 +38,7 @@ import { Form22Certificate } from './components/Reports/form22-certificate/form2
 import { DeliveryChecklist } from './components/Reports/delivery-checklist/delivery-checklist';
 import { DeliverySlip } from './components/Reports/delivery-slip/delivery-slip';
 import { SaleLetter } from './components/Reports/sale-letter/sale-letter';
-
+import { WorkInProgress } from './components/work-in-progress/work-in-progress';
 
 
 export const routes: Routes = [
@@ -49,25 +49,9 @@ export const routes: Routes = [
     path: '', component: LayoutComponent,
     canActivateChild: [AuthGuard],
     children: [
-
-      // SHOWROOM MODULE
-      {
-        path: 'showroom',
-        children: [
-          { path: 'itemmaster-fg', component: ItemmasterFG, data: [6] },
-          { path: 'form22master', component: Form22master, data: [10] }
-        ]
-      },
-
-      // WORKSHOP MODULE
-      {
-        path: 'workshop',
-        children: [
-          { path: 'item-master', component: ItemMaster, data: [5] }
-        ]
-      },
-
-      // MASTER MODULE (COMMON)
+      { path: 'showroom/itemmaster-fg', component: ItemmasterFG, data: [6] },
+      { path: 'showroom/form22master', component: Form22master, data: [10] },
+      { path: 'workshop/item-master', component: ItemMaster, data: [5] },
       { path: 'dealer-master', component: DealerMaster, data: [4] },
       { path: 'dealer-account-master', component: DealerAccountMaster, data: [4] },
       { path: 'upload', component: DealerMasterBulkDataDipatch, data: [] },
@@ -120,14 +104,13 @@ export const routes: Routes = [
       { path: 'extended-battery-warranty', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty-list/extended-battery-warranty-list').then(m => m.ExtendedBatteryWarrantyList) },
       { path: 'extended-battery-warranty/:id', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty').then(m => m.ExtendedBatteryWarranty) },
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
-      { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-detail/chassis-detail').then(m => m.ChassisDetail) }
-      { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
-      { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [22] },
+      { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-detail/chassis-detail').then(m => m.ChassisDetail) },
       { path: 'proforma-invoice', component: ProformaInvoice, data: [22] },
       { path: 'form22-certificate/:chassisNo', component: Form22Certificate, data: [22] },
-      {path:'delivery-checkList',component:DeliveryChecklist,data:[22]},
-      {path:'delivery-slip',component:DeliverySlip,data:[22]},
-       {path:'sale-Letter/:saleBillNo',component:SaleLetter,data:[22]}
+      { path: 'delivery-checkList', component: DeliveryChecklist, data: [22] },
+      { path: 'delivery-slip', component: DeliverySlip, data: [22] },
+      { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] },
+      { path: '**', component: WorkInProgress }
     ]
   }
 ];

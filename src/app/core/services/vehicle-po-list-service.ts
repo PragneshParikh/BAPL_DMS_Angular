@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
@@ -11,8 +11,17 @@ export class VehiclePoListService {
 
   constructor(private http: HttpClient) { }
 
-  getPOList(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/PurchaseOrder/Polist`);
+  getPOList(dealerCode?:string): Observable<any[]> {
+    let params = new HttpParams();
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
+    }
+
+    return this.http.get<any[]>(`${this.baseUrl}/PurchaseOrder/Polist`,
+      {
+      params 
+    
+    });
   }
 
   downloadPurchaseOrderExcel(filters: any): Observable<Blob> {

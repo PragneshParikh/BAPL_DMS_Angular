@@ -7,15 +7,11 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class DealerService {
-  private apiUrl = environment.apiUrl;
+  protected baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 
-  // getDealers(): Observable<any[]> {
-  //   return this.http.get<any[]>(this.apiUrl + '/DealerMaster/list');
-  // }
-
-   getDealers(search?: string): Observable<any> {
+  getDealers(search?: string): Observable<any> {
 
     let params = new HttpParams();
 
@@ -23,24 +19,27 @@ export class DealerService {
       params = params.set('search', search);
     }
 
-    return this.http.get(`${this.apiUrl}/DealerMaster/list`, { params });
+    return this.http.get(`${this.baseUrl}/DealerMaster/list`, { params });
   }
 
-
   downloadDealerExcel() {
-  return this.http.get(
-    `${this.apiUrl}/DealerMaster/download`,
-    { responseType: 'blob' }
-  );
-}
+    return this.http.get(
+      `${this.baseUrl}/DealerMaster/download`,
+      { responseType: 'blob' }
+    );
+  }
 
-updateTradeCertificate(dealerId: number, tradeCertificate: string) {
-  return this.http.put(
-    `${this.apiUrl}/DealerMaster/updateTradeCertificate?dealerId=${dealerId}`,
-    JSON.stringify(tradeCertificate),
-    {
-      headers: { 'Content-Type': 'application/json' }
-    }
-  );
-}
+  updateTradeCertificate(dealerId: number, tradeCertificate: string) {
+    return this.http.put(
+      `${this.baseUrl}/DealerMaster/updateTradeCertificate?dealerId=${dealerId}`,
+      JSON.stringify(tradeCertificate),
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
+
+  getByDealerId(dealerId: string | null): Observable<any> {
+    return this.http.get(`${this.baseUrl}/DealerMaster/dealerCode?dealerCode=${dealerId}`);
+  }
 }
