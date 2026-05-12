@@ -70,6 +70,7 @@ export class Login {
       if (data.status == 'success') {
         this.toastService.show(data.message, { classname: 'bg-success text-white', delay: 5000 });
         this.storageService.setRole(data.role);
+        this.storageService.setSelectedModule('ShowRoom');
         this.router.navigate(['/']);
       } else {
         this.toastService.show(data.message, { classname: 'bg-danger text-white', delay: 5000 });

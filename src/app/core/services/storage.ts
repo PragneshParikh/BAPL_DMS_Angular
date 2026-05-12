@@ -48,12 +48,24 @@ export class StorageService {
         localStorage.removeItem('token');
         localStorage.removeItem('selectedModule');
         localStorage.removeItem('menuRights');
+        localStorage.removeItem('role');
     }
+
     setRole(role: string) {
         localStorage.setItem('role', role);
     }
 
     getRole(): string {
         return localStorage.getItem('role') || '';
+    }
+
+    setSelectedModule(module: string) {
+        const encoded = this.encode(module);
+        localStorage.setItem('selectedModule', encoded);
+    }
+
+    getSelectedModule(): string {
+        const data = localStorage.getItem('selectedModule');
+        return data ? this.decode(data) : '';
     }
 }

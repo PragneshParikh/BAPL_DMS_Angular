@@ -83,6 +83,7 @@ export const routes: Routes = [
       { path: 'customer-ledger/:id', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger').then(m => m.CustomerLedger) },
       { path: 'delivery-certificate', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
       { path: 'stock-report', data: [40], loadComponent: () => import('./components/stock-reports/stock-report').then(m => m.StockReportComponent) },
+      { path: 'job-card-report', data: [41], loadComponent: () => import('./components/Reports/job-report/job-report').then(m => m.JobReportComponent) },
       { path: 'add-vehicle-sale-bill/delivery-certificate/:id', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
       { path: 'job-card', component: JobCard, data: [23] },
       { path: 'job-card-addForm/:test', component: JobCardAddForm, data: [23] },
@@ -109,8 +110,8 @@ export const routes: Routes = [
       { path: 'form22-certificate/:chassisNo', component: Form22Certificate, data: [22] },
       { path: 'delivery-checkList', component: DeliveryChecklist, data: [22] },
       { path: 'delivery-slip', component: DeliverySlip, data: [22] },
-      { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] },
-      { path: '**', component: WorkInProgress }
+      { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] }
     ]
-  }
+  },
+  { path: '**', component: WorkInProgress }
 ];

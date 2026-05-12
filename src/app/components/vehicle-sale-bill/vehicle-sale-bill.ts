@@ -54,9 +54,7 @@ export class VehicleSaleBill {
     private router: Router,
     private loader: LoaderService,
     private toaster: ToastService,
-    private storageService: StorageService
-  ) {
-  }
+    private storageService: StorageService) { }
 
   ngOnInit() {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
@@ -180,5 +178,49 @@ export class VehicleSaleBill {
   getErpStatusName(value: string | undefined): string {
     return ErpOptions.find(x => x.value === value)?.name || '';
   }
+
+  downloadDealerExcel(): void {
+
+  const from = this.filter.fromDate
+    ? new Date(this.filter.fromDate)
+    : undefined;
+
+  const to = this.filter.toDate
+    ? new Date(this.filter.toDate)
+    : undefined;
+
+  this.loader.show();
+
+  this.service.downloadExcel(from, to).subscribe({
+    next: (data: Blob) => {
+
+      const blob = new Blob([data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'SaleBillList.xlsx';
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+
+      this.loader.hide();
+
+      this.toaster.show(
+        'Dealer Excel downloaded successfully',
+        {
+          classname: 'bg-success text-light',
+          delay: 3000
+        }
+      );
+    },
+    error: () => {
+      this.loader.hide();
+    }
+  });
+}
 
 }

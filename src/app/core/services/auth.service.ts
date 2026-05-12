@@ -6,6 +6,7 @@ import { User } from '../../store/Authentication/auth.models';
 import { environment } from '../../../environments/environment';
 import { StorageService } from './storage';
 import { Router } from '@angular/router';
+import { MenuService } from './menu-service';
 
 
 const httpOptions = {
@@ -32,6 +33,7 @@ export class AuthenticationService {
         private storageService: StorageService,
         private ngZone: NgZone,
         private router: Router,
+        private menuService: MenuService
     ) {
 
         const storedUser = storageService.getUser();
@@ -106,6 +108,9 @@ export class AuthenticationService {
         localStorage.removeItem('token');
         localStorage.removeItem('selectedModule');
         localStorage.removeItem('menuRights');
+        localStorage.removeItem('role');
+
+        this.menuService.resetMenu();
         this.currentUserSubject.next(null!);
 
         this.ngZone.run(() => {
