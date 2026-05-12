@@ -78,11 +78,11 @@ export class CustomerLedger {
   @Input() ledgerId!: number;
   @Input() defaultLedgerType: string = '';
 
-  ngOnInit() {
+  async ngOnInit() {
 
-    this.getUserList();
-    this.getCity();
-    this.getState();
+    await this.getUserList();
+    await this.getCity();
+    await this.getState();
 
     this.isExternalCall = !!this.activeModal || !!this.ledgerId;
 
@@ -134,6 +134,7 @@ export class CustomerLedger {
           updatedDate: res.updatedDate,
         }
         this.loader.hide();
+        this.changeCityOptions(this.formData.state);
       }, error: (err) => {
         this.loader.hide();
         console.error(err);
@@ -208,7 +209,8 @@ export class CustomerLedger {
     }
   }
 
-  getCity() {
+  async getCity() {
+
     this.cityService.get().subscribe({
       next: (res) => {
         this._cities = res;
@@ -247,6 +249,9 @@ export class CustomerLedger {
 
   onStateChange(event: any) {
     const selectedStateId = event.target.value;
+    this.changeCityOptions(selectedStateId);
+  }
+  changeCityOptions(selectedStateId: any) {
     this.cities = this._cities.filter(x => x.stateId === Number(selectedStateId));
   }
 

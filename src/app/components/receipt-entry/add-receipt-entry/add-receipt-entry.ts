@@ -90,25 +90,6 @@ export class AddReceiptEntry implements OnInit {
     });
   }
 
-  // async ngOnInit(): Promise<void> {
-  //   this.loader.show();
-  //   await this.getParties();
-  //   await this.loadProducts();
-  //   this.fetchLocations();
-  //   this.getFinanciers();
-
-
-  //   this.router.paramMap.subscribe(async params => {
-  //     this.id = params.get('id');
-
-  //     if (this.id) {
-  //       this.isEditMode = true;
-  //             await this.loadReceiptById(this.id);
-  //     }
-  //   });
-  //   this.loader.hide();
-  // }
-
   async ngOnInit(): Promise<void> {
   this.loader.show();
 
@@ -539,6 +520,7 @@ export class AddReceiptEntry implements OnInit {
     }
 
     const payload: ReceiptEntryAddViewModel = {
+      dealerCode:this.storageService.getDealerCode(),
       location: this.formData.location,
       receiptNo: this.formData.receiptNo || this.nextReceiptNo,
       saleType: this.formData.saleType,

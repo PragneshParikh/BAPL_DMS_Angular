@@ -1,7 +1,14 @@
-table>thead>tr>th {
-  background-color: #747CA0;
-  color: #ffffff;
+#vehiclePoForm{
+  .col-md-1-5 {
+    flex: 0 0 12.5%;
+    max-width: 12.5%;
+  }
 }
+
+// table>thead>tr>th {
+//   background-color: #747CA0;
+//   color: #ffffff;
+// }
 
 ::ng-deep{
 

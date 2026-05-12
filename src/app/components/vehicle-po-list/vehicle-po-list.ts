@@ -4,9 +4,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { VehiclePoListService } from '../../core/services/vehicle-po-list-service';
-import { TRANSACTION_TYPES } from '../../constant';
+import { PO_STATUSES, TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { StorageService } from '../../core/services/storage';
 
 @Component({
   selector: 'app-vehicle-po-list',
@@ -16,6 +17,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
   styleUrl: './vehicle-po-list.scss',
 })
 export class VehiclePoList implements OnInit {
+  poStatuses = PO_STATUSES;
   purchaseNo: string = '';
   dateFrom: string = '';
   dateTo: string = '';
@@ -32,15 +34,19 @@ export class VehiclePoList implements OnInit {
   page = 1;
   pageSize = 10;
   totalRecords = 0;
+  isSuperAdmin: boolean;
+  dealerCode: any;
 
   constructor(
     private router: Router,
     private poListService: VehiclePoListService,
     private loader: LoaderService,
-    private toastr: ToastService
+    private toastr: ToastService,
+    private storageService:StorageService
   ) { }
 
   ngOnInit() {
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() ===  'superadmin';
     this.initDefaultDates();
     this.loadPOList();
   }
@@ -57,7 +63,11 @@ export class VehiclePoList implements OnInit {
 
   loadPOList() {
     this.loader.show();
-    this.poListService.getPOList().subscribe({
+    if(!this.isSuperAdmin)
+    {
+      this.dealerCode =this.storageService.getDealerCode();
+    }
+    this.poListService.getPOList(this.dealerCode).subscribe({
       next: (res: any[]) => {
         this.loader.hide();
         console.log('PO List res:', res);
@@ -239,6 +249,15 @@ export class VehiclePoList implements OnInit {
         this.toastr.show('Excel download failed', { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
+  }
+
+  resetFilters() {
+    this.purchaseNo = '';
+    this.partyName = '';
+    this.transactionType = '';
+    this.isSubmitted = '';
+    this.initDefaultDates();
+    this.onSearch();
   }
 }
 

@@ -125,7 +125,7 @@
                         </thead>
                         <tbody>
                             @for (data of pagedData; track $index) {
-                            <tr (click)="openDetails(From22itemModal,data)" style="cursor:pointer">
+                            <tr (dblclick)="openDetails(From22itemModal,data)" style="cursor:pointer">
                                 <td>
                                     {{ (page - 1) * pageSize + $index + 1 }}
                                 </td>

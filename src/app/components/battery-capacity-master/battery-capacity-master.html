@@ -90,7 +90,7 @@
 
                             @for (item of paginatedData; track $index) {
 
-                            <tr (click)="openEditModal(editModal, item)" style="cursor: pointer;">
+                            <tr (dblclick)="openEditModal(editModal, item)" style="cursor: pointer;">
 
                                 <td>
                                     {{ ($index + 1) + ((page - 1) * pageSize) }}

@@ -10,6 +10,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 })
 export class InvoiceDetail {
   @Input() invoiceDetails: any;
+  @Input() sourceType: string;
 
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';

@@ -11,6 +11,8 @@ import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { debounceTime, Subject } from 'rxjs';
 import { ErpOptions } from '../../constant';
+import { DealerService } from '../../core/services/dealer-service';
+import { StorageService } from '../../core/services/storage';
 
 @Component({
   selector: 'app-vehicle-sale-bill',
@@ -45,13 +47,18 @@ export class VehicleSaleBill {
     erpStatus: ""
   };
   searchChanged: Subject<string> = new Subject();
+  isSuperAdmin: boolean;
+  dealerCode: string;
 
   constructor(private service: VehicleSaleBillService,
     private router: Router,
     private loader: LoaderService,
-    private toaster: ToastService) { }
+    private toaster: ToastService,
+    private storageService: StorageService) { }
 
   ngOnInit() {
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
     const today = new Date();
     const sevenDaysBefore = new Date(today);
     sevenDaysBefore.setDate(today.getDate() - 7);
@@ -60,22 +67,23 @@ export class VehicleSaleBill {
     this.searchChanged.pipe(debounceTime(400)).subscribe(() => {
       this.loadData();
     });
-
     this.loadData();
+
   }
 
 
   loadData() {
     this.loader.show();
     this.page = 1;
-
-
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService ? this.storageService.getDealerCode() : '';
+    }
     const from = this.filter.fromDate ? new Date(this.filter.fromDate) : undefined;
 
     const to = this.filter.toDate ? new Date(this.filter.toDate) : undefined;
     const erpStatus = this.filter.erpStatus ? this.filter.erpStatus : undefined;
 
-    this.service.getAllVehicleSaleBills(this.searchText, from, to, erpStatus)
+    this.service.getAllVehicleSaleBills(this.dealerCode, this.searchText, from, to, erpStatus)
       .subscribe({
         next: (res) => {
           this.vehicleBills = res;

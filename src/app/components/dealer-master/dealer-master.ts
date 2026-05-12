@@ -8,6 +8,9 @@ import { DealerMasterViewModel } from '../../ViewModels/Dealer/DealerMasterViewM
 import { DealerApiResponse } from '../../ViewModels/Dealer/DealerApiResponse';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
+import { StorageService } from '../../core/services/storage';
+import { Console } from 'console';
+
 @Component({
   selector: 'app-dealer-master',
   standalone: true,
@@ -37,12 +40,19 @@ export class DealerMaster implements OnInit {
 
   private searchSubject = new Subject<string>();
 
+  isSuperAdmin: boolean = false;
+  dealerCode: string = '';
+
   constructor(
     private dealerService: DealerService,
     private modalService: NgbModal,
     private loader: LoaderService,
-    private toaster: ToastService
-  ) { }
+    private toaster: ToastService,
+    private storageService: StorageService
+  ) {
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    this.dealerCode = this.storageService.getDealerCode() || '';
+  }
 
   /* ================= INIT ================= */
 
@@ -57,12 +67,19 @@ export class DealerMaster implements OnInit {
 
     this.loader.show();
 
-    this.dealerService.getDealers().subscribe({
+    const request$ = this.isSuperAdmin
+      ? this.dealerService.getDealers(null)
+      : this.dealerService.getByDealerId(this.dealerCode);
+
+    request$.subscribe({
       next: (res: DealerApiResponse) => {
 
         const data = res.data || [];
 
-        this.dealerList = data.map((dealer, index) => ({
+        // Ensure array format
+        const dealerData = Array.isArray(data) ? data : [data];
+
+        this.dealerList = dealerData.map((dealer, index) => ({
           ...dealer,
           slNo: index + 1
         }));
@@ -70,16 +87,12 @@ export class DealerMaster implements OnInit {
         this.originalDealerList = [...this.dealerList];
 
         this.refreshPage();
-
-
-
         this.loader.hide();
       },
 
       error: (err) => {
         console.error(err);
 
-        // ❌ Error toaster
         this.toaster.show('Failed to load dealers!', {
           classname: 'bg-danger text-white',
           delay: 5000
@@ -147,17 +160,7 @@ export class DealerMaster implements OnInit {
     });
 
   }
-  // openDealerModal(dealer: DealerMasterViewModel): void {
-
-  //   this.selectedDealer = dealer;
-
-  //   this.modalService.open(this.dealerModal, {
-  //     windowClass: 'dealer-modal',
-  //     size: 'xl',
-  //     scrollable: true
-  //   });
-
-  // }
+ 
 
   /* ================= SELECT ================= */
 
@@ -207,7 +210,7 @@ export class DealerMaster implements OnInit {
     this.searchSubject.pipe(
       debounceTime(400),
       distinctUntilChanged(),
-      switchMap(search => this.dealerService.getDealers(search))
+      switchMap(search => this.dealerService.getByDealerId(search))
     ).subscribe({
 
       next: (res: DealerApiResponse) => {

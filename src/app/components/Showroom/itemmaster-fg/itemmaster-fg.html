@@ -56,7 +56,7 @@
 
               @for (data of pagedData; track $index) {
 
-              <tr (click)="openDetails(itemModal,data)" style="cursor:pointer">
+              <tr (dblclick)="openDetails(itemModal,data)" style="cursor:pointer">
                 <td>
                   {{ (page - 1) * pageSize + $index + 1 }}
                 </td>
@@ -337,7 +337,7 @@
         <label class="form-label">Form-22 Header</label>
         <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
-       <div class="col-md-2">
+      <div class="col-md-2">
         <label class="form-label">No. Of Charger</label>
         <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
