@@ -7,7 +7,9 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class VehiclePoService {
-  private baseUrl = environment.apiUrl;
+  protected baseUrl = environment.apiUrl;
+  // protected erpBaseUrl = environment.ERPApiUrl;
+  protected erpBaseUrl = '';
 
   constructor(private http: HttpClient) { }
 
