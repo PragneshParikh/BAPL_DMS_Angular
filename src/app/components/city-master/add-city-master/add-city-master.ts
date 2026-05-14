@@ -107,7 +107,7 @@ checkDuplicateCity() {
   const cityName = this.formData.cityName.trim().toLowerCase();
 
   this.cityExists = this.cityList.some(c =>
-    c.stateId == this.formData.stateId &&   // ✅ correct
+    c.stateId == this.formData.stateId &&  
     c.cityName.trim().toLowerCase() === cityName
   );
 

@@ -8,21 +8,20 @@ import { Router, RouterLink } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { LanguageService } from '../../core/services/language.service';
 import { TranslateService } from '@ngx-translate/core';
-import { NgbDropdownModule, NgbModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbModal, NgbNavModule, NgbAccordionItem } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SimplebarAngularModule } from 'simplebar-angular';
 import { MenuService } from '../../core/services/menu-service';
-import { partsDispatch, saleInvoice } from './data';
+import { saleInvoice } from './data';
 import { map, Observable, of } from 'rxjs';
-import { VehicleDispatchservice } from '../../core/services/vehicle-dispatchservice';
 import { LoaderService } from '../../core/services/loader';
 import { InvoiceDetail } from '../../dialogs/invoice-detail/invoice-detail';
-import { result } from 'lodash';
 import { StorageService } from '../../core/services/storage';
 import { Lotinspectionservice } from '../../core/services/lotinspectionservice';
-import { error } from 'console';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { VehicleInwardService } from '../../core/services/vehicle-inwardservice';
+import { PartsInwardservice } from '../../core/services/partsinwardservice';
 @Component({
   selector: 'app-topbar',
   templateUrl: './topbar.component.html',
@@ -34,13 +33,15 @@ import { ToastService } from '../../shared/toaster/toast-service';
     ReactiveFormsModule,
     SimplebarAngularModule,
     NgbDropdownModule,
-    RouterLink
+    RouterLink,
+    NgbAccordionItem
   ],
   standalone: true
 })
 export class TopbarComponent implements OnInit {
-  partsDispatch: any[] = [];
-  vehicleDispatch: any[] = [];
+  partsInward: any[] = [];
+  vehicleInward: any[] = [];
+  d2dNotificationList: any[] = [];
   invoiceNotifications: any[] = [];
   partsNotifications: any[] = [];
   saleInvoice: any[] = [];
@@ -61,7 +62,7 @@ export class TopbarComponent implements OnInit {
   @ViewChild('removenotification') removenotification !: TemplateRef<any>;
   notifyId: any;
   unReadInwards: number = 0;
-  public selectedOption: string = localStorage.getItem('selectedModule') ? JSON.parse(localStorage.getItem('selectedModule') || '{}') : 'ShowRoom';
+  public selectedOption: string = 'ShowRoom';
   dealerCode: string = '';
 
   menuList: any[] = [];
@@ -76,15 +77,22 @@ export class TopbarComponent implements OnInit {
     private authService: AuthenticationService,
     private router: Router,
     private menuService: MenuService,
-    private vehicleDispatchService: VehicleDispatchservice,
+    private vehicleInwardService: VehicleInwardService,
     private loader: LoaderService,
     private storageService: StorageService,
     private lotInspectionService: Lotinspectionservice,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private partInwardService: PartsInwardservice
   ) { }
 
   ngOnInit(): void {
     this.userData = this.authService.currentUserValue;
+
+    if (!this.userData) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.element = document.documentElement;
 
     this.lastLoginDate$ = of(this.userData.lastLoginDate).pipe(
@@ -111,10 +119,10 @@ export class TopbarComponent implements OnInit {
     this.dealerCode = this.storageService.getDealerCode();
 
     this.getVehicleDispatchNotification();
+    this.getPartsInwardNotification();
 
     // Fetch Data
     this.saleInvoice = saleInvoice;
-    this.partsDispatch = partsDispatch;
   }
 
   /**
@@ -173,7 +181,7 @@ export class TopbarComponent implements OnInit {
   onSelectionChange(option: string) {
     if (option !== this.selectedOption) {
       this.selectedOption = option;
-      localStorage.setItem('selectedModule', JSON.stringify(option));
+      this.storageService.setSelectedModule(option);
       this.menuService.filterMenu(option);
       this.router.navigate(['/']);
     }
@@ -290,12 +298,12 @@ export class TopbarComponent implements OnInit {
   }
   getVehicleDispatchNotification() {
     this.loader.show();
-    this.vehicleDispatchService.getByVehicleStatus(false, this.dealerCode).subscribe({
+    this.vehicleInwardService.getByVehicleStatus(false, this.dealerCode).subscribe({
       next: (result) => {
-        this.vehicleDispatch = result;
+        this.vehicleInward = result;
 
         // Group by invoice number
-        const groupedInvoices = this.vehicleDispatch.reduce((acc: any, item: any) => {
+        const groupedInvoices = this.vehicleInward.reduce((acc: any, item: any) => {
           const invoiceNo = item.invoiceNo;
           if (!acc[invoiceNo]) {
             acc[invoiceNo] = {
@@ -320,6 +328,41 @@ export class TopbarComponent implements OnInit {
       }
     });
   }
+
+  getPartsInwardNotification() {
+    this.partInwardService.getPendingNotificationByDealer(this.dealerCode).subscribe({
+      next: (res: any) => {
+        this.partsInward = res;
+
+        // Group by invoice number
+        const groupedInvoices = this.partsInward.reduce((acc: any, item: any) => {
+          const invoiceNo = item.invoiceNo;
+          if (!acc[invoiceNo]) {
+            acc[invoiceNo] = {
+              invoiceNumber: invoiceNo,
+              invoiceDate: item.invoiceDate,
+              numberOfItems: 0,
+              status: 'Received' // You can adjust this based on your logic
+            };
+          }
+          acc[invoiceNo].numberOfItems += 1;
+          return acc;
+        }, {});
+
+        // Convert grouped object to array
+        this.partsNotifications = Object.values(groupedInvoices);
+
+        this.loader.hide();
+      }, error: (err) => {
+        this.toastService.show('Something went wrong', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+        console.log(err);
+      }
+    });
+  }
+
   onClickInvoiceNumber(invoiceData) {
 
     const modalRef = this.modalService.open(InvoiceDetail, {
@@ -328,11 +371,11 @@ export class TopbarComponent implements OnInit {
       keyboard: false    // prevent closing with ESC
     });
 
-    const invoiceDetails = this.vehicleDispatch.filter(x => x.invoiceNo === invoiceData.invoiceNumber);
+    const invoiceDetails = this.vehicleInward.filter(x => x.invoiceNo === invoiceData.invoiceNumber);
     // Pass data to the modal component
     modalRef.componentInstance.invoiceDetails = invoiceDetails;
+    modalRef.componentInstance.sourceType = 'vehicle';
 
-    // Optional: handle modal close or dismiss
     modalRef.result.then(
       (result) => {
         if (result && result.isAccepted) {
@@ -355,7 +398,7 @@ export class TopbarComponent implements OnInit {
     );
   }
   updateNotificationStatusByInvoice(invoiceNumber: string) {
-    this.vehicleDispatchService.updateStatusByInvoiceNumber(invoiceNumber).subscribe({
+    this.vehicleInwardService.updateStatusByInvoiceNumber(invoiceNumber).subscribe({
       next: (res) => {
         this.toastService.show('Record updated sucessfully', {
           classname: 'bg-success text-white',
@@ -393,4 +436,47 @@ export class TopbarComponent implements OnInit {
     });
   }
 
+  onClickPartNumber(item: any) {
+
+    const modalRef = this.modalService.open(InvoiceDetail, {
+      size: 'xl',      // modal size: 'sm', 'lg', 'xl'
+      backdrop: 'static', // prevent closing by clicking outside
+      keyboard: false    // prevent closing with ESC
+    });
+
+    const invoiceDetails = this.partsInward.filter(x => x.invoiceNo === item.invoiceNumber);
+    modalRef.componentInstance.invoiceDetails = invoiceDetails;
+    modalRef.componentInstance.sourceType = 'parts';
+
+    modalRef.result.then(
+      (result) => {
+        if (result && result.isAccepted) {
+          this.loader.show();
+          this.updatePartInwardStatusByInvoice(item.invoiceNumber);
+          this.loader.hide();
+        }
+      },
+      (reason) => {
+        console.log('Modal dismissed:', reason);
+      }
+    );
+
+  }
+
+  updatePartInwardStatusByInvoice(invoiceNumber: string) {
+    this.partInwardService.update(invoiceNumber).subscribe({
+      next: (res) => {
+        this.toastService.show('Record updated sucessfully', {
+          classname: 'bg-success text-white',
+          delay: 5000
+        });
+      }, error: (err) => {
+        this.toastService.show('Something went wrong', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+        console.error(err);
+      }
+    });
+  }
 }

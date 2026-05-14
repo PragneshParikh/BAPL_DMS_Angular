@@ -28,6 +28,7 @@ export class SidebarComponent implements OnInit {
   filteredMenuItems: MenuItem[] = [];
   @ViewChild('sideMenu') sideMenu!: ElementRef;
   @Output() mobileMenuButtonClicked = new EventEmitter();
+  isSidebarActive = false;
 
   constructor(public translate: TranslateService,
     private menuService: MenuService,
@@ -195,6 +196,7 @@ export class SidebarComponent implements OnInit {
    * Toggle the menu bar when having mobile screen
    */
   toggleMobileMenu(event: any) {
+    this.isSidebarActive = !this.isSidebarActive;
     var sidebarsize = document.documentElement.getAttribute("data-sidebar-size");
     if (sidebarsize == 'sm-hover-active') {
       document.documentElement.setAttribute("data-sidebar-size", 'sm-hover');

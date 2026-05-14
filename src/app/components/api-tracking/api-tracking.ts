@@ -9,6 +9,7 @@ import { nextTick } from 'process';
 import { error } from 'console';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { APIUniqueList } from '../../constant';
 
 @Component({
   selector: 'app-api-tracking',
@@ -28,6 +29,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
   styleUrl: './api-tracking.scss',
 })
 export class ApiTracking implements OnInit {
+  apiUniques = APIUniqueList;
   dataSource: any[] = [];
   searchTerm: string = '';
   jsonString: any = '';

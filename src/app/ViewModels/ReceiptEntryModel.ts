@@ -1,11 +1,11 @@
 export interface ReceiptEntryModel {
   id: number;
-
+dealerCode?:string;
   location?: string;
 
   receiptNo: string;
 
-  receiptDate: string; 
+  receiptDate: string;
 
   saleType?: string;
 
@@ -56,6 +56,7 @@ export interface ReceiptFilter {
   bookingId?: string;
   location?: string;
   saleType?: string;
+  dealerCode?:string;
 }
 
 export interface ReceiptEntryAddViewModel {
@@ -67,7 +68,7 @@ export interface ReceiptEntryAddViewModel {
   financier?: string;
   productCode: string;
   salesExecutive?: string;
-    businessType?: string;
+  businessType?: string;
 
   receiptType?: string;
   mobileNo?: string;
@@ -76,6 +77,7 @@ export interface ReceiptEntryAddViewModel {
   refNo?: string;
   narration?: string;
   totalAmount?: number;
+  dealerCode?:string;
 }
 
 export interface ReceiptEntryEditModel {
@@ -92,8 +94,8 @@ export interface ReceiptEntryEditModel {
   productName?: string;
   productColor?: string;
   productDescription?: string;
-    businessType?: string;
- salesExecutive?: string;
+  businessType?: string;
+  salesExecutive?: string;
   receiptType?: string;
   refNo?: string;
   narration?: string;

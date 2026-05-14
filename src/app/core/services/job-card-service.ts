@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -37,8 +37,21 @@ export class JobCardService {
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetPdiChecklist`)
   }
 
-  getJobCardList(dealerCode: string): Observable<any> {
-    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetJobCardList?dealerCode=${dealerCode}`);
+  // getJobCardList(dealerCode: string): Observable<any> {
+  //   return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetJobCardList?dealerCode=${dealerCode}`);
+  // }
+
+  getJobCardList(dealerCode?:string):Observable<any>{
+    let params =new HttpParams();
+    if(dealerCode)
+    {
+      params =params.set('dealerCode',dealerCode)
+    }
+    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetJobCardList`,
+      {
+        params
+      }
+    );
   }
 
   insertJobCard(data: any) {

@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UpdateSaleDetailsVM, VehicleSaleChasisRequest, VehicleSaleChasisResponse } from '../../ViewModels/VehicleSaleBill';
 import { VehicleSaleListChasisResponse } from '../../ViewModels/VehicleSaleChasisResponse';
+import { Form22SlipViewModel } from '../../ViewModels/Form22SlipViewModel';
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +26,7 @@ export class VehicleSaleBillService {
   //   return this.http.get<any[]>(`${this.apiUrl}/VehicleSaleBill`);
   // }
 
- getAllVehicleSaleBills(search?: string, fromDate?: Date, toDate?: Date, erpStatus?: string): Observable<any[]> {
+ getAllVehicleSaleBills(dealerCode?:string,search?: string, fromDate?: Date, toDate?: Date, erpStatus?: string): Observable<any[]> {
   let params = new HttpParams();
 
   if (search) {
@@ -42,6 +43,10 @@ export class VehicleSaleBillService {
   if (erpStatus) {
     params = params.set('erpStatus', erpStatus);
   }
+  if(dealerCode)
+  {
+    params =params.set('dealerCode',dealerCode)
+  }
 
   return this.http.get<any[]>(`${this.apiUrl}/VehicleSaleBill`, { params });
 }
@@ -55,15 +60,15 @@ export class VehicleSaleBillService {
     });
   }
 
-  getChasisPricing(dealerCode: string, ledgerId: number) {
-  return this.http.get<any>(
-    `${this.apiUrl}/VehicleSaleBill/GetChasisPricing?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
-  );
-}
+//   getChasisPricing(dealerCode: string, ledgerId: number) {
+//   return this.http.get<any>(
+//     `${this.apiUrl}/VehicleSaleBill/GetChasisPricing?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
+//   );
+// }
 
-getChassisListPDIOK(dealerCode: string): Observable<VehicleSaleListChasisResponse[]> {
+getChassisListPDIOK(dealerCode: string, ledgerId: number): Observable<VehicleSaleListChasisResponse[]> {
   return this.http.get<VehicleSaleListChasisResponse[]>(
-    `${this.apiUrl}/VehicleSaleBill/ChassisListPDIOK?dealerCode=${dealerCode}`
+    `${this.apiUrl}/VehicleSaleBill/ChassisListPDIOK?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
   );
 }
 getVehicleSaleBillById(id: number): Observable<any> {
@@ -93,4 +98,33 @@ updateRegistrationAndReserveChassis(
       { params }
     );
   }
+
+
+  getForm22(chassisNo: string): Observable<Form22SlipViewModel> {
+    const params = new HttpParams().set('chassisNo', chassisNo);
+
+    return this.http.get<Form22SlipViewModel>(
+      `${this.apiUrl}/VehicleSaleBill/Form22`,
+      { params }
+    );
+  }
+
+  downloadExcel(fromDate?: Date, toDate?: Date) {
+     let params = new HttpParams();
+
+   if (fromDate) {
+    params = params.set('fromDate', fromDate.toISOString());
+  }
+
+  if (toDate) {
+    params = params.set('toDate', toDate.toISOString());
+  }
+  
+  return this.http.get(
+    `${this.apiUrl}/VehicleSaleBill/download`,
+    {params:params,
+      responseType: 'blob' }
+  );
+}
+
 }

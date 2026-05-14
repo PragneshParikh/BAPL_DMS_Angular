@@ -11,7 +11,7 @@
         <div class="col-lg-12">
             <div class="modal-body">
 
-                <div class="table-responsive">
+                <div class="table-responsive" *ngIf="sourceType === 'vehicle'">
                     <table class="table table-sm table-gridjs">
                         <thead>
                             <tr>
@@ -87,6 +87,32 @@
                                 <td>
                                     {{ invoice.chargerWarranty }}
                                 </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-responsive" *ngIf="sourceType === 'parts'">
+                    <table class="table table-sm table-gridjs">
+                        <thead>
+                            <tr>
+                                <th>Sr. No. </th>
+                                <th class="sort" (click)="onSort('invoiceDate')">Invoice Date</th>
+                                <th class="sort" (click)="onSort('invoiceNo')">Invoice No</th>
+                                <th class="sort" (click)="onSort('partNo')">Part No</th>
+                                <th class="sort" (click)="onSort('itemRate')">Item Rate</th>
+                                <th class="sort" (click)="onSort('itemQty')">Item Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (invoice of invoiceDetails; track $index) {
+                            <tr>
+                                <td class="text-center"> {{ $index + 1}} </td>
+                                <td> {{ invoice.invoiceDate | date:'MM/dd/yyyy' }} </td>
+                                <td> {{ invoice.invoiceNo }} </td>
+                                <td> {{ invoice.partNo }} </td>
+                                <td> {{ invoice.itemRate }} </td>
+                                <td> {{ invoice.itemQty }} </td>
                             </tr>
                             }
                         </tbody>

@@ -4,101 +4,100 @@
     <h5 class="mb-sm-0">LOT Inspection List</h5>
 </div>
 <!--End-->
-            <!-- Filter Card -->
-            <div class="card">
-                <div class="card-body">
-                    <div class="row g-3 align-items-end">
-                        <!-- Date From -->
-                        <div class="col-md-2">
-                            <label class="form-label">Date From</label>
-                            <input type="date" class="form-control" #fromDate>
-                        </div>
-
-                        <!-- Date To -->
-                        <div class="col-md-2">
-                            <label class="form-label">Date To</label>
-                            <input type="date" class="form-control" #toDate>
-                        </div>
-
-                        <!-- Report Type -->
-                        <div class="col-md-2">
-                            <label class="form-label">Report Type</label>
-                            <select class="form-select" formData="reportType">
-                                <option value="Lot Inspection">Lot Inspection</option>
-                            </select>
-                        </div>
-
-                        <!-- Invoice No -->
-                        <div class="col-md-2">
-                            <label class="form-label">Invoice No.</label>
-                            <input type="text" class="form-control" placeholder="Invoice No." #invoiceNo>
-                        </div>
-
-                        <!-- Search Button -->
-                        <div class="col-md-1 d-grid">
-                            <button class="btn btn-sm btn-primary"
-                                (click)="searchItems(fromDate.value, toDate.value, invoiceNo.value)">
-                                Search
-                            </button>
-                        </div>
-
-                    </div>
-                </div>
+<!-- Filter Card -->
+<div class="card">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <!-- Date From -->
+            <div class="col-md-2">
+                <label class="form-label">Date From</label>
+                <input type="date" class="form-control" #fromDate>
             </div>
-            <!-- Table Card -->
-            <div class="card">
-                <!-- Total Records -->
-                <div class="mb-3">
-                    <strong>Total Record(s): {{ collectionSize || 0 }}</strong>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive" style="max-height: 400px; overflow: auto;">
-                        <table class="table table-hover table-bordered mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th (click)="sort('invoiceNo')">Invoice No</th>
-                                    <th (click)="sort('invoiceDate')">Invoice Date</th>
-                                    <th (click)="sort('lotno')">LOT No.</th>
-                                    <th (click)="sort('arrivalDate')">Arrival Date</th>
-                                    <th (click)="sort('truckNo')">Truck No.</th>
-                                    <th (click)="sort('transporterName')">Transporter Name</th>
-                                    <th (click)="sort('driverName')">Driver Name</th>
-                                    <th (click)="sort('nameSupervisor')">Supervisor Name</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let data of pagedData" (click)="onNavigate(data.invoiceNo,$event)"
-                                    style="cursor:pointer">
-                                    <td>{{ data.invoiceNo }}</td>
-                                    <td>{{ data.invoiceDate }}</td>
-                                    <td>{{ data.lotno }}</td>
-                                    <td>{{ data.arrivalDate }}</td>
-                                    <!-- <td>{{ item.lrno }}</td>
+
+            <!-- Date To -->
+            <div class="col-md-2">
+                <label class="form-label">Date To</label>
+                <input type="date" class="form-control" #toDate>
+            </div>
+
+            <!-- Report Type -->
+            <div class="col-md-2">
+                <label class="form-label">Report Type</label>
+                <select class="form-select" formData="reportType">
+                    <option value="Lot Inspection">Lot Inspection</option>
+                </select>
+            </div>
+
+            <!-- Invoice No -->
+            <div class="col-md-2">
+                <label class="form-label">Invoice No.</label>
+                <input type="text" class="form-control" placeholder="Invoice No." #invoiceNo>
+            </div>
+
+            <!-- Search Button -->
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-sm btn-primary"
+                    (click)="searchItems(fromDate.value, toDate.value, invoiceNo.value)">
+                    Search
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- Table Card -->
+<div class="card">
+    <!-- Total Records -->
+    <div class="mb-3">
+        <strong>Total Record(s): {{ collectionSize || 0 }}</strong>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive" style="max-height: 400px; overflow: auto;">
+            <table class="table table-hover table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th (click)="sort('invoiceNo')">Invoice No</th>
+                        <th (click)="sort('invoiceDate')">Invoice Date</th>
+                        <th (click)="sort('lotno')">LOT No.</th>
+                        <th (click)="sort('arrivalDate')">Arrival Date</th>
+                        <th (click)="sort('truckNo')">Truck No.</th>
+                        <th (click)="sort('transporterName')">Transporter Name</th>
+                        <th (click)="sort('driverName')">Driver Name</th>
+                        <th (click)="sort('nameSupervisor')">Supervisor Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let data of pagedData" (dblclick)="onNavigate(data.invoiceNo)" style="cursor:pointer">
+                        <td>{{ data.invoiceNo }}</td>
+                        <td>{{ data.invoiceDate }}</td>
+                        <td>{{ data.lotno }}</td>
+                        <td>{{ data.arrivalDate }}</td>
+                        <!-- <td>{{ item.lrno }}</td>
                                 <td>{{ item.lrdate }}</td> -->
-                                    <td>{{ data.truckNo }}</td>
-                                    <td>{{ data.transporterName }}</td>
-                                    <td>{{ data.driverName }}</td>
-                                    <!-- <td>{{ item.driverContact }}</td>
+                        <td>{{ data.truckNo }}</td>
+                        <td>{{ data.transporterName }}</td>
+                        <td>{{ data.driverName }}</td>
+                        <!-- <td>{{ item.driverContact }}</td>
                                 <td>{{ item.commonReMarks }}</td>
                                 <td>{{ item.vehicleFasteningBracket }}</td>
                                 <td>{{ item.plasticCover }}</td> -->
-                                    <td>{{ data.nameSupervisor }}</td>
-                                </tr>
-                                <!-- No Data -->
-                                <tr *ngIf="collectionSize === 0">
-                                    <td colspan="9" class="text-center text-muted py-3">
-                                        No Data Available
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <!-- PAGINATION -->
-                    <div class="d-flex justify-content-end p-2">
-                        <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
-                            (pageChange)="pageChange($event)" [boundaryLinks]="true">
-                        </ngb-pagination>
-                    </div>
-                </div>
-            </div>
+                        <td>{{ data.nameSupervisor }}</td>
+                    </tr>
+                    <!-- No Data -->
+                    <tr *ngIf="collectionSize === 0">
+                        <td colspan="9" class="text-center text-muted py-3">
+                            No Data Available
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- PAGINATION -->
+        <div class="d-flex justify-content-end p-2">
+            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                (pageChange)="pageChange($event)" [boundaryLinks]="true">
+            </ngb-pagination>
+        </div>
+    </div>
+</div>
 <router-outlet></router-outlet>

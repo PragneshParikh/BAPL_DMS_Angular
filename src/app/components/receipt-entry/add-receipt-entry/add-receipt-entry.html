@@ -15,7 +15,7 @@
                             <div class="card-body">
 
                                 <form #receiptForm="ngForm" (ngSubmit)="onSubmit(receiptForm)">
-                                    <!-- 🔹 Row 1 -->
+                                    <!--    Row 1 -->
                                     <div class="row mb-2">
                                         <div class="col-md-3">
                                             <label>
@@ -62,7 +62,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- 🔹 Row 2 -->
+                                    <!--    Row 2 -->
                                     <div class="row mb-2">
                                         <div class="col-md-3">
                                             <label>Booking ID</label>
@@ -111,8 +111,8 @@
                                                 </label> -->
 
                                                 <label *ngFor="let type of customerTypes">
-                                                    <input type="radio"name="customerTypes"
-                                                        [(ngModel)]="formData.customerTypes" #customerType="ngModel"
+                                                    <input type="radio" name="customerType" [value]="type.type"
+                                                        [(ngModel)]="formData.customerType"
                                                         (change)="onCustomerTypeChange()" required>
                                                     {{ type.name }}
                                                 </label>
@@ -153,7 +153,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- 🔹 Row 3 -->
+                                    <!--    Row 3 -->
                                     <div class="row mb-2">
                                         <div class="col-md-3">
                                             <label>Financier</label>
@@ -222,7 +222,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- 🔹 Row 4 -->
+                                    <!--    Row 4 -->
                                     <div class="row mb-2">
                                         <div class="col-md-3">
                                             <label>Product Color</label>
@@ -272,7 +272,7 @@
                                         <div class="col-md-3"></div>
                                     </div>
 
-                                    <!-- 🔹 Row 5 (Final Row) -->
+                                    <!--    Row 5 (Final Row) -->
                                     <div class="row mb-2">
                                         <div class="col-md-6">
                                             <label>Ref No.</label>
@@ -287,12 +287,13 @@
                                         </div>
                                     </div>
 
-                                    <!-- 🔹 Button -->
+                                    <!--    Button -->
                                     <div class="row mt-4">
                                         <div class="col-md-12 d-flex justify-content-end gap-2">
 
                                             <!-- Add / Update Button -->
-                                            <button type="submit" class="btn btn-primary btn-sm" (click)="onAddClick()">
+                                            <button type="submit" class="btn btn-primary btn-sm"
+                                                [disabled]="disableSave" >
                                                 Save
                                             </button>
                                             <!-- Cancel Button -->

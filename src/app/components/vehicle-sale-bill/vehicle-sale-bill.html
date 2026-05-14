@@ -66,7 +66,7 @@
                                 Add
                             </button>
 
-                            <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'">
+                            <button class="btn btn-success btn-sm" (click)="downloadDealerExcel()" [ngbTooltip]="'Export to Excel' ">
                                 <i class="ri-file-excel-2-line"></i>
                             </button>
                         </div>
@@ -95,6 +95,7 @@
                             <tr>
                                 <th>Sl No.</th>
                                 <th class="sort" (click)="onSort('saleBillNo')" style="cursor:pointer">Sale Bill No</th>
+                                <th>Action</th>
                                 <th class="sort" (click)="onSort('status')" style="cursor:pointer">Status</th>
                                 <th class="sort" (click)="onSort('location')" style="cursor:pointer">Location</th>
                                 <th class="sort" (click)="onSort('saleDate')" style="cursor:pointer">Sale Date</th>
@@ -122,7 +123,7 @@
                             }
 
                             @for (item of paginatedBills; track $index) {
-                            <tr style="cursor: pointer" (click)="viewDetails(item)">
+                            <tr style="cursor: pointer" (dblclick)="viewDetails(item)">
 
                                 <!-- Serial -->
                                 <td>
@@ -133,6 +134,40 @@
                                 <td>
                                     <ngb-highlight [result]="item.saleBillNo" [term]="searchText"></ngb-highlight>
                                 </td>
+
+                                <td class="position-relative">
+    <div class="dropdown">
+        <button class="btn btn-sm dropdown-toggle" 
+                type="button" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false">
+            <i class="ri-printer-line"></i> Print
+        </button>
+
+        <ul class="dropdown-menu">
+            <li>
+                <a class="dropdown-item" href="#">
+                    Option 1
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="#">
+                    Option 2
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="#">
+                    Option 3
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="#">
+                    Option 4
+                </a>
+            </li>
+        </ul>
+    </div>
+</td>
 
                                 <td>
                                     <ngb-highlight [result]="getErpStatusName(item.erpStatus)" [term]="searchText">

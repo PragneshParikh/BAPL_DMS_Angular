@@ -15,6 +15,8 @@ import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { CustomerLedger } from '../../customer-ledger/customer-ledger';
 import { TRANSACTION_TYPES } from '../../../constant';
+import { thru } from 'lodash';
+import { log } from 'console';
 
 @Component({
   selector: 'app-add-receipt-entry',
@@ -32,7 +34,8 @@ import { TRANSACTION_TYPES } from '../../../constant';
 })
 export class AddReceiptEntry implements OnInit {
   customerTypes = TRANSACTION_TYPES;
-  today = new Date().toISOString().split('T')[0];;
+  today = new Date().toISOString().split('T')[0];
+  disableSave: boolean;
   @ViewChild('ReceiptEntryModal') ReceiptEntryModal!: TemplateRef<any>;
   selectedLead: LmsleadMaster | null = null;
   locations: LocationName[] = [];
@@ -45,7 +48,7 @@ export class AddReceiptEntry implements OnInit {
   formData: any = {
     location: null,
     receiptNo: null,
-    receiptDate: this.today,
+    receiptDate: null,
     saleType: 'Receipt',
     bookingId: null,
     partyName: "",
@@ -88,29 +91,38 @@ export class AddReceiptEntry implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    this.loader.show();
-    await this.getParties();
-    await this.loadProducts();
-    this.fetchLocations();
-    this.getFinanciers();
+  this.loader.show();
 
+  //  Get ID synchronously
+  this.id = this.router.snapshot.paramMap.get('id');
+  console.log("id",this.id);
+  
+  this.isEditMode = !!this.id;
 
-    this.router.paramMap.subscribe(async params => {
-      this.id = params.get('id');
+  console.log(this.isEditMode);
+  
 
-      if (this.id) {
-        this.isEditMode = true;
-        await this.loadReceiptById(this.id);
-      }
-    });
-    this.loader.hide();
+  await this.getParties();
+  await this.loadProducts();
+  this.fetchLocations();
+  this.getFinanciers();
+
+  if (this.isEditMode) {
+    await this.loadReceiptById(this.id);
+  } else {
+    this.formData.receiptDate = this.today;
   }
+
+  this.loader.hide();
+}
 
 
   loadReceiptById(id: number): Promise<any> {
     return new Promise((resolve) => {
       this.receiptEntryService.getReceiptById(id).subscribe({
         next: (res: ReceiptEntryEditModel) => {
+          console.log(res);
+          
           this.apiResponse = res;
           this.formData = {
             location: res.location,
@@ -131,9 +143,9 @@ export class AddReceiptEntry implements OnInit {
           };
 
           // apply filter
-          this.onCustomerTypeChange();
           //  CALL HERE ALSO
           this.mapEditDropdowns();
+          this.onCustomerTypeChange();
 
           return resolve(true);
         }
@@ -274,7 +286,9 @@ export class AddReceiptEntry implements OnInit {
 
   onSaleTypeChange() {
     if (this.formData.saleType === 'Against Lead') {
-      this.formData.customerType = 'b2b';
+     if (!this.isEditMode) {
+  this.formData.customerType = 'b2c';
+}
       this.onCustomerTypeChange(); // Filter parties
 
       // Open modal immediately
@@ -420,46 +434,49 @@ export class AddReceiptEntry implements OnInit {
     modal.close();
   }
 
-  onAddClick() {
-    this.loader.show();
-    const payload: ReceiptEntryAddViewModel = {
-      location: this.formData.location,
-      receiptNo: this.formData.receiptNo || this.nextReceiptNo,
-      saleType: this.formData.saleType,
-      bookingId: this.formData.bookingId,
-      partyName: this.formData.partyName,
-      financier: this.formData.financier,
-      productCode: this.formData?.productName || '',
-      salesExecutive: this.formData.salesExecutive,
-      receiptType: this.formData.receiptType,
-      mobileNo: this.formData.mobileNo,
-      billDate: this.formData.receiptDate,
-      billNo: '',
-      refNo: this.formData.refNo,
-      narration: this.formData.narration,
-      totalAmount: this.formData.totalAmount
-    };
+  // onAddClick() {
+  //   this.disableSave=true;
+  //   this.loader.show();
+  //   const payload: ReceiptEntryAddViewModel = {
+  //     location: this.formData.location,
+  //     receiptNo: this.formData.receiptNo || this.nextReceiptNo,
+  //     saleType: this.formData.saleType,
+  //     bookingId: this.formData.bookingId,
+  //     partyName: this.formData.partyName,
+  //     financier: this.formData.financier,
+  //     productCode: this.formData?.productName || '',
+  //     salesExecutive: this.formData.salesExecutive,
+  //     receiptType: this.formData.receiptType,
+  //     mobileNo: this.formData.mobileNo,
+  //     billDate: this.formData.receiptDate,
+  //     billNo: '',
+  //     refNo: this.formData.refNo,
+  //     narration: this.formData.narration,
+  //     totalAmount: this.formData.totalAmount,
+  //     businessType:this.formData.customerType
+  //   };
 
 
-    this.receiptEntryService.addReceiptEntry(payload).subscribe({
-      next: (res) => {
-        this.loader.hide();
-        this.toaster.show('Receipt added Succesfully!', {
-          classname: 'bg-success text-white',
-          delay: 5000
-        });
-        this.resetForm();
-        this.navigation.navigate(['/receipt-entry']);
-      },
-      error: (err) => {
-        console.error('API Error:', err);
-        this.toaster.show('Failed to add receipt entry', {
-          classname: 'bg-danger text-white',
-          delay: 5000
-        });
-      }
-    });
-  }
+  //   this.receiptEntryService.addReceiptEntry(payload).subscribe({
+  //     next: (res) => {
+  //       this.loader.hide();
+  //       this.toaster.show('Receipt added Succesfully!', {
+  //         classname: 'bg-success text-white',
+  //         delay: 5000
+  //       });
+  //       this.resetForm();
+  //       this.navigation.navigate(['/receipt-entry']);
+  //     },
+  //     error: (err) => {
+  //       this.disableSave=false;
+  //       console.error('API Error:', err);
+  //       this.toaster.show('Failed to add receipt entry', {
+  //         classname: 'bg-danger text-white',
+  //         delay: 5000
+  //       });
+  //     }
+  //   });
+  // }
 
   resetForm() {
     this.formData.selectedLocation = '';
@@ -503,6 +520,7 @@ export class AddReceiptEntry implements OnInit {
     }
 
     const payload: ReceiptEntryAddViewModel = {
+      dealerCode:this.storageService.getDealerCode(),
       location: this.formData.location,
       receiptNo: this.formData.receiptNo || this.nextReceiptNo,
       saleType: this.formData.saleType,
@@ -513,15 +531,19 @@ export class AddReceiptEntry implements OnInit {
       salesExecutive: this.formData.salesExecutive,
       receiptType: this.formData.receiptType,
       mobileNo: this.formData.mobileNo,
-      billDate: this.formData.billDate,
+      billDate: this.formData.receiptDate,
       billNo: '',
       refNo: this.formData.refNo,
       narration: this.formData.narration,
       businessType: this.formData.customerType,
       totalAmount: this.formData.totalAmount
     };
+console.log(this.isEditMode,this.id);
 
     if (this.isEditMode && this.id) {
+
+      console.log(payload);
+      
       // Call Update API
       this.receiptEntryService.updateReceipt(this.id, payload).subscribe({
         next: (res) => {

@@ -4,6 +4,7 @@ import { AuthenticationService } from '../../../core/services/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ToastService } from '../../../shared/toaster/toast-service';
+import { StorageService } from '../../../core/services/storage';
 
 @Component({
   selector: 'app-login',
@@ -25,7 +26,9 @@ export class Login {
   constructor(private formBuilder: UntypedFormBuilder,
     private authenticationService: AuthenticationService,
     private router: Router,
-    public toastService: ToastService) {
+    public toastService: ToastService,
+    private storageService: StorageService
+  ) {
     // redirect to home if already logged in
     if (this.authenticationService.currentUserValue) {
       this.router.navigate(['/']);
@@ -66,6 +69,8 @@ export class Login {
     this.authenticationService.login(this.f['username'].value, this.f['password'].value).subscribe((data: any) => {
       if (data.status == 'success') {
         this.toastService.show(data.message, { classname: 'bg-success text-white', delay: 5000 });
+        this.storageService.setRole(data.role);
+        this.storageService.setSelectedModule('ShowRoom');
         this.router.navigate(['/']);
       } else {
         this.toastService.show(data.message, { classname: 'bg-danger text-white', delay: 5000 });

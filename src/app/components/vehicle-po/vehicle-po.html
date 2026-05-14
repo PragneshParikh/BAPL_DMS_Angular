@@ -1,8 +1,4 @@
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-    <!-- <h4 class="mb-sm-0">
-        <i class="ri-car-line me-2"></i>{{ isSubmitted ? 'Vehicle Purchase Order Submitted to ERP' : 'Vehicle Purchase
-        Order' }}
-    </h4> -->
     <h4 class="mb-sm-0 text-center">
         <i class="ri-car-line me-2"></i>
         Vehicle Purchase Order
@@ -13,15 +9,14 @@
     </span>
     <div class="page-title-right">
         <div class="d-flex gap-1">
-            <!-- <select class="form-select form-select-sm">
-                <option>01 Apr 2025 to 31 Mar 2026</option>
-            </select> -->
-            <button class="btn btn-sm btn-light"><i class="ri-printer-line"></i></button>
+            <button class="btn btn-sm btn-light">
+                <i class="ri-printer-line"></i>
+            </button>
         </div>
     </div>
 </div>
 
-<div class="row">
+<div class="row" #vehiclePoForm id="vehiclePoForm">
     <div class="col-lg-12">
         <div class="card">
             <div class="card-header border-0 py-1"></div>
@@ -36,9 +31,6 @@
                 <div class="row g-1 mb-2 align-items-end">
                     <div class="col-md-2">
                         <label class="form-label mb-0 small">Location</label>
-                        <!-- <select class="form-select form-select-sm border-start border-2">
-                            <option>RRG Test Dealer Consig</option>
-                        </select> -->
                         <select class="form-select form-select-sm border-start border-2"
                             [class.is-invalid]="locationInvalid" [(ngModel)]="selectedLocation"
                             (change)="onLocationChange(); locationInvalid = false" [disabled]="isSubmitted">
@@ -49,28 +41,17 @@
                         </select>
                     </div>
 
-                    <!-- <div class="col-md-1">
-                        <label class="form-label mb-0 small">Prefix No</label>
-                        <input type="text" class="form-control form-control-sm" [(ngModel)]="prefixNo"
-                            [readonly]="isSubmitted" disabled>
-                    </div> -->
-
                     <div class="col-md-2">
                         <label class="form-label mb-0 small">Order No</label>
                         <input type="text" class="form-control form-control-sm bg-light" [(ngModel)]="orderNo" readonly>
                     </div>
 
-                    <!-- <div class="col-md-1">
-                        <label class="form-label mb-0 small">Date</label>
-                        <input type="text" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="poDate"
-                            readonly>
-                    </div> -->
-                    <div class="col-md-1">
-                        <label class="form-label mb-0 small">Date</label>
+                    <div class="col-md-1-5">
+                        <label class=" form-label mb-0 small ">Date</label>
                         <input type="text" class="form-control form-control-sm bg-light text-muted"
-                            [ngModel]="poDate | date:'yyyy-MM-dd'" readonly>
+                            [ngModel]="poDate | date:'dd-MM-yyyy'" readonly>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label class="form-label mb-0 small">Party Name</label>
                         <select class="form-select form-select-sm border-start border-2"
                             [class.is-invalid]="ledgerInvalid" [(ngModel)]="selectedLedgerCode"
@@ -85,43 +66,22 @@
                         <div class="w-100">
                             <label class="form-label mb-0 small">Party Balance</label>
                             <div class="input-group input-group-sm">
-                                <input type="text" class="form-control" value="0.00">
+                                <input type="text" class="form-control" value="0.00" [disabled]="true">
                                 <span class="input-group-text">0.00</span>
                             </div>
                         </div>
-                        <!-- <button class="btn btn-sm btn-light border" [disabled]="isSubmitted">
-                            <i class="ri-refresh-line"></i>
-                        </button> -->
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1-5">
                         <label class="form-label mb-0 small">Transaction Type</label>
                         <select class="form-select form-select-sm border-start border-2"
                             [class.is-invalid]="transactionTypeInvalid" [(ngModel)]="selectedTransactionType"
-                            (change)="transactionTypeInvalid = false" [disabled]="isSubmitted">
-                            <option value="">--Select--</option>
+                            (change)="onChangeTransactionType($event)" [disabled]="isSubmitted">
                             <option *ngFor="let type of transactionTypeList" [value]="type.type">
                                 {{type.name}}
                             </option>
                         </select>
                     </div>
-                    <!-- <div class="col-md-2">
-                        <label class="form-label mb-0 small">Famell</label>
-                        <select class="form-select form-select-sm border-start border-2" [(ngModel)]="famell"
-                            [disabled]="isSubmitted">
-                            <option value="Famell It">Famell It</option>
-                        </select>
-                    </div> -->
-
-                    <!-- <div class="col-md-1 text-center">
-                        <label class="form-label mb-0 d-block small">GST</label>
-                        <div class="form-check form-switch d-inline-block">
-                            <input type="checkbox" class="form-check-input" id="calGst" [(ngModel)]="isGst"
-                                [disabled]="isSubmitted">
-                            <label class="form-check-label small" for="calGst">{{ isGst ? 'Y' : 'N' }}</label>
-                        </div>
-                    </div> -->
                 </div>
-
 
                 <!-- Remarks -->
                 <div class="row g-1 mb-2">
@@ -135,7 +95,8 @@
                     <div class="col-6">
                         <label class="form-label mb-0 small">Remarks</label>
                         <textarea class="form-control form-control-sm" rows="1" [(ngModel)]="remarks"
-                            [disabled]="isSubmitted"></textarea>
+                            [disabled]="isSubmitted">
+                        </textarea>
                     </div>
 
                 </div>
@@ -147,22 +108,15 @@
                     <h5 class="fs-14 text-primary mb-0">
                         <i class="ri-list-settings-line me-1"></i>Purchase Detail(s)
                     </h5>
-                    <!-- <button class="btn btn-sm btn-outline-primary"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#purchaseDetails">
-                        Toggle
-                    </button> -->
                     <button class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"
                         type="button" data-bs-toggle="collapse" data-bs-target="#purchaseDetails" aria-expanded="true"
                         aria-controls="purchaseDetails">
                         <i id="collapseIcon" class="ri-arrow-down-s-line"></i>
                     </button>
-
                 </div>
 
                 <!-- Collapse Body -->
                 <div class="collapse show" id="purchaseDetails">
-
                     <div class="row g-1 mb-2 align-items-end">
                         <div class="col-md-4">
                             <label class="form-label mb-0 small">Model</label>
@@ -173,12 +127,6 @@
                                 </option>
                             </select>
                         </div>
-
-                        <!-- <div class="col-md-3">
-                            <label class="form-label mb-0 small">Model Description</label>
-                            <input type="text" class="form-control form-control-sm bg-light"
-                                [value]="currentItem.description" readonly>
-                        </div> -->
 
                         <div class="col-md-2">
                             <label class="form-label mb-0 small">Colour</label>
@@ -193,25 +141,12 @@
                                 (input)="qtyInvalid = false; calculateRowTotals()" [readonly]="isSubmitted">
                         </div>
 
-                        <!-- <div class="col-md-1">
-                            <button class="btn btn-sm btn-outline-success w-100">
-                                <i class="ri-battery-2-charge-line"></i>
-                                Battery
-                            </button>
-                        </div> -->
-
                         <div class="col-md-1">
                             <label class="form-label mb-0 small">Rate</label>
                             <input type="text" class="form-control form-control-sm text-end bg-light"
                                 [value]="currentItem.rate | number:'1.2-2'" readonly>
                         </div>
 
-                        <!-- <div class="col-md-1">
-                            <label class="form-label mb-0 small">Subsidy</label>
-                            <input type="number" class="form-control form-control-sm bg-light" name="discAmt"
-                                [(ngModel)]="currentItem.discAmt" (input)="calculateRowTotals()"
-                                [readonly]="isSubmitted" readonly>
-                        </div> -->
                         <div class="col-md-1">
                             <label class="form-label mb-0 small">Subsidy</label>
                             <input type="number" class="form-control form-control-sm bg-light" name="discAmt"
@@ -239,42 +174,10 @@
                         </div>
                     </div>
 
-                    <div class="row g-1 mb-2 align-items-end">
-                        <!-- <div class="col-md-3">
-                            <label class="form-label mb-0 small">Amount</label>
-                            <div class="input-group input-group-sm">
-                                <input type="text" class="form-control bg-light" [value]="currentItem.amount | number:'1.2-2'" readonly>
-                                <span class="input-group-text bg-primary text-white">
-                                    <i class="ri-information-line"></i>
-                                </span>
-                            </div>
-                        </div> -->
-
-                        <!-- <div class="col-md-1">
-                            <label class="form-label mb-0 small">Txbl Amnt</label>
-                            <div class="input-group input-group-sm">
-                                <input type="text" class="form-control bg-light"
-                                    [value]="currentItem.taxableAmount | number:'1.2-2'" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-1">
-                            <label class="form-label mb-0 small">Net Amount</label>
-                            <div class="input-group input-group-sm">
-                                <input type="text" class="form-control bg-light"
-                                    [value]="currentItem.amount | number:'1.2-2'" readonly>
-                            </div>
-                        </div> -->
-                        <!-- <div class="col-md-2">
-                            <button class="btn btn-sm btn-primary" (click)="addPurchaseItem()"
-                                [disabled]="isSubmitted">Add
-                            </button>
-                        </div> -->
-                    </div>
-
                     <!-- TABLE -->
                     <div class="table-responsive border rounded">
                         <div style="overflow-x:auto;">
-                            <table class="table table-sm table-striped table-bordered mb-0 small"
+                            <table class="table table-sm table-striped table-bordered mb-0 small table-hover"
                                 style="min-width: 1200px;">
                                 <thead class="table-striped" style="white-space: nowrap;">
                                     <tr>
@@ -289,15 +192,8 @@
                                         <th>(+) SGST Amt.</th>
                                         <th>(+) CGST Amt.</th>
                                         <th>(+) IGST Amt.</th>
-                                        <!-- <th>(-) Subsidy</th> -->
                                         <th>Net Amount</th>
                                         <th>Cur.Stock</th>
-                                        <!-- <th>Battery Chemical</th>
-                                        <th>Battery Capacity</th>
-                                        <th>Battery Make</th>
-                                        <th>System Voltage</th>
-                                        <th>Battery Type</th>
-                                        <th>Trans Type</th> -->
                                     </tr>
                                 </thead>
                                 <tbody class="text-center align-middle" style="white-space: nowrap;">
@@ -323,19 +219,14 @@
                                         <td class="text-end">{{item.sgstAmt | number:'1.2-2'}}</td>
                                         <td class="text-end">{{item.cgstAmt | number:'1.2-2'}}</td>
                                         <td class="text-end">{{item.igstAmt | number:'1.2-2'}}</td>
-                                        <!-- <td class="text-end">{{item.subsidy | number:'1.2-2'}}</td> -->
                                         <td class="text-end">{{item.amount | number:'1.2-2'}}</td>
                                         <td>0</td>
-                                        <!-- <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td>{{selectedTransactionType}}</td> -->
                                     </tr>
                                 </tbody>
-                                <tfoot *ngIf="purchaseDetails.length > 0">
-                                    <tr style="background-color: #f8f9fa; font-weight: 600; border-top: 2px solid #dee2e6;">
+                                <!-- <tfoot *ngIf="purchaseDetails.length > 0"> -->
+                                <tfoot>
+                                    <tr
+                                        style="background-color: #f8f9fa; font-weight: 600; border-top: 2px solid #dee2e6;">
                                         <td colspan="5" class="text-end pe-3 text-dark">Total</td>
                                         <td class="text-center text-dark">{{totalQty}}</td>
                                         <td class="text-end text-dark"></td>
@@ -352,50 +243,27 @@
                     </div>
 
                     <!-- Pagination -->
-                    <div class="row mt-3">
-                        <div class="col-md-12">
-                            <div class="float-end">
-                                <ngb-pagination [collectionSize]="purchaseDetails.length" [(page)]="page"
-                                    [pageSize]="pageSize" (pageChange)="refreshPage()" [boundaryLinks]="true">
-                                </ngb-pagination>
-                            </div>
+                    <div class="col-sm-12 col-md-12 mt-2">
+                        <div class="text-md-right float-md-end gridjs-pagination">
+                            <ngb-pagination [collectionSize]="purchaseDetails.length" [(page)]="page"
+                                [pageSize]="pageSize" (pageChange)="refreshPage()" [boundaryLinks]="true">
+                            </ngb-pagination>
                         </div>
                     </div>
+                    <!-- End Pagination -->
 
                 </div>
             </div>
 
-            <!-- Footer SAME -->
-            <!-- <div class="card-footer bg-white border-top py-2">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex gap-1">
-                        <button class="btn btn-outline-primary btn-sm">New</button>
-                        <button class="btn btn-outline-primary btn-sm">Credit Limit</button>
-                        <button class="btn btn-outline-secondary btn-sm">Submit To ERP</button>
-                    </div>
-
-                    <div class="d-flex gap-1">
-                        <button class="btn btn-outline-danger btn-sm">Send Email</button>
-                        <button class="btn btn-outline-success btn-sm">Save</button>
-                        <button class="btn btn-outline-danger btn-sm">Cancel</button>
-                    </div>
-                </div>
-            </div> -->
             <div class="card-footer bg-white border-top py-2">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex gap-1">
-                        <!-- <button class="btn btn-primary btn-sm">New</button> -->
-                        <!-- <button class="btn btn-primary btn-sm">Credit Limit</button> -->
-                        <!-- <button class="btn btn-secondary btn-sm">Submit To ERP</button> -->
-                    </div>
-
-                    <div class="d-flex gap-1">
-                        <!-- <button class="btn btn-primary btn-sm">Send Email</button> -->
-                        <button class="btn btn-primary btn-sm" (click)="onSubmitToERP()" [disabled]="isSubmitted">Submit
-                            To ERP</button>
-                        <button class="btn btn-primary btn-sm" (click)="onSave()" [disabled]="isSubmitted">Save</button>
-                        <button class="btn btn-light btn-sm" (click)="redirectToCreatePOList()">Cancel</button>
-                    </div>
+                <div class="d-flex justify-content-end gap-1">
+                    <button class="btn btn-sm btn-primary" (click)="onSubmitToERP()" [disabled]="isSubmitted">Submit
+                        To ERP
+                    </button>
+                    <button class="btn btn-sm btn-primary" (click)="onSave()" [disabled]="isSubmitted">Save
+                    </button>
+                    <button class="btn btn-sm btn-danger" (click)="redirectToCreatePOList()">Cancel
+                    </button>
                 </div>
             </div>
         </div>

@@ -8,6 +8,7 @@ import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { StorageService } from '../../core/services/storage';
 
 @Component({
   selector: 'app-lotinspection',
@@ -37,18 +38,20 @@ export class Lotinspection implements OnInit {
   //  ALERT
   showAlert: boolean = false;
   alertMessage: string = '';
+  isSuperAdmin:boolean;
 
 
   constructor(private lotinspectionService: Lotinspectionservice,
     private loader: LoaderService,
     public toaster: ToastService,
-    private router: Router
+    private router: Router,
+    private storageService: StorageService
   ) { }
 
 
   ngOnInit() {
 
-
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     // default search (today to today)
     //this.searchTerm = `${today} to ${today}`;
 
@@ -57,7 +60,13 @@ export class Lotinspection implements OnInit {
   // LOAD DATA
   loadLotInspectionList() {
     this.loader.show();
-    this.lotinspectionService.getAllLotInspectionHeaderDetails(this.searchTerm || '')
+
+    let dealerCode = '';
+    if(!this.isSuperAdmin)
+    {
+      dealerCode = this.storageService.getDealerCode();
+    }
+    this.lotinspectionService.getAllLotInspectionHeaderDetails(this.searchTerm || '', dealerCode )
       .subscribe({
         next: (res: any) => {
           console.log("FULL RESPONSE:", res);

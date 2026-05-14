@@ -1,73 +1,51 @@
 <div>
     <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
         <h4 class="mb-sm-0">Vehicle Purchase Order</h4>
-        <div class="page-title-right">
-            <!-- <button class="btn btn-success btn-sm" (click)="redirectToCreatePO()">
-                <i class="ri-add-line align-bottom me-1"></i> Add New
-            </button> -->
-        </div>
     </div>
 
     <!-- SEARCH CARD -->
     <div class="card">
         <div class="card-body">
-            <div class="row g-2 align-items-end">
-                <div class="col-md-2">
-                    <label class="form-label">Purchase No</label>
-                    <input type="text" class="form-control" placeholder="Enter No." [(ngModel)]="purchaseNo">
+            <form #poFilterForm="ngForm" (ngSubmit)="onSearch()">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label">Purchase No</label>
+                        <input type="text" class="form-control form-control-sm" placeholder="Enter No."
+                            [(ngModel)]="purchaseNo" name="purchaseNo">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Date from</label>
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateFrom" name="dateFrom">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Date to</label>
+                        <input type="date" class="form-control form-control-sm " [(ngModel)]="dateTo" name="dateTo">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Submitted To Erp</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="isSubmitted" name="isSubmitted">
+                            <option *ngFor="let status of poStatuses" [value]="status.value">
+                                {{status.name}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mt-2">
+                        <button type="submit" class="btn btn-primary btn-sm me-1">
+                            <i class="align-bottom me-1"></i> Search
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm ms-2" (click)="redirectToCreatePO()">
+                            <i class="align-bottom me-1"></i> Add
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm ms-2" (click)="resetFilters()">
+                            <i class="align-bottom me-1"></i> Reset
+                        </button>
+                        <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'"
+                            (click)="downloadPurchaseOrderExcel()">
+                            <i class="ri-file-excel-2-line"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label">Date from</label>
-                    <input type="date" class="form-control" [(ngModel)]="dateFrom">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Date to</label>
-                    <input type="date" class="form-control" [(ngModel)]="dateTo">
-                </div>
-                <!-- <div class="col-md-2">
-                    <label class="form-label">Transaction Type</label>
-                    <select class="form-select" [(ngModel)]="transactionType">
-                        <option value="">--Select--</option>
-                        <option *ngFor="let type of transactionTypeList" [value]="type.type">{{type.name}}</option>
-                    </select>
-                </div> -->
-                <!-- <div class="col-md-2">
-                    <label class="form-label">Party Name</label>
-                    <select class="form-select" [(ngModel)]="partyName">
-                        <option value="">--Select--</option>
-                        <option value="BGAUSS AUTO PRIVATE LIMITED">BGAUSS AUTO PRIVATE LIMITED</option>
-                    </select>
-                </div> -->
-                <div class="col-md-2">
-                    <label class="form-label">Submitted To Erp</label>
-                    <select class="form-select" [(ngModel)]="isSubmitted">
-                        <option value="">--Select--</option>
-                        <option value="Submited To Erp">Submitted To Erp</option>
-                        <option value="Not Submited To Erp">Not Submitted To Erp</option>
-                    </select>
-                </div>
-                <!-- <div class="col-md-2 mt-2">
-                    <label class="form-label">Per Page Records</label>
-                    <select class="form-select border-start border-2" [(ngModel)]="pageSize" (change)="refreshPage()">
-                        <option [ngValue]="10">10</option>
-                        <option [ngValue]="25">25</option>
-                        <option [ngValue]="50">50</option>
-                        <option [ngValue]="100">100</option>
-                    </select>
-                </div> -->
-                <div class="col-md-2 mt-2 text-end">
-                    <button class="btn btn-primary btn-sm me-1" (click)="onSearch()">
-                        <i class="align-bottom me-1"></i> Search
-                    </button>
-
-                    <button class="btn btn-primary btn-sm ms-2" (click)="redirectToCreatePO()">
-                        <i class="align-bottom me-1"></i> Add
-                    </button>
-                     <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'" (click)="downloadPurchaseOrderExcel()">
-                        <i class="ri-file-excel-2-line"></i>
-                    </button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -76,7 +54,7 @@
         <div class="card-body">
             <!-- <p>Total Record(s): {{totalRecords}}</p> -->
             <div class="table-responsive border rounded">
-                <table class="table table-bordered table-striped align-middle table-nowrap mb-0 table-sm">
+                <table class="table table-bordered table-hover table-striped align-middle table-nowrap mb-0 table-sm">
                     <thead>
                         <tr style="background-color:#747CA0 !important;color:white; cursor: pointer;">
                             <th>S.No</th>
@@ -134,15 +112,14 @@
             </div>
 
             <!-- Pagination -->
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <div class="float-end">
-                        <ngb-pagination [collectionSize]="purchaseOrders.length" [(page)]="page" [pageSize]="pageSize"
-                            (pageChange)="refreshPage()" [boundaryLinks]="true">
-                        </ngb-pagination>
-                    </div>
+            <div class="col-sm-12 col-md-12">
+                <div class="text-md-right float-md-end gridjs-pagination">
+                    <ngb-pagination [collectionSize]="purchaseOrders.length" [(page)]="page" [pageSize]="pageSize"
+                        (pageChange)="refreshPage()" [boundaryLinks]="true">
+                    </ngb-pagination>
                 </div>
             </div>
+            <!-- End Pagination -->
 
         </div>
     </div>

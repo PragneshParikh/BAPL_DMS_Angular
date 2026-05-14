@@ -35,6 +35,7 @@ export class JobCard {
   selectedChassis: string = '';
   searchTimeout: any;
   jobTypeId: number = 0;
+  isSuperAdmin:boolean;
 
 
   //Pagination
@@ -67,7 +68,7 @@ export class JobCard {
     chassisNo: ''
   };
   ngOnInit(): void {
-
+this.isSuperAdmin = this.storageService.getRole().toLocaleLowerCase() === 'superadmin';
     this.setUserRole();
     this.fetchLocations();
     this.loadChassisList();
@@ -110,7 +111,10 @@ export class JobCard {
 
   loadJobCardList() {
     // this.lodder = true;
-    const dealerCode = this.storageService.getDealerCode();
+    let dealerCode ='';
+    if (!this.isSuperAdmin) {
+       dealerCode = this.storageService.getDealerCode();
+  }
 
     this.jobCardService.getJobCardList(dealerCode).subscribe({
       next: (res) => {
