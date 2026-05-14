@@ -33,6 +33,8 @@ import { AddCityMaster } from './components/city-master/add-city-master/add-city
 import { ModelwiseServiceSchedule } from './components/modelwise-service-schedule/modelwise-service-schedule';
 import { PdiChecklistmaster } from './components/pdi-checklistmaster/pdi-checklistmaster';
 import { PerformaInvoice } from './components/Reports/performa-invoice/performa-invoice';
+import { FFIR } from './components/ffir/ffir';
+import { Ffirlisting } from './components/ffir/ffirlisting/ffirlisting';
 import { ProformaInvoice } from './components/proforma-invoice/proforma-invoice';
 import { Form22Certificate } from './components/Reports/form22-certificate/form22-certificate';
 import { DeliveryChecklist } from './components/Reports/delivery-checklist/delivery-checklist';
@@ -104,6 +106,13 @@ export const routes: Routes = [
       { path: 'pdiChecklistmaster', component: PdiChecklistmaster, data: [36] },
       { path: 'extended-battery-warranty', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty-list/extended-battery-warranty-list').then(m => m.ExtendedBatteryWarrantyList) },
       { path: 'extended-battery-warranty/:id', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty').then(m => m.ExtendedBatteryWarranty) },
+      { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
+      { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
+      { path: 'ffir', component: FFIR, data: [23] },
+
+      { path: 'ffir/:id', component: FFIR, data: [23] },
+
+      { path: 'ffirlisting', component: Ffirlisting, data: [23] }
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
       { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-detail/chassis-detail').then(m => m.ChassisDetail) },
       { path: 'proforma-invoice', component: ProformaInvoice, data: [22] },
