@@ -1,0 +1,204 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">
+    Vehicle Stock Report
+  </h4>
+</div>
+
+<div class="card">
+
+  <div class="card-header">
+    <h5 class="card-title mb-0">
+      Filters
+    </h5>
+  </div>
+
+  <div class="card-body">
+
+    <form [formGroup]="filterForm">
+
+      <div class="row g-2 align-items-end">
+
+        <div class="col-md-2">
+          <label class="form-label">
+            Dealer Code
+          </label>
+
+          <input
+            type="text"
+            formControlName="dealerCode"
+            class="form-control form-control-sm">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">
+            Model Code
+          </label>
+
+          <input
+            type="text"
+            formControlName="modelCode"
+            class="form-control form-control-sm">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">
+            Chassis No
+          </label>
+
+          <input
+            type="text"
+            formControlName="chassisNo"
+            class="form-control form-control-sm">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">
+            Stock Status
+          </label>
+
+          <select
+            formControlName="stockStatus"
+            class="form-select form-select-sm">
+
+            <option value="">
+              All
+            </option>
+
+            <option value="In Stock">
+              In Stock
+            </option>
+
+            <option value="Billed">
+              Billed
+            </option>
+
+          </select>
+        </div>
+
+        <div class="col-md-auto ms-auto d-flex gap-2">
+
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            (click)="onSearch()">
+
+            Search
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-light btn-sm border"
+            (click)="onReset()">
+
+            Reset
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            (click)="exportToCSV()">
+
+            <i class="ri-file-excel-2-line"></i>
+          </button>
+
+        </div>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+<div class="card">
+
+  <div class="card-body">
+
+    <div
+      *ngIf="isLoading"
+      class="text-center p-4">
+
+      Loading...
+    </div>
+
+    <div
+      class="table-responsive"
+      *ngIf="!isLoading">
+
+      <table
+        class="table table-bordered table-sm table-striped text-nowrap mb-0"
+        style="font-size: 12px;">
+
+        <thead class="table-light">
+
+          <tr>
+
+            <th>Sr No</th>
+            <th>Dealer Code</th>
+            <th>Dealer Name</th>
+            <th>Days In Stock</th>
+            <th>Model Code</th>
+            <th>Model Name</th>
+            <th>OEM Model</th>
+            <th>Color</th>
+            <th>Chassis No</th>
+            <th>Motor No</th>
+            <th>Battery No</th>
+            <th>Invoice No</th>
+            <th>Dispatch Date</th>
+            <th>Receive Date</th>
+            <th>Stock Status</th>
+            <th>Vehicle Status</th>
+            <th>Location</th>
+            
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr *ngIf="reportData.length === 0">
+
+            <td
+              colspan="17"
+              class="text-center">
+
+              No data available
+            </td>
+
+          </tr>
+
+          <tr *ngFor="let item of reportData">
+
+            <td>{{ item.srNo }}</td>
+            <td>{{ item.dealerCode }}</td>
+            <td>{{ item.dealerName }}</td>
+            <td>{{ item.daysInStock }}</td>
+            <td>{{ item.modelCode }}</td>
+            <td>{{ item.modelName }}</td>
+            <td>{{ item.oemModelName }}</td>
+            <td>{{ item.colorName }}</td>
+            <td>{{ item.chassisNo }}</td>
+            <td>{{ item.motorNo }}</td>
+            <td>{{ item.batteryNo }}</td>
+            <td>{{ item.invoiceNo }}</td>
+            <td>{{ formatDate(item.dispatchDate) }}</td>
+            <td>{{ formatDate(item.receiveDate) }}</td>
+            <td>{{ item.stockStatus }}</td>
+            <td>{{ item.vehicleStatus }}</td>
+            <td>{{ item.location }}</td>
+            
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
