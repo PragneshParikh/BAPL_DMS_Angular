@@ -1,0 +1,145 @@
+<!--PAGE Title-->
+<div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
+    <h5 class="mb-0">PCR/CIR List</h5>
+</div>
+<!--End-->
+
+<div class="card">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <!-- Date From -->
+            <div class="col-md-3">
+                <label class="form-label">Date From</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="searchModel.fromDate"
+                    (change)="search()">
+            </div>
+
+            <!-- Date To -->
+            <div class="col-md-3">
+                <label class="form-label">Date To</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="searchModel.toDate"
+                    (change)="search()">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">CIR NO.</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="searchModel.cirNo"
+                    (ngModelChange)="onSearchChange()" placeholder="Enter CIR No." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Job No.</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="searchModel.jobNo"
+                    (ngModelChange)="onSearchChange()" placeholder="Enter Job No." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Customer Name</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="searchModel.customerName"
+                    (ngModelChange)="onSearchChange()" placeholder="Enter Customer Name" />
+            </div>
+            <!-- Search Button -->
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-sm btn-primary" (click)="search()">
+                    Search
+                </button>
+            </div>
+            <!--End search button-->
+            <!-- Download Excel Button (click)="downloadItemMasterExcel()" -->
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'">
+                    <i class="ri-file-excel-2-line"></i>
+                </button>
+            </div>
+            <!--End Excel button-->
+            <!-- Add Button-->
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-primary btn-sm" (click)="onNavigate()">
+                    Add
+                </button>
+            </div>
+            <!--End add button-->
+        </div>
+    </div>
+</div>
+<!--END-->
+
+<!--Table Card-->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive table-responsive-sm" style="max-height: 400px; overflow: auto;">
+
+            <table class="table table-sm table-hover table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>SR.No.</th>
+                        <th>Action</th>
+                        <th>CIR No/CIR Date</th>
+                        <th>CIR Against</th>
+                        <th>Customer</th>
+                        <th>Model</th>
+                        <th>Purpose</th>
+                        <th>Current KMS</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr *ngFor="let item of pagedData; let i = index">
+
+                        <!-- SR NO -->
+                        <td>{{ i + 1 }}</td>
+
+                        <!-- ACTION -->
+                        <td>
+                            <!-- <button class="btn btn-sm btn-soft-primary" (click)="onFFIREdit(item)"><i
+                                    class="ri-pencil-fill fs-12"></i></button>
+                            <button class="btn btn-sm btn-soft-danger" [disabled]="currentUserRole !== 'SuperAdmin'"
+                                title="Only SuperAdmin can delete" (click)="deleteJobCard(item.id)">
+                                <i class="ri-delete-bin-fill fs-12"></i>
+                            </button> -->
+                        </td>
+
+                        <!-- CIRNo / CIRDate -->
+                        <td>
+                            {{ item.cirNo }} <br>
+                            {{ item.cirDate | date:'dd-MM-yyyy' }}
+                        </td>
+
+                        <!-- JobNo / JobDate -->
+                        <td>
+                            {{ item.jobNo }} <br>
+                            {{ item.jobDate | date:'dd-MM-yyyy' }}
+                        </td>
+
+
+                        <!-- Manual Job No -->
+                        <td>{{ item.customerName }}</td>
+
+                        <!-- Location -->
+                        <td>{{ item.modelName }}</td>
+
+                        <!-- Purpose -->
+                        <td>{{ item.purposeOfCIR }}</td>
+
+                        <!-- Current Kms -->
+                        <td>{{ item.currentKms }}</td>
+
+                    </tr>
+
+                    <!-- No Data -->
+                    <tr *ngIf="pagedData.length === 0">
+                        <td colspan="13" class="text-center text-muted py-3">
+                            No Data Available
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- PAGINATION -->
+        <div class="d-flex justify-content-end p-2">
+            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                (pageChange)="pageChange($event)">
+            </ngb-pagination>
+        </div>
+        <!--End Pagination-->
+    </div>
+</div>
+<!--End-->
+<!--<router-outlet></router-outlet>-->
