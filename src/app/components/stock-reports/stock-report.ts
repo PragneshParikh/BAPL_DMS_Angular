@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StockReportService } from '../../core/services/stock-report.service';
+import { ReportService } from '../../core/services/report.service';
 import { StockReport, DealerStockGroup } from '../../ViewModels/models/stock-report.model';
 
 @Component({
   selector: 'app-stock-report',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './stock-report.html',
-  styleUrls: ['./stock-report.scss']
+  templateUrl: './stock-report.html'
 })
 export class StockReportComponent implements OnInit {
 
@@ -16,7 +15,7 @@ export class StockReportComponent implements OnInit {
   grandTotal: number = 0;
   isLoading = false;
 
-  constructor(private stockReportService: StockReportService) {}
+  constructor(private ReportService: ReportService) {}
 
   ngOnInit(): void {
     this.loadDealerWiseReport();
@@ -24,7 +23,7 @@ export class StockReportComponent implements OnInit {
 
   loadDealerWiseReport(): void {
     this.isLoading = true;
-    this.stockReportService.getDealerWiseReport().subscribe({
+    this.ReportService.getDealerWiseStockReport().subscribe({
       next: (data) => {
         const map = new Map<string, DealerStockGroup>();
         data.forEach(row => {

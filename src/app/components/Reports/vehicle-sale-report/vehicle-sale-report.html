@@ -1,0 +1,192 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">Vehicle Sale Report</h4>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Filters</h5>
+      </div>
+
+      <div class="card-body">
+        <form [formGroup]="filterForm">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label">Dealer</label>
+              <select formControlName="dealerCode" class="form-select form-select-sm">
+                <option value="">-- All Dealers --</option>
+                <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
+                  {{ dealer.dealerName }}
+                </option>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">From Date</label>
+              <input type="date" formControlName="fromDate" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">To Date</label>
+              <input type="date" formControlName="toDate" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-auto ms-auto d-flex align-items-end gap-2">
+              <button type="button" class="btn btn-primary btn-sm" (click)="onSearch()">
+                Search
+              </button>
+
+              <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">
+                Reset
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-success btn-sm"
+                (click)="exportToCSV()"
+                
+                aria-label="Export to Excel">
+                <i class="ri-file-excel-2-line"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div *ngIf="isLoading" class="text-center p-4">
+          Loading...
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading">
+          <table class="table table-bordered table-sm table-striped text-nowrap mb-0" style="font-size: 12px;">
+            <thead class="table-light">
+              <tr>
+                  <th>Sr. No</th>
+                  <th>Model Code</th>
+                  <th>Model Description</th>
+                  <th>OEM Model Name</th>
+                  <th>Vehicle Group</th>
+                  <th>Color Code</th>
+                  <th>Chasis No</th>
+                  <th>Reg No</th>
+
+                  <th>Dealer Code</th>
+                  <th>Dealer Name</th>
+                  <th>Dealer City</th>
+                  <th>Dealer State</th>
+
+                  <th>Location</th>
+                  <th>Loc. Code</th>
+                  <th>Loc. City</th>
+
+                  <th>Name</th>
+                  <th>Address 1</th>
+                  <th>Address 2</th>
+
+                  <th>Customer State</th>
+                  <th>Customer City</th>
+
+                  <th>Pin</th>
+                  <th>Email</th>
+                  <th>Mobile No</th>
+
+                  <th>Type</th>
+
+                  <th>Booking ID</th>
+
+                  <th>Dispatch Date</th>
+                  <th>Sale Date</th>
+
+                  <th>Invoice No</th>
+
+                  <th>Bill Type</th>
+
+                  <th>Finance By</th>
+
+                  <th>Financer Code</th>
+
+                  <th>Financer Category</th>
+
+                  <th>Executive Name</th>
+
+                  <th>Prospect Name</th>
+
+                  <th>Prospect Mob. No</th>
+
+                  <th>Motor Number</th>
+
+                  <th>Battery No</th>
+                  <th>Battery No 2</th>
+                  <th>Battery No 3</th>
+
+                  <th>Battery Capacity</th>
+
+                  <th>Subsidy Amount</th>
+
+                  <th>Fame II Required</th>
+
+                  <th>Total Amount</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngIf="reportData.length === 0">
+                <td colspan="43" class="text-center">No data available</td>
+              </tr>
+
+              <tr *ngFor="let item of reportData">
+                <td>{{ item.srNo }}</td>
+                <td>{{ item.modelCode }}</td>
+                <td>{{ item.modelDescription }}</td>
+                <td>{{ item.oemModelName }}</td>
+                <td>{{ item.vehicleGroup }}</td>
+                <td>{{ item.colorCode }}</td>
+                <td>{{ item.chasisNo }}</td>
+                <td>{{ item.regNo }}</td>
+                <td>{{ item.dealerCode }}</td>
+                <td>{{ item.dealerName }}</td>
+                <td>{{ item.dealerCity }}</td>
+                <td>{{ item.dealerState }}</td>
+                <td>{{ item.location }}</td>
+                <td>{{ item.locCode }}</td>
+                <td>{{ item.locCity }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.address1 }}</td>
+                <td>{{ item.address2 }}</td>
+                <td>{{ item.customerState }}</td>
+                <td>{{ item.customerCity }}</td>
+                <td>{{ item.pin }}</td>
+                <td>{{ item.email }}</td>
+                <td>{{ item.mobileNo }}</td>
+                <td>{{ item.type }}</td>
+                <td>{{ item.bookingId }}</td>
+                <td>{{ formatDate(item.dispatchDate) }}</td>
+                <td>{{ formatDate(item.saleDate) }}</td>
+                <td>{{ item.invoiceNo }}</td>
+                <td>{{ item.billType }}</td>
+                <td>{{ item.financeBy }}</td>
+                <td>{{ item.financerCode }}</td>
+                <td>{{ item.financerCategory }}</td>
+                <td>{{ item.executiveName }}</td>
+                <td>{{ item.prospectName }}</td>
+                <td>{{ item.prospectMobNo }}</td>
+                <td>{{ item.motorNumber }}</td>
+                <td>{{ item.batteryNo }}</td>
+                <td>{{ item.batteryNo2 }}</td>
+                <td>{{ item.batteryNo3 }}</td>
+                <td>{{ item.batteryCapacity }}</td>
+                <td>{{ item.subsidyAmount }}</td>
+                <td>{{ item.fameIIRequired ? 'YES' : 'NO' }}</td>
+                <td>{{ item.totalAmount }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

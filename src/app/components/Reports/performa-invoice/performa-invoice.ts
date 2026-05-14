@@ -100,7 +100,7 @@ export class PerformaInvoice implements OnInit {
       this.amounts.discount += item.preGstDiscount || 0;
 
       //  Use finalAmount directly (already calculated in backend)
-      this.amounts.total += item.finalAmount || 0;
+      // this.amounts.total += item.finalAmount || 0;
 
       this.preGstDiscount += item.preGstDiscount || 0;
 
