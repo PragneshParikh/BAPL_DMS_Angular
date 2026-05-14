@@ -793,33 +793,36 @@ export class VehiclePO implements OnInit {
     //   }))
     // };
 
-    const poModel = {
-      refno: this.orderNo,
-      pordrdate: this.poDate,
-      pordr_type: 'SSO',
-      ordrtype: this.poType,
-      testcertificate: '',
-      consigneecode: this.selectedLocation,
-      customercode: dealerCode || '',
-      amount: 0,
-      FameIIFlag: '',
+    const soHeader = {
+      soHeader: {
+        CustomerCode: dealerCode || '',
+        ConsigneeCode: this.selectedLocation,
+        TestCertificate: '',
+        RefNo: this.orderNo,
+        ordrtype: this.poType,
+        pordr_type: 'SSO',
+        Amount: 100,
+        pordrdate: this.poDate,
+        transType: "B2C",
+        FameIIFlag: '',
+      },
       soLine: this.purchaseDetails.map((item) => ({
-        Itemname: item.modelNo,
+        ItemName: item.modelNo,
         modlname: item.modelNo,
         descriptions: item.description,
         Unit: 'NOS',
-        qty: item.qty,
+        Qty: item.qty,
         itemmodelname: item.modelNo,
         colridno: 0,
         colrcode: '',
         dmspordridno: '1111',
-        poid: '1111'
+        poid: 1111
       }))
     };
 
-    console.log('Submitting to ERP with model:', poModel);
+    console.log('Submitting to ERP with model:', soHeader);
 
-    this.vehiclePoService.sendToERP(poModel).subscribe({
+    this.vehiclePoService.sendToERP(soHeader).subscribe({
       next: (res: any) => {
         this.loader.hide();
         console.log('Submit to ERP response:', res);

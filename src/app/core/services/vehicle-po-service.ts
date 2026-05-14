@@ -17,7 +17,7 @@ export class VehiclePoService {
   }
 
   sendToERP(poModel: any): Observable<any> {
-    return this.http.post<any>(`${this.erpBaseUrl}/api/BAPLSOHeader`, JSON.stringify(poModel), {
+    return this.http.post<any>(`${this.erpBaseUrl}/BAPLSOHeader`, JSON.stringify(poModel), {
       headers: { 'Content-Type': 'application/json' },
     });
   }
