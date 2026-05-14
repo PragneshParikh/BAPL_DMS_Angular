@@ -33,7 +33,7 @@ import {
 } from 'rxjs';
 
 import { environment }
-from '../../../environments/environment';
+  from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -52,8 +52,7 @@ export class ReportService {
   // =====================================================
 
   getDealerDropdown():
-    Observable<DealerDropdownItem[]>
-  {
+    Observable<DealerDropdownItem[]> {
     return this.http
       .get<{
         success: boolean;
@@ -71,16 +70,14 @@ export class ReportService {
   // =====================================================
 
   getDealerWiseStockReport():
-    Observable<StockReport[]>
-  {
+    Observable<StockReport[]> {
     return this.http.get<StockReport[]>(
       `${this.apiUrl}/dealer-wise`
     );
   }
 
   getColourWiseStockReport():
-    Observable<StockReport[]>
-  {
+    Observable<StockReport[]> {
     return this.http.get<StockReport[]>(
       `${this.apiUrl}/colour-wise`
     );
@@ -92,8 +89,7 @@ export class ReportService {
 
   getJobReport(
     filter: JobReportFilterModel
-  ): Observable<JobReportPagedResponse>
-  {
+  ): Observable<JobReportPagedResponse> {
     return this.http.post<JobReportPagedResponse>(
       `${this.apiUrl}/job-card`,
       filter
@@ -104,8 +100,7 @@ export class ReportService {
     dealerCode?: string,
     fromDate?: Date,
     toDate?: Date
-  ): Observable<DealerWiseJobReportSummary[]>
-  {
+  ): Observable<DealerWiseJobReportSummary[]> {
     let params = new HttpParams();
 
     if (dealerCode)
@@ -138,11 +133,10 @@ export class ReportService {
     dealerCode: string,
     fromDate?: Date,
     toDate?: Date
-  ): Observable<JobReportSummaryStats>
-  {
+  ): Observable<JobReportSummaryStats> {
     let params =
       new HttpParams()
-      .set('dealerCode', dealerCode);
+        .set('dealerCode', dealerCode);
 
     if (fromDate)
       params = params.set(
@@ -166,11 +160,10 @@ export class ReportService {
     dealerCode: string,
     fromDate?: Date,
     toDate?: Date
-  ): Observable<JobReportViewModel[]>
-  {
+  ): Observable<JobReportViewModel[]> {
     let params =
       new HttpParams()
-      .set('dealerCode', dealerCode);
+        .set('dealerCode', dealerCode);
 
     if (fromDate)
       params = params.set(
@@ -198,8 +191,7 @@ export class ReportService {
     dealerCode?: string,
     fromDate?: Date,
     toDate?: Date
-  ): Observable<VehicleSaleReportViewModel[]>
-  {
+  ): Observable<VehicleSaleReportViewModel[]> {
     let params = new HttpParams();
 
     if (dealerCode)
@@ -236,8 +228,7 @@ export class ReportService {
     filter: VehicleStockFilterModel
   ): Observable<
     PagedResponse<VehicleStockReportViewModel>
-  >
-  {
+  > {
     return this.http.post<
       PagedResponse<VehicleStockReportViewModel>
     >(
@@ -250,5 +241,7 @@ export class ReportService {
   // PO TRACKING REPORT
   // =====================================================
 
-  
+
+
+
 }
