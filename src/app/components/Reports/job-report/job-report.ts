@@ -1,11 +1,16 @@
   import { Component, OnInit, OnDestroy } from '@angular/core';
-  import { JobReportService, 
-          JobReportViewModel, 
-          JobReportPagedResponse, 
-          JobReportFilterModel, 
-          DealerWiseJobReportSummary, 
-          JobReportSummaryStats,
-          DealerDropdownItem  } from '../../../core/services/job-report.service';
+  import {
+  ReportService
+} from '../../../core/services/report.service';
+
+import {
+  JobReportViewModel,
+  JobReportPagedResponse,
+  JobReportFilterModel,
+  DealerWiseJobReportSummary,
+  JobReportSummaryStats,
+  DealerDropdownItem
+} from '../../../ViewModels/models/job-report.model';
   import { Subject, takeUntil } from 'rxjs';
   import { CommonModule } from '@angular/common';
   import {
@@ -34,7 +39,7 @@
     reportData: JobReportViewModel[] = [];
     dealerWiseData: DealerWiseJobReportSummary[] = [];
     summaryStats: JobReportSummaryStats | null = null;
-    dealerList: DealerDropdownItem[] = []; 
+    dealerList: DealerDropdownItem[] = [];
     Math = Math;
 
     // Pagination
@@ -87,7 +92,7 @@
 
     constructor(
       private fb: FormBuilder,
-      private jobReportService: JobReportService
+private reportService: ReportService
     ) {
       this.filterForm = this.fb.group({
         dealerCode: [''],
@@ -103,7 +108,7 @@
 
     ngOnInit(): void {
       this.initializeFormWithDefaultDates();
-      this.loadDealerDropdown(); 
+      this.loadDealerDropdown();
       this.loadReport();
     }
 
@@ -139,7 +144,7 @@
       this.isLoading = true;
       const filter = this.buildFilterModel();
 
-      this.jobReportService.getJobReportAsync(filter)
+      this.reportService.getJobReport(filter)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response: JobReportPagedResponse) => {
@@ -152,25 +157,25 @@
           }
         });
     }
-        loadDealerDropdown(): void {
-          this.jobReportService.getDealerDropdown()
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-              next: (data: DealerDropdownItem[]) => {
-                this.dealerList = data;
-              },
-              error: (error) => {
-                console.error('Error loading dealer dropdown:', error);
-              }
-            });
-        }
+    loadDealerDropdown(): void {
+      this.reportService.getDealerDropdown()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (data: DealerDropdownItem[]) => {
+            this.dealerList = data;
+          },
+          error: (error) => {
+            console.error('Error loading dealer dropdown:', error);
+          }
+        });
+    }
     loadDealerWiseReport(): void {
       this.isLoading = true;
       const dealerCode = this.filterForm.get('dealerCode')?.value;
       const fromDate = this.parseDate(this.filterForm.get('fromDate')?.value);
       const toDate = this.parseDate(this.filterForm.get('toDate')?.value);
 
-      this.jobReportService.getDealerWiseJobReportAsync(dealerCode, fromDate, toDate)
+      this.reportService.getDealerWiseJobReport(dealerCode, fromDate, toDate)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response: DealerWiseJobReportSummary[]) => {
@@ -192,7 +197,7 @@
 
       if (!dealerCode) return;
 
-      this.jobReportService.getJobReportSummaryStats(dealerCode, fromDate, toDate)
+      this.reportService.getJobReportSummaryStats(dealerCode, fromDate, toDate)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response: JobReportSummaryStats) => {
@@ -204,7 +209,7 @@
         });
     }
 
-    private handleReportResponse(response: JobReportPagedResponse): void  {
+    private handleReportResponse(response: JobReportPagedResponse): void {
       this.reportData = response.data;
       this.totalRecords = response.totalRecords;
       this.pageIndex = response.pageIndex;
@@ -304,10 +309,10 @@
         return;
       }
 
-      this.jobReportService.exportJobCardReport(dealerCode, fromDate, toDate)
+      this.reportService.exportJobCardReport(dealerCode, fromDate, toDate)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (data) => {
+          next: (data) => {   
             this.generateExcel(data);
           },
           error: (error) => {
@@ -363,35 +368,35 @@
 
     // ==================== PAGINATION METHODS ====================
 
-  firstPage(): void {
-    if (this.pageIndex > 1) {
-      this.pageIndex = 1;
-      this.loadReport();
+    firstPage(): void {
+      if (this.pageIndex > 1) {
+        this.pageIndex = 1;
+        this.loadReport();
+      }
     }
-  }
 
-  previousPage(): void {
-    if (this.pageIndex > 1) {
-      this.pageIndex--;
-      this.loadReport();
+    previousPage(): void {
+      if (this.pageIndex > 1) {
+        this.pageIndex--;
+        this.loadReport();
+      }
     }
-  }
 
-  nextPage(): void {
-    if (this.pageIndex * this.pageSize < this.totalRecords) {
-      this.pageIndex++;
-      this.loadReport();
+    nextPage(): void {
+      if (this.pageIndex * this.pageSize < this.totalRecords) {
+        this.pageIndex++;
+        this.loadReport();
+      }
     }
-  }
 
-  lastPage(): void {
-    const totalPages = Math.ceil(this.totalRecords / this.pageSize);
+    lastPage(): void {
+      const totalPages = Math.ceil(this.totalRecords / this.pageSize);
 
-    if (this.pageIndex < totalPages) {
-      this.pageIndex = totalPages;
-      this.loadReport();
+      if (this.pageIndex < totalPages) {
+        this.pageIndex = totalPages;
+        this.loadReport();
+      }
     }
-  }
 
     // ==================== UTILITY METHODS ====================
 
