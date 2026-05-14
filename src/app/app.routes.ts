@@ -85,6 +85,7 @@
         { path: 'stock-report', data: [40], loadComponent: () => import('./components/stock-reports/stock-report').then(m => m.StockReportComponent) },
         { path: 'job-card-report', data: [41], loadComponent: () => import('./components/Reports/job-report/job-report').then(m => m.JobReportComponent) },
         { path: 'vehicle-sale-report', data: [43],loadComponent: () =>import('./components/Reports/vehicle-sale-report/vehicle-sale-report') .then(m => m.VehicleSaleReportComponent)},
+        { path: 'vehicle-stocks-report', data: [46], loadComponent: () =>import('./components/Reports/vehicle-stock-report/vehicle-stock-report').then(m => m.VehicleStockReportComponent)},
         { path: 'add-vehicle-sale-bill/delivery-certificate/:id', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
         { path: 'job-card', component: JobCard, data: [23] },
         { path: 'job-card-addForm/:test', component: JobCardAddForm, data: [23] },

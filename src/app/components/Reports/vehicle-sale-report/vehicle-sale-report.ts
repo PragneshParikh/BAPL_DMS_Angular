@@ -13,13 +13,22 @@ import {
   FormBuilder,
   FormGroup
 } from '@angular/forms';
-import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 import {
-  VehicleSaleReportService,
-  VehicleSaleReportViewModel,
+  NgbTooltipModule
+} from '@ng-bootstrap/ng-bootstrap';
+
+import {
+  ReportService
+} from '../../../core/services/report.service';
+
+import {
+  VehicleSaleReportViewModel
+} from '../../../ViewModels/models/vehicle-sale-report.model';
+
+import {
   DealerDropdownItem
-} from '../../../core/services/vehicle-sale-report.service';
+} from '../../../ViewModels/models/job-report.model';
 
 @Component({
   selector: 'app-vehicle-sale-report',
@@ -30,25 +39,27 @@ import {
     ReactiveFormsModule,
     NgbTooltipModule
   ],
-  templateUrl:'./vehicle-sale-report.html',
+  templateUrl: './vehicle-sale-report.html',
 })
+
 export class VehicleSaleReportComponent
   implements OnInit {
 
   filterForm!: FormGroup;
 
-  reportData: VehicleSaleReportViewModel[] = [];
+  reportData:
+    VehicleSaleReportViewModel[] = [];
 
-  dealerList: DealerDropdownItem[] = [];
+  dealerList:
+    DealerDropdownItem[] = [];
 
-  isLoading: boolean = false;
+  isLoading = false;
 
   Math = Math;
 
   constructor(
     private fb: FormBuilder,
-    private vehicleSaleReportService:
-      VehicleSaleReportService
+    private reportService: ReportService
   ) {
 
     this.filterForm = this.fb.group({
@@ -78,25 +89,37 @@ export class VehicleSaleReportComponent
     );
 
     this.filterForm.patchValue({
-      fromDate: this.formatDateForInput(firstDay),
-      toDate: this.formatDateForInput(today)
+      fromDate:
+        this.formatDateForInput(firstDay),
+      toDate:
+        this.formatDateForInput(today)
     });
   }
 
-  formatDateForInput(date: Date): string {
-    return date.toISOString().split('T')[0];
+  formatDateForInput(
+    date: Date
+  ): string {
+
+    return date
+      .toISOString()
+      .split('T')[0];
   }
 
   loadDealerDropdown(): void {
 
-    this.vehicleSaleReportService
+    this.reportService
       .getDealerDropdown()
       .subscribe({
-        next: (data) => {
-          this.dealerList = data;
+        next: (response) => {
+
+          this.dealerList = response;
         },
         error: (error) => {
-          console.error(error);
+
+          console.error(
+            'Dealer dropdown error',
+            error
+          );
         }
       });
   }
@@ -106,19 +129,25 @@ export class VehicleSaleReportComponent
     this.isLoading = true;
 
     const dealerCode =
-      this.filterForm.get('dealerCode')?.value;
+      this.filterForm
+        .get('dealerCode')
+        ?.value;
 
     const fromDate =
       this.parseDate(
-        this.filterForm.get('fromDate')?.value
+        this.filterForm
+          .get('fromDate')
+          ?.value
       );
 
     const toDate =
       this.parseDate(
-        this.filterForm.get('toDate')?.value
+        this.filterForm
+          .get('toDate')
+          ?.value
       );
 
-    this.vehicleSaleReportService
+    this.reportService
       .getVehicleSaleReport(
         dealerCode,
         fromDate,
@@ -131,9 +160,13 @@ export class VehicleSaleReportComponent
 
           this.isLoading = false;
         },
+
         error: (error) => {
 
-          console.error(error);
+          console.error(
+            'Vehicle sale report error',
+            error
+          );
 
           this.isLoading = false;
         }
@@ -141,6 +174,7 @@ export class VehicleSaleReportComponent
   }
 
   onSearch(): void {
+
     this.loadReport();
   }
 
@@ -153,7 +187,9 @@ export class VehicleSaleReportComponent
     this.loadReport();
   }
 
-  parseDate(dateString: string): Date | undefined {
+  parseDate(
+    dateString: string
+  ): Date | undefined {
 
     return dateString
       ? new Date(dateString)
@@ -162,7 +198,10 @@ export class VehicleSaleReportComponent
 
   formatDate(date: any): string {
 
-    if (!date) return '';
+    if (!date) {
+
+      return '';
+    }
 
     return new Date(date)
       .toLocaleDateString('en-IN');
@@ -206,17 +245,26 @@ export class VehicleSaleReportComponent
       headers,
       ...rows
     ]
-    .map(e => e.join(','))
-    .join('\n');
+      .map(row =>
+        row.map(value =>
+          `"${value ?? ''}"`
+        ).join(',')
+      )
+      .join('\n');
 
     const blob = new Blob(
       [csvContent],
-      { type: 'text/csv;charset=utf-8;' }
+      {
+        type:
+          'text/csv;charset=utf-8;'
+      }
     );
 
-    const link = document.createElement('a');
+    const link =
+      document.createElement('a');
 
-    const url = URL.createObjectURL(blob);
+    const url =
+      URL.createObjectURL(blob);
 
     link.setAttribute('href', url);
 
@@ -225,6 +273,10 @@ export class VehicleSaleReportComponent
       'vehicle-sale-report.csv'
     );
 
+    document.body.appendChild(link);
+
     link.click();
+
+    document.body.removeChild(link);
   }
 }
