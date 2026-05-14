@@ -44,6 +44,7 @@ export interface ReceiptEntryModel {
 
 export interface LocationName {
   locname: string;
+  locCode:string;
 }
 
 export interface ReceiptFilter {

@@ -160,10 +160,10 @@ export class JobCardAddForm {
           this.selectedLocation = this.chassiseditData.jobCardHeader.serviceloc;
           // OPTIONAL (safe match)
           const match = this.locations.find(
-            x => x.locname === this.selectedLocation
+            x => x.locCode === this.selectedLocation
           );
           if (match) {
-            this.selectedLocation = match.locname;
+            this.selectedLocation = match.locCode ;
           }
         }
         //console.log("Workshop Locations", this.locations);
