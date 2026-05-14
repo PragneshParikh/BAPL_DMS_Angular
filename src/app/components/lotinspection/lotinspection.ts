@@ -38,7 +38,7 @@ export class Lotinspection implements OnInit {
   //  ALERT
   showAlert: boolean = false;
   alertMessage: string = '';
-  isSuperAdmin:boolean;
+  isSuperAdmin: boolean;
 
 
   constructor(private lotinspectionService: Lotinspectionservice,
@@ -62,11 +62,10 @@ export class Lotinspection implements OnInit {
     this.loader.show();
 
     let dealerCode = '';
-    if(!this.isSuperAdmin)
-    {
+    if (!this.isSuperAdmin) {
       dealerCode = this.storageService.getDealerCode();
     }
-    this.lotinspectionService.getAllLotInspectionHeaderDetails(this.searchTerm || '', dealerCode )
+    this.lotinspectionService.getAllLotInspectionHeaderDetails(this.searchTerm || '', dealerCode)
       .subscribe({
         next: (res: any) => {
           console.log("FULL RESPONSE:", res);
@@ -139,13 +138,11 @@ export class Lotinspection implements OnInit {
   }
 
   // Navigation on Lot Inspection Header Form page
-  onNavigate(invoiceNo: string,event: Event) {
-    debugger;
-    
+  onNavigate(invoiceNo: string, event: Event) {
     event.stopPropagation();
     this.lotinspectionService.getAllLotInspectionHeaderDetails(invoiceNo).subscribe({
       next: (res: any) => {
-        if (res?.data?.length > 0 && res.data[0].isLotInspected === true)  {
+        if (res?.data?.length > 0 && res.data[0].isLotInspected === true) {
           //console.log('BLOCKED');
           Swal.fire({
             icon: 'warning',
