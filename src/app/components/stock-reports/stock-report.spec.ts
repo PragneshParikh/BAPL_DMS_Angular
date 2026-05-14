@@ -1,22 +1,20 @@
 import { Injectable } from '@angular/core';
 
-import { HttpClient }
-from '@angular/common/http';
+import {
+  HttpClient
+} from '@angular/common/http';
 
-import { Observable }
-from 'rxjs';
+import {
+  Observable
+} from 'rxjs';
 
-import { environment } from '../../../environments/environment';
+import {
+  environment
+} from '../../../environments/environment';
 
-
-import { StockReport }
-from './models/stock-report.model';
-
-import { DealerStockGroup }
-from './models/dealer-stock-group.model';
-
-import { ColourStockGroup }
-from './models/colour-stock-group.model';
+import {
+  StockReport
+} from '../../ViewModels/models/stock-report.model';
 
 @Injectable({
   providedIn: 'root'
@@ -24,11 +22,11 @@ from './models/colour-stock-group.model';
 export class StockReportService {
 
   private apiUrl =
-    `${environment.apiUrl}/StockReport`;
+    `${environment.apiUrl}/Report`;
 
   constructor(
     private http: HttpClient
-  ) {}
+  ) { }
 
   getDealerWiseReport():
     Observable<StockReport[]>

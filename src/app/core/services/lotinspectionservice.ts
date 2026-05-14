@@ -11,12 +11,15 @@ export class Lotinspectionservice {
 
   constructor(private httpClient: HttpClient) { }
 
-  getAllLotInspectionHeaderDetails(search: string = ''): Observable<any> {
+  getAllLotInspectionHeaderDetails(search: string = '',dealerCode?:string): Observable<any> {
     let params = new HttpParams().set('search', search ?? '');
 
 
     if (search && search.trim() !== '') {
       params = params.set('search', search.trim());
+    }
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
     }
     return this.httpClient.get<any[]>(`${this.baseUrl}/LOTInspection/GetAllAcceptedInvoiceList`, { params });
   }

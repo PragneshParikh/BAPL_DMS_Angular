@@ -6,7 +6,7 @@ import { LocationName } from '../../ViewModels/ReceiptEntryModel';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { JobType, JobSource, userRole } from '../../constant';
-import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPagination, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterModule } from '@angular/router';
 import { JobCardService } from '../../core/services/job-card-service';
 import Swal from 'sweetalert2';
@@ -15,7 +15,7 @@ import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
 @Component({
   selector: 'app-job-card',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, NgbPaginationModule, NgbTooltipModule],
+  imports: [CommonModule, FormsModule, RouterModule, NgbPagination, NgbTooltipModule],
   templateUrl: './job-card.html',
   styleUrl: './job-card.scss',
 })
@@ -28,12 +28,14 @@ export class JobCard {
   isEditMode = false;
   //dropdown changes
   selectedLocation: string = '';
-  selectedJobtype: string = '';
+  selectedJobtype: any;
   selectedJobSource: string = '';
   selectedComplaints: string = '';
   selectedViewJobs: string = '';
   selectedChassis: string = '';
   searchTimeout: any;
+  jobTypeId: number = 0;
+  isSuperAdmin:boolean;
 
 
   //Pagination
@@ -66,7 +68,7 @@ export class JobCard {
     chassisNo: ''
   };
   ngOnInit(): void {
-
+this.isSuperAdmin = this.storageService.getRole().toLocaleLowerCase() === 'superadmin';
     this.setUserRole();
     this.fetchLocations();
     this.loadChassisList();
@@ -93,7 +95,8 @@ export class JobCard {
   // load Chassis number
   loadChassisList() {
     const dealerCode = this.storageService.getDealerCode();
-    this.jobCardService.getAllInspectedChassis(dealerCode).subscribe({
+    this.jobTypeId = this.selectedJobtype;
+    this.jobCardService.getAllInspectedChassis(dealerCode,this.jobTypeId).subscribe({
       next: (res: any) => {
         console.log(res);
 
@@ -108,7 +111,10 @@ export class JobCard {
 
   loadJobCardList() {
     // this.lodder = true;
-    const dealerCode = this.storageService.getDealerCode();
+    let dealerCode ='';
+    if (!this.isSuperAdmin) {
+       dealerCode = this.storageService.getDealerCode();
+  }
 
     this.jobCardService.getJobCardList(dealerCode).subscribe({
       next: (res) => {
@@ -241,7 +247,7 @@ export class JobCard {
       this.jobCardList = res;
     });
   }
-  
+
   //  PAGINATION
   pageChange(page: number) {
     this.page = page;

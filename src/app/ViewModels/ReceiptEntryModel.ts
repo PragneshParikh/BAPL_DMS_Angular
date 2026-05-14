@@ -1,6 +1,6 @@
 export interface ReceiptEntryModel {
   id: number;
-
+dealerCode?:string;
   location?: string;
 
   receiptNo: string;
@@ -44,6 +44,7 @@ export interface ReceiptEntryModel {
 
 export interface LocationName {
   locname: string;
+  locCode:string;
 }
 
 export interface ReceiptFilter {
@@ -55,6 +56,7 @@ export interface ReceiptFilter {
   bookingId?: string;
   location?: string;
   saleType?: string;
+  dealerCode?:string;
 }
 
 export interface ReceiptEntryAddViewModel {
@@ -75,6 +77,7 @@ export interface ReceiptEntryAddViewModel {
   refNo?: string;
   narration?: string;
   totalAmount?: number;
+  dealerCode?:string;
 }
 
 export interface ReceiptEntryEditModel {

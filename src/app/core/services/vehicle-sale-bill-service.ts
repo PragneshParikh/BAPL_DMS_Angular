@@ -26,7 +26,7 @@ export class VehicleSaleBillService {
   //   return this.http.get<any[]>(`${this.apiUrl}/VehicleSaleBill`);
   // }
 
- getAllVehicleSaleBills(search?: string, fromDate?: Date, toDate?: Date, erpStatus?: string): Observable<any[]> {
+ getAllVehicleSaleBills(dealerCode?:string,search?: string, fromDate?: Date, toDate?: Date, erpStatus?: string): Observable<any[]> {
   let params = new HttpParams();
 
   if (search) {
@@ -42,6 +42,10 @@ export class VehicleSaleBillService {
   }
   if (erpStatus) {
     params = params.set('erpStatus', erpStatus);
+  }
+  if(dealerCode)
+  {
+    params =params.set('dealerCode',dealerCode)
   }
 
   return this.http.get<any[]>(`${this.apiUrl}/VehicleSaleBill`, { params });
@@ -104,5 +108,23 @@ updateRegistrationAndReserveChassis(
       { params }
     );
   }
+
+  downloadExcel(fromDate?: Date, toDate?: Date) {
+     let params = new HttpParams();
+
+   if (fromDate) {
+    params = params.set('fromDate', fromDate.toISOString());
+  }
+
+  if (toDate) {
+    params = params.set('toDate', toDate.toISOString());
+  }
+  
+  return this.http.get(
+    `${this.apiUrl}/VehicleSaleBill/download`,
+    {params:params,
+      responseType: 'blob' }
+  );
+}
 
 }

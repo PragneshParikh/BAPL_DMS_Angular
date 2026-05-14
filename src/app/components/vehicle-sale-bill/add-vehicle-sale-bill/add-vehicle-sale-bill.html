@@ -21,7 +21,7 @@
                         <i class="ri-printer-line me-2"></i> Print Ex-Showroom Invoice
                     </a>
                 </li>
-                 <li>
+                <li>
                     <a class="dropdown-item" (click)="printOnRoadInvoice()">
                         <i class="ri-printer-line me-2"></i> Print On Road Invoice
                     </a>
@@ -35,25 +35,25 @@
 
                 <li>
                     <a class="dropdown-item" (click)="printSaleLetter()">
-                       <i class="ri-printer-line me-2"></i> Print Sale Letter
+                        <i class="ri-printer-line me-2"></i> Print Sale Letter
                     </a>
                 </li>
 
                 <li>
                     <a class="dropdown-item" (click)="printForm22()">
-                       <i class="ri-printer-line me-2"></i> Print Form 22
+                        <i class="ri-printer-line me-2"></i> Print Form 22
                     </a>
                 </li>
 
                 <li>
                     <a class="dropdown-item" (click)="printDeliveryChecklist()">
-                      <i class="ri-printer-line me-2"></i> Print Delivery Check List
+                        <i class="ri-printer-line me-2"></i> Print Delivery Check List
                     </a>
                 </li>
 
                 <li>
                     <a class="dropdown-item" (click)="printDeliveryCertificate()">
-                      <i class="ri-printer-line me-2"></i> Print Delivery Certificate
+                        <i class="ri-printer-line me-2"></i> Print Delivery Certificate
                     </a>
                 </li>
 
@@ -66,23 +66,25 @@
                 (click)="billId ? updateVehicleSaleBill() : saveVehicleDetailsOnly()">
                 Save
             </button>
-            <button *ngIf="billId && !isErpLocked && !isInvoiced" class="btn btn-sm btn-primary" [disabled]="!canSave() || isErpLocked"
-                (click)=" updateVehicleSaleBill()">
+            <button *ngIf="billId && !isErpLocked && !isInvoiced" class="btn btn-sm btn-primary"
+                [disabled]="!canSave() || isErpLocked" (click)=" updateVehicleSaleBill()">
                 Update
             </button>
 
-            <button *ngIf="!isErpLocked && billId && !isInvoiced" class="btn btn-sm btn-primary" (click)="openRegistrationModal()">
+            <button *ngIf="!isErpLocked && billId && !isInvoiced" class="btn btn-sm btn-primary"
+                (click)="openRegistrationModal()">
                 Open Registration
             </button>
 
-             <button *ngIf="!isErpLocked && billId && !isInvoiced && erpStatus !== 'Reserved'" class="btn btn-sm btn-primary" (click)="navigateToPerformaInvoice()">
-               Genearate Proforma Invoice
+            <button *ngIf="!isErpLocked && billId && !isInvoiced && erpStatus !== 'Reserved'"
+                class="btn btn-sm btn-primary" (click)="navigateToPerformaInvoice()">
+                Genearate Proforma Invoice
             </button>
-             <button *ngIf="!isErpLocked && billId && !isInvoiced &&  isRegistrationComplete()" class="btn btn-sm btn-primary" (click)="connfirmInvoiceGeneration()">
-               Genearate Invoice
+            <button *ngIf="!isErpLocked && billId && !isInvoiced &&  isRegistrationComplete()"
+                class="btn btn-sm btn-primary" (click)="connfirmInvoiceGeneration()">
+                Genearate Invoice
             </button>
-            <button class="btn btn-sm btn-primary" (click)="onSubmitToERP()"
-                *ngIf="isInvoiced && !isErpLocked">
+            <button class="btn btn-sm btn-primary" (click)="onSubmitToERP()" *ngIf="isInvoiced && !isErpLocked">
                 Submit To ERP
             </button>
             <button class="btn btn-light btn-sm" (click)="redirectToSaleList()">Close</button>
@@ -375,9 +377,9 @@
 
                     <i class="ri-arrow-down-s-line transition-icon"></i>
                 </div>
-<div *ngIf="!isCustomerValid()" class="text-danger mt-1">
-  Please select a valid customer before choosing chassis.
-</div>
+                <div *ngIf="!isCustomerValid()" class="text-danger mt-1">
+                    Please select a valid customer before choosing chassis.
+                </div>
 
                 <div id="vehicleDetails" class="collapse show">
                     <div class="card card-body border-0 shadow-sm p-3">
@@ -512,7 +514,7 @@
                                             <th>Ins Amt</th>
                                             <th>Pre GST Disc.</th>
                                             <th>Taxable Amount</th>
-                                            <th>Ext Warranty</th>
+                                            <!-- <th>Ext Warranty</th> -->
                                             <th>SGST %</th>
                                             <th>SGST Amnt</th>
                                             <th>CGST %</th>
@@ -526,7 +528,7 @@
                                             <th>Battery Chemical</th>
                                             <th>Battery Capacity</th>
                                             <th>Battery Make</th>
-                                            <th>Stock Detail No</th>
+                                            <!-- <th>Stock Detail No</th> -->
                                             <th>VCU</th>
                                         </tr>
                                     </thead>
@@ -569,9 +571,9 @@
                                             <td>{{ row.preGstDiscount }}</td>
                                             <td>{{ row.taxableAmount ?? row.amount}}</td>
 
-                                            <td>
+                                            <!-- <td>
                                                 {{ row.extWarranty }}
-                                            </td>
+                                            </td> -->
                                             <td>{{ row.sgstPer }}%</td>
                                             <td>{{row.sgst }}</td>
                                             <td>{{row.cgstPer }}%</td>
@@ -590,7 +592,7 @@
                                             <td>{{row.batteryChemical}}</td>
                                             <td>{{row.batteryCapacity}}</td>
                                             <td>{{row.batteryMake}}</td>
-                                            <td>{{row.stockDetailNo}}</td>
+                                            <!-- <td>{{row.stockDetailNo}}</td> -->
                                             <td>{{row.vcu}}</td>
 
                                         </tr>
@@ -617,8 +619,7 @@
                             <!-- ADD BUTTON HERE -->
                             <div class="col-md-12 d-flex justify-content-end mt-2">
                                 <button class="btn btn-primary btn-sm" type="button"
-                                    (click)="addVehicle(vehicleSaleForm)"
-                                    [disabled]="isErpLocked ||
+                                    (click)="addVehicle(vehicleSaleForm)" [disabled]="isErpLocked ||
                                     !isCustomerValid() 
                                     ||    !model.chassisNo 
                                     ||(model.customerType==='B2C' && vehicleList?.length > 0) ">
@@ -694,7 +695,7 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label-sm">Handeling Charges</label>
+                            <label class="form-label-sm">Handling Charges</label>
                             <input type="number" class="form-control form-control-sm"
                                 [(ngModel)]="model.handlingCharges" name="handlingCharges">
                         </div>
@@ -745,7 +746,7 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label-sm">Satate Subsidy Amnt</label>
+                            <label class="form-label-sm">State Subsidy Amnt</label>
                             <input type="number" class="form-control form-control-sm">
                         </div>
 

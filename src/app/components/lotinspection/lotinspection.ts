@@ -7,6 +7,8 @@ import { ActivatedRoute, Route, Router, RouterModule } from '@angular/router';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
+import { StorageService } from '../../core/services/storage';
 
 @Component({
   selector: 'app-lotinspection',
@@ -36,18 +38,20 @@ export class Lotinspection implements OnInit {
   //  ALERT
   showAlert: boolean = false;
   alertMessage: string = '';
+  isSuperAdmin:boolean;
 
 
   constructor(private lotinspectionService: Lotinspectionservice,
     private loader: LoaderService,
     public toaster: ToastService,
-    private router: Router
+    private router: Router,
+    private storageService: StorageService
   ) { }
 
 
   ngOnInit() {
 
-
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     // default search (today to today)
     //this.searchTerm = `${today} to ${today}`;
 
@@ -56,7 +60,13 @@ export class Lotinspection implements OnInit {
   // LOAD DATA
   loadLotInspectionList() {
     this.loader.show();
-    this.lotinspectionService.getAllLotInspectionHeaderDetails(this.searchTerm || '')
+
+    let dealerCode = '';
+    if(!this.isSuperAdmin)
+    {
+      dealerCode = this.storageService.getDealerCode();
+    }
+    this.lotinspectionService.getAllLotInspectionHeaderDetails(this.searchTerm || '', dealerCode )
       .subscribe({
         next: (res: any) => {
           console.log("FULL RESPONSE:", res);
@@ -129,9 +139,34 @@ export class Lotinspection implements OnInit {
   }
 
   // Navigation on Lot Inspection Header Form page
-  onNavigate(invoiceNo: string) {
-    //this.router.navigate(['lotinspection', invoiceNo]);
-    this.router.navigate(['/lot-inspection-details', invoiceNo]);
+  onNavigate(invoiceNo: string,event: Event) {
+    debugger;
+    
+    event.stopPropagation();
+    this.lotinspectionService.getAllLotInspectionHeaderDetails(invoiceNo).subscribe({
+      next: (res: any) => {
+        if (res?.data?.length > 0 && res.data[0].isLotInspected === true)  {
+          //console.log('BLOCKED');
+          Swal.fire({
+            icon: 'warning',
+            title: 'Already Inspected',
+            text: `Chassis No lot inspection already done`,
+            confirmButtonText: 'OK'
+          });
+          return;
+        }
+        this.router.navigate(['/lot-inspection-details', invoiceNo]);
+      },
+      error: (err) => {
+        console.error('Error while checking lot inspection:', err);
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Something went wrong. Please try again.'
+        });
+      }
+    });
   }
 }
 

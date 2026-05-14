@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ChassisDetail } from './chassis-detail';
+import { WorkInProgress } from './work-in-progress';
 
-describe('ChassisDetail', () => {
-  let component: ChassisDetail;
-  let fixture: ComponentFixture<ChassisDetail>;
+describe('WorkInProgress', () => {
+  let component: WorkInProgress;
+  let fixture: ComponentFixture<WorkInProgress>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ChassisDetail]
+      imports: [WorkInProgress]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ChassisDetail);
+    fixture = TestBed.createComponent(WorkInProgress);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -18,51 +18,53 @@ export class ReceiptEntryService {
    */
   constructor(private http: HttpClient) { }
 
-  getReceiptList(searchTerm: string, fromDate?: Date, toDate?: Date): Observable<any[]> {
-  let params = new HttpParams();
+  getReceiptList(searchTerm: string, fromDate?: Date, toDate?: Date,dealerCode?: string): Observable<any[]> {
+    let params = new HttpParams();
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
+    }
+    if (searchTerm) {
+      params = params.set('searchTerm', searchTerm);
+    }
 
-  if (searchTerm) {
-    params = params.set('searchTerm', searchTerm);
+    if (fromDate) {
+      params = params.set('fromDate', this.formatDate(fromDate));
+    }
+
+    if (toDate) {
+      params = params.set('toDate', this.formatDate(toDate));
+    }
+
+    return this.http.get<any[]>(
+      `${this.apiUrl}/ReceiptEntry/getAllReceiptList`,
+      { params }
+    );
   }
 
-  if (fromDate) {
-    params = params.set('fromDate', this.formatDate(fromDate));
-  }
-
-  if (toDate) {
-    params = params.set('toDate', this.formatDate(toDate));
-  }
-
-  return this.http.get<any[]>(
-    `${this.apiUrl}/ReceiptEntry/getAllReceiptList`,
-    { params }
-  );
-}
-  
 
   getReceiptEntryList(filter: ReceiptFilter): Observable<ReceiptEntryModel[]> {
 
-  let params = new HttpParams();
+    let params = new HttpParams();
 
-  Object.keys(filter).forEach(key => {
-    let value = filter[key as keyof ReceiptFilter];
+    Object.keys(filter).forEach(key => {
+      let value = filter[key as keyof ReceiptFilter];
 
-    if (value !== null && value !== undefined && value !== '') {
+      if (value !== null && value !== undefined && value !== '') {
 
-      // Convert Date to string
-      if (value instanceof Date) {
-        value = this.formatDate(value);
+        // Convert Date to string
+        if (value instanceof Date) {
+          value = this.formatDate(value);
+        }
+
+        params = params.set(key, value as string);
       }
+    });
 
-      params = params.set(key, value as string);
-    }
-  });
-
-  return this.http.get<ReceiptEntryModel[]>(
-    `${this.apiUrl}/ReceiptEntry/getReceiptEntryList`,
-    { params }
-  );
-}
+    return this.http.get<ReceiptEntryModel[]>(
+      `${this.apiUrl}/ReceiptEntry/getReceiptEntryList`,
+      { params }
+    );
+  }
 
   getLocationList(dealerCode: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/LocationMaster/GetLocationTypeWiseNameByDealerCode?dealerCode=${dealerCode}`);
@@ -115,11 +117,11 @@ export class ReceiptEntryService {
     );
   }
   private formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = ('0' + (date.getMonth() + 1)).slice(-2);
-  const day = ('0' + date.getDate()).slice(-2);
+    const year = date.getFullYear();
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
 
-  return `${year}-${month}-${day}`;
-}
+    return `${year}-${month}-${day}`;
+  }
 
 }
