@@ -193,7 +193,7 @@ export class JobCardAddForm {
     });
   }
   loadServiceHistory(chassisNo: string) {
-    debugger
+    //debugger
 
     this.jobCardService.getJobCardServiceHistory(chassisNo).subscribe({
       next: (res: any) => {
@@ -235,7 +235,7 @@ export class JobCardAddForm {
   }
 
   loadChassisList() {
-    debugger
+    //debugger
     const dealerCode = this.storageService.getDealerCode();
     this.jobTypeId = this.selectedJobtype
 
@@ -273,56 +273,128 @@ export class JobCardAddForm {
     console.log('Selected Location:', this.selectedLocation);
   }
 
+  // onJobType(isEdit = false) {
+
+  //   if (!this.selectedJobtype) return;   // 👈 IMPORTANT
+
+  //   const dealerCode = this.storageService.getDealerCode();
+
+  //   this.jobCardService
+  //     .getAllInspectedChassis(dealerCode, this.selectedJobtype)
+  //     .subscribe(res => {
+  //       this.chassisList = res;
+  //     });
+
+
+
+  //   this.jobCardService.getServiceHead(this.selectedJobtype).subscribe(res => {
+
+  //     this.serviceHeadList = res;
+
+  //     if (isEdit) {
+  //       this.selectedServiceHead = this.chassiseditData.jobCardHeader.servicehead;
+
+  //       //  load service type for edit
+  //       this.loadServiceType(this.selectedServiceHead, true);
+  //     } else {
+  //       this.selectedServiceHead = '';
+  //       this.serviceTypeList = [];
+  //       this.selectedServiceType = '';
+  //     }
+  //   });
+  // }
   onJobType(isEdit = false) {
 
-    if (!this.selectedJobtype) return;   // 👈 IMPORTANT
+  if (!this.selectedJobtype) return;
 
-    const dealerCode = this.storageService.getDealerCode();
+  const dealerCode = this.storageService.getDealerCode();
 
-    this.jobCardService
-      .getAllInspectedChassis(dealerCode, this.selectedJobtype)
-      .subscribe(res => {
-        this.chassisList = res;
-      });
+  // Load chassis
+  this.jobCardService
+    .getAllInspectedChassis(dealerCode, this.selectedJobtype)
+    .subscribe(res => {
+      this.chassisList = res;
+    });
 
-
-
-    this.jobCardService.getServiceHead(this.selectedJobtype).subscribe(res => {
+  // Load service heads
+  this.jobCardService
+    .getServiceHead(this.selectedJobtype)
+    .subscribe((res: any[]) => {
 
       this.serviceHeadList = res;
 
+      // EDIT MODE
       if (isEdit) {
-        this.selectedServiceHead = this.chassiseditData.jobCardHeader.servicehead;
 
-        //  load service type for edit
+        this.selectedServiceHead =
+          this.chassiseditData.jobCardHeader.servicehead;
+
         this.loadServiceType(this.selectedServiceHead, true);
-      } else {
-        this.selectedServiceHead = '';
-        this.serviceTypeList = [];
-        this.selectedServiceType = '';
+
+        return;
       }
+
+      // ADD MODE
+      if (this.serviceHeadList.length > 0) {
+
+        // auto select first service head
+        this.selectedServiceHead =
+          this.serviceHeadList[0].serviceHeadId;
+
+        // auto load service type
+        this.loadServiceType(this.selectedServiceHead);
+
+      }
+      else {
+
+        this.selectedServiceHead = '';
+        this.selectedServiceType = '';
+        this.serviceTypeList = [];
+
+      }
+
     });
-  }
+}
   onServiceHeadChange() {
+    debugger
     this.loadServiceType(this.selectedServiceHead);
   }
 
   loadServiceType(serviceHeadId: number, isEdit = false) {
 
-    this.jobCardService.getServiceType(serviceHeadId).subscribe(res => {
+    this.jobCardService
+      .getServiceType(serviceHeadId)
+      .subscribe((res: any[]) => {
 
-      this.serviceTypeList = res;
+        this.serviceTypeList = res;
 
-      if (isEdit) {
-        this.selectedServiceType = this.chassiseditData.jobCardHeader.servicetype;
-      } else {
-        this.selectedServiceType = '';
-      }
-    });
+        // EDIT MODE
+        if (isEdit) {
+
+          this.selectedServiceType =
+            this.chassiseditData.jobCardHeader.servicetype;
+
+          return;
+        }
+
+        // SINGLE VALUE AUTO SELECT
+        if (this.serviceTypeList.length === 1) {
+
+          this.selectedServiceType =
+            this.serviceTypeList[0].id;
+
+        }
+        else {
+
+          this.selectedServiceType = '';
+
+        }
+
+      });
   }
-  onServiceTypeChange() {
-    this.selectedServiceType = '';
-  }
+  // onServiceTypeChange() {
+  //   //this.selectedServiceType = '';
+  // }
 
 
   onChassisChange() {
@@ -455,7 +527,7 @@ export class JobCardAddForm {
     this.complaintList.splice(index, 1);
   }
   savePdi() {
-    debugger;
+    //debugger;
     console.log("pdiCheckList", this.pdiCheckList)
     this.pdiCheckList = this.pdiCheckList.map(x => ({
       ...x,
@@ -463,7 +535,7 @@ export class JobCardAddForm {
       remarks: x.remarks || ''
     }));
 
-    console.log("PDI Stored Locally", this.pdiCheckList);
+    //console.log("PDI Stored Locally", this.pdiCheckList);
 
     this.isPdiSaved = true; // optional flag
 
@@ -800,6 +872,19 @@ export class JobCardAddForm {
 
     // IMPORTANT: reload PDI checklist (not empty)
     this.loadPdiData();
+  }
+  goToFFIR() {
+
+    if (!this.isEditMode || !this.editId) {
+      Swal.fire({
+        icon: 'warning',
+        text: 'Please save job card first before opening FFIR',
+        width: '300px'
+      });
+      return;
+    }
+
+    this.router.navigate(['/ffir', this.editId]);
   }
 }
 

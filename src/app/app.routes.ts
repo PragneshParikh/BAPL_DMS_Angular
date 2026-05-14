@@ -34,6 +34,7 @@ import { ModelwiseServiceSchedule } from './components/modelwise-service-schedul
 import { PdiChecklistmaster } from './components/pdi-checklistmaster/pdi-checklistmaster';
 import { PerformaInvoice } from './components/Reports/performa-invoice/performa-invoice';
 import { FFIR } from './components/ffir/ffir';
+import { Ffirlisting } from './components/ffir/ffirlisting/ffirlisting';
 
 
 export const routes: Routes = [
@@ -106,10 +107,10 @@ export const routes: Routes = [
       { path: 'material-transfer', data: [29], loadComponent: () => import('./components/material-transfer/material-transfer').then(m => m.MaterialTransfer) },
       { path: 'material-transfer/:id', data: [29], loadComponent: () => import('./components/material-transfer/material-transfer-detail/material-transfer-detail').then(m => m.MaterialTransferDetail) },
       { path: 'city-master', component: CityMaster, data: [19] },
-       { path: 'city-master/add', component: AddCityMaster, data: [19] },
-        { path: 'city-master/edit/:id', component: AddCityMaster, data: [19] },
-        { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
-        { path: 'pdiChecklistmaster', component: PdiChecklistmaster, data: [36] },
+      { path: 'city-master/add', component: AddCityMaster, data: [19] },
+      { path: 'city-master/edit/:id', component: AddCityMaster, data: [19] },
+      { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
+      { path: 'pdiChecklistmaster', component: PdiChecklistmaster, data: [36] },
 
       { path: 'city-master/add', component: AddCityMaster, data: [19] },
       { path: 'city-master/edit/:id', component: AddCityMaster, data: [19] },
@@ -117,7 +118,11 @@ export const routes: Routes = [
       { path: 'extended-battery-warranty/:id', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty').then(m => m.ExtendedBatteryWarranty) },
       { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
-      { path: 'ffir', component: FFIR, data: [40] },
+      { path: 'ffir', component: FFIR, data: [23] },
+
+      { path: 'ffir/:id', component: FFIR, data: [23] },
+
+      { path: 'ffirlisting', component: Ffirlisting, data: [23] }
     ]
   }
 ];

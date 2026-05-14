@@ -6,7 +6,7 @@ import { LocationName } from '../../ViewModels/ReceiptEntryModel';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { JobType, JobSource, userRole } from '../../constant';
-import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPagination, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Router, RouterModule } from '@angular/router';
 import { JobCardService } from '../../core/services/job-card-service';
 import Swal from 'sweetalert2';
@@ -15,7 +15,7 @@ import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
 @Component({
   selector: 'app-job-card',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, NgbPaginationModule, NgbTooltipModule],
+  imports: [CommonModule, FormsModule, RouterModule, NgbPagination, NgbTooltipModule],
   templateUrl: './job-card.html',
   styleUrl: './job-card.scss',
 })
