@@ -47,28 +47,28 @@
                 </div>
             </form>
         </div>
-    </div>
 
-    <!-- TABLE CARD -->
-    <div class="card mt-4">
-        <div class="card-body">
-            <!-- <p>Total Record(s): {{totalRecords}}</p> -->
-            <div class="table-responsive border rounded">
-                <table class="table table-bordered table-hover table-striped align-middle table-nowrap mb-0 table-sm">
-                    <thead>
-                        <tr style="background-color:#747CA0 !important;color:white; cursor: pointer;">
-                            <th>S.No</th>
-                            <!-- <th>Prefix No</th> -->
-                            <th class="sort" [ngClass]="getSortClass('purchaseNo')" (click)="sort('purchaseNo')">
-                                Purchase No</th>
-                            <th class="sort" [ngClass]="getSortClass('date')" (click)="sort('date')">Date</th>
-                            <th class="sort" [ngClass]="getSortClass('transactionType')"
-                                (click)="sort('transactionType')">Trans Type</th>
-                            <!-- <th>Is Supplier</th> -->
-                            <th class="sort" [ngClass]="getSortClass('partyName')" (click)="sort('partyName')">Party
-                                Name</th>
-                            <th>Location</th>
-                            <!-- <th class="sort" [ngClass]="getSortClass('modelName')" (click)="sort('modelName')">Model
+        <!-- TABLE CARD -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <!-- <p>Total Record(s): {{totalRecords}}</p> -->
+                <div class="table-responsive border rounded">
+                    <table
+                        class="table table-bordered table-hover table-striped align-middle table-nowrap mb-0 table-sm">
+                        <thead>
+                            <tr style="background-color:#747CA0 !important;color:white; cursor: pointer;">
+                                <th>S.No</th>
+                                <!-- <th>Prefix No</th> -->
+                                <th class="sort" [ngClass]="getSortClass('purchaseNo')" (click)="sort('purchaseNo')">
+                                    Purchase No</th>
+                                <th class="sort" [ngClass]="getSortClass('date')" (click)="sort('date')">Date</th>
+                                <th class="sort" [ngClass]="getSortClass('transactionType')"
+                                    (click)="sort('transactionType')">Trans Type</th>
+                                <!-- <th>Is Supplier</th> -->
+                                <th class="sort" [ngClass]="getSortClass('partyName')" (click)="sort('partyName')">Party
+                                    Name</th>
+                                <th>Location</th>
+                                <!-- <th class="sort" [ngClass]="getSortClass('modelName')" (click)="sort('modelName')">Model
                                 Name</th> -->
                             <!-- <th>Color</th> -->
                             <!-- <th>Order Qty</th> -->
@@ -97,30 +97,30 @@
                                     {{ po.isSubmitted === 'Submited To Erp' ? 'Yes' : 'No' }}
                                 </span>
                             </td> -->
-                            <td class="text-center">
-                                <span class="badge"
-                                    [ngClass]="po.isSubmitted === 'Submited To Erp' ? 'bg-success' : 'bg-danger'">
-                                    {{ po.isSubmitted === 'Submited To Erp' ? 'Yes' : 'No' }}
-                                </span>
-                            </td>
-                        </tr>
-                        <tr *ngIf="pagedPurchaseOrders.length == 0">
-                            <td colspan="13" class="text-center p-3">No Records Found</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            <div class="col-sm-12 col-md-12">
-                <div class="text-md-right float-md-end gridjs-pagination">
-                    <ngb-pagination [collectionSize]="purchaseOrders.length" [(page)]="page" [pageSize]="pageSize"
-                        (pageChange)="refreshPage()" [boundaryLinks]="true">
-                    </ngb-pagination>
+                                <td class="text-center">
+                                    <span class="badge"
+                                        [ngClass]="po.isSubmitted === 'Submited To Erp' ? 'bg-success' : 'bg-danger'">
+                                        {{ po.isSubmitted === 'Submited To Erp' ? 'Yes' : 'No' }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr *ngIf="pagedPurchaseOrders.length == 0">
+                                <td colspan="13" class="text-center p-3">No Records Found</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-            <!-- End Pagination -->
 
+                <!-- Pagination -->
+                <div class="col-sm-12 col-md-12">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+                        <ngb-pagination [collectionSize]="purchaseOrders.length" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="refreshPage()" [boundaryLinks]="true">
+                        </ngb-pagination>
+                    </div>
+                </div>
+                <!-- End Pagination -->
+
+            </div>
         </div>
     </div>
-</div>
