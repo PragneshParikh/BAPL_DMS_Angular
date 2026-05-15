@@ -23,6 +23,11 @@ import {
 } from '../../ViewModels/models/vehicle-stock-report.model';
 
 import {
+  POTrackingReportViewModel,
+  POTrackingFilterModel,
+} from '../../ViewModels/models/po-tracking-report.model';
+
+import {
   HttpClient,
   HttpParams
 } from '@angular/common/http';
@@ -241,7 +246,33 @@ export class ReportService {
   // PO TRACKING REPORT
   // =====================================================
 
+    getPOTrackingReport(
+      filter: POTrackingFilterModel
+    ): Observable<
+      PagedResponse<POTrackingReportViewModel>
+    > {
 
+      return this.http.post<
+        PagedResponse<POTrackingReportViewModel>
+      >(
+        `${this.apiUrl}/po-tracking`,
+        filter
+      );
+    }
 
+    // =====================================================
+    // PO TRACKING DROPDOWNS
+    // =====================================================
 
+    getPOTypeDropdown(): Observable<string[]> {
+      return this.http.get<string[]>(
+        `${this.apiUrl}/po-tracking/dropdown/po-type`
+      );
+    }
+
+    getPOStatusDropdown(): Observable<string[]> {
+      return this.http.get<string[]>(
+        `${this.apiUrl}/po-tracking/dropdown/po-status`
+      );
+    }
 }
