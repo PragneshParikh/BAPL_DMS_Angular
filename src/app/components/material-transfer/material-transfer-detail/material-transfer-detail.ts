@@ -389,7 +389,14 @@ export class MaterialTransferDetail implements OnInit {
 
   onBlurQuantity(value: number) {
     if (value > 0) {
-      let rate = this.itemList.find(x => x.id === Number(this.newItem.itemId)).custprice;
+      const _item = this.itemList.find(x => x.id === Number(this.newItem.itemId));
+
+      if (_item.batchClosingQty < value) {
+        this.toast.show(`Stock limit exceeded. Please reduce the quantity.`, { classname: 'bg-warning text-white', delay: 5000 });
+        return;
+      }
+
+      let rate = _item ? _item.custprice : 0;
       this.newItem.mrp = Number((rate || 0) * (this.newItem.quantity || 0)).toFixed(2);
       this.newItem.amount = (Number(this.newItem.itemRate) * (this.newItem.quantity || 0)).toFixed(2);
     }
