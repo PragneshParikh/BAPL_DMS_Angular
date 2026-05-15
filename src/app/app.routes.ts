@@ -39,6 +39,7 @@
   import { DeliverySlip } from './components/Reports/delivery-slip/delivery-slip';
   import { SaleLetter } from './components/Reports/sale-letter/sale-letter';
   import { WorkInProgress } from './components/work-in-progress/work-in-progress';
+  import { EmployeeMasterComponent } from './components/employee-master/employee-master';
 
 
   export const routes: Routes = [
@@ -103,6 +104,7 @@
         { path: 'city-master', component: CityMaster, data: [19] },
         { path: 'city-master/add', component: AddCityMaster, data: [19] },
         { path: 'city-master/edit/:id', component: AddCityMaster, data: [19] },
+        { path: 'employee', component: EmployeeMasterComponent, data: [49] },
         { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
         { path: 'pdiChecklistmaster', component: PdiChecklistmaster, data: [36] },
         { path: 'extended-battery-warranty', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty-list/extended-battery-warranty-list').then(m => m.ExtendedBatteryWarrantyList) },
