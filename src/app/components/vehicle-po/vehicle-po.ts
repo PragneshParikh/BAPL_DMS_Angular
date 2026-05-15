@@ -776,22 +776,6 @@ export class VehiclePO implements OnInit {
     this.loader.show();
 
     const dealerCode = this.storageService.getDealerCode();
-    // const poModel = {
-    //   PONumber: this.orderNo,
-    //   PODate: this.poDate,
-    //   POType: this.poType,
-    //   CustomerCode: dealerCode || '',
-    //   TransactionType: this.selectedTransactionType,
-    //   Remarks: this.remarks,
-    //   LocCode: this.selectedLocation,
-    //   LedgerCode: this.selectedLedgerCode,
-    //   Items: this.purchaseDetails.map((item, index) => ({
-    //     ItemCode: item.modelNo,
-    //     Qty: item.qty,
-    //     LineNumber: index + 1,
-    //     DiscAmt: item.discAmt || 0
-    //   }))
-    // };
 
     const soHeader = {
       soHeader: {
@@ -820,15 +804,20 @@ export class VehiclePO implements OnInit {
       }))
     };
 
-    console.log('Submitting to ERP with model:', soHeader);
-
     this.vehiclePoService.sendToERP(soHeader).subscribe({
       next: (res: any) => {
         this.loader.hide();
         console.log('Submit to ERP response:', res);
         this.toaster.show('Submit to ERP successful!', { classname: 'bg-success text-white', delay: 5000 });
         this.isSubmitted = true; // Disable button after success
-        this.redirectToCreatePOList();
+        this.vehiclePoService.updatePOStatus(this.orderNo, 'Submitted').subscribe({
+          next: (updateRes) => {
+            this.redirectToCreatePOList();
+          },
+          error: (updateErr) => {
+            console.error('Error updating PO status after ERP submission:', updateErr);
+          }
+        });
       },
       error: (err) => {
         this.loader.hide();
@@ -837,6 +826,7 @@ export class VehiclePO implements OnInit {
       }
     });
   }
+
   redirectToCreatePOList() {
     this.router.navigate(['/vehicle-po-list']);
   }
