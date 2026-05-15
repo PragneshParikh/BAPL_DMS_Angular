@@ -31,6 +31,10 @@ export class VehiclePoService {
     return this.http.put<any>(`${this.baseUrl}/PurchaseOrder/update`, poModel);
   }
 
+  updatePOStatus(poNumber: string, status: string): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/PurchaseOrder/updatePOStatus`, { poNumber, status });
+  }
+
   deletePOItems(poNumber: string): Observable<any> {
     return this.http.delete<any>(`${this.baseUrl}/PurchaseOrder/items/${poNumber}`);
   }
