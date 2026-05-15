@@ -4,7 +4,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center text-white">
             <h5 class="mb-sm-0">PCR/CIR</h5>
-            <h5 class="mb-sm-0">Job No. {{ffirData?.jobNo}}</h5>
+            <h5 class="mb-sm-0">Job No. {{ffirData?.jobNo || ffirObj?.jobCardHeaderId}}</h5>
         </div>
 
         <div class="card-body">
@@ -73,7 +73,7 @@
 
                                     </select> -->
                                     <input type="text" class="form-control form-control-sm"
-                                        [value]="ffirData?.serviceloc" readonly>
+                                        [value]="ffirData.locationName" readonly>
                                 </div>
 
                                 <div class="col-md-3">
@@ -90,7 +90,7 @@
                                 <div class="col-md-3">
                                     <label>Vehicle Sales Date</label>
                                     <input type="date" class="form-control form-control-sm"
-                                        [value]="ffirData?.vehicleSaleDate | date:'yyyy-MM-dd'" readonly>
+                                        [value]="ffirData.vehicleSaleDate | date:'yyyy-MM-dd'" readonly>
                                 </div>
                                 <div class="col-md-3">
                                     <label>Failure Date</label>
@@ -164,34 +164,51 @@
                                     </select>
                                 </div> -->
                                 <div class="col-md-2">
+
                                     <label>Repeat Failure?</label>
+
                                     <div class="btn-group w-50">
-                                        <input type="radio" class="btn-check btn-check-sm" name="repeat" id="rN"
+
+                                        <input type="radio" class="btn-check btn-check-sm" name="repeatFailure" id="rN"
                                             [value]="false" [(ngModel)]="ffirObj.repeatFailure">
+
                                         <label class="btn btn-outline-secondary" for="rN">
                                             N
                                         </label>
-                                        <input type="radio" class="btn-check btn-check-sm" name="repeat" id="rY"
+
+                                        <input type="radio" class="btn-check btn-check-sm" name="repeatFailure" id="rY"
                                             [value]="true" [(ngModel)]="ffirObj.repeatFailure">
+
                                         <label class="btn btn-outline-secondary" for="rY">
                                             Y
                                         </label>
+
                                     </div>
+
                                 </div>
+
                                 <div class="col-md-2">
+
                                     <label>Chassis Modified?</label>
+
                                     <div class="btn-group w-50">
-                                        <input type="radio" class="btn-check btn-check-sm" name="repeat" id="rN"
-                                            [value]="false" [(ngModel)]="ffirObj.chassisModified">
-                                        <label class="btn btn-outline-secondary" for="rN">
+
+                                        <input type="radio" class="btn-check btn-check-sm" name="chassisModified"
+                                            id="cN" [value]="false" [(ngModel)]="ffirObj.chassisModified">
+
+                                        <label class="btn btn-outline-secondary" for="cN">
                                             N
                                         </label>
-                                        <input type="radio" class="btn-check btn-check-sm" name="repeat" id="rY"
-                                            [value]="true" [(ngModel)]="ffirObj.chassisModified">
-                                        <label class="btn btn-outline-secondary" for="rY">
+
+                                        <input type="radio" class="btn-check btn-check-sm" name="chassisModified"
+                                            id="cY" [value]="true" [(ngModel)]="ffirObj.chassisModified">
+
+                                        <label class="btn btn-outline-secondary" for="cY">
                                             Y
                                         </label>
+
                                     </div>
+
                                 </div>
                                 <div class="col-md-12">
                                     <label>Remarks</label>
@@ -208,25 +225,39 @@
                                             </tr>
                                         </thead>
                                         <tbody>
+
                                             <tr *ngFor="let item of selectedMainParts; let i = index">
 
                                                 <td>
                                                     <button class="btn btn-sm btn-danger" (click)="deleteMainPart(i)">
+
                                                         <i class="ri-delete-bin-line"></i>
+
                                                     </button>
                                                 </td>
 
                                                 <td>{{ i + 1 }}</td>
 
-                                                <td>{{ item.fullPartName }}</td>
+                                                <td>
+
+                                                    {{
+                                                    item.fullPartName
+                                                    ||
+                                                    (item.partAffectedName + ' - ' + item.partAffectedDescription)
+                                                    }}
+
+                                                </td>
 
                                             </tr>
+
                                             <tr *ngIf="selectedMainParts.length === 0">
 
                                                 <td colspan="3" class="text-center">
                                                     No Data Found
                                                 </td>
+
                                             </tr>
+
                                         </tbody>
                                     </table>
                                 </div>

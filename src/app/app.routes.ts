@@ -112,7 +112,7 @@ export const routes: Routes = [
 
       { path: 'ffir/:id', component: FFIR, data: [23] },
 
-      { path: 'ffirlisting', component: Ffirlisting, data: [23] }
+      { path: 'ffirlisting', component: Ffirlisting, data: [23] },
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
       { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-detail/chassis-detail').then(m => m.ChassisDetail) },
       { path: 'proforma-invoice', component: ProformaInvoice, data: [22] },
