@@ -275,4 +275,53 @@ export class ReportService {
         `${this.apiUrl}/po-tracking/dropdown/po-status`
       );
     }
+
+     // =====================================================
+    // PARTS DISPATCH REPORT
+    // =====================================================
+
+  getPartsDispatchReport(
+    dealerCode?: string,
+    fromDate?: Date,
+    toDate?: Date
+  ): Observable<any[]> {
+
+    let params = new HttpParams();
+
+    if (dealerCode) {
+
+      params = params.set(
+        'dealerCode',
+        dealerCode
+      );
+    }
+
+    if (fromDate) {
+
+      params = params.set(
+        'fromDate',
+        fromDate.toISOString()
+      );
+    }
+
+    if (toDate) {
+
+      params = params.set(
+        'toDate',
+        toDate.toISOString()
+      );
+    }
+
+    return this.http.get<any[]>(
+      `${this.apiUrl}/parts-dispatch`,
+      { params }
+    );
+  }
+
+    getDealerList(): Observable<any[]> {
+
+    return this.http.get<any[]>(
+      `${this.apiUrl}/dealer-list`
+    );
+  }
 }

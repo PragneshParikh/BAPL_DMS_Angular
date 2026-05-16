@@ -28,9 +28,11 @@ export class StorageService {
         return data?.userId;
     }
 
-    getDealerCode() {
-        const data = this.getUser();
-        return data?.userName;
+    getDealerCode(): string {
+        // Try explicit dealerCode first, fall back to userName
+        return localStorage.getItem('dealerCode')
+            ?? this.getUser()?.userName
+            ?? '';
     }
 
     setMenuRights(menu) {
