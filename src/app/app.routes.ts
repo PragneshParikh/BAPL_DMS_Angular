@@ -117,6 +117,13 @@ export const routes: Routes = [
                   { path: 'hsrp-order/:id', component: HSRPOrder, data: [48] },
                   { path: 'hsrp-inward', component: HsrpInward, data: [48] },
                   { path: 'upload', component: DealerMasterBulkDataDipatch, data: [] },
+                  { path: 'stock-report', data: [40], loadComponent: () => import('./components/stock-reports/stock-report').then(m => m.StockReportComponent) },
+                  { path: 'job-card-report', data: [41], loadComponent: () => import('./components/Reports/job-report/job-report').then(m => m.JobReportComponent) },
+                  { path: 'vehicle-sale-report', data: [43], loadComponent: () => import('./components/Reports/vehicle-sale-report/vehicle-sale-report').then(m => m.VehicleSaleReportComponent) },
+                  { path: 'vehicle-stocks-report', data: [46], loadComponent: () => import('./components/Reports/vehicle-stock-report/vehicle-stock-report').then(m => m.VehicleStockReportComponent) },
+                  { path: 'po-tracking-report', data: [47], loadComponent: () => import('./components/Reports/po-tracking-report/po-tracking-report').then(m => m.POTrackingReportComponent) },
+                  { path: 'parts-dispatch-report', data: [50], loadComponent: () => import('./components/Reports/parts-dispatch-report/parts-dispatch-report').then(m => m.PartsDispatchReport) },
+                  { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
 
                   { path: 'proforma-invoice', data: [22], component: ProformaInvoice },
                   { path: 'form22-certificate/:chassisNo', data: [22], component: Form22Certificate },

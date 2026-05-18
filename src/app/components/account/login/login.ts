@@ -71,6 +71,9 @@ export class Login {
         this.toastService.show(data.message, { classname: 'bg-success text-white', delay: 5000 });
         this.storageService.setRole(data.role);
         this.storageService.setSelectedModule('ShowRoom');
+         if (data.userName) {
+          localStorage.setItem('dealerCode', data.userName);
+        }
         this.router.navigate(['/']);
       } else {
         this.toastService.show(data.message, { classname: 'bg-danger text-white', delay: 5000 });
