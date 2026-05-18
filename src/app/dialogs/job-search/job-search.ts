@@ -16,6 +16,13 @@ import { SharedModule } from '../../shared/shared.module';
 export class JobSearch {
   jobList: any[] = [];
 
+  formData = {
+    jobNo: null,
+    manualJobNo: null,
+    dateFrom: null,
+    dateTo: null,
+  };
+
   page = 1;
   pageSize = 10;
   collectionSize = 0;
@@ -25,14 +32,16 @@ export class JobSearch {
     private loader: LoaderService,
     private toast: ToastService,
     private jobCardService: JobCardService
-  ) { }
+  ) {
 
-  formData = {
-    jobNo: null,
-    manualJobNo: null,
-    dateFrom: null,
-    dateTo: null,
-  };
+    this.formData = {
+      jobNo: null,
+      manualJobNo: null,
+      dateFrom: new Date(new Date().setDate(new Date().getDate() - 15)).toISOString().split('T')[0],
+      dateTo: new Date().toISOString().split('T')[0]
+    };
+    console.log(this.formData);
+  }
 
   onSubmit(form: any) {
     // Logic to handle job search form submission 

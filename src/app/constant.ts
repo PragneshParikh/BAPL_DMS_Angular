@@ -182,6 +182,7 @@ export const FFIRPurposeofCIR = [
     { id: 2, value: 'For Information' },
     { id: 3, value: 'For Technical Assistance' }
 ]
+
 export const APIUniqueList = [
     { value: 'color', name: 'Color' },
     { value: 'dealermaster', name: 'Dealer' },

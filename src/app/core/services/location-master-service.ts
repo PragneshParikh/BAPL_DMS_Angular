@@ -8,26 +8,28 @@ import { environment } from '../../../environments/environment';
 })
 export class LocationMasterService {
 
-  private apiUrl = `${environment.apiUrl}/LocationMaster/GetAllLocationMaster`;
-  private apiUrldrp = `${environment.apiUrl}/LocationMaster/GetLocationByDealerCode`;
-  private dealerUrl = `${environment.apiUrl}/DealerMaster/GetDealerDropdown`;
-  private locationmasterexcelUrl = `${environment.apiUrl}/LocationMaster/DownloadLocationMasterExcel`;
+  protected baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 
   getAllLocationMaster(): Observable<any> {
-    return this.http.get<any>(this.apiUrl);
+    return this.http.get<any>(`${this.baseUrl}/LocationMaster/GetAllLocationMaster`);
   }
 
   getDealerDropdown(): Observable<any> {
-    return this.http.get<any>(this.dealerUrl);
+    return this.http.get<any>(`${this.baseUrl}/DealerMaster/GetDealerDropdown`);
   }
 
   downloadLocationMasterExcel(): Observable<Blob> {
-    return this.http.get(this.locationmasterexcelUrl, { responseType: 'blob' });
+    return this.http.get(`${this.baseUrl}/LocationMaster/DownloadLocationMasterExcel`, { responseType: 'blob' });
   }
 
   getLocationByDealerCode(dealerCode: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrldrp}/${dealerCode}`);
+    return this.http.get<any>(`${this.baseUrl}/LocationMaster/GetLocationByDealerCode/${dealerCode}`);
   }
+
+  getLocationByDealerCodeAndAreaId(dealerCode: string, areaId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/LocationMaster/GetLocationByDealerByAreaId?dealerCode=${dealerCode}&areaId=${areaId}`);
+  }
+
 }

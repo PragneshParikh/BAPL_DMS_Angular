@@ -67,7 +67,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let data of pagedData" (dblclick)="onNavigate(data.invoiceNo,$event)" style="cursor:pointer">
+                    <tr *ngFor="let data of pagedData" (dblclick)="onNavigate(data.invoiceNo, $event)"
+                        style="cursor:pointer">
                         <td>{{ data.invoiceNo }}</td>
                         <td>{{ data.invoiceDate }}</td>
                         <td>{{ data.lotno }}</td>

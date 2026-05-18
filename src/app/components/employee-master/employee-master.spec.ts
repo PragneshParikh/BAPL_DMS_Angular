@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ChassisDetail } from './chassis-detail';
+import { EmployeeMasterComponent } from './employee-master';
 
-describe('ChassisDetail', () => {
-  let component: ChassisDetail;
-  let fixture: ComponentFixture<ChassisDetail>;
+describe('EmployeeMasterComponent', () => {
+  let component: EmployeeMasterComponent;
+  let fixture: ComponentFixture<EmployeeMasterComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ChassisDetail]
+      imports: [  EmployeeMasterComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ChassisDetail);
+    fixture = TestBed.createComponent( EmployeeMasterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
