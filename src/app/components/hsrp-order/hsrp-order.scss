@@ -1,0 +1,73 @@
+/* SL CELL (both header + row) */
+.sl-cell,
+.sl-header {
+    position: relative;
+    text-align: center;
+}
+
+/* CHECKBOX (shared for header + row) */
+.header-checkbox,
+.row-checkbox {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    opacity: 0;
+    visibility: hidden;
+    
+    z-index: 2;              /* ensure clickable */
+    cursor: pointer;
+}
+
+/* TEXT (SL NO / LABEL) */
+.sl-no,
+.sl-label {
+    display: inline-block;
+    transition: opacity 0.2s ease;
+}
+
+/* =========================
+   SHOW ON HOVER (ROWS)
+   ========================= */
+.table-row-hover:hover .row-checkbox {
+    opacity: 1;
+    visibility: visible;
+}
+
+.table-row-hover:hover .sl-no {
+    opacity: 0;
+}
+
+/* =========================
+   SHOW ON HOVER (HEADER)
+   ========================= */
+.sl-header:hover .header-checkbox {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sl-header:hover .sl-label {
+    opacity: 0;
+}
+
+/* =========================
+   KEEP VISIBLE WHEN SELECTED
+   ========================= */
+.table-row-active .row-checkbox {
+    opacity: 1;
+    visibility: visible;
+}
+
+.table-row-active .sl-no {
+    opacity: 0;
+}
+
+.sl-header-active .header-checkbox {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sl-header-active .sl-label {
+    opacity: 0;
+}

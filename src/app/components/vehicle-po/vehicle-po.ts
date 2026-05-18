@@ -7,12 +7,11 @@ import { ItemMasterService } from '../../core/services/item-master-service';
 import { VehiclePoService } from '../../core/services/vehicle-po-service';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TRANSACTION_TYPES } from '../../constant';
+import { IssueTypes, TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import Swal from 'sweetalert2';
 import { LedgerMaster } from '../../core/services/ledger-master';
-import { error } from 'console';
 import { PrefixService } from '../../core/services/prefix';
 export interface PurchaseOrderItemViewModel {
   ItemCode: string;
@@ -141,7 +140,6 @@ export class VehiclePO implements OnInit {
     this.vehiclePoService.getSubsidyValue().subscribe({
       next: (val) => {
         this.globalSubsidy = val || 0;
-        console.log('Global Subsidy fetched:', this.globalSubsidy);
       },
       error: (err) => console.error('Error fetching subsidy:', err)
     });
@@ -165,11 +163,9 @@ export class VehiclePO implements OnInit {
 
   loadPODetails(poNumber: string) {
     this.loader.show();
-    console.log('Loading details for PO:', poNumber);
     this.vehiclePoService.getPOByNumber(poNumber).subscribe({
       next: (response: any) => {
         this.loader.hide();
-        console.log('API Response for PO details:', response);
         const res = Array.isArray(response) ? response[0] : response;
 
         if (res) {
@@ -189,7 +185,6 @@ export class VehiclePO implements OnInit {
           }
 
           const itemsArr = res.Items || res.items || res.purchaseOrderDetails || res.PurchaseOrderDetails || [];
-          console.log('Items found in response:', itemsArr);
 
           if (itemsArr && itemsArr.length > 0) {
             this.purchaseDetails = itemsArr.map((item: any) => {
@@ -288,7 +283,6 @@ export class VehiclePO implements OnInit {
               }
             });
 
-            console.log('Mapped purchaseDetails:', this.purchaseDetails);
             this.loadPage();
           } else {
             console.warn('No items found in PO response');
@@ -331,8 +325,6 @@ export class VehiclePO implements OnInit {
               };
             });
 
-            console.log('Enriched Location List with States:', this.locationList);
-
             // Set default if not already set by loadPODetails
             if (this.locationList.length > 0 && !this.selectedLocation) {
               this.selectedLocation = this.locationList[0].loccode || this.locationList[0].Loccode || this.locationList[0].locname;
@@ -343,7 +335,7 @@ export class VehiclePO implements OnInit {
               this.calculateRowTotals();
             }
           },
-          error: (err) => console.log('Error fetching dealer locations:', err)
+          error: (err) => console.error('Error fetching dealer locations:', err)
         });
       },
       error: (err) => {
@@ -400,7 +392,6 @@ export class VehiclePO implements OnInit {
     this.itemService.getPurchaseDetailsWithHsnTaxByModelNo(this.currentItem.modelNo).subscribe({
       next: (res: any) => {
         this.loader.hide();
-        console.log('Model details response:', res);
         if (res) {
           // Robust property extraction (handling different casing from backend)
           const getVal = (obj: any, ...keys: string[]) => {
@@ -525,18 +516,12 @@ export class VehiclePO implements OnInit {
     let rawSubsidy = this.currentItem.rawSubsidy || 0;
     this.currentItem.subsidy = rawSubsidy > 0 ? (rawSubsidy * qty) : 0;
 
-    console.log('Calculating totals for location:', this.selectedLocation);
-    console.log('Location list available:', this.locationList);
-
     const dealerLoc = this.locationList.find(l =>
       ((l.locname || l.Locname || '').trim().toLowerCase()) ===
       ((this.selectedLocation || '').trim().toLowerCase())
     ) || (this.locationList.length > 0 ? this.locationList[0] : null);
 
-    console.log('Detected dealer location info:', dealerLoc);
-
     const locState = (dealerLoc?.state || dealerLoc?.State || '').trim();
-    console.log('Detected state:', locState);
 
     // Robust property extraction (handling different casing from backend)
     const getVal = (obj: any, ...keys: string[]) => {
@@ -555,8 +540,6 @@ export class VehiclePO implements OnInit {
     const rawCgstRate = getVal(this.currentItem, 'rawCgstRate', 'cgst');
     const rawIgstRate = getVal(this.currentItem, 'rawIgstRate', 'igst');
 
-    console.log('Calculation rates:', { rawSgstRate, rawCgstRate, rawIgstRate });
-
     // Determine if Interstate: 
     // 1. Explicitly not Maharashtra
     // 2. OR if Transaction Type is 'I' (Interstate)
@@ -564,17 +547,12 @@ export class VehiclePO implements OnInit {
     let isInterstate = locState ? locState.toLowerCase() !== 'maharashtra' : false;
 
     if (this.selectedTransactionType === 'I') {
-      console.log('Forcing Interstate logic because Transaction Type is Interstate');
       isInterstate = true;
     } else if (this.selectedTransactionType === 'L') {
-      console.log('Forcing Local logic because Transaction Type is Local');
       isInterstate = false;
     } else if (rawIgstRate > 0 && (rawSgstRate === 0 && rawCgstRate === 0)) {
-      console.log('Auto-detecting Interstate because only IGST is present');
       isInterstate = true;
     }
-
-    console.log('Final isInterstate:', isInterstate);
 
     if (isInterstate) {
       // Interstate logic: Use IGST
@@ -780,7 +758,7 @@ export class VehiclePO implements OnInit {
         this.isSaving = false;
         if (res.success) {
           this.toaster.show(res.message || 'Purchase Order saved successfully.', { classname: 'bg-success text-white', delay: 5000 });
-          this.router.navigate(['/vehicle-po-list']);
+          this.redirectToCreatePOList();
         } else {
           this.toaster.show(res.message || 'Error saving Purchase Order.', { classname: 'bg-danger text-white', delay: 5000 });
         }
@@ -795,24 +773,47 @@ export class VehiclePO implements OnInit {
   }
 
   onSubmitToERP() {
-    const poFullNumber = this.prefixNo + this.orderNo;
-
-    if (!poFullNumber) {
-      this.toaster.show('Invalid PO Number. Please ensure the PO is saved correctly.', { classname: 'bg-danger text-white', delay: 5000 });
-      return;
-    }
-
     this.loader.show();
 
-    console.log('Submitting to ERP, PO Number:', poFullNumber);
+    const dealerCode = this.storageService.getDealerCode();
 
-    this.vehiclePoService.sendToERP(this.orderNo).subscribe({
+    const soHeader = {
+      soHeader: {
+        CustomerCode: dealerCode || '',
+        ConsigneeCode: this.selectedLocation,
+        TestCertificate: '',
+        RefNo: this.orderNo,
+        ordrtype: this.poType,
+        pordr_type: 'SSO',
+        Amount: this.totalNetAmount.toFixed(2),
+        pordrdate: this.poDate,
+        transType: this.selectedTransactionType,
+        FameIIFlag: '',
+      },
+      soLine: this.purchaseDetails.map((item) => ({
+        ItemName: item.modelNo,
+        modlname: item.modelNo,
+        descriptions: item.description,
+        Unit: 'NOS',
+        Qty: item.qty,
+        itemmodelname: item.modelNo,
+        colridno: 0,
+        colrcode: '',
+        dmspordridno: '1111',
+        poid: 1111
+      }))
+    };
+
+    this.vehiclePoService.sendToERP(soHeader).subscribe({
       next: (res: any) => {
         this.loader.hide();
-        console.log('Submit to ERP response:', res);
         this.toaster.show('Submit to ERP successful!', { classname: 'bg-success text-white', delay: 5000 });
-        this.isSubmitted = true; // Disable button after success
-        this.router.navigate(['/vehicle-po-list']);
+        this.isSubmitted = res.Succeed; // Disable button after success
+
+        const match = res?.ConfirmMessage?.match(/SO No\.\s*([A-Za-z0-9/-]+)/);
+        const salesOrderNo = match ? match[1] : '';
+
+        this.updatePOStatus(this.orderNo, res.Succeed, salesOrderNo, this.selectedLocation);
       },
       error: (err) => {
         this.loader.hide();
@@ -821,6 +822,7 @@ export class VehiclePO implements OnInit {
       }
     });
   }
+
   redirectToCreatePOList() {
     this.router.navigate(['/vehicle-po-list']);
   }
@@ -859,6 +861,17 @@ export class VehiclePO implements OnInit {
       if (!result.isConfirmed) {
         event.target.value = '';
         this.selectedTransactionType = '';
+      }
+    });
+  }
+
+  updatePOStatus(orderNo: string, isSubmitted: boolean, saleOrderNo: string, consigneeCode: string) {
+    this.vehiclePoService.updatePOStatus(orderNo, isSubmitted, saleOrderNo, consigneeCode).subscribe({
+      next: (updateRes) => {
+        this.redirectToCreatePOList();
+      },
+      error: (updateErr) => {
+        console.error('Error updating PO status after ERP submission:', updateErr);
       }
     });
   }

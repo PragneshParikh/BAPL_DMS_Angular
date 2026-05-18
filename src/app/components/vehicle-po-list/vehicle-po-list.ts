@@ -42,11 +42,11 @@ export class VehiclePoList implements OnInit {
     private poListService: VehiclePoListService,
     private loader: LoaderService,
     private toastr: ToastService,
-    private storageService:StorageService
+    private storageService: StorageService
   ) { }
 
   ngOnInit() {
-    this.isSuperAdmin = this.storageService.getRole().toLowerCase() ===  'superadmin';
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     this.initDefaultDates();
     this.loadPOList();
   }
@@ -63,14 +63,12 @@ export class VehiclePoList implements OnInit {
 
   loadPOList() {
     this.loader.show();
-    if(!this.isSuperAdmin)
-    {
-      this.dealerCode =this.storageService.getDealerCode();
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
     }
     this.poListService.getPOList(this.dealerCode).subscribe({
       next: (res: any[]) => {
         this.loader.hide();
-        console.log('PO List res:', res);
         const flattened = this.flattenPOList(res);
         this.originalPurchaseOrders = flattened;
         this.onSearch(); // Apply the default 7-day filter and sorting

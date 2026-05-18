@@ -7,7 +7,8 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class VehiclePoService {
-  private baseUrl = environment.apiUrl;
+  protected baseUrl = environment.apiUrl;
+  protected erpBaseUrl = environment.ERPApiUrl;
 
   constructor(private http: HttpClient) { }
 
@@ -15,10 +16,9 @@ export class VehiclePoService {
     return this.http.post<any>(`${this.baseUrl}/PurchaseOrder/create`, poModel);
   }
 
-  sendToERP(poNumber: string): Observable<any> {
-    // Backend expects [FromBody] string poNumber
-    return this.http.post<any>(`${this.baseUrl}/PurchaseOrder/SendToERP`, JSON.stringify(poNumber), {
-      headers: { 'Content-Type': 'application/json' }
+  sendToERP(poModel: any): Observable<any> {
+    return this.http.post<any>(`${this.erpBaseUrl}/BAPLSOHeader`, JSON.stringify(poModel), {
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 
@@ -29,6 +29,10 @@ export class VehiclePoService {
 
   updatePO(poModel: any): Observable<any> {
     return this.http.put<any>(`${this.baseUrl}/PurchaseOrder/update`, poModel);
+  }
+
+  updatePOStatus(poNumber: string, status: boolean, saleOrderNo: string, consigneeCode: string): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/PurchaseOrder/updatePOStatus`, { poNumber, status, saleOrderNo });
   }
 
   deletePOItems(poNumber: string): Observable<any> {

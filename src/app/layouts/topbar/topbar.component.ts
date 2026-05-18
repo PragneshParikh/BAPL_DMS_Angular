@@ -87,6 +87,12 @@ export class TopbarComponent implements OnInit {
 
   ngOnInit(): void {
     this.userData = this.authService.currentUserValue;
+
+    if (!this.userData) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.element = document.documentElement;
 
     this.lastLoginDate$ = of(this.userData.lastLoginDate).pipe(

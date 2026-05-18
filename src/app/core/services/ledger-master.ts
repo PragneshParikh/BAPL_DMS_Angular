@@ -35,4 +35,9 @@ export class LedgerMaster {
     return this.httpClient.post(`${this.baseUrl}/ledger-master`, data);
   }
 
+  getLedgerByType(ledgerType: string): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/ledger-master/ledgerByType?ledgerType=${ledgerType}`);
+  }
+
+
 }

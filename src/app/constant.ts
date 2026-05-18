@@ -154,7 +154,36 @@ export const ModuleTypes = [
     { name: 'warranty_claim_invoice', moduleName: 'Warranty Claim Invoice' },
     { name: 'free_service_claim', moduleName: 'Free Service Claim' },
     { name: 'CIR_investigation', moduleName: 'CIR Investigation' },
-    { name: 'purchase_order', moduleName: 'Purchase Order' }
+    { name: 'purchase_order', moduleName: 'Purchase Order' },
+    { name: 'hsrp_order', moduleName: 'HSRP Order' },
+    { name: 'sale_bill', moduleName: 'Vehicle Sale Bill' },
+    { name: 'receipt_entry', moduleName: 'Receipt Entry' }
+]
+
+export const FFIRPresentVehicleStatus = [
+    { id: 1, value: 'Complaint Resolved' },
+    { id: 2, value: 'Running with Problem' },
+    { id: 3, value: 'Under Observation' },
+    { id: 4, value: 'Off Road' }
+]
+
+export const FFIRIssueType = [
+    { id: 1, value: 'U/W' },
+    { id: 2, value: 'FOC' },
+    { id: 3, value: 'GoodWill' }
+]
+
+export const FFIRTypeRoadSurface = [
+    { id: 1, value: 'National Highway/ Four lane roads' },
+    { id: 2, value: 'City roads/ State highways/ 2 Lane roads with slight undulation/Pot holes' },
+    { id: 3, value: 'Single lane/ Roads with heavy undulation/ Pot holes/ Bumps' },
+    { id: 4, value: 'Kutcha Road : Unpaved road' }
+]
+
+export const FFIRPurposeofCIR = [
+    { id: 1, value: 'For Warranty Approval' },
+    { id: 2, value: 'For Information' },
+    { id: 3, value: 'For Technical Assistance' }
 ]
 
 export const APIUniqueList = [

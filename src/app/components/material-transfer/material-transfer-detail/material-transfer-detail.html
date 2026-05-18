@@ -26,7 +26,7 @@
                                     <label class="form-label">Job No (ODO {{ formData.OdoMeter }}) </label>
                                     <div class="input-group input-group-sm">
                                         <input type="text" class="form-control form-control-sm" name="jobNo"
-                                            #jobNo="ngModel" [(ngModel)]="formData.jobNo" required readonly>
+                                            #jobNo="ngModel" [(ngModel)]="formData.jobNo" required [disabled]="true">
                                         <button type="button" class="btn btn-outline-secondary bg-primary text-white"
                                             (click)="openJobSearch()">
                                             <i class="ri-file-line"></i>
@@ -64,7 +64,8 @@
                             <div class="row g-1">
                                 <div class="col-md-4">
                                     <label class="form-label">Item Name
-                                        <span class="fs-10">(Stock @ Location 0.0)(GST% 0.0)</span>
+                                        <span class="fs-10">(Stock @ Location {{newItem.batchClosingQty}})(GST%
+                                            0.0)</span>
                                     </label>
                                     <div class="input-group input-group-sm">
                                         <select class="form-select form-select-sm" name="itemName"
@@ -86,20 +87,24 @@
                                 </div>
                                 <div class="col-md-1">
                                     <label class="form-label">Quantity</label>
-                                    <input type="number" class="form-control form-control-sm" name="quantity"
+                                    <!-- <input type="number" class="form-control form-control-sm" name="quantity"
                                         #quantity="ngModel" [(ngModel)]="newItem.quantity"
-                                        (blur)="onBlurQuantity(quantity.value)" required />
+                                        (blur)="onBlurQuantity(quantity.value)" required /> -->
+                                    <input type="text" class="form-control form-control-sm" name="quantity"
+                                        #quantity="ngModel" [(ngModel)]="newItem.quantity" maxlength="4"
+                                        (input)="onQuantityInput($event)" (blur)="onBlurQuantity(quantity.value)"
+                                        required />
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Item Rate</label>
                                     <input type="number" class="form-control form-control-sm" name="itemRate"
                                         #itemRate="ngModel" [(ngModel)]="newItem.itemRate" [disabled]="true">
                                 </div>
-                                <div class="col-md-2">
+                                <!-- <div class="col-md-2">
                                     <label class="form-label">Retrun Qty</label>
                                     <input type="number" class="form-control form-control-sm" name="returnQty"
                                         #returnQty="ngModel" [(ngModel)]="newItem.returnQty" [disabled]="true" />
-                                </div>
+                                </div> -->
                             </div>
 
                             <div class="row g-1 mt-1">
@@ -113,12 +118,12 @@
                                     <input type="text" class="form-control form-control-sm" name="remarks"
                                         #remarks="ngModel" [(ngModel)]="newItem.remarks">
                                 </div>
-                                <div class="col-md-1">
+                                <!-- <div class="col-md-1">
                                     <label class="form-label">Item Rec.</label>
                                     <input type="text" class="form-control form-control-sm" name="itemReceived"
                                         #itemReceived="ngModel" [(ngModel)]="newItem.received" readonly>
-                                </div>
-                                <div class="col-md-1">
+                                </div> -->
+                                <div class="col-md-3">
                                     <label class="form-label">Technician</label>
                                     <select class="form-select form-select-sm" name="technician" #technician="ngModel"
                                         [(ngModel)]="newItem.technician">
@@ -126,11 +131,11 @@
                                         </option>
                                     </select>
                                 </div>
-                                <div class="col-md-1">
+                                <!-- <div class="col-md-1">
                                     <label class="form-label">Valid Days</label>
                                     <input type="text" class="form-control form-control-sm" name="validDays"
                                         #validDays="ngModel" [(ngModel)]="newItem.validdays" readonly>
-                                </div>
+                                </div> -->
                                 <div class="col-md-1">
                                     <label class="form-label">Issue Type</label>
                                     <select class="form-select form-select-sm" name="issueType" #issueType="ngModel"
@@ -140,14 +145,15 @@
                                         </option>
                                     </select>
                                 </div>
-                                <div class="col-md-1">
+                                <!-- <div class="col-md-1">
                                     <label class="form-label">CIR/TAR</label>
                                     <input type="text" class="form-control form-control-sm" name="cirTar"
                                         #cirTar="ngModel" [(ngModel)]="newItem.cir" readonly>
-                                </div>
+                                </div> -->
                                 <div class="col-md-1">
                                     <label class="form-label">&nbsp;</label><br />
-                                    <button type="submit" class="btn btn-primary btn-sm">
+                                    <button type="button" class="btn btn-primary btn-sm"
+                                        (click)="openLabourRateDialog()">
                                         Labour
                                     </button>
                                 </div>
@@ -182,22 +188,21 @@
                                     <th class="text-nowrap">Amount</th>
                                     <th class="text-nowrap">MRP</th>
                                     <th class="text-nowrap">WAV Rate</th>
-                                    <th class="text-nowrap">Valid Days</th>
-                                    <th class="text-nowrap">Valid Kms</th>
+                                    <!-- <th class="text-nowrap">Valid Days</th> -->
+                                    <!-- <th class="text-nowrap">Valid Kms</th> -->
                                     <th class="text-nowrap">Remarks</th>
                                     <th class="text-nowrap">First Fill</th>
                                     <th class="text-nowrap">First Fill Stock</th>
-                                    <th class="text-nowrap">Item Rec.</th>
-                                    <th class="text-nowrap">Item Rec. Rate</th>
-                                    <th class="text-nowrap">CIR</th>
-                                    <th class="text-nowrap">Item Wrnt Approval</th>
-                                    <th class="text-nowrap">Item Wrnt Approval Status</th>
+                                    <!-- <th class="text-nowrap">Item Rec. Rate</th> -->
+                                    <!-- <th class="text-nowrap">CIR</th> -->
+                                    <!-- <th class="text-nowrap">Item Wrnt Approval</th> -->
+                                    <!-- <th class="text-nowrap">Item Wrnt Approval Status</th> -->
                                 </tr>
                             </thead>
                             <tbody>
                                 <!-- Sample Data Row -->
                                 <tr *ngFor="let item of items; let i = index" [hidden]="item.status === 'Deleted'">
-                                    <td class="action-cell">
+                                    <td class="action-cell text-nowrap">
                                         <button class="btn btn-sm btn-soft-info py-0 px-1 me-1"
                                             (click)="editItem(item)">
                                             <i class="ri-pencil-line"></i>
@@ -206,34 +211,35 @@
                                             <i class="ri-delete-bin-line"></i>
                                         </button>
                                     </td>
-                                    <td>{{ i + 1 }}</td>
+                                    <td class="text-nowrap">{{ i + 1 }}</td>
                                     <td class="text-nowrap">{{ item.itemname }}</td>
                                     <td class="text-nowrap">{{ item.itemdesc }}</td>
-                                    <td>{{ item.quantity }}</td>
-                                    <td>{{ item.itemRate }}</td>
-                                    <td>{{ item.stock }}</td>
-                                    <td>{{ item.issueType | getIssueTypeName: issueTypes }}</td>
-                                    <td>{{ item.issueSubType }}</td>
-                                    <td>{{ item.inwardsrno }}</td>
-                                    <td>{{ item.issuesrno }}</td>
-                                    <td>{{ item.technician | getTechnicianName: lstTechnician }}</td>
-                                    <td>{{ item.amount }}</td>
-                                    <td>{{ item.mrp }}</td>
-                                    <td>{{ item.wav }}</td>
-                                    <td>{{ item.validdays }}</td>
-                                    <td>{{ item.validkms }}</td>
+                                    <td class="text-nowrap">{{ item.quantity }}</td>
+                                    <td class="text-nowrap">{{ item.itemRate }}</td>
+                                    <td class="text-nowrap">{{ item.stock }}</td>
+                                    <td class="text-nowrap">{{ item.issueType | getIssueTypeName: issueTypes }}</td>
+                                    <td class="text-nowrap">{{ item.issueSubType }}</td>
+                                    <td class="text-nowrap">{{ item.inwardsrno }}</td>
+                                    <td class="text-nowrap">{{ item.issuesrno }}</td>
+                                    <td class="text-nowrap">{{ item.technician | getTechnicianName: lstTechnician }}
+                                    </td>
+                                    <td class="text-nowrap">{{ item.amount }}</td>
+                                    <td class="text-nowrap">{{ item.mrp | number:'1.2-2' }}</td>
+                                    <td class="text-nowrap">{{ item.wav }}</td>
+                                    <!-- <td>{{ item.validdays }}</td> -->
+                                    <!-- <td>{{ item.validkms }}</td> -->
                                     <td class="text-nowrap" [title]="item.remarks">
                                         {{ item.remarks?.length > 30
                                         ? (item.remarks | slice:0:30) + '...'
                                         : item.remarks }}
                                     </td>
-                                    <td>{{ item.firstfill }}</td>
-                                    <td>{{ item.firstfillstock }}</td>
-                                    <td>{{ item.received }}</td>
-                                    <td>{{ item.receivedrate }}</td>
-                                    <td>{{ item.cir }}</td>
-                                    <td>{{ item.warrantyapproval }}</td>
-                                    <td>{{ item.warrantyapprovalstatus }}</td>
+                                    <td class="text-nowrap">{{ item.firstfill }}</td>
+                                    <td class="text-nowrap">{{ item.firstfillstock }}</td>
+                                    <!-- <td>{{ item.received }}</td> -->
+                                    <!-- <td>{{ item.receivedrate }}</td> -->
+                                    <!-- <td>{{ item.cir }}</td> -->
+                                    <!-- <td>{{ item.warrantyapproval }}</td> -->
+                                    <!-- <td>{{ item.warrantyapprovalstatus }}</td> -->
                                 </tr>
 
                             </tbody>
@@ -264,9 +270,7 @@
                             </h2>
 
                             <div id="previouseMaterials" class="accordion-collapse collapse show">
-                                <div class="accordion-body py-2">
-
-                                </div>
+                                <div class="accordion-body py-2"> </div>
                             </div>
                         </div>
                     </div>
@@ -282,7 +286,7 @@
                     <div class=" row mt-3">
                         <div class="col-md-12">
 
-                            <button type="button" class="btn btn-primary btn-sm float-end" (click)="backToList()">
+                            <button type="button" class="btn btn-danger btn-sm float-end" (click)="backToList()">
                                 Cancel
                             </button>
                             <button type="submit" [disabled]="customerLedgerForm.invalid"

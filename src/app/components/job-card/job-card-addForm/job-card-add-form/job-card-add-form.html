@@ -84,6 +84,11 @@
           <li><a class="dropdown-item">Total(60)</a></li>
         </ul>
       </div>
+      <div>
+        <button class="btn btn-primary btn-sm" type="button" [disabled]="!isEditMode" (click)="goToFFIR()">
+          FFIR
+        </button>
+      </div>
 
     </div>
 
@@ -179,7 +184,7 @@
 
                   <option value="">Select Location</option>
 
-                  <option *ngFor="let loc of locations" [ngValue]="loc.locname">
+                  <option *ngFor="let loc of locations" [value]="loc.locCode">
                     {{ loc.locname }}
                   </option>
 

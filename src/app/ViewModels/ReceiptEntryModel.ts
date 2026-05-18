@@ -44,6 +44,7 @@ dealerCode?:string;
 
 export interface LocationName {
   locname: string;
+  locCode:string;
 }
 
 export interface ReceiptFilter {

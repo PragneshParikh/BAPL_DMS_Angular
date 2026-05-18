@@ -60,13 +60,13 @@
                                 required #taxCode="ngModel" name="taxCode" (change)="onTaxChange()">
                                 <option [ngValue]="null">-- Select TaxCode --</option>
                                 <option *ngFor="let t of taxList" [ngValue]="t">
-                                    ta {{ t.taxCode }}
+                                    {{ t.taxCode }}
                                 </option>
                             </select>
 
                             <small class="text-danger"
                                 *ngIf="taxCode.invalid && (taxCode.touched ||addAggregateTaxForm.submitted)">
-                                taxCode is required
+                                Taxcode is required
                             </small>
                         </div>
 
