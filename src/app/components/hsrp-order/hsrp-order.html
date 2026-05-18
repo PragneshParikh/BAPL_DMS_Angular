@@ -1,0 +1,408 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">HSRP Order Entry</h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <!--Filter Part-->
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+
+                    <!-- From Date -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Date From</label>
+                        <input type="text" class="form-control form-control-sm" mwlFlatpickr
+                            [(ngModel)]="filter.fromDate" [altInput]="true" [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'"
+                            placeholder="Select date">
+                    </div>
+
+                    <!-- To Date -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Date To</label>
+                        <input type="text" class="form-control form-control-sm" mwlFlatpickr [(ngModel)]="filter.toDate"
+                            [altInput]="true" [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'" placeholder="Select date">
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="col-md-auto">
+                        <button class="btn btn-primary btn-sm" (click)="onFilterChange()">
+                            Search 
+                        </button>
+                    </div>
+
+                    <!-- Right Side Button -->
+                    <div class="col-md-auto ms-auto d-flex align-items-end gap-2">
+
+                        <!-- HSRP Type -->
+                        <div style="width:150px;">
+                            <label class="form-label small mb-1">HSRP Type</label>
+                            <select class="form-select form-select-sm" [(ngModel)]="selectedType"
+                                (change)="onTypeChange()">
+                                <option value="order">HSRP Order</option>
+                                <option value="inward">HSRP Inward</option>
+                            </select>
+                        </div>
+
+                        <!-- Button -->
+                        <div>
+                            <label class="form-label small mb-1 invisible">Action</label>
+                            <button class="btn btn-primary btn-sm w-100" (click)="navigateToListingPage()">
+                                View List
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- TABLE CARD -->
+        <div class="card">
+
+            <!-- CARD HEADER -->
+            <div class="card-header py-2">
+
+                <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+
+                    <!-- LEFT SIDE -->
+                    <div class="d-flex align-items-end gap-2 flex-wrap">
+
+                        <!-- ORDER NO -->
+                        <div style="width: 190px;">
+                            <label class="form-label mb-1 small">
+                                Order No
+                            </label>
+
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.orderNo"
+                                readonly>
+                        </div>
+
+                        <!-- ORDER DATE -->
+                        <div style="width: 100px;">
+                            <label class="form-label mb-1 small">
+                                Order Date
+                            </label>
+
+                            <input type="date" class="form-control form-control-sm" [(ngModel)]="model.orderDate"
+                                readonly>
+                        </div>
+
+                        <!-- SUPPLIER -->
+                        <div style="min-width: 200px;">
+                            <label class="form-label mb-1 small">
+                                Supplier
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select class="form-select form-select-sm" [(ngModel)]="model.supplierLedgerId"
+                                name="supplierName" #supplierName="ngModel" required>
+                                <option value=""> Select Supplier </option>
+                                <option *ngFor="let sup of Suppliers" [value]="sup.id">
+                                    {{ sup.ledgerName }}
+                                </option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT SIDE -->
+                    <div class="d-flex align-items-end gap-2 flex-wrap">
+
+                        <!-- FROM DATE -->
+                        <!-- <div style="width: 90px;">
+                            <label class="form-label mb-1 small">
+                                From Date
+                            </label>
+
+                            <input type="text" class="form-control form-control-sm" mwlFlatpickr
+                                [(ngModel)]="filter.fromDate" (ngModelChange)="getPendingHSRPOrder()" [altInput]="true"
+                                [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'" placeholder="From Date">
+                        </div> -->
+
+                        <!-- TO DATE -->
+                        <!-- <div style="width: 90px;">
+                            <label class="form-label mb-1 small">
+                                To Date
+                            </label>
+
+                            <input type="text" class="form-control form-control-sm" mwlFlatpickr
+                                [(ngModel)]="filter.toDate" (ngModelChange)="getPendingHSRPOrder()" [altInput]="true"
+                                [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'" placeholder="To Date">
+                        </div> -->
+
+                        <!-- SEARCH -->
+                        <div style="width: 180px;">
+                            <label class="form-label mb-1 small invisible">
+                                Search
+                            </label>
+
+                            <div class="search-box">
+                                <input type="text" class="form-control form-control-sm search" placeholder="Search..."
+                                    [(ngModel)]="searchTerm" (input)="onSearchChange()" />
+
+                                <i class="ri-search-line search-icon"></i>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- CARD BODY -->
+            <div class="card-body">
+
+                <div class="table-responsive fixed-table">
+
+                    <table class="table table-bordered table-striped hsrp-table table-sm" style="font-size: 12px;">
+
+                        <!-- TABLE HEADER -->
+                        <thead>
+
+                            <tr>
+                                <th class="text-center">
+                                    <input type="checkbox" [(ngModel)]="selectAll" [indeterminate]="isIndeterminate"
+                                        (change)="toggleSelectAll()" />
+                                </th>
+
+                                <th>Sl No</th>
+
+                                <th>
+                                    Chassis No <br>
+                                    Reg No
+                                </th>
+
+                                <th>
+                                    Model <br>
+                                    Colour
+                                </th>
+
+                                <th>
+                                    Sold To <br>
+                                    Mobile No
+                                </th>
+
+                                <th>
+                                    Invoice Date <br>
+                                    Invoice No
+                                </th>
+
+                                <th class="text-center">
+                                    Front Plate
+                                </th>
+
+                                <th class="text-center">
+                                    Rear Plate
+                                </th>
+
+                                <th>
+                                    HSRP Order Status
+                                </th>
+
+                                <th>
+                                    HSRP Response
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <!-- TABLE BODY -->
+                        <tbody>
+
+                            @if (paginatedOrders.length === 0) {
+
+                            <tr>
+                                <td colspan="9" class="text-center">
+                                    No data available
+                                </td>
+                            </tr>
+
+                            }
+
+                            @for (item of paginatedOrders; track $index) {
+
+                            <tr class="table-row-hover" [ngClass]="{'table-row-active': item.selected}">
+
+                                <!--     SL NO WITH HOVER CHECKBOX -->
+                                <td class="text-center">
+                                    <input type="checkbox" [(ngModel)]="item.selected"
+                                        (change)="onRowSelectionChange()" />
+                                </td>
+
+                                <td>
+                                    {{ ($index + 1) + ((page - 1) * pageSize) }}
+                                </td>
+
+
+                                <!-- CHASSIS & REG -->
+                                <td>
+
+                                    <div>
+                                        <strong>
+                                   <ngb-highlight [result]="item.chassisNo || '-'" [term]="searchTerm"></ngb-highlight>
+                                        </strong>
+                                    </div>
+
+                                    <div class="text-muted">
+                                        <ngb-highlight [result]="item.regNo || '-'" [term]="searchTerm"></ngb-highlight>
+                                    </div>
+
+                                </td>
+
+                                <!-- MODEL & COLOUR -->
+                                <td>
+
+                                    <div>
+                                        <ngb-highlight [result]="item.modelName || '-'" [term]="searchTerm"></ngb-highlight>
+                                    </div>
+
+                                    <div class="text-muted">
+                                        <ngb-highlight [result]="item.colour || '-' " [term]="searchTerm"></ngb-highlight>
+                                    </div>
+
+                                </td>
+
+                                <!-- CUSTOMER -->
+                                <td>
+
+                                    <div>
+                                      <ngb-highlight [result]="item.customerName || '-' " [term]="searchTerm"></ngb-highlight>
+                                    </div>
+
+                                    <div class="text-muted">
+                                        <ngb-highlight [result]="item.customerMobile || '-' " [term]="searchTerm"></ngb-highlight>
+                                    </div>
+
+                                </td>
+
+                                <!-- INVOICE -->
+                                <td>
+
+                                    <div>
+                                        <ngb-highlight [result]="item.invoiceDate | date:'dd/MM/yyyy'" [term]="searchTerm"></ngb-highlight>
+                                    </div>
+
+                                    <div class="text-muted">
+                                        <ngb-highlight [result]="item.invoiceNo || '-' " [term]="searchTerm"></ngb-highlight>
+                                    </div>
+
+                                </td>
+
+                                <!-- FRONT PLATE -->
+                                <td class="text-center">
+
+                                    <div class="btn-group" role="group">
+
+                                        <!-- NO -->
+                                        <input type="radio" class="btn-check" [name]="'isFrontPlate' + $index"
+                                            [id]="'frontNo' + $index" [(ngModel)]="item.isFrontPlate" [value]="false">
+
+                                        <label class="btn btn-sm px-3 py-1" [for]="'frontNo' + $index" [ngClass]="item.isFrontPlate === false
+                                               ? 'btn-primary text-white'
+                                               : 'btn-light text-black'"> N
+                                        </label>
+
+                                        <!-- YES -->
+                                        <input type="radio" class="btn-check" [name]="'isFrontPlate' + $index"
+                                            [id]="'frontYes' + $index" [(ngModel)]="item.isFrontPlate" [value]="true">
+
+                                        <label class="btn btn-sm px-3 py-1" [for]="'frontYes' + $index" [ngClass]="item.isFrontPlate === true
+                                                ? 'btn-primary text-white'
+                                               : 'btn-light text-black'">
+                                            Y
+                                        </label>
+
+                                    </div>
+
+                                </td>
+
+                                <!-- REAR PLATE -->
+                                <td class="text-center">
+
+                                    <div class="btn-group" role="group">
+
+                                        <!-- NO -->
+                                        <input type="radio" class="btn-check" [name]="'isRearPlate' + $index"
+                                            [id]="'rearNo' + $index" [(ngModel)]="item.isRearPlate" [value]="false">
+
+                                        <label class="btn btn-sm px-3 py-1" [for]="'rearNo' + $index" [ngClass]="item.isRearPlate === false
+                                               ? 'btn-primary text-white'
+                                               : 'btn-light text-black'"> N
+                                        </label>
+
+                                        <!-- YES -->
+                                        <input type="radio" class="btn-check" [name]="'isRearPlate' + $index"
+                                            [id]="'rearYes' + $index" [(ngModel)]="item.isRearPlate" [value]="true">
+
+                                        <label class="btn btn-sm px-3 py-1" [for]="'rearYes' + $index" [ngClass]="item.isRearPlate === true
+                                                ? 'btn-primary text-white'
+                                               : 'btn-light text-black'">
+                                            Y
+                                        </label>
+
+                                    </div>
+
+                                </td>
+
+                                <!-- STATUS -->
+                                <td>
+                                    {{ item.hsrpOrderStatus || '-' }}
+                                </td>
+
+                                <!-- RESPONSE -->
+                                <td>
+                                    {{ item.hsrpResponse || '-' }}
+                                </td>
+
+                            </tr>
+
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+
+                <!-- PAGINATION -->
+                <div class="row mt-3">
+
+                    <div class="col-sm-12 col-md-12">
+
+                        <div class="text-md-right float-md-end gridjs-pagination">
+
+                            <ngb-pagination [collectionSize]="filteredOrders.length" [(page)]="page"
+                                [pageSize]="pageSize" (pageChange)="onPageChange($event)" [boundaryLinks]="true">
+
+                            </ngb-pagination>
+
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-3">
+
+                    <!-- CLOSE BUTTON -->
+                    <!-- <button class="btn btn-light btn-sm">
+                        Close
+                    </button> -->
+
+                    <!-- SAVE BUTTON -->
+                    <button class="btn btn-primary btn-sm" (click)="submitHSRPOrder()" [disabled]="!hasSelection()">
+                        Save
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,255 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">HSRP Inward List</h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+
+            <!--Filter Part-->
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+
+                    <!-- From Date -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Date From</label>
+                        <input type="text" class="form-control form-control-sm" mwlFlatpickr
+                            [(ngModel)]="filter.fromDate" [altInput]="true" [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'"
+                            placeholder="Select date">
+                    </div>
+
+                    <!-- To Date -->
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Date To</label>
+                        <input type="text" class="form-control form-control-sm" mwlFlatpickr [(ngModel)]="filter.toDate"
+                            [altInput]="true" [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'" placeholder="Select date">
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="col-md-auto">
+                        <button class="btn btn-primary btn-sm" (click)="onFilterChange()">
+                            Search
+                        </button>
+                    </div>
+
+                    <!-- Right Side Button -->
+                    <div class="col-md-auto ms-auto d-flex align-items-end gap-2">
+
+                        <!-- HSRP Type -->
+                        <div style="width:150px;">
+                            <label class="form-label small mb-1">HSRP Type</label>
+                            <select class="form-select form-select-sm" [(ngModel)]="selectedType"
+                                (change)="onTypeChange()">
+                                <option value="order">HSRP Order</option>
+                                <option value="inward">HSRP Inward</option>
+                            </select>
+                        </div>
+
+                        <!-- Button -->
+                        <div>
+                            <label class="form-label small mb-1 invisible">Action</label>
+                            <button class="btn btn-primary btn-sm w-100" (click)="navigateToListingPage()">
+                                View List
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+
+            <!-- HEADER -->
+            <div class="card-header">
+
+                <div class="d-flex justify-content-between align-items-end flex-wrap gap-2">
+
+                    <!-- LEFT (DATE FILTER) -->
+                    <div class="d-flex align-items-end gap-2">
+
+                        <div style="width:120px;">
+                            <label class="form-label small">From Date</label>
+                            <input type="text" class="form-control form-control-sm" mwlFlatpickr
+                                [(ngModel)]="filter.fromDate" (ngModelChange)="onFilterChange()" [altInput]="true"
+                                [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'">
+                        </div>
+
+                        <div style="width:120px;">
+                            <label class="form-label small">To Date</label>
+                            <input type="text" class="form-control form-control-sm" mwlFlatpickr
+                                [(ngModel)]="filter.toDate" (ngModelChange)="onFilterChange()" [altInput]="true"
+                                [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'">
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT -->
+                    <div class="d-flex align-items-end gap-2">
+
+                        <!-- TYPE -->
+                        <!-- <div style="width:150px;">
+                            <label class="form-label small">HSRP Type</label>
+                            <select class="form-select form-select-sm" [(ngModel)]="selectedType"
+                                (change)="onTypeChange()">
+                                <option value="order">HSRP Order</option>
+                                <option value="inward">HSRP Inward</option>
+                            </select>
+                        </div> -->
+
+                        <!-- SEARCH -->
+                        <div style="width:250px;">
+                            <label class="form-label small invisible">Search</label>
+                            <input type="text" class="form-control form-control-sm" placeholder="Search..."
+                                [(ngModel)]="searchTerm" (input)="onSearchChange()">
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- BODY -->
+            <div class="card-body">
+
+                <div class="table-responsive fixed-table" style="overflow-x: auto; white-space: nowrap;">
+
+                    <table class="table table-bordered table-striped table-sm" style="font-size:12px;">
+
+                        <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>Sl No</th>
+                                <th>Order No<br>Order Date</th>
+
+                                <th>Supplier</th>
+                                <th>Customer</th>
+                                <th>Chassis No<br>Reg No</th>
+                                <th class="text-center">Front Plate</th>
+                                <th class="text-center">Rear Plate</th>
+                                <th class="text-center" style="min-width: 120px;">Inward Status</th>
+                                <th>Inward Response</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr *ngIf="paginatedOrders.length === 0">
+                                <td colspan="8" class="text-center">No data available</td>
+                            </tr>
+
+                            <tr *ngFor="let item of paginatedOrders; let i = index">
+                                <td class="text-center">
+                                    <input type="checkbox" [(ngModel)]="item.selected">
+                                </td>
+
+                                <td>{{ (i + 1) + ((page - 1) * pageSize) }}</td>
+
+                                <td><strong>{{ item.orderNo || '-' }}</strong> <br>{{item.orderDate|date:'dd-MM-yyyy'}}
+                                </td>
+
+                                <td><ngb-highlight [result]="item.supplierName || '-'" [term]="searchTerm"></ngb-highlight></td>
+
+                                <td><ngb-highlight [result]="item.customerName || '-'" [term]="searchTerm"></ngb-highlight></td>
+
+                                <td><ngb-highlight [result]="item.chassisNo || '-'" [term]="searchTerm"></ngb-highlight><br><ngb-highlight [result]="item.regNo || '-'" [term]="searchTerm"></ngb-highlight></td>
+
+                                <!-- FRONT PLATE -->
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+
+                                        <input type="radio" class="btn-check" [name]="'frontPlate' + i"
+                                            [id]="'frontNo' + i" [(ngModel)]="item.isFrontPlate" [value]="false">
+
+                                        <label class="btn px-3 py-1" [for]="'frontNo' + i" [ngClass]="item.isFrontPlate === false
+                    ? 'btn-primary text-white'
+                    : 'btn-light text-black'">
+                                            N
+                                        </label>
+
+                                        <input type="radio" class="btn-check" [name]="'frontPlate' + i"
+                                            [id]="'frontYes' + i" [(ngModel)]="item.isFrontPlate" [value]="true">
+
+                                        <label class="btn px-3 py-1" [for]="'frontYes' + i" [ngClass]="item.isFrontPlate === true
+                    ? 'btn-primary text-white'
+                    : 'btn-light text-black'">
+                                            Y
+                                        </label>
+
+                                    </div>
+                                </td>
+
+                                <!-- REAR PLATE -->
+                                <td class="text-center">
+
+                                    <div class="btn-group" role="group">
+
+                                        <!-- NO -->
+                                        <input type="radio" class="btn-check" [name]="'isRearPlate' + i"
+                                            [id]="'rearNo' + i" [(ngModel)]="item.isRearPlate" [value]="false">
+
+                                        <label class="btn btn-sm px-3 py-1" [for]="'rearNo' + i" [ngClass]="item.isRearPlate === false
+                   ? 'btn-primary text-white'
+                   : 'btn-light text-black'">
+                                            N
+                                        </label>
+
+                                        <!-- YES -->
+                                        <input type="radio" class="btn-check" [name]="'isRearPlate' + i"
+                                            [id]="'rearYes' + i" [(ngModel)]="item.isRearPlate" [value]="true">
+
+                                        <label class="btn btn-sm px-3 py-1" [for]="'rearYes' + i" [ngClass]="item.isRearPlate === true
+                   ? 'btn-primary text-white'
+                   : 'btn-light text-black'">
+                                            Y
+                                        </label>
+
+                                    </div>
+
+                                </td>
+
+                                <!-- INWARD STATUS -->
+                                <td class="text-center">
+
+                                    <select class="form-select form-select-sm" [(ngModel)]="item.inwardStatus">
+
+                                        <option value=null>Pending</option>
+                                        <option value="Received">Received</option>
+
+                                    </select>
+
+                                </td>
+
+                                <!-- INWARD RESPONSE -->
+                                <td>
+                                    {{item.inwardResponse||'-'}}
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <!-- PAGINATION -->
+                <div class="mt-3 d-flex justify-content-end">
+                    <ngb-pagination [collectionSize]="filteredOrders.length" [(page)]="page" [pageSize]="pageSize"
+                        (pageChange)="onPageChange($event)">
+                    </ngb-pagination>
+                </div>
+                <!-- SAVE BUTTON -->
+                 <div class="mt-3 d-flex justify-content-end">
+
+                <button class="btn btn-primary btn-sm" (click)="submitHSRPInward()">
+                    Save
+                </button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

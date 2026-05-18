@@ -154,7 +154,10 @@ export const ModuleTypes = [
     { name: 'warranty_claim_invoice', moduleName: 'Warranty Claim Invoice' },
     { name: 'free_service_claim', moduleName: 'Free Service Claim' },
     { name: 'CIR_investigation', moduleName: 'CIR Investigation' },
-    { name: 'purchase_order', moduleName: 'Purchase Order' }
+    { name: 'purchase_order', moduleName: 'Purchase Order' },
+    { name: 'hsrp_order', moduleName: 'HSRP Order' },
+    { name: 'sale_bill', moduleName: 'Vehicle Sale Bill' },
+    { name: 'receipt_entry', moduleName: 'Receipt Entry' }
 ]
 
 export const FFIRPresentVehicleStatus = [
