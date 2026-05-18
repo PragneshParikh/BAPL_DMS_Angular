@@ -7,7 +7,7 @@ import { ItemMasterService } from '../../core/services/item-master-service';
 import { VehiclePoService } from '../../core/services/vehicle-po-service';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TRANSACTION_TYPES } from '../../constant';
+import { IssueTypes, TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import Swal from 'sweetalert2';
@@ -785,9 +785,9 @@ export class VehiclePO implements OnInit {
         RefNo: this.orderNo,
         ordrtype: this.poType,
         pordr_type: 'SSO',
-        Amount: 100,
+        Amount: this.totalNetAmount.toFixed(2),
         pordrdate: this.poDate,
-        transType: "B2C",
+        transType: this.selectedTransactionType,
         FameIIFlag: '',
       },
       soLine: this.purchaseDetails.map((item) => ({
@@ -807,17 +807,13 @@ export class VehiclePO implements OnInit {
     this.vehiclePoService.sendToERP(soHeader).subscribe({
       next: (res: any) => {
         this.loader.hide();
-        console.log('Submit to ERP response:', res);
         this.toaster.show('Submit to ERP successful!', { classname: 'bg-success text-white', delay: 5000 });
-        this.isSubmitted = true; // Disable button after success
-        this.vehiclePoService.updatePOStatus(this.orderNo, 'Submitted').subscribe({
-          next: (updateRes) => {
-            this.redirectToCreatePOList();
-          },
-          error: (updateErr) => {
-            console.error('Error updating PO status after ERP submission:', updateErr);
-          }
-        });
+        this.isSubmitted = res.Succeed; // Disable button after success
+
+        const match = res?.ConfirmMessage?.match(/SO No\.\s*([A-Za-z0-9/-]+)/);
+        const salesOrderNo = match ? match[1] : '';
+
+        this.updatePOStatus(this.orderNo, res.Succeed, salesOrderNo, this.selectedLocation);
       },
       error: (err) => {
         this.loader.hide();
@@ -865,6 +861,17 @@ export class VehiclePO implements OnInit {
       if (!result.isConfirmed) {
         event.target.value = '';
         this.selectedTransactionType = '';
+      }
+    });
+  }
+
+  updatePOStatus(orderNo: string, isSubmitted: boolean, saleOrderNo: string, consigneeCode: string) {
+    this.vehiclePoService.updatePOStatus(orderNo, isSubmitted, saleOrderNo, consigneeCode).subscribe({
+      next: (updateRes) => {
+        this.redirectToCreatePOList();
+      },
+      error: (updateErr) => {
+        console.error('Error updating PO status after ERP submission:', updateErr);
       }
     });
   }
