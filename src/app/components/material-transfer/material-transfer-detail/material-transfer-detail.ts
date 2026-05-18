@@ -113,7 +113,7 @@ export class MaterialTransferDetail implements OnInit {
       this.getMaterialIssueId();
     }
     this.getItemList();
-    this.getLocationList();
+    this.getLocationList(this.dealerCode, 2);
     this.getMaterialTransferList(this.jobId);
   }
 
@@ -143,9 +143,9 @@ export class MaterialTransferDetail implements OnInit {
     });
   }
 
-  getLocationList() {
+  getLocationList(dealerCode: string, areaId: number) {
     this.loader.show();
-    this.locationService.getLocationByDealerCode(this.dealerCode).subscribe({
+    this.locationService.getLocationByDealerCodeAndAreaId(dealerCode, areaId).subscribe({
       next: (result) => {
         this.lstLocation = result;
       },
@@ -261,6 +261,17 @@ export class MaterialTransferDetail implements OnInit {
   }
 
   onAddItem() {
+    if (this.newItem.itemId <= 0) {
+      this.toast.show('Please select an item to add.', { classname: 'bg-warning text-white', delay: 5000 });
+      return;
+    }
+
+    if (this.newItem.quantity <= 0) {
+      this.toast.show('Please enter a valid quantity.', { classname: 'bg-warning text-white', delay: 5000 });
+      return;
+    }
+
+
     let index = this.items.findIndex(x => x.id === this.newItem.id);
 
     const itemToSave = {
@@ -301,6 +312,7 @@ export class MaterialTransferDetail implements OnInit {
           this.jobId = result.jobDetail.id;
           this.getMaterialTransferList(result.jobDetail.id);
           this.getJobCardById(result.jobDetail.id);
+          this.getLocationList(this.dealerCode, 2);
         }
       },
       (reason) => {
@@ -377,7 +389,14 @@ export class MaterialTransferDetail implements OnInit {
 
   onBlurQuantity(value: number) {
     if (value > 0) {
-      let rate = this.itemList.find(x => x.id === Number(this.newItem.itemId)).custprice;
+      const _item = this.itemList.find(x => x.id === Number(this.newItem.itemId));
+
+      if (_item.batchClosingQty < value) {
+        this.toast.show(`Stock limit exceeded. Please reduce the quantity.`, { classname: 'bg-warning text-white', delay: 5000 });
+        return;
+      }
+
+      let rate = _item ? _item.custprice : 0;
       this.newItem.mrp = Number((rate || 0) * (this.newItem.quantity || 0)).toFixed(2);
       this.newItem.amount = (Number(this.newItem.itemRate) * (this.newItem.quantity || 0)).toFixed(2);
     }
@@ -403,6 +422,7 @@ export class MaterialTransferDetail implements OnInit {
 
           this.newItem.itemdesc = selectedItem.itemdesc;
           this.newItem.itemname = selectedItem.itemname;
+          this.newItem.itemId = selectedItem.id;
           this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
         },
         error: (err) => {
@@ -493,6 +513,13 @@ export class MaterialTransferDetail implements OnInit {
     };
   }
 
+  onQuantityInput(event: any): void {
+    const input = event.target.value.replace(/[^0-9]/g, '');
+
+    this.newItem.quantity = input ? Number(input) : 0;
+
+    event.target.value = input;
+  }
 }
 
 export const TechnicianList = [

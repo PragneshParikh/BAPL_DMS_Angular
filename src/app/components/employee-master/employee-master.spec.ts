@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DataSeed } from './data-seed';
+import { EmployeeMasterComponent } from './employee-master';
 
-describe('DataSeed', () => {
-  let component: DataSeed;
-  let fixture: ComponentFixture<DataSeed>;
+describe('EmployeeMasterComponent', () => {
+  let component: EmployeeMasterComponent;
+  let fixture: ComponentFixture<EmployeeMasterComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DataSeed]
+      imports: [  EmployeeMasterComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(DataSeed);
+    fixture = TestBed.createComponent( EmployeeMasterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

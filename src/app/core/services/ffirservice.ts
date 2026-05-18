@@ -36,5 +36,18 @@ export class FFIRService {
   );
 
 }
+getFFIRById(id: number): Observable<any> {
+
+  return this.httpClient.get(
+    `${environment.apiUrl}/FFIR/GetFFIRById/${id}`
+  );
+
+}
+updateFFIR(id: number, payload: any): Observable<any> {
+  return this.httpClient.put(
+    `${environment.apiUrl}/FFIR/UpdateFFIR/${id}`,
+    payload
+  );
+}
 
 }
