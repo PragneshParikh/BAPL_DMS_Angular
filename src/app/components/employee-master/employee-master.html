@@ -1,159 +1,51 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">Employee Master</h4>
+</div>
+
 <div class="card">
-
-  <!-- HEADER -->
-  <div class="card-header d-flex justify-content-between align-items-center">
-
-    <h5 class="mb-0">
-      Employee Master
-    </h5>
-
-    <div class="d-flex gap-2">
-
-      <button
-        type="button"
-        class="btn btn-primary btn-sm"
-        (click)="saveEmployee()">
-
-        Save
-
-      </button>
-
-      <button
-        type="button"
-        class="btn btn-light btn-sm"
-        (click)="resetForm()">
-
-        Reset
-
-      </button>
-
-    </div>
-
-  </div>
 
   <!-- BODY -->
   <div class="card-body">
 
-    <form [formGroup]="employeeForm">
+    <form #employeeMasterForm="ngForm" (ngSubmit)="onSubmit(employeeMasterForm)">
 
       <div class="row">
-
-        <!-- ========================================= -->
-        <!-- LEFT IMAGE SECTION -->
-        <!-- ========================================= -->
-
         <div class="col-md-2">
-
           <!-- IMAGE BOX -->
-          <div
-            style="
-              width:120px;
-              height:150px;
-              border:1px solid #dcdcdc;
-              background:#fff;
-              overflow:hidden;
-              margin:auto;
-              display:flex;
-              align-items:center;
-              justify-content:center;
-            ">
-
-            <img
-              *ngIf="imagePreview"
-              [src]="imagePreview"
-              style="
-                width:100%;
-                height:100%;
-                object-fit:cover;
-              ">
-
-            <i
-              *ngIf="!imagePreview"
-              class="ri-image-line"
-              style="
-                font-size:40px;
-                color:#adb5bd;
-              ">
-            </i>
-
+          <div style=" width:120px; height:150px; border:1px solid #dcdcdc; background:#fff; overflow:hidden;
+              margin:auto; display:flex; align-items:center; justify-content:center;">
+            <img *ngIf="imagePreview" [src]="imagePreview" style="width:100%; height:100%; object-fit:cover;">
+            <i *ngIf="!imagePreview" class="ri-image-line" style="font-size:40px; color:#adb5bd;"> </i>
           </div>
 
           <!-- TITLE -->
           <div
-            style="
-              width:120px;
-              margin:auto;
-              border:1px solid #dcdcdc;
-              border-top:none;
-              padding:6px;
-              text-align:center;
-              font-weight:500;
-              font-size:13px;
-            ">
-
+            style="width:120px; margin:auto; border:1px solid #dcdcdc; border-top:none; padding:6px; text-align:center; font-weight:500; font-size:13px; ">
             Upload Profile Image
-
           </div>
 
           <!-- HIDDEN FILE -->
-          <input
-            #fileInput
-            type="file"
-            hidden
-            accept="image/*"
-            (change)="onFileSelect($event)">
+          <input #fileInput type="file" hidden accept="image/*" (change)="onFileSelect($event)">
 
           <!-- UPLOAD -->
-          <button
-            type="button"
-            class="btn btn-primary btn-sm mt-2"
-            style="
-              width:120px;
-              display:block;
-              margin:auto;
-            "
+          <button type="button" class="btn btn-primary btn-sm mt-2" style="width:120px; display:block; margin:auto;"
             (click)="fileInput.click()">
-
             Upload
-
           </button>
 
           <!-- DELETE -->
-          <button
-            type="button"
-            class="btn btn-danger btn-sm mt-2"
-            style="
-              width:120px;
-              display:block;
-              margin:auto;
-            "
-            (click)="removeImage()">
-
-            Delete Image
-
-          </button>
+          <!-- <button type="button" class="btn btn-danger btn-sm mt-2" style="width:120px; display:block; margin:auto;"
+            (click)="removeImage()"> Delete Image
+          </button> -->
 
           <!-- NOTE -->
-          <div
-            class="text-center mt-3"
-            style="
-              font-size:12px;
-              line-height:20px;
-              color:#555;
-            ">
-
+          <div class="text-center mt-3" style="font-size:12px; line-height:20px; color:#555;">
             <b>Note</b>
-
             <br>
-
             Photo should be 3.5cm x 4.5cm at 100 dpi.
-
             <br>
-
             Maximum size should be 50kb.
-
           </div>
-
         </div>
 
         <!-- ========================================= -->
@@ -161,249 +53,145 @@
         <!-- ========================================= -->
 
         <div class="col-md-10">
-
           <div class="row g-3">
-
             <!-- ROW 1 -->
-
-            <div class="col-md-3">
-
-              <label>Employee Code</label>
-
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                formControlName="employeeCode">
-
-            </div>
-
-            <div class="col-md-3">
-
-              <label>First Name</label>
-
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                formControlName="firstName">
-
-            </div>
-
-            <div class="col-md-3">
-
-              <label>Last Name</label>
-
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                formControlName="lastName">
-
-            </div>
-
-            <div class="col-md-3">
-
-              <label>Gender</label>
-
-              <select
-                class="form-select form-select-sm"
-                formControlName="gender">
-
-                <option value="">
-                  Select Gender
-                </option>
-
-                <option value="Male">
-                  Male
-                </option>
-
-                <option value="Female">
-                  Female
-                </option>
-
-              </select>
-
+            <div class="row mb-2">
+              <div class="col-md-3">
+                <label class="form-label">Employee Code</label>
+                <input type="text" class="form-control form-control-sm" #employeeCode="ngModel"
+                  [(ngModel)]="employeeData.employeeCode" name="employeeCode">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">First Name</label>
+                <input type="text" class="form-control form-control-sm" #firstName="ngModel"
+                  [(ngModel)]="employeeData.firstName" name="firstName">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Last Name</label>
+                <input type="text" class="form-control form-control-sm" #lastName="ngModel"
+                  [(ngModel)]="employeeData.lastName" name="lastName">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Gender <span class="text-danger">*</span></label>
+                <select class="form-select form-select-sm" name="gender" [(ngModel)]="employeeData.gender"
+                  #gender="ngModel" required>
+                  <option *ngFor="let g of genders" [value]="g.value">
+                    {{ g.title }}
+                  </option>
+                </select>
+              </div>
             </div>
 
             <!-- ROW 2 -->
+            <div class="row mb-2">
+              <div class="col-md-3">
+                <label class="form-label">Mobile No.</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.mobile" name="mobile"
+                  #mobile="ngModel">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Email ID</label>
+                <input type="email" class="form-control form-control-sm" [(ngModel)]="employeeData.emailID"
+                  name="emailID" #emailID="ngModel">
+              </div>
 
-            <div class="col-md-3">
-
-              <label>Mobile No.</label>
-
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                formControlName="mobile">
-
-            </div>
-
-            <div class="col-md-3">
-
-              <label>Email ID</label>
-
-              <input
-                type="email"
-                class="form-control form-control-sm"
-                formControlName="emailID">
-
-            </div>
-
-            <div class="col-md-3">
-
-              <label>Password</label>
-
-              <input
-                type="password"
-                class="form-control form-control-sm"
-                formControlName="password">
-
-            </div>
-
-            <div class="col-md-3">
-
-              <label>Date Of Join</label>
-
-              <input
-                type="date"
-                class="form-control form-control-sm"
-                formControlName="dateOfJoin">
-
+              <div class="col-md-3">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control form-control-sm" [(ngModel)]="employeeData.password"
+                  name="password" #password="ngModel">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Date Of Join</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="employeeData.dateOfJoin"
+                  name="dateOfJoin" #dateOfJoin="ngModel">
+              </div>
             </div>
 
             <!-- ROW 3 -->
-
-            <div class="col-md-3">
-
-              <label>Dealer Code</label>
-
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                formControlName="dealerCode">
-
-            </div>
-
-            <div class="col-md-3">
-
-              <label>Department</label>
-
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                formControlName="department">
-
-            </div>
-
-            <div class="col-md-3">
-
-              <label>Designation</label>
-
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                formControlName="designation">
-
-            </div>
-
-            <div class="col-md-3">
-
-              <label>Supervisor</label>
-
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                formControlName="supervisor">
-
+            <div class="row mb-2">
+              <div class="col-md-3">
+                <label class="form-label">Dealer Code</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.dealerCode"
+                  name="dealerCode" #dealerCode="ngModel">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Department</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.department"
+                  name="department" #department="ngModel">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Designation</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.designation"
+                  name="designation" #designation="ngModel">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Supervisor</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.supervisor"
+                  name="supervisor" #supervisor="ngModel">
+              </div>
             </div>
 
             <!-- ROW 4 -->
-
-            <div class="col-md-3">
-
-              <label>Is Active</label>
-
-              <select
-                class="form-select form-select-sm"
-                formControlName="isActive">
-
-                <option [ngValue]="true">
-                  Yes
-                </option>
-
-                <option [ngValue]="false">
-                  No
-                </option>
-
-              </select>
-
-            </div>
-
-            <div class="col-md-3">
-
-              <label>State</label>
-
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                formControlName="state">
-
-            </div>
-
-            <div class="col-md-3">
-
-              <label>City</label>
-
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                formControlName="city">
-
-            </div>
-
-            <div class="col-md-3">
-
-              <label>Pincode</label>
-
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                formControlName="pincode">
-
+            <div class="row mb-2">
+              <div class="col-md-3">
+                <label class="form-label">Is Active</label>
+                <select class="form-select form-select-sm" [(ngModel)]="employeeData.isActive" name="isActive"
+                  #isActive="ngModel">
+                  <option [ngValue]="true"> Yes </option>
+                  <option [ngValue]="false"> No </option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">State</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.state" name="state"
+                  #state="ngModel">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">City</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.city" name="city"
+                  #city="ngModel">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Pincode</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.pincode"
+                  name="pincode" #pincode="ngModel">
+              </div>
             </div>
 
             <!-- ROW 5 -->
-
-            <div class="col-md-6">
-
-              <label>Address</label>
-
-              <textarea
-                rows="3"
-                class="form-control form-control-sm"
-                formControlName="address">
+            <div class="row mb-2">
+              <div class="col-md-6">
+                <label class="form-label">Address</label>
+                <textarea rows="3" class="form-control form-control-sm" [(ngModel)]="employeeData.address"
+                  name="address" #address="ngModel">
               </textarea>
-
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Notes</label>
+                <textarea rows="3" class="form-control form-control-sm" [(ngModel)]="employeeData.notes" name="notes"
+                  #notes="ngModel">
+              </textarea>
+              </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="row mt-3">
+              <div class="col-md-12">
+                <button type="button" class="btn btn-primary btn-sm float-end" (click)="backToList()">
+                  Cancel
+                </button>
+                <button type="submit" [disabled]="employeeMasterForm.invalid"
+                  class="btn btn-primary btn-sm float-end me-1">
+                  Save
+                </button>
 
-              <label>Notes</label>
-
-              <textarea
-                rows="3"
-                class="form-control form-control-sm"
-                formControlName="notes">
-              </textarea>
-
+              </div>
             </div>
 
           </div>
-
         </div>
 
+
       </div>
-
     </form>
-
   </div>
-
 </div>
