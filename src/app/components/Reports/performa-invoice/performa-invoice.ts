@@ -71,7 +71,7 @@ export class PerformaInvoice implements OnInit {
     }
   }
 
-  // CALCULATE FOR MULTIPLE ROWS
+ // CALCULATE FOR MULTIPLE ROWS
   calculateAmounts() {
     const details = this.saleBill?.details || [];
 
@@ -126,6 +126,102 @@ export class PerformaInvoice implements OnInit {
 
     this.convert();
   }
+
+//   calculateAmounts() {
+
+//   const details = this.saleBill?.details || [];
+
+//   this.amounts = {
+//     taxable: 0,
+//     cgst: 0,
+//     sgst: 0,
+//     igst: 0,
+//     cgstPercent: 0,
+//     sgstPercent: 0,
+//     igstPercent: 0,
+//     exShowroom: 0,
+//     discount: 0,
+//     total: 0
+//   };
+
+//   this.registrationAmount = 0;
+//   this.insuranceAmount = 0;
+
+//   let exTotal = 0;
+//   let onRoadBase = 0;
+
+//   details.forEach((item: any) => {
+
+//     const rate = item.itemRate || 0;
+//     const discount = item.preGstDiscount || 0;
+
+//     const cgstPer = item.cgstper || 0;
+//     const sgstPer = item.sgstper || 0;
+//     const igstPer = item.igstper || 0;
+
+//     // =========================
+//     //    EX SHOWROOM LOGIC
+//     // GST on FULL itemRate
+//     // =========================
+//     const exCgst = (rate * cgstPer) / 100;
+//     const exSgst = (rate * sgstPer) / 100;
+//     const exIgst = (rate * igstPer) / 100;
+
+//     const exGstTotal = exCgst + exSgst + exIgst;
+
+//     const exItemTotal = rate + exGstTotal - discount;
+
+//     exTotal += exItemTotal;
+
+//     // =========================
+//     //    ON ROAD LOGIC
+//     // Discount FIRST, then GST
+//     // =========================
+//     const netAmount = rate - discount;
+
+//     const onCgst = (netAmount * cgstPer) / 100;
+//     const onSgst = (netAmount * sgstPer) / 100;
+//     const onIgst = (netAmount * igstPer) / 100;
+
+//     const onGstTotal = onCgst + onSgst + onIgst;
+
+//     const onItemTotal = netAmount + onGstTotal;
+
+//     onRoadBase += onItemTotal;
+
+//         this.amounts.cgstPercent = item.cgstper || 0;
+//       this.amounts.sgstPercent = item.sgstper || 0;
+//       this.amounts.igstPercent = item.igstper || 0;
+//     this.amounts.taxable += rate;
+//     this.amounts.cgst += exCgst;
+//     this.amounts.sgst += exSgst;
+//     this.amounts.igst += exIgst;
+
+//     this.amounts.discount += discount;
+
+//     this.registrationAmount += item.regAmount || 0;
+//     this.insuranceAmount += item.insuranceAmount || 0;
+//   });
+
+//   //    Final totals
+//   this.amounts.total = exTotal;
+
+//   this.onRoadTotal =
+//     onRoadBase +
+//     this.registrationAmount +
+//     this.insuranceAmount;
+
+//   // Ex-showroom display
+//   this.amounts.exShowroom =
+//     this.amounts.taxable +
+//     this.amounts.cgst +
+//     this.amounts.sgst +
+//     this.amounts.igst;
+
+//   this.convert();
+//   console.log(this.onRoadTotal);
+  
+// }
 
   getDealerDetails() {
     const dealerCode = this.storageService.getDealerCode();
