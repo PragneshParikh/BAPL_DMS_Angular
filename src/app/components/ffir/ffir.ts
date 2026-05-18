@@ -49,7 +49,7 @@ export class FFIR {
   ffirObj: any = {
 
     ffirPrefix: '',
-    dealerCode:'',
+    dealerCode: '',
     cirDate: '',
 
     jobCardCustomerId: 0,
@@ -90,7 +90,7 @@ export class FFIR {
 
   constructor(private storageService: StorageService,
     private receiptEntryService: ReceiptEntryService,
-    private router : Router,
+    private router: Router,
     private ffirService: FFIRService,
     private route: ActivatedRoute,
     private loader: LoaderService,
@@ -99,21 +99,56 @@ export class FFIR {
 
   // fetch jobcard related data
   ngOnInit(): void {
-    debugger;
+    //debugger;
     this.jobCardId = Number(this.route.snapshot.paramMap.get('id'));
-
-
-    console.log("Received JobCardId:", this.jobCardId);
+    //console.log("Received JobCardId:", this.jobCardId);
 
     this.fetchJobNoBasedData();
     this.loadParts();
     this.loadFailureComplaints();
 
+    this.route.queryParams.subscribe(params => {
+      if (params['id']) {
+        this.isEditMode = true;
+        this.editId = +params['id'];
+        this.getFFIRById(this.editId);
+      }
+    });
+
+
+  }
+  getFFIRById(id: number) {
+
+    this.ffirService.getFFIRById(id).subscribe({
+
+      next: (res: any) => {
+
+        this.ffirObj = res;
+        // FORMAT DATE
+        this.ffirObj.cirDate =
+          res.cirDate
+            ? new Date(res.cirDate).toISOString().split('T')[0]
+            : '';
+
+        this.ffirObj.failureDate =
+          res.failureDate
+            ? new Date(res.failureDate).toISOString().split('T')[0]
+            : '';
+
+        this.selectedMainParts = res.mainParts || [];
+        this.jobCardId = this.ffirObj.jobCardHeaderId
+        this.fetchJobNoBasedData();
+        this.loadParts();
+        this.loadFailureComplaints();
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    });
   }
 
-
   fetchJobNoBasedData(): void {
-    //debugger;
+   // debugger;
     if (!this.jobCardId) return;   // safety check
     this.loader.show();
     this.jobCardService.getCIRJobCardDetails(this.jobCardId).subscribe({
@@ -121,13 +156,14 @@ export class FFIR {
         this.loader.hide();
         //console.log("FFIR API Response", res);
         this.ffirData = res;
+        //console.log("FFIR API Response", this.ffirData);
         this.chassisNo = this.ffirData.chassisNo;
         if (this.chassisNo) {
           this.loadJobcardHistory(this.chassisNo);
         }
         //const ffirData = res
         this.complaintList = [{
-          id:this.ffirData.id,
+          id: this.ffirData.id,
           customerVoice: this.ffirData.customerVoice,
           complaintCode: this.ffirData.complaintCode,
           complaint: this.ffirData.complaint,
@@ -149,32 +185,54 @@ export class FFIR {
 
 
   //Fetech Dealer Location
-  fetchLocations(): void {
-    const dealerCode = this.storageService.getDealerCode();
-    this.receiptEntryService.getLocationList(dealerCode).subscribe({
+ fetchLocations(): void {
+
+  const dealerCode =
+    this.storageService.getDealerCode();
+
+  this.receiptEntryService
+    .getLocationList(dealerCode)
+    .subscribe({
+
       next: (data: any[]) => {
-        // only Workshop (id = 2)
-        this.locations = data.filter(x => x.locareadidNo === 2);
-        // EDIT MODE FIX
+
+        // only Workshop
+        this.locations = data.filter(
+          x => x.locareadidNo === 2
+        );
+
+        // EDIT MODE
         if (this.isEditMode && this.chassiseditData) {
-          // backend value assign
-          this.selectedLocation = this.chassiseditData.jobCardHeader.serviceloc;
-          // OPTIONAL (safe match)
+
+          const serviceLocCode =
+            this.chassiseditData
+              .jobCardHeader
+              .serviceloc;
+
+          // MATCH
           const match = this.locations.find(
-            x => x.locname === this.selectedLocation
+            x => x.locCode === serviceLocCode
           );
           if (match) {
-            this.selectedLocation = match.locname;
+            this.selectedLocation =
+              match.locname;
+              console.log("LocationName:",this.selectedLocation)
           }
         }
-        //console.log("Workshop Locations", this.locations);
       },
-      error: (err) => {
-        console.error('Error fetching locations', err);
-      }
-    });
-  }
 
+      error: (err) => {
+
+        console.error(
+          'Error fetching locations',
+          err
+        );
+
+      }
+
+    });
+
+}
   onFileSelected(event: any, index: number) {
     const file = event.target.files[0];
     if (!file) return;
@@ -251,13 +309,12 @@ export class FFIR {
     this.selectedMainParts.splice(index, 1);
   }
   loadFailureComplaints() {
-    // debugger;
+    
     this.ffirService.getComplaintCodeList().subscribe(res => {
       this.failurcomplaintList = res;
     });
   }
   filterComplaints() {
-    debugger;
     const failurecomplaintvalue = this.searchComplaintText.toLowerCase();
 
     this.filteredComplaints = this.failurcomplaintList.filter(x =>
@@ -266,7 +323,6 @@ export class FFIR {
   }
 
   selectComplaint(complaint: any) {
-    debugger
     this.searchComplaintText = complaint.complaint;
     this.showComplaintDropdown = false;
   }
@@ -283,44 +339,81 @@ export class FFIR {
   }
 
   saveFFIR() {
-    //debugger;
+   // debugger;
     const dealerCode = this.storageService.getDealerCode();
     this.ffirObj.dealerCode = dealerCode;
-    // split data for backend payload
     this.ffirObj.mainParts = this.selectedMainParts.map((item: any) => {
-      const splitData = item.fullPartName.split('-');
+      // EDIT MODE
+      if (item.partAffectedName) {
+
+        return {
+
+          partAffectedName:
+            item.partAffectedName,
+
+          partAffectedDescription:
+            item.partAffectedDescription
+
+        };
+
+      }
+
+      // ADD MODE
+      const splitData =
+        item.fullPartName?.split('-') || [];
+
       return {
-        fullPartName: item.fullPartName, // optional frontend use
+
         partAffectedName:
           splitData[0]?.trim() || '',
-        partAffectedDescription:
-          splitData.slice(1).join('-').trim() || ''
-      };
-    });
 
+        partAffectedDescription:
+          splitData.slice(1)
+            .join('-')
+            .trim() || ''
+
+      };
+
+    });
     this.ffirObj.ffirChassisNo = this.chassisNo;
     this.ffirObj.jobCardHeaderId = this.jobCardId;
-    this.ffirObj.jobCardCustomerId = this.failurcomplaintList[0].id;   
-    console.log("FFIROBJSave", this.ffirObj);
-
-    this.ffirService.insertFFIR(this.ffirObj).subscribe({
-      next: (res: any) => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'FFIR saved successfully'
-        }).then(()=>{
-          this.router.navigate(['/ffirlisting']);
-        })
-      },
-      error: (err) => {
-        console.error(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Something went wrong'
+    this.ffirObj.jobCardCustomerId = this.failurcomplaintList[0].id;
+    // EDIT
+    if (this.isEditMode) {
+      this.ffirService
+        .updateFFIR(this.editId, this.ffirObj)
+        .subscribe({
+          next: (res: any) => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'FFIR updated successfully'
+            }).then(() => {
+              this.router.navigate(['/ffirlisting']);
+            });
+          },
+          error: (err) => {
+            console.log(err);
+          }
         });
-      }
-    });
+    }
+    // INSERT
+    else {
+      this.ffirService.insertFFIR(this.ffirObj).subscribe({
+        next: (res: any) => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'FFIR saved successfully'
+          }).then(() => {
+            this.router.navigate(['/ffirlisting']);
+          });
+        },
+        error: (err) => {
+          console.error(err);
+        }
+      });
+    }
   }
+
 }
