@@ -1,0 +1,307 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+
+  <h4 class="mb-sm-0">
+    Part dispatch ( with kit = Y)
+  </h4>
+
+</div>
+
+<div class="row">
+
+  <div class="col-lg-12">
+
+    <!-- FILTER CARD -->
+
+    <div class="card">
+
+      <div class="card-header">
+
+        <h5 class="card-title mb-0">
+          Filters
+        </h5>
+
+      </div>
+
+      <div class="card-body">
+
+        <div class="row g-3 align-items-end">
+
+          <!-- DEALER -->
+
+          <div class="col-xl-3 col-lg-3 col-md-6">
+
+            <label class="form-label">
+              Dealer Name
+            </label>
+
+            <select
+              class="form-select form-select-sm"
+              [(ngModel)]="dealerCode">
+
+              <option value="">
+                All Dealers
+              </option>
+
+              <option
+                *ngFor="let dealer of dealerList"
+                [value]="dealer.dealerCode">
+
+                {{ dealer.dealerName }}
+
+              </option>
+
+            </select>
+
+          </div>
+
+          <!-- FROM DATE -->
+
+          <div class="col-xl-3 col-lg-3 col-md-6">
+
+            <label class="form-label">
+              From Date
+            </label>
+
+            <input
+              type="date"
+              class="form-control form-control-sm"
+              [(ngModel)]="fromDate">
+
+          </div>
+
+          <!-- TO DATE -->
+
+          <div class="col-xl-3 col-lg-3 col-md-6">
+
+            <label class="form-label">
+              To Date
+            </label>
+
+            <input
+              type="date"
+              class="form-control form-control-sm"
+              [(ngModel)]="toDate">
+
+          </div>
+
+          <!-- PO TYPE -->
+
+            <div class="col-xl-2 col-lg-3 col-md-6">
+
+            <label class="form-label">
+                PO Type
+            </label>
+
+            <select
+                class="form-select form-select-sm"
+                [(ngModel)]="poType">
+
+                <option value="">
+                All PO Types
+                </option>
+
+                <option
+                *ngFor="let type of poTypeList"
+                [value]="type">
+
+                {{ type }}
+
+                </option>
+
+            </select>
+
+            </div>
+
+
+          <!-- BUTTONS -->
+
+          <div class="col-xl-3 col-lg-3 col-md-12">
+
+            <label class="form-label d-block invisible">
+              Action
+            </label>
+
+            <div class="d-flex gap-2">
+
+              <button
+                class="btn btn-primary btn-sm"
+                (click)="getReport()">
+
+                Search
+
+              </button>
+
+              <button
+                class="btn btn-light btn-sm border"
+                (click)="resetFilters()">
+
+                Reset
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TABLE CARD -->
+
+    <div class="card">
+
+      <div class="card-body">
+
+        <!-- HEADER -->
+
+        <div
+          class="d-flex justify-content-between align-items-center mb-2">
+
+          <h6 class="mb-0">
+            Part Dispatch Kit Report
+          </h6>
+
+          <span class="badge bg-primary">
+
+            Total Records :
+            {{ reportData.length }}
+
+          </span>
+
+        </div>
+
+        <!-- LOADER -->
+
+        <div
+          *ngIf="loading"
+          class="text-center p-4">
+
+          <div
+            class="spinner-border text-primary mb-3">
+          </div>
+
+          <p class="text-muted mb-0">
+            Loading report data...
+          </p>
+
+        </div>
+
+        <!-- TABLE -->
+
+        <div
+          class="table-responsive"
+          style="max-height: 650px;"
+          *ngIf="!loading">
+
+          <table
+            class="table table-bordered table-hover table-striped align-middle text-nowrap mb-0"
+            style="font-size: 12px;">
+
+            <thead
+              class="table-light sticky-top">
+
+              <tr>
+
+                <th>Sr No</th>
+
+                <th>PO Number</th>
+
+                <th>PO Date</th>
+
+                <th>Submit To ERP Date</th>
+
+                <th>PO Type</th>
+
+                <th>Company Name</th>
+
+                <th>Mobile No</th>
+
+                <th>Dealer Code</th>
+
+                <th>Dealer City</th>
+
+                <th>Dealer State</th>
+
+                <th>Location Code</th>
+
+                <th>Location Name</th>
+
+                <th>Location City</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <!-- NO DATA -->
+
+              <tr *ngIf="reportData.length === 0">
+
+                <td
+                  colspan="13"
+                  class="text-center">
+
+                  No records found
+
+                </td>
+
+              </tr>
+
+              <!-- DATA -->
+
+              <tr *ngFor="let item of reportData">
+
+                <td>{{ item.srNo }}</td>
+
+                <td>{{ item.poNumber }}</td>
+
+                <td>
+                  {{ item.poDate | date:'dd-MM-yyyy' }}
+                </td>
+
+                <td>
+                  {{
+                    item.submitToERPDate
+                    | date:'dd-MM-yyyy'
+                  }}
+                </td>
+
+                <td class="text-nowrap">
+                    {{ item.poType }}
+                </td>
+
+                <td>{{ item.companyName }}</td>
+
+                <td>{{ item.mobileNo }}</td>
+
+                <td>{{ item.dealerCode }}</td>
+
+                <td>{{ item.dealerCity }}</td>
+
+                <td>{{ item.dealerState }}</td>
+
+                <td>{{ item.locationCode }}</td>
+
+                <td>{{ item.locationName }}</td>
+
+                <td>{{ item.locationCity }}</td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
