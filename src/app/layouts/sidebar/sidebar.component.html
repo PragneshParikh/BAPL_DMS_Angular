@@ -20,10 +20,9 @@
         <img src="assets/images/BGaussLightLogo.png" alt="" height="47">
       </span>
     </a>
-    <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover"
-      (click)="toggleMobileMenu($event)">
-      <i class="toggle-icon" [class.active]="isSidebarActive"
-        [ngClass]="isSidebarActive ? 'ri-toggle-fill' : 'ri-toggle-line'"></i>
+    <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end  btn-vertical-sm-hover" id="vertical-hover"
+      (click)="toggleMobileMenu()">
+      <i class="toggle-icon" [class.ri-toggle-fill]="isSidebarActive" [class.ri-toggle-line]="!isSidebarActive"></i>
     </button>
   </div>
 
