@@ -38,7 +38,7 @@ export class CustomerLedger {
     state: '',
     pin: '',
     email: '',
-    gender: 'female',
+    gender: '',
     dateOfBirth: '',
     createdBy: '1',
     createdDate: new Date(),
@@ -76,6 +76,7 @@ export class CustomerLedger {
     this.formData.createdBy = this.storageService.getDealerCode();
   }
   @Input() ledgerId!: number;
+  @Input() fromReceiptEntry: boolean = false;
   @Input() defaultLedgerType: string = '';
 
   async ngOnInit() {
@@ -85,6 +86,7 @@ export class CustomerLedger {
     await this.getState();
 
     this.isExternalCall = !!this.activeModal || !!this.ledgerId;
+    this.isExternalCall = this.fromReceiptEntry;
 
     //SET DEFAULT TYPE (ONLY ADD MODE)
     if (!this.ledgerId && this.defaultLedgerType) {
@@ -180,7 +182,7 @@ export class CustomerLedger {
           if (this.activeModal) {
             this.activeModal.close(newId);
           }
-          this.router.navigate(['/customer-ledger']);
+          this.backToList();
         },
         error: (err) => {
           console.error(err);
@@ -193,15 +195,14 @@ export class CustomerLedger {
   }
 
   backToList() {
-
     // If modal → close
     if (this.activeModal) {
       this.activeModal.close();
       return;
     }
     // If called from Receipt Entry
-    if (this.isExternalCall) {
-      this.router.navigate(['/receipt-entry']);
+    if (this.fromReceiptEntry) {
+      this.router.navigate(['/receipt-entry/add']);
     }
     // Default → Customer Ledger listing
     else {
