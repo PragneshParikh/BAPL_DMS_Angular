@@ -416,13 +416,19 @@
                                     readonly>
 
                             </div>
-                            <ng-container *ngIf="billId">
+                            <!-- <div class="col-md-1">
+                                <label class="form-label-sm mb-1">FameII</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="model.preGSTDiscount" name="fameII"
+                                    readonly>
 
-                                <div class="col-md-2">
-                                    <label class="form-label-sm mb-1">FameII Amount</label>
-                                    <input class="form-control form-control-sm" [(ngModel)]="model.preGSTDiscount"
-                                        name="preGSTDiscount" readonly>
-                                </div>
+                            </div> -->
+                            
+                            <div class="col-md-2">
+                                <label class="form-label-sm mb-1">FameII Amount</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="model.preGSTDiscount"
+                                name="preGSTDiscount" readonly>
+                            </div>
+                            <ng-container *ngIf="billId">
 
                                 <!-- THESE FIELDS NEED TO BE SHOWN AFTER SALE -->
 
@@ -512,7 +518,7 @@
                                             <th>ItemRate</th>
                                             <th>Regn Amt</th>
                                             <th>Ins Amt</th>
-                                            <th>Pre GST Disc.</th>
+                                            <th>FameII Disc.</th>
                                             <th>Taxable Amount</th>
                                             <!-- <th>Ext Warranty</th> -->
                                             <th>SGST %</th>
