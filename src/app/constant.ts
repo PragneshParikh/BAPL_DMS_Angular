@@ -198,3 +198,10 @@ export const PO_STATUSES = [
     { name: 'Submitted To ERP', value: 'Submited To ERP' },
     { name: 'Not Submitted To ERP', value: 'Not Submited To ERP' }
 ]
+
+export const cashAccounts = [
+    { id: 1, accountName: 'Bank Transfer' },
+    { id: 2, accountName: 'Cash' },
+    { id: 3, accountName: 'Cheque' },
+    { id: 4, accountName: 'UPI Payment' }
+]

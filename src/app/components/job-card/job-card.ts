@@ -72,7 +72,7 @@ this.isSuperAdmin = this.storageService.getRole().toLocaleLowerCase() === 'super
     this.setUserRole();
     this.fetchLocations();
     this.loadChassisList();
-    this.loadJobCardList();
+   this.loadJobCardList();
   }
 
 

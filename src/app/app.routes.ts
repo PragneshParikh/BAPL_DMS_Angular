@@ -1,45 +1,48 @@
-  import { Routes } from '@angular/router';
-  import { LayoutComponent } from './layouts/layout.component';
-  import { DealerMaster } from './components/dealer-master/dealer-master';
-  import { DealerAccountMaster } from './components/dealer-account-master/dealer-account-master';
-  import { DealerMasterBulkDataDipatch } from './components/dealer-master-bulk-data-dipatch/dealer-master-bulk-data-dipatch';
-  import { LocationMasterComponent } from './components/location-master/location-master';
-  import { BatteryCapacityMaster } from './components/battery-capacity-master/battery-capacity-master';
-  import { Form22master } from './components/Showroom/form22master/form22master';
-  import { ItemMaster } from './components/Workshop/item-master/item-master';
-  import { ItemmasterFG } from './components/Showroom/itemmaster-fg/itemmaster-fg';
-  import { OemmodelMasterComponent } from './components/oemmodel-master/oemmodel-master';
-  import { AuthGuard } from './core/guards/auth.guard';
-  import { TaxCodeMasterComponent } from './components/taxcode-master/taxcode-master';
-  import { HsnCodeMaster } from './components/hsn-code-master/hsn-code-master';
-  import { Hsnwisetaxcode } from './components/hsnwisetaxcode/hsnwisetaxcode';
-  import { AgreegateTaxCodeMaster } from './components/agreegate-tax-code-master/agreegate-tax-code-master';
-  import { Lotinspection } from './components/lotinspection/lotinspection';
-  import { LotInspectionDetails } from './components/lotinspection/lot-inspection-details/lot-inspection-details/lot-inspection-details';
-  import { ReceiptEntry } from './components/receipt-entry/receipt-entry';
-  import { AddReceiptEntry } from './components/receipt-entry/add-receipt-entry/add-receipt-entry';
-  import { JobCard } from './components/job-card/job-card';
-  import { VehiclePO } from './components/vehicle-po/vehicle-po';
-  import { VehiclePoList } from './components/vehicle-po-list/vehicle-po-list';
-  import { JobCardAddForm } from './components/job-card/job-card-addForm/job-card-add-form/job-card-add-form';
-  import { AddVehicleSaleBill } from './components/vehicle-sale-bill/add-vehicle-sale-bill/add-vehicle-sale-bill';
-  import { PartsPoList } from './components/parts-po-list/parts-po-list';
-  import { PartsPo } from './components/parts-po/parts-po';
-  import { VehicleSaleBill } from './components/vehicle-sale-bill/vehicle-sale-bill';
-  import { OemmodelWarranty } from './components/oemmodel-warranty/oemmodel-warranty';
-  import { AddOemmodelWarranty } from './components/oemmodel-warranty/add-oemmodel-warranty/add-oemmodel-warranty';
-  import { CityMaster } from './components/city-master/city-master';
-  import { AddCityMaster } from './components/city-master/add-city-master/add-city-master';
-  import { ModelwiseServiceSchedule } from './components/modelwise-service-schedule/modelwise-service-schedule';
-  import { PdiChecklistmaster } from './components/pdi-checklistmaster/pdi-checklistmaster';
-  import { PerformaInvoice } from './components/Reports/performa-invoice/performa-invoice';
-  import { ProformaInvoice } from './components/proforma-invoice/proforma-invoice';
-  import { Form22Certificate } from './components/Reports/form22-certificate/form22-certificate';
-  import { DeliveryChecklist } from './components/Reports/delivery-checklist/delivery-checklist';
-  import { DeliverySlip } from './components/Reports/delivery-slip/delivery-slip';
-  import { SaleLetter } from './components/Reports/sale-letter/sale-letter';
-  import { WorkInProgress } from './components/work-in-progress/work-in-progress';
-  import { EmployeeMasterComponent } from './components/employee-master/employee-master';
+import { Routes } from '@angular/router';
+import { LayoutComponent } from './layouts/layout.component';
+import { DealerMaster } from './components/dealer-master/dealer-master';
+import { DealerAccountMaster } from './components/dealer-account-master/dealer-account-master';
+import { DealerMasterBulkDataDipatch } from './components/dealer-master-bulk-data-dipatch/dealer-master-bulk-data-dipatch';
+import { LocationMasterComponent } from './components/location-master/location-master';
+import { BatteryCapacityMaster } from './components/battery-capacity-master/battery-capacity-master';
+import { Form22master } from './components/Showroom/form22master/form22master';
+import { ItemMaster } from './components/Workshop/item-master/item-master';
+import { ItemmasterFG } from './components/Showroom/itemmaster-fg/itemmaster-fg';
+import { OemmodelMasterComponent } from './components/oemmodel-master/oemmodel-master';
+import { AuthGuard } from './core/guards/auth.guard';
+import { TaxCodeMasterComponent } from './components/taxcode-master/taxcode-master';
+import { HsnCodeMaster } from './components/hsn-code-master/hsn-code-master';
+import { Hsnwisetaxcode } from './components/hsnwisetaxcode/hsnwisetaxcode';
+import { AgreegateTaxCodeMaster } from './components/agreegate-tax-code-master/agreegate-tax-code-master';
+import { Lotinspection } from './components/lotinspection/lotinspection';
+import { LotInspectionDetails } from './components/lotinspection/lot-inspection-details/lot-inspection-details/lot-inspection-details';
+import { ReceiptEntry } from './components/receipt-entry/receipt-entry';
+import { AddReceiptEntry } from './components/receipt-entry/add-receipt-entry/add-receipt-entry';
+import { JobCard } from './components/job-card/job-card';
+import { VehiclePO } from './components/vehicle-po/vehicle-po';
+import { VehiclePoList } from './components/vehicle-po-list/vehicle-po-list';
+import { JobCardAddForm } from './components/job-card/job-card-addForm/job-card-add-form/job-card-add-form';
+import { AddVehicleSaleBill } from './components/vehicle-sale-bill/add-vehicle-sale-bill/add-vehicle-sale-bill';
+import { PartsPoList } from './components/parts-po-list/parts-po-list';
+import { PartsPo } from './components/parts-po/parts-po';
+import { VehicleSaleBill } from './components/vehicle-sale-bill/vehicle-sale-bill';
+import { OemmodelWarranty } from './components/oemmodel-warranty/oemmodel-warranty';
+import { AddOemmodelWarranty } from './components/oemmodel-warranty/add-oemmodel-warranty/add-oemmodel-warranty';
+import { CityMaster } from './components/city-master/city-master';
+import { AddCityMaster } from './components/city-master/add-city-master/add-city-master';
+import { ModelwiseServiceSchedule } from './components/modelwise-service-schedule/modelwise-service-schedule';
+import { PdiChecklistmaster } from './components/pdi-checklistmaster/pdi-checklistmaster';
+import { PerformaInvoice } from './components/Reports/performa-invoice/performa-invoice';
+import { ProformaInvoice } from './components/proforma-invoice/proforma-invoice';
+import { Form22Certificate } from './components/Reports/form22-certificate/form22-certificate';
+import { DeliveryChecklist } from './components/Reports/delivery-checklist/delivery-checklist';
+import { DeliverySlip } from './components/Reports/delivery-slip/delivery-slip';
+import { SaleLetter } from './components/Reports/sale-letter/sale-letter';
+import { WorkInProgress } from './components/work-in-progress/work-in-progress';
+import { EmployeeMasterComponent } from './components/employee-master/employee-master';
+import { FFIR } from './components/ffir/ffir';
+import { Ffirlisting } from './components/ffir/ffirlisting/ffirlisting';
+import { RepairBill } from './components/repair-bill/repair-bill';
 
 
 export const routes: Routes = [
@@ -108,17 +111,16 @@ export const routes: Routes = [
       { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
       { path: 'ffir', component: FFIR, data: [23] },
-
       { path: 'ffir/:id', component: FFIR, data: [23] },
-
       { path: 'ffirlisting', component: Ffirlisting, data: [23] },
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
-      { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-detail/chassis-detail').then(m => m.ChassisDetail) },
+      { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-search/chassis-search').then(m => m.ChassisSearch) },
       { path: 'proforma-invoice', component: ProformaInvoice, data: [22] },
       { path: 'form22-certificate/:chassisNo', component: Form22Certificate, data: [22] },
       { path: 'delivery-checkList', component: DeliveryChecklist, data: [22] },
       { path: 'delivery-slip', component: DeliverySlip, data: [22] },
-      { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] }
+      { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] },
+      { path: 'repair-bill', component: RepairBill, data: [51] },
     ]
   },
   { path: '**', component: WorkInProgress }

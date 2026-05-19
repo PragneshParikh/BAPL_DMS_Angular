@@ -1,0 +1,592 @@
+<div class="container-fluid repair-bill-page p-2">
+
+    <!-- Header -->
+    <div class="card shadow-sm mb-2">
+        <div class="card-header text-white py-2 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">Repair Bill [GST]</h6>
+
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-light btn-sm">
+                    <i class="ri-menu-line"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="card-body p-2">
+
+            <!-- Row 1 -->
+            <div class="row g-2 mb-2">
+
+                <div class="col-md-2">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-control form-control-sm bg-light text-muted"
+                        [(ngModel)]="currentDate" readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Location</label>
+
+                    <input type="text" class="form-control form-control-sm bg-light text-muted"
+                        [value]="selectedLocation" readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Prefix</label>
+                    <input type="text" class="form-control form-control-sm">
+                </div>
+
+                <div class="col-md-1">
+                    <label class="form-label">Bill No.</label>
+                    <input type="text" class="form-control form-control-sm bg-light text-muted" [value]="1" readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Bill Type</label>
+
+                    <div class="d-flex gap-3 mt-1">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" checked>
+                            <label class="form-check-label">Cash</label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio">
+                            <label class="form-check-label">Credit</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Cash Account</label>
+
+                    <div class="input-group input-group-sm">
+
+                        <select class="form-select form-select-sm" [(ngModel)]="selectedCashAccount">
+
+                            <option value=null>--Select Cash--</option>
+
+                            <option *ngFor="let item of cashAccounts" [value]="item.id">
+                                {{ item.accountName }}
+                            </option>
+                        </select>
+
+                        <!-- Search Button -->
+                        <!-- <button class="btn btn-outline-primary" (click)="openPopup()">
+                            <i class="ri-search-line"></i>
+                        </button> -->
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="row g-2 mb-3">
+
+                <div class="col-md-2">
+                    <label class="form-label">Party Name</label>
+                    <input type="text" class="form-control form-control-sm bg-light text-muted" [value]="selectedJobCard?.partyName || ''"
+                        readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Mobile Number</label>
+                    <input type="text" class="form-control form-control-sm bg-light text-muted"
+                        [value]="selectedJobCard?.partyMobileNo || ''" readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Party State</label>
+                    <input type="text" class="form-control form-control-sm bg-light text-muted" [value]="selectedJobCard?.partyState || ''"
+                        readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Scheme</label>
+                    <select class="form-select form-select-sm">
+                        <option>--Select--</option>
+                    </select>
+                </div>
+
+                <div class="col-md-1">
+                    <label class="form-label">Job Search</label>
+                    <button class="btn btn-light btn-sm w-100" (click)="openPopup()">
+                        <i class="ri-car-line"></i>
+                    </button>
+                </div>
+            </div>
+            <!--Job Card details show hide-->
+            <div class="card mt-3" *ngIf="showJobDetails">
+
+                <div class="card-header">
+
+                    <div class="d-flex justify-content-between">
+
+                        <h6 class="mb-0">
+                            <b>Selected Job Details</b>
+                        </h6>
+
+                        <button class="btn btn-sm btn-primary" (click)="toggleJobDetails()">
+                            <i class="ri-eye-line" *ngIf="!showSelectedJob"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row g-2">
+                        <div class="col-md-2">
+                            <label>Job Date</label>
+                            <input class="form-control form-control-sm"
+                                [value]="selectedJobCard?.jobCardHeader?.jobinDate | date:'dd-MM-yyyy'" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Job No.</label>
+                            <input class="form-control form-control-sm" [value]="selectedJobCard?.jobCardHeader?.jobNo"
+                                readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Reg No</label>
+                            <input class="form-control form-control-sm"
+                                [value]="selectedJobCard?.jobCardCustomer?.registerNo" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Model</label>
+                            <input class="form-control form-control-sm"
+                                [value]="selectedJobCard?.jobCardCustomer?.modelName" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>ODO</label>
+                            <input class="form-control form-control-sm"
+                                [value]="selectedJobCard?.jobCardHeader?.vehiclekms" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Chassis</label>
+                            <input class="form-control form-control-sm"
+                                [value]="selectedJobCard?.jobCardCustomer?.chassisNo" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Technician</label>
+                            <input class="form-control form-control-sm"
+                                [value]="selectedJobCard?.jobCardHeader?.technician" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--End-->
+
+            <!-- Item Entry -->
+            <div class="border rounded p-2 mb-2 bg-light-subtle">
+
+                <div class="row g-2 align-items-end mb-2">
+
+                    <div class="col-md-2">
+                        <label class="form-label">Labour</label>
+
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control">
+
+                            <button class="btn btn-outline-primary">
+                                <i class="ri-search-line"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label">Qty/Hrs.</label>
+                        <input type="number" class="form-control form-control-sm text-end">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label">Rate</label>
+                        <input type="number" class="form-control form-control-sm text-end">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label">Discount</label>
+                        <input type="number" class="form-control form-control-sm text-end">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label">Disc. Type</label>
+                        <select class="form-select form-select-sm">
+                            <option>Value</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Issue Type</label>
+                        <select class="form-select form-select-sm">
+                            <option>Paid</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Technician</label>
+                        <select class="form-select form-select-sm">
+                            <option>--Select--</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Item Type -->
+                <div class="d-flex gap-3 mb-2 small">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="itemType">
+                        <label class="form-check-label">Part</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="itemType">
+                        <label class="form-check-label">Accessory</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="itemType">
+                        <label class="form-check-label">Oil</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="itemType" checked>
+                        <label class="form-check-label">Labour</label>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm align-middle text-nowrap mb-0">
+
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Action</th>
+                                <th>Sr.No</th>
+                                <th>Part No</th>
+                                <th>Description</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Discount</th>
+                                <th>Disc.Type</th>
+                                <th>IGST Amt.</th>
+                                <th>Amount</th>
+                                <th>Issue Type</th>
+                                <th>Technician</th>
+                                <th>WAV Rate</th>
+                                <th>First Fill</th>
+                                <th>First Fill Stock</th>
+                                <th>FOC</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <button class="btn btn-sm btn-primary">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </td>
+
+                                <td>1</td>
+                                <td>PLPC12LM0085-C12</td>
+                                <td>C12 FRONT PANEL-ABS Replacement</td>
+                                <td class="text-end">1</td>
+                                <td class="text-end">53.333</td>
+                                <td class="text-end">5.000</td>
+                                <td>Value</td>
+                                <td class="text-end">8.700</td>
+                                <td class="text-end">57.033</td>
+                                <td>Paid</td>
+                                <td>SERTEST</td>
+                                <td class="text-end">0</td>
+                                <td>NA</td>
+                                <td class="text-end">0.000</td>
+                                <td>No</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Bottom Section -->
+            <div class="row g-2 mb-3">
+
+                <div class="col-md-4">
+                    <label class="form-label">Remarks</label>
+                    <textarea rows="4" class="form-control"></textarea>
+                </div>
+
+                <div class="col-md-8">
+
+                    <div class="row g-2 mb-2">
+
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-primary btn-sm w-100">
+                                Add Discount
+                            </button>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Discount</label>
+                            <input type="text" class="form-control form-control-sm text-end" value="5.000">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Taxable Amount</label>
+                            <input type="text" class="form-control form-control-sm text-end" value="48.333">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Net Amount</label>
+                            <input type="text" class="form-control form-control-sm text-end" value="57.000">
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+
+                        <div class="col-md-3">
+                            <label class="form-label">Disc. Amount(-)</label>
+                            <input type="text" class="form-control form-control-sm text-end" value="0.00">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Amount Received</label>
+                            <input type="text" class="form-control form-control-sm text-end" value="57.000">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="d-flex justify-content-between align-items-center border-top pt-2">
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="ri-bank-line"></i>Insurance
+                    </button>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary btn-sm">
+                        <i class="ri-save-line"></i> Save As Invoice
+                    </button>
+
+                    <button class="btn btn-light btn-sm">
+                        <i class="ri-close-line"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--- Popup model jobdetails-->
+<ng-template [ngIf]="showPopup">
+
+    <div class="custom-modal-backdrop">
+
+        <div class="custom-modal">
+
+            <!-- Header -->
+            <div class="custom-modal-header bg-primary">
+
+                <h5 class="mb-0 text-white">
+                    Job Search
+                </h5>
+
+                <button class="btn-close-custom text-white" (click)="closePopup()">
+
+                    <i class="ri-close-line"></i>
+
+                </button>
+
+            </div>
+
+            <!-- Body -->
+            <div class="custom-modal-body">
+
+                <!-- SEARCH -->
+                <div class="row g-2 mb-3">
+
+                    <div class="col-md-2">
+                        <label>Date From</label>
+
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="currentDate">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Date To</label>
+
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="currentDate">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Job No</label>
+
+                        <input type="text" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Registration No</label>
+
+                        <input type="text" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Chassis Number</label>
+
+                        <input type="text" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <label class="form-label d-block">
+                            Show Previous Year Jobs
+                        </label>
+
+                        <div class="form-check form-switch mt-1">
+
+                            <input class="form-check-input" type="checkbox" id="previousYearToggle">
+
+                            <label class="form-check-label" for="previousYearToggle">
+
+                                {{ showPreviousYearJobs ? 'Yes' : 'No' }}
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
+
+                        <button class="btn btn-sm btn-outline-primary" (click)="loadJobCardList()">
+
+                            <i class="ri-search-line"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- TABLE -->
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-sm">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>Sr No.</th>
+                                <th>Job No</th>
+                                <th>Job Date</th>
+                                <th>Location</th>
+                                <th>Job Type/Service Name</th>
+                                <th>Party Name</th>
+                                <th>Regn./Chassis No.</th>
+                                <th>Vehicle Type</th>
+                                <th>Job Source</th>
+                                <th>Action</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr *ngFor="let item of jobCardList; let i = index">
+
+                                <td>{{ i + 1 }}</td>
+
+                                <td>
+                                    {{ item.jobCardHeader?.jobNo }}
+                                </td>
+
+                                <td>
+                                    {{ item.jobCardHeader?.jobinDate | date:'dd-MM-yyyy' }}
+                                </td>
+
+                                <td>
+                                    {{ item.location }}
+                                </td>
+
+                                <td>
+                                    {{ item.jobtype }}
+                                    <br>
+                                    {{ item.serviceType }}
+                                </td>
+
+                                <td>
+                                    {{ item.partyName }}
+                                </td>
+
+                                <td>
+                                    <b>R:</b>
+                                    {{ item.jobCardCustomer?.registerNo }}
+
+                                    <br>
+
+                                    <b>C:</b>
+                                    {{ item.jobCardCustomer?.chassisNo }}
+                                </td>
+
+                                <td>
+                                    External
+                                </td>
+
+                                <td>
+                                    {{ item.jobsource }}
+                                </td>
+
+                                <td>
+
+                                    <button class="btn btn-sm btn-soft-primary" (click)="onSelect(item)">
+
+                                        <i class="ri-check-line fs-12"></i>
+
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+                            <!-- No Data -->
+                            <tr *ngIf="jobCardList.length === 0">
+
+                                <td colspan="10" class="text-center text-muted py-3">
+
+                                    No Data Available
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</ng-template>
+<!--End -->
