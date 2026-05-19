@@ -1,86 +1,273 @@
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-    <h4 class="mb-sm-0">Chassis Search</h4>
+    <h4 class="mb-sm-0">
+        Chassis Search
+    </h4>
 </div>
 
 <div class="row">
+
     <div class="col-lg-12">
+
         <div class="card">
+
             <div class="card-body">
 
-                <form #chassisSearchForm="ngForm" (ngSubmit)="onSubmit(chassisSearchForm)">
-                    <div class="row mb-2">
-                        <div class="col-md-3">
-                            <label class="form-label">Chassis Number</label>
-                            <input type="text" class="form-control form-control-sm" name="chassisNumber"
-                                #chassisNumber="ngModel" maxlength="17" minlength="17"
-                                [(ngModel)]="formData.chassisNumber" style="text-transform: uppercase;" required>
-                            @if (chassisNumber.invalid && chassisNumber.touched) {
-                            <small class="text-danger">
-                                Chassis Number is required.
-                            </small>
-                            }
-                            @if (chassisNumber.errors?.['minlength'] || chassisNumber.errors?.['maxlength']) {
-                            <small class="text-danger">
-                                Chassis Number must be exactly 17 characters long.
-                            </small>
-                            }
+                <!-- ===================================== -->
+                <!-- EXCEL IMPORT -->
+                <!-- ===================================== -->
+
+                <div class="row mb-4">
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Upload Chassis Excel
+                        </label>
+
+                        <input
+                            type="file"
+                            class="form-control form-control-sm"
+                            accept=".xlsx,.xls"
+                            (change)="onFileSelect($event)">
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <label class="form-label">
+                            &nbsp;
+                        </label>
+
+                        <div>
+
+                            <button
+                                type="button"
+                                class="btn btn-success btn-sm"
+                                (click)="uploadExcel()">
+
+                                Upload Excel
+                            </button>
+
                         </div>
+
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <!-- ===================================== -->
+                <!-- CHASSIS SEARCH -->
+                <!-- ===================================== -->
+
+                <form
+                    #chassisSearchForm="ngForm"
+                    (ngSubmit)="onSubmit(chassisSearchForm)">
+
+                    <div class="row mb-2">
+
                         <div class="col-md-3">
-                            <label class="form-label">&nbsp;</label><br>
-                            <button type="submit" [disabled]="chassisSearchForm.invalid"
+
+                            <label class="form-label">
+                                Chassis Number
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                name="chassisNumber"
+                                #chassisNumber="ngModel"
+                                maxlength="17"
+                                minlength="17"
+                                [(ngModel)]="formData.chassisNumber"
+                                style="text-transform: uppercase;"
+                                required>
+
+                            @if (chassisNumber.invalid && chassisNumber.touched) {
+
+                            <small class="text-danger">
+
+                                Chassis Number is required.
+
+                            </small>
+
+                            }
+
+                            @if (chassisNumber.errors?.['minlength']
+                            || chassisNumber.errors?.['maxlength']) {
+
+                            <small class="text-danger">
+
+                                Chassis Number must be exactly
+                                17 characters long.
+
+                            </small>
+
+                            }
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            <label class="form-label">
+                                &nbsp;
+                            </label>
+
+                            <br>
+
+                            <button
+                                type="submit"
+                                [disabled]="chassisSearchForm.invalid"
                                 class="btn btn-primary btn-sm me-1">
+
                                 Search
                             </button>
-                            <button type="button" (click)="resetForms()" class="btn btn-primary btn-sm">
+
+                            <button
+                                type="button"
+                                (click)="resetForms()"
+                                class="btn btn-primary btn-sm">
+
                                 Reset
                             </button>
+
                         </div>
+
                     </div>
+
                 </form>
+
                 <hr>
+
+                <!-- ===================================== -->
+                <!-- DETAILS -->
+                <!-- ===================================== -->
+
                 <form>
+
                     <div class="row mb-2">
+
                         <div class="col-md-3">
-                            <label class="form-label">Engine Number</label>
-                            <input type="text" class="form-control form-control-sm" [value]="vinData.motorNo"
-                                style="text-transform: uppercase;" disabled>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Chassis Number</label>
-                            <input type="text" class="form-control form-control-sm" [value]="vinData.chasisNo"
-                                style="text-transform: uppercase;" disabled>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Defects</label>
-                            <input type="text" class="form-control form-control-sm" [value]="vinData.defects" disabled>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Item Name</label>
-                            <input type="text" class="form-control form-control-sm" [value]="vinData.itemName" disabled>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Color</label>
-                            <input type="text" class="form-control form-control-sm" [value]="vinData.colrCode" disabled>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Current Location</label>
-                            <input type="text" class="form-control form-control-sm" [value]="vinData.currentLocation"
+
+                            <label class="form-label">
+                                Engine Number
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                [value]="vinData.motorNo"
+                                style="text-transform: uppercase;"
                                 disabled>
+
                         </div>
+
                         <div class="col-md-3">
-                            <label class="form-label">Purchase Details</label>
-                            <input type="text" class="form-control form-control-sm" [value]="vinData.purchaseDetails"
+
+                            <label class="form-label">
+                                Chassis Number
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                [value]="vinData.chasisNo"
+                                style="text-transform: uppercase;"
                                 disabled>
+
                         </div>
+
                         <div class="col-md-3">
-                            <label class="form-label">Sale Details</label>
-                            <input type="text" class="form-control form-control-sm" [value]="vinData.customerName"
+
+                            <label class="form-label">
+                                Defects
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                [value]="vinData.defects"
                                 disabled>
+
                         </div>
+
+                        <div class="col-md-3">
+
+                            <label class="form-label">
+                                Item Name
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                [value]="vinData.itemName"
+                                disabled>
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            <label class="form-label">
+                                Color
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                [value]="vinData.colrCode"
+                                disabled>
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            <label class="form-label">
+                                Current Location
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                [value]="vinData.currentLocation"
+                                disabled>
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            <label class="form-label">
+                                Purchase Details
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                [value]="vinData.purchaseDetails"
+                                disabled>
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            <label class="form-label">
+                                Sale Details
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                [value]="vinData.customerName"
+                                disabled>
+
+                        </div>
+
                     </div>
+
                 </form>
 
             </div>
+
         </div>
-    </div><!-- end card -->
+
+    </div>
+
 </div>
