@@ -190,7 +190,7 @@ export const APIUniqueList = [
     { value: 'color', name: 'Color' },
     { value: 'dealermaster', name: 'Dealer' },
     { value: 'hsncodemaster', name: 'HSNCodeMaster' },
-    { value: 'vehicledispatch', name: 'Vehicle Inward' },
+    { value: 'vehicleinward', name: 'Vehicle Inward' },
     { value: 'purchaseorder', name: 'Purchase Order' },
     { value: 'locationmaster', name: 'Location Master' },
     { value: 'dealermaster', name: 'Dealer Master' },

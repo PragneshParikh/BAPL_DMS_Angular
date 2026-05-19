@@ -28,7 +28,7 @@ export class SidebarComponent implements OnInit {
   filteredMenuItems: MenuItem[] = [];
   @ViewChild('sideMenu') sideMenu!: ElementRef;
   @Output() mobileMenuButtonClicked = new EventEmitter();
-  isSidebarActive = false;
+  isSidebarActive = true;
 
   constructor(public translate: TranslateService,
     private menuService: MenuService,
@@ -40,6 +40,13 @@ export class SidebarComponent implements OnInit {
   }
 
   async ngOnInit() {
+
+    document.documentElement.setAttribute(
+      "data-sidebar-size",
+      "sm-hover-active"
+    );
+
+    this.isSidebarActive = true;
 
     await this.getMasterMenu();
     this.loadRoleWiseMenuRights();
@@ -195,14 +202,28 @@ export class SidebarComponent implements OnInit {
   /**
    * Toggle the menu bar when having mobile screen
    */
-  toggleMobileMenu(event: any) {
-    this.isSidebarActive = !this.isSidebarActive;
-    var sidebarsize = document.documentElement.getAttribute("data-sidebar-size");
-    if (sidebarsize == 'sm-hover-active') {
-      document.documentElement.setAttribute("data-sidebar-size", 'sm-hover');
+  toggleMobileMenu() {
+
+    const currentSize =
+      document.documentElement.getAttribute("data-sidebar-size");
+
+    if (currentSize === "sm-hover-active") {
+
+      document.documentElement.setAttribute(
+        "data-sidebar-size",
+        "sm-hover"
+      );
+
+      this.isSidebarActive = false;
 
     } else {
-      document.documentElement.setAttribute("data-sidebar-size", 'sm-hover-active')
+
+      document.documentElement.setAttribute(
+        "data-sidebar-size",
+        "sm-hover-active"
+      );
+
+      this.isSidebarActive = true;
     }
   }
 
