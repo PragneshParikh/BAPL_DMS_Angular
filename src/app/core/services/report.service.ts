@@ -93,6 +93,8 @@ export class ReportService {
     );
   }
 
+  
+
   // =====================================================
   // JOB REPORT
   // =====================================================
@@ -246,7 +248,34 @@ export class ReportService {
       filter
     );
   }
+getDealerList() {
 
+    return this.http.get<any[]>(
+        `${environment.apiUrl}/Report/dealer-list`
+    );
+}
+
+getModelList() {
+
+    return this.http.get<any[]>(
+        `${environment.apiUrl}/Report/model-list`
+    );
+}
+getModelListByDealer(
+    dealerCode: string
+) {
+
+    return this.http.get<any[]>(
+        `${environment.apiUrl}/Report/model-list/${dealerCode}`
+    );
+}
+
+getChassisList() {
+
+    return this.http.get<string[]>(
+        `${environment.apiUrl}/Report/chassis-list`
+    );
+}
   // =====================================================
   // PO TRACKING REPORT
   // =====================================================
@@ -320,13 +349,6 @@ export class ReportService {
     return this.http.get<any[]>(
       `${this.apiUrl}/parts-dispatch`,
       { params }
-    );
-  }
-
-    getDealerList(): Observable<any[]> {
-
-    return this.http.get<any[]>(
-      `${this.apiUrl}/dealer-list`
     );
   }
 
