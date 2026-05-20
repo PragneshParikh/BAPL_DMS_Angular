@@ -58,6 +58,7 @@
                                     *ngIf="formData.ledgerType === 'Party'">*</span></label>
                             <select class="form-select form-select-sm" name="gender" [(ngModel)]="formData.gender"
                                 #gender="ngModel" [required]="formData.ledgerType === 'Party'">
+                                <option value="">Select Gender</option>
                                 <option *ngFor="let g of genders" [value]="g.value">
                                     {{ g.title }}
                                 </option>
@@ -127,9 +128,9 @@
                             }
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label"> DOB </label>
+                            <label class="form-label"> DOB <span class="text-danger">*</span></label>
                             <input type="date" class="form-control form-control-sm" name="dob"
-                                [(ngModel)]="formData.dateOfBirth" #dob="ngModel" />
+                                [(ngModel)]="formData.dateOfBirth" #dob="ngModel" required />
                         </div>
                     </div>
 
@@ -142,16 +143,16 @@
                             </textarea>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">State</label>
+                            <label class="form-label">State <span class="text-danger">*</span></label>
                             <select class="form-select form-select-sm" name="state" [(ngModel)]="formData.state"
-                                (change)="onStateChange($event)">
+                                (change)="onStateChange($event)" required>
                                 <option *ngFor="let state of states" [value]="state.stateId">{{ state.stateName }}
                                 </option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">City</label>
-                            <select class="form-select form-select-sm" name="city" [(ngModel)]="formData.city">
+                            <label class="form-label">City <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" name="city" [(ngModel)]="formData.city" required>
                                 <option *ngFor="let city of cities" [value]="city.cityId">{{ city.cityName }}</option>
                             </select>
                         </div>

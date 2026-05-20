@@ -77,6 +77,8 @@ export class AddReceiptEntry implements OnInit {
   filteredParties: LedgerMaster[] = [];
   receiptDate: string;
   selectedSaleType: string;
+  selectedParty: string;
+  isSearchMobileInvalid: boolean;
   constructor(private router: ActivatedRoute,
     private receiptEntryService: ReceiptEntryService,
     private storageService: StorageService,
@@ -309,6 +311,9 @@ export class AddReceiptEntry implements OnInit {
 
 
   searchLead() {
+    if (this.searchType === 'Mobile No' && this.isSearchMobileInvalid) {
+    return;
+  }
     let mobileNo: string | null = null;
     let bookingId: string | null = null;
 
@@ -592,34 +597,66 @@ console.log(this.isEditMode,this.id);
     this.navigation.navigate(['/receipt-entry']);
   }
 
-  openCustomerLedgerAdd() {
-    const modalRef = this.modalService.open(CustomerLedger, {
-      size: 'lg',
-      backdrop: 'static'
-    });
+ openCustomerLedgerAdd(type: string) {
 
-    modalRef.componentInstance.defaultLedgerType = 'Financier';
+  const modalRef = this.modalService.open(CustomerLedger, {
+    size: 'lg',
+    backdrop: 'static'
+  });
 
-    modalRef.result.then((newId) => {
-      if (newId) {
+  modalRef.componentInstance.defaultLedgerType = type;
+  modalRef.componentInstance.fromReceiptEntry = true;
 
-        // IMPORTANT: subscribe and act AFTER data comes
-        this.receiptEntryService.getLedgerByType('Financier').subscribe({
-          next: (res) => {
-            this.financiers = res;
+  modalRef.result.then((newId) => {
+    if (newId) {
 
-            // Force change detection via new reference
-            this.financiers = [...this.financiers];
+      this.receiptEntryService.getLedgerByType(type).subscribe({
+        next: (res) => {
 
-            //  OPTIONAL: auto-select newly added
-            const added = this.financiers.find(f => f.id === newId);
-            if (added) {
+          if (type === 'Financier') {
+            this.financiers = [...res];
+          } else {
+            this.parties = [...res];
+          }
+
+          // Auto select newly added
+          const added = res.find((x: any) => x.id === newId);
+
+          if (added) {
+            if (type === 'Financier') {
               this.formData.financier = added.ledgerName;
               this.selectedFinancier = added.ledgerName;
+            } else {
+              this.formData.partyName = added.ledgerName;
+              this.selectedParty = added.ledgerName;
             }
           }
-        });
-      }
-    }).catch(() => { });
+        }
+      });
+    }
+  }).catch(() => {});
+}
+sanitizeMobile(event: any) {
+    let value = event.target.value;
+
+    value = value.replace(/[^0-9]/g, '');
+
+    value = value.slice(0, 10);
+
+    event.target.value = value;
+    this.formData.mobileNumber = value;
   }
+  onSearchInput(event: any) {
+  if (this.searchType === 'Mobile No') {
+    this.sanitizeMobile(event); // reuse existing function
+
+    // validate AFTER sanitize
+    const value = event.target.value;
+    this.isSearchMobileInvalid = value.length !== 10;
+    this.searchText = value;
+  } else {
+    this.searchText = event.target.value;
+    this.isSearchMobileInvalid = false;
+  }
+}
 }

@@ -12,99 +12,144 @@
     </h5>
   </div>
 
-  <div class="card-body">
+    <div class="card-body">
 
-    <form [formGroup]="filterForm">
+      <form [formGroup]="filterForm">
 
-      <div class="row g-2 align-items-end">
+        <div class="row g-2 align-items-end">
 
-        <div class="col-md-2">
-          <label class="form-label">
-            Dealer Code
-          </label>
+      <!-- Dealer Code -->
 
-          <input
-            type="text"
-            formControlName="dealerCode"
-            class="form-control form-control-sm">
-        </div>
+            <div class="col-md-2">
 
-        <div class="col-md-2">
-          <label class="form-label">
-            Model Code
-          </label>
-
-          <input
-            type="text"
-            formControlName="modelCode"
-            class="form-control form-control-sm">
-        </div>
-
-        <div class="col-md-2">
-          <label class="form-label">
-            Chassis No
-          </label>
-
-          <input
-            type="text"
-            formControlName="chassisNo"
-            class="form-control form-control-sm">
-        </div>
-
-        <div class="col-md-2">
-          <label class="form-label">
-            Stock Status
+          <label class="form-label mb-1">
+              Dealer Name
           </label>
 
           <select
-            formControlName="stockStatus"
+              formControlName="dealerCode"
+              class="form-select form-select-sm">
+
+              <option value="">
+                  All
+              </option>
+
+              <option
+                  *ngFor="let dealer of dealerList"
+                  [value]="dealer.dealerCode">
+
+                  {{ dealer.dealerName }}
+              </option>
+
+          </select>
+
+      </div>        
+      
+      <!-- Model Name -->
+
+  <div class="col-md-2">
+      <label class="form-label mb-1">
+          Model Name
+      </label>
+
+        <select
+            formControlName="modelCode"
             class="form-select form-select-sm">
 
             <option value="">
-              All
+                All
             </option>
 
-            <option value="In Stock">
-              In Stock
+            <option
+                *ngFor="let model of modelList"
+                [value]="model.modelCode">
+
+                {{ model.modelName }}
             </option>
 
-            <option value="Billed">
-              Billed
-            </option>
+        </select>
+    </div>
+
+      <div class="col-md-2">
+          <label class="form-label mb-1">
+              Chassis No
+          </label>
+
+          <select
+              formControlName="chassisNo"
+              class="form-select form-select-sm">
+
+              <option value="">
+                  All
+              </option>
+
+              <option
+                  *ngFor="let chassis of chassisList"
+                  [value]="chassis">
+
+                  {{ chassis }}
+              </option>
 
           </select>
-        </div>
+      </div>
 
-        <div class="col-md-auto ms-auto d-flex gap-2">
+      <!-- Stock Status -->
+
+      <div class="col-md-2">
+          <label class="form-label mb-1">
+              Stock Status
+          </label>
+
+          <select
+              formControlName="stockStatus"
+              class="form-select form-select-sm">
+
+              <option value="">
+                  All
+              </option>
+
+              <option value="In Stock">
+                  In Stock
+              </option>
+
+              <option value="Billed">
+                  Billed
+              </option>
+
+          </select>
+      </div>
+
+      <!-- Buttons -->
+
+      <div class="col-md-auto ms-auto d-flex gap-2">
 
           <button
-            type="button"
-            class="btn btn-primary btn-sm"
-            (click)="onSearch()">
+              type="button"
+              class="btn btn-primary btn-sm"
+              (click)="onSearch()">
 
-            Search
+              Search
           </button>
 
           <button
-            type="button"
-            class="btn btn-light btn-sm border"
-            (click)="onReset()">
+              type="button"
+              class="btn btn-light btn-sm border"
+              (click)="onReset()">
 
-            Reset
+              Reset
           </button>
 
           <button
-            type="button"
-            class="btn btn-success btn-sm"
-            (click)="exportToCSV()">
+              type="button"
+              class="btn btn-success btn-sm"
+              (click)="exportToCSV()">
 
-            <i class="ri-file-excel-2-line"></i>
+              <i class="ri-file-excel-2-line"></i>
           </button>
-
-        </div>
 
       </div>
 
+  </div>
     </form>
 
   </div>
