@@ -116,6 +116,7 @@ export const routes: Routes = [
                   { path: 'hsrp-order-list', component: HSRPOrderList, data: [48] },
                   { path: 'hsrp-order/:id', component: HSRPOrder, data: [48] },
                   { path: 'hsrp-inward', component: HsrpInward, data: [48] },
+                  { path: 'employee', component: EmployeeMasterComponent, data: [49] },
                   { path: 'upload', component: DealerMasterBulkDataDipatch, data: [] },
                   { path: 'stock-report', data: [40], loadComponent: () => import('./components/stock-reports/stock-report').then(m => m.StockReportComponent) },
                   { path: 'job-card-report', data: [41], loadComponent: () => import('./components/Reports/job-report/job-report').then(m => m.JobReportComponent) },
