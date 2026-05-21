@@ -1,0 +1,149 @@
+<div id="news-bulletin-model">
+
+    <!-- HEADER -->
+    <div class="modal-header bg-primary py-2">
+
+        <h5 class="modal-title text-white fw-bold">
+            Add News & Bulletin
+        </h5>
+
+        <button type="button" class="btn-close btn-close-white" aria-hidden="true" (click)="close(false)">
+        </button>
+
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+
+        <div class="container-fluid">
+
+            <div class="row g-3">
+
+                <!-- LEFT SIDE : FORM -->
+
+                <div class="col-md-6 border-end">
+                    <form #newsFileUploadForm="ngForm">
+
+                        <div class="row">
+                            <!-- DATE -->
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"> Select Date <span class="text-danger"> * </span>
+                                </label>
+                                <input type="date" class="form-control form-control-sm" name="publishDate"
+                                    #publishDate="ngModel" [ngModel]="formData.publishDate | date:'yyyy-MM-dd'"
+                                    (ngModelChange)="formData.publishDate = $event" required>
+                                <small class="text-danger"
+                                    *ngIf="publishDate.invalid && (publishDate.touched ||newsFileUploadForm.submitted)">
+                                    Date is required
+                                </small>
+                            </div>
+
+                            <!-- Active/Inactive -->
+                            <!-- <div class="col-md-1 text-center">
+                                <label class="form-label mb-0 d-block small">Active</label>
+                                <div class="form-check form-switch d-inline-block">
+                                    <input type="checkbox" class="form-check-input" [(ngModel)]="formData.isActive">
+                                    <label class="form-check-label small">{{ formData.isActive=== true? 'Y': 'N'
+                                        }}</label>
+                                </div>
+                            </div> -->
+                        </div>
+
+                        <div class="row">
+                            <!-- TITLE -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"> Title <span class="text-danger"> * </span>
+                                </label>
+                                <input type="text" class="form-control form-control-sm" name="title" #title="ngModel"
+                                    [(ngModel)]="formData.title" placeholder="Enter title" required>
+                                <small class="text-danger"
+                                    *ngIf="title.invalid && (title.touched || newsFileUploadForm.submitted)">
+                                    Title is required
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- DESCRIPTION -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold"> Description </label>
+                                <textarea rows="4" class="form-control form-control-sm" name="description"
+                                    #description="ngModel" [(ngModel)]="formData.description"
+                                    placeholder="Enter description">
+                        </textarea>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- FILE -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    Upload Files
+                                </label>
+                                <input type="file" class="form-control form-control-sm" multiple accept=".pdf"
+                                    (change)="onFileSelected($event)">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- RIGHT SIDE : UPLOADED FILES -->
+                <div class="col-md-6">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                        <h6 class="fw-bold mb-0">
+                            Uploaded Files
+                        </h6>
+
+
+                    </div>
+
+                    <!-- FILE LIST -->
+                    <div class="border rounded p-2" style="min-height: 320px; max-height: 320px; overflow-y: auto;">
+
+                        <!-- NO FILE -->
+                        <!-- <div *ngIf="!selectedFiles || selectedFiles.length === 0" class="text-center text-muted py-5"> -->
+                        <div *ngIf="!formData.files || formData.files.length === 0" class="text-center text-muted py-5">
+
+                            No files uploaded
+
+                        </div>
+
+                        <!-- FILE ITEMS -->
+                        <!-- <div *ngFor="let file of selectedFiles; let i = index" -->
+                        <div *ngFor="let file of formData.files; let i = index">
+                            <div *ngIf="file.status !== 'Deleted'"
+                                class="d-flex justify-content-between align-items-center border rounded p-2 mb-2 bg-light">
+                                <div class="text-truncate">
+                                    <i class="ri-file-text-line me-2 text-primary"></i>
+                                    {{ file.fileName }}
+                                </div>
+                                <button type="button" class="btn btn-sm btn-danger" (click)="removeFile(i)">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-footer py-2">
+        <button class="btn btn-sm btn-primary px-4" (click)="close(true)" [disabled]="newsFileUploadForm.invalid">
+            Save
+        </button>
+        <button class="btn btn-sm btn-danger px-4" (click)="close(false)">
+            Close
+        </button>
+
+    </div>
+
+</div>

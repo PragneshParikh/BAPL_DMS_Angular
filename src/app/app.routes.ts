@@ -124,6 +124,7 @@ export const routes: Routes = [
                   { path: 'po-tracking-report', data: [47], loadComponent: () => import('./components/Reports/po-tracking-report/po-tracking-report').then(m => m.POTrackingReportComponent) },
                   { path: 'parts-dispatch-report', data: [50], loadComponent: () => import('./components/Reports/parts-dispatch-report/parts-dispatch-report').then(m => m.PartsDispatchReport) },
                   { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
+                  { path: 'news-bulletin', data: [53], loadComponent: () => import('./components/news-bulletin/news-bulletin').then(m => m.NewsBulletin) },
 
                   { path: 'proforma-invoice', data: [22], component: ProformaInvoice },
                   { path: 'form22-certificate/:chassisNo', data: [22], component: Form22Certificate },

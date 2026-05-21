@@ -1,0 +1,130 @@
+<!--PAGE Title-->
+<div class="page-title-box d-sm-flex align-items-center justify-content-between">
+    <h5 class="mb-sm-0">News & Bulletin</h5>
+</div>
+<!--End-->
+
+<!-- PAGE HEADER -->
+
+<div class="container-fluid py-2 full-height">
+    <div class="row h-100">
+
+        <!-- LEFT -->
+        <div class="col-md-4 mb-2">
+            <div class="card shadow border-0 full-card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-white"> News </h5>
+                    <button class="btn btn-sm fw-bold btn-light text-primary" *ngIf="isSuperAdmin"
+                        (click)="onAddNewFile()"> &nbsp; Add
+                    </button>
+                </div>
+
+                <div class="card-body folder-scroll">
+                    <div *ngFor="let year of objectKeys(folderStructure)" class="mb-2">
+                        <div class="folder-box year-folder d-flex align-items-center" (click)="toggleYear(year)">
+                            <span class="toggle-icon me-2">
+                                {{ openedYear === year ? '−' : '+' }}
+                            </span>
+                            📁 {{ year }}
+                        </div>
+
+                        <div *ngIf="openedYear === year" class="ms-3 mt-2">
+                            <!-- MONTH -->
+                            <div *ngFor="let month of objectKeys(folderStructure[year])" class="mb-2">
+                                <div class="folder-box month-folder d-flex align-items-center"
+                                    (click)="toggleMonth(month)">
+                                    <span class="toggle-icon me-2">
+                                        {{ openedMonth === month ? '−' : '+' }}
+                                    </span>
+                                    📂 {{ month }}
+                                </div>
+
+                                <!-- MONTH DATA -->
+                                <div *ngIf="openedMonth === month" class="ms-3 mt-2">
+                                    <!-- DATE -->
+                                    <div *ngFor="let date of objectKeys(folderStructure[year][month])" class="mb-2">
+                                        <div class="folder-box date-folder d-flex align-items-center"
+                                            [ngClass]="{'active-date': selectedDate === date }"
+                                            (click)="selectDate(year, month, date)">
+                                            <span class="toggle-icon me-2">
+                                                {{ selectedDate === date ? '' : ''}}
+                                            </span>
+                                            📅 {{ date }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-md-8 mb-2">
+            <div class="card shadow border-0 full-card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        📄 Files
+                        <span *ngIf="selectedDate" class="fs-6">
+                            : {{ selectedDate }}
+                        </span>
+                    </h5>
+                </div>
+
+                <!-- SCROLL -->
+                <div class="card-body file-scroll">
+                    <!-- EMPTY -->
+                    <div *ngIf="selectedFiles.length === 0"
+                        class="h-100 d-flex justify-content-center align-items-center text-muted">
+                        <h5>
+                            Select a Date Folder
+                        </h5>
+                    </div>
+
+                    <!-- TITLE & DESCRIPTION -->
+                    <div *ngIf="selectedDate && selectedFiles.length > 0"
+                        class="border rounded p-3 mb-3 bg-light position-relative">
+
+                        <!-- EDIT ICON -->
+                        <button class="btn btn-sm btn-primary btn-outline-primary position-absolute top-0 end-0 m-2"
+                            *ngIf="isSuperAdmin" (click)="editNews(selectedFiles[0])">
+                            <i class="ri-pencil-line"></i>
+                        </button>
+
+                        <h5 class="text-primary mb-2">
+                            {{ selectedFiles[0].title }}
+                        </h5>
+
+                        <p class="mb-0 text-muted">
+                            {{ selectedFiles[0].description }}
+                        </p>
+
+                    </div>
+
+                    <!-- FILES -->
+                    <!-- FILES -->
+                    <div *ngFor="let news of selectedFiles">
+
+                        <div *ngFor="let file of news.files"
+                            class="file-box d-flex justify-content-between align-items-center">
+
+                            <div>
+                                📄 {{ file.fileName }}
+                            </div>
+
+                            <div class="d-flex">
+                                <button class="btn btn-sm btn-outline-primary" (click)="viewPdf(file)">
+                                    View
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
