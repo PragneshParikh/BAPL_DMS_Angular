@@ -24,12 +24,15 @@ import {
 
 @Component({
     selector: 'app-vehicle-stock-report',
+
     standalone: true,
+
     imports: [
         CommonModule,
         FormsModule,
         ReactiveFormsModule
     ],
+
     templateUrl:
         './vehicle-stock-report.html',
 })
@@ -40,6 +43,12 @@ export class VehicleStockReportComponent
 
     reportData:
         VehicleStockReportViewModel[] = [];
+
+    dealerList: any[] = [];
+
+    modelList: any[] = [];
+
+    chassisList: string[] = [];
 
     isLoading: boolean = false;
 
@@ -74,10 +83,100 @@ export class VehicleStockReportComponent
         });
     }
 
+    // =====================================================
+    // INIT
+    // =====================================================
+
     ngOnInit(): void {
+
+        this.loadDropdowns();
 
         this.loadReport();
     }
+
+    // =====================================================
+    // LOAD DROPDOWNS
+    // =====================================================
+
+    loadDropdowns(): void {
+
+    // ============================================
+    // DEALER LIST
+    // ============================================
+
+    this.reportService
+        .getDealerList()
+        .subscribe({
+
+            next: (response: any[]) => {
+
+                this.dealerList =
+                    response.map(x => ({
+
+                        dealerCode:
+                            x.dealerCode,
+
+                        dealerName:
+                            x.dealerName
+                    }));
+            },
+
+            error: (error) => {
+
+                console.error(error);
+            }
+        });
+
+    // ============================================
+    // MODEL LIST
+    // ============================================
+
+    this.reportService
+        .getModelList()
+        .subscribe({
+
+            next: (response: any[]) => {
+
+                this.modelList =
+                    response.map(x => ({
+
+                        modelCode:
+                            x.modelCode,
+
+                        modelName:
+                            x.modelName
+                    }));
+            },
+
+            error: (error) => {
+
+                console.error(error);
+            }
+        });
+
+    // ============================================
+    // CHASSIS LIST
+    // ============================================
+
+    this.reportService
+        .getChassisList()
+        .subscribe({
+
+            next: (response: string[]) => {
+
+                this.chassisList = response;
+            },
+
+            error: (error) => {
+
+                console.error(error);
+            }
+        });
+}
+
+    // =====================================================
+    // LOAD REPORT
+    // =====================================================
 
     loadReport(): void {
 
@@ -98,8 +197,19 @@ export class VehicleStockReportComponent
 
                 next: (response) => {
 
-                    this.reportData =
-                        response.data;
+                this.reportData =
+                         response.data.map(
+                            (x: any, index: number) => ({
+
+                                ...x,
+
+                                srNo:
+                                    ((this.pageIndex - 1)
+                                        * this.pageSize)
+                                        + index + 1
+                            })
+                            
+                        );
 
                     this.totalRecords =
                         response.totalRecords;
@@ -116,12 +226,20 @@ export class VehicleStockReportComponent
             });
     }
 
+    // =====================================================
+    // SEARCH
+    // =====================================================
+
     onSearch(): void {
 
         this.pageIndex = 1;
 
         this.loadReport();
     }
+
+    // =====================================================
+    // RESET
+    // =====================================================
 
     onReset(): void {
 
@@ -144,18 +262,29 @@ export class VehicleStockReportComponent
             toDate: null
         });
 
+        this.modelList = [];
+
         this.pageIndex = 1;
 
         this.loadReport();
     }
 
+    // =====================================================
+    // FORMAT DATE
+    // =====================================================
+
     formatDate(date: any): string {
 
-        if (!date) return '';
+        if (!date)
+            return '';
 
         return new Date(date)
             .toLocaleDateString('en-IN');
     }
+
+    // =====================================================
+    // EXPORT CSV
+    // =====================================================
 
     exportToCSV(): void {
 

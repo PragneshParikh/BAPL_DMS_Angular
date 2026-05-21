@@ -10,8 +10,8 @@ import { NgbPaginationModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-ffirlisting',
-  standalone:true,
-  imports: [FormsModule,CommonModule,NgbTooltip,NgbPaginationModule],
+  standalone: true,
+  imports: [FormsModule, CommonModule, NgbTooltip, NgbPaginationModule],
   templateUrl: './ffirlisting.html',
   styleUrl: './ffirlisting.scss',
 })
@@ -187,7 +187,7 @@ export class Ffirlisting {
 
     this.page = Number(event);
 
-  this.refreshTable();
+    this.refreshTable();
 
   }
 
@@ -200,5 +200,14 @@ export class Ffirlisting {
     this.pagedData = this.filteredData.slice(start, end);
 
   }
+  
+  onFFIREdit(item: any) {
+
+  this.router.navigate(['/ffir'], {
+    queryParams: {
+      id: item.id
+    }
+  });
+}
 
 }

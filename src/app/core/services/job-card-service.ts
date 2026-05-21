@@ -26,7 +26,7 @@ export class JobCardService {
   getAllInspectedChassis(dealerCode: string, jobTypeId:number): Observable<any> {
     //debugger;
     if (!jobTypeId) jobTypeId = 0; 
-    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetAllInspectedChassis/dealerCode=${dealerCode}&jobTypeId=${jobTypeId}`);
+    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetAllInspectedChassis/${dealerCode}/${jobTypeId}`);
   }
 
   getJobSource(): Observable<any> {

@@ -154,7 +154,10 @@ export const ModuleTypes = [
     { name: 'warranty_claim_invoice', moduleName: 'Warranty Claim Invoice' },
     { name: 'free_service_claim', moduleName: 'Free Service Claim' },
     { name: 'CIR_investigation', moduleName: 'CIR Investigation' },
-    { name: 'purchase_order', moduleName: 'Purchase Order' }
+    { name: 'purchase_order', moduleName: 'Purchase Order' },
+    { name: 'hsrp_order', moduleName: 'HSRP Order' },
+    { name: 'sale_bill', moduleName: 'Vehicle Sale Bill' },
+    { name: 'receipt_entry', moduleName: 'Receipt Entry' }
 ]
 
 export const FFIRPresentVehicleStatus = [
@@ -187,7 +190,7 @@ export const APIUniqueList = [
     { value: 'color', name: 'Color' },
     { value: 'dealermaster', name: 'Dealer' },
     { value: 'hsncodemaster', name: 'HSNCodeMaster' },
-    { value: 'vehicledispatch', name: 'Vehicle Inward' },
+    { value: 'vehicleinward', name: 'Vehicle Inward' },
     { value: 'purchaseorder', name: 'Purchase Order' },
     { value: 'locationmaster', name: 'Location Master' },
     { value: 'dealermaster', name: 'Dealer Master' },

@@ -74,8 +74,12 @@
                                         <div class="col-md-3">
                                             <label>Mobile No</label>
                                             <input type="text" class="form-control form-control-sm" name="mobileNo"
-                                                [(ngModel)]="formData.mobileNo"
+                                                (input)="sanitizeMobile($event)" [(ngModel)]="formData.mobileNo"
+                                                #mobileNo="ngModel" pattern="^[0-9]{10}$" maxlength="10"
                                                 [readonly]="formData.saleType === 'Against Lead'">
+                                            <small class="text-danger" *ngIf="mobileNo?.invalid && mobileNo?.touched">
+                                                Enter valid 10-digit mobile number
+                                            </small>
                                         </div>
 
                                         <!-- <div class="col-md-3">
@@ -128,14 +132,24 @@
                                             <label>Party Name<span class="text-danger">*</span></label>
                                             <ng-container
                                                 *ngIf="formData.saleType === 'Receipt'; else againstLeadInput">
-                                                <select class="form-select form-select-sm"
-                                                    [(ngModel)]="formData.partyName" name="partyNameInput"
-                                                    #partyName="ngModel" required>
-                                                    <option value="">--Select Party Name--</option>
-                                                    <option *ngFor="let p of filteredParties" [value]="p.ledgerName">
-                                                        {{ p.ledgerName }}
-                                                    </option>
-                                                </select>
+                                                <div class="d-flex align-items-center">
+                                                    <select class="form-select form-select-sm"
+                                                        [(ngModel)]="formData.partyName" name="partyNameInput"
+                                                        #partyName="ngModel" required>
+                                                        <option value="">--Select Party Name--</option>
+                                                        <option *ngFor="let p of filteredParties"
+                                                            [value]="p.ledgerName">
+                                                            {{ p.ledgerName }}
+                                                        </option>
+                                                    </select>
+                                                    <!-- Add Button -->
+
+                                                    <button type="button" class="btn btn-sm btn-primary"
+                                                        (click)="openCustomerLedgerAdd('Party')"
+                                                        [ngbTooltip]="'Add New Party'">
+                                                        +
+                                                    </button>
+                                                </div>
                                                 <div class="text-danger mt-1"
                                                     *ngIf="partyName.invalid && (partyName.touched || receiptForm.submitted)">
                                                     <small>Party Name is required.</small>
@@ -177,7 +191,7 @@
                                                 <!-- Add Button -->
 
                                                 <button type="button" class="btn btn-sm btn-primary"
-                                                    (click)="openCustomerLedgerAdd()"
+                                                    (click)="openCustomerLedgerAdd('Financier')"
                                                     [ngbTooltip]="'Add New Financier'">
                                                     +
                                                 </button>
@@ -293,7 +307,7 @@
 
                                             <!-- Add / Update Button -->
                                             <button type="submit" class="btn btn-primary btn-sm"
-                                                [disabled]="disableSave" >
+                                                [disabled]="disableSave">
                                                 Save
                                             </button>
                                             <!-- Cancel Button -->
@@ -336,7 +350,11 @@
             </div>
             <div class="col-md-6">
                 <label>Search Text</label>
-                <input type="text" class="form-control" [(ngModel)]="searchText" />
+                <input type="text" class="form-control" [(ngModel)]="searchText" (input)="onSearchInput($event)"
+                    [class.is-invalid]="searchType === 'Mobile No' && isSearchMobileInvalid" />
+                    <div *ngIf="searchType === 'Mobile No' && isSearchMobileInvalid" class="text-danger mt-1">
+                        Enter valid 10-digit mobile number
+                    </div>
             </div>
             <div class="col-md-2 d-flex align-items-end">
                 <button class="btn btn-primary" (click)="searchLead()">Search</button>

@@ -28,6 +28,11 @@ import {
 } from '../../ViewModels/models/po-tracking-report.model';
 
 import {
+  PartDispatchKitReportViewModel
+  
+} from '../../ViewModels/models/part-dispatch-kit-report.model';
+
+import {
   HttpClient,
   HttpParams
 } from '@angular/common/http';
@@ -87,6 +92,8 @@ export class ReportService {
       `${this.apiUrl}/colour-wise`
     );
   }
+
+  
 
   // =====================================================
   // JOB REPORT
@@ -241,7 +248,34 @@ export class ReportService {
       filter
     );
   }
+getDealerList() {
 
+    return this.http.get<any[]>(
+        `${environment.apiUrl}/Report/dealer-list`
+    );
+}
+
+getModelList() {
+
+    return this.http.get<any[]>(
+        `${environment.apiUrl}/Report/model-list`
+    );
+}
+getModelListByDealer(
+    dealerCode: string
+) {
+
+    return this.http.get<any[]>(
+        `${environment.apiUrl}/Report/model-list/${dealerCode}`
+    );
+}
+
+getChassisList() {
+
+    return this.http.get<string[]>(
+        `${environment.apiUrl}/Report/chassis-list`
+    );
+}
   // =====================================================
   // PO TRACKING REPORT
   // =====================================================
@@ -275,4 +309,105 @@ export class ReportService {
         `${this.apiUrl}/po-tracking/dropdown/po-status`
       );
     }
+
+     // =====================================================
+    // PARTS DISPATCH REPORT
+    // =====================================================
+
+  getPartsDispatchReport(
+    dealerCode?: string,
+    fromDate?: Date,
+    toDate?: Date
+  ): Observable<any[]> {
+
+    let params = new HttpParams();
+
+    if (dealerCode) {
+
+      params = params.set(
+        'dealerCode',
+        dealerCode
+      );
+    }
+
+    if (fromDate) {
+
+      params = params.set(
+        'fromDate',
+        fromDate.toISOString()
+      );
+    }
+
+    if (toDate) {
+
+      params = params.set(
+        'toDate',
+        toDate.toISOString()
+      );
+    }
+
+    return this.http.get<any[]>(
+      `${this.apiUrl}/parts-dispatch`,
+      { params }
+    );
+  }
+
+  //=====================================================
+ //PART DISPATCH KIT REPORT
+ //=====================================================
+
+  getPartDispatchKitReport(
+    dealerCode?: string,
+    fromDate?: Date,
+    toDate?: Date
+  ): Observable<
+    PartDispatchKitReportViewModel[]
+  > {
+
+    let params = new HttpParams();
+
+    if (dealerCode) {
+
+      params = params.set(
+        'dealerCode',
+        dealerCode
+      );
+    }
+
+    if (fromDate) {
+
+      params = params.set(
+        'fromDate',
+        fromDate.toISOString()
+      );
+    }
+
+    if (toDate) {
+
+      params = params.set(
+        'toDate',
+        toDate.toISOString()
+      );
+    }
+
+    return this.http.get<
+      PartDispatchKitReportViewModel[]
+    >(
+      `${this.apiUrl}/part-dispatch-kit`,
+      { params }
+    );
+  }
+
+  // ======================================
+  // PART DISPATCH KIT PO TYPES
+  // ======================================
+
+  getPartDispatchKitPOTypeDropdown() {
+
+    return this.http.get<string[]>(
+      `${this.apiUrl}/part-dispatch-kit-po-types`
+    );
+  }
+
+  
 }
