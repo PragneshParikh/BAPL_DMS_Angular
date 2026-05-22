@@ -45,6 +45,7 @@ import { FFIR } from './components/ffir/ffir';
 import { HSRPOrder } from './components/hsrp-order/hsrp-order';
 import { HSRPOrderList } from './components/hsrp-order/hsrporder-list/hsrporder-list';
 import { HsrpInward } from './components/hsrp-order/hsrp-inward/hsrp-inward';
+import { EmployeeMasterList } from './components/employee-master/employee-master-list/employee-master-list';
 
 
 export const routes: Routes = [
@@ -125,7 +126,10 @@ export const routes: Routes = [
                   { path: 'parts-dispatch-report', data: [50], loadComponent: () => import('./components/Reports/parts-dispatch-report/parts-dispatch-report').then(m => m.PartsDispatchReport) },
                   { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
                   { path: 'news-bulletin', data: [53], loadComponent: () => import('./components/news-bulletin/news-bulletin').then(m => m.NewsBulletin) },
-
+             // EMPLOYEE MASTER
+                  { path: 'employee', data: [49], component: EmployeeMasterList},
+                  { path: 'employee/add', data: [49], component: EmployeeMasterComponent},
+                  { path: 'employee/edit/:id', data: [49], component: EmployeeMasterComponent},
                   { path: 'proforma-invoice', data: [22], component: ProformaInvoice },
                   { path: 'form22-certificate/:chassisNo', data: [22], component: Form22Certificate },
                   { path: 'delivery-checkList', data: [22], component: DeliveryChecklist },
