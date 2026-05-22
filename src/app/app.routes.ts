@@ -43,6 +43,8 @@ import { EmployeeMasterComponent } from './components/employee-master/employee-m
 import { FFIR } from './components/ffir/ffir';
 import { Ffirlisting } from './components/ffir/ffirlisting/ffirlisting';
 import { RepairBill } from './components/repair-bill/repair-bill';
+import { LabourMaster } from './components/labour-master-import/labour-master-import';
+import { LabourRateMaster } from './components/labour-rate-master/labour-rate-master';
 
 
 export const routes: Routes = [
@@ -121,6 +123,8 @@ export const routes: Routes = [
       { path: 'delivery-slip', component: DeliverySlip, data: [22] },
       { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] },
       { path: 'repair-bill', component: RepairBill, data: [51] },
+      { path: 'labour-master-import', component: LabourMaster, data: [54] },
+      { path: 'labour-rate-master', component: LabourRateMaster, data: [55] },
     ]
   },
   { path: '**', component: WorkInProgress }

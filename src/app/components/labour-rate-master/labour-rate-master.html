@@ -1,0 +1,374 @@
+<div class="card">
+
+    <div class="card-body">
+
+        <!-- Search Section -->
+        <div class="row">
+
+            <div class="col-md-3">
+
+                <label>Rate Type</label>
+
+                <select class="form-select form-select-sm" [(ngModel)]="rateType">
+
+                    <option value="">
+                        --Select--
+                    </option>
+
+                    <option value="Modelwise Labour Rate">
+                        Modelwise Labour Rate
+                    </option>
+
+                    <option value="Partwise Labour Rate">
+                        Partwise Labour Rate
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="col-md-3 align-self-end">
+                <button class="btn btn-primary btn-sm" (click)="onSearch()">
+                    <i class="ri-search-line"></i>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- ===================================== -->
+        <!-- MODELWISE GRID -->
+        <!-- ===================================== -->
+
+        <div class="card mt-3" *ngIf="rateType === 'Modelwise Labour Rate' && modelWiseLabourList.length > 0">
+            <div class="card-header">
+                <h5 class="mb-0"> Modelwise Labour Rate Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Labour Code</th>
+                                <th>Labour Description</th>
+                                <th>Labour Rate</th>
+                                <th>OemModel Name</th>
+                                <th>City Tier</th>
+                                <th>SGST</th>
+                                <th>CGST</th>
+                                <th>IGST</th>
+                                <th>HSN Code</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of pagedModelWiseLabourList; let i = index"
+                                (click)="openEditPopup(item)" style="cursor:pointer;">
+                                <td>{{((currentPage - 1) * pageSize) + i + 1}}</td>
+                                <td>{{item.labourCode}}</td>
+                                <td>{{item.labourDescription}}</td>
+                                <td>{{item.labourRate}}</td>
+                                <td>{{item.oemModelName}}</td>
+                                <td>{{item.cityTier}}</td>
+                                <td>{{item.sgst}}</td>
+                                <td>{{item.cgst}}</td>
+                                <td>{{item.igst}}</td>
+                                <td>{{item.hsnCode}}</td>
+                                <td>
+                                    <span class="badge bg-success" *ngIf="item.isLabourRateActive">Active </span>
+                                    <span class="badge bg-danger" *ngIf="!item.isLabourRateActive">Inactive </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div class="d-flex justify-content-end mt-3">
+                    <ul class="pagination pagination-sm">
+                        <li class="page-item" [class.disabled]="currentPage === 1">
+                            <a class="page-link" (click)="setPage(currentPage - 1)"> Previous </a>
+                        </li>
+                        <li class="page-item" *ngFor=" let page of [].constructor(totalPages); let i = index"
+                            [class.active]="currentPage === i + 1">
+                            <a class="page-link" (click)="setPage(i + 1)"> {{i + 1}} </a>
+                        </li>
+                        <li class="page-item" [class.disabled]="currentPage === totalPages">
+                            <a class="page-link" (click)="setPage(currentPage + 1)">Next </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================== -->
+        <!-- PARTWISE GRID -->
+        <!-- ===================================== -->
+
+        <div class="card mt-3" *ngIf="rateType === 'Partwise Labour Rate' && partWiseLabourList.length > 0">
+            <div class="card-header">
+                <h5 class="mb-0"> Partwise Labour Rate Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Labour Code</th>
+                                <th>Labour Name</th>
+                                <th>Part Code</th>
+                                <th>Part Description</th>
+                                <th>Model Name</th>
+                                <th>City Tier</th>
+                                <th>Labour Rate</th>
+                                <th>Labour Hrs</th>
+                                <th>CGST</th>
+                                <th>SGST</th>
+                                <th>IGST</th>
+                                <th>Job Type</th>
+                                <th>Dealer Code</th>
+                                <th>HSN Code</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of pagedPartWiseLabourList; let i = index"
+                                (click)="openPartwiseEditPopup(item)" style="cursor:pointer;">
+                                <td> {{((currentPage - 1) * pageSize)+ i + 1}}</td>
+                                <td>{{item.labourCode}}</td>
+                                <td>{{item.labourName}}</td>
+                                <td>{{item.partCode}}</td>
+                                <td>{{item.partDescription}}</td>
+                                <td>{{item.oemModelName}}</td>
+                                <td>{{item.cityTier}}</td>
+                                <td>{{item.labourRate}}</td>
+                                <td>{{item.labourHrs}}</td>
+                                <td>{{item.cgst}}</td>
+                                <td>{{item.sgst}}</td>
+                                <td>{{item.igst}}</td>
+                                <td>{{item.jobType}}</td>
+                                <td>{{item.dealerCode}}</td>
+                                <td>{{item.hsnCode}}</td>
+                               <td>
+                                    <span class="badge bg-success" *ngIf="item.isActive">Active </span>
+                                    <span class="badge bg-danger" *ngIf="!item.isActive">Inactive </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================== -->
+<!-- EDIT POPUP ModelWiseLabour-->
+<!-- ===================================== -->
+
+<div class="modal fade show d-block" *ngIf="showEditPopup">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title text-white">Update Labour Master</h5>
+                <button type="button" class="btn-close text-white" (click)="closePopup()"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label>Labour Code</label>
+                        <input class="form-control" [(ngModel)]="selectedLabour.labourCode">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Labour Description</label>
+                        <input class="form-control form-control-sm" [(ngModel)]="selectedLabour.labourDescription">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Labour Rate</label>
+                        <input type="number" class="form-control form-control-sm"
+                            [(ngModel)]="selectedLabour.labourRate">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>CGST</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedLabour.cgst">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>SGST</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedLabour.sgst">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>IGST</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedLabour.igst">
+                    </div>
+                    <div class="col-md-4">
+                        <label>Effective Date</label>
+                        <input type="date" class="form-control form-control-sm"
+                            [value]="selectedLabour.effectiveDate | date:'yyyy-MM-dd'">
+                    </div>
+                    <div class="col-md-4">
+                        <label>OemModelName</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="selectedLabour.oemModelName">
+                            <option value=""> -- Select Oemmodel name -- </option>
+                            <option *ngFor="let o of oemModels" [value]="o.oemModelName">
+                                {{o.oemModelName}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>CityTier</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedLabour.cityTier">
+                    </div>
+                    <div class="col-md-4">
+
+                        <label class="form-label d-block">
+                            Status
+                        </label>
+
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="activeSwitch"
+                                [(ngModel)]="selectedLabour.isLabourRateActive">
+                            <label class="form-check-label ms-2" for="activeSwitch">
+                                <span class="badge" [ngClass]="selectedLabour.isLabourRateActive
+                           ? 'bg-success'
+                           : 'bg-danger'">{{
+                                    selectedLabour.isLabourRateActive
+                                    ? 'Active'
+                                    : 'Inactive'
+                                    }}
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" (click)="updateLabour()"> Update </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop fade show" *ngIf="showEditPopup">
+</div>
+
+<!-- ===================================== -->
+<!-- EDIT POPUP PArtWiseLabour-->
+<!-- ===================================== -->
+
+<div class="modal fade show d-block" *ngIf="showPartwiseEditPopup">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title text-white">Update Labour PartWise Master</h5>
+                <button type="button" class="btn-close text-white" (click)="closePopup()"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label>Labour Code</label>
+                        <input class="form-control" [(ngModel)]="selectedPartwiseLabour.labourCode">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Labour Name</label>
+                        <input class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.labourName">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Labour Rate</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.labourRate">
+                    </div>
+                    <div class="col-md-4">
+                        <label>Labour Hours</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.labourHours">
+                    </div>
+                    <div class="col-md-4">
+                        <label>Part Code</label>
+                        <input class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.partCode">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Part Description</label>
+                        <input class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.partDescription">
+                    </div>
+                    <div class="col-md-4">
+                        <label>Job Type</label>
+                        <input class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.jobType">
+                    </div>
+                    <div class="col-md-4">
+                        <label>HSNCODE</label>
+                        <input class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.hsnCode">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>CGST</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.cgst">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>SGST</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.sgst">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>IGST</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.igst">
+                    </div>
+                    <div class="col-md-4">
+                        <label>Effective Date</label>
+                        <input type="date" class="form-control form-control-sm" [value]="selectedPartwiseLabour.effectiveDate | date:'yyyy-MM-dd'">
+                    </div>
+                    <div class="col-md-4">
+                        <label>OemModelName</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="selectedPartwiseLabour.oemModelName">
+                            <option value=""> -- Select Oemmodel name -- </option>
+                            <option *ngFor="let o of oemModels" [value]="o.oemModelName">
+                                {{o.oemModelName}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>CityTier</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.cityTier">
+                    </div>
+                    <div class="col-md-4">
+
+                        <label class="form-label d-block">
+                            Status
+                        </label>
+
+                        <div class="form-check form-switch form-check-sm">
+                            <input class="form-check-input" type="checkbox" id="activeSwitch"
+                                [(ngModel)]="selectedPartwiseLabour.isActive">
+                            <label class="form-check-label ms-2" for="activeSwitch">
+                                <span class="badge" [ngClass]="selectedPartwiseLabour.isActive
+                           ? 'bg-success'
+                           : 'bg-danger'">{{
+                                    selectedPartwiseLabour.isActive
+                                    ? 'Active'
+                                    : 'Inactive'
+                                    }}
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" (click)="updatePartwiseLabour()"> Update </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop fade show" *ngIf="showPartwiseEditPopup">
+</div>
