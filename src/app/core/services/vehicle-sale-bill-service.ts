@@ -65,6 +65,13 @@ getChassisListPDIOK(dealerCode: string, ledgerId: number): Observable<VehicleSal
     `${this.apiUrl}/VehicleSaleBill/ChassisListPDIOK?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
   );
 }
+
+getAllChassisWithPDIStatus(dealerCode: string, ledgerId: number): Observable<VehicleSaleListChasisResponse[]> {
+  return this.http.get<VehicleSaleListChasisResponse[]>(
+    `${this.apiUrl}/VehicleSaleBill/ChassisList?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
+  );
+}
+
 getVehicleSaleBillById(id: number): Observable<any> {
   return this.http.get<any>(`${this.apiUrl}/VehicleSaleBill/${id}`);
 }
@@ -73,7 +80,7 @@ getVehicleSaleBillById(id: number): Observable<any> {
 //To be modified when SaleBill is created
 
 confirmInvoice(saleBillNo: string) {
-  return this.http.put<boolean>(
+  return this.http.put<number>(
     `${this.apiUrl}/VehicleSaleBill/ConfirmInvoice?saleBillNo=${saleBillNo}`,
     null  
   );

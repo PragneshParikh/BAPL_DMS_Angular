@@ -22,7 +22,7 @@
 
     <div class="text-center border-bottom pb-1">
       <h6 class="mb-0 fw-bold text-uppercase">
-        {{ isInvoiced ? 'TAX INVOICE' : 'PERFORMA INVOICE' }}
+        {{ isInvoiced ? 'TAX INVOICE' : 'PROFORMA INVOICE' }}
       </h6>
     </div>
     <!-- CUSTOMER DETAILS -->
@@ -115,6 +115,13 @@
 
     <!-- TAX -->
     <table class="small w-100">
+
+      <tr *ngIf="invoiceType !== 'ex' && amounts.preGstDiscount > 0">
+        <td>Pre GST Discount</td>
+        <td class="text-end">
+          ({{ amounts.preGstDiscount | number:'1.2-2' }})
+        </td>
+      </tr>
       <tr>
         <td>Taxable Price</td>
         <td class="text-end">{{ amounts.taxable | number:'1.2-2' }}</td>
@@ -137,19 +144,26 @@
           <td class="text-end">{{ amounts.igst | number:'1.2-2' }}</td>
         </tr>
       </ng-template>
+
+      <tr *ngIf="invoiceType !== 'ex' && amounts.postGstDiscount > 0">
+        <td>Post GST Discount</td>
+        <td class="text-end">
+          ({{ amounts.postGstDiscount | number:'1.2-2' }})
+        </td>
+      </tr>
     </table>
 
     <div class="dashed"></div>
 
     <!-- TOTAL -->
     <table class="small w-100">
-      <tr>
+      <!-- <tr>
         <td><b>Ex-Showroom Price</b></td>
         <td class="text-end"><b>{{ amounts.exShowroom | number:'1.2-2' }}</b></td>
-      </tr>
+      </tr> -->
       <tr>
         <td><b>Less PM E-DRIVE Incentive from Govt. of India</b></td>
-        <td class="text-end">({{ amounts.discount | number:'1.2-2' }})</td>
+        <td class="text-end">({{ amounts.fameII | number:'1.2-2' }})</td>
       </tr>
       <!-- <tr>
         <td><b> {{ isInvoiced ? 'Invoice Total' : 'Proforma Invoice Total' }}</b></td>
@@ -158,9 +172,9 @@
 
       <!-- ON ROAD SECTION -->
 
-      <ng-container *ngIf="invoiceType === 'onroad'">
+      <ng-container *ngIf="invoiceType !== 'ex'">
 
-        <tr>
+       <tr *ngIf="registrationAmount > 0">
           <td>
             Reg. Amount
           </td>
@@ -170,7 +184,7 @@
           </td>
         </tr>
 
-        <tr>
+        <tr *ngIf="insuranceAmount > 0">
           <td>
             Ins. Amount
           </td>
@@ -180,7 +194,7 @@
           </td>
         </tr>
 
-        <tr>
+        <!-- <tr>
           <td>
             <b>Pre GST Discount</b>
           </td>
@@ -188,7 +202,7 @@
           <td class="text-end">
             ({{ preGstDiscount | number:'1.2-2' }})
           </td>
-        </tr>
+        </tr> -->
 
       </ng-container>
 
@@ -198,21 +212,17 @@
 
         <td>
 
-          <b>
-
-            {{
-
-            invoiceType === 'onroad'
-            ? 'On Road Total'
-            : (
-            isInvoiced
-            ? 'Invoice Total'
-            : 'Proforma Invoice Total'
-            )
-
-            }}
-
-          </b>
+        <b>
+  {{
+    invoiceType === 'onroad'
+      ? 'On Road Total'
+      : (
+          isInvoiced
+            ? 'Ex-Showroom Total'
+            : 'Proforma Total'
+        )
+  }}
+</b>
 
         </td>
 
