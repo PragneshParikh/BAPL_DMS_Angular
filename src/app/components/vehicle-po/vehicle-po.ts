@@ -4,7 +4,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { StorageService } from '../../core/services/storage';
 import { ItemMasterService } from '../../core/services/item-master-service';
-import { VehiclePoService } from '../../core/services/vehicle-po-service';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IssueTypes, TRANSACTION_TYPES } from '../../constant';
@@ -13,6 +12,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import Swal from 'sweetalert2';
 import { LedgerMaster } from '../../core/services/ledger-master';
 import { PrefixService } from '../../core/services/prefix';
+import { PurchaseService } from '../../core/services/purchase-service';
 export interface PurchaseOrderItemViewModel {
   ItemCode: string;
   Qty: number;
@@ -99,7 +99,7 @@ export class VehiclePO implements OnInit {
     private locationService: LocationMasterService,
     private storageService: StorageService,
     private itemService: ItemMasterService,
-    private vehiclePoService: VehiclePoService,
+    private purchaseService: PurchaseService,
     private route: ActivatedRoute,
     private router: Router,
     private loader: LoaderService,
@@ -137,7 +137,7 @@ export class VehiclePO implements OnInit {
   }
 
   fetchGlobalSubsidy() {
-    this.vehiclePoService.getSubsidyValue().subscribe({
+    this.purchaseService.getSubsidyValue().subscribe({
       next: (val) => {
         this.globalSubsidy = val || 0;
       },
@@ -163,7 +163,7 @@ export class VehiclePO implements OnInit {
 
   loadPODetails(poNumber: string) {
     this.loader.show();
-    this.vehiclePoService.getPOByNumber(poNumber).subscribe({
+    this.purchaseService.getPOByNumber(poNumber).subscribe({
       next: (response: any) => {
         this.loader.hide();
         const res = Array.isArray(response) ? response[0] : response;
@@ -740,6 +740,7 @@ export class VehiclePO implements OnInit {
       Remarks: this.remarks,
       LocCode: this.selectedLocation,
       LedgerCode: this.selectedLedgerCode,
+      SubOrderType: null,
       Items: this.purchaseDetails.map((item, index) => ({
         ItemCode: item.modelNo,
         Qty: item.qty,
@@ -749,8 +750,8 @@ export class VehiclePO implements OnInit {
     };
 
     const saveObs = this.ponumber
-      ? this.vehiclePoService.updatePO(poModel)
-      : this.vehiclePoService.createPurchaseOrder(poModel);
+      ? this.purchaseService.updatePO(poModel)
+      : this.purchaseService.createPurchaseOrder(poModel);
 
     saveObs.subscribe({
       next: (res) => {
@@ -804,14 +805,15 @@ export class VehiclePO implements OnInit {
       }))
     };
 
-    this.vehiclePoService.sendToERP(soHeader).subscribe({
+    this.purchaseService.sendToERP(soHeader).subscribe({
       next: (res: any) => {
         this.loader.hide();
         this.toaster.show('Submit to ERP successful!', { classname: 'bg-success text-white', delay: 5000 });
         this.isSubmitted = res.Succeed; // Disable button after success
 
-        const match = res?.ConfirmMessage?.match(/SO No\.\s*([A-Za-z0-9/-]+)/);
-        const salesOrderNo = match ? match[1] : '';
+        // const match = res?.ConfirmMessage?.match(/SO No\.\s*([A-Za-z0-9/-]+)/);
+        // const salesOrderNo = match ? match[1] : '';
+        const salesOrderNo = res.ReturnValue.SOId;
 
         this.updatePOStatus(this.orderNo, res.Succeed, salesOrderNo, this.selectedLocation);
       },
@@ -866,7 +868,7 @@ export class VehiclePO implements OnInit {
   }
 
   updatePOStatus(orderNo: string, isSubmitted: boolean, saleOrderNo: string, consigneeCode: string) {
-    this.vehiclePoService.updatePOStatus(orderNo, isSubmitted, saleOrderNo, consigneeCode).subscribe({
+    this.purchaseService.updatePOStatus(orderNo, isSubmitted, saleOrderNo, consigneeCode).subscribe({
       next: (updateRes) => {
         this.redirectToCreatePOList();
       },

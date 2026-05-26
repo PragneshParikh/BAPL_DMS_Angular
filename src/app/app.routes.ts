@@ -94,7 +94,7 @@ export const routes: Routes = [
                   { path: 'material-transfer', data: [29], loadComponent: () => import('./components/material-transfer/material-transfer').then(m => m.MaterialTransfer) },
                   { path: 'material-transfer/:id', data: [29], loadComponent: () => import('./components/material-transfer/material-transfer-detail/material-transfer-detail').then(m => m.MaterialTransferDetail) },
                   { path: 'parts-po-list', data: [33], component: PartsPoList },
-                  { path: 'parts-po', data: [33], component: PartsPo },
+                  // { path: 'parts-po', data: [33], component: PartsPo },
                   { path: 'parts-po/:ponumber', data: [33], component: PartsPo },
                   { path: 'oemmodel-warranty', data: [34], component: OemmodelWarranty },
                   { path: 'oemmodel-warranty/add', data: [34], component: AddOemmodelWarranty },
