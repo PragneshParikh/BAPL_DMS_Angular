@@ -115,12 +115,8 @@ export const userRole = [
 ]
 
 export const ErpOptions = [
-    { name: 'Submitted to ERP', value: 'PushedToERP' },
-    { name: 'Pending', value: 'Pending' },
-    { name: 'Alloted', value: 'Alloted' },
     { name: 'Invoiced', value: 'Invoiced' },
-    { name: 'Reserved', value: 'Reserved' },
-    { name: 'Invalid', value: 'Invalid' }
+    {name: 'Proforma Created', value: 'PerformaCreated'}
     //     { name: 'Pending ERP Submission', value: 'Pending' }
 ];
 
