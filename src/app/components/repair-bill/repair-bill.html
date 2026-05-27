@@ -1,0 +1,1023 @@
+<div class="container-fluid repair-bill-page p-2">
+
+    <!-- Header -->
+    <div class="card shadow-sm mb-2">
+        <div class="card-header text-white py-2 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">Repair Bill [GST]</h6>
+
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-light btn-sm">
+                    <i class="ri-menu-line"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="card-body p-2">
+
+            <!-- Row 1 -->
+            <div class="row g-2 mb-2">
+
+                <div class="col-md-2">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-control form-control-sm bg-light text-muted"
+                        [(ngModel)]="currentDate" readonly>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Location</label>
+
+                    <input type="text" class="form-control form-control-sm bg-light text-muted"
+                        [value]="selectedLocation" readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Prefix</label>
+                    <input type="text" class="form-control form-control-sm bg-light text-muted"
+                        [value]="RepairBillprefix" readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Bill No.</label>
+                    <input type="text" class="form-control form-control-sm bg-light text-muted" [value]="billNo"
+                        readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Bill Type</label>
+
+                    <div class="d-flex gap-3 mt-1">
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="billType" value="Cash"
+                                [(ngModel)]="billType">
+
+                            <label class="form-check-label">
+                                Cash
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="billType" value="Credit"
+                                [(ngModel)]="billType">
+
+                            <label class="form-check-label">
+                                Credit
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Cash Account</label>
+
+                    <div class="input-group input-group-sm">
+
+                        <select class="form-select form-select-sm" [(ngModel)]="selectedCashAccount">
+
+                            <option value=null>--Select Cash--</option>
+
+                            <option *ngFor="let item of cashAccounts" [value]="item.id">
+                                {{ item.accountName }}
+                            </option>
+                        </select>
+
+                        <!-- Search Button -->
+                        <!-- <button class="btn btn-outline-primary" (click)="openPopup()">
+                            <i class="ri-search-line"></i>
+                        </button> -->
+
+                    </div>
+                </div>
+
+
+                <!-- Row 2 -->
+                <!--<div class="row g-2 mb-3">-->
+
+                <div class="col-md-2">
+                    <label class="form-label">Party Name</label>
+                    <input type="text" class="form-control form-control-sm bg-light text-muted"
+                        [value]="selectedJobCard?.partyName || ''" readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Mobile Number</label>
+                    <input type="text" class="form-control form-control-sm bg-light text-muted"
+                        [value]="selectedJobCard?.partyMobileNo || ''" readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Party State</label>
+                    <input type="text" class="form-control form-control-sm bg-light text-muted"
+                        [value]="selectedJobCard?.partyState || ''" readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Scheme</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="selectedScheme">
+
+                        <option value=null>--Select Scheme--</option>
+
+                        <option *ngFor="let item of SchemeName" [value]="item.id">
+                            {{ item.value }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-1">
+                    <label class="form-label">Job Search</label>
+                    <button class="btn btn-light btn-sm w-100" (click)="openPopup()">
+                        <i class="ri-car-line"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- </div>-->
+            <!--Job Card details show hide-->
+            <div class="card mt-3" *ngIf="showJobDetails">
+
+                <div class="card-header">
+
+                    <div class="d-flex justify-content-between">
+
+                        <h6 class="mb-0">
+                            <b>Selected Job Details</b>
+                        </h6>
+
+                        <button class="btn btn-sm btn-primary" (click)="toggleJobDetails()">
+                            <i class="ri-eye-line" *ngIf="!showSelectedJob"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row g-2">
+                        <div class="col-md-2">
+                            <label>Job Date</label>
+                            <input class="form-control form-control-sm bg-light text-muted"
+                                [value]="selectedJobCard?.jobCardHeader?.jobinDate | date:'dd-MM-yyyy'" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Job No.</label>
+                            <input class="form-control form-control-sm bg-light text-muted"
+                                [value]="selectedJobCard?.jobCardHeader?.jobNo" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Reg No</label>
+                            <input class="form-control form-control-sm bg-light text-muted"
+                                [value]="selectedJobCard?.jobCardCustomer?.registerNo" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Model</label>
+                            <input class="form-control form-control-sm bg-light text-muted"
+                                [value]="selectedJobCard?.jobCardCustomer?.modelName" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>ODO Reading</label>
+                            <input class="form-control form-control-sm bg-light text-muted"
+                                [value]="selectedJobCard?.jobCardHeader?.vehiclekms" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Chassis</label>
+                            <input class="form-control form-control-sm bg-light text-muted"
+                                [value]="selectedJobCard?.jobCardCustomer?.chassisNo" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Technician</label>
+                            <input class="form-control form-control-sm bg-light text-muted"
+                                [value]="selectedJobCard?.jobCardHeader?.technician" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--End-->
+
+            <!-- Item Entry -->
+
+            <div class="border rounded p-2 mb-2 bg-light-subtle">
+
+                <div class="row g-2 align-items-end mb-2">
+
+                    <div class="col-md-2 position-relative" *ngIf="selectedItemType === 'Labour'">
+
+                        <label class="form-label">Labour</label>
+
+                        <div class="input-group input-group-sm">
+
+                            <input type="text" class="form-control" [(ngModel)]="labourCode" (input)="onLabourSearch()">
+                        </div>
+
+                        <!-- Autocomplete Dropdown -->
+                        <ul *ngIf="showLabourDropdown" class="list-group position-absolute w-100 shadow"
+                            style="z-index:1000; max-height:200px; overflow:auto;">
+
+                            <li *ngFor="let item of filteredLabourList" class="list-group-item list-group-item-action"
+                                (click)="selectLabour(item)">
+
+                                {{ item.labourCode }} -
+                                {{ item.labourDescription }}
+
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                    <div class="col-md-2 position-relative" *ngIf="selectedItemType === 'Part'">
+
+                        <label class="form-label">Part No.</label>
+
+                        <div class="input-group input-group-sm">
+
+                            <input type="text" class="form-control" [(ngModel)]="itemcode" (input)="onPartSearch()">
+                        </div>
+
+
+                        <ul *ngIf="showPartDropdown" class="list-group position-absolute w-100 shadow"
+                            style="z-index:1000; max-height:200px; overflow:auto;">
+
+                            <li *ngFor="let item of filteredLabourList" class="list-group-item list-group-item-action"
+                                (click)="selectPart(item)">
+
+                                {{ item.itemcode }} -
+                                {{ item.itemdesc }}
+
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                    <div class="col-md-3" *ngIf="selectedItemType === 'Labour'">
+
+                        <label class="form-label">Description</label>
+
+                        <input type="text" class="form-control form-control-sm bg-light text-muted"
+                            [(ngModel)]="selectedDescription" readonly>
+
+                    </div>
+                    <div class="col-md-3" *ngIf="selectedItemType === 'Part'">
+
+                        <label class="form-label">Description</label>
+
+                        <input type="text" class="form-control form-control-sm bg-light text-muted"
+                            [(ngModel)]="selectedPartDescription" readonly>
+
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">Qty/Hrs.</label>
+                        <input type="number" class="form-control form-control-sm text-end bg-light text-muted"
+                            [value]="1" readonly>
+                    </div>
+                    <div class="col-md-1" *ngIf="selectedItemType === 'Labour'">
+
+                        <label class="form-label">Rate</label>
+
+                        <input type="number" class="form-control form-control-sm text-end bg-light text-muted"
+                            [(ngModel)]="selectedRate" readonly>
+
+                    </div>
+                    <div class="col-md-1" *ngIf="selectedItemType === 'Part'">
+
+                        <label class="form-label">Rate</label>
+
+                        <input type="number" class="form-control form-control-sm text-end bg-light text-muted"
+                            [(ngModel)]="selectedPartRate" readonly>
+
+                    </div>
+
+
+                    <div class="col-md-1">
+                        <label class="form-label">Discount</label>
+                        <input type="number" class="form-control form-control-sm text-end" [(ngModel)]="discount">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Disc. Type</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="discountType">
+                            <option value="Value">Value</option>
+                            <option value="%">%</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Issue Type</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="selectedIssueType">
+
+                            <option value=null>--Select Cash--</option>
+
+                            <option *ngFor="let item of IssueType" [value]="item.id">
+                                {{ item.name }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Technician</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="technician">
+                            <option value="">Select Technician</option>
+                            <option value="Manoj">Manoj</option>
+                            <option value="Suraj">Suraj</option>
+                            <option value="Vishal">Vishal</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-sm btn-soft-primary" (click)="addLabour()">
+                            + Add
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Item Type -->
+                <div class="d-flex gap-3 mb-2 small">
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="itemType" value="Part"
+                            [(ngModel)]="isPartSelected">
+
+                        <label class="form-check-label">
+                            Part
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="itemType" value="Accessory"
+                            [(ngModel)]="isAccessorySelected">
+
+                        <label class="form-check-label">
+                            Accessory
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="itemType" value="Labour"
+                            [(ngModel)]="isLabourSelected">
+
+                        <label class="form-check-label">
+                            Labour
+                        </label>
+                    </div>
+
+                </div>
+
+                <!-- LAbour Table -->
+                <div class="table-responsive" *ngIf="selectedItemType === 'Labour'">
+                    <table class="table table-bordered table-sm align-middle text-nowrap mb-0">
+
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Action</th>
+                                <th>Sr.No</th>
+                                <th>LabourCode</th>
+                                <th>Description</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Discount</th>
+                                <th>Disc.Type</th>
+                                <th>IGST Amt.</th>
+                                <th>Amount</th>
+                                <th>Issue Type</th>
+                                <th>FOC Rate</th>
+                                <th>GST %</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngFor="let item of labourItems; let i=index">
+                                <td>
+                                    <button class="btn btn-sm btn-primary" (click)="editLabour(i)">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+
+                                    <button class="btn btn-sm btn-danger" (click)="deleteLabour(i)">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </td>
+
+                                <td>{{i+1}}</td>
+
+                                <td>{{item.labourCode}}</td>
+
+                                <td>{{item.description}}</td>
+
+                                <td class="text-end">
+                                    {{item.qty}}
+                                </td>
+
+                                <td class="text-end">
+                                    {{item.rate | number:'1.2-2'}}
+                                </td>
+
+                                <td class="text-end">
+                                    {{item.discount | number:'1.2-2'}}
+                                </td>
+
+                                <td>
+                                    {{item.discountType}}
+                                </td>
+
+                                <td class="text-end">
+                                    {{item.igstAmount | number:'1.2-2'}}
+                                </td>
+
+                                <td class="text-end">
+                                    {{item.netAmount | number:'1.2-2'}}
+                                </td>
+                                <td class="text-end">
+                                    {{item.issuetypeName}}
+                                </td>
+
+                                <td class="text-end">
+                                    {{item.rate | number:'1.2-2'}}
+                                </td>
+                                <td class="text-end">
+                                    {{item.igst | number:'1.2-2'}}
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <hr />
+                <!--Part Table-->
+                <div class="table-responsive" *ngIf="selectedItemType === 'Labour'">
+
+                    <table class="table table-bordered table-sm">
+
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Part No</th>
+                                <th>Description</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Discount</th>
+                                <th>Discount Type</th>
+                                <th>IGST Amt.</th>
+                                <th>Amount</th>
+                                <th>IssueType</th>
+                                <th>FOC Rate</th>
+                                <th>GST %</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr *ngFor="let item of materialedJobCarDList; let i=index">
+                                <td>{{i+1}}</td>
+                                <td>{{item.partCode}}</td>
+                                <td>{{item.partDesc}}</td>
+                                <td>{{item.partQty}}</td>
+                                <td>{{item.partRate}}</td>
+                                <td>{{item.discount}}</td>
+                                <td>{{item.igstAmount}}</td>
+                                <td>{{item.netAmount}}</td>
+                                <td>{{item.issuetypeName}}</td>
+                                <td>{{item.rate}}</td>
+                                <td>{{item.igst}}</td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <!-- Accessory Table -->
+                <!-- <div class="table-responsive" *ngIf="selectedItemType === 'Accessory'">
+
+                    <table class="table table-bordered table-sm">
+
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Action</th>
+                                <th>Sr.No</th>
+                                <th>Accessory Code</th>
+                                <th>Description</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr *ngFor="let item of accessoryItems; let i=index">
+
+                                <td>
+                                    <button class="btn btn-sm btn-primary">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </td>
+
+                                <td>{{i+1}}</td>
+                                <td>{{item.code}}</td>
+                                <td>{{item.description}}</td>
+                                <td>{{item.qty}}</td>
+                                <td>{{item.rate}}</td>
+                                <td>{{item.netAmount}}</td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div> -->
+
+            </div>
+
+            <!-- Bottom Section -->
+            <div class="row g-2 mb-3">
+
+                <div class="col-md-4">
+                    <label class="form-label">Remarks</label>
+                    <textarea rows="4" class="form-control"></textarea>
+                </div>
+
+                <div class="col-md-8">
+
+                    <div class="row g-2 mb-2">
+
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-primary btn-sm w-100" (click)="openDiscountPopup()">
+                                Add Discount
+                            </button>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Discount</label>
+                            <input class="form-control form-control-sm text-end" [value]="discount | number:'1.2-2'"
+                                readonly>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Taxable Amount</label>
+                            <input class="form-control form-control-sm text-end"
+                                [value]="totalTaxableAmount | number:'1.2-2'" readonly>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Net Amount</label>
+                            <input class="form-control form-control-sm text-end"
+                                [value]="totalNetAmount | number:'1.2-2'" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+
+                        <div class="col-md-3">
+                            <label class="form-label">Disc. Amount(-)</label>
+                            <input class="form-control form-control-sm text-end"
+                                [value]="totalDiscount | number:'1.2-2'" readonly>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Amount Received</label>
+                            <input class="form-control form-control-sm text-end"
+                                [value]="amountReceived | number:'1.2-2'" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="d-flex justify-content-between align-items-center border-top pt-2">
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm" (click)="showInsurancePopup = true">
+                        <i class="ri-bank-line"></i>Insurance
+                    </button>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary btn-sm">
+                        <i class="ri-save-line"></i> Save As Invoice
+                    </button>
+
+                    <button class="btn btn-light btn-sm">
+                        <i class="ri-close-line"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--- Popup model jobdetails-->
+<ng-template [ngIf]="showPopup">
+
+    <div class="custom-modal-backdrop">
+
+        <div class="custom-modal">
+
+            <!-- Header -->
+            <div class="custom-modal-header bg-primary">
+
+                <h5 class="mb-0 text-white">
+                    Job Search
+                </h5>
+
+                <button class="btn-close-custom text-white" (click)="closePopup()">
+
+                    <i class="ri-close-line"></i>
+
+                </button>
+
+            </div>
+
+            <!-- Body -->
+            <div class="custom-modal-body">
+
+                <!-- SEARCH -->
+                <div class="row g-2 mb-3">
+
+                    <div class="col-md-2">
+                        <label>Date From</label>
+
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateFrom">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Date To</label>
+
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateTo">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Job No</label>
+
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="jobNo">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Registration No</label>
+
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="registerNo">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Chassis Number</label>
+
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="chassisNo">
+                    </div>
+
+                    <!-- <div class="col-md-2">
+
+                        <label class="form-label d-block">
+                            Show Previous Year Jobs
+                        </label>
+
+                        <div class="form-check form-switch mt-1">
+
+                            <input class="form-check-input" type="checkbox" id="previousYearToggle">
+
+                            <label class="form-check-label" for="previousYearToggle">
+
+                                {{ showPreviousYearJobs ? 'Yes' : 'No' }}
+
+                            </label>
+
+                        </div>
+
+                    </div> -->
+
+                    <div class="col-md-2 d-flex align-items-end">
+
+                        <button class="btn btn-sm btn-outline-primary" (click)="loadJobCardList()">
+
+                            <i class="ri-search-line"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- TABLE -->
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-sm">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>Sr No.</th>
+                                <th>Job No</th>
+                                <th>Job Date</th>
+                                <th>Location</th>
+                                <th>Job Type/Service Name</th>
+                                <th>Party Name</th>
+                                <th>Regn./Chassis No.</th>
+                                <th>Vehicle Type</th>
+                                <th>Job Source</th>
+                                <th>Action</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr *ngFor="let item of jobCardList; let i = index">
+
+                                <td>{{ i + 1 }}</td>
+
+                                <td>
+                                    {{ item.jobCardHeader?.jobNo }}
+                                </td>
+
+                                <td>
+                                    {{ item.jobCardHeader?.jobinDate | date:'dd-MM-yyyy' }}
+                                </td>
+
+                                <td>
+                                    {{ item.location }}
+                                </td>
+
+                                <td>
+                                    {{ item.jobtype }}
+                                    <br>
+                                    {{ item.serviceType }}
+                                </td>
+
+                                <td>
+                                    {{ item.partyName }}
+                                </td>
+
+                                <td>
+                                    <b>R:</b>
+                                    {{ item.jobCardCustomer?.registerNo }}
+
+                                    <br>
+
+                                    <b>C:</b>
+                                    {{ item.jobCardCustomer?.chassisNo }}
+                                </td>
+
+                                <td>
+                                    External
+                                </td>
+
+                                <td>
+                                    {{ item.jobsource }}
+                                </td>
+
+                                <td>
+
+                                    <button class="btn btn-sm btn-soft-primary"
+                                        (mouseenter)="showMaterialTransferWarning(item)" (click)="onSelect(item)">
+
+                                        <i class="ri-check-line fs-12"></i>
+
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+                            <!-- No Data -->
+                            <tr *ngIf="jobCardList.length === 0">
+
+                                <td colspan="10" class="text-center text-muted py-3">
+
+                                    No Data Available
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</ng-template>
+<!--End -->
+
+<!---Discount popup-->
+<ng-template [ngIf]="showDiscountPopup">
+
+    <div class="custom-modal-backdrop">
+
+        <div class="custom-modal" style="width:450px;">
+
+            <!-- Header -->
+            <div class="custom-modal-header bg-primary text-white">
+                <h5 class="mb-0 text-white">Discount</h5>
+
+                <button type="button" class="btn-close-custom text-white" (click)="showDiscountPopup=false">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="custom-modal-body">
+
+                <div class="row g-3">
+
+                    <!-- Part Discount -->
+                    <div class="col-md-6">
+                        <label class="form-label">Part Disc</label>
+
+                        <div class="input-group input-group-sm">
+
+                            <select class="form-select" [(ngModel)]="partDiscountType">
+
+                                <option value="Value">Value</option>
+                                <option value="%">%</option>
+
+                            </select>
+
+                            <input type="number" class="form-control text-end" [(ngModel)]="partDiscount">
+                        </div>
+                    </div>
+
+                    <!-- Accessory Discount -->
+                    <div class="col-md-6">
+                        <label class="form-label">Ascry Disc</label>
+
+                        <div class="input-group input-group-sm">
+
+                            <select class="form-select" [(ngModel)]="accessoryDiscountType">
+
+                                <option value="Value">Value</option>
+                                <option value="%">%</option>
+
+                            </select>
+
+                            <input type="number" class="form-control text-end" [(ngModel)]="accessoryDiscount">
+                        </div>
+                    </div>
+
+                    <!-- Oil Discount -->
+                    <div class="col-md-6">
+                        <label class="form-label">Oil Disc</label>
+
+                        <div class="input-group input-group-sm">
+
+                            <select class="form-select" [(ngModel)]="oilDiscountType">
+
+                                <option value="Value">Value</option>
+                                <option value="%">%</option>
+
+                            </select>
+
+                            <input type="number" class="form-control text-end" [(ngModel)]="oilDiscount">
+                        </div>
+                    </div>
+
+                    <!-- Labour Discount -->
+                    <div class="col-md-6">
+                        <label class="form-label">Lab Disc</label>
+
+                        <div class="input-group input-group-sm">
+
+                            <select class="form-select" [(ngModel)]="labourDiscountType">
+
+                                <option value="Value">Value</option>
+                                <option value="%">%</option>
+
+                            </select>
+
+                            <input type="number" class="form-control text-end" [(ngModel)]="labourDiscount">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="text-center mt-4">
+
+                    <button class="btn btn-sm btn-primary me-2" (click)="applyDiscount()">
+
+                        <i class="ri-upload-2-line"></i>
+                        Submit
+
+                    </button>
+
+                    <button class="btn btn-sm btn-light" (click)="showDiscountPopup=false">
+
+                        <i class="ri-close-line"></i>
+                        Close
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</ng-template>
+<!--end popup-->
+
+<!-- Insurance Popup-->
+<!-- Insurance Popup -->
+<ng-template [ngIf]="showInsurancePopup">
+    <div class="custom-modal-backdrop">
+        <div class="custom-modal" style="width:700px;">
+            <!-- Header -->
+            <div class="custom-modal-header bg-primary text-white">
+                <h5 class="mb-0 text-white">Insurance Detail</h5>
+
+                <button type="button" class="btn-close-custom text-white" (click)="showInsurancePopup = false">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <!-- Body -->
+            <div class="custom-modal-body">
+                <div class="row g-3">
+
+                    <!-- Insurance Party -->
+                    <div class="col-md-6">
+                        <label class="form-label"> Insurance Party </label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="insuranceParty">
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-md-6">
+                        <label class="form-label"> Description </label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="insuranceDescription">
+                    </div>
+
+                    <!-- Surveyor Name -->
+                    <div class="col-md-6">
+                        <label class="form-label">Surveyor Name </label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="surveyorName">
+                    </div>
+
+                    <!-- Contact Number -->
+                    <div class="col-md-6">
+                        <label class="form-label"> Contact Number </label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="contactNumber">
+                    </div>
+
+                    <!-- Policy No -->
+                    <div class="col-md-2">
+                        <label class="form-label">Policy No.</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="policyNo">
+                    </div>
+
+                    <!-- Valid Till -->
+                    <div class="col-md-2">
+                        <label class="form-label"> Valid Till </label>
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="validTill">
+                    </div>
+
+                    <!-- Zero Dep -->
+                    <div class="col-md-2">
+                        <label class="form-label d-block">Zero Dep.</label>
+
+                        <div class="form-check form-switch">
+
+                            <input class="form-check-input" type="checkbox" id="zeroDepSwitch" [(ngModel)]="zeroDep">
+
+                            <label class="form-check-label" for="zeroDepSwitch">
+                                {{ zeroDep ? 'Yes' : 'No' }}
+                            </label>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary me-2" (click)="saveInsurance()">
+                        <i class="ri-check-line"></i>
+                        Save
+                    </button>
+
+                    <button class="btn btn-light" (click)="showInsurancePopup = false">
+                        <i class="ri-close-line"></i>
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<!--End insurance popup-->
