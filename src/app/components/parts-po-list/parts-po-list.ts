@@ -113,21 +113,6 @@ export class PartsPoList implements OnInit {
     return date.toLocaleDateString('en-GB').replace(/\//g, '-');
   }
 
-  // redirectToCreatePO() {
-  //   this.router.navigate(['/parts-po', 0]);
-  // }
-
-  // editPO(po: any) {
-  //   let poNumber = 0;
-
-  //   if (po && po.poNumber) {
-  //     poNumber = po.poNumber;
-  //   }
-
-  //   const _enc_PO = btoa(poNumber.toString());
-  //   this.router.navigate(['/parts-po', _enc_PO]);
-  // }
-
   editPO(po: any) {
 
     const poNumber = po?.poNumber || '0';

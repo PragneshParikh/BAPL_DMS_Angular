@@ -26,4 +26,8 @@ export class KitDetailService {
   updateKitDetails(data: any): Observable<any> {
     return this.httpClient.put(`${this.baseUrl}/kit-details`, data);
   }
+
+  getKitDetailsWithItemsByHeaderAndLocation(headerId: string, dealerLocation: string, partyLocation: string): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/kit-details/GetKitDetailsWithItemByHeaderLocation`, { params: { headerId: headerId, dealerLocation: dealerLocation, companyLocation: partyLocation } });
+  }
 }
