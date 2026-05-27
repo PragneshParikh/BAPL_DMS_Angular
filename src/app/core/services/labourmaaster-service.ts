@@ -30,4 +30,7 @@ export class LabourmaasterService {
   getLabourMasterPartwiseListApi():Observable<any>{
     return this.httpClient.get(`${this.baseUrl}/LabourMaster/GetLabourMasterPartwiseListApi`);
   }
+  getLabourRateDropDown(oemmodelName:string):Observable<any>{
+    return this.httpClient.get(`${this.baseUrl}/LabourMaster/GetLabourRateDropDown/${oemmodelName}`);
+  }
 }
