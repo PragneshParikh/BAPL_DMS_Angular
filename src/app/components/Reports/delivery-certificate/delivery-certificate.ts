@@ -30,6 +30,7 @@ export class DeliveryCertificate {
   dealer: DealerMasterViewModel | null = null;
   regNo: string = 'AP09CD1234';
   customerName: string = 'John Doe';
+  invoiceNo: any;
 
   /**
    *
@@ -79,6 +80,7 @@ export class DeliveryCertificate {
           this.deliveryDate = this.currentDate;
           this.saleBillId = '';
           this.saleBill = {};
+          this.invoiceNo = res.details[0].invoiceNo;
           this.regNo = res.details[0].regNo;
           this.customerName = res.customerName;
 

@@ -64,4 +64,8 @@
   stockDetailsNo?: string;
   vcu?: string;
   customerSaleDate?: Date;
+  pdiStatus?: string;
+  fameIIAmnt?: number;
+  postGstDisc?: number; 
+  proformaCreated?: string;
 }

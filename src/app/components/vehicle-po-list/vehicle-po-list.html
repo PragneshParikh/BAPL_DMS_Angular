@@ -58,41 +58,35 @@
                         <thead>
                             <tr style="background-color:#747CA0 !important;color:white; cursor: pointer;">
                                 <th>S.No</th>
-                                <!-- <th>Prefix No</th> -->
                                 <th class="sort" [ngClass]="getSortClass('purchaseNo')" (click)="sort('purchaseNo')">
                                     Purchase No</th>
                                 <th class="sort" [ngClass]="getSortClass('date')" (click)="sort('date')">Date</th>
                                 <th class="sort" [ngClass]="getSortClass('transactionType')"
                                     (click)="sort('transactionType')">Trans Type</th>
-                                <!-- <th>Is Supplier</th> -->
                                 <th class="sort" [ngClass]="getSortClass('partyName')" (click)="sort('partyName')">Party
                                     Name</th>
                                 <th>Location</th>
-                                <!-- <th class="sort" [ngClass]="getSortClass('modelName')" (click)="sort('modelName')">Model
-                                Name</th> -->
-                            <!-- <th>Color</th> -->
-                            <!-- <th>Order Qty</th> -->
-                            <th>Order Amount</th>
-                            <th class="sort" [ngClass]="getSortClass('isSubmitted')" (click)="sort('isSubmitted')">
-                                IsSubmittedToErp</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let po of pagedPurchaseOrders; let i=index" (click)="editPO(po)"
-                            style="cursor: pointer;" class="hover-row">
-                            <td>{{ (page - 1) * pageSize + i + 1 }}.</td>
-                            <!-- <td>{{po.prefixNo}}</td> -->
-                            <td>{{po.purchaseNo}}</td>
-                            <td>{{po.date}}</td>
-                            <td>{{po.transactionType}}</td>
-                            <!-- <td>{{po.isSupplier}}</td> -->
-                            <td>{{po.partyName}}</td>
-                            <td>{{po.location}}</td>
-                            <!-- <td>{{po.modelName}}</td> -->
-                            <!-- <td>{{po.color}}</td> -->
-                            <!-- <td>{{po.orderQty}}</td> -->
-                            <td>{{po.orderAmount}}</td>
-                            <!-- <td>
+                                <th>Order Amount</th>
+                                <th class="sort" [ngClass]="getSortClass('isSubmitted')" (click)="sort('isSubmitted')">
+                                    IsSubmittedToErp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let po of pagedPurchaseOrders; let i=index" (dblclick)="editPO(po)"
+                                style="cursor: pointer;" class="hover-row">
+                                <td>{{ (page - 1) * pageSize + i + 1 }}.</td>
+                                <!-- <td>{{po.prefixNo}}</td> -->
+                                <td>{{po.purchaseNo}}</td>
+                                <td>{{po.date}}</td>
+                                <td>{{po.transactionType}}</td>
+                                <!-- <td>{{po.isSupplier}}</td> -->
+                                <td>{{po.partyName}}</td>
+                                <td>{{po.location}}</td>
+                                <!-- <td>{{po.modelName}}</td> -->
+                                <!-- <td>{{po.color}}</td> -->
+                                <!-- <td>{{po.orderQty}}</td> -->
+                                <td>{{po.orderAmount}}</td>
+                                <!-- <td>
                                 <span class="badge" [ngClass]="po.isSubmitted === 'Submited To Erp' ? 'bg-success' : 'bg-danger'">
                                     {{ po.isSubmitted === 'Submited To Erp' ? 'Yes' : 'No' }}
                                 </span>

@@ -1,0 +1,215 @@
+// .full-height {
+//     height: calc(80vh - 100px);
+//     overflow: hidden;
+// }
+
+// .full-card {
+//     height: calc(100vh - 100px);
+// }
+
+// .folder-scroll,
+// .file-scroll {
+//     height: calc(100vh - 120px);
+//     overflow-y: auto;
+//     overflow-x: hidden;
+// }
+
+// .folder-box {
+//     padding: 5px 5px;
+//     border-radius: 10px;
+//     cursor: pointer;
+//     transition: 0.3s;
+//     font-weight: 500;
+// }
+
+// .folder-box:hover {
+//     transform: translateX(5px);
+//     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+// }
+
+// .year-folder {
+//     background: #0d6efd;
+//     color: white;
+// }
+
+// .month-folder {
+//     background: #e7f1ff;
+//     border-left: 4px solid #0d6efd;
+//     color: #0d6efd;
+// }
+
+// .date-folder {
+//     background: #f8f9fa;
+//     border-left: 4px solid #6c757d;
+// }
+
+// .file-box {
+//     background: white;
+//     border: 1px solid #dee2e6;
+//     border-radius: 10px;
+//     padding: 12px 15px;
+//     margin-bottom: 10px;
+//     transition: 0.3s;
+// }
+
+// .file-box:hover {
+//     transform: translateY(-2px);
+//     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+// }
+
+// .toggle-icon {
+//     width: 20px;
+//     text-align: center;
+//     font-size: 18px;
+// }
+
+/* MAIN PAGE HEIGHT */
+.full-height {
+
+    height: calc(100vh - 120px);
+
+    overflow: hidden;
+}
+
+
+/* CARD HEIGHT */
+.full-card {
+
+    height: 100%;
+}
+
+
+/* SCROLL AREA */
+.folder-scroll,
+.file-scroll {
+
+    height: calc(100vh - 220px);
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+
+    padding-right: 4px;
+}
+
+
+/* SCROLLBAR */
+.folder-scroll::-webkit-scrollbar,
+.file-scroll::-webkit-scrollbar {
+
+    width: 6px;
+}
+
+
+.folder-scroll::-webkit-scrollbar-thumb,
+.file-scroll::-webkit-scrollbar-thumb {
+
+    background: #cfcfcf;
+
+    border-radius: 10px;
+}
+
+
+/* COMMON FOLDER */
+.folder-box {
+
+    padding: 8px 12px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+
+    font-weight: 500;
+
+    user-select: none;
+}
+
+
+/* HOVER */
+.folder-box:hover {
+
+    transform: translateX(4px);
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+
+/* YEAR */
+.year-folder {
+
+    background: linear-gradient(45deg, #0d6efd, #3d8bfd);
+
+    color: white;
+}
+
+
+/* MONTH */
+.month-folder {
+
+    background: #eaf3ff;
+
+    border-left: 4px solid #0d6efd;
+
+    color: #0d6efd;
+}
+
+
+/* DATE */
+.date-folder {
+
+    background: #f8f9fa;
+
+    border-left: 4px solid #6c757d;
+}
+
+
+/* ACTIVE DATE */
+.active-date {
+
+    background: #198754 !important;
+
+    color: white !important;
+
+    border-left: 4px solid #146c43;
+}
+
+
+/* FILE */
+.file-box {
+
+    background: white;
+
+    border: 1px solid #dee2e6;
+
+    border-radius: 10px;
+
+    padding: 12px 15px;
+
+    margin-bottom: 10px;
+
+    transition: all 0.2s ease;
+}
+
+
+/* FILE HOVER */
+.file-box:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+
+/* TOGGLE ICON */
+.toggle-icon {
+
+    width: 20px;
+
+    text-align: center;
+
+    font-size: 18px;
+
+    font-weight: bold;
+}

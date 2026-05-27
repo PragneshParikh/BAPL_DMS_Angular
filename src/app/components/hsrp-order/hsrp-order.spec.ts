@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DataSeed } from './data-seed';
+import { HSRPOrder } from './hsrp-order';
 
-describe('DataSeed', () => {
-  let component: DataSeed;
-  let fixture: ComponentFixture<DataSeed>;
+describe('HSRPOrder', () => {
+  let component: HSRPOrder;
+  let fixture: ComponentFixture<HSRPOrder>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DataSeed]
+      imports: [HSRPOrder]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(DataSeed);
+    fixture = TestBed.createComponent(HSRPOrder);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,0 +1,374 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">
+    Parts Dispatch Report
+  </h4>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+
+    <!-- FILTER CARD -->
+    <div class="card">
+
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          Filters
+        </h5>
+      </div>
+
+      <div class="card-body">
+
+        <div class="row g-3 align-items-end">
+
+          <!-- Dealer Code -->
+          <div class="col-xl-3 col-lg-3 col-md-6">
+
+            <label class="form-label">
+              Dealer Code
+            </label>
+
+            <select
+                class="form-select form-select-sm"
+                [(ngModel)]="dealerCode">
+
+                <option value="">
+                  All Dealers
+                </option>
+
+                <option
+                  *ngFor="let dealer of dealerList"
+                  [value]="dealer.dealerCode">
+
+                  {{ dealer.dealerName }}
+
+                </option>
+
+            </select>
+
+          </div>
+
+          <!-- From Date -->
+          <div class="col-xl-3 col-lg-3 col-md-6">
+
+            <label class="form-label">
+              From Date
+            </label>
+
+            <input
+              type="date"
+              class="form-control form-control-sm"
+              [(ngModel)]="fromDate">
+
+          </div>
+
+          <!-- To Date -->
+          <div class="col-xl-3 col-lg-3 col-md-6">
+
+            <label class="form-label">
+              To Date
+            </label>
+
+            <input
+              type="date"
+              class="form-control form-control-sm"
+              [(ngModel)]="toDate">
+
+          </div>
+
+          <!-- Buttons -->
+          <div class="col-xl-3 col-lg-3 col-md-12">
+
+            <label class="form-label d-block invisible">
+              Action
+            </label>
+
+            <div class="d-flex gap-2 justify-content-start">
+
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                (click)="getReport()">
+
+                Search
+
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-light btn-sm border"
+                (click)="resetFilters()">
+
+                Reset
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- REPORT TABLE CARD -->
+    <div class="card">
+
+      <div class="card-body">
+
+        <!-- LOADER -->
+        <div
+          *ngIf="loading"
+          class="text-center p-4">
+
+          <div
+            class="spinner-border text-primary mb-3"
+            role="status">
+          </div>
+
+          <p class="text-muted fw-semibold mb-0">
+            Loading report data...
+          </p>
+
+        </div>
+
+        <!-- TABLE -->
+        <div
+          class="table-responsive"
+          style="max-height: 650px;"
+          *ngIf="!loading">
+
+          <table
+            class="table table-bordered table-hover table-striped align-middle text-nowrap mb-0"
+            style="font-size: 12px;">
+
+            <thead
+              class="table-light sticky-top"
+              style="z-index: 1;">
+
+              <tr>
+
+                <th>SR NO</th>
+
+                <th>Dealer Name</th>
+
+                <th>Dealer Code</th>
+
+                <th>Customer Name</th>
+
+                <th>Mobile No</th>
+
+                <th>City</th>
+
+                <th>State</th>
+
+                <th>Vehicle Model</th>
+
+                <th>Vehicle VIN</th>
+
+                <th>Battery Master Name</th>
+
+                <th>Date Of Sale</th>
+
+                <th>Part Name</th>
+
+                <th>Device Group</th>
+
+                <th>Device Type</th>
+
+                <th>Item Description</th>
+
+                <th>Std Warranty (Months)</th>
+
+                <th>Std Warranty (ODO)</th>
+
+                <th>Ext Warranty (Months)</th>
+
+                <th>Ext Warranty (ODO)</th>
+
+                <th>Std Warranty Expiry</th>
+
+                <th>Ext Warranty Expiry</th>
+
+                <th>Last ODO Reading Date</th>
+
+                <th>ODO Reading</th>
+
+                <th>Warranty Status (Date)</th>
+
+                <th>Warranty Status (ODO)</th>
+
+                <th>Final Warranty Status</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <!-- NO DATA -->
+
+              <tr *ngIf="reportData.length === 0">
+
+                <td
+                  colspan="26"
+                  class="text-center">
+
+                  No data available
+
+                </td>
+
+              </tr>
+
+              <!-- DATA ROWS -->
+
+              <tr *ngFor="let item of reportData">
+
+                <td>{{ item.srNo }}</td>
+
+                <td>{{ item.dealerName }}</td>
+
+                <td>{{ item.dealerCode }}</td>
+
+                <td>{{ item.customerName }}</td>
+
+                <td>{{ item.mobileNo }}</td>
+
+                <td>{{ item.city }}</td>
+
+                <td>{{ item.state }}</td>
+
+                <td>{{ item.vehicleModel }}</td>
+
+                <td>{{ item.vehicleVIN }}</td>
+
+                <td>{{ item.batteryMasterName }}</td>
+
+                <td>
+                  {{ item.dateOfSale | date:'dd-MM-yyyy' }}
+                </td>
+
+                <td>{{ item.partName }}</td>
+
+                <td>{{ item.deviceGroup }}</td>
+
+                <td>{{ item.deviceType }}</td>
+
+                <td>{{ item.itemDescription }}</td>
+
+                <td>
+                  {{ item.vehicleStandardWarrantyMonths }}
+                </td>
+
+                <td>
+                  {{ item.vehicleStandardWarrantyODOReading }}
+                </td>
+
+                <td>
+                  {{ item.vehicleExtendedWarrantyMonths }}
+                </td>
+
+                <td>
+                  {{ item.vehicleExtendedWarrantyODOReading }}
+                </td>
+
+                <td>
+                  {{
+                    item.standardWarrantyExpiryDate
+                    | date:'dd-MM-yyyy'
+                  }}
+                </td>
+
+                <td>
+                  {{
+                    item.extendedWarrantyExpiryDate
+                    | date:'dd-MM-yyyy'
+                  }}
+                </td>
+
+                <td>
+                  {{
+                    item.lastODOReadingDate
+                    | date:'dd-MM-yyyy'
+                  }}
+                </td>
+
+                <td>
+                  {{ item.odoReadingLastDate }}
+                </td>
+
+                <!-- WARRANTY DATE -->
+
+                <td>
+
+                  <span
+                    class="badge"
+                    [ngClass]="{
+                      'bg-success':
+                        item.currentWarrantyStatusDate === 'In Warranty',
+
+                      'bg-danger':
+                        item.currentWarrantyStatusDate !== 'In Warranty'
+                    }">
+
+                    {{ item.currentWarrantyStatusDate }}
+
+                  </span>
+
+                </td>
+
+                <!-- WARRANTY ODO -->
+
+                <td>
+
+                  <span
+                    class="badge"
+                    [ngClass]="{
+                      'bg-success':
+                        item.currentWarrantyStatusODO === 'In Warranty',
+
+                      'bg-danger':
+                        item.currentWarrantyStatusODO !== 'In Warranty'
+                    }">
+
+                    {{ item.currentWarrantyStatusODO }}
+
+                  </span>
+
+                </td>
+
+                <!-- FINAL STATUS -->
+
+                <td>
+
+                  <span
+                    class="badge"
+                    [ngClass]="{
+                      'bg-success':
+                        item.finalWarrantyStatus === 'Active',
+
+                      'bg-danger':
+                        item.finalWarrantyStatus !== 'Active'
+                    }">
+
+                    {{ item.finalWarrantyStatus }}
+
+                  </span>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

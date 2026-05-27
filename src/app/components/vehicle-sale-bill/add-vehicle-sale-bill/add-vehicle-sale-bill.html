@@ -16,6 +16,11 @@
 
             <ul ngbDropdownMenu class="dropdown-menu">
 
+                <li *ngIf="!isInvoiced">
+                    <a class="dropdown-item" (click)="navigateToPerformaInvoice()">
+                        <i class="ri-printer-line me-2"></i> Print Proforma Invoice
+                    </a>
+                </li>
                 <li>
                     <a class="dropdown-item" (click)="printExShowroomInvoice()">
                         <i class="ri-printer-line me-2"></i> Print Ex-Showroom Invoice
@@ -71,22 +76,22 @@
                 Update
             </button>
 
-            <button *ngIf="!isErpLocked && billId && !isInvoiced" class="btn btn-sm btn-primary"
+            <!-- <button *ngIf="!isErpLocked && billId && !isInvoiced" class="btn btn-sm btn-primary" -->
+            <button *ngIf="billId" class="btn btn-sm btn-primary"
                 (click)="openRegistrationModal()">
                 Open Registration
             </button>
 
-            <button *ngIf="!isErpLocked && billId && !isInvoiced && erpStatus !== 'Reserved'"
+            <!-- <button *ngIf="!isErpLocked && billId && !isInvoiced && erpStatus !== 'Reserved'"
                 class="btn btn-sm btn-primary" (click)="navigateToPerformaInvoice()">
                 Genearate Proforma Invoice
-            </button>
-            <button *ngIf="!isErpLocked && billId && !isInvoiced &&  isRegistrationComplete()"
-                class="btn btn-sm btn-primary" (click)="connfirmInvoiceGeneration()">
+            </button> -->
+            <button *ngIf="billId && !isInvoiced" class="btn btn-sm btn-primary" (click)="connfirmInvoiceGeneration()">
                 Genearate Invoice
             </button>
-            <button class="btn btn-sm btn-primary" (click)="onSubmitToERP()" *ngIf="isInvoiced && !isErpLocked">
+            <!-- <button class="btn btn-sm btn-primary" (click)="onSubmitToERP()" *ngIf="isInvoiced && !isErpLocked">
                 Submit To ERP
-            </button>
+            </button> -->
             <button class="btn btn-light btn-sm" (click)="redirectToSaleList()">Close</button>
 
         </div>
@@ -388,7 +393,7 @@
                         <div class="row g-2 align-items-end">
 
                             <!--Temp-->
-                            <div class="col-md-3">
+                            <!-- <div class="col-md-3">
                                 <label class="form-label-sm mb-1">Chassis No.<span class="text-danger">*</span></label>
                                 <select [(ngModel)]="model.chassisNo" name="chassisNo"
                                     [disabled]="model.customerSaleDate != null" class="form-control form-control-sm"
@@ -399,6 +404,43 @@
                                         {{ c.chassisNo }} - {{ c.itemName }} - {{ c.mfgYear }}
                                     </option>
                                 </select>
+                                <small *ngIf="chassisNo.invalid && (chassisNo.touched || vehicleSaleForm.submitted)"
+                                    class="text-danger mt-1">
+                                    Chassis No is required.
+                                </small>
+                            </div> -->
+
+
+                            <div class="col-md-3 position-relative">
+                                <label class="form-label-sm mb-1">
+                                    Chassis No.<span class="text-danger">*</span>
+                                </label>
+
+                                <!-- INPUT -->
+                                <input type="text" class="form-control form-control-sm" name="chassisNo"
+                                    [(ngModel)]="model.chassisNo" [disabled]="model.customerSaleDate != null"
+                                    (input)="filterChassis()" (focus)="onFocusChassis()" (blur)="onBlur()"
+                                    autocomplete="off" required #chassisNo="ngModel">
+
+                                <!-- DROPDOWN -->
+                                <div *ngIf="showDropdown" class="dropdown-menu show w-100"
+                                    style="max-height: 200px; overflow-y: auto;">
+
+                                    <!-- LIST -->
+                                    <button type="button" class="dropdown-item" *ngFor="let c of filteredChassis"
+                                        [disabled]="isChassisUsed(c.chassisNo)" (click)="selectChassis(c)">
+
+                                        {{ c.chassisNo }} - {{ c.itemName }} - {{ c.mfgYear }}
+                                    </button>
+
+                                    <!-- NOT FOUND -->
+                                    <span *ngIf="showNotFound" class="dropdown-item text-danger">
+                                        Chassis not found
+                                    </span>
+
+                                </div>
+
+                                <!-- VALIDATION -->
                                 <small *ngIf="chassisNo.invalid && (chassisNo.touched || vehicleSaleForm.submitted)"
                                     class="text-danger mt-1">
                                     Chassis No is required.
@@ -416,13 +458,29 @@
                                     readonly>
 
                             </div>
-                            <ng-container *ngIf="billId">
+                            <!-- <div class="col-md-1">
+                                <label class="form-label-sm mb-1">FameII</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="model.preGSTDiscount" name="fameII"
+                                    readonly>
 
-                                <div class="col-md-2">
-                                    <label class="form-label-sm mb-1">Pre Gst Disc.</label>
-                                    <input class="form-control form-control-sm" [(ngModel)]="model.preGSTDiscount"
-                                        name="preGSTDiscount" readonly>
-                                </div>
+                            </div> -->
+
+                            <div class="col-md-2">
+                                <label class="form-label-sm mb-1">FameII Amount</label>
+                                <input class="form-control form-control-sm" [(ngModel)]="model.fameIIAmnt"
+                                    name="fameIIAmnt" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label-sm mb-1">Pre-GST Discount</label>
+                                <input type="number" class="form-control form-control-sm"
+                                    [(ngModel)]="model.preGSTDiscount" name="preGSTDiscount">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label-sm mb-1">Post-GST Discount</label>
+                                <input type="number" class="form-control form-control-sm"
+                                    [(ngModel)]="model.postGSTDiscount" name="postGSTDiscount">
+                            </div>
+                            <ng-container *ngIf="billId">
 
                                 <!-- THESE FIELDS NEED TO BE SHOWN AFTER SALE -->
 
@@ -512,7 +570,7 @@
                                             <th>ItemRate</th>
                                             <th>Regn Amt</th>
                                             <th>Ins Amt</th>
-                                            <th>Pre GST Disc.</th>
+                                            <th>FameII Disc.</th>
                                             <th>Taxable Amount</th>
                                             <!-- <th>Ext Warranty</th> -->
                                             <th>SGST %</th>
@@ -568,7 +626,7 @@
                                             <td>{{ row.rate }}</td>
                                             <td>{{ row.regAmt }}</td>
                                             <td>{{ row.insAmt }}</td>
-                                            <td>{{ row.preGstDiscount }}</td>
+                                            <td>{{ row.fameIIAmnt}}</td>
                                             <td>{{ row.taxableAmount ?? row.amount}}</td>
 
                                             <!-- <td>
