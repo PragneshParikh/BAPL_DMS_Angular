@@ -45,6 +45,9 @@ import { Ffirlisting } from './components/ffir/ffirlisting/ffirlisting';
 import { RepairBill } from './components/repair-bill/repair-bill';
 import { LabourMaster } from './components/labour-master-import/labour-master-import';
 import { LabourRateMaster } from './components/labour-rate-master/labour-rate-master';
+import { HSRPOrder } from './components/hsrp-order/hsrp-order';
+import { HSRPOrderList } from './components/hsrp-order/hsrporder-list/hsrporder-list';
+import { HsrpInward } from './components/hsrp-order/hsrp-inward/hsrp-inward';
 
 
 export const routes: Routes = [
@@ -68,7 +71,6 @@ export const routes: Routes = [
       { path: 'oemmodel-master', data: [11], component: OemmodelMasterComponent },
       { path: 'kit-creation', data: [24], loadComponent: () => import('./components/kit-creation/kit-creation').then(m => m.KitCreation) },
       { path: 'kit-creation/:id', data: [24], loadComponent: () => import('./components/kit-creation/kit-creation-details/kit-creation-details').then(m => m.KitCreationDetails) },
-      { path: 'data-seed', data: [9], loadComponent: () => import('./components/data-seed/data-seed').then(m => m.DataSeed) },
       { path: 'hsnCode-master', component: HsnCodeMaster, data: [13] },
       { path: 'taxcode-master', component: TaxCodeMasterComponent, data: [14] },
       { path: 'access-control', data: [9], loadComponent: () => import('./components/access-control/access-control').then(m => m.AccessControl) },
@@ -110,12 +112,10 @@ export const routes: Routes = [
       { path: 'pdiChecklistmaster', component: PdiChecklistmaster, data: [36] },
       { path: 'extended-battery-warranty', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty-list/extended-battery-warranty-list').then(m => m.ExtendedBatteryWarrantyList) },
       { path: 'extended-battery-warranty/:id', data: [37], loadComponent: () => import('../app/components/extended-battery-warranty/extended-battery-warranty').then(m => m.ExtendedBatteryWarranty) },
-      { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
       { path: 'ffir', component: FFIR, data: [23] },
       { path: 'ffir/:id', component: FFIR, data: [23] },
       { path: 'ffirlisting', component: Ffirlisting, data: [23] },
-      { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
       { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-search/chassis-search').then(m => m.ChassisSearch) },
       { path: 'proforma-invoice', component: ProformaInvoice, data: [22] },
       { path: 'form22-certificate/:chassisNo', component: Form22Certificate, data: [22] },
@@ -125,6 +125,18 @@ export const routes: Routes = [
       { path: 'repair-bill', component: RepairBill, data: [51] },
       { path: 'labour-master-import', component: LabourMaster, data: [54] },
       { path: 'labour-rate-master', component: LabourRateMaster, data: [55] },
+      { path: 'employee/add', data: [49], component: EmployeeMasterComponent },
+      { path: 'employee/edit/:id', data: [49], component: EmployeeMasterComponent },
+      { path: 'hsrp-order', component: HSRPOrder, data: [48] },
+      { path: 'hsrp-order-list', component: HSRPOrderList, data: [48] },
+      { path: 'hsrp-order/:id', component: HSRPOrder, data: [48] },
+      { path: 'hsrp-inward', component: HsrpInward, data: [48] },
+      { path: 'vehicle-sale-report', data: [43], loadComponent: () => import('./components/Reports/vehicle-sale-report/vehicle-sale-report').then(m => m.VehicleSaleReportComponent) },
+      { path: 'vehicle-stocks-report', data: [46], loadComponent: () => import('./components/Reports/vehicle-stock-report/vehicle-stock-report').then(m => m.VehicleStockReportComponent) },
+      { path: 'po-tracking-report', data: [47], loadComponent: () => import('./components/Reports/po-tracking-report/po-tracking-report').then(m => m.POTrackingReportComponent) },
+      { path: 'parts-dispatch-report', data: [50], loadComponent: () => import('./components/Reports/parts-dispatch-report/parts-dispatch-report').then(m => m.PartsDispatchReport) },
+      { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
+      { path: 'news-bulletin', data: [53], loadComponent: () => import('./components/news-bulletin/news-bulletin').then(m => m.NewsBulletin) },
     ]
   },
   { path: '**', component: WorkInProgress }
