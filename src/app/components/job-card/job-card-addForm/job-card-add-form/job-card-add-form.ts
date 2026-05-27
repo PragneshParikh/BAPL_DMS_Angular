@@ -543,7 +543,7 @@ export class JobCardAddForm {
   }
   //insert jobcard
   saveJobCard() {
-
+debugger
     //  VALIDATION (recommended)
     if (!this.isPdiSaved) {
       Swal.fire('Error', 'Please complete PDI first', 'error');
@@ -627,6 +627,7 @@ export class JobCardAddForm {
 
     //  COMPLAINT
     const jobCardComplaint = this.complaintList.map(x => ({
+      id: x.id || 0,
       dealerCode: dealerCode,
       customerVoice: x.customerVoice,
       complaintCode: x.complaintCode,
@@ -757,6 +758,7 @@ export class JobCardAddForm {
 
     // ================= COMPLAINT =================
     this.complaintList = data.jobCardComplaint || [];
+    console.log("Complaintlist",this.complaintList)
 
     // ================= PDI =================
     this.pdiCheckList = data.pdiChecklistChassiWise.map((x: any) => ({

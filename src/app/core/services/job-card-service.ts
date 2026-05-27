@@ -23,9 +23,9 @@ export class JobCardService {
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetServiceType?serviceHeadId=${serviceHeadId}`);
   }
 
-  getAllInspectedChassis(dealerCode: string, jobTypeId:number): Observable<any> {
+  getAllInspectedChassis(dealerCode: string, jobTypeId: number): Observable<any> {
     //debugger;
-    if (!jobTypeId) jobTypeId = 0; 
+    if (!jobTypeId) jobTypeId = 0;
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetAllInspectedChassis/${dealerCode}/${jobTypeId}`);
   }
 
@@ -41,10 +41,36 @@ export class JobCardService {
   //   return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetJobCardList?dealerCode=${dealerCode}`);
   // }
 
-  getJobCardList(dealerCode?: string): Observable<any> {
+  getJobCardList(dealerCode?: string,
+    dateFrom?: string,
+    dateTo?: string,
+    jobNo?: string,
+    registerNo?: string,
+    chassisNo?: string): Observable<any> {
     let params = new HttpParams();
+
     if (dealerCode) {
-      params = params.set('dealerCode', dealerCode)
+      params = params.set('dealerCode', dealerCode);
+    }
+
+    if (dateFrom) {
+      params = params.set('dateFrom', dateFrom);
+    }
+
+    if (dateTo) {
+      params = params.set('dateTo', dateTo);
+    }
+
+    if (jobNo) {
+      params = params.set('jobNo', jobNo);
+    }
+
+    if (registerNo) {
+      params = params.set('registerNo', registerNo);
+    }
+
+    if (chassisNo) {
+      params = params.set('chassisNo', chassisNo);
     }
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetJobCardList`,
       {
@@ -91,8 +117,11 @@ export class JobCardService {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetServiceHistory/${chassisNo}`)
   }
 
-  getCIRJobCardDetails(id:number){
-    debugger
+  getCIRJobCardDetails(id: number) {
+
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetCIRJobCardDetails/${id}`)
+  }
+  getMaterialedJobCardList(jobId: number) {
+    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetMaterialedJobCardList/${jobId}`)
   }
 }

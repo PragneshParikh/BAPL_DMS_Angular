@@ -101,7 +101,7 @@ export const CashTypeOptions = [
 export const IssueTypes = [
     { id: 1, name: 'Paid' },
     { id: 2, name: 'U/W' },
-    { id: 3, name: 'FOC' },
+    { id: 3, name: 'FSC' },
     { id: 4, name: 'Goodwill' },
     // { name: 'Paid', value: 'paid' },
     // { name: 'U/W', value: 'u/w' },
@@ -151,6 +151,7 @@ export const ModuleTypes = [
     { name: 'free_service_claim', moduleName: 'Free Service Claim' },
     { name: 'CIR_investigation', moduleName: 'CIR Investigation' },
     { name: 'purchase_order', moduleName: 'Purchase Order' },
+    { name: 'Repair_bill', moduleName: 'Repair Bill' },
     { name: 'hsrp_order', moduleName: 'HSRP Order' },
     { name: 'sale_bill', moduleName: 'Vehicle Sale Bill' },
     { name: 'receipt_entry', moduleName: 'Receipt Entry' }
@@ -197,3 +198,20 @@ export const PO_STATUSES = [
     { name: 'Submitted To ERP', value: 'Submited To ERP' },
     { name: 'Not Submitted To ERP', value: 'Not Submited To ERP' }
 ]
+
+export const cashAccounts = [
+    { id: 1, accountName: 'Bank Transfer' },
+    { id: 2, accountName: 'Cash' },
+    { id: 3, accountName: 'Cheque' },
+    { id: 4, accountName: 'UPI Payment' }
+]
+
+export const SchemeName = [
+    { id: 1, value: 'Government Employee' },
+    { id: 2, value: 'Bussiness' },
+    { id: 3, value: 'House Wife' },
+    { id: 4, value: 'Private Employee' },
+    { id: 5, value: 'Professionals' },
+    { id: 6, value: 'Student' }
+]
+
