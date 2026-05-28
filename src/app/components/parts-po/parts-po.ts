@@ -17,6 +17,7 @@ import { PrefixService } from '../../core/services/prefix';
 import { TaxService } from '../../core/services/tax';
 import { PurchaseService } from '../../core/services/purchase-service';
 import { LedgerMaster } from '../../core/services/ledger-master';
+import _ from 'lodash';
 
 @Component({
   selector: 'app-parts-po',
@@ -138,21 +139,6 @@ export class PartsPo implements OnInit {
     this.loadJobCards();
     await this.getPartyName();
 
-    // this.route.params.subscribe(params => {
-
-    //   const encodedPo = params['ponumber'];
-
-    //   this.poNumber = encodedPo ? atob(encodedPo) : '0';
-
-    //   if (this.poNumber !== '0') {
-    //     this.isEdit = true;
-    //     this.getDetailsByPONumber();
-    //   } else {
-    //     this.isEdit = false;
-    //     this.generateNewOrderNo();
-    //   }
-    // });
-
     this.route.params.subscribe(params => {
 
       const encPO = params['ponumber'];
@@ -188,31 +174,6 @@ export class PartsPo implements OnInit {
     });
   }
 
-  // loadShowroomLocations() {
-  //   const dealerCode = this.storageService.getDealerCode();
-  //   this.locationService.getAllLocationMaster().subscribe({
-  //     next: (allLocs: any[]) => {
-  //       const fullLocationMap = Array.isArray(allLocs) ? allLocs : [];
-  //       this.locationService.getLocationByDealerCode(dealerCode).subscribe({
-  //         next: (res: any) => {
-  //           const dealerLocs = Array.isArray(res) ? res : [];
-  //           this.locationList = dealerLocs.map(loc => {
-  //             const matchedLoc = fullLocationMap.find(m =>
-  //               (m.locname || '').trim().toLowerCase() === (loc.locname || '').trim().toLowerCase()
-  //             );
-  //             return {
-  //               ...loc,
-  //               state: matchedLoc?.state || matchedLoc?.State || loc.state || loc.State || ''
-  //             };
-  //           });
-  //           if (this.locationList.length > 0 && !this.selectedLocation) {
-  //             this.selectedLocation = this.locationList[0].locname;
-  //           }
-  //         }
-  //       });
-  //     }
-  //   });
-  // }
   loadShowroomLocations() {
     this.loader.show();
     this.locationService.getLocationByDealerCodeAndAreaId(this.dealerCode, 2).subscribe({
@@ -330,15 +291,6 @@ export class PartsPo implements OnInit {
     };
   }
 
-  // loadItemMasterList() {
-  //   // For Parts, grpidno is 1, itemType is 2
-  //   this.itemService.getItems(1, '', 2).subscribe({
-  //     next: (res: any[]) => {
-  //       this.modelList = Array.isArray(res) ? res : [];
-  //     },
-  //     error: (err) => console.error('Error loading item master:', err)
-  //   });
-  // }
   getItemList() {
     this.loader.show();
     this.itemmasterService.fetchItemsByHsnTaxAndGroupId(1).subscribe({
@@ -373,6 +325,7 @@ export class PartsPo implements OnInit {
       return;
     }
 
+    //#region IsKIT
     if (this.partsPOData.isKit) {
       const selectedKit = this.kitList.find(k => k.id === Number(this.currentItem.partNo) || k.kitName === this.currentItem.partNo);
       if (selectedKit) {
@@ -380,7 +333,7 @@ export class PartsPo implements OnInit {
         this.currentItem.quantity = 1; // Default kit qty to 1
 
         this.loader.show();
-        this.kitDetailService.getKitDetailsByKitHeaderId(this.currentItem.partNo).subscribe({
+        this.kitDetailService.getKitDetailsWithItemsByHeaderAndLocation(this.currentItem.partNo, this.partsPOData.selectedLocation, this.partsPOData.partyName).subscribe({
           next: (res: any) => {
             this.loader.hide();
             const details = Array.isArray(res) ? res : (res?.data || []);
@@ -388,7 +341,7 @@ export class PartsPo implements OnInit {
 
             details.forEach((det: any) => {
               const qty = det.quantity || 0;
-              let rate = det.item?.ipurrate || det.rate || 0;
+              let rate = det.item?.custprice || det.rate || 0;
 
               // Fallback to Item Master if rate is missing
               if (!rate || rate === 0) {
@@ -398,14 +351,14 @@ export class PartsPo implements OnInit {
                   (m.itemcode || '').trim().toUpperCase() === (itemCode || '').trim().toUpperCase()
                 );
                 if (masterItem) {
-                  rate = Number(masterItem.ipurrate || masterItem.Ipurrate || 0);
+                  rate = Number(masterItem.custprice || masterItem.custprice || 0);
                 }
               }
 
               totalRate += (qty * rate);
             });
 
-            this.currentItem.rate = totalRate;
+            this.currentItem.itemRate = totalRate.toFixed(2);
             this.calculateRowTotals();
           },
           error: (err) => {
@@ -416,62 +369,8 @@ export class PartsPo implements OnInit {
       }
       return;
     }
+    //#endregion
 
-    // this.itemmasterService.getPurchaseDetailsWithHsnTaxByModelNo(this.currentItem.partNo).subscribe({
-    //   next: (res: any) => {
-    //     this.loader.hide();
-    //     if (res) {
-    //       const getVal = (obj: any, ...keys: string[]) => {
-    //         for (const key of keys) {
-    //           if (obj[key] !== undefined && obj[key] !== null) return obj[key];
-    //         }
-    //         return 0;
-    //       };
-
-    //       this.currentItem.description = res.itemdesc || res.itemDesc || res.Itemdesc || res.Itemname || '';
-    //       this.currentItem.rawSgstRate = getVal(res, 'Sgst', 'sgst', 'SGST');
-    //       this.currentItem.rawCgstRate = getVal(res, 'Cgst', 'cgst', 'CGST');
-    //       this.currentItem.rawIgstRate = getVal(res, 'Igst', 'igst', 'IGST');
-    //       this.currentItem.rate = getVal(res, 'Ipurrate', 'ipurrate', 'IPURRATE', 'rate');
-    //       this.currentItem.mrp = 0;
-    //       this.currentItem.itemType = res.itemtype || res.itemType || 1;
-
-    //       // ── Fallback: if HSN lookup returned 0 rates, use rates stored
-    //       //    directly on the ItemMaster record (already in modelList) ─────────
-    //       const allZero = !this.currentItem.rawSgstRate &&
-    //         !this.currentItem.rawCgstRate &&
-    //         !this.currentItem.rawIgstRate;
-    //       if (allZero) {
-    //         const masterItem = this.modelList.find(m =>
-    //           (m.itemcode || '').trim().toUpperCase() === (this.currentItem.partNo || '').trim().toUpperCase()
-    //         );
-    //         if (masterItem) {
-    //           this.currentItem.rawSgstRate = Number(masterItem.sgst ?? masterItem.Sgst ?? 0);
-    //           this.currentItem.rawCgstRate = Number(masterItem.cgst ?? masterItem.Cgst ?? 0);
-    //           this.currentItem.rawIgstRate = Number(masterItem.igst ?? masterItem.Igst ?? 0);
-    //         }
-    //       }
-    //       // ─────────────────────────────────────────────────────────────────────
-
-    //       this.calculateRowTotals();
-    //     }
-    //   },
-    //   error: (err) => {
-    //     this.loader.hide();
-    //     // On API error, still try to load from modelList
-    //     const masterItem = this.modelList.find(m =>
-    //       (m.itemcode || '').trim().toUpperCase() === (this.currentItem.partNo || '').trim().toUpperCase()
-    //     );
-    //     if (masterItem) {
-    //       this.currentItem.description = masterItem.itemdesc || masterItem.itemname || '';
-    //       this.currentItem.rawSgstRate = Number(masterItem.sgst ?? masterItem.Sgst ?? 0);
-    //       this.currentItem.rawCgstRate = Number(masterItem.cgst ?? masterItem.Cgst ?? 0);
-    //       this.currentItem.rawIgstRate = Number(masterItem.igst ?? masterItem.Igst ?? 0);
-    //       this.currentItem.rate = Number(masterItem.ipurrate ?? masterItem.Ipurrate ?? 0);
-    //       this.calculateRowTotals();
-    //     }
-    //   }
-    // });
     const selectedItem = this.itemList.find(item => item.itemcode === this.currentItem.partNo);
     if (selectedItem) {
       this.loader.show();
@@ -501,73 +400,12 @@ export class PartsPo implements OnInit {
 
   }
 
-  // onBlurQuantity(args: any) {
-  //   let value = Number(args.target.value);
-  //   if (value > 0) {
-  //     const _item = this.itemList.find(x => x.id === Number(this.currentItem.itemId));
-
-  //     // if (_item.batchClosingQty < value) {
-  //     //   this.toaster.show(`Stock limit exceeded. Please reduce the quantity.`, { classname: 'bg-warning text-white', delay: 5000 });
-  //     //   return;
-  //     // }
-
-  //     // let rate = _item ? _item.custprice : 0;
-  //     // this.newItem.mrp = Number((rate || 0) * (this.currentItem.quantity || 0)).toFixed(2);
-  //     // this.newItem.amount = (Number(this.currentItem.itemRate) * (this.currentItem.quantity || 0)).toFixed(2);
-  //   }
-  // }
-
   calculateRowTotals() {
     let qty = Number(this.currentItem.quantity) || 0;
     let rate = Number(this.currentItem.rate) || 0;
 
     let taxableAmount = (qty * rate);
     this.currentItem.taxableAmount = taxableAmount > 0 ? taxableAmount : 0;
-
-    // const dealerLoc = this.locationList.find(l =>
-    //   ((l.locname || '').trim().toLowerCase()) ===
-    //   ((this.selectedLocation || '').trim().toLowerCase())
-    // ) || (this.locationList.length > 0 ? this.locationList[0] : null);
-
-    // const locState = (dealerLoc?.state || dealerLoc?.State || '').trim();
-
-    // const rawSgstRate = Number(this.currentItem.rawSgstRate) || 0;
-    // const rawCgstRate = Number(this.currentItem.rawCgstRate) || 0;
-    // const rawIgstRate = Number(this.currentItem.rawIgstRate) || 0;
-
-    // Determine interstate/local — mirrors vehicle-po logic exactly
-    // let isInterstate = locState ? locState.toLowerCase() !== 'maharashtra' : false;
-
-    // if (this.selectedTransactionType === 'I') {
-    //   isInterstate = true;
-    // } else if (this.selectedTransactionType === 'L') {
-    //   isInterstate = false;
-    // } else if (rawIgstRate > 0 && (rawSgstRate === 0 && rawCgstRate === 0)) {
-    //   // Only IGST available on the item — treat as interstate
-    //   isInterstate = true;
-    // }
-
-    // if (isInterstate) {
-    //   this.currentItem.sgstAmt = 0;
-    //   this.currentItem.cgstAmt = 0;
-    //   this.currentItem.igstAmt = (this.currentItem.taxableAmount * rawIgstRate) / 100;
-
-    //   // Fallback: if IGST rate is 0 but we have local rates, use their sum as IGST
-    //   if (this.currentItem.igstAmt === 0 && (rawSgstRate + rawCgstRate) > 0) {
-    //     this.currentItem.igstAmt = (this.currentItem.taxableAmount * (rawSgstRate + rawCgstRate)) / 100;
-    //   }
-    // } else {
-    //   this.currentItem.sgstAmt = (this.currentItem.taxableAmount * rawSgstRate) / 100;
-    //   this.currentItem.cgstAmt = (this.currentItem.taxableAmount * rawCgstRate) / 100;
-    //   this.currentItem.igstAmt = 0;
-
-    //   // Fallback: if only IGST rate is defined, split it equally as SGST+CGST
-    //   if (this.currentItem.sgstAmt === 0 && this.currentItem.cgstAmt === 0 && rawIgstRate > 0) {
-    //     const halfIgst = rawIgstRate / 2;
-    //     this.currentItem.sgstAmt = (this.currentItem.taxableAmount * halfIgst) / 100;
-    //     this.currentItem.cgstAmt = (this.currentItem.taxableAmount * halfIgst) / 100;
-    //   }
-    // }
 
     this.currentItem.amount = this.currentItem.taxableAmount + this.currentItem.sgstAmt + this.currentItem.cgstAmt + this.currentItem.igstAmt;
 
@@ -596,7 +434,7 @@ export class PartsPo implements OnInit {
 
       // Fetch kit details and expand them
       this.loader.show();
-      this.kitDetailService.getKitDetailsByKitHeaderId(this.currentItem.partNo).subscribe({
+      this.kitDetailService.getKitDetailsWithItemsByHeaderAndLocation(this.currentItem.partNo, this.partsPOData.selectedLocation, this.partsPOData.partyName).subscribe({
         next: (res: any) => {
           this.loader.hide();
           const details = Array.isArray(res) ? res : (res?.data || []);
@@ -610,71 +448,30 @@ export class PartsPo implements OnInit {
           const zeroParts: string[] = [];
 
           details.forEach((det: any) => {
-            const rawSgst = det.item?.sgst || 0;
-            const rawCgst = det.item?.cgst || 0;
-            const rawIgst = det.item?.igst || 0;
-            const qty = det.quantity || 0;
 
-            let rate = det.item?.ipurrate || det.rate || 0;
-            // Fallback to Item Master if rate is missing
-            if (!rate || rate === 0) {
-              const itemCode = det.item?.itemcode || det.itemcode || det.itemName;
-              const masterItem = this.itemList.find(m =>
-                m.id === det.itemId ||
-                (m.itemcode || '').trim().toUpperCase() === (itemCode || '').trim().toUpperCase()
-              );
-              if (masterItem) {
-                rate = Number(masterItem.ipurrate || masterItem.Ipurrate || 0);
-              }
-            }
+            const totalGST = det.taxDetails.reduce(
+              (sum, tax) => sum + Number(tax.taxRate || 0), 0
+            );
 
-            const partDesc = det.itemDescription || det.item?.itemdesc || det.itemName || 'Unknown';
+            const gstPrice = this.calculateGST(det.itemPrice, totalGST);
+            const gstData = this.calculateGSTAmount(det.itemPrice, det.taxDetails);
 
-            // Collect parts with zero rate for validation
-            if (!rate || rate === 0) {
-              zeroParts.push(partDesc);
-            }
+            const sgstAmt = gstData.sgst * det.quantity;
+            const cgstAmt = gstData.cgst * det.quantity;
+            const igstAmt = gstData.igst * det.quantity;
 
-            const taxable = qty * rate;
-
-            // Determine interstate flag from selected location/transaction type
-            const dealerLoc = this.locationList.find(l =>
-              ((l.locname || '').trim().toLowerCase()) ===
-              ((this.partsPOData.selectedLocation || '').trim().toLowerCase())
-            ) || (this.locationList.length > 0 ? this.locationList[0] : null);
-            const locState = (dealerLoc?.state || dealerLoc?.State || '').trim();
-            // let isInterstate = locState ? locState.toLowerCase() !== 'maharashtra' : false;
-            // if (this.selectedTransactionType === 'I') isInterstate = true;
-            // else if (this.selectedTransactionType === 'L') isInterstate = false;
-            // else if (rawIgst > 0 && rawSgst === 0 && rawCgst === 0) isInterstate = true;
-
-            let sgstAmt = 0, cgstAmt = 0, igstAmt = 0;
-            // if (isInterstate) {
-            //   igstAmt = (taxable * rawIgst) / 100;
-            //   if (igstAmt === 0 && (rawSgst + rawCgst) > 0) igstAmt = (taxable * (rawSgst + rawCgst)) / 100;
-            // } else {
-            //   sgstAmt = (taxable * rawSgst) / 100;
-            //   cgstAmt = (taxable * rawCgst) / 100;
-            //   if (sgstAmt === 0 && cgstAmt === 0 && rawIgst > 0) {
-            //     sgstAmt = (taxable * rawIgst / 2) / 100;
-            //     cgstAmt = (taxable * rawIgst / 2) / 100;
-            //   }
-            // }
+            let amount = Number(gstPrice.basePrice) * Number(det.quantity);
 
             kitItems.push({
-              partNo: det.itemName || det.item?.itemcode || det.itemcode || det.itemId,
-              description: partDesc,
-              qty: qty,
-              rate: rate,
-              mrp: det.item?.mrp || 0,
-              taxableAmount: taxable,
+              partNo: det.itemCode,
+              description: det.itemDescription,
+              quantity: det.quantity,
+              itemRate: gstPrice.basePrice,
+              mrp: det.itemPrice * det.quantity,
               sgstAmt: sgstAmt,
               cgstAmt: cgstAmt,
               igstAmt: igstAmt,
-              amount: taxable + sgstAmt + cgstAmt + igstAmt,
-              rawSgstRate: rawSgst,
-              rawCgstRate: rawCgst,
-              rawIgstRate: rawIgst,
+              amount: amount,
               itemType: det.item?.itemtype || 1,
               fromKit: true
             });
@@ -690,7 +487,6 @@ export class PartsPo implements OnInit {
 
           this.resetCurrentItem();
           this.loadPage();
-          this.toaster.show('Kit expanded successfully.', { classname: 'bg-success text-white', delay: 3000 });
         },
         error: (err) => {
           this.loader.hide();
@@ -698,16 +494,8 @@ export class PartsPo implements OnInit {
           this.toaster.show('Error loading kit details.', { classname: 'bg-danger text-white', delay: 3000 });
         }
       });
-    } else {
-      // Standard Part Addition
-      // const isDuplicate = this.purchaseDetails.some((item, index) =>
-      //   item.partNo === this.currentItem.partNo && index !== this.editingIndex
-      // );
 
-      // if (isDuplicate) {
-      //   this.toaster.show(`Part "${this.currentItem.description}" is already added.`, { classname: 'bg-danger text-white', delay: 5000 });
-      //   return;
-      // }
+    } else {
 
       // Attempt to set a fallback description if still empty
       if (!this.currentItem.itemdesc) {
@@ -862,12 +650,22 @@ export class PartsPo implements OnInit {
       TransactionType: this.partsPOData.transactionType,
       LocCode: this.partsPOData.selectedLocation,
       LedgerCode: this.partsPOData.partyName,
+      IsAgainstKit: this.partsPOData.isKit,
       createdBy: userId,
       createdDate: new Date(),
-      Items: this.pagedPurchaseDetails.map((item) => ({
-        ItemCode: item.partNo,
-        Qty: item.quantity
-      }))
+      // Items: this.pagedPurchaseDetails.map((item) => ({
+      //   ItemCode: item.partNo,
+      //   Qty: item.quantity
+      // }))
+      Items: this.partsPOData.isKit
+        ? this.purchaseDetails.map((item: any) => ({
+          ItemCode: item.partNo,
+          Qty: item.quantity
+        }))
+        : this.pagedPurchaseDetails.map((item: any) => ({
+          ItemCode: item.partNo,
+          Qty: item.quantity
+        }))
     };
 
     if (this.isEdit) {
@@ -1025,11 +823,14 @@ export class PartsPo implements OnInit {
           orderNo: res.poNumber.split('/').pop(),
           subPoType: res.subOrderType,
           transactionType: res.transactionType,
-          isKit: false,
+          isKit: res.isAgainstKit,
           partyName: res.ledgerCode,
           poType: 'Spares'
         }
-        this.pagedPurchaseDetails = res.items.map((item: any) => {
+
+        this.isSubmitted = res.isSubmitted;
+
+        const mappedData = res.items.map((item: any) => {
 
           const totalGST = item.taxes.reduce(
             (sum, tax) => sum + Number(tax.taxRate || 0), 0
@@ -1046,7 +847,6 @@ export class PartsPo implements OnInit {
             itemRate: gstPrice.basePrice,
             mrp: item.rate,
             amount: Number(gstPrice.basePrice) * Number(item.qty),
-            // taxableAmount: gstData.,
             sgstAmt: gstData.sgst * item.qty,
             cgstAmt: gstData.cgst * item.qty,
             igstAmt: gstData.igst * item.qty,
@@ -1057,6 +857,13 @@ export class PartsPo implements OnInit {
             currentStock: 0
           };
         });
+
+        if (res.isAgainstKit) {
+          this.purchaseDetails = _.cloneDeep(mappedData);
+          this.loadPage();
+        } else {
+          this.pagedPurchaseDetails = mappedData;
+        }
       },
       error: (err) => {
         this.loader.hide();
