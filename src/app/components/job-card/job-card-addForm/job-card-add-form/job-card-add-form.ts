@@ -551,6 +551,8 @@ export class JobCardAddForm {
     }
 
     const dealerCode = this.storageService.getDealerCode();
+    const userId = this.storageService.getUserId();
+
     //  HEADER
     const jobCardHeader = {
       id: this.isEditMode ? this.editId : 0,
@@ -579,8 +581,8 @@ export class JobCardAddForm {
       observation: this.observation || "",
       supervisorComment: this.supervisorComment || "",
       isPdiSuccess: true,
-      createdBy: 'Admin',
-      updatedBy: dealerCode
+      createdBy: userId,
+      updatedBy: userId
     };
 
     // BATTERY
@@ -600,8 +602,8 @@ export class JobCardAddForm {
       controllerNo: this.controllerNo,
       batteryChemical: this.batteryChemestry,
       batteryCapacity: this.batteryCapacity,
-      createdBy: 'Admin',
-      updatedBy: dealerCode
+      createdBy: userId,
+      updatedBy: userId
     };
 
     //  CUSTOMER
@@ -622,8 +624,8 @@ export class JobCardAddForm {
 
       remarks: this.customerObj.remarks || null,
 
-      createdBy: 'Admin',
-      updatedBy: dealerCode
+      createdBy: userId,
+      updatedBy: userId
     };
 
     //  COMPLAINT
@@ -633,8 +635,8 @@ export class JobCardAddForm {
       customerVoice: x.customerVoice,
       complaintCode: x.complaintCode,
       complaint: x.complaint,
-      createdBy: 'Admin',
-      updatedBy: dealerCode
+      createdBy: userId,
+      updatedBy: userId
     }));
 
     //  PDI (USE STORED DATA )
@@ -644,8 +646,8 @@ export class JobCardAddForm {
       pdichecklistMasterId: x.id,
       isStatus: x.isStatus,   // use normalized value
       remarks: x.remarks,
-      createdBy: 'Admin',
-      updatedBy: dealerCode
+      createdBy: userId,
+      updatedBy: userId
     }));
     //  FINAL PAYLOAD
     const payload = {
@@ -661,16 +663,18 @@ export class JobCardAddForm {
       ? this.jobCardService.updateJobCard(payload)
       : this.jobCardService.insertJobCard(payload);
 
+    this.loader.show();
     apiCall.subscribe({
       next: (res: any) => {
-        this.toastr.show(`${this.isEditMode} ? 'Updated Successfully' : 'Saved Successfully'`, { classname: 'bg-success text-white', delay: 5000 });
-        this.router.navigate(['/job-card']);
+        this.toastr.show(`${this.isEditMode ? 'Updated' : 'Saved'} Successfully`, { classname: 'bg-success text-white', delay: 5000 });
         this.resetForm();
+        this.router.navigate(['/job-card']);
         this.isEditMode = false;
+        this.loader.hide();
       },
       error: (err) => {
         console.error(err);
-        // Swal.fire('Error', 'Something went wrong', 'error');
+        this.loader.hide();
         this.toastr.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
@@ -746,11 +750,13 @@ export class JobCardAddForm {
     this.complaintList = data.jobCardComplaint || [];
 
     // ================= PDI =================
-    this.pdiCheckList = data.pdiChecklistChassiWise.map((x: any) => ({
-      id: x.pdichecklistMasterId,
-      isStatus: x.isStatus,
-      remarks: x.remarks
-    }));
+    if (data.pdiChecklistChassiWise && data.pdiChecklistChassiWise !== null) {
+      this.pdiCheckList = data.pdiChecklistChassiWise.map((x: any) => ({
+        id: x.pdichecklistMasterId,
+        isStatus: x.isStatus,
+        remarks: x.remarks
+      }));
+    }
 
 
     this.isPdiSaved = true; // important

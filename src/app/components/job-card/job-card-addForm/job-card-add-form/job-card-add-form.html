@@ -627,7 +627,7 @@
   <div class="card-footer d-flex justify-content-end gap-2">
     <button type="button" class="btn btn-primary btn-sm" (click)="saveJobCard()">Save</button>
     <button class="btn btn-primary btn-sm" (click)="openPdiModal(PdiModelChecklist)">PDI Checklist</button>
-    <button class="btn btn-light btn-sm">Cancel</button>
+    <button class="btn btn-danger btn-sm">Cancel</button>
   </div>
 </div>
 
@@ -682,7 +682,7 @@
 
   <!-- Footer -->
   <div class="modal-footer">
-    <button class="btn btn-primary btn-sm" [disabled]="!validatePdi()" (click)="savePdi(); modal.close()">Save</button>
+    <button class="btn btn-primary btn-sm" (click)="savePdi(); modal.close()">Save</button>
     <button class="btn btn-danger btn-sm" (click)="onClose(modal)">Close</button>
   </div>
 
