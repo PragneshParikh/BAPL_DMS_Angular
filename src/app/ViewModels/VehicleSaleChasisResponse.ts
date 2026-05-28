@@ -33,11 +33,11 @@
   stockNo?: string;
 
   //  GST
-  sgstPer?: number;
+  sgstper?: number;
   sgst?: number;
-  cgstPer?: number;
+  cgstper?: number;
   cgst?: number;
-  igstPer?: number;
+  igstper?: number;
   igst?: number;
 
   
