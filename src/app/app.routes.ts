@@ -48,6 +48,7 @@ import { LabourRateMaster } from './components/labour-rate-master/labour-rate-ma
 import { HSRPOrder } from './components/hsrp-order/hsrp-order';
 import { HSRPOrderList } from './components/hsrp-order/hsrporder-list/hsrporder-list';
 import { HsrpInward } from './components/hsrp-order/hsrp-inward/hsrp-inward';
+import { EmployeeMasterList } from './components/employee-master/employee-master-list/employee-master-list';
 
 
 export const routes: Routes = [

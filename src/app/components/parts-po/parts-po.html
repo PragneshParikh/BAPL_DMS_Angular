@@ -18,240 +18,249 @@
                 <div class="card-header border-0 py-1"></div>
                 <div class="card-body pt-1 pb-2">
                     <form #partsPoForm="ngForm">
+                        <fieldset [disabled]="isSubmitted">
+                            <!-- Purchase Info Header -->
+                            <div class="row g-1 mb-2 align-items-end">
+                                <div class="col-md-1-5">
+                                    <label class="form-label mb-0 small">Date</label>
+                                    <input type="text" class="form-control form-control-sm bg-light" name="poDate"
+                                        #poDate="ngModel" [ngModel]="partsPOData.poDate | date:'dd-MM-yyyy'"
+                                        [disabled]="true">
+                                </div>
 
-                        <!-- Purchase Info Header -->
-                        <div class="row g-1 mb-2 align-items-end">
-                            <div class="col-md-1-5">
-                                <label class="form-label mb-0 small">Date</label>
-                                <input type="text" class="form-control form-control-sm bg-light" name="poDate"
-                                    #poDate="ngModel" [ngModel]="partsPOData.poDate | date:'dd-MM-yyyy'"
-                                    [disabled]="true">
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label mb-0 small">Location</label>
-                                <select class="form-select form-select-sm border-start border-2" name="location"
-                                    #location="ngModel" [class.is-invalid]="locationInvalid"
-                                    [(ngModel)]="partsPOData.selectedLocation" (change)="onLocationChange()">
-                                    <option *ngFor="let loc of locationList" [value]="loc.loccode">{{loc.locname}}
-                                    </option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label mb-0 small">Prefix No.</label>
-                                <input type="text" class="form-control form-control-sm" name="prefix" #prefix="ngModel"
-                                    [(ngModel)]="partsPOData.prefixNo" placeholder="Prefix" [disabled]="true">
-                            </div>
-
-                            <div class="col-md-1">
-                                <label class="form-label mb-0 small">Order No.</label>
-                                <input type="text" class="form-control form-control-sm bg-light" name="orderNo"
-                                    #orderNo="ngModel" [(ngModel)]="partsPOData.orderNo" readonly>
-                            </div>
-
-                            <div class="col-md-1-5">
-                                <label class="form-label mb-0 small d-block">OrderType</label>
-                                <div class="d-flex align-5-items-center gap-1">
-                                    <select class="form-select form-select-sm" [class.is-invalid]="orderTypeInvalid"
-                                        name="orderType" #orderType="ngModel" [(ngModel)]="partsPOData.subPoType"
-                                        (change)="onPoTypeChange()">
-                                        <option value="VOR">VOR</option>
-                                        <option value="SSOMSO">SSO/MSO</option>
+                                <div class="col-md-3">
+                                    <label class="form-label mb-0 small">Location</label>
+                                    <select class="form-select form-select-sm border-start border-2" name="location"
+                                        #location="ngModel" [class.is-invalid]="locationInvalid"
+                                        [(ngModel)]="partsPOData.selectedLocation" (change)="onLocationChange()">
+                                        <option *ngFor="let loc of locationList" [value]="loc.loccode">{{loc.locname}}
+                                        </option>
                                     </select>
-                                    <button *ngIf="partsPOData.subPoType === 'VOR'" type="button"
-                                        class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#vorModal">
-                                        <i class="ri-add-line"></i>
-                                    </button>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label mb-0 small">Prefix No.</label>
+                                    <input type="text" class="form-control form-control-sm" name="prefix"
+                                        #prefix="ngModel" [(ngModel)]="partsPOData.prefixNo" placeholder="Prefix"
+                                        [disabled]="true">
+                                </div>
+
+                                <div class="col-md-1">
+                                    <label class="form-label mb-0 small">Order No.</label>
+                                    <input type="text" class="form-control form-control-sm bg-light" name="orderNo"
+                                        #orderNo="ngModel" [(ngModel)]="partsPOData.orderNo" readonly>
+                                </div>
+
+                                <div class="col-md-1-5">
+                                    <label class="form-label mb-0 small d-block">OrderType</label>
+                                    <div class="d-flex align-5-items-center gap-1">
+                                        <select class="form-select form-select-sm" [class.is-invalid]="orderTypeInvalid"
+                                            name="orderType" #orderType="ngModel" [(ngModel)]="partsPOData.subPoType"
+                                            (change)="onPoTypeChange()" [disabled]="isEdit">
+                                            <option value="VOR">VOR</option>
+                                            <option value="SSOMSO">SSO/MSO</option>
+                                        </select>
+                                        <button *ngIf="partsPOData.subPoType === 'VOR'" type="button"
+                                            class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#vorModal">
+                                            <i class="ri-add-line"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-1-5">
+                                    <label class="form-label mb-0 small">Transaction Type</label>
+                                    <select class="form-select form-select-sm border-start border-2"
+                                        name="transactionType" #transactionType="ngModel"
+                                        [class.is-invalid]="transactionTypeInvalid"
+                                        [(ngModel)]="partsPOData.transactionType" [disabled]="isEdit">
+                                        <option *ngFor="let type of transactionTypeList" [value]="type.type">
+                                            {{type.name}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-1 text-center">
+                                    <label class="form-label mb-0 d-block small">Against KIT</label>
+                                    <div class="form-check form-switch d-inline-block">
+                                        <input type="checkbox" class="form-check-input" id="isKit" name="isKit"
+                                            #isKit="ngModel" [(ngModel)]="partsPOData.isKit"
+                                            (change)="onKitToggleChange()"
+                                            [disabled]="isSubmitted || partsPOData.subPoType !== 'SSOMSO' || isEdit">
+                                        <label class="form-check-label small" for="isKit">{{ partsPOData.isKit ? 'Y' :
+                                            'N'
+                                            }}</label>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-1-5">
-                                <label class="form-label mb-0 small">Transaction Type</label>
-                                <select class="form-select form-select-sm border-start border-2" name="transactionType"
-                                    #transactionType="ngModel" [class.is-invalid]="transactionTypeInvalid"
-                                    [(ngModel)]="partsPOData.transactionType">
-                                    <option *ngFor="let type of transactionTypeList" [value]="type.type">{{type.name}}
-                                    </option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-1 text-center">
-                                <label class="form-label mb-0 d-block small">Against KIT</label>
-                                <div class="form-check form-switch d-inline-block">
-                                    <input type="checkbox" class="form-check-input" id="isKit" name="isKit"
-                                        #isKit="ngModel" [(ngModel)]="partsPOData.isKit" (change)="onKitToggleChange()"
-                                        [disabled]="isSubmitted || partsPOData.subPoType !== 'SSOMSO'">
-                                    <label class="form-check-label small" for="isKit">{{ partsPOData.isKit ? 'Y' : 'N'
-                                        }}</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-1 mb-2">
-                            <div class="col-md-3">
-                                <label class="form-label mb-0 small">Party</label>
-                                <!-- <input type="text" class="form-control form-control-sm" name="party"
+                            <div class="row g-1 mb-2">
+                                <div class="col-md-3">
+                                    <label class="form-label mb-0 small">Party</label>
+                                    <!-- <input type="text" class="form-control form-control-sm" name="party"
                                     #party="ngModel" [(ngModel)]="partsPOData.partyName" [disabled]="true"> -->
-                                <select class="form-select form-select-sm" [(ngModel)]="partsPOData.partyName"
-                                    name="party" #party="ngModel" [disabled]="true">
-                                    <option *ngFor="let ledger of ledgerList" [value]="ledger.ledgerCode">
-                                        {{ledger.ledgerName}}
-                                    </option>
-                                </select>
+                                    <select class="form-select form-select-sm" [(ngModel)]="partsPOData.partyName"
+                                        name="party" #party="ngModel" [disabled]="true">
+                                        <option *ngFor="let ledger of ledgerList" [value]="ledger.ledgerCode">
+                                            {{ledger.ledgerName}}
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
+                        </fieldset>
                     </form>
 
 
                     <!-- Item Selection Info -->
-                    <div class="row g-1 mb-2 align-items-end">
-                        <div class="col-md-3">
-                            <label class="form-label mb-0 small">Part No.</label>
-                            <!-- Models Dropdown -->
-                            <select *ngIf="!partsPOData.isKit" class="form-select form-select-sm border-start border-2"
-                                [class.is-invalid]="partNoInvalid" [(ngModel)]="currentItem.partNo"
-                                (change)="onModelChange()">
-                                <option value="">--Select--</option>
-                                <option *ngFor="let item of itemList" [value]="item.itemcode">{{item.itemname}}
-                                </option>
-                            </select>
-                            <!-- Kits Dropdown -->
-                            <select *ngIf="partsPOData.isKit" class="form-select form-select-sm border-start border-2"
-                                [class.is-invalid]="partNoInvalid" [(ngModel)]="currentItem.partNo"
-                                (change)="onModelChange()">
-                                <option value="">--Select--</option>
-                                <option *ngFor="let kit of kitList" [value]="kit.id">{{kit.kitName}}</option>
-                            </select>
-                        </div>
+                    <fieldset [disabled]="isSubmitted || isEdit">
+                        <div class="row g-1 mb-2 align-items-end">
 
-                        <div class="col-md-1">
-                            <label class="form-label mb-0 small text-success">Last Price: 0.00</label>
-                            <input type="number" class="form-control form-control-sm text-end bg-light" readonly
-                                placeholder="0.00">
-                        </div>
+                            <!-- Part No -->
+                            <div class="col-md-3">
+                                <label class="form-label mb-0 small">Part No.</label>
+                                <!-- Models Dropdown -->
+                                <select *ngIf="!partsPOData.isKit"
+                                    class="form-select form-select-sm border-start border-2"
+                                    [class.is-invalid]="partNoInvalid" [(ngModel)]="currentItem.partNo"
+                                    (change)="onModelChange()">
+                                    <option value="">--Select--</option>
+                                    <option *ngFor="let item of itemList" [value]="item.itemcode">{{item.itemname}}
+                                    </option>
+                                </select>
+                                <!-- Kits Dropdown -->
+                                <select *ngIf="partsPOData.isKit"
+                                    class="form-select form-select-sm border-start border-2"
+                                    [class.is-invalid]="partNoInvalid" [(ngModel)]="currentItem.partNo"
+                                    (change)="onModelChange()">
+                                    <option value="">--Select--</option>
+                                    <option *ngFor="let kit of kitList" [value]="kit.id">{{kit.kitName}}</option>
+                                </select>
+                            </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label mb-0 small">Part Description</label>
-                            <input type="text" class="form-control form-control-sm bg-light"
-                                [(ngModel)]="currentItem.itemdesc" readonly>
-                        </div>
+                            <!-- Last Price -->
+                            <div class="col-md-1">
+                                <label class="form-label mb-0 small text-success">Last Price: 0.00</label>
+                                <input type="number" class="form-control form-control-sm text-end bg-light" readonly
+                                    placeholder="0.00">
+                            </div>
 
-                        <div class="col-md-1">
-                            <label class="form-label mb-0 small">Qty.</label>
-                            <input type="number" class="form-control form-control-sm text-end" name=""
-                                [class.is-invalid]="qtyInvalid" [(ngModel)]="currentItem.quantity"
-                                (input)="calculateRowTotals()">
-                        </div>
+                            <!-- Part Description -->
+                            <div class="col-md-4">
+                                <label class="form-label mb-0 small">Part Description</label>
+                                <input type="text" class="form-control form-control-sm bg-light"
+                                    [(ngModel)]="currentItem.itemdesc" readonly>
+                            </div>
 
-                        <div class="col-md-1">
-                            <label class="form-label mb-0 small">Rate</label>
-                            <input type="number" class="form-control form-control-sm text-end"
-                                [(ngModel)]="currentItem.itemRate" (input)="calculateRowTotals()" [disabled]="true">
-                        </div>
+                            <!-- Qty -->
+                            <div class="col-md-1">
+                                <label class="form-label mb-0 small">Qty.</label>
+                                <input type="number" class="form-control form-control-sm text-end" name=""
+                                    [class.is-invalid]="qtyInvalid" [(ngModel)]="currentItem.quantity"
+                                    (input)="calculateRowTotals()">
+                            </div>
 
-                        <div class="col-md-1">
-                            <label class="form-label mb-0 small">Cur. Stock</label>
-                            <input type="text" class="form-control form-control-sm bg-light text-end"
-                                [value]="currentItem.currentStock" readonly>
-                        </div>
-                        <!-- <div class="row g-1 mt-3"> -->
-                        <div class="col-md-4">
-                            <label class="form-label mb-0 small">Remarks</label>
-                            <textarea class="form-control form-control-sm" rows="1" [(ngModel)]="partsPOData.remarks"
-                                placeholder="Enter remarks..."></textarea>
-                        </div>
-                        <!-- </div> -->
-                        <div class="col-md-1">
-                            <button class="btn btn-sm btn-primary" (click)="addPurchaseItem()">Add</button>
-                        </div>
+                            <!-- Rate -->
+                            <div class="col-md-1">
+                                <label class="form-label mb-0 small">Rate</label>
+                                <input type="number" class="form-control form-control-sm text-end"
+                                    [(ngModel)]="currentItem.itemRate" (input)="calculateRowTotals()" [disabled]="true">
+                            </div>
 
-                    </div>
+                            <!-- Current Stock -->
+                            <div class="col-md-1">
+                                <label class="form-label mb-0 small">Cur. Stock</label>
+                                <input type="text" class="form-control form-control-sm bg-light text-end"
+                                    [value]="currentItem.currentStock" readonly>
+                            </div>
+
+                            <!-- Remarks -->
+                            <div class="col-md-4">
+                                <label class="form-label mb-0 small">Remarks</label>
+                                <textarea class="form-control form-control-sm" rows="1"
+                                    [(ngModel)]="partsPOData.remarks" placeholder="Enter remarks..."></textarea>
+                            </div>
+
+                            <!-- Add button -->
+                            <div class="col-md-1">
+                                <button class="btn btn-sm btn-primary" (click)="addPurchaseItem()">Add</button>
+                            </div>
+                        </div>
+                    </fieldset>
 
                     <!-- TABLE -->
-                    <div class="table-responsive border rounded mt-3">
-                        <table class="table table-sm table-striped table-bordered mb-0 small">
-                            <thead class="table-light text-center">
-                                <tr>
-                                    <th>Sr.No</th>
-                                    <th>Action</th>
-                                    <th>Part No.</th>
-                                    <th>Part Desc.</th>
-                                    <th>Qty</th>
-                                    <th>Rate</th>
-                                    <th>(+) SGST Amt.</th>
-                                    <th>(+) CGST Amt.</th>
-                                    <th>(+) IGST Amt.</th>
-                                    <th>Net Amount</th>
-                                    <th>MRP</th>
-                                    <th>Stock</th>
-                                </tr>
-                            </thead>
-                            <tbody class="align-middle">
-                                <tr *ngFor="let item of pagedPurchaseDetails; let i = index">
-                                    <td class="text-center">{{(page - 1) * pageSize + i + 1}}</td>
-                                    <td class="text-center">
-                                        <ng-container *ngIf="!item.fromKit; else kitRow">
-                                            <button class="btn btn-sm btn-soft-info py-0 px-1 me-1"
-                                                (click)="editItem(i)">
-                                                <i class="ri-pencil-line"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-soft-danger py-0 px-1"
-                                                (click)="deleteItem(i)">
-                                                <i class="ri-delete-bin-line"></i>
-                                            </button>
-                                        </ng-container>
-                                        <ng-template #kitRow>
-                                            <span
-                                                class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
-                                                <i class="ri-box-3-fill me-1"></i> KIT
-                                            </span>
-                                        </ng-template>
-                                    </td>
-                                    <td>{{item.partNo}}</td>
-                                    <td>{{item.description}}</td>
-                                    <td class="text-center">{{item.quantity}}</td>
-                                    <td class="text-end">{{item.itemRate | number:'1.2-2'}}</td>
-                                    <td class="text-end">{{item.sgstAmt | number:'1.2-2'}}</td>
-                                    <td class="text-end">{{item.cgstAmt | number:'1.2-2'}}</td>
-                                    <td class="text-end">{{item.igstAmt | number:'1.2-2'}}</td>
-                                    <td class="text-end fw-semibold">{{item.amount | number:'1.2-2'}}</td>
-                                    <td class="text-end">{{item.mrp | number:'1.2-2'}}</td>
-                                    <td class="text-center">0</td>
-                                </tr>
-                                <!-- Total Row -->
-                                <tr class="fw-bold table-secondary">
-                                    <td colspan="4" class="text-end">Total :</td>
-                                    <td class="text-center">{{totalQty}}</td>
-                                    <td></td>
-                                    <td class="text-end">{{totalSgst | number:'1.2-2'}}</td>
-                                    <td class="text-end">{{totalCgst | number:'1.2-2'}}</td>
-                                    <td class="text-end">{{totalIgst | number:'1.2-2'}}</td>
-                                    <td class="text-end">{{totalAmount | number:'1.2-2'}}</td>
-                                    <td colspan="2"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Remarks -->
-                    <!-- <div class="row g-1 mt-3">
-                    <div class="col-md-6">
-                        <label class="form-label mb-0 small">Remarks</label>
-                        <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="remarks"
-                            placeholder="Enter remarks..."></textarea>
-                    </div>
-                </div> -->
+                    <fieldset [disabled]="isSubmitted">
+                        <div class="table-responsive border rounded mt-3">
+                            <table class="table table-sm table-striped table-bordered mb-0 small">
+                                <thead class="table-light text-center">
+                                    <tr>
+                                        <th>Sr.No</th>
+                                        <th>Action</th>
+                                        <th>Part No.</th>
+                                        <th>Part Desc.</th>
+                                        <th>Qty</th>
+                                        <th>Rate</th>
+                                        <th>(+) SGST Amt.</th>
+                                        <th>(+) CGST Amt.</th>
+                                        <th>(+) IGST Amt.</th>
+                                        <th>Net Amount</th>
+                                        <th>MRP</th>
+                                        <th>Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="align-middle">
+                                    <tr *ngFor="let item of pagedPurchaseDetails; let i = index">
+                                        <td class="text-center">{{(page - 1) * pageSize + i + 1}}</td>
+                                        <td class="text-center">
+                                            <ng-container *ngIf="!item.fromKit; else kitRow">
+                                                <button class="btn btn-sm btn-soft-info py-0 px-1 me-1"
+                                                    (click)="editItem(i)">
+                                                    <i class="ri-pencil-line"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-soft-danger py-0 px-1"
+                                                    (click)="deleteItem(i)">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                </button>
+                                            </ng-container>
+                                            <ng-template #kitRow>
+                                                <span
+                                                    class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
+                                                    <i class="ri-box-3-fill me-1"></i> KIT
+                                                </span>
+                                            </ng-template>
+                                        </td>
+                                        <td>{{item.partNo}}</td>
+                                        <td>{{item.description}}</td>
+                                        <td class="text-center">{{item.quantity}}</td>
+                                        <td class="text-end">{{item.itemRate | number:'1.2-2'}}</td>
+                                        <td class="text-end">{{item.sgstAmt | number:'1.2-2'}}</td>
+                                        <td class="text-end">{{item.cgstAmt | number:'1.2-2'}}</td>
+                                        <td class="text-end">{{item.igstAmt | number:'1.2-2'}}</td>
+                                        <td class="text-end fw-semibold">{{item.amount | number:'1.2-2'}}</td>
+                                        <td class="text-end">{{item.mrp | number:'1.2-2'}}</td>
+                                        <td class="text-center">0</td>
+                                    </tr>
+                                    <!-- Total Row -->
+                                    <tr class="fw-bold table-secondary">
+                                        <td colspan="4" class="text-end">Total :</td>
+                                        <td class="text-center">{{totalQty}}</td>
+                                        <td></td>
+                                        <td class="text-end">{{totalSgst | number:'1.2-2'}}</td>
+                                        <td class="text-end">{{totalCgst | number:'1.2-2'}}</td>
+                                        <td class="text-end">{{totalIgst | number:'1.2-2'}}</td>
+                                        <td class="text-end">{{totalAmount | number:'1.2-2'}}</td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </fieldset>
 
                     <!-- Pagination -->
-                    <div class="row mt-2" *ngIf="purchaseDetails.length > pageSize">
-                        <div class="col-12">
-                            <div class="float-end">
-                                <ngb-pagination [collectionSize]="purchaseDetails.length" [(page)]="page"
-                                    [pageSize]="pageSize" (pageChange)="refreshPage()" [boundaryLinks]="true">
-                                </ngb-pagination>
-                            </div>
+                    <div class="col-sm-12 col-md-12 mt-2">
+                        <div class="text-md-right float-md-end gridjs-pagination">
+                            <ngb-pagination [collectionSize]="purchaseDetails.length" [(page)]="page"
+                                [pageSize]="pageSize" (pageChange)="refreshPage()" [maxSize]="5" [boundaryLinks]="true">
+                            </ngb-pagination>
                         </div>
                     </div>
 

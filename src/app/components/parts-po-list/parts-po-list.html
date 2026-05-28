@@ -71,15 +71,15 @@
                                 style="cursor: pointer;" class="hover-row">
                                 <td>{{ (page - 1) * pageSize + i + 1 }}.</td>
                                 <td>{{po.poNumber}}</td>
-                                <td>{{po.poDate}}</td>
+                                <td>{{po.poDate | date : 'dd-MM-yyyy'}}</td>
                                 <td>{{po.transactionType}}</td>
-                                <td>{{po.partyName}}</td>
-                                <td>{{po.location}}</td>
-                                <td>{{po.orderAmount}}</td>
+                                <td>{{po.ledgerName}}</td>
+                                <td>{{po.locationName}}</td>
+                                <td>{{po.totalAmount}}</td>
                                 <td class="text-center">
                                     <span class="badge"
-                                        [ngClass]="po.isSubmitted === 'Submited To Erp' ? 'bg-success' : 'bg-danger'">
-                                        {{ po.isSubmitted === 'Submited To Erp' ? 'Yes' : 'No' }}
+                                        [ngClass]="po.isSubmitted === true ? 'bg-success' : 'bg-danger'">
+                                        {{ po.isSubmitted === true ? 'Yes' : 'No' }}
                                     </span>
                                 </td>
                             </tr>
@@ -91,10 +91,10 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="col-sm-12 col-md-12">
+                <div class="col-sm-12 col-md-12 mt-2">
                     <div class="text-md-right float-md-end gridjs-pagination">
                         <ngb-pagination [collectionSize]="purchaseOrders.length" [(page)]="page" [pageSize]="pageSize"
-                            (pageChange)="refreshPage()" [boundaryLinks]="true">
+                            (pageChange)="refreshPage()" [maxSize]="5" [boundaryLinks]="true">
                         </ngb-pagination>
                     </div>
                 </div>
