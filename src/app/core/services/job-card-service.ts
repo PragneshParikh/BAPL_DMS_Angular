@@ -24,7 +24,6 @@ export class JobCardService {
   }
 
   getAllInspectedChassis(dealerCode: string, jobTypeId: number): Observable<any> {
-    //debugger;
     if (!jobTypeId) jobTypeId = 0;
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetAllInspectedChassis/${dealerCode}/${jobTypeId}`);
   }
@@ -123,5 +122,9 @@ export class JobCardService {
   }
   getMaterialedJobCardList(jobId: number) {
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetMaterialedJobCardList/${jobId}`)
+  }
+
+  getJobNo(dealerCode: string): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetNextJobNo/${dealerCode}`);
   }
 }

@@ -35,7 +35,7 @@ export class JobCard {
   selectedChassis: string = '';
   searchTimeout: any;
   jobTypeId: number = 0;
-  isSuperAdmin:boolean;
+  isSuperAdmin: boolean;
 
 
   //Pagination
@@ -68,11 +68,11 @@ export class JobCard {
     chassisNo: ''
   };
   ngOnInit(): void {
-this.isSuperAdmin = this.storageService.getRole().toLocaleLowerCase() === 'superadmin';
+    this.isSuperAdmin = this.storageService.getRole().toLocaleLowerCase() === 'superadmin';
     this.setUserRole();
     this.fetchLocations();
     this.loadChassisList();
-   this.loadJobCardList();
+    this.loadJobCardList();
   }
 
 
@@ -96,7 +96,7 @@ this.isSuperAdmin = this.storageService.getRole().toLocaleLowerCase() === 'super
   loadChassisList() {
     const dealerCode = this.storageService.getDealerCode();
     this.jobTypeId = this.selectedJobtype;
-    this.jobCardService.getAllInspectedChassis(dealerCode,this.jobTypeId).subscribe({
+    this.jobCardService.getAllInspectedChassis(dealerCode, this.jobTypeId).subscribe({
       next: (res: any) => {
         console.log(res);
 
@@ -111,10 +111,10 @@ this.isSuperAdmin = this.storageService.getRole().toLocaleLowerCase() === 'super
 
   loadJobCardList() {
     // this.lodder = true;
-    let dealerCode ='';
+    let dealerCode = '';
     if (!this.isSuperAdmin) {
-       dealerCode = this.storageService.getDealerCode();
-  }
+      dealerCode = this.storageService.getDealerCode();
+    }
 
     this.jobCardService.getJobCardList(dealerCode).subscribe({
       next: (res) => {
