@@ -1,197 +1,403 @@
-<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-  <h4 class="mb-sm-0">Employee Master</h4>
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent mb-2">
+  <h4 class="mb-sm-0 text-uppercase fw-bold">
+    Employee Master
+  </h4>
 </div>
+<!-- ===================================================== -->
+<!-- PAGE HEADER -->
+<!-- ===================================================== -->
 
-<div class="card">
+<div
+    class="d-flex justify-content-between align-items-center mb-2">
 
-  <!-- BODY -->
-  <div class="card-body">
+    <h4 class="fw-bold mb-0">
+
+        {{
+          isEditMode
+          ? 'Edit Employee'
+          : 'Add Employee'
+        }}
+
+    </h4>
+
+    <!-- BACK BUTTON -->
+
+    <button
+        type="button"
+        class="btn btn-secondary btn-sm"
+        (click)="backToList()">
+
+        <i class="ri-arrow-left-line"></i>
+
+        Back
+
+    </button>
+
+</div>
+<!-- ===================================================== -->
+<!-- EMPLOYEE FORM -->
+<!-- ===================================================== -->
+
+<div class="card shadow-sm mx-2">
+
+  <div class="card-body p-3">
 
     <form #employeeMasterForm="ngForm" (ngSubmit)="onSubmit(employeeMasterForm)">
 
       <div class="row">
-        <div class="col-md-2">
-          <!-- IMAGE BOX -->
-          <div style=" width:120px; height:150px; border:1px solid #dcdcdc; background:#fff; overflow:hidden;
-              margin:auto; display:flex; align-items:center; justify-content:center;">
-            <img *ngIf="imagePreview" [src]="imagePreview" style="width:100%; height:100%; object-fit:cover;">
-            <i *ngIf="!imagePreview" class="ri-image-line" style="font-size:40px; color:#adb5bd;"> </i>
+
+        <!-- ===================================================== -->
+        <!-- PROFILE IMAGE -->
+        <!-- ===================================================== -->
+
+        <div class="col-md-2 text-center">
+
+          <div class="border rounded overflow-hidden bg-white d-flex align-items-center justify-content-center"
+            style="width:100px; height:120px; margin:auto;">
+
+            <img *ngIf="imagePreview" [src]="imagePreview" class="w-100 h-100" style="object-fit:cover;" />
+
+            <i *ngIf="!imagePreview" class="ri-image-line text-muted" style="font-size:40px;">
+            </i>
+
           </div>
 
-          <!-- TITLE -->
-          <div
-            style="width:120px; margin:auto; border:1px solid #dcdcdc; border-top:none; padding:6px; text-align:center; font-weight:500; font-size:13px; ">
+          <div class="border border-top-0 p-1 fw-semibold" style="width:100px; margin:auto; font-size:12px;">
+
             Upload Profile Image
+
           </div>
 
-          <!-- HIDDEN FILE -->
-          <input #fileInput type="file" hidden accept="image/*" (change)="onFileSelect($event)">
+          <input #fileInput type="file" hidden accept="image/*" (change)="onFileSelect($event)" />
 
-          <!-- UPLOAD -->
-          <button type="button" class="btn btn-primary btn-sm mt-2" style="width:120px; display:block; margin:auto;"
+          <button type="button" class="btn btn-primary btn-sm mt-2 px-2 py-1" style="width:100px;"
             (click)="fileInput.click()">
+
             Upload
+
           </button>
 
-          <!-- DELETE -->
-          <!-- <button type="button" class="btn btn-danger btn-sm mt-2" style="width:120px; display:block; margin:auto;"
-            (click)="removeImage()"> Delete Image
-          </button> -->
+          <div class="mt-2 text-muted" style="font-size:11px; line-height:18px;">
 
-          <!-- NOTE -->
-          <div class="text-center mt-3" style="font-size:12px; line-height:20px; color:#555;">
             <b>Note</b>
+
             <br>
+
             Photo should be 3.5cm x 4.5cm at 100 dpi.
+
             <br>
+
             Maximum size should be 50kb.
+
           </div>
+
         </div>
 
-        <!-- ========================================= -->
-        <!-- RIGHT FORM SECTION -->
-        <!-- ========================================= -->
+        <!-- ===================================================== -->
+        <!-- FORM SECTION -->
+        <!-- ===================================================== -->
 
-        <div class="col-md-10">
-          <div class="row g-3">
-            <!-- ROW 1 -->
-            <div class="row mb-2">
-              <div class="col-md-3">
-                <label class="form-label">Employee Code</label>
-                <input type="text" class="form-control form-control-sm" #employeeCode="ngModel"
-                  [(ngModel)]="employeeData.employeeCode" name="employeeCode">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">First Name</label>
-                <input type="text" class="form-control form-control-sm" #firstName="ngModel"
-                  [(ngModel)]="employeeData.firstName" name="firstName">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Last Name</label>
-                <input type="text" class="form-control form-control-sm" #lastName="ngModel"
-                  [(ngModel)]="employeeData.lastName" name="lastName">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Gender <span class="text-danger">*</span></label>
-                <select class="form-select form-select-sm" name="gender" [(ngModel)]="employeeData.gender"
-                  #gender="ngModel" required>
-                  <option *ngFor="let g of genders" [value]="g.value">
-                    {{ g.title }}
-                  </option>
-                </select>
-              </div>
+        <div class="col-md-10 ps-2">
+
+          <!-- ROW 1 -->
+
+          <div class="row mb-2">
+
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                Employee Code
+              </label>
+
+              <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.employeeCode"
+                name="employeeCode">
+
             </div>
 
-            <!-- ROW 2 -->
-            <div class="row mb-2">
-              <div class="col-md-3">
-                <label class="form-label">Mobile No.</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.mobile" name="mobile"
-                  #mobile="ngModel">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Email ID</label>
-                <input type="email" class="form-control form-control-sm" [(ngModel)]="employeeData.emailID"
-                  name="emailID" #emailID="ngModel">
-              </div>
+            <div class="col-md-3">
 
-              <div class="col-md-3">
-                <label class="form-label">Password</label>
-                <input type="password" class="form-control form-control-sm" [(ngModel)]="employeeData.password"
-                  name="password" #password="ngModel">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Date Of Join</label>
-                <input type="date" class="form-control form-control-sm" [(ngModel)]="employeeData.dateOfJoin"
-                  name="dateOfJoin" #dateOfJoin="ngModel">
-              </div>
+              <label class="form-label mb-1">
+                First Name
+              </label>
+
+              <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.firstName"
+                name="firstName">
+
             </div>
 
-            <!-- ROW 3 -->
-            <div class="row mb-2">
-              <div class="col-md-3">
-                <label class="form-label">Dealer Code</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.dealerCode"
-                  name="dealerCode" #dealerCode="ngModel">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Department</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.department"
-                  name="department" #department="ngModel">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Designation</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.designation"
-                  name="designation" #designation="ngModel">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Supervisor</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.supervisor"
-                  name="supervisor" #supervisor="ngModel">
-              </div>
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                Last Name
+              </label>
+
+              <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.lastName"
+                name="lastName">
+
             </div>
 
-            <!-- ROW 4 -->
-            <div class="row mb-2">
-              <div class="col-md-3">
-                <label class="form-label">Is Active</label>
-                <select class="form-select form-select-sm" [(ngModel)]="employeeData.isActive" name="isActive"
-                  #isActive="ngModel">
-                  <option [ngValue]="true"> Yes </option>
-                  <option [ngValue]="false"> No </option>
-                </select>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">State</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.state" name="state"
-                  #state="ngModel">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">City</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.city" name="city"
-                  #city="ngModel">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Pincode</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="employeeData.pincode"
-                  name="pincode" #pincode="ngModel">
-              </div>
-            </div>
+            <div class="col-md-3">
 
-            <!-- ROW 5 -->
-            <div class="row mb-2">
-              <div class="col-md-6">
-                <label class="form-label">Address</label>
-                <textarea rows="3" class="form-control form-control-sm" [(ngModel)]="employeeData.address"
-                  name="address" #address="ngModel">
-              </textarea>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Notes</label>
-                <textarea rows="3" class="form-control form-control-sm" [(ngModel)]="employeeData.notes" name="notes"
-                  #notes="ngModel">
-              </textarea>
-              </div>
-            </div>
+              <label class="form-label mb-1">
+                Gender
+              </label>
 
-            <div class="row mt-3">
-              <div class="col-md-12">
-                <button type="button" class="btn btn-primary btn-sm float-end" (click)="backToList()">
-                  Cancel
-                </button>
-                <button type="submit" [disabled]="employeeMasterForm.invalid"
-                  class="btn btn-primary btn-sm float-end me-1">
-                  Save
-                </button>
+              <select class="form-select form-select-sm py-1" [(ngModel)]="employeeData.gender" name="gender">
 
-              </div>
+                <option value="">
+                  Select Gender
+                </option>
+
+                <option *ngFor="let g of genders" [value]="g.value">
+
+                  {{ g.title }}
+
+                </option>
+
+              </select>
+
             </div>
 
           </div>
-        </div>
 
+          <!-- ROW 2 -->
+
+          <div class="row mb-2">
+
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                Mobile No.
+              </label>
+
+              <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.mobile"
+                name="mobile">
+
+            </div>
+
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                Email ID
+              </label>
+
+              <input type="email" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.emailId"
+                name="emailId">
+
+            </div>
+
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                Password
+              </label>
+
+              <input type="password" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.password"
+                name="password">
+
+            </div>
+
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                Date Of Join
+              </label>
+
+              <input type="date" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.dateOfJoin"
+                name="dateOfJoin">
+
+            </div>
+
+          </div>
+
+          <!-- ROW 3 -->
+
+          <div class="row mb-2">
+
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                Dealer Code
+              </label>
+
+              <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.dealerCode"
+                name="dealerCode">
+
+            </div>
+
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                Department
+              </label>
+
+              <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.department"
+                name="department">
+
+            </div>
+
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                Designation
+              </label>
+
+              <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.designation"
+                name="designation">
+
+            </div>
+
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                Supervisor
+              </label>
+
+              <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.supervisor"
+                name="supervisor">
+
+            </div>
+
+          </div>
+
+          <!-- ROW 4 -->
+
+          <div class="row mb-2">
+
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                Is Active
+              </label>
+
+              <select class="form-select form-select-sm py-1" [(ngModel)]="employeeData.isActive" name="isActive">
+
+                <option [ngValue]="true">
+                  Yes
+                </option>
+
+                <option [ngValue]="false">
+                  No
+                </option>
+
+              </select>
+
+            </div>
+
+            <!-- STATE -->
+
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                State
+              </label>
+
+              <select class="form-select form-select-sm py-1" [(ngModel)]="employeeData.state" name="state"
+                (change)="onStateChange()">
+
+                <option value="">
+                  Select State
+                </option>
+
+                <option *ngFor="let state of states" [value]="state.stateId">
+
+                  {{ state.stateName }}
+
+                </option>
+
+              </select>
+
+            </div>
+
+            <!-- CITY -->
+
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                City
+              </label>
+
+              <select class="form-select form-select-sm py-1" [(ngModel)]="employeeData.city" name="city">
+
+                <option value="">
+                  Select City
+                </option>
+
+                <option *ngFor="let city of filteredCities" [value]="city.cityId">
+
+                  {{ city.cityName }}
+
+                </option>
+
+              </select>
+
+            </div>
+
+            <div class="col-md-3">
+
+              <label class="form-label mb-1">
+                Pincode
+              </label>
+
+              <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.pincode"
+                name="pincode">
+
+            </div>
+
+          </div>
+
+          <!-- ROW 5 -->
+
+          <div class="row mb-2">
+
+            <div class="col-md-6">
+
+              <label class="form-label mb-1">
+                Address
+              </label>
+
+              <textarea rows="2" class="form-control form-control-sm" [(ngModel)]="employeeData.address" name="address">
+              </textarea>
+
+            </div>
+
+            <div class="col-md-6">
+
+              <label class="form-label mb-1">
+                Notes
+              </label>
+
+              <textarea rows="2" class="form-control form-control-sm" [(ngModel)]="employeeData.notes" name="notes">
+              </textarea>
+
+            </div>
+
+          </div>
+
+          <!-- BUTTONS -->
+
+          <div class="text-end mt-2">
+
+            <button type="button" class="btn btn-secondary btn-sm px-2 py-1 me-2" (click)="backToList()">
+
+              Cancel
+
+            </button>
+
+            <button type="submit" class="btn btn-primary btn-sm px-2 py-1">
+
+              {{ isEditMode ? 'Update' : 'Save' }}
+
+            </button>
+
+          </div>
+
+        </div>
 
       </div>
+
     </form>
+
   </div>
+
 </div>
