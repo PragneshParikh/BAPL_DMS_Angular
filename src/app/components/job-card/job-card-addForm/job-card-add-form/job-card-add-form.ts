@@ -746,11 +746,13 @@ export class JobCardAddForm {
     this.complaintList = data.jobCardComplaint || [];
 
     // ================= PDI =================
-    this.pdiCheckList = data.pdiChecklistChassiWise.map((x: any) => ({
-      id: x.pdichecklistMasterId,
-      isStatus: x.isStatus,
-      remarks: x.remarks
-    }));
+    if (data.pdiChecklistChassiWise && data.pdiChecklistChassiWise !== null) {
+      this.pdiCheckList = data.pdiChecklistChassiWise.map((x: any) => ({
+        id: x.pdichecklistMasterId,
+        isStatus: x.isStatus,
+        remarks: x.remarks
+      }));
+    }
 
 
     this.isPdiSaved = true; // important
