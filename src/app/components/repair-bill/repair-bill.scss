@@ -1,0 +1,72 @@
+
+.repair-bill-page .form-label {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.repair-bill-page .form-control,
+.repair-bill-page .form-select {
+    font-size: 12px;
+}
+
+.repair-bill-page .table th,
+.repair-bill-page .table td {
+    font-size: 11px;
+    vertical-align: middle;
+}
+
+.repair-bill-page .card-header {
+    min-height: 42px;
+}
+
+.repair-bill-page .btn-sm {
+    font-size: 11px;
+}
+
+.repair-bill-page textarea {
+    resize: none;
+}
+.custom-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-modal {
+    width: 95%;
+    max-width: 1200px;
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.custom-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #ddd;
+    background: #f5f5f5;
+}
+
+.custom-modal-body {
+    padding: 15px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.btn-close-custom {
+    border: none;
+    background: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+
