@@ -6,6 +6,9 @@ import Swal from 'sweetalert2';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
 import { Form22masterservice } from '../../core/services/form22masterservice';
+import { StorageService } from '../../core/services/storage';
+import { JobCardService } from '../../core/services/job-card-service';
+import { debug } from 'console';
 
 @Component({
   selector: 'app-labour-rate-master',
@@ -16,6 +19,8 @@ import { Form22masterservice } from '../../core/services/form22masterservice';
 export class LabourRateMaster implements OnInit {
 
   constructor(private LabourMasterService: LabourmaasterService,
+    private storageService: StorageService,
+    private jobCardService: JobCardService,
     private form22service: Form22masterservice,
     private loader: LoaderService
   ) { }
@@ -26,7 +31,7 @@ export class LabourRateMaster implements OnInit {
   oemModels: any[] = [];
   modelWiseLabourList: any[] = [];
   selectedLabour: any = {};
-  selectedPartwiseLabour : any ={};
+  selectedPartwiseLabour: any = {};
   pagedModelWiseLabourList: any[] = [];
   partWiseLabourList: any[] = [];
   pagedPartWiseLabourList: any[] = [];
@@ -35,9 +40,17 @@ export class LabourRateMaster implements OnInit {
   currentPage = 1;
   totalPages = 0;
 
+  selectedJobtype: any = '';
+  jobTypeList: any[] = [];
+  serviceHeadList: any[] = [];
+  serviceTypeList: any[] = [];
+  selectedServiceHead: any;
+  selectedServiceType: string;
+
   ngOnInit(): void {
     this.loadOemModels();
     this.onSearch();
+    this.loadJobTypes();
   }
   // =========================
   // Load OEM Models
@@ -89,6 +102,7 @@ export class LabourRateMaster implements OnInit {
       next: (res: any) => {
         this.loader.hide();
         this.partWiseLabourList = res.data || res;
+        console.log(this.partWiseLabourList);
         this.totalPages = Math.ceil(
           this.partWiseLabourList.length /
           this.pageSize
@@ -124,7 +138,23 @@ export class LabourRateMaster implements OnInit {
     this.selectedLabour = {
       ...item
     };
-    console.log(this.selectedLabour)
+    if (this.selectedLabour.jobType) {
+      this.jobCardService.getServiceHead(
+        this.selectedLabour.jobType
+      ).subscribe({
+        next: (res: any) => {
+          this.serviceHeadList = res;
+          if (this.selectedLabour.serviceHead) {
+            this.jobCardService.getServiceType(this.selectedLabour.serviceHead)
+              .subscribe({
+                next: (typeRes: any) => {
+                  this.serviceTypeList = typeRes;
+                }
+              });
+          }
+        }
+      });
+    }
     this.showEditPopup = true;
   }
   openPartwiseEditPopup(item: any): void {
@@ -132,11 +162,200 @@ export class LabourRateMaster implements OnInit {
       ...item
     };
     console.log(this.selectedPartwiseLabour)
+    if (this.selectedPartwiseLabour.jobType) {
+      this.jobCardService.getServiceHead(
+        this.selectedPartwiseLabour.jobType
+      ).subscribe({
+        next: (res: any) => {
+          this.serviceHeadList = res;
+          if (this.selectedPartwiseLabour.serviceHead) {
+            this.jobCardService.getServiceType(this.selectedPartwiseLabour.serviceHead)
+              .subscribe({
+                next: (typeRes: any) => {
+                  this.serviceTypeList = typeRes;
+                }
+              });
+          }
+        }
+      });
+    }
     this.showPartwiseEditPopup = true;
   }
   closePopup(): void {
     this.showEditPopup = false;
     this.showPartwiseEditPopup = false;
+  }
+
+  loadJobTypes() {
+    this.jobCardService.getJobType().subscribe({
+      next: (res) => {
+        this.jobTypeList = res;
+      },
+      error: (err) => {
+        console.error('Error fetching job types', err);
+      }
+    });
+  }
+
+  onJobType(type: 'model' | 'part'): void {
+debugger;
+  console.log(type);
+
+  if (type === 'model') {
+
+    console.log(this.selectedLabour.jobType);
+
+    if (!this.selectedLabour.jobType) {
+      return;
+    }
+
+    this.jobCardService
+      .getServiceHead(
+        this.selectedLabour.jobType
+      )
+      .subscribe({
+        next: (res: any) => {
+
+          this.serviceHeadList = res;
+
+        }
+      });
+
+  }
+
+  else {
+    console.log(
+      this.selectedPartwiseLabour.jobType
+    );
+   
+    if (!this.selectedPartwiseLabour.jobType) {
+      return;
+    }
+
+    this.jobCardService
+      .getServiceHead(
+        this.selectedPartwiseLabour.jobType
+      )
+      .subscribe({
+        next: (res: any) => {
+
+          this.serviceHeadList = res;
+
+        }
+      });
+
+  }
+
+}
+
+
+  // =========================================
+  // SERVICE HEAD CHANGE
+  // =========================================
+
+  onServiceHeadChange(type: 'model' | 'part'): void {
+  debugger;
+    this.serviceTypeList = [];
+
+    // MODELWISE
+
+    if (type === 'model') {
+
+      this.selectedLabour.servicetype = '';
+
+      this.jobCardService
+        .getServiceType(
+          this.selectedLabour.serviceHead
+        )
+        .subscribe({
+
+          next: (res: any) => {
+
+            this.serviceTypeList = res;
+
+            // AUTO SELECT SINGLE
+
+            if (
+              this.serviceTypeList.length === 1
+            ) {
+
+              this.selectedLabour.servicetype =
+                this.serviceTypeList[0].id;
+
+            }
+
+          }
+
+        });
+
+    }
+
+    // PARTWISE
+
+    else {
+
+      this.selectedPartwiseLabour.servicetype = '';
+
+      this.jobCardService
+        .getServiceType(
+          this.selectedPartwiseLabour.serviceHead
+        )
+        .subscribe({
+
+          next: (res: any) => {
+
+            this.serviceTypeList = res;
+            console.log(this.serviceTypeList)
+
+            // AUTO SELECT SINGLE
+
+            if (
+              this.serviceTypeList.length === 1
+            ) {
+
+              this.selectedPartwiseLabour.servicetype =
+                this.serviceTypeList[0].id;
+
+            }
+
+          }
+
+        });
+
+    }
+
+  }
+
+  loadServiceType(serviceHeadId: number, isEdit = false) {
+
+    this.jobCardService
+      .getServiceType(serviceHeadId)
+      .subscribe((res: any[]) => {
+
+        this.serviceTypeList = res;
+
+        // EDIT MODE
+        if (isEdit) {
+
+          this.selectedServiceType = '';
+
+          return;
+        }
+
+        // SINGLE VALUE AUTO SELECT
+        if (this.serviceTypeList.length === 1) {
+
+          this.selectedServiceType =
+            this.serviceTypeList[0].id;
+
+        }
+        else {
+
+          this.selectedServiceType = '';
+
+        }
+
+      });
   }
 
   updateLabour(): void {

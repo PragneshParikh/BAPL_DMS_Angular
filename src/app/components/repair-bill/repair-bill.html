@@ -157,7 +157,7 @@
                         <div class="col-md-2">
                             <label>Job Date</label>
                             <input class="form-control form-control-sm bg-light text-muted"
-                                [value]="selectedJobCard?.jobCardHeader?.jobinDate | date:'dd-MM-yyyy'" readonly>
+                                [value]="selectedJobCard?.jobCardHeader?.jobinDate" readonly>
                         </div>
                         <div class="col-md-2">
                             <label>Job No.</label>
@@ -230,7 +230,7 @@
 
                     </div>
 
-                    <div class="col-md-2 position-relative" *ngIf="selectedItemType === 'Part'">
+                    <!-- <div class="col-md-2 position-relative" *ngIf="selectedItemType === 'Part'">
 
                         <label class="form-label">Part No.</label>
 
@@ -253,7 +253,7 @@
 
                         </ul>
 
-                    </div>
+                    </div> -->
 
                     <div class="col-md-3" *ngIf="selectedItemType === 'Labour'">
 
@@ -263,14 +263,14 @@
                             [(ngModel)]="selectedDescription" readonly>
 
                     </div>
-                    <div class="col-md-3" *ngIf="selectedItemType === 'Part'">
+                    <!-- <div class="col-md-3" *ngIf="selectedItemType === 'Part'">
 
                         <label class="form-label">Description</label>
 
                         <input type="text" class="form-control form-control-sm bg-light text-muted"
                             [(ngModel)]="selectedPartDescription" readonly>
 
-                    </div>
+                    </div> -->
                     <div class="col-md-1">
                         <label class="form-label">Qty/Hrs.</label>
                         <input type="number" class="form-control form-control-sm text-end bg-light text-muted"
@@ -284,14 +284,14 @@
                             [(ngModel)]="selectedRate" readonly>
 
                     </div>
-                    <div class="col-md-1" *ngIf="selectedItemType === 'Part'">
+                    <!-- <div class="col-md-1" *ngIf="selectedItemType === 'Part'">
 
                         <label class="form-label">Rate</label>
 
                         <input type="number" class="form-control form-control-sm text-end bg-light text-muted"
                             [(ngModel)]="selectedPartRate" readonly>
 
-                    </div>
+                    </div> -->
 
 
                     <div class="col-md-1">
@@ -319,7 +319,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-2">
+                    <!-- <div class="col-md-2">
                         <label class="form-label">Technician</label>
                         <select class="form-select form-select-sm" [(ngModel)]="technician">
                             <option value="">Select Technician</option>
@@ -327,7 +327,7 @@
                             <option value="Suraj">Suraj</option>
                             <option value="Vishal">Vishal</option>
                         </select>
-                    </div>
+                    </div> -->
                     <div class="col-md-2">
                         <button class="btn btn-sm btn-soft-primary" (click)="addLabour()">
                             + Add
@@ -952,9 +952,28 @@
                 <div class="row g-3">
 
                     <!-- Insurance Party -->
-                    <div class="col-md-6">
-                        <label class="form-label"> Insurance Party </label>
-                        <input type="text" class="form-control form-control-sm" [(ngModel)]="insuranceParty">
+                    <div class="col-md-6 position-relative">
+
+                        <label class="form-label">
+                            Insurance Party
+                        </label>
+
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="insuranceParty"
+                            (input)="onInsuranceSearch()">
+
+                        <!-- Dropdown -->
+                        <ul *ngIf="showInsuranceDropdown" class="list-group position-absolute w-100 shadow"
+                            style="z-index:1000; max-height:200px; overflow:auto;">
+
+                            <li *ngFor="let item of filteredInsuranceList"
+                                class="list-group-item list-group-item-action" (click)="selectInsurance(item)">
+
+                                {{ item.ledgerName }}
+
+                            </li>
+
+                        </ul>
+
                     </div>
 
                     <!-- Description -->
@@ -978,13 +997,13 @@
                     <!-- Policy No -->
                     <div class="col-md-2">
                         <label class="form-label">Policy No.</label>
-                        <input type="text" class="form-control form-control-sm" [(ngModel)]="policyNo">
+                        <input type="text" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="policyNo" readonly>
                     </div>
 
                     <!-- Valid Till -->
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label class="form-label"> Valid Till </label>
-                        <input type="date" class="form-control form-control-sm" [(ngModel)]="validTill">
+                        <input type="date" class="form-control form-control-sm bg-light text-muted" [value]="selectedJobCard?.jobCardCustomer?.insuranceExpDate | date:'yyyy-MM-dd'" readonly>
                     </div>
 
                     <!-- Zero Dep -->
