@@ -38,7 +38,7 @@ export class AddVehicleSaleBill implements OnInit {
   searchClicked: boolean;
   selectedCustomerId: number;
   chassisList: VehicleSaleListChasisResponse[] = [];
-  erpStatus: any;
+  Status: any;
   isErpLocked: boolean;
   isInvoiced: boolean;
   filteredChassis: any[] = [];
@@ -168,7 +168,7 @@ export class AddVehicleSaleBill implements OnInit {
     finalAmount: 0,
     key: '',
     book: '',
-    erpstatus: ''
+    Status: ''
 
   };
 
@@ -319,12 +319,11 @@ export class AddVehicleSaleBill implements OnInit {
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
         console.log('Bill Data:', res);
-        this.selectedCustomerId = res.ledgerId;
-        this.erpStatus = res.erpStatus || '';
+this.selectedCustomerId = res.ledgerId;
+        this.Status = res.Status || '';
         this.isErpLocked =
-          this.erpStatus.toLowerCase() === 'pushedtoerp';
-        if (this, this.erpStatus.toLowerCase() === 'invalid') {
-          this.loader.hide();
+          this.Status.toLowerCase() === 'pushedtoerp';
+        if (this, this.Status.toLowerCase() === 'invalid') {
           this.toaster.show('The chassis alocated with this bill has been sold out.Please realocate the chassis and try again.',
             {
               classname: 'bg-warning text-white',
@@ -332,12 +331,12 @@ export class AddVehicleSaleBill implements OnInit {
             }
           );
         }
-        this.isInvoiced = this.erpStatus.toLowerCase() === 'invoiced';
+        this.isInvoiced = this.Status.toLowerCase() === 'invoiced';
 
         // Load chassis FIRST, then bind bill
         this.loadChassisList(() => {
           this.loadBillForEdit(res);
-          if ((this.erpStatus == 'Alloted' || this.erpStatus == 'Pending') && this.vehicleList.some(v => v.regNo == '' && v.insNo == '' || (v.regAmt === 0 || v.insAmt === 0))) {
+          if ((this.Status == 'Alloted' || this.Status == 'Pending') && this.vehicleList.some(v => v.regNo == '' && v.insNo == '' || (v.regAmt === 0 || v.insAmt === 0))) {
             this.openRegistrationModal();
           }
         });
@@ -709,7 +708,7 @@ export class AddVehicleSaleBill implements OnInit {
       refEmail: '',
       refPoint: 0,
       refRemarks: '',
-      erpStatus: !this.billId ? 'PerformaCreated' : '',
+      Status: !this.billId ? 'PerformaCreated' : '',
       dealerCode: this.storageService.getDealerCode(),
 
 
@@ -1185,10 +1184,7 @@ export class AddVehicleSaleBill implements OnInit {
   }
 
 
-  printLastSaved() {
-    console.log('Print Last Saved');
-  }
-
+ 
   printExShowroomInvoice() {
 
     this.router.navigate(
