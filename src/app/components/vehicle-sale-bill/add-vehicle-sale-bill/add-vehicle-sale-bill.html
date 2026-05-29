@@ -77,9 +77,8 @@
             </button>
 
             <!-- <button *ngIf="!isErpLocked && billId && !isInvoiced" class="btn btn-sm btn-primary" -->
-            <button *ngIf="billId" class="btn btn-sm btn-primary"
-                (click)="openRegistrationModal()">
-                Open Registration
+            <button *ngIf="billId" class="btn btn-sm btn-primary" (click)="openRegistrationModal()">
+                Open Regn./ Ins.
             </button>
 
             <!-- <button *ngIf="!isErpLocked && billId && !isInvoiced && erpStatus !== 'Reserved'"
@@ -163,14 +162,28 @@
                             </div>
 
                             <!-- D2D -->
+                            <!-- D2D -->
                             <div class="col-md-2">
-                                <label class="form-label d-block">D2D</label>
+                                <label class="form-label d-block mb-1">D2D</label>
 
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="d2dSwitch"
-                                        [(ngModel)]="model.isD2D" name="isD2D" (change)="onD2DChange()">
+                                <div class="btn-group w-auto" role="group">
 
-                                    <label class="form-check-label" for="d2dSwitch">Enable</label>
+                                    <!-- Disable -->
+                                    <input type="radio" class="btn-check" name="d2dSwitch" id="d2dOff" [value]="false"
+                                        [(ngModel)]="model.isD2D" (change)="onD2DChange()">
+
+                                    <label class="btn btn-outline-primary btn-sm px-2 py-1" for="d2dOff">
+                                        No
+                                    </label>
+
+                                    <!-- Enable -->
+                                    <input type="radio" class="btn-check" name="d2dSwitch" id="d2dOn" [value]="true"
+                                        [(ngModel)]="model.isD2D" (change)="onD2DChange()">
+
+                                    <label class="btn btn-outline-primary btn-sm px-2 py-1" for="d2dOn">
+                                        Yes
+                                    </label>
+
                                 </div>
                             </div>
 
@@ -571,6 +584,7 @@
                                             <th>Regn Amt</th>
                                             <th>Ins Amt</th>
                                             <th>FameII Disc.</th>
+                                            <th>Pre-GST Disc.</th>
                                             <th>Taxable Amount</th>
                                             <!-- <th>Ext Warranty</th> -->
                                             <th>SGST %</th>
@@ -579,6 +593,7 @@
                                             <th>CGST Amnt</th>
                                             <th>IGST %</th>
                                             <th>IGST Amnt</th>
+                                            <th>Post-GST Disc.</th>
                                             <th>Final Amount</th>
                                             <th>Cess</th>
                                             <th>TCS</th>
@@ -605,10 +620,10 @@
                                                     (click)="deleteVehicle(i)" [disabled]="isSubmitted">
                                                     <i class="ri-delete-bin-line"></i>
                                                 </button>
+                                              
                                             </td>
 
                                             <td>{{ i + 1 }}</td>
-
                                             <td>{{ row.chassisNo }}</td>
                                             <td>{{ row.modelName || row.model }}</td>
                                             <td>{{ row.colour }}</td>
@@ -627,18 +642,19 @@
                                             <td>{{ row.regAmt }}</td>
                                             <td>{{ row.insAmt }}</td>
                                             <td>{{ row.fameIIAmnt}}</td>
-                                            <td>{{ row.taxableAmount ?? row.amount}}</td>
+                                            <td>{{ row.preGstDiscount }}</td>
+                                            <td>{{ row.taxableAmount}}</td>
 
                                             <!-- <td>
                                                 {{ row.extWarranty }}
                                             </td> -->
-                                            <td>{{ row.sgstPer }}%</td>
-                                            <td>{{row.sgst }}</td>
-                                            <td>{{row.cgstPer }}%</td>
-                                            <td>{{ row.cgst }}</td>
-                                            <td>{{ row.igstPer }}%</td>
-                                            <td>{{ row.igst }}</td>
-
+                                            <td>{{ row.sgstPer || row.sgstper ?? 0}}%</td>
+                                            <td>{{row.sgst || row.sgstamnt ||row.sgstamnt ?? 0}}</td>
+                                            <td>{{row.cgstPer || row.cgstper ?? 0 }}%</td>
+                                            <td>{{ row.cgst || row.cgstamnt ?? 0}}</td>
+                                            <td>{{ row.igstPer || row.igstper ?? 0 }}%</td>
+                                            <td>{{ row.igst || row.igstamnt ?? 0 }}</td>
+                                            <td>{{ row.postGstDiscount }}</td>
                                             <td>{{ row.finalAmount }}</td>
                                             <td>{{ row.cess }}</td>
                                             <td>{{ row.tcs }}</td>
@@ -675,7 +691,7 @@
                             </div>
 
                             <!-- ADD BUTTON HERE -->
-                            <div class="col-md-12 d-flex justify-content-end mt-2">
+                            <!-- <div class="col-md-12 d-flex justify-content-end mt-2">
                                 <button class="btn btn-primary btn-sm" type="button"
                                     (click)="addVehicle(vehicleSaleForm)" [disabled]="isErpLocked ||
                                     !isCustomerValid() 
@@ -683,7 +699,34 @@
                                     ||(model.customerType==='B2C' && vehicleList?.length > 0) ">
                                     Add
                                 </button>
+                            </div> -->
+
+                            <div class="col-md-12 d-flex justify-content-end mt-2">
+                                <button class="btn btn-primary btn-sm" type="button"
+                                    (click)="addVehicle(vehicleSaleForm)" [disabled]="
+            isErpLocked ||
+            !isCustomerValid() ||
+            !model.chassisNo ||
+            (
+              model.customerType === 'B2C' &&
+              vehicleList?.length > 0 &&
+              editingIndex === -1
+            ) ||
+            (
+              editingIndex > -1 &&
+              billId &&
+              model.preGSTDiscount === vehicleList[editingIndex]?.preGSTDiscount &&
+              model.postGSTDiscount === vehicleList[editingIndex]?.postGSTDiscount
+            )
+        ">
+                                    {{
+                                    editingIndex > -1
+                                    ? 'Update'
+                                    : 'Add'
+                                    }}
+                                </button>
                             </div>
+
 
                         </div>
 
