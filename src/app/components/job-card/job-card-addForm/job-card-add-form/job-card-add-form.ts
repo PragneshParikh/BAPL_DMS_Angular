@@ -7,15 +7,16 @@ import { ReceiptEntryService } from '../../../../core/services/receipt-entry-ser
 import { LocationName } from '../../../../ViewModels/ReceiptEntryModel';
 import { JobCardService } from '../../../../core/services/job-card-service';
 import { selectLeadData } from '../../../../store/CRM/crm_selector';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTimepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { icons } from '../../../../core/data';
-import { Console, info } from 'console';
+import { Console, error, info } from 'console';
 import { title } from 'process';
 import { text } from 'stream/consumers';
 import { Route, Router } from '@angular/router';
 import { ToastService } from '../../../../shared/toaster/toast-service';
 import { delay } from 'lodash';
+import { LoaderService } from '../../../../core/services/loader';
 
 @Component({
   selector: 'app-job-card-add-form',
@@ -50,12 +51,12 @@ export class JobCardAddForm {
   registerNo = '';
   vehicleKms: number = 0;
   jobPrefix: '';
-  jobInDate: '';
-  jobInTime: '';
+  jobInDate: any = new Date().toISOString().split('T')[0];
+  jobInTime: any = this.getCurrentTime();
   jobNo: number = 0;
   manualJobNo: number = 0;
-  estDelDate: '';
-  estDelTime: '';
+  estDelDate: any = new Date().toISOString().split('T')[0];
+  estDelTime: string = this.getCurrentTime();
   supervisor: '';
   technician: '';
   jobEstimate: number = 0;
@@ -87,8 +88,6 @@ export class JobCardAddForm {
   isPdiModalOpen = false;
   isEditMode = false;
   editId: number = 0;
-
-
 
   isOpen: any = {
     job: true,
@@ -123,16 +122,20 @@ export class JobCardAddForm {
   };
   isPdiSaved = false;
 
-
+  dealerCode: string = '';
 
   constructor(private storageService: StorageService,
     private receiptEntryService: ReceiptEntryService,
     private router: Router,
     private jobCardService: JobCardService,
     public toastr: ToastService,
-    private modalService: NgbModal) { }
+    private modalService: NgbModal,
+    private loader: LoaderService,
+    private toaster: ToastService) { }
 
   ngOnInit(): void {
+    console.log('Date :', new Date().toISOString().split('T')[0]);
+    this.dealerCode = this.storageService.getDealerCode();
     const data = history.state.data;
 
     if (data) {
@@ -145,6 +148,10 @@ export class JobCardAddForm {
     this.loadChassisList();
     this.loadJobSorces();
     this.loadPdiData();
+
+    if (!this.isEditMode) {
+      this.getJobNo();
+    }
   }
 
   //Fetech Dealer Location
@@ -163,10 +170,9 @@ export class JobCardAddForm {
             x => x.locCode === this.selectedLocation
           );
           if (match) {
-            this.selectedLocation = match.locCode ;
+            this.selectedLocation = match.locCode;
           }
         }
-        //console.log("Workshop Locations", this.locations);
       },
       error: (err) => {
         console.error('Error fetching locations', err);
@@ -193,25 +199,19 @@ export class JobCardAddForm {
     });
   }
   loadServiceHistory(chassisNo: string) {
-    //debugger
 
     this.jobCardService.getJobCardServiceHistory(chassisNo).subscribe({
       next: (res: any) => {
-        console.log("servicehistory", res)
         if (!res || res.length === 0) {
-
-          this.toastr.show('This chassis number is not sold History not available', {
-            classname: 'bg-danger text-white',
-            delay: 2000
-          });
-
+          // this.toastr.show('This chassis number is not sold History not available', {
+          //   classname: 'bg-danger text-white',
+          //   delay: 2000
+          // });
           this.serviceHistoryList = []; // clear table
           return;
         }
-
         this.serviceHistoryList = res;
       },
-
       error: (err) => {
         this.toastr.show("Something went wrong");
         console.error(err);
@@ -224,9 +224,9 @@ export class JobCardAddForm {
       next: (res) => {
         this.jobSourceList = res;
 
-        if (this.isEditMode) {
-          this.selectedJobSources = this.chassiseditData.jobCardHeader.jobSource;
-        }
+        this.selectedJobSources = this.isEditMode
+          ? this.chassiseditData?.jobCardHeader?.jobSource
+          : this.jobSourceList?.[0]?.jobSourceId;
       },
       error: (err) => {
         console.error('Error fetching job types', err);
@@ -255,7 +255,7 @@ export class JobCardAddForm {
 
   loadPdiData() {
     this.jobCardService.getPdiChecklist().subscribe(res => {
-      this.pdiCheckList = res;
+      this.pdiCheckList = res
     });
   }
   toggle(section: string) {
@@ -269,8 +269,6 @@ export class JobCardAddForm {
   onLocationChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedLocation = target.value;
-
-    console.log('Selected Location:', this.selectedLocation);
   }
 
   // onJobType(isEdit = false) {
@@ -305,58 +303,57 @@ export class JobCardAddForm {
   // }
   onJobType(isEdit = false) {
 
-  if (!this.selectedJobtype) return;
+    if (!this.selectedJobtype) return;
 
-  const dealerCode = this.storageService.getDealerCode();
+    const dealerCode = this.storageService.getDealerCode();
 
-  // Load chassis
-  this.jobCardService
-    .getAllInspectedChassis(dealerCode, this.selectedJobtype)
-    .subscribe(res => {
-      this.chassisList = res;
-    });
+    // Load chassis
+    this.jobCardService
+      .getAllInspectedChassis(dealerCode, this.selectedJobtype)
+      .subscribe(res => {
+        this.chassisList = res;
+      });
 
-  // Load service heads
-  this.jobCardService
-    .getServiceHead(this.selectedJobtype)
-    .subscribe((res: any[]) => {
+    // Load service heads
+    this.jobCardService
+      .getServiceHead(this.selectedJobtype)
+      .subscribe((res: any[]) => {
 
-      this.serviceHeadList = res;
+        this.serviceHeadList = res;
 
-      // EDIT MODE
-      if (isEdit) {
+        // EDIT MODE
+        if (isEdit) {
 
-        this.selectedServiceHead =
-          this.chassiseditData.jobCardHeader.servicehead;
+          this.selectedServiceHead =
+            this.chassiseditData.jobCardHeader.servicehead;
 
-        this.loadServiceType(this.selectedServiceHead, true);
+          this.loadServiceType(this.selectedServiceHead, true);
 
-        return;
-      }
+          return;
+        }
 
-      // ADD MODE
-      if (this.serviceHeadList.length > 0) {
+        // ADD MODE
+        if (this.serviceHeadList.length > 0) {
 
-        // auto select first service head
-        this.selectedServiceHead =
-          this.serviceHeadList[0].serviceHeadId;
+          // auto select first service head
+          this.selectedServiceHead =
+            this.serviceHeadList[0].serviceHeadId;
 
-        // auto load service type
-        this.loadServiceType(this.selectedServiceHead);
+          // auto load service type
+          this.loadServiceType(this.selectedServiceHead);
 
-      }
-      else {
+        }
+        else {
 
-        this.selectedServiceHead = '';
-        this.selectedServiceType = '';
-        this.serviceTypeList = [];
+          this.selectedServiceHead = '';
+          this.selectedServiceType = '';
+          this.serviceTypeList = [];
 
-      }
+        }
 
-    });
-}
+      });
+  }
   onServiceHeadChange() {
-    debugger
     this.loadServiceType(this.selectedServiceHead);
   }
 
@@ -381,7 +378,7 @@ export class JobCardAddForm {
         if (this.serviceTypeList.length === 1) {
 
           this.selectedServiceType =
-            this.serviceTypeList[0].id;
+            this.serviceTypeList[0].serviceTypeId;
 
         }
         else {
@@ -469,7 +466,7 @@ export class JobCardAddForm {
       //  ADD MODE → default
       this.pdiCheckList = this.pdiCheckList.map(x => ({
         ...x,
-        isStatus: true,
+        isStatus: false,
         remarks: ''
       }));
     }
@@ -487,15 +484,15 @@ export class JobCardAddForm {
     );
   }
   onClose(modal: any) {
-    if (!this.validatePdi()) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Incomplete Checklist',
-        text: 'Please complete all PDI items before closing',
-        width: '300px'
-      });
-      return;
-    }
+    // if (!this.validatePdi()) {
+    //   Swal.fire({
+    //     icon: 'error',
+    //     title: 'Incomplete Checklist',
+    //     text: 'Please complete all PDI items before closing',
+    //     width: '300px'
+    //   });
+    //   return;
+    // }
 
     modal.dismiss();
   }
@@ -527,15 +524,11 @@ export class JobCardAddForm {
     this.complaintList.splice(index, 1);
   }
   savePdi() {
-    //debugger;
-    console.log("pdiCheckList", this.pdiCheckList)
     this.pdiCheckList = this.pdiCheckList.map(x => ({
       ...x,
       isStatus: x.isStatus === true,   // normalize
       remarks: x.remarks || ''
     }));
-
-    //console.log("PDI Stored Locally", this.pdiCheckList);
 
     this.isPdiSaved = true; // optional flag
 
@@ -543,13 +536,23 @@ export class JobCardAddForm {
   }
   //insert jobcard
   saveJobCard() {
-debugger
     //  VALIDATION (recommended)
-    if (!this.isPdiSaved) {
-      Swal.fire('Error', 'Please complete PDI first', 'error');
+    // if (!this.isPdiSaved) {
+    //   Swal.fire('Error', 'Please complete PDI first', 'error');
+    //   return;
+    // }
+
+    if (!this.selectedChassis || this.selectedChassis.trim() === '') {
+      this.toaster.show("Please select chassis number.", { classname: 'bg-warning text-white', delay: 5000 })
+      return;
+    } else if (!this.selectedJobtype || this.selectedJobtype === '') {
+      this.toaster.show("Please select Job type.", { classname: 'bg-warning text-white', delay: 5000 })
       return;
     }
+
     const dealerCode = this.storageService.getDealerCode();
+    const userId = this.storageService.getUserId();
+
     //  HEADER
     const jobCardHeader = {
       id: this.isEditMode ? this.editId : 0,
@@ -578,8 +581,8 @@ debugger
       observation: this.observation || "",
       supervisorComment: this.supervisorComment || "",
       isPdiSuccess: true,
-      createdBy: 'Admin',
-      updatedBy: dealerCode
+      createdBy: userId,
+      updatedBy: userId
     };
 
     // BATTERY
@@ -599,8 +602,8 @@ debugger
       controllerNo: this.controllerNo,
       batteryChemical: this.batteryChemestry,
       batteryCapacity: this.batteryCapacity,
-      createdBy: 'Admin',
-      updatedBy: dealerCode
+      createdBy: userId,
+      updatedBy: userId
     };
 
     //  CUSTOMER
@@ -621,8 +624,8 @@ debugger
 
       remarks: this.customerObj.remarks || null,
 
-      createdBy: 'Admin',
-      updatedBy: dealerCode
+      createdBy: userId,
+      updatedBy: userId
     };
 
     //  COMPLAINT
@@ -632,8 +635,8 @@ debugger
       customerVoice: x.customerVoice,
       complaintCode: x.complaintCode,
       complaint: x.complaint,
-      createdBy: 'Admin',
-      updatedBy: dealerCode
+      createdBy: userId,
+      updatedBy: userId
     }));
 
     //  PDI (USE STORED DATA )
@@ -643,13 +646,11 @@ debugger
       pdichecklistMasterId: x.id,
       isStatus: x.isStatus,   // use normalized value
       remarks: x.remarks,
-      createdBy: 'Admin',
-      updatedBy: dealerCode
+      createdBy: userId,
+      updatedBy: userId
     }));
-    console.log("in save methodthis.pdiCheckList", JobCardpdiChecklist)
     //  FINAL PAYLOAD
     const payload = {
-
       jobCardHeader,
       jobCardBattery,
       jobCardCustomer,
@@ -657,41 +658,30 @@ debugger
       pdiChecklistChassiWise: JobCardpdiChecklist
     };
 
-    console.log("FINAL PAYLOAD", payload);
-
     //  API CALL
     const apiCall = this.isEditMode
       ? this.jobCardService.updateJobCard(payload)
       : this.jobCardService.insertJobCard(payload);
 
+    this.loader.show();
     apiCall.subscribe({
       next: (res: any) => {
-
-        Swal.fire({
-          icon: 'success',
-          title: this.isEditMode ? 'Updated Successfully' : 'Saved Successfully',
-          text: this.isEditMode ? 'Job Card Updated' : 'Job Card Created',
-          width: '400px'
-        }).then(() => {
-
-          //  NAVIGATE AFTER CLICK OK
-          this.router.navigate(['/job-card']);
-
-        });
-
+        this.toastr.show(`${this.isEditMode ? 'Updated' : 'Saved'} Successfully`, { classname: 'bg-success text-white', delay: 5000 });
         this.resetForm();
+        this.router.navigate(['/job-card']);
         this.isEditMode = false;
+        this.loader.hide();
       },
       error: (err) => {
         console.error(err);
-        Swal.fire('Error', 'Something went wrong', 'error');
+        this.loader.hide();
+        this.toastr.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
   }
 
   // edit jobcard
   patchEditData(data: any) {
-    console.log("EDIT DATA", data);
 
     // ================= HEADER =================
     this.selectedJobtype = data.jobCardHeader.jobtype;
@@ -758,14 +748,15 @@ debugger
 
     // ================= COMPLAINT =================
     this.complaintList = data.jobCardComplaint || [];
-    console.log("Complaintlist",this.complaintList)
 
     // ================= PDI =================
-    this.pdiCheckList = data.pdiChecklistChassiWise.map((x: any) => ({
-      id: x.pdichecklistMasterId,
-      isStatus: x.isStatus,
-      remarks: x.remarks
-    }));
+    if (data.pdiChecklistChassiWise && data.pdiChecklistChassiWise !== null) {
+      this.pdiCheckList = data.pdiChecklistChassiWise.map((x: any) => ({
+        id: x.pdichecklistMasterId,
+        isStatus: x.isStatus,
+        remarks: x.remarks
+      }));
+    }
 
 
     this.isPdiSaved = true; // important
@@ -888,5 +879,29 @@ debugger
 
     this.router.navigate(['/ffir', this.editId]);
   }
-}
 
+  getCurrentTime(): string {
+    const now = new Date();
+
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+
+    return `${hours}:${minutes}`;
+  }
+
+  getJobNo() {
+    this.loader.show();
+    this.jobCardService.getJobNo(this.dealerCode).subscribe({
+      next: (res) => {
+        this.loader.hide();
+        this.jobNo = res;
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toaster.show("Something went wrong", { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  }
+
+}
