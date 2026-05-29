@@ -6,7 +6,7 @@ import { StorageService } from '../../core/services/storage';
 import { ItemMasterService } from '../../core/services/item-master-service';
 import { KitCreationService } from '../../core/services/kit-creation.service';
 import { KitDetailService } from '../../core/services/kit-detail-service';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
@@ -18,6 +18,7 @@ import { TaxService } from '../../core/services/tax';
 import { PurchaseService } from '../../core/services/purchase-service';
 import { LedgerMaster } from '../../core/services/ledger-master';
 import _ from 'lodash';
+import { JobSearch } from '../../dialogs/job-search/job-search';
 
 @Component({
   selector: 'app-parts-po',
@@ -28,7 +29,7 @@ import _ from 'lodash';
 })
 export class PartsPo implements OnInit {
   locationList: any[] = [];
-  // selectedLocation: string = '';
+  jobId: number = 0;
 
   itemList: any[] = [];
   kitList: any[] = [];
@@ -37,23 +38,10 @@ export class PartsPo implements OnInit {
   page = 1;
   pageSize = 5;
 
-  // Purchase Info fields (Prefix and OrderNo are UI-only for now)
-  // prefixNo: string = '';
-  // orderNo: string = '';
-  // poDate: string = new Date().toISOString();
-  // remarks: string = '';
-  // poType: string = 'Spares';
-  // subPoType: string = '';
   isSubmitted: boolean = false;
   isSaving: boolean = false;
-  // partyName: string = 'BGAUSS AUTO PRIVATE LIMITED';
-  // isGst: boolean = true;
-  // isKit: boolean = false;
   poNumber: string = '';
-  // totalAmt: number = 0;
-  // editingIndex: number | null = null;
   transactionTypeList = TRANSACTION_TYPES;
-  // selectedTransactionType: string = '';
 
   locationInvalid: boolean = false;
   transactionTypeInvalid: boolean = false;
@@ -63,18 +51,18 @@ export class PartsPo implements OnInit {
 
   jobCardList: any[] = [];
   activeJobCards: any[] = [];
-  vorDetails: any = {
-    jobNo: '',
-    chassisNo: '',
-    registerNo: '',
-    engineNo: '',
-    jobType: '',
-    serviceHead: '',
-    serviceType: '',
-    partyName: '',
-    mobileNo: '',
-    modelNo: ''
-  };
+  // vorDetails: any = {
+  //   jobNo: '',
+  //   chassisNo: '',
+  //   registerNo: '',
+  //   engineNo: '',
+  //   jobType: '',
+  //   serviceHead: '',
+  //   serviceType: '',
+  //   partyName: '',
+  //   mobileNo: '',
+  //   modelNo: ''
+  // };
 
   currentItem: any = {
     id: 0,
@@ -127,7 +115,8 @@ export class PartsPo implements OnInit {
     private jobCardService: JobCardService,
     private prefixService: PrefixService,
     private taxService: TaxService,
-    private ledgerService: LedgerMaster
+    private ledgerService: LedgerMaster,
+    private modalService: NgbModal
   ) {
     this.dealerCode = this.storageService.getDealerCode();
   }
@@ -245,51 +234,51 @@ export class PartsPo implements OnInit {
     });
   }
 
-  onJobNoChange() {
-    if (!this.vorDetails.jobNo) {
-      this.resetVorDetails();
-      return;
-    }
+  // onJobNoChange() {
+  //   // if (!this.vorDetails.jobNo) {
+  //   //   this.resetVorDetails();
+  //   //   return;
+  //   // }
 
-    const job = this.activeJobCards.find(j =>
-      (j.jobCardHeader?.jobNo || '').toString().trim() === this.vorDetails.jobNo.toString().trim()
-    );
+  //   // const job = this.activeJobCards.find(j =>
+  //   //   (j.jobCardHeader?.jobNo || '').toString().trim() === this.vorDetails.jobNo.toString().trim()
+  //   // );
 
-    if (job) {
-      this.vorDetails = {
-        jobNo: job.jobCardHeader?.jobNo,
-        chassisNo: job.jobCardCustomer?.chassisNo || '',
-        registerNo: job.jobCardCustomer?.registerNo || '',
-        engineNo: job.jobCardCustomer?.engineNo || '',
-        jobType: job.jobtype || '',
-        serviceHead: job.serviceHead || '',
-        serviceType: job.serviceType || '',
-        partyName: job.jobCardCustomer?.customerName || '',
-        mobileNo: job.jobCardCustomer?.customerMobile || '',
-        modelNo: job.jobCardCustomer?.modelName || ''
-      };
-    } else {
-      // Keep JobNo but clear other fields if not found in active list
-      const currentNo = this.vorDetails.jobNo;
-      this.resetVorDetails();
-      this.vorDetails.jobNo = currentNo;
-    }
-  }
+  //   // if (job) {
+  //   //   // this.vorDetails = {
+  //   //   //   jobNo: job.jobCardHeader?.jobNo,
+  //   //   //   chassisNo: job.jobCardCustomer?.chassisNo || '',
+  //   //   //   registerNo: job.jobCardCustomer?.registerNo || '',
+  //   //   //   engineNo: job.jobCardCustomer?.engineNo || '',
+  //   //   //   jobType: job.jobtype || '',
+  //   //   //   serviceHead: job.serviceHead || '',
+  //   //   //   serviceType: job.serviceType || '',
+  //   //   //   partyName: job.jobCardCustomer?.customerName || '',
+  //   //   //   mobileNo: job.jobCardCustomer?.customerMobile || '',
+  //   //   //   modelNo: job.jobCardCustomer?.modelName || ''
+  //   //   // };
+  //   // } else {
+  //   //   // Keep JobNo but clear other fields if not found in active list
+  //   //   // const currentNo = this.vorDetails.jobNo;
+  //   //   // this.resetVorDetails();
+  //   //   // this.vorDetails.jobNo = currentNo;
+  //   // }
+  // }
 
-  resetVorDetails() {
-    this.vorDetails = {
-      jobNo: '',
-      chassisNo: '',
-      registerNo: '',
-      engineNo: '',
-      jobType: '',
-      serviceHead: '',
-      serviceType: '',
-      partyName: '',
-      mobileNo: '',
-      modelNo: ''
-    };
-  }
+  // resetVorDetails() {
+  //   this.vorDetails = {
+  //     jobNo: '',
+  //     chassisNo: '',
+  //     registerNo: '',
+  //     engineNo: '',
+  //     jobType: '',
+  //     serviceHead: '',
+  //     serviceType: '',
+  //     partyName: '',
+  //     mobileNo: '',
+  //     modelNo: ''
+  //   };
+  // }
 
   getItemList() {
     this.loader.show();
@@ -886,5 +875,24 @@ export class PartsPo implements OnInit {
 
   redirectToPOList() {
     this.router.navigate(['/parts-po-list']);
+  }
+
+  openJobSearchDialog() {
+    const modalRef = this.modalService.open(JobSearch, {
+      size: 'xl',
+      backdrop: 'static',
+      keyboard: false
+    });
+
+    modalRef.result.then(
+      (result) => {
+        if (result && result.isAccepted) {
+          this.jobId = result.jobDetail.id;
+        }
+      },
+      (reason) => {
+        console.log('Modal dismissed:', reason);
+      }
+    );
   }
 }
