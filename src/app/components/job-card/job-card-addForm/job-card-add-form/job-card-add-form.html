@@ -230,7 +230,7 @@
 
                   <option value="">Select Job Source</option>
 
-                  <option *ngFor="let jobsource of jobSourceList" [ngValue]="jobsource.jobSourceId">
+                  <option *ngFor="let jobsource of jobSourceList" [value]="jobsource.jobSourceId">
                     {{ jobsource.jobSourceName }}
                   </option>
                 </select>

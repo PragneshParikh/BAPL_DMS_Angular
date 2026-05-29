@@ -224,9 +224,9 @@ export class JobCardAddForm {
       next: (res) => {
         this.jobSourceList = res;
 
-        if (this.isEditMode) {
-          this.selectedJobSources = this.chassiseditData.jobCardHeader.jobSource;
-        }
+        this.selectedJobSources = this.isEditMode
+          ? this.chassiseditData?.jobCardHeader?.jobSource
+          : this.jobSourceList?.[0]?.jobSourceId;
       },
       error: (err) => {
         console.error('Error fetching job types', err);
