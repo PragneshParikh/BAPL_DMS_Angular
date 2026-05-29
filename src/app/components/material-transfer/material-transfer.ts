@@ -7,7 +7,6 @@ import { Router, RouterOutlet } from '@angular/router';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { MaterialTransferService } from '../../core/services/material-transfer';
-import { error } from 'console';
 import { StorageService } from '../../core/services/storage';
 
 @Component({

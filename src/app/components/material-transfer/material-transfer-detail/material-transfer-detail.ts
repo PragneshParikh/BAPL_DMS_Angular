@@ -104,6 +104,7 @@ export class MaterialTransferDetail implements OnInit {
   ) {
     this.router.params.subscribe(params => {
       this.jobId = Number(params['id']);
+      this.getJobCardById(this.jobId);
     });
     this.dealerCode = this.storageService.getDealerCode();
   }
@@ -184,7 +185,6 @@ export class MaterialTransferDetail implements OnInit {
     if (!form.valid) {
       return;
     }
-
 
     const lstAdded: any[] = this.items.filter(x => x.status === "Added");
     const lstModified: any[] = this.items.filter(x => x.status === "Modified");
