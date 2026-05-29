@@ -97,6 +97,17 @@ export const routes: Routes = [
       { path: 'vehicle-sale-bill/add', component: AddVehicleSaleBill, data: [27] },
       { path: 'vehicle-sale-bill/edit/:id', component: AddVehicleSaleBill, data: [27] },
 
+      { path: 'add-vehicle-sale-bill/delivery-certificate/:id', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
+      { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
+      { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-search/chassis-search').then(m => m.ChassisSearch) },
+      { path: 'proforma-invoice', component: ProformaInvoice, data: [22] },
+      { path: 'form22-certificate/:chassisNo', component: Form22Certificate, data: [22] },
+      { path: 'delivery-checkList', component: DeliveryChecklist, data: [22] },
+      { path: 'delivery-slip', component: DeliverySlip, data: [22] },
+      { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] },
+
+
+
       { path: 'oemmodel-warranty', component: OemmodelWarranty, data: [34] },
       { path: 'oemmodel-warranty/add', component: AddOemmodelWarranty, data: [34] },
       { path: 'oemmodel-warranty/edit/:id', component: AddOemmodelWarranty, data: [34] },

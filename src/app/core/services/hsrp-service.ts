@@ -67,19 +67,55 @@ export class HsrpService {
   }
 
   createBulkHSRPOrder(data: any[]): Observable<any> {
-  return this.http.post(`${this.baseUrl}/HSRP/create`, data);
-}
-updateBulkHSRPOrder(data: any[]): Observable<any> {
-  return this.http.put(`${this.baseUrl}/HSRP/update`, data);
-}
+    return this.http.post(`${this.baseUrl}/HSRP/create`, data);
+  }
+  updateBulkHSRPOrder(data: any[]): Observable<any> {
+    return this.http.put(`${this.baseUrl}/HSRP/update`, data);
+  }
 
-updateBulkHSRPInward(data: any[]): Observable<any> {
-  return this.http.put(`${this.baseUrl}/HSRP/updateInward`, data);
-}
+  updateBulkHSRPInward(data: any[]): Observable<any> {
+    return this.http.put(`${this.baseUrl}/HSRP/updateInward`, data);
+  }
 
-getHSRPById(id: number): Observable<any> {
-  return this.http.get<any>(`${this.baseUrl}/HSRP/${id}`);
-}
+  getHSRPById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/HSRP/${id}`);
+  }
+ downloadHSRPExcel(
+  isSuperAdmin: boolean,
+  dealerCode?: string,
+  fromDate?: string | Date,
+  toDate?: string | Date
+) {
 
+  let params = new HttpParams();
+  
+  params = params.set('isSuperAdmin', isSuperAdmin??false);
+
+  if (dealerCode) {
+    params = params.set('dealerCode', dealerCode);
+  }
+
+  if (fromDate) {
+    params = params.set(
+      'fromDate',
+      new Date(fromDate).toISOString()
+    );
+  }
+
+  if (toDate) {
+    params = params.set(
+      'toDate',
+      new Date(toDate).toISOString()
+    );
+  }
+
+  return this.http.get(
+    `${this.baseUrl}/HSRP/download`,
+    {
+      params,
+      responseType: 'blob'
+    }
+  );
+}
 
 }

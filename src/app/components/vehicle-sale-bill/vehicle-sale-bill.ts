@@ -44,7 +44,7 @@ export class VehicleSaleBill {
   filter: any = {
     fromDate: null,
     toDate: null,
-    erpStatus: ""
+    status: ""
   };
   searchChanged: Subject<string> = new Subject();
   isSuperAdmin: boolean;
@@ -81,9 +81,9 @@ export class VehicleSaleBill {
     const from = this.filter.fromDate ? new Date(this.filter.fromDate) : undefined;
 
     const to = this.filter.toDate ? new Date(this.filter.toDate) : undefined;
-    const erpStatus = this.filter.erpStatus ? this.filter.erpStatus : undefined;
+    const Status = this.filter.Status ? this.filter.Status : undefined;
 
-    this.service.getAllVehicleSaleBills(this.dealerCode, this.searchText, from, to, erpStatus)
+    this.service.getAllVehicleSaleBills(this.dealerCode, this.searchText, from, to, Status)
       .subscribe({
         next: (res) => {
           this.vehicleBills = res;
@@ -175,7 +175,8 @@ export class VehicleSaleBill {
     });
   }
 
-  getErpStatusName(value: string | undefined): string {
+  getStatusName(value: string | undefined): string {
+    console.log('Getting status name for value:', value);
     return ErpOptions.find(x => x.value === value)?.name || '';
   }
 
