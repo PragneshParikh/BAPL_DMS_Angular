@@ -493,10 +493,6 @@ export class MaterialTransferDetail implements OnInit {
       .toFixed(2);
   }
 
-  openLabourRateDialog() {
-    alert('Labour rate dialog opened');
-  }
-
   calculateGST(finalPrice: number, totalGST: number = 0) {
 
     const ratio = (100 + totalGST) / 100;
