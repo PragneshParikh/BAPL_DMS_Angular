@@ -14,6 +14,8 @@ import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { it } from 'node:test';
 import { PrefixService } from '../../core/services/prefix';
+import { LedgerMaster } from '../../core/services/ledger-master';
+import { VehicleSaleBillService } from '../../core/services/vehicle-sale-bill-service';
 
 @Component({
   selector: 'app-repair-bill',
@@ -25,13 +27,14 @@ export class RepairBill implements OnInit {
 
   currentDate: string = new Date().toISOString().split('T')[0];
   RepairBillprefix: string = '';
-  billNo : number = 0;
+  billNo: number = 0;
   selectedLocation: string = '';
   locations: any[] = [];
   jobCardList: any[] = [];
   labourCodeList: any[] = [];
   partCodeList: any[] = [];
   materialedJobCarDList: any[] = [];
+  insurancelist: any[] = [];
   selectedJobCard: any = {};
   itemdesc: any;
   showJobDetails = false;
@@ -124,6 +127,11 @@ export class RepairBill implements OnInit {
 
   zeroDep = 'N';
 
+filteredInsuranceList: any[] = [];
+
+showInsuranceDropdown = false;
+  selectedInsuranceId: any;
+
 
   constructor(private receiptEntryService: ReceiptEntryService,
     private storageService: StorageService,
@@ -131,6 +139,8 @@ export class RepairBill implements OnInit {
     private labourMasterService: LabourmaasterService,
     private itemService: ItemMasterService,
     private prefixService: PrefixService,
+    private ledgerMasterService: LedgerMaster,
+    private vehicleSaleBillService : VehicleSaleBillService,
     private loader: LoaderService,
     private toaster: ToastService
   ) {
@@ -140,6 +150,7 @@ export class RepairBill implements OnInit {
     this.loadPrefix();
     this.fetchLocations();
     this.loadPartNo();
+    this.loadInsuranceName();
   }
 
   loadPrefix(): void {
@@ -158,6 +169,64 @@ export class RepairBill implements OnInit {
       }
     })
   }
+
+  loadInsuranceName(): void {
+
+  this.loader.show();
+
+  this.ledgerMasterService.getInsuranceLedgers().subscribe({
+
+    next: (res: any[]) => {
+
+      this.loader.hide();
+
+      this.insurancelist = res || [];
+
+      this.filteredInsuranceList = [...this.insurancelist];
+    },
+
+    error: (err) => {
+
+      this.loader.hide();
+
+      console.log(err);
+    }
+  });
+}
+
+
+  onInsuranceSearch(): void {
+
+  if (!this.insuranceParty?.trim()) {
+
+    this.filteredInsuranceList = [];
+
+    this.showInsuranceDropdown = false;
+
+    return;
+  }
+
+  this.filteredInsuranceList =
+    this.insurancelist.filter((x: any) =>
+
+      x.ledgerName
+        .toLowerCase()
+        .includes(this.insuranceParty.toLowerCase())
+
+    );
+
+  this.showInsuranceDropdown =
+    this.filteredInsuranceList.length > 0;
+}
+selectInsurance(item: any): void {
+
+  this.insuranceParty = item.ledgerName;
+  this.selectedInsuranceId = item.id;
+
+  this.showInsuranceDropdown = false;
+
+  console.log(item);
+}
 
   loadPartNo(): void {
     this.loader.show();
@@ -208,12 +277,13 @@ export class RepairBill implements OnInit {
     this.showPopup = false;
   }
   loadJobCardList(): void {
+    debugger
     let dealerCode = '';
     if (!this.isSuperAdmin) {
       dealerCode = this.storageService.getDealerCode();
     }
     this.loader.show();
-
+    
     this.jobCardService.getJobCardList(dealerCode,
       this.dateFrom,
       this.dateTo,
@@ -224,7 +294,7 @@ export class RepairBill implements OnInit {
       next: (res) => {
         this.loader.hide();
         this.jobCardList = res;
-        //console.log("listing : ", this.jobCardList);
+        console.log("listing : ", this.jobCardList);
 
         // this.loading = false;
       },
@@ -247,6 +317,7 @@ export class RepairBill implements OnInit {
   }
 
   onSelect(item: any) {
+    debugger;
     if (item.isMaterialTransfer === false || item.isMaterialTransfer === "null") {
       this.toaster.show('Material Transfer is not completed for this Job Card', {
         classname: 'bg-warning text-dark',
@@ -255,7 +326,17 @@ export class RepairBill implements OnInit {
 
     }
     this.selectedJobCard = item;
-
+    console.log(this.selectedJobCard)
+    this.chassisNo = this.selectedJobCard.jobCardHeader.chassisno;
+    this.vehicleSaleBillService.getPolicyNo(this.chassisNo).subscribe({
+      next:(res)=>{
+        this.policyNo = res;
+        console.log(this.policyNo)
+      },
+      error : (err)=>{
+        console.log(err);
+      }
+    })
     this.showPopup = false;
     this.showJobDetails = true;
     this.loadLabourCodelist();
@@ -295,7 +376,7 @@ export class RepairBill implements OnInit {
       next: (res) => {
         this.loader.hide();
         this.labourCodeList = res;
-        //console.log(this.labourCodeList)
+        console.log(this.labourCodeList)
 
       },
       error: (err) => {
@@ -593,7 +674,7 @@ export class RepairBill implements OnInit {
   }
 
   applyLabourDiscount(): void {
-
+debugger
     this.labourItems.forEach(item => {
 
       const grossAmount =
@@ -656,7 +737,7 @@ export class RepairBill implements OnInit {
     });
   }
   applyPartDiscount(): void {
-
+debugger
     this.partItems.forEach(item => {
 
       const grossAmount =

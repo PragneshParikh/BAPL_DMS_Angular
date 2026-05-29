@@ -128,4 +128,8 @@ updateRegistrationAndReserveChassis(
   );
 }
 
+getPolicyNo(chassisNo:string) : Observable<any>{
+  return this.http.get<any>(`${this.apiUrl}/VehicleSaleBill/PolicyNos/${chassisNo}`)
+}
+
 }

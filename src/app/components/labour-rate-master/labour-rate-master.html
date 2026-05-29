@@ -58,6 +58,9 @@
                                 <th>CGST</th>
                                 <th>IGST</th>
                                 <th>HSN Code</th>
+                                <th>Job Type</th>
+                                <th>Service Head</th>
+                                <th>Service Type</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -74,6 +77,9 @@
                                 <td>{{item.cgst}}</td>
                                 <td>{{item.igst}}</td>
                                 <td>{{item.hsnCode}}</td>
+                                <td>{{item.jobTypeName}}</td>
+                                <td>{{item.serviceHeadName}}</td>
+                                <td>{{item.servicetypeName}}</td>
                                 <td>
                                     <span class="badge bg-success" *ngIf="item.isLabourRateActive">Active </span>
                                     <span class="badge bg-danger" *ngIf="!item.isLabourRateActive">Inactive </span>
@@ -126,6 +132,8 @@
                                 <th>SGST</th>
                                 <th>IGST</th>
                                 <th>Job Type</th>
+                                <th>Service Head</th>
+                                <th>Service Type</th>
                                 <th>Dealer Code</th>
                                 <th>HSN Code</th>
                                 <th>Status</th>
@@ -146,10 +154,12 @@
                                 <td>{{item.cgst}}</td>
                                 <td>{{item.sgst}}</td>
                                 <td>{{item.igst}}</td>
-                                <td>{{item.jobType}}</td>
+                                <td>{{item.jobTypeName}}</td>
+                                <td>{{item.serviceHeadName}}</td>
+                                <td>{{item.servicetypeName}}</td>
                                 <td>{{item.dealerCode}}</td>
                                 <td>{{item.hsnCode}}</td>
-                               <td>
+                                <td>
                                     <span class="badge bg-success" *ngIf="item.isActive">Active </span>
                                     <span class="badge bg-danger" *ngIf="!item.isActive">Inactive </span>
                                 </td>
@@ -221,6 +231,75 @@
                         </select>
                     </div>
                     <div class="col-md-4">
+
+                        <label>Job Type</label>
+
+                        <select class="form-select form-select-sm" [(ngModel)]="selectedLabour.jobType"
+                            (change)="onJobType('model')">
+
+                            <option value="">
+                                Select Job Type
+                            </option>
+
+                            <option *ngFor="let job of jobTypeList" [ngValue]="job.id">
+
+                                {{ job.jobtypeName }}
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <label>Service Head</label>
+                        <div *ngIf="serviceHeadList.length > 1; else singleHead">
+                            <select class="form-select form-select-sm" [(ngModel)]="selectedLabour.serviceHead"
+                                (change)="onServiceHeadChange('model')">
+
+                                <option value="">
+                                    Select Service Head
+                                </option>
+
+                                <option *ngFor="let sh of serviceHeadList" [ngValue]="sh.id">
+
+                                    {{ sh.serviceHeadName }}
+
+                                </option>
+
+                            </select>
+                        </div>
+                        <ng-template #singleHead>
+                            <input class="form-control form-control-sm" [value]="serviceHeadList[0]?.serviceHeadName"
+                                readonly>
+                        </ng-template>
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <label>Service Type</label>
+                        <div *ngIf="serviceTypeList.length > 1; else singleType">
+                            <select class="form-select form-select-sm" [(ngModel)]="selectedLabour.servicetype">
+
+                                <option value="">
+                                    Select Service Type
+                                </option>
+
+                                <option *ngFor="let st of serviceTypeList" [ngValue]="st.id">
+
+                                    {{ st.serviceTypeName }}
+
+                                </option>
+
+                            </select>
+                        </div>
+                        <ng-template #singleType>
+                            <input class="form-control form-control-sm" [value]="serviceTypeList[0]?.serviceTypeName"
+                                readonly>
+                        </ng-template>
+                    </div>
+                    <div class="col-md-4">
                         <label>CityTier</label>
                         <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedLabour.cityTier">
                     </div>
@@ -284,11 +363,13 @@
 
                     <div class="col-md-4">
                         <label>Labour Rate</label>
-                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.labourRate">
+                        <input type="number" class="form-control form-control-sm"
+                            [(ngModel)]="selectedPartwiseLabour.labourRate">
                     </div>
                     <div class="col-md-4">
                         <label>Labour Hours</label>
-                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.labourHours">
+                        <input type="number" class="form-control form-control-sm"
+                            [(ngModel)]="selectedPartwiseLabour.labourHours">
                     </div>
                     <div class="col-md-4">
                         <label>Part Code</label>
@@ -297,11 +378,8 @@
 
                     <div class="col-md-4">
                         <label>Part Description</label>
-                        <input class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.partDescription">
-                    </div>
-                    <div class="col-md-4">
-                        <label>Job Type</label>
-                        <input class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.jobType">
+                        <input class="form-control form-control-sm"
+                            [(ngModel)]="selectedPartwiseLabour.partDescription">
                     </div>
                     <div class="col-md-4">
                         <label>HSNCODE</label>
@@ -310,21 +388,25 @@
 
                     <div class="col-md-4">
                         <label>CGST</label>
-                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.cgst">
+                        <input type="number" class="form-control form-control-sm"
+                            [(ngModel)]="selectedPartwiseLabour.cgst">
                     </div>
 
                     <div class="col-md-4">
                         <label>SGST</label>
-                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.sgst">
+                        <input type="number" class="form-control form-control-sm"
+                            [(ngModel)]="selectedPartwiseLabour.sgst">
                     </div>
 
                     <div class="col-md-4">
                         <label>IGST</label>
-                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.igst">
+                        <input type="number" class="form-control form-control-sm"
+                            [(ngModel)]="selectedPartwiseLabour.igst">
                     </div>
                     <div class="col-md-4">
                         <label>Effective Date</label>
-                        <input type="date" class="form-control form-control-sm" [value]="selectedPartwiseLabour.effectiveDate | date:'yyyy-MM-dd'">
+                        <input type="date" class="form-control form-control-sm"
+                            [value]="selectedPartwiseLabour.effectiveDate | date:'yyyy-MM-dd'">
                     </div>
                     <div class="col-md-4">
                         <label>OemModelName</label>
@@ -336,8 +418,78 @@
                         </select>
                     </div>
                     <div class="col-md-4">
+
+                        <label>Job Type</label>
+
+                        <select class="form-select form-select-sm" [(ngModel)]="selectedPartwiseLabour.jobType"
+                            (change)="onJobType('part')">
+
+                            <option value="">
+                                Select Job Type
+                            </option>
+
+                            <option *ngFor="let job of jobTypeList" [ngValue]="job.jobTypeId">
+
+                                {{ job.jobtypeName }}
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <label>Service Head</label>
+                        <div *ngIf="serviceHeadList.length > 1; else singleHead">
+                            <select class="form-select form-select-sm" [(ngModel)]="selectedPartwiseLabour.serviceHead"
+                                (change)="onServiceHeadChange('part')">
+
+                                <option value="">
+                                    Select Service Head
+                                </option>
+
+                                <option *ngFor="let sh of serviceHeadList" [ngValue]="sh.serviceHeadId">
+
+                                    {{ sh.serviceHeadName }}
+
+                                </option>
+
+                            </select>
+                        </div>
+                        <ng-template #singleHead>
+                            <input class="form-control form-control-sm" [value]="serviceHeadList[0]?.serviceHeadName"
+                                readonly>
+                        </ng-template>
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <label>Service Type</label>
+                        <div *ngIf="serviceTypeList.length > 1; else singleType">
+                            <select class="form-select form-select-sm" [(ngModel)]="selectedPartwiseLabour.servicetype">
+
+                                <option value="">
+                                    Select Service Type
+                                </option>
+
+                                <option *ngFor="let st of serviceTypeList" [ngValue]="st.serviceTypeId">
+
+                                    {{ st.serviceTypeName }}
+
+                                </option>
+
+                            </select>
+                        </div>
+                        <ng-template #singleType>
+                            <input class="form-control form-control-sm" [value]="serviceTypeList[0]?.serviceTypeName"
+                                readonly>
+                        </ng-template>
+                    </div>
+                    <div class="col-md-4">
                         <label>CityTier</label>
-                        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedPartwiseLabour.cityTier">
+                        <input type="number" class="form-control form-control-sm"
+                            [(ngModel)]="selectedPartwiseLabour.cityTier">
                     </div>
                     <div class="col-md-4">
 

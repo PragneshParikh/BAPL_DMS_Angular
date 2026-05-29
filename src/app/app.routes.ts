@@ -68,7 +68,7 @@ export const routes: Routes = [
       { path: 'oemmodel-master', data: [11], component: OemmodelMasterComponent },
       { path: 'kit-creation', data: [24], loadComponent: () => import('./components/kit-creation/kit-creation').then(m => m.KitCreation) },
       { path: 'kit-creation/:id', data: [24], loadComponent: () => import('./components/kit-creation/kit-creation-details/kit-creation-details').then(m => m.KitCreationDetails) },
-      { path: 'data-seed', data: [9], loadComponent: () => import('./components/data-seed/data-seed').then(m => m.DataSeed) },
+      //{ path: 'data-seed', data: [9], loadComponent: () => import('./components/data-seed/data-seed').then(m => m.DataSeed) },
       { path: 'hsnCode-master', component: HsnCodeMaster, data: [13] },
       { path: 'taxcode-master', component: TaxCodeMasterComponent, data: [14] },
       { path: 'access-control', data: [9], loadComponent: () => import('./components/access-control/access-control').then(m => m.AccessControl) },

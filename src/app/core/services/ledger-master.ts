@@ -34,6 +34,9 @@ export class LedgerMaster {
   insert(data: any): Observable<any> {
     return this.httpClient.post(`${this.baseUrl}/ledger-master`, data);
   }
+  getInsuranceLedgers():Observable<any>{
+    return this.httpClient.get<[]>(`${this.baseUrl}/ledger-master/insurance`);
+  }
 
   getLedgerByType(ledgerType: string): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/ledger-master/ledgerByType?ledgerType=${ledgerType}`);
