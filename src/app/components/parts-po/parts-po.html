@@ -59,8 +59,9 @@
                                             (change)="onPoTypeChange()" [disabled]="isEdit">
                                             <option value="VOR">VOR</option>
                                             <option value="SSOMSO">SSO/MSO</option>
+                                            <option value="Accessories">Accessories</option>
                                         </select>
-                                        <button *ngIf="partsPOData.subPoType === 'VOR'" type="button"
+                                        <button *ngIf="partsPOData.subPoType === 'VOR' && !isEdit" type="button"
                                             class="btn btn-primary btn-sm" data-bs-toggle="modal"
                                             (click)="openJobSearchDialog()">
                                             <i class="ri-add-line"></i>
@@ -112,7 +113,7 @@
 
 
                     <!-- Item Selection Info -->
-                    <fieldset [disabled]="isSubmitted || isEdit">
+                    <fieldset [disabled]="isSubmitted &&(this.isEdit && partsPOData.subPoType === 'VOR')">
                         <div class="row g-1 mb-2 align-items-end">
 
                             <!-- Part No -->
