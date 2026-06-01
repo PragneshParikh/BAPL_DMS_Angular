@@ -16,16 +16,25 @@ import { JobCardService } from '../../../core/services/job-card-service';
 import { GetTechnicianNamePipe } from '../../../core/pipes/get-technician-name-pipe';
 import { GetIssueTypeNamePipe } from '../../../core/pipes/get-issue-type-name-pipe';
 import { TaxService } from '../../../core/services/tax';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @Component({
   selector: 'app-material-transfer-detail',
-  imports: [SharedModule, FormsModule, ReactiveFormsModule, CommonModule, GetTechnicianNamePipe, GetIssueTypeNamePipe],
+  imports: [
+    SharedModule,
+    FormsModule,
+    ReactiveFormsModule,
+    CommonModule,
+    GetTechnicianNamePipe,
+    GetIssueTypeNamePipe,
+    NgSelectModule
+  ],
   templateUrl: './material-transfer-detail.html',
   styleUrl: './material-transfer-detail.scss',
 })
 export class MaterialTransferDetail implements OnInit {
 
-  issueTypes = IssueTypes;
+  issueTypes = IssueTypes.filter(x => x.id === 1 || x.id === 2);
   lstTechnician = TechnicianList;
 
   formData = {
@@ -104,7 +113,9 @@ export class MaterialTransferDetail implements OnInit {
   ) {
     this.router.params.subscribe(params => {
       this.jobId = Number(params['id']);
-      this.getJobCardById(this.jobId);
+      if (this.jobId > 0) {
+        this.getJobCardById(this.jobId);
+      }
     });
     this.dealerCode = this.storageService.getDealerCode();
   }
