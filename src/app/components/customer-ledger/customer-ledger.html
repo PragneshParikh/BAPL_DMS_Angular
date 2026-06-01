@@ -128,9 +128,9 @@
                             }
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label"> DOB <span class="text-danger">*</span></label>
+                            <label class="form-label"> DOB </label>
                             <input type="date" class="form-control form-control-sm" name="dob"
-                                [(ngModel)]="formData.dateOfBirth" #dob="ngModel" required />
+                                [(ngModel)]="formData.dateOfBirth" #dob="ngModel" />
                         </div>
                     </div>
 
@@ -158,7 +158,9 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">PIN Code</label>
-                            <input type="text" class="form-control form-control-sm" name="pinCode" pattern="^[0-9]{6}$"
+                            <input type="text" class="form-control form-control-sm" name="pinCode" 
+                            inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')" pattern="^[0-9]{6}$"
+                            maxlength="6" 
                                 #pinCode="ngModel" [(ngModel)]="formData.pin">
                             @if (pinCode.invalid && pinCode.touched) {
                             <small class="text-danger">

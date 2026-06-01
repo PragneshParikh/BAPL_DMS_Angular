@@ -38,12 +38,12 @@ export class AddVehicleSaleBill implements OnInit {
   searchClicked: boolean;
   selectedCustomerId: number;
   chassisList: VehicleSaleListChasisResponse[] = [];
-  erpStatus: any;
+  Status: any;
   isErpLocked: boolean;
   isInvoiced: boolean;
   filteredChassis: any[] = [];
-showDropdown = false;
-showNotFound = false;
+  showDropdown = false;
+  showNotFound = false;
 
 
   /**
@@ -146,7 +146,7 @@ showNotFound = false;
     itemName: '',
     qty: null,
     rate: null,
-    fameIIAmnt: 0, 
+    fameIIAmnt: 0,
 
     // Referral
     referralName: '',
@@ -154,30 +154,30 @@ showNotFound = false;
     referralEmail: '',
     referralPoint: null,
     referralRemarks: '',
-    sgstPer: 0,
+    sgstper: 0,
     sgst: 0,
     regNo: '',
 
-    cgstPer: 0,
+    cgstper: 0,
     cgst: 0,
 
-    igstPer: 0,
+    igstper: 0,
     igst: 0,
     cess: 0,
     tcs: 0,
     finalAmount: 0,
     key: '',
     book: '',
-    erpstatus: ''
+    Status: ''
 
   };
 
 
   ngOnInit(): void {
-    
+
     this.model.customerType = 'B2C';
     this.onCustomerTypeChange();
-    
+
     this.fetchLocations();
     this.getFinanciers();
     this.getParties();
@@ -204,8 +204,6 @@ showNotFound = false;
 
 
   loadBillForEdit(bill: any) {
-    console.log(bill, "sd");
-
     //  Header fields
     this.model.saleBillNo = bill.saleBillNo;
     this.model.saleDate = bill.saleDate ? bill.saleDate.split('T')[0] : '';
@@ -221,6 +219,9 @@ showNotFound = false;
     this.model.cashAccount = bill.cashAc;
     this.model.salesExecutive = bill.salesExecutive;
     this.model.tempRegNo = bill.isTempRegNo;
+    this.model.igstper = bill.details[0].igstper ?? '';
+    this.model.sgstper = bill.details[0].sgstper ?? '';
+    this.model.cgstper = bill.details[0].cgstper ?? '';
     this.model.tempRegRequired = bill.isTempRegNo ? 'yes' : 'no';
 
     this.vehicleList = bill.details.map((d: any) => ({
@@ -232,23 +233,33 @@ showNotFound = false;
       insNo: d.insNo || '',
       regNo: d.regNo || '',
       itemCode: d.itemCode || '',
-
       rate: d.itemRate,
       regAmt: d.regAmount,
       insAmt: d.insuranceAmount,
       preGstDiscount: d.preGstDiscount,
+      postGstDiscount: d.postGstDiscount,
+      fameIIAmnt: d.fameIIDisc || 0,
       insStartDate: d.insStartDate ? d.insStartDate.split('T')[0] : null,
       insExpDate: d.insExpDate ? d.insExpDate.split('T')[0] : null,
 
-      amount: (d.itemRate || 0) - (d.preGstDiscount || 0) - (d.fameIIAmnt || 0),
+      amount: d.itemRate,
+      taxableAmount: d.taxableAmount || (d.itemRate - d.preGstDiscount) || 0,
 
-      sgst: d.sgstamnt ?? d.sgst ?? 0,
-      cgst: d.cgstamnt ?? d.cgst ?? 0,
-      igst: d.igstamnt ?? d.igst ?? 0,
+      sgstamnt: d.sgstamnt ?? d.sgst ?? 0,
+      cgstamnt: d.cgstamnt ?? d.cgst ?? 0,
+      igstamnt: d.igstamnt ?? d.igst ?? 0,
 
-      sgstPer: d.sgstper ?? 0,
-      cgstPer: d.cgstper ?? 0,
-      igstPer: d.igstper ?? 0,
+      sgstper: d.sgstper ?? 0,
+      cgstper: d.cgstper ?? 0,
+      igstper: d.igstper ?? 0,
+
+      // sgst: d.sgstAmnt ?? d.sgst ?? 0,
+      // cgst: d.cgstAmnt ?? d.cgst ?? 0,
+      // igst: d.igstAmnt ?? d.igst ?? d.igstamnt?? 0,
+
+      // sgstper: d.sgstper ?? 0,
+      // cgstper: d.cgstper ?? 0,
+      // igstper: d.igstper ?? 0,
       battery: d.battery || '',
       convertorNo: d.convertorNo || '',
       chargerNo: d.chargerNo || '',
@@ -270,7 +281,7 @@ showNotFound = false;
 
       finalAmount: d.finalAmount,
       saleDate: d.saleDate,
-      motorNo:d.motorNo
+      motorNo: d.motorNo
 
     }));
     this.mergeBillChassisIntoDropdown();
@@ -303,14 +314,16 @@ showNotFound = false;
 
 
   getBillById(id: number) {
+
+    this.loader.show();
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
         console.log('Bill Data:', res);
 this.selectedCustomerId = res.ledgerId;
-        this.erpStatus = res.erpStatus || '';
+        this.Status = res.Status || '';
         this.isErpLocked =
-          this.erpStatus.toLowerCase() === 'pushedtoerp';
-        if (this, this.erpStatus.toLowerCase() === 'invalid') {
+          this.Status.toLowerCase() === 'pushedtoerp';
+        if (this, this.Status.toLowerCase() === 'invalid') {
           this.toaster.show('The chassis alocated with this bill has been sold out.Please realocate the chassis and try again.',
             {
               classname: 'bg-warning text-white',
@@ -318,12 +331,12 @@ this.selectedCustomerId = res.ledgerId;
             }
           );
         }
-        this.isInvoiced = this.erpStatus.toLowerCase() === 'invoiced';
+        this.isInvoiced = this.Status.toLowerCase() === 'invoiced';
 
         // Load chassis FIRST, then bind bill
         this.loadChassisList(() => {
           this.loadBillForEdit(res);
-          if ((this.erpStatus == 'Alloted' || this.erpStatus == 'Pending') && this.vehicleList.some(v => v.regNo == '' && v.insNo == '' || (v.regAmt === 0 || v.insAmt === 0))) {
+          if ((this.Status == 'Alloted' || this.Status == 'Pending') && this.vehicleList.some(v => v.regNo == '' && v.insNo == '' || (v.regAmt === 0 || v.insAmt === 0))) {
             this.openRegistrationModal();
           }
         });
@@ -332,6 +345,7 @@ this.selectedCustomerId = res.ledgerId;
         console.error(err);
       }
     });
+    this.loader.hide();
   }
 
   fetchLocations(): void {
@@ -366,14 +380,6 @@ this.selectedCustomerId = res.ledgerId;
       this.model.cashAccount = null;
     }
   }
-
-  // getNextSaleBillNo() {
-  //   this.vehicleSaleBillService.getNextSaleBillNo().subscribe({
-  //     next: (data) => {
-  //       this.model.saleBillNo = data;
-  //     }
-  //   });
-  // }
 
   getNextSaleBillNo() {
     const dealerCode = this.storageService.getDealerCode();
@@ -412,14 +418,14 @@ this.selectedCustomerId = res.ledgerId;
     console.log('Payload for Vehicle Details Only:', payload);
 
     this.vehicleSaleBillService.createVehicleSaleBill(payload).subscribe({
-      next: (res:number) => {
+      next: (res: number) => {
         this.billId = res;
-        
+
         this.toaster.show('Vehicle Details Saved', {
           classname: 'bg-success text-light',
           delay: 3000
         });
-       this.router.navigate(['/vehicle-sale-bill']);
+        this.router.navigate(['/vehicle-sale-bill']);
       },
       error: () => {
         this.toaster.show('Failed to save', {
@@ -439,7 +445,6 @@ this.selectedCustomerId = res.ledgerId;
   }
 
   addVehicle(form: NgForm) {
-
     if (
       this.model.billingType === 'Counter Sale[single]' &&
       this.vehicleList.length >= 1 &&
@@ -454,21 +459,18 @@ this.selectedCustomerId = res.ledgerId;
 
     const taxable = this.calculateAmount();
     this.calculateTaxes();
-    console.log(taxable,"in add");
-    
-
-    // const gstTotal = this.model.isD2D
-    //   ? 0
-    //   : (this.model.sgst + this.model.cgst + this.model.igst);
+    console.log(taxable, "in add");
     const gstTotal = this.model.sgst + this.model.cgst + this.model.igst;
-
-    const finalAmount =
-     ( taxable +
-      gstTotal +
-      (this.model.cess || 0) +
+    console.log(gstTotal, "GST Total");
+    const postGstDisc = this.model.postGSTDiscount || 0;
+    const fameDisc = this.model.fameIIAmnt || 0;
+    const totalPostDisc = postGstDisc + fameDisc;
+    const totalPostAmount = (this.model.cess || 0) +
       (this.model.tcs || 0) +
       (this.model.insAmount || 0) +
-      (this.model.regAmount || 0))-this.model.postGSTDiscount||0;
+      (this.model.regAmount || 0);
+
+    const finalAmount = taxable + gstTotal + totalPostAmount - totalPostDisc;
 
     const vehicle = {
       id: this.editingIndex > -1 ? this.vehicleList[this.editingIndex].id : undefined,
@@ -492,11 +494,11 @@ this.selectedCustomerId = res.ledgerId;
       postGstDiscount: this.model.postGSTDiscount,
       ledgerId: this.selectedCustomerId || null,
 
-      sgstPer: this.model.sgstPer,
+      sgstper: this.model.sgstper,
       sgst: this.model.sgst,
-      cgstPer: this.model.cgstPer,
+      cgstper: this.model.cgstper,
       cgst: this.model.cgst,
-      igstPer: this.model.igstPer,
+      igstper: this.model.igstper,
       igst: this.model.igst,
       itemCode: this.model.itemCode || '',
       battery: this.model.battery || '',
@@ -522,6 +524,7 @@ this.selectedCustomerId = res.ledgerId;
 
       finalAmount: finalAmount
     };
+    console.log(vehicle, "d");
 
     this.model.finalAmount = this.getGrandTotal();
     if (this.editingIndex > -1) {
@@ -545,18 +548,18 @@ this.selectedCustomerId = res.ledgerId;
     }
     this.resetVehicleForm();
   }
-    calculateAmount() {
+  calculateAmount() {
     const rate = this.model.itemRate || 0;
     const discount = this.model.preGSTDiscount || 0;
     const fameIIAmnt = this.model.fameIIAmnt || 0;
     console.log(rate, discount, fameIIAmnt, "Amount Calculation");
 
-    return rate - discount - fameIIAmnt;
+    return rate - discount;
   }
 
 
   editVehicle(dataRow: any) {
-
+    this.editingIndex = this.vehicleList.findIndex(v => v.chassisNo === dataRow.chassisNo);
     const selected = dataRow;
     console.log(selected, "sele");
     this.model.chassisNo = selected.chassisNo;
@@ -569,12 +572,12 @@ this.selectedCustomerId = res.ledgerId;
     this.model.itemCode = selected.model;
     this.model.itemRate = selected.rate ?? 0;
     this.model.postGSTDiscount = selected.postGstDiscount || 0;
-    this.model.fameIIAmnt = selected.fameIIAmnt || 0;     
+    this.model.fameIIAmnt = selected.fameIIAmnt || 0;
 
     this.model.regAmount = selected.regAmt ?? 0;
     this.model.insAmount = selected.insAmt ?? 0;
 
-    this.model.amount = selected.amount ?? 0;
+    this.model.amount = selected.amount - (selected.preGstDiscount || 0) || 0;
     this.model.sgst = selected.sgst ?? 0;
     this.model.cgst = selected.cgst ?? 0;
     this.model.igst = selected.igst ?? 0;
@@ -651,6 +654,7 @@ this.selectedCustomerId = res.ledgerId;
       this.model.billingType = 'Counter Sale[single]';
     }
   }
+
   updateVehicleSaleBill(string?: string) {
     const payload = this.buildPayload();
 
@@ -661,10 +665,10 @@ this.selectedCustomerId = res.ledgerId;
 
     this.vehicleSaleBillService.updateVehicleSaleBill(this.billId, payload).subscribe({
       next: () => {
-        
-        if(string!=='proforma'){
+
+        if (string !== 'proforma') {
           this.toaster.show('Updated Successfully', { classname: 'bg-success text-light', delay: 3000 });
-        this.router.navigate(['/vehicle-sale-bill']);
+          this.router.navigate(['/vehicle-sale-bill']);
         }
       },
       error: (err) => {
@@ -704,7 +708,7 @@ this.selectedCustomerId = res.ledgerId;
       refEmail: '',
       refPoint: 0,
       refRemarks: '',
-      erpStatus: !this.billId ? 'PerformaCreated' : '',
+      Status: !this.billId ? 'PerformaCreated' : '',
       dealerCode: this.storageService.getDealerCode(),
 
 
@@ -716,15 +720,15 @@ this.selectedCustomerId = res.ledgerId;
 
         ItemRate: Number(v.rate) || 0,
         PreGstDiscount: Number(v.preGstDiscount) || 0,
-        taxableAmount: (Number(v.itemRate) || 0) - (Number(v.preGstDiscount) || 0) - (Number(v.fameIIAmnt) || 0),
+        taxableAmount: (Number(v.itemRate) || Number(v.rate) || 0) - (Number(v.preGstDiscount) || 0),
         RegAmount: Number(v.regAmt) || 0,
-        InsuranceAmount: Number(v.insuranceAmount) || 0,
-        Sgstper: Number(v.sgstPer) || 0,
-        SgstAmnt: Number(v.sgst) || 0,
-        Cgstper: Number(v.cgstPer) || 0,
-        CgstAmnt: Number(v.cgst) || 0,
-        Igstper: Number(v.igstPer) || 0,
-        IgstAmnt: Number(v.igst) || 0,
+        InsuranceAmount: Number(v.insuranceAmount) || Number(v.insAmnt) || 0,
+        Sgstper: Number(v.sgstper) || Number(v.sgstper) || 0,
+        SgstAmnt: Number(v.sgst) || Number(v.sgstamnt) || 0,
+        Cgstper: Number(v.cgstper) || Number(v.cgstper) || 0,
+        CgstAmnt: Number(v.cgst) || Number(v.cgstamnt) || 0,
+        Igstper: Number(v.igstper) || Number(v.igstper) || 0,
+        IgstAmnt: Number(v.igst) || Number(v.igstamnt) || 0,
         PostGstDiscount: Number(v.postGstDiscount) || 0,
         FameIIDisc: Number(v.fameIIAmnt) || 0,
 
@@ -769,6 +773,8 @@ this.selectedCustomerId = res.ledgerId;
         customerSaleDate: v.customerSaleDate || null
       }))
     };
+
+
 
   }
   getLedgerIdFromName(): number | null {
@@ -850,7 +856,7 @@ this.selectedCustomerId = res.ledgerId;
 
   selectParty(party: LedgerMaster) {
     this.model.customerName = party.ledgerName;
-    this.model.billingName =this.model.customerName;
+    this.model.billingName = this.model.customerName;
     this.selectedCustomerId = party.id;
     this.filteredParties = [];
     this.chassisList = [];
@@ -901,11 +907,11 @@ this.selectedCustomerId = res.ledgerId;
         delay: 3000
       });
 
-      this.model.chassisNo = ''; 
+      this.model.chassisNo = '';
       return;
     }
 
-    
+
 
     const selected = this.chassisList.find(
       c => c.chassisNo === this.model.chassisNo
@@ -913,29 +919,29 @@ this.selectedCustomerId = res.ledgerId;
 
     if (!selected) return;
 
-      if (!selected.pdiStatus || selected.pdiStatus === 'Not Done') {
-    this.toaster.show('Please complete PDI before proceeding', {
-      classname: 'bg-danger text-light',
-      delay: 3000
-    });
+    if (!selected.pdiStatus || selected.pdiStatus === 'Not Done') {
+      this.toaster.show('Please complete PDI before proceeding', {
+        classname: 'bg-danger text-light',
+        delay: 3000
+      });
 
-    this.model.chassisNo = '';
-    return;
-  }
-
-  if (selected.proformaCreated) {
-  this.toaster.show(
-    `Proforma already generated f(Bill No: ${selected.proformaCreated}). Please select another chassis.`,
-    {
-      classname: 'bg-warning text-dark',
-      delay: 5000
+      this.model.chassisNo = '';
+      return;
     }
-  );
-  this.model.chassisNo = '';
-  return;
-}
 
-        // Basic details
+    if (selected.proformaCreated) {
+      this.toaster.show(
+        `Proforma already generated f(Bill No: ${selected.proformaCreated}). Please select another chassis.`,
+        {
+          classname: 'bg-warning text-dark',
+          delay: 5000
+        }
+      );
+      this.model.chassisNo = '';
+      return;
+    }
+
+    // Basic details
     this.model.itemCode = selected.itemCode;
     this.model.colour = selected.itemColor;
     this.model.itemName = selected.itemName;
@@ -958,9 +964,9 @@ this.selectedCustomerId = res.ledgerId;
     this.model.stockDetailNo = selected.stockNo;
 
     // GST
-    this.model.sgstPer = selected.sgstPer;
-    this.model.cgstPer = selected.cgstPer;
-    this.model.igstPer = selected.igstPer;
+    this.model.sgstper = selected.sgstper;
+    this.model.cgstper = selected.cgstper;
+    this.model.igstper = selected.igstper;
 
     // Discount
     this.model.preGSTDiscount = selected.preGstDisc;
@@ -977,15 +983,16 @@ this.selectedCustomerId = res.ledgerId;
   }
 
   calculateTaxes() {
-  const taxable = this.calculateAmount();
+    const taxable = this.calculateAmount();
 
-  console.log(taxable,"Taxable");
-  
+    console.log(taxable, "Taxable");
 
-  this.model.sgst = taxable * (this.model.sgstPer || 0) / 100;
-  this.model.cgst = taxable * (this.model.cgstPer || 0) / 100;
-  this.model.igst = taxable * (this.model.igstPer || 0) / 100;
-}
+    console.log(this.model, this.model.sgstper, this.model.cgstper, this.model.igstper, "GST Percentages");
+
+    this.model.sgst = taxable * (this.model.sgstper || 0) / 100;
+    this.model.cgst = taxable * (this.model.cgstper || 0) / 100;
+    this.model.igst = taxable * (this.model.igstper || 0) / 100;
+  }
 
 
   resetVehicleForm() {
@@ -1006,8 +1013,8 @@ this.selectedCustomerId = res.ledgerId;
     this.model.regAmount = 0;
     this.model.insNo = '';
     this.model.insAmount = 0;
-    this.model.fameIIAmnt=0;
-   // this.model.postGSTDiscount=0;
+    this.model.fameIIAmnt = 0;
+    // this.model.postGSTDiscount=0;
   }
 
   resetSelectedFields() {
@@ -1032,24 +1039,24 @@ this.selectedCustomerId = res.ledgerId;
   // }
 
   isSaleInfoValid(): boolean {
-  const isBasicValid =
-    !!this.model.location &&
-    !!this.model.saleType &&
-    !!this.model.customerName &&
-    this.isCustomerValid() &&
-    !!this.model.billingName;
+    const isBasicValid =
+      !!this.model.location &&
+      !!this.model.saleType &&
+      !!this.model.customerName &&
+      this.isCustomerValid() &&
+      !!this.model.billingName;
 
-  //  Conditional validation
-  if (this.model.saleType === 'Credit') {
-    return isBasicValid && !!this.model.financier;
+    //  Conditional validation
+    if (this.model.saleType === 'Credit') {
+      return isBasicValid && !!this.model.financier;
+    }
+
+    if (this.model.saleType === 'Cash') {
+      return isBasicValid && !!this.model.cashAccount;
+    }
+
+    return isBasicValid;
   }
-
-  if (this.model.saleType === 'Cash') {
-    return isBasicValid && !!this.model.cashAccount;
-  }
-
-  return isBasicValid;
-}
 
   canSave(): boolean {
     return this.isSaleInfoValid() && this.vehicleList.length > 0;
@@ -1080,6 +1087,7 @@ this.selectedCustomerId = res.ledgerId;
       if (updatedList) {
 
         this.vehicleList = [...updatedList];
+
 
         //recalculate per-row finalAmount
         this.calculateVehicleAmounts();
@@ -1130,9 +1138,9 @@ this.selectedCustomerId = res.ledgerId;
           batteryCapacity: '',
           batteryMake: '',
           stockNo: '',
-          sgstPer: 0,
-          cgstPer: 0,
-          igstPer: 0,
+          sgstper: 0,
+          cgstper: 0,
+          igstper: 0,
           dealerPrice: 0,
           customerPrice: 0
         } as any);
@@ -1144,103 +1152,107 @@ this.selectedCustomerId = res.ledgerId;
     this.vehicleList = this.vehicleList.map(v => {
 
       const taxable =
-        (v.rate || 0) - (v.preGstDiscount || 0) - (v.fameIIAmnt || 0  );
+        (v.rate || 0) -
+        (v.preGstDiscount || 0);
 
-      const gst =
-        (v.sgst || 0) +
-        (v.cgst || 0) +
-        (v.igst || 0);
+      const sgst = taxable * (v.sgstper || 0) / 100;
+      const cgst = taxable * (v.cgstper || 0) / 100;
+      const igst = taxable * (v.igstper || 0) / 100;
+      console.log(taxable, sgst, cgst, igst, "Recalculated Amounts");
 
       const finalAmount =
         taxable +
-        gst +
+        sgst +
+        cgst +
+        igst +
         (v.cess || 0) +
         (v.tcs || 0) +
-        (v.regAmt || 0) +        // REGISTRATION ADDED
-        (v.insAmt || 0)-
+        (v.regAmt || 0) +       
+        (v.insAmt || 0) -
         (v.postGstDiscount || 0)
-        ;         //  INSURANCE ADDED
+        - v.fameIIAmnt
+        ;       
 
       return {
         ...v,
+        sgst,
+        cgst,
+        igst,
         finalAmount
       };
     });
   }
 
 
-  printLastSaved() {
-    console.log('Print Last Saved');
+ 
+  printExShowroomInvoice() {
+
+    this.router.navigate(
+      ['add-vehicle-sale-bill/performaInvoice', this.billId],
+      {
+        queryParams: {
+          type: 'ex'
+        }
+      }
+    );
+
   }
 
- printExShowroomInvoice() {
+  printOnRoadInvoice() {
 
-  this.router.navigate(
-    ['add-vehicle-sale-bill/performaInvoice', this.billId],
-    {
-      queryParams: {
-        type: 'ex'
+    this.router.navigate(
+      ['add-vehicle-sale-bill/performaInvoice', this.billId],
+      {
+        queryParams: {
+          type: 'onroad'
+        }
       }
-    }
-  );
+    );
 
-}
-
-printOnRoadInvoice() {
-
-  this.router.navigate(
-    ['add-vehicle-sale-bill/performaInvoice', this.billId],
-    {
-      queryParams: {
-        type: 'onroad'
-      }
-    }
-  );
-
-}
+  }
   printSaleLetter() {
     this.router.navigate(['sale-Letter', this.billId]);
   }
 
   printDeliverySlip() {
-  if (!this.vehicleList.length) return;
+    if (!this.vehicleList.length) return;
 
-  const vehicle = this.vehicleList[0]; //
-console.log(vehicle.motorNo,"dsa");
+    const vehicle = this.vehicleList[0]; //
+    console.log(vehicle.motorNo, "dsa");
 
-  this.router.navigate(['/delivery-slip'], {
+    this.router.navigate(['/delivery-slip'], {
 
-    queryParams: {
-      partyName: this.model.customerName,
-      modelName: vehicle.modelName,
-      chassisNo: vehicle.chassisNo,
-      motorNo: vehicle.motorNo, 
-      regNo: vehicle.regNo
-    }
-  });
-}
+      queryParams: {
+        partyName: this.model.customerName,
+        modelName: vehicle.modelName,
+        chassisNo: vehicle.chassisNo,
+        motorNo: vehicle.motorNo,
+        regNo: vehicle.regNo
+      }
+    });
+  }
 
   printForm22() {
-  if (!this.vehicleList.length) return;
+    if (!this.vehicleList.length) return;
 
-  const chassisNo = this.vehicleList[0].chassisNo;
+    const chassisNo = this.vehicleList[0].chassisNo;
 
-  this.router.navigate(['form22-certificate', chassisNo]);
-}
+    this.router.navigate(['form22-certificate', chassisNo]);
+  }
 
   printDeliveryChecklist() {
-   this.router.navigate(['/delivery-checkList']);
+    this.router.navigate(['/delivery-checkList']);
   }
 
   //temporary implementation--will modify once we have delivery certificate API ready
   printDeliveryCertificate() {
-    this.router.navigate(['add-vehicle-sale-bill/delivery-certificate',this.billId]);
-   
+    this.router.navigate(['add-vehicle-sale-bill/delivery-certificate', this.billId]);
+
   }
 
   navigateToPerformaInvoice() {
-   // this.model.erpstatus = 'Alloted';
-   // this.updateVehicleSaleBill("proforma");
+    // this.model.erpstatus = 'Alloted';
+    // this.updateVehicleSaleBill("proforma");
     this.router.navigate(['add-vehicle-sale-bill/performaInvoice', this.billId]);
   }
 
@@ -1249,15 +1261,14 @@ console.log(vehicle.motorNo,"dsa");
     this.isInvoiced = true;
     this.vehicleSaleBillService.confirmInvoice(this.model.saleBillNo).subscribe({
       next: (res: number) => {
-        if(res !== 0)
-        {
+        if (res !== 0) {
 
           this.toaster.show('Invoice Generated Successfully', { classname: 'bg-success text-light', delay: 3000 });
 
         }
-        else{
-           this.toaster.show('Failed to Generate Invoice', { classname: 'bg-danger text-light', delay: 3000 });
-           this.isInvoiced = false;
+        else {
+          this.toaster.show('Failed to Generate Invoice', { classname: 'bg-danger text-light', delay: 3000 });
+          this.isInvoiced = false;
         }
       },
       error: () => {
@@ -1272,38 +1283,38 @@ console.log(vehicle.motorNo,"dsa");
   // }
 
   filterChassis() {
-  const search = (this.model.chassisNo || '').toLowerCase();
+    const search = (this.model.chassisNo || '').toLowerCase();
 
-  this.filteredChassis = this.chassisList.filter(c =>
-    c.chassisNo.toLowerCase().includes(search)
-  );
+    this.filteredChassis = this.chassisList.filter(c =>
+      c.chassisNo.toLowerCase().includes(search)
+    );
 
-  this.showNotFound =
-    search.length > 0 && this.filteredChassis.length === 0;
-}
+    this.showNotFound =
+      search.length > 0 && this.filteredChassis.length === 0;
+  }
 
-selectChassis(c: any) {
-  if (this.isChassisUsed(c.chassisNo)) return;
+  selectChassis(c: any) {
+    if (this.isChassisUsed(c.chassisNo)) return;
 
-  this.model.chassisNo = c.chassisNo;
-  this.showDropdown = false;
-  this.showNotFound = false;
-
-  this.onChassisChange();
-}
-
-onBlur() {
-  setTimeout(() => {
+    this.model.chassisNo = c.chassisNo;
     this.showDropdown = false;
-  }, 200);
-}
+    this.showNotFound = false;
 
-onFocusChassis() {
-  this.showDropdown = true;
+    this.onChassisChange();
+  }
 
-  // show all options initially
-  this.filteredChassis = [...this.chassisList];
+  onBlur() {
+    setTimeout(() => {
+      this.showDropdown = false;
+    }, 200);
+  }
 
-  this.showNotFound = false;
-}
+  onFocusChassis() {
+    this.showDropdown = true;
+
+    // show all options initially
+    this.filteredChassis = [...this.chassisList];
+
+    this.showNotFound = false;
+  }
 }

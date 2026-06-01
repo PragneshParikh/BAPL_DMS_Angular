@@ -77,7 +77,7 @@ export interface VehicleSaleBillResponseViewModel {
   salesExecutive?: string;
   isD2d: boolean;
   cashAccount?: string;
-  erpStatus?: string;
+  status?: string;
   details: VehicleSaleBillDetailVM[];
 }
 

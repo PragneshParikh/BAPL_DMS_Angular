@@ -27,7 +27,7 @@
 
                     <div class="col-md-2">
                         <label class="form-label mb-0 small">Status</label>
-                        <select class="form-select form-select-sm" [(ngModel)]="filter.erpStatus">
+                        <select class="form-select form-select-sm" [(ngModel)]="filter.Status">
                             <option value="">All</option>
                             <option *ngFor="let s of ErpOptions" [value]="s.value">
                                 {{ s.name }}
@@ -171,7 +171,8 @@
 </td> -->
 
                                 <td>
-                                    <ngb-highlight [result]="getErpStatusName(item.erpStatus)" [term]="searchText">
+                                    
+                                    <ngb-highlight [result]="getStatusName(item.status)" [term]="searchText">
                                     </ngb-highlight>
                                 </td>
 

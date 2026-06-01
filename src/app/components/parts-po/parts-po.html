@@ -62,7 +62,7 @@
                                         </select>
                                         <button *ngIf="partsPOData.subPoType === 'VOR'" type="button"
                                             class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#vorModal">
+                                            (click)="openJobSearchDialog()">
                                             <i class="ri-add-line"></i>
                                         </button>
                                     </div>
@@ -287,10 +287,11 @@
             </div>
         </div>
     </div>
-
 </div>
+
+
 <!-- VOR Details Modal -->
-<div class="modal fade" id="vorModal" tabindex="-1">
+<!-- <div class="modal fade" id="vorModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header dealer-modal-header" style="background-color:#747CA0">
@@ -300,7 +301,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <!-- ================= VOR Info ================= -->
+                <\!-- ================= VOR Info ================= --\>
                 <div class="row">
                     <div class="col-md-3">
                         <label class="form-label">Job No</label>
@@ -371,4 +372,4 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
