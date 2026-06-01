@@ -152,6 +152,7 @@ export const routes: Routes = [
       { path: 'labour-master-import', component: LabourMaster, data: [54] },
       { path: 'labour-rate-master', component: LabourRateMaster, data: [55] },
 
+      { path: 'employee', data: [49], component: EmployeeMasterList },
       { path: 'employee/add', component: EmployeeMasterComponent, data: [49] },
       { path: 'employee/edit/:id', component: EmployeeMasterComponent, data: [49] },
 
