@@ -66,7 +66,7 @@ export class VehiclePoList implements OnInit {
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
     }
-    this.purchaseService.getPOList(this.dealerCode).subscribe({
+    this.purchaseService.getPOList('Vehicle', this.dealerCode).subscribe({
       next: (res: any[]) => {
         this.loader.hide();
         const flattened = this.flattenPOList(res);

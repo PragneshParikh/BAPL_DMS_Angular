@@ -740,6 +740,7 @@ export class VehiclePO implements OnInit {
       Remarks: this.remarks,
       LocCode: this.selectedLocation,
       LedgerCode: this.selectedLedgerCode,
+      SubOrderType: null,
       Items: this.purchaseDetails.map((item, index) => ({
         ItemCode: item.modelNo,
         Qty: item.qty,
@@ -810,8 +811,9 @@ export class VehiclePO implements OnInit {
         this.toaster.show('Submit to ERP successful!', { classname: 'bg-success text-white', delay: 5000 });
         this.isSubmitted = res.Succeed; // Disable button after success
 
-        const match = res?.ConfirmMessage?.match(/SO No\.\s*([A-Za-z0-9/-]+)/);
-        const salesOrderNo = match ? match[1] : '';
+        // const match = res?.ConfirmMessage?.match(/SO No\.\s*([A-Za-z0-9/-]+)/);
+        // const salesOrderNo = match ? match[1] : '';
+        const salesOrderNo = res.ReturnValue.SOId;
 
         this.updatePOStatus(this.orderNo, res.Succeed, salesOrderNo, this.selectedLocation);
       },

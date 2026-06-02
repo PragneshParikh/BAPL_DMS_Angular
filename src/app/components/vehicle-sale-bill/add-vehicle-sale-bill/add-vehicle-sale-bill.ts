@@ -140,7 +140,7 @@ export class AddVehicleSaleBill implements OnInit {
     narration: '',
     insStartDate: this.today,
     insuranceName: '',
-    insuranceId: null,
+      insuranceId: null,
 
     insExpDate: this.getInsuranceExpiryDate(this.today),
 
@@ -162,14 +162,14 @@ export class AddVehicleSaleBill implements OnInit {
     referralEmail: '',
     referralPoint: null,
     referralRemarks: '',
-    sgstPer: 0,
+    sgstper: 0,
     sgst: 0,
     regNo: '',
 
-    cgstPer: 0,
+    cgstper: 0,
     cgst: 0,
 
-    igstPer: 0,
+    igstper: 0,
     igst: 0,
     cess: 0,
     tcs: 0,
@@ -209,51 +209,51 @@ export class AddVehicleSaleBill implements OnInit {
     date.setFullYear(date.getFullYear() + 1);
     return date.toISOString().split('T')[0];
   }
-  getInsuranceCompanies() {
-    this.receiptEntryService.getLedgerByType('Insurance').subscribe({
+getInsuranceCompanies(){
+  this.receiptEntryService.getLedgerByType('Insurance').subscribe({
       next: (res) => {
         this.insurance = res;
-        console.log('Insurance API Response:', res);
+console.log('Insurance API Response:', res);  
       }
     });
-  }
-  filterInsurance() {
-    const search = (this.model.insuranceName || '').trim().toLowerCase();
+}
+filterInsurance() {
+  const search = (this.model.insuranceName || '').trim().toLowerCase();
 
-    if (!search) {
-      this.filteredInsurance = [];
-      this.insuranceNotFound = false;
-      return;
-    }
-
-    this.filteredInsurance = this.insurance.filter(x =>
-      x.ledgerName?.toLowerCase().includes(search)
-    );
-
-    this.insuranceNotFound = this.filteredInsurance.length === 0;
-  }
-
-  selectInsurance(party: LedgerMaster) {
-    this.model.insuranceName = party.ledgerName;
-    this.model.insuranceId = party.id;
+  if (!search) {
     this.filteredInsurance = [];
     this.insuranceNotFound = false;
-  }
-  onInsuranceFocus() {
-    this.showInsuranceDropdown = true;
-    this.filteredInsurance = [...this.insurance];
+    return;
   }
 
-  onInsuranceBlur() {
-    setTimeout(() => {
-      this.showInsuranceDropdown = false;
-    }, 200);
-  }
+  this.filteredInsurance = this.insurance.filter(x =>
+    x.ledgerName?.toLowerCase().includes(search)
+  );
+
+  this.insuranceNotFound = this.filteredInsurance.length === 0;
+}
+
+selectInsurance(party: LedgerMaster) {
+  this.model.insuranceName = party.ledgerName;
+  this.model.insuranceId = party.id;
+  this.filteredInsurance = [];
+  this.insuranceNotFound = false;
+}
+onInsuranceFocus() {
+  this.showInsuranceDropdown = true;
+  this.filteredInsurance = [...this.insurance];
+}
+
+onInsuranceBlur() {
+  setTimeout(() => {
+    this.showInsuranceDropdown = false;
+  }, 200);
+}
 
   loadBillForEdit(bill: any) {
     this.loader.show();
-    console.log(bill, "is loading");
-
+    console.log(bill,"is loading");
+    
     //  Header fields
     this.model.saleBillNo = bill.saleBillNo;
     this.model.saleDate = bill.saleDate ? bill.saleDate.split('T')[0] : '';
@@ -269,6 +269,9 @@ export class AddVehicleSaleBill implements OnInit {
     this.model.cashAccount = bill.cashAc;
     this.model.salesExecutive = bill.salesExecutive;
     this.model.tempRegNo = bill.isTempRegNo;
+    this.model.igstper = bill.details[0].igstper ?? '';
+    this.model.sgstper = bill.details[0].sgstper ?? '';
+    this.model.cgstper = bill.details[0].cgstper ?? '';
     this.model.tempRegRequired = bill.isTempRegNo ? 'yes' : 'no';
 
 
@@ -281,11 +284,12 @@ export class AddVehicleSaleBill implements OnInit {
       insNo: d.insNo || '',
       regNo: d.regNo || '',
       itemCode: d.itemCode || '',
-
       rate: d.itemRate,
       regAmount: d.regAmount,
       insuranceAmount: d.insuranceAmount,
       preGstDiscount: d.preGstDiscount,
+      postGstDiscount: d.postGstDiscount,
+      fameIIAmnt: d.fameIIDisc || 0,
       insStartDate: d.insStartDate ? d.insStartDate.split('T')[0] : null,
       insExpDate: d.insExpDate ? d.insExpDate.split('T')[0] : null,
 
@@ -302,13 +306,13 @@ export class AddVehicleSaleBill implements OnInit {
       insuranceName: d.insuranceName || '',
       insuranceId: d.insuranceId || null,
 
-      sgst: d.sgstamnt ?? d.sgst ?? 0,
-      cgst: d.cgstamnt ?? d.cgst ?? 0,
-      igst: d.igstamnt ?? d.igst ?? 0,
+      // sgst: d.sgstAmnt ?? d.sgst ?? 0,
+      // cgst: d.cgstAmnt ?? d.cgst ?? 0,
+      // igst: d.igstAmnt ?? d.igst ?? d.igstamnt?? 0,
 
-      sgstPer: d.sgstper ?? 0,
-      cgstPer: d.cgstper ?? 0,
-      igstPer: d.igstper ?? 0,
+      // sgstper: d.sgstper ?? 0,
+      // cgstper: d.cgstper ?? 0,
+      // igstper: d.igstper ?? 0,
       battery: d.battery || '',
       convertorNo: d.convertorNo || '',
       chargerNo: d.chargerNo || '',
@@ -364,6 +368,8 @@ export class AddVehicleSaleBill implements OnInit {
 
 
   getBillById(id: number) {
+
+    this.loader.show();
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
         this.loader.hide();
@@ -430,14 +436,6 @@ export class AddVehicleSaleBill implements OnInit {
     }
   }
 
-  // getNextSaleBillNo() {
-  //   this.vehicleSaleBillService.getNextSaleBillNo().subscribe({
-  //     next: (data) => {
-  //       this.model.saleBillNo = data;
-  //     }
-  //   });
-  // }
-
   getNextSaleBillNo() {
     const dealerCode = this.storageService.getDealerCode();
 
@@ -502,7 +500,6 @@ export class AddVehicleSaleBill implements OnInit {
   }
 
   addVehicle(form: NgForm) {
-
     if (
       this.model.billingType === 2 &&
       this.vehicleList.length >= 1 &&
@@ -518,20 +515,17 @@ export class AddVehicleSaleBill implements OnInit {
     const taxable = this.calculateAmount();
     this.calculateTaxes();
     console.log(taxable, "in add");
-
-
-    // const gstTotal = this.model.isD2D
-    //   ? 0
-    //   : (this.model.sgst + this.model.cgst + this.model.igst);
     const gstTotal = this.model.sgst + this.model.cgst + this.model.igst;
+    console.log(gstTotal, "GST Total");
+    const postGstDisc = this.model.postGSTDiscount || 0;
+    const fameDisc = this.model.fameIIAmnt || 0;
+    const totalPostDisc = postGstDisc + fameDisc;
+    const totalPostAmount = (this.model.cess || 0) +
+      (this.model.tcs || 0) +
+      (this.model.insAmount || 0) +
+      (this.model.regAmount || 0);
 
-    const finalAmount =
-      (taxable +
-        gstTotal +
-        (this.model.cess || 0) +
-        (this.model.tcs || 0) +
-        (this.model.insAmount || 0) +
-        (this.model.regAmount || 0)) - this.model.postGSTDiscount || 0;
+    const finalAmount = taxable + gstTotal + totalPostAmount - totalPostDisc;
 
     const vehicle = {
       id: this.editingIndex > -1 ? this.vehicleList[this.editingIndex].id : undefined,
@@ -557,11 +551,11 @@ export class AddVehicleSaleBill implements OnInit {
       postGstDiscount: this.model.postGSTDiscount,
       ledgerId: this.selectedCustomerId || null,
 
-      sgstPer: this.model.sgstPer,
+      sgstper: this.model.sgstper,
       sgst: this.model.sgst,
-      cgstPer: this.model.cgstPer,
+      cgstper: this.model.cgstper,
       cgst: this.model.cgst,
-      igstPer: this.model.igstPer,
+      igstper: this.model.igstper,
       igst: this.model.igst,
       itemCode: this.model.itemCode || '',
       battery: this.model.battery || '',
@@ -587,6 +581,7 @@ export class AddVehicleSaleBill implements OnInit {
 
       finalAmount: finalAmount
     };
+    console.log(vehicle, "d");
 
     this.model.finalAmount = this.getGrandTotal();
     if (this.editingIndex > -1) {
@@ -616,12 +611,12 @@ export class AddVehicleSaleBill implements OnInit {
     const fameIIAmnt = this.model.fameIIAmnt || 0;
     console.log(rate, discount, fameIIAmnt, "Amount Calculation");
 
-    return rate - discount - fameIIAmnt;
+    return rate - discount;
   }
 
 
   editVehicle(dataRow: any) {
-
+    this.editingIndex = this.vehicleList.findIndex(v => v.chassisNo === dataRow.chassisNo);
     const selected = dataRow;
     console.log(selected, "sele");
     this.model.chassisNo = selected.chassisNo;
@@ -639,7 +634,7 @@ export class AddVehicleSaleBill implements OnInit {
     this.model.regAmount = selected.regAmount ?? 0;
     this.model.insAmount = selected.insuranceAmount ?? 0;
 
-    this.model.amount = selected.amount ?? 0;
+    this.model.amount = selected.amount - (selected.preGstDiscount || 0) || 0;
     this.model.sgst = selected.sgst ?? 0;
     this.model.cgst = selected.cgst ?? 0;
     this.model.igst = selected.igst ?? 0;
@@ -669,7 +664,7 @@ export class AddVehicleSaleBill implements OnInit {
 
     this.model.customerSaleDate = selected.customerSaleDate;
     this.model.insuranceName = selected.insuranceName || '';
-    this.model.insuranceId = selected.insuranceId || null;
+this.model.insuranceId = selected.insuranceId || null;
 
 
     // DATES
@@ -718,6 +713,7 @@ export class AddVehicleSaleBill implements OnInit {
       this.model.billingType = 2;
     }
   }
+
   updateVehicleSaleBill(string?: string) {
     const payload = this.buildPayload();
 
@@ -838,6 +834,8 @@ export class AddVehicleSaleBill implements OnInit {
         insuranceId: v.insuranceId || null,
       }))
     };
+
+
 
   }
   getLedgerIdFromName(): number | null {
@@ -1027,9 +1025,9 @@ export class AddVehicleSaleBill implements OnInit {
     this.model.stockDetailNo = selected.stockNo;
 
     // GST
-    this.model.sgstPer = selected.sgstper;
-    this.model.cgstPer = selected.cgstper;
-    this.model.igstPer = selected.igstper;
+    this.model.sgstper = selected.sgstper;
+    this.model.cgstper = selected.cgstper;
+    this.model.igstper = selected.igstper;
 
     // Discount
     this.model.preGSTDiscount = selected.preGstDisc;
@@ -1050,10 +1048,11 @@ export class AddVehicleSaleBill implements OnInit {
 
     console.log(taxable, "Taxable");
 
+    console.log(this.model, this.model.sgstper, this.model.cgstper, this.model.igstper, "GST Percentages");
 
-    this.model.sgst = taxable * (this.model.sgstPer || 0) / 100;
-    this.model.cgst = taxable * (this.model.cgstPer || 0) / 100;
-    this.model.igst = taxable * (this.model.igstPer || 0) / 100;
+    this.model.sgst = taxable * (this.model.sgstper || 0) / 100;
+    this.model.cgst = taxable * (this.model.cgstper || 0) / 100;
+    this.model.igst = taxable * (this.model.igstper || 0) / 100;
   }
 
 
@@ -1145,13 +1144,14 @@ export class AddVehicleSaleBill implements OnInit {
 
     modalRef.componentInstance.vehicleList = this.vehicleList;
     modalRef.componentInstance.isInvoiced = this.isInvoiced;
-    console.log(this.isInvoiced, "PArent");
-
+    console.log(this.isInvoiced ,"PArent");
+    
 
     modalRef.result.then((updatedList) => {
       if (updatedList) {
 
         this.vehicleList = [...updatedList];
+
 
         //recalculate per-row finalAmount
         this.calculateVehicleAmounts();
@@ -1202,9 +1202,9 @@ export class AddVehicleSaleBill implements OnInit {
           batteryCapacity: '',
           batteryMake: '',
           stockNo: '',
-          sgstPer: 0,
-          cgstPer: 0,
-          igstPer: 0,
+          sgstper: 0,
+          cgstper: 0,
+          igstper: 0,
           dealerPrice: 0,
           customerPrice: 0
         } as any);
@@ -1216,32 +1216,39 @@ export class AddVehicleSaleBill implements OnInit {
     this.vehicleList = this.vehicleList.map(v => {
 
       const taxable =
-        (v.rate || 0) - (v.preGstDiscount || 0) - (v.fameIIAmnt || 0);
+        (v.rate || 0) -
+        (v.preGstDiscount || 0);
 
-      const gst =
-        (v.sgst || 0) +
-        (v.cgst || 0) +
-        (v.igst || 0);
+      const sgst = taxable * (v.sgstper || 0) / 100;
+      const cgst = taxable * (v.cgstper || 0) / 100;
+      const igst = taxable * (v.igstper || 0) / 100;
+      console.log(taxable, sgst, cgst, igst, "Recalculated Amounts");
 
       const finalAmount =
         taxable +
-        gst +
+        sgst +
+        cgst +
+        igst +
         (v.cess || 0) +
         (v.tcs || 0) +
-        (v.regAmount || 0) +
+        (v.regAmount || 0) +       
         (v.insuranceAmount || 0) -
         (v.postGstDiscount || 0)
-        ;         //  INSURANCE ADDED
+        - v.fameIIAmnt
+        ;       
 
       return {
         ...v,
+        sgst,
+        cgst,
+        igst,
         finalAmount
       };
     });
   }
 
 
-
+ 
   printExShowroomInvoice() {
 
     this.router.navigate(
