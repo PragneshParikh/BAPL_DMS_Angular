@@ -8,6 +8,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
 import { LedgerMaster } from '../../../core/services/ledger-master';
 import { CurrencyService } from '../../../core/services/currency-service';
+import { ReceiptEntryService } from '../../../core/services/receipt-entry-service';
+import { BillingTypeOptions } from '../../../constant';
+
 
 @Component({
   selector: 'app-performa-invoice',
@@ -19,7 +22,7 @@ import { CurrencyService } from '../../../core/services/currency-service';
 export class PerformaInvoice implements OnInit {
 
   currentDate: Date = new Date();
-
+ financiers: any[] = [];
   dealer: DealerMasterViewModel | null = null;
   saleBillId: string = '';
   saleBill: any;
@@ -58,10 +61,13 @@ export class PerformaInvoice implements OnInit {
     private vehicleSaleBillService: VehicleSaleBillService,
     private router: Router,
     private ledgerService: LedgerMaster,
-    private currencyService: CurrencyService
+    private currencyService: CurrencyService,
+    private receiptEntryService: ReceiptEntryService,
+
   ) { }
 
   ngOnInit() {
+    this.getFinanciers();
     this.getDealerDetails();
 
     this.saleBillId = this.route.snapshot.paramMap.get('saleBillNo') || '';
@@ -74,6 +80,23 @@ export class PerformaInvoice implements OnInit {
     }
   }
 
+    getFinanciers() {
+
+    this.receiptEntryService.getLedgerByType('Financier').subscribe({
+      next: (res) => {
+        this.financiers = res;
+        console.log(res, "Financiers Response");
+
+      }
+    });
+  }
+
+  getBillTypeName(id: number): string {
+  return BillingTypeOptions.find(x => x.id === id)?.value || '-';
+}
+getFinancierName(id: number): string {
+  return this.financiers.find(x => x.id === id)?.ledgerName || '-';
+}
 //  // CALCULATE FOR MULTIPLE ROWS
 //   calculateAmounts() {
 //     const details = this.saleBill?.details || [];

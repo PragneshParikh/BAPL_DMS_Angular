@@ -137,7 +137,7 @@
                                 <select class="form-select form-select-sm" [(ngModel)]="model.location" name="location"
                                     #location="ngModel" required>
                                     <option value="">Select Location</option>
-                                    <option *ngFor="let loc of locations" [value]="loc.locname">
+                                    <option *ngFor="let loc of locations" [value]="loc.loccode">
                                         {{ loc.locname }}
                                     </option>
                                 </select>

@@ -67,7 +67,7 @@ export class AddVehicleSaleBill implements OnInit {
 
   }
 
-  locations: LocationName[] = [];
+  locations: any[] = [];
   vehicleList: any[] = [];
   editingIndex: number = -1;
   billId: number | null = null;
@@ -257,7 +257,14 @@ onInsuranceBlur() {
     //  Header fields
     this.model.saleBillNo = bill.saleBillNo;
     this.model.saleDate = bill.saleDate ? bill.saleDate.split('T')[0] : '';
-    this.model.location = bill.location;
+    // this.model.location = bill.location;
+    const locationObj = this.locations.find(
+  x => x.locname === bill.location
+);
+
+this.model.location = locationObj
+  ? locationObj.locCode
+  : bill.location;
     this.model.saleType = bill.saleType;
     this.model.customerType = bill.customerType;
     this.model.billingType = bill.billType;
@@ -408,10 +415,12 @@ onInsuranceBlur() {
 
     this.locationService.getLocationByDealerCode(dealerCode).subscribe({
       next: (data: any[]) => {
+        console.log("Locat",data);
+        
         this.locations = data;
 
         if (this.locations.length > 0 && !this.billId) {
-          this.model.location = this.locations[0].locname || this.locations[0].locname;
+          this.model.location = this.locations[0].loccode || this.locations[0].loccode;
         }
       },
       error: (err) => {
@@ -932,6 +941,7 @@ this.model.insuranceId = selected.insuranceId || null;
   onSubmitToERP() {
     this.loader.show();
     const saleBillNo = this.billId;
+    const dealerCode = this.storageService.getDealerCode();
 
     if (!saleBillNo) {
       this.toaster.show('Sale No is required!', {
@@ -941,14 +951,23 @@ this.model.insuranceId = selected.insuranceId || null;
       return;
     }
 
-    this.vehicleSaleBillService.sendToERP(saleBillNo).subscribe({
+    this.vehicleSaleBillService.sendToERP(dealerCode, saleBillNo).subscribe({
       next: (res) => {
+
+        //To be added when json confirmed
+        // this.vehicleSaleBillService.sendSaleBillToERP(res).subscribe({
+        //   next: (erpRes) => {
+
+        //     console.log(erpRes, "Final ERP Response"); 
+        //   }});
+        console.log(res, "ERP Response");
+
         this.loader.hide();
         this.redirectToSaleList();
-        this.toaster.show('Successfully pushed to ERP', {
-          classname: 'bg-success text-white',
-          delay: 5000
-        });
+        // this.toaster.show('Successfully pushed to ERP', {
+        //   classname: 'bg-success text-white',
+        //   delay: 5000
+        // });
       },
       error: (err) => {
         this.toaster.show('Failed to push to ERP', {
@@ -1325,8 +1344,9 @@ this.model.insuranceId = selected.insuranceId || null;
     this.isInvoiced = true;
     this.vehicleSaleBillService.confirmInvoice(this.model.saleBillNo).subscribe({
       next: (res: number) => {
-        if (res !== 0) {
 
+        if (res !== 0) {
+          this.onSubmitToERP();
           this.toaster.show('Invoice Generated Successfully', { classname: 'bg-success text-light', delay: 3000 });
 
         }

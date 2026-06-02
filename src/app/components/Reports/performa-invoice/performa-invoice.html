@@ -54,7 +54,7 @@
         <td>: {{ CustomerLedger?.eMail || '-' }}</td>
 
         <td class="label ps-4">Bill Type</td>
-        <td>: {{ saleBill?.billType || '-' }}</td>
+        <td>: {{ getBillTypeName(saleBill?.billType) }}</td>
       </tr>
 
       <tr>
@@ -78,7 +78,7 @@
         <td>: India</td>
 
         <td class="label ps-4">Financier</td>
-        <td>: {{ saleBill?.financier || '-' }}</td>
+        <td>: {{ getFinancierName(saleBill?.financier) }}</td>
       </tr>
     </table>
 
