@@ -147,13 +147,8 @@ this.router.navigate(['/hsrp-inward']);
 
     this.hsrpService.getPendingHSRPOrders(dealerCode, this.formatDate(this.filter.fromDate), this.formatDate(this.filter.toDate)).subscribe({
       next: (res: any) => {
-        this.orders = (res || []).map(item => ({
-  ...item,
-  isFrontPlate: item.isFrontPlate ?? true,
-  isRearPlate: item.isRearPlate ?? true
-}));
-
-this.filteredOrders = [...this.orders];
+        this.orders = res || [];
+        this.filteredOrders = [...this.orders];
         this.updatePagination();
       },
       error: (err) => {
@@ -275,17 +270,6 @@ this.filteredOrders = [...this.orders];
 
     const dealerCode = this.storageService.getDealerCode();
     const selectedItems = this.paginatedOrders.filter(x => x.selected);
-
-    const missingRegistration = selectedItems.filter(x => !x.regNo || x.regNo.trim() === '');
-    if(missingRegistration.length > 0)
-    {
-     const chassisList = selectedItems.filter(x => !x.regNo || x.regNo.trim() === '').map(x => x.chassisNo);
-      this.toasterService.show(`Registration number is missing for chassis: ${chassisList.join(', ')}`,{
-        classname:'bg-warning text-white',
-        delay:5000
-      });
-      return;
-    }
 
     if (selectedItems.length === 0) {
       this.toasterService.show('Please select atleast one row', {

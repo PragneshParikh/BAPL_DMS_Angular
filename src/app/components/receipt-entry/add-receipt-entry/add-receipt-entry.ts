@@ -17,7 +17,6 @@ import { CustomerLedger } from '../../customer-ledger/customer-ledger';
 import { TRANSACTION_TYPES } from '../../../constant';
 import { thru } from 'lodash';
 import { log } from 'console';
-import { PrefixService } from '../../../core/services/prefix';
 
 @Component({
   selector: 'app-add-receipt-entry',
@@ -87,7 +86,6 @@ export class AddReceiptEntry implements OnInit {
     private navigation: Router,
     private loader: LoaderService,
     public toaster: ToastService,
-    private prefixService: PrefixService
   ) {
     this.router.paramMap.subscribe(params => {
       this.id = params.get('id');
@@ -269,11 +267,8 @@ export class AddReceiptEntry implements OnInit {
     });
   }
   getNextReceiptNo() {
-
-    const dealerCode = this.storageService.getDealerCode();
-    this.prefixService.getPrefixByDealerByModule(dealerCode, 'receipt_entry').subscribe({
+    this.receiptEntryService.getNextReceiptNo().subscribe({
       next: (data) => {
-        console.log('Next receipt no:', data);
         this.nextReceiptNo = data;
       }
     });
