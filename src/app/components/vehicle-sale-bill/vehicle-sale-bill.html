@@ -27,7 +27,7 @@
 
                     <div class="col-md-2">
                         <label class="form-label mb-0 small">Status</label>
-                        <select class="form-select form-select-sm" [(ngModel)]="filter.Status">
+                        <select class="form-select form-select-sm" [(ngModel)]="filter.status">
                             <option value="">All</option>
                             <option *ngFor="let s of ErpOptions" [value]="s.value">
                                 {{ s.name }}
@@ -171,8 +171,9 @@
 </td> -->
 
                                 <td>
-                                    
+
                                     <ngb-highlight [result]="getStatusName(item.status)" [term]="searchText">
+
                                     </ngb-highlight>
                                 </td>
 
@@ -193,7 +194,7 @@
 
                                 <!-- Bill Type -->
                                 <td>
-                                    {{ item.billType }}
+                                    {{ getBillingTypeName(item.billType) }}
                                 </td>
 
                                 <!-- Customer -->

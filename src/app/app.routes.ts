@@ -171,7 +171,7 @@ export const routes: Routes = [
 
       { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
 
-      { path: 'news-bulletin', data: [53], loadComponent: () => import('./components/news-bulletin/news-bulletin').then(m => m.NewsBulletin) },
+      { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
 
     ]
   },

@@ -44,6 +44,11 @@ export class AddVehicleSaleBill implements OnInit {
   filteredChassis: any[] = [];
   showDropdown = false;
   showNotFound = false;
+  insurance: LedgerMaster[];
+  filteredInsurance: LedgerMaster[];
+  showInsuranceDropdown: boolean;
+  insuranceParties: any;
+  insuranceNotFound: boolean;
 
 
   /**
@@ -105,7 +110,7 @@ export class AddVehicleSaleBill implements OnInit {
     cashAccount: '',
     customerName: '',
     billingName: '',
-    billingType: '',
+    billingType: null,
     billFrom: '',
     salesExecutive: '',
     tempRegRequired: 'no',
@@ -134,6 +139,9 @@ export class AddVehicleSaleBill implements OnInit {
     exchange: 'N',
     narration: '',
     insStartDate: this.today,
+    insuranceName: '',
+      insuranceId: null,
+
     insExpDate: this.getInsuranceExpiryDate(this.today),
 
 
@@ -177,7 +185,7 @@ export class AddVehicleSaleBill implements OnInit {
 
     this.model.customerType = 'B2C';
     this.onCustomerTypeChange();
-
+    this.getInsuranceCompanies();
     this.fetchLocations();
     this.getFinanciers();
     this.getParties();
@@ -201,9 +209,51 @@ export class AddVehicleSaleBill implements OnInit {
     date.setFullYear(date.getFullYear() + 1);
     return date.toISOString().split('T')[0];
   }
+getInsuranceCompanies(){
+  this.receiptEntryService.getLedgerByType('Insurance').subscribe({
+      next: (res) => {
+        this.insurance = res;
+console.log('Insurance API Response:', res);  
+      }
+    });
+}
+filterInsurance() {
+  const search = (this.model.insuranceName || '').trim().toLowerCase();
 
+  if (!search) {
+    this.filteredInsurance = [];
+    this.insuranceNotFound = false;
+    return;
+  }
+
+  this.filteredInsurance = this.insurance.filter(x =>
+    x.ledgerName?.toLowerCase().includes(search)
+  );
+
+  this.insuranceNotFound = this.filteredInsurance.length === 0;
+}
+
+selectInsurance(party: LedgerMaster) {
+  this.model.insuranceName = party.ledgerName;
+  this.model.insuranceId = party.id;
+  this.filteredInsurance = [];
+  this.insuranceNotFound = false;
+}
+onInsuranceFocus() {
+  this.showInsuranceDropdown = true;
+  this.filteredInsurance = [...this.insurance];
+}
+
+onInsuranceBlur() {
+  setTimeout(() => {
+    this.showInsuranceDropdown = false;
+  }, 200);
+}
 
   loadBillForEdit(bill: any) {
+    this.loader.show();
+    console.log(bill,"is loading");
+    
     //  Header fields
     this.model.saleBillNo = bill.saleBillNo;
     this.model.saleDate = bill.saleDate ? bill.saleDate.split('T')[0] : '';
@@ -224,6 +274,7 @@ export class AddVehicleSaleBill implements OnInit {
     this.model.cgstper = bill.details[0].cgstper ?? '';
     this.model.tempRegRequired = bill.isTempRegNo ? 'yes' : 'no';
 
+
     this.vehicleList = bill.details.map((d: any) => ({
 
       chassisNo: d.chassisNo,
@@ -234,8 +285,8 @@ export class AddVehicleSaleBill implements OnInit {
       regNo: d.regNo || '',
       itemCode: d.itemCode || '',
       rate: d.itemRate,
-      regAmt: d.regAmount,
-      insAmt: d.insuranceAmount,
+      regAmount: d.regAmount,
+      insuranceAmount: d.insuranceAmount,
       preGstDiscount: d.preGstDiscount,
       postGstDiscount: d.postGstDiscount,
       fameIIAmnt: d.fameIIDisc || 0,
@@ -252,6 +303,8 @@ export class AddVehicleSaleBill implements OnInit {
       sgstper: d.sgstper ?? 0,
       cgstper: d.cgstper ?? 0,
       igstper: d.igstper ?? 0,
+      insuranceName: d.insuranceName || '',
+      insuranceId: d.insuranceId || null,
 
       // sgst: d.sgstAmnt ?? d.sgst ?? 0,
       // cgst: d.cgstAmnt ?? d.cgst ?? 0,
@@ -288,6 +341,7 @@ export class AddVehicleSaleBill implements OnInit {
 
 
     this.model.finalAmount = this.getGrandTotal();
+    this.loader.hide();
   }
 
 
@@ -318,9 +372,10 @@ export class AddVehicleSaleBill implements OnInit {
     this.loader.show();
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
+        this.loader.hide();
         console.log('Bill Data:', res);
-this.selectedCustomerId = res.ledgerId;
-        this.Status = res.Status || '';
+        this.selectedCustomerId = res.ledgerId;
+        this.Status = res.status || '';
         this.isErpLocked =
           this.Status.toLowerCase() === 'pushedtoerp';
         if (this, this.Status.toLowerCase() === 'invalid') {
@@ -336,16 +391,16 @@ this.selectedCustomerId = res.ledgerId;
         // Load chassis FIRST, then bind bill
         this.loadChassisList(() => {
           this.loadBillForEdit(res);
-          if ((this.Status == 'Alloted' || this.Status == 'Pending') && this.vehicleList.some(v => v.regNo == '' && v.insNo == '' || (v.regAmt === 0 || v.insAmt === 0))) {
+          if ((this.Status == 'Alloted' || this.Status == 'Pending') && this.vehicleList.some(v => v.regNo == '' && v.insNo == '' || (v.regAmount === 0 || v.insuranceAmount === 0))) {
             this.openRegistrationModal();
           }
         });
       },
       error: (err) => {
+        this.loader.hide();
         console.error(err);
       }
     });
-    this.loader.hide();
   }
 
   fetchLocations(): void {
@@ -446,7 +501,7 @@ this.selectedCustomerId = res.ledgerId;
 
   addVehicle(form: NgForm) {
     if (
-      this.model.billingType === 'Counter Sale[single]' &&
+      this.model.billingType === 2 &&
       this.vehicleList.length >= 1 &&
       this.editingIndex === -1
     ) {
@@ -485,10 +540,12 @@ this.selectedCustomerId = res.ledgerId;
       insStartDate: this.model.insStartDate || null,
       insExpDate: this.model.insExpDate || null,
       taxableAmount: taxable,
+      insuranceName: this.model.insuranceName || '',
+      insuranceId: this.model.insuranceId || null,
 
       rate: this.model.itemRate,
-      regAmt: this.model.regAmount,
-      insAmt: this.model.insAmount,
+      regAmount: this.model.regAmount,
+      insuranceAmount: this.model.insAmount,
       preGstDiscount: this.model.preGSTDiscount,
       fameIIAmnt: this.model.fameIIAmnt,
       postGstDiscount: this.model.postGSTDiscount,
@@ -574,8 +631,8 @@ this.selectedCustomerId = res.ledgerId;
     this.model.postGSTDiscount = selected.postGstDiscount || 0;
     this.model.fameIIAmnt = selected.fameIIAmnt || 0;
 
-    this.model.regAmount = selected.regAmt ?? 0;
-    this.model.insAmount = selected.insAmt ?? 0;
+    this.model.regAmount = selected.regAmount ?? 0;
+    this.model.insAmount = selected.insuranceAmount ?? 0;
 
     this.model.amount = selected.amount - (selected.preGstDiscount || 0) || 0;
     this.model.sgst = selected.sgst ?? 0;
@@ -606,6 +663,8 @@ this.selectedCustomerId = res.ledgerId;
     this.model.batteryMake = selected.batteryMake || '';
 
     this.model.customerSaleDate = selected.customerSaleDate;
+    this.model.insuranceName = selected.insuranceName || '';
+this.model.insuranceId = selected.insuranceId || null;
 
 
     // DATES
@@ -648,10 +707,10 @@ this.selectedCustomerId = res.ledgerId;
   }
   onCustomerTypeChange() {
     if (this.model.customerType === 'B2B') {
-      this.model.billingType = 'Dealer Sale/Institutional';
+      this.model.billingType = 1;
     }
     if (this.model.customerType === 'B2C') {
-      this.model.billingType = 'Counter Sale[single]';
+      this.model.billingType = 2;
     }
   }
 
@@ -721,7 +780,7 @@ this.selectedCustomerId = res.ledgerId;
         ItemRate: Number(v.rate) || 0,
         PreGstDiscount: Number(v.preGstDiscount) || 0,
         taxableAmount: (Number(v.itemRate) || Number(v.rate) || 0) - (Number(v.preGstDiscount) || 0),
-        RegAmount: Number(v.regAmt) || 0,
+        RegAmount: Number(v.regAmount) || 0,
         InsuranceAmount: Number(v.insuranceAmount) || Number(v.insAmnt) || 0,
         Sgstper: Number(v.sgstper) || Number(v.sgstper) || 0,
         SgstAmnt: Number(v.sgst) || Number(v.sgstamnt) || 0,
@@ -770,7 +829,9 @@ this.selectedCustomerId = res.ledgerId;
 
         FinalAmount: Number(v.finalAmount) || 0,
         IsAgainstExchange: v.exchange === 'Y',
-        customerSaleDate: v.customerSaleDate || null
+        customerSaleDate: v.customerSaleDate || null,
+        insuranceName: v.insuranceName || '',
+        insuranceId: v.insuranceId || null,
       }))
     };
 
@@ -1082,6 +1143,9 @@ this.selectedCustomerId = res.ledgerId;
     const modalRef = this.modalService.open(VehicleRegistrationdetails, { size: 'xl' });
 
     modalRef.componentInstance.vehicleList = this.vehicleList;
+    modalRef.componentInstance.isInvoiced = this.isInvoiced;
+    console.log(this.isInvoiced ,"PArent");
+    
 
     modalRef.result.then((updatedList) => {
       if (updatedList) {
@@ -1167,8 +1231,8 @@ this.selectedCustomerId = res.ledgerId;
         igst +
         (v.cess || 0) +
         (v.tcs || 0) +
-        (v.regAmt || 0) +       
-        (v.insAmt || 0) -
+        (v.regAmount || 0) +       
+        (v.insuranceAmount || 0) -
         (v.postGstDiscount || 0)
         - v.fameIIAmnt
         ;       

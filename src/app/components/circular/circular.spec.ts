@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AddNewsBulletin } from './add-news-bulletin';
+import { Circular } from './circular';
 
-describe('AddNewsBulletin', () => {
-  let component: AddNewsBulletin;
-  let fixture: ComponentFixture<AddNewsBulletin>;
+describe('Circular', () => {
+  let component: Circular;
+  let fixture: ComponentFixture<Circular>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AddNewsBulletin]
+      imports: [Circular]
     })
-    .compileComponents();
+      .compileComponents();
 
-    fixture = TestBed.createComponent(AddNewsBulletin);
+    fixture = TestBed.createComponent(Circular);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

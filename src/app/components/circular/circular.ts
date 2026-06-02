@@ -2,20 +2,19 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { StorageService } from '../../core/services/storage';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AddNewsBulletin } from '../../dialogs/add-news-bulletin/add-news-bulletin';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { error } from 'console';
 import { LoaderService } from '../../core/services/loader';
-import { NewsBulletinService } from '../../core/services/news-bulletin';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { CircularService } from '../../core/services/circular';
+import { AddCircular } from '../../dialogs/add-circular/add-circular';
 
 @Component({
-  selector: 'app-news-bulletin',
+  selector: 'app-circular',
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
-  templateUrl: './news-bulletin.html',
-  styleUrl: './news-bulletin.scss',
+  templateUrl: './circular.html',
+  styleUrl: './circular.scss',
 })
-export class NewsBulletin {
+export class Circular {
 
   folderStructure: any = {};
 
@@ -36,18 +35,18 @@ export class NewsBulletin {
     private modalService: NgbModal,
     private loader: LoaderService,
     private toast: ToastService,
-    private newsBulletinService: NewsBulletinService
+    private curcularService: CircularService
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
   }
 
   ngOnInit(): void {
-    this.getNewsAndBulletin();
+    this.getCircular();
   }
 
-  getNewsAndBulletin() {
+  getCircular() {
     this.loader.show();
-    this.newsBulletinService.get().subscribe({
+    this.curcularService.get().subscribe({
       next: (res) => {
         this.loader.hide();
         this.folderStructure = res;
@@ -111,7 +110,7 @@ export class NewsBulletin {
   }
 
   onAddNewFile() {
-    const modalRef = this.modalService.open(AddNewsBulletin, {
+    const modalRef = this.modalService.open(AddCircular, {
       size: 'xl',
       backdrop: 'static',
       keyboard: false
@@ -136,10 +135,10 @@ export class NewsBulletin {
       data.updatedBy = this.storageService.getUserId();
       data.updatedDate = new Date();
       // data.files = data.files.filter(x => x.status === 'Added');
-      this.newsBulletinService.update(data).subscribe({
+      this.curcularService.update(data).subscribe({
         next: (res: any) => {
           this.loader.hide();
-          this.getNewsAndBulletin();
+          this.getCircular();
           this.toast.show('records updated successfully.', { classname: 'bg-success text-white', delay: 5000 });
         }, error: (err) => {
           console.error(err);
@@ -149,10 +148,10 @@ export class NewsBulletin {
       });
     } else {
       data.createdBy = this.storageService.getUserId();
-      this.newsBulletinService.insert(data).subscribe({
+      this.curcularService.insert(data).subscribe({
         next: (res: any) => {
           this.loader.hide();
-          this.getNewsAndBulletin();
+          this.getCircular();
           this.toast.show('Files uploaded successfully.', { classname: 'bg-success text-white', delay: 5000 });
         }, error: (err) => {
           console.error(err);
@@ -165,10 +164,10 @@ export class NewsBulletin {
 
   // deleteFile(file: any) {
   //   this.loader.show();
-  //   this.newsBulletinService.delete(file.id).subscribe({
+  //   this.curcularService.delete(file.id).subscribe({
   //     next: () => {
   //       this.loader.hide();
-  //       this.getNewsAndBulletin();
+  //       this.getCircular();
   //       this.toast.show("File deleted sucessfully.", { classname: 'bg-sucess text-white', delay: 5000 });
   //     },
   //     error: (err) => {
@@ -181,7 +180,7 @@ export class NewsBulletin {
   // }
 
   editNews(selectedFile: any) {
-    const modalRef = this.modalService.open(AddNewsBulletin, {
+    const modalRef = this.modalService.open(AddCircular, {
       size: 'xl',
       backdrop: 'static',
       keyboard: false

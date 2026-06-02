@@ -10,7 +10,7 @@ import { log } from 'console';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { debounceTime, Subject } from 'rxjs';
-import { ErpOptions } from '../../constant';
+import { BillingTypeOptions, ErpOptions } from '../../constant';
 import { DealerService } from '../../core/services/dealer-service';
 import { StorageService } from '../../core/services/storage';
 
@@ -49,6 +49,7 @@ export class VehicleSaleBill {
   searchChanged: Subject<string> = new Subject();
   isSuperAdmin: boolean;
   dealerCode: string;
+  billingTypeOptions = BillingTypeOptions;
 
   constructor(private service: VehicleSaleBillService,
     private router: Router,
@@ -181,6 +182,7 @@ export class VehicleSaleBill {
   }
 
   downloadDealerExcel(): void {
+    this.loader.show();
 
     const from = this.filter.fromDate
       ? new Date(this.filter.fromDate)
@@ -211,7 +213,7 @@ export class VehicleSaleBill {
         this.loader.hide();
 
         this.toaster.show(
-          'Dealer Excel downloaded successfully',
+          'Excel downloaded successfully',
           {
             classname: 'bg-success text-light',
             delay: 3000
@@ -223,5 +225,7 @@ export class VehicleSaleBill {
       }
     });
   }
-
+  getBillingTypeName(id: number): string {
+    return this.billingTypeOptions.find(x => x.id === id)?.value ?? '';
+  }
 }
