@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { LedgerMaster } from '../../ViewModels/LedgerMasterViewModel';
+import { ReceiptEntryService } from '../../core/services/receipt-entry-service';
 
 @Component({
   selector: 'app-vehicle-registrationdetails',
@@ -10,12 +12,18 @@ import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
   styleUrl: './vehicle-registrationdetails.scss',
 })
 
-export class VehicleRegistrationdetails {
+export class VehicleRegistrationdetails implements OnInit {
   today = new Date().toISOString().split('T')[0];
-  constructor(private activeModal: NgbActiveModal
+  insurance: LedgerMaster[] = [];
+  insuranceNotFound: boolean = false;
+  showInsuranceDropdown: boolean = false;
+  filteredInsurance: LedgerMaster[];
+  constructor(private activeModal: NgbActiveModal,
+    private receiptEntryService: ReceiptEntryService
     
   ) { }
   vehicleList: any[] = [];
+  isInvoiced: boolean = false;
 selectedRow: any = null;
 editChassisNo: string | null = null;
 
@@ -27,9 +35,13 @@ editChassisNo: string | null = null;
     insAmount: null,
     insStartDate: this.today,
     insExpDate: this.getInsuranceExpiryDate(this.today),
+    insuranceName: '',
+    insuranceId: null
 
   };
-
+ngOnInit(): void {
+  this.getInsuranceCompanies();
+}
   getInsuranceExpiryDate(dateString: string): string {
     const date = new Date(dateString);
 
@@ -51,7 +63,7 @@ editChassisNo: string | null = null;
     this.activeModal.dismiss("closed");
   }
  editRow(row: any) {
-  console.log(row);
+  console.log(row,"editRow called");
   
   this.selectedRow = row;
   this.editChassisNo = row.chassisNo;
@@ -59,11 +71,13 @@ editChassisNo: string | null = null;
   this.model = {
     chassisNo: row.chassisNo,
     regNo: row.regNo,
-    regAmount: row.regAmt,
+    regAmount: row.regAmount,
     insNo: row.insNo,
-    insAmount: row.insAmt,
+    insAmount: row.insuranceAmount,
     insStartDate: row.insStartDate,
-    insExpDate: row.insExpDate
+    insExpDate: row.insExpDate,
+    insuranceName: row.insuranceName,
+    insuranceId: row.insuranceId
   };
 }
 saveRow() {
@@ -82,7 +96,9 @@ saveRow() {
     insNo: this.model.insNo,
     insuranceAmount: this.model.insAmount,
     insStartDate: this.model.insStartDate,
-    insExpDate: this.model.insExpDate
+    insExpDate: this.model.insExpDate,
+    insuranceName: this.model.insuranceName,
+    insuranceId: this.model.insuranceId
   };
 
   this.editChassisNo = null;
@@ -98,8 +114,51 @@ addRow() {
   this.selectedRow.insAmt = this.model.insAmount;
   this.selectedRow.insStartDate = this.model.insStartDate;
   this.selectedRow.insExpDate = this.model.insExpDate;
+  this.selectedRow.insuranceName = this.model.insuranceName;
+  this.selectedRow.insuranceId = this.model.insuranceId;
+  
 
   // optional: clear selection after update
   this.selectedRow = null;
+}
+getInsuranceCompanies(){
+  this.receiptEntryService.getLedgerByType('Insurance').subscribe({
+      next: (res) => {
+        this.insurance = res;
+console.log('Insurance API Response:', res);  
+      }
+    });
+}
+filterInsurance() {
+  const search = (this.model.insuranceName || '').trim().toLowerCase();
+
+  if (!search) {
+    this.filteredInsurance = [];
+    this.insuranceNotFound = false;
+    return;
+  }
+
+  this.filteredInsurance = this.insurance.filter(x =>
+    x.ledgerName?.toLowerCase().includes(search)
+  );
+
+  this.insuranceNotFound = this.filteredInsurance.length === 0;
+}
+
+selectInsurance(party: LedgerMaster) {
+  this.model.insuranceName = party.ledgerName;
+  this.model.insuranceId = party.id;
+  this.filteredInsurance = [];
+  this.insuranceNotFound = false;
+}
+onInsuranceFocus() {
+  this.showInsuranceDropdown = true;
+  this.filteredInsurance = [...this.insurance];
+}
+
+onInsuranceBlur() {
+  setTimeout(() => {
+    this.showInsuranceDropdown = false;
+  }, 200);
 }
 }

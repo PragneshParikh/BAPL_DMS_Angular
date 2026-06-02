@@ -3,15 +3,20 @@ import { CommonModule } from '@angular/common';
 import { ItemMasterService } from '../../../core/services/item-master-service';
 import { NgbHighlight, NgbModal, NgbPaginationModule, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { LoaderService } from '../../../core/services/loader';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DurationTypes } from '../../../constant';
+import { ToastService } from '../../../shared/toaster/toast-service';
+import { StorageService } from '../../../core/services/storage';
 
 @Component({
   selector: 'app-item-master',
-  standalone: true,
-  imports: [CommonModule, NgbHighlight, NgbPaginationModule, NgbTooltipModule],
+  imports: [CommonModule, NgbHighlight, NgbPaginationModule, NgbTooltipModule, ReactiveFormsModule, FormsModule],
   templateUrl: './item-master.html',
   styleUrl: './item-master.scss',
 })
 export class ItemMaster implements OnInit {
+
+  durationTypes = DurationTypes;
 
   griddata: any[] = [];
   filteredData: any[] = [];
@@ -22,7 +27,7 @@ export class ItemMaster implements OnInit {
 
   // pagination
   page = 1;
-  pageSize = 5;
+  pageSize = 10;
   collectionSize = 0;
 
   // sorting
@@ -34,7 +39,9 @@ export class ItemMaster implements OnInit {
   constructor(
     private itemService: ItemMasterService,
     private loader: LoaderService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private toaster: ToastService,
+    private storageService: StorageService
   ) { }
 
   ngOnInit() {
@@ -47,18 +54,15 @@ export class ItemMaster implements OnInit {
 
     this.itemService.getItems(this.groupId, this.searchTerm).subscribe({
       next: (res: any) => {
-
         this.griddata = res;
         this.filteredData = [...this.griddata];
         this.collectionSize = this.filteredData.length;
 
         this.refreshTable();
         this.loader.hide();
-
-        console.log(this.griddata);
       },
       error: (err) => {
-        console.log(err);
+        console.error(err);
         this.loader.hide();
       }
 
@@ -142,8 +146,28 @@ export class ItemMaster implements OnInit {
   }
 
   openDetails(modal: any, item: any) {
+    this.selectedItem = {};
     this.selectedItem = item;
     this.modalService.open(modal, { size: 'xl' });
+  }
+
+  updateItem() {
+    this.loader.show();
+    this.selectedItem.updatedBy = this.storageService.getUserId();
+    this.selectedItem.updatedDate = new Date();
+    this.itemService.updateItem(this.selectedItem).subscribe({
+      next: (res) => {
+        this.loader.hide();
+        this.loadItems();
+        this.modalService.dismissAll();
+        this.toaster.show('Item updated successfully', { classname: 'bg-success text-light', delay: 5000 });
+      },
+      error: (err) => {
+        console.error(err);
+        this.loader.hide();
+        this.toaster.show('something went wrong', { classname: 'bg-danger text-light', delay: 5000 });
+      }
+    });
   }
 
 }
