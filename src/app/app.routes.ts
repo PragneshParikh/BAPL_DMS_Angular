@@ -46,6 +46,10 @@ import { RepairBill } from './components/repair-bill/repair-bill';
 import { LabourMaster } from './components/labour-master-import/labour-master-import';
 import { LabourRateMaster } from './components/labour-rate-master/labour-rate-master';
 import { RepairBillList } from './components/repair-bill/repair-bill-list/repair-bill-list';
+import { HsrpInward } from './components/hsrp-order/hsrp-inward/hsrp-inward';
+import { HSRPOrderList } from './components/hsrp-order/hsrporder-list/hsrporder-list';
+import { HSRPOrder } from './components/hsrp-order/hsrp-order';
+import { EmployeeMasterList } from './components/employee-master/employee-master-list/employee-master-list';
 
 
 export const routes: Routes = [

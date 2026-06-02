@@ -1,6 +1,6 @@
-  
 
-  export interface VehicleSaleListChasisResponse {
+
+export interface VehicleSaleListChasisResponse {
   chassisNo: string;
   itemCode: string;
   itemName: string;
@@ -33,14 +33,14 @@
   stockNo?: string;
 
   //  GST
-  sgstPer?: number;
+  sgstper?: number;
   sgst?: number;
-  cgstPer?: number;
+  cgstper?: number;
   cgst?: number;
-  igstPer?: number;
+  igstper?: number;
   igst?: number;
 
-  
+
   insNo?: string;
   insStartDate?: Date;
   insExpDate?: Date;
@@ -66,6 +66,6 @@
   customerSaleDate?: Date;
   pdiStatus?: string;
   fameIIAmnt?: number;
-  postGstDisc?: number; 
+  postGstDisc?: number;
   proformaCreated?: string;
 }

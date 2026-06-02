@@ -3,11 +3,11 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { VehiclePoListService } from '../../core/services/vehicle-po-list-service';
 import { PO_STATUSES, TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { StorageService } from '../../core/services/storage';
+import { PurchaseService } from '../../core/services/purchase-service';
 
 @Component({
   selector: 'app-vehicle-po-list',
@@ -39,7 +39,7 @@ export class VehiclePoList implements OnInit {
 
   constructor(
     private router: Router,
-    private poListService: VehiclePoListService,
+    private purchaseService: PurchaseService,
     private loader: LoaderService,
     private toastr: ToastService,
     private storageService: StorageService
@@ -66,7 +66,7 @@ export class VehiclePoList implements OnInit {
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
     }
-    this.poListService.getPOList(this.dealerCode).subscribe({
+    this.purchaseService.getPOList(this.dealerCode).subscribe({
       next: (res: any[]) => {
         this.loader.hide();
         const flattened = this.flattenPOList(res);
@@ -226,7 +226,7 @@ export class VehiclePoList implements OnInit {
       isSubmitted: this.isSubmitted
     };
 
-    this.poListService.downloadPurchaseOrderExcel(filters).subscribe({
+    this.purchaseService.downloadPurchaseOrderExcel(filters).subscribe({
       next: (response: Blob) => {
         this.loader.hide();
         const blob = new Blob([response], {
