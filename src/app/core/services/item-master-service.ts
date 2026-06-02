@@ -55,4 +55,8 @@ export class ItemMasterService {
     return this.http.get(`${this.baseUrl}/ItemMaster/GetItemsByOEMModel/${id}`)
   }
 
+  updateItem(item: any): Observable<any> {
+    return this.http.put(`${this.baseUrl}/ItemMaster/${item.id}`, item);
+  }
+
 }

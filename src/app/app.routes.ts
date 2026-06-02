@@ -83,6 +83,18 @@ export const routes: Routes = [
       { path: 'vehicle-sale-bill/edit/:id', component: AddVehicleSaleBill, data: [27] },
       { path: 'vehicle-sale-bill/add', component: AddVehicleSaleBill, data: [27] },
       { path: 'vehicle-sale-bill', component: VehicleSaleBill, data: [27] },
+
+      { path: 'add-vehicle-sale-bill/delivery-certificate/:id', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
+      { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
+      { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-search/chassis-search').then(m => m.ChassisSearch) },
+      { path: 'proforma-invoice', component: ProformaInvoice, data: [22] },
+      { path: 'form22-certificate/:chassisNo', component: Form22Certificate, data: [22] },
+      { path: 'delivery-checkList', component: DeliveryChecklist, data: [22] },
+      { path: 'delivery-slip', component: DeliverySlip, data: [22] },
+      { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] },
+
+
+
       { path: 'oemmodel-warranty', component: OemmodelWarranty, data: [34] },
       { path: 'oemmodel-warranty/add', component: AddOemmodelWarranty, data: [34] },
       { path: 'oemmodel-warranty/edit/:id', component: AddOemmodelWarranty, data: [34] },
@@ -127,6 +139,28 @@ export const routes: Routes = [
       { path: 'repair-bill-list', component: RepairBillList, data: [51] },
       { path: 'labour-master-import', component: LabourMaster, data: [54] },
       { path: 'labour-rate-master', component: LabourRateMaster, data: [55] },
+
+      { path: 'employee', data: [49], component: EmployeeMasterList },
+      { path: 'employee/add', component: EmployeeMasterComponent, data: [49] },
+      { path: 'employee/edit/:id', component: EmployeeMasterComponent, data: [49] },
+
+      { path: 'hsrp-order', component: HSRPOrder, data: [48] },
+      { path: 'hsrp-order/:id', component: HSRPOrder, data: [48] },
+      { path: 'hsrp-order-list', component: HSRPOrderList, data: [48] },
+      { path: 'hsrp-inward', component: HsrpInward, data: [48] },
+
+      { path: 'vehicle-sale-report', data: [43], loadComponent: () => import('./components/Reports/vehicle-sale-report/vehicle-sale-report').then(m => m.VehicleSaleReportComponent) },
+
+      { path: 'vehicle-stocks-report', data: [46], loadComponent: () => import('./components/Reports/vehicle-stock-report/vehicle-stock-report').then(m => m.VehicleStockReportComponent) },
+
+      { path: 'po-tracking-report', data: [47], loadComponent: () => import('./components/Reports/po-tracking-report/po-tracking-report').then(m => m.POTrackingReportComponent) },
+
+      { path: 'parts-dispatch-report', data: [50], loadComponent: () => import('./components/Reports/parts-dispatch-report/parts-dispatch-report').then(m => m.PartsDispatchReport) },
+
+      { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
+
+      { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
+
     ]
   },
   { path: '**', component: WorkInProgress }

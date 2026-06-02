@@ -7,7 +7,6 @@ import { Router, RouterOutlet } from '@angular/router';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { MaterialTransferService } from '../../core/services/material-transfer';
-import { error } from 'console';
 import { StorageService } from '../../core/services/storage';
 
 @Component({
@@ -52,7 +51,7 @@ export class MaterialTransfer implements OnInit {
   }
 
   onSearchChange() {
-    // Logic to handle search term change
+    this.getMaterialTransfer();
   }
 
   addMaterialTransfer() {
@@ -79,7 +78,7 @@ export class MaterialTransfer implements OnInit {
 
   getMaterialTransfer() {
     this.loader.show();
-    this.materialTransfterService.getByDealer(this.dealerCode, this.page, this.pageSize).subscribe({
+    this.materialTransfterService.getByDealer(this.searchTerm, this.dealerCode, this.page, this.pageSize).subscribe({
       next: (res: any) => {
         this.loader.hide();
         this.dataSource = res.data;
@@ -91,5 +90,26 @@ export class MaterialTransfer implements OnInit {
         this.toast.show('Something went wrong.', { classname: 'bg-danger text-light', delay: 5000 });
       }
     })
+  }
+
+  downloadExcel() {
+    this.loader.show();
+    this.materialTransfterService.downloadExcel().subscribe((data: Blob) => {
+
+      const blob = new Blob([data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'MaterialTransferList.xlsx';
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+      this.loader.hide();
+      this.toast.show('File downloaded successfully', { classname: 'bg-success text-light', delay: 5000 });
+    });
   }
 }

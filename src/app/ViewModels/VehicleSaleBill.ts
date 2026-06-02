@@ -72,12 +72,12 @@ export interface VehicleSaleBillResponseViewModel {
   saleType: string;
   billingName: string;
   referralName: string;
-  billType: string;
+  billType: number;
   financier?: string;
   salesExecutive?: string;
   isD2d: boolean;
   cashAccount?: string;
-  erpStatus?: string;
+  status?: string;
   details: VehicleSaleBillDetailVM[];
 }
 

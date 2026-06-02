@@ -41,23 +41,23 @@
                             placeholder="Prefix" readonly>
                     </div>
 
-                    <div class="col-md-1">
-                        <label class="form-label mb-0 small">Order No.</label>
-                        <input type="text" class="form-control form-control-sm bg-light" [(ngModel)]="orderNo" readonly>
-                    </div>
-                    <!-- <div class="col-md-1">
-                        <div class="input-group input-group-sm">
-                            <label class="form-label mb-0 small">OrderType</label>
-                            <select class="form-select form-select-sm" [(ngModel)]="poType">
-                                <option value="">--Select--</option>
-                                <option value="VOR">VOR</option>
-                                <option value="SSOMSO">SSO/MSO</option>
-                            </select>
-                            <button type="button" class="btn btn-outline-secondary bg-primary text-white btn-sm">
-                                <i class="ri-add-line"></i>
-                            </button>
-                        </div>
-                    </div> -->
+                                <div class="col-md-1-5">
+                                    <label class="form-label mb-0 small d-block">OrderType</label>
+                                    <div class="d-flex align-5-items-center gap-1">
+                                        <select class="form-select form-select-sm" [class.is-invalid]="orderTypeInvalid"
+                                            name="orderType" #orderType="ngModel" [(ngModel)]="partsPOData.subPoType"
+                                            (change)="onPoTypeChange()" [disabled]="isEdit">
+                                            <option value="VOR">VOR</option>
+                                            <option value="SSOMSO">SSO/MSO</option>
+                                            <option value="Accessories">Accessories</option>
+                                        </select>
+                                        <button *ngIf="partsPOData.subPoType === 'VOR' && !isEdit" type="button"
+                                            class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                            (click)="openJobSearchDialog()">
+                                            <i class="ri-add-line"></i>
+                                        </button>
+                                    </div>
+                                </div>
 
                     <div class="col-md-2">
                         <label class="form-label mb-0 small d-block">OrderType</label>
@@ -91,14 +91,9 @@
                             readonly>
                     </div>
 
-                    <!-- <div class="col-md-1 text-center">
-                        <label class="form-label mb-0 d-block small">Cal. GST</label>
-                        <div class="form-check form-switch d-inline-block">
-                            <input type="checkbox" class="form-check-input" id="isGst" [(ngModel)]="isGst"
-                                [disabled]="isSubmitted">
-                            <label class="form-check-label small" for="isGst">{{ isGst ? 'Y' : 'N' }}</label>
-                        </div>
-                    </div> -->
+                    <!-- Item Selection Info -->
+                    <fieldset [disabled]="isSubmitted &&(this.isEdit && partsPOData.subPoType === 'VOR')">
+                        <div class="row g-1 mb-2 align-items-end">
 
                     <div class="col-md-1 text-center">
                         <label class="form-label mb-0 d-block small">Against KIT</label>
@@ -290,8 +285,9 @@
     </div>
 </div>
 
+
 <!-- VOR Details Modal -->
-<div class="modal fade" id="vorModal" tabindex="-1">
+<!-- <div class="modal fade" id="vorModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header dealer-modal-header" style="background-color:#747CA0">
@@ -301,7 +297,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <!-- ================= VOR Info ================= -->
+                <\!-- ================= VOR Info ================= --\>
                 <div class="row">
                     <div class="col-md-3">
                         <label class="form-label">Job No</label>
@@ -372,4 +368,4 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->

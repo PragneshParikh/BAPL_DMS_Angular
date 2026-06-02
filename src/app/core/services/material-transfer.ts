@@ -11,8 +11,8 @@ export class MaterialTransferService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getByDealer(dealerCode: any, pageIndex: number, pageSize: number): Observable<any> {
-    return this.httpClient.get(`${this.baseUrl}/material-transfer/GetByDealerPaged?dealerCode=${dealerCode}&pageIndex=${pageIndex}&pageSize=${pageSize}`);
+  getByDealer(searchTerm: string = null, dealerCode: any, pageIndex: number, pageSize: number): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/material-transfer/GetByDealerPaged?searchTerm=${searchTerm}&dealerCode=${dealerCode}&pageIndex=${pageIndex}&pageSize=${pageSize}`);
   }
 
   getMaterialIssueId() {
@@ -39,4 +39,9 @@ export class MaterialTransferService {
       }
     });
   }
+
+  downloadExcel() {
+    return this.httpClient.get(`${this.baseUrl}/material-transfer/download`, { responseType: 'blob' });
+  }
+
 }

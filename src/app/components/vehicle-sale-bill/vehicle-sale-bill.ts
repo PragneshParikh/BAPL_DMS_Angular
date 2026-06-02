@@ -10,7 +10,7 @@ import { log } from 'console';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { debounceTime, Subject } from 'rxjs';
-import { ErpOptions } from '../../constant';
+import { BillingTypeOptions, ErpOptions } from '../../constant';
 import { DealerService } from '../../core/services/dealer-service';
 import { StorageService } from '../../core/services/storage';
 
@@ -44,11 +44,12 @@ export class VehicleSaleBill {
   filter: any = {
     fromDate: null,
     toDate: null,
-    erpStatus: ""
+    status: ""
   };
   searchChanged: Subject<string> = new Subject();
   isSuperAdmin: boolean;
   dealerCode: string;
+  billingTypeOptions = BillingTypeOptions;
 
   constructor(private service: VehicleSaleBillService,
     private router: Router,
@@ -81,9 +82,9 @@ export class VehicleSaleBill {
     const from = this.filter.fromDate ? new Date(this.filter.fromDate) : undefined;
 
     const to = this.filter.toDate ? new Date(this.filter.toDate) : undefined;
-    const erpStatus = this.filter.erpStatus ? this.filter.erpStatus : undefined;
+    const Status = this.filter.Status ? this.filter.Status : undefined;
 
-    this.service.getAllVehicleSaleBills(this.dealerCode, this.searchText, from, to, erpStatus)
+    this.service.getAllVehicleSaleBills(this.dealerCode, this.searchText, from, to, Status)
       .subscribe({
         next: (res) => {
           this.vehicleBills = res;
@@ -175,11 +176,13 @@ export class VehicleSaleBill {
     });
   }
 
-  getErpStatusName(value: string | undefined): string {
+  getStatusName(value: string | undefined): string {
+    console.log('Getting status name for value:', value);
     return ErpOptions.find(x => x.value === value)?.name || '';
   }
 
   downloadDealerExcel(): void {
+    this.loader.show();
 
     const from = this.filter.fromDate
       ? new Date(this.filter.fromDate)
@@ -210,7 +213,7 @@ export class VehicleSaleBill {
         this.loader.hide();
 
         this.toaster.show(
-          'Dealer Excel downloaded successfully',
+          'Excel downloaded successfully',
           {
             classname: 'bg-success text-light',
             delay: 3000
@@ -222,5 +225,7 @@ export class VehicleSaleBill {
       }
     });
   }
-
+  getBillingTypeName(id: number): string {
+    return this.billingTypeOptions.find(x => x.id === id)?.value ?? '';
+  }
 }

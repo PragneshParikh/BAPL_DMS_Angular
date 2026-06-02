@@ -77,9 +77,8 @@
             </button>
 
             <!-- <button *ngIf="!isErpLocked && billId && !isInvoiced" class="btn btn-sm btn-primary" -->
-            <button *ngIf="billId" class="btn btn-sm btn-primary"
-                (click)="openRegistrationModal()">
-                Open Registration
+            <button *ngIf="billId && isInvoiced" class="btn btn-sm btn-primary" (click)="openRegistrationModal()">
+                Open Regn./ Ins.
             </button>
 
             <!-- <button *ngIf="!isErpLocked && billId && !isInvoiced && erpStatus !== 'Reserved'"
@@ -208,8 +207,7 @@
                                         </button>
                                         <option class="dropdown-list" value="">Select Financier</option>
 
-                                        <option *ngFor="let f of financiers" [value]="f.ledgerName"
-                                            class="dropdown-list">
+                                        <option *ngFor="let f of financiers" [value]="f.id" class="dropdown-list">
 
                                             {{ f.ledgerName }}
 
@@ -257,11 +255,11 @@
 
                                     <option value="">Select Billing Type</option>
 
-                                    <option *ngFor="let option of billingTypeOptions" [value]="option.value" [disabled]="
-          (model.customerType === 'B2B' && option.value !== 'Dealer Sale/Institutional') ||
-          (model.customerType === 'B2C' && option.value !== 'Counter Sale[single]')
+                                    <option *ngFor="let option of billingTypeOptions" [ngValue]="option.id" [disabled]="
+          (model.customerType === 'B2B' && option.id !== 1) ||
+          (model.customerType === 'B2C' && option.id !== 2)
         ">
-                                        {{ option.name }}
+                                        {{ option.value }}
                                     </option>
 
                                 </select>
@@ -392,24 +390,6 @@
                         <!-- ROW 1 -->
                         <div class="row g-2 align-items-end">
 
-                            <!--Temp-->
-                            <!-- <div class="col-md-3">
-                                <label class="form-label-sm mb-1">Chassis No.<span class="text-danger">*</span></label>
-                                <select [(ngModel)]="model.chassisNo" name="chassisNo"
-                                    [disabled]="model.customerSaleDate != null" class="form-control form-control-sm"
-                                    (change)="onChassisChange()" required #chassisNo="ngModel">
-                                    <option *ngFor="let c of chassisList" [value]="c.chassisNo"
-                                        [disabled]="isChassisUsed(c.chassisNo)">
-
-                                        {{ c.chassisNo }} - {{ c.itemName }} - {{ c.mfgYear }}
-                                    </option>
-                                </select>
-                                <small *ngIf="chassisNo.invalid && (chassisNo.touched || vehicleSaleForm.submitted)"
-                                    class="text-danger mt-1">
-                                    Chassis No is required.
-                                </small>
-                            </div> -->
-
 
                             <div class="col-md-3 position-relative">
                                 <label class="form-label-sm mb-1">
@@ -480,52 +460,90 @@
                                 <input type="number" class="form-control form-control-sm"
                                     [(ngModel)]="model.postGSTDiscount" name="postGSTDiscount">
                             </div>
-                            <ng-container *ngIf="billId">
+                            <!-- <ng-container *ngIf="billId"> -->
 
-                                <!-- THESE FIELDS NEED TO BE SHOWN AFTER SALE -->
+                            <!-- THESE FIELDS NEED TO BE SHOWN AFTER SALE -->
 
-                                <div class="col-md-2">
-                                    <label class="form-label-sm mb-1">Regn No</label>
-                                    <input type="text" class="form-control form-control-sm" #regNo="ngModel"
-                                        [(ngModel)]="model.regNo" name="regNo" readonly>
+                            <div class="col-md-2">
+                                <label class="form-label-sm mb-1">Regn No</label>
+                                <input type="text" class="form-control form-control-sm" #regNo="ngModel"
+                                    [(ngModel)]="model.regNo" name="regNo">
 
-                                </div>
-                                <div class="col-md-1">
-                                    <label class="form-label-sm mb-1">Reg Amt.</label>
-                                    <input type="number" class="form-control form-control-sm" #regAmount="ngModel"
-                                        [(ngModel)]="model.regAmount" name="regAmount" readonly>
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label-sm mb-1">Reg Amt.</label>
+                                <input type="number" class="form-control form-control-sm" #regAmount="ngModel"
+                                    [(ngModel)]="model.regAmount" name="regAmount">
 
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label-sm mb-1">Ins. No</label>
-                                    <input type="text" class="form-control form-control-sm" #insNo="ngModel"
-                                        [(ngModel)]="model.insNo" name="insNo" readonly>
+                            </div>
 
-                                </div>
-                                <div class="col-md-1">
-                                    <label class="form-label-sm mb-1">Ins. Amt</label>
-                                    <input type="number" class="form-control form-control-sm" #insAmount="ngModel"
-                                        [(ngModel)]="model.insAmount" name="insAmount" readonly>
+                            <div class="col-md-3">
+                                <label class="form-label form-label-sm">
+                                    Insurance Party
+                                </label>
 
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label-sm mb-1">Ins Start Date</label>
-                                    <input type="date" class="form-control form-control-sm" #insStartDate="ngModel"
-                                        [(ngModel)]="model.insStartDate" name="insStartDate " required readonly>
+                                <div class="d-flex position-relative">
 
-                                </div>
+                                    <input type="text" class="form-control form-control-sm" name="insuranceName"
+                                        [(ngModel)]="model.insuranceName" #insuranceName="ngModel"
+                                        (input)="filterInsurance()" (focus)="onInsuranceFocus()"
+                                        (blur)="onInsuranceBlur()" autocomplete="off" />
 
-                                <div class="col-md-2">
-                                    <label class="form-label-sm mb-1">Ins Exp Date</label>
-                                    <input type="date" class="form-control form-control-sm" #insExpDate="ngModel"
-                                        [(ngModel)]="model.insExpDate" name="insExpDate" required readonly>
-                                    <div *ngIf="insExpDate.invalid && (insExpDate.touched || vehicleSaleForm.submitted)"
-                                        class="text-danger text-xs mt-1">
-                                        Ins Exp Date is required.
+                                    <!-- AUTOCOMPLETE DROPDOWN -->
+                                    <ul *ngIf="showInsuranceDropdown && filteredInsurance?.length > 0"
+                                        class="list-group position-absolute w-100 small-dropdown"
+                                        style="top:100%; z-index:1000;">
+
+                                        <li class="list-group-item list-group-item-action"
+                                            *ngFor="let party of filteredInsurance"
+                                            (mousedown)="selectInsurance(party)">
+                                            {{ party.ledgerName }}
+                                        </li>
+
+                                    </ul>
+                                    <div *ngIf="insuranceNotFound"
+                                        class="list-group-item position-absolute w-100 bg-white border text-danger text-center small-dropdown"
+                                        style="top:100%; z-index:1000;">
+                                        No insurance found
                                     </div>
+
                                 </div>
 
-                            </ng-container>
+                            </div>
+
+
+
+
+                            <div class="col-md-2">
+                                <label class="form-label-sm mb-1">Ins. No</label>
+                                <input type="text" class="form-control form-control-sm" #insNo="ngModel"
+                                    [(ngModel)]="model.insNo" name="insNo">
+
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label-sm mb-1">Ins. Amt</label>
+                                <input type="number" class="form-control form-control-sm" #insAmount="ngModel"
+                                    [(ngModel)]="model.insAmount" name="insAmount">
+
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label-sm mb-1">Ins Start Date</label>
+                                <input type="date" class="form-control form-control-sm" #insStartDate="ngModel"
+                                    [(ngModel)]="model.insStartDate" name="insStartDate " required>
+
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label-sm mb-1">Ins Exp Date</label>
+                                <input type="date" class="form-control form-control-sm" #insExpDate="ngModel"
+                                    [(ngModel)]="model.insExpDate" name="insExpDate" required>
+                                <div *ngIf="insExpDate.invalid && (insExpDate.touched || vehicleSaleForm.submitted)"
+                                    class="text-danger text-xs mt-1">
+                                    Ins Exp Date is required.
+                                </div>
+                            </div>
+
+                            <!-- </ng-container> -->
 
 
 
@@ -605,6 +623,7 @@
                                                     (click)="deleteVehicle(i)" [disabled]="isSubmitted">
                                                     <i class="ri-delete-bin-line"></i>
                                                 </button>
+
                                             </td>
 
                                             <td>{{ i + 1 }}</td>
@@ -624,8 +643,8 @@
                                             </td>
 
                                             <td>{{ row.rate }}</td>
-                                            <td>{{ row.regAmt }}</td>
-                                            <td>{{ row.insAmt }}</td>
+                                            <td>{{ row.regAmount }}</td>
+                                            <td>{{ row.insuranceAmount }}</td>
                                             <td>{{ row.fameIIAmnt}}</td>
                                             <td>{{ row.taxableAmount ?? row.amount}}</td>
 

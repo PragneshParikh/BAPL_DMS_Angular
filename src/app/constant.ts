@@ -81,8 +81,8 @@ export const SaleTypeOptions = [
 ];
 
 export const BillingTypeOptions = [
-    { name: 'Dealer Sale/Institutional', value: 'Dealer Sale/Institutional' },
-    { name: 'Counter Sale[Single]', value: 'Counter Sale[single]' }
+    { id: 1, value: 'Dealer Sale/Institutional' },
+    { id: 2, value: 'Counter Sale[Single]' }
 ];
 
 export const BillFromOptions = [
@@ -102,11 +102,7 @@ export const IssueTypes = [
     { id: 1, name: 'Paid' },
     { id: 2, name: 'U/W' },
     { id: 3, name: 'FSC' },
-    { id: 4, name: 'Goodwill' },
-    // { name: 'Paid', value: 'paid' },
-    // { name: 'U/W', value: 'u/w' },
-    // { name: 'FOC', value: 'foc' },
-    // { name: 'Goodwill', value: 'goodwill' }
+    { id: 4, name: 'Goodwill' }
 ]
 
 export const userRole = [
@@ -116,7 +112,7 @@ export const userRole = [
 
 export const ErpOptions = [
     { name: 'Invoiced', value: 'Invoiced' },
-    {name: 'Proforma Created', value: 'PerformaCreated'}
+    { name: 'Proforma Created', value: 'PerformaCreated' }
     //     { name: 'Pending ERP Submission', value: 'Pending' }
 ];
 

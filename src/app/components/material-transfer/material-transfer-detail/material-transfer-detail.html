@@ -70,8 +70,9 @@
                                     <div class="input-group input-group-sm">
                                         <select class="form-select form-select-sm" name="itemName"
                                             [(ngModel)]="newItem.itemId" (ngModelChange)="onChangeItem($event)">
-                                            <option *ngFor="let item of itemList;" [value]="item.id">{{
-                                                item.itemdesc }}</option>
+                                            <option *ngFor="let item of itemList;" [value]="item.id">
+                                                {{item.itemcode}} - {{ item.itemdesc }}
+                                            </option>
                                         </select>
                                     </div>
                                 </div>
@@ -87,42 +88,29 @@
                                 </div>
                                 <div class="col-md-1">
                                     <label class="form-label">Quantity</label>
-                                    <!-- <input type="number" class="form-control form-control-sm" name="quantity"
-                                        #quantity="ngModel" [(ngModel)]="newItem.quantity"
-                                        (blur)="onBlurQuantity(quantity.value)" required /> -->
                                     <input type="text" class="form-control form-control-sm" name="quantity"
                                         #quantity="ngModel" [(ngModel)]="newItem.quantity" maxlength="4"
                                         (input)="onQuantityInput($event)" (blur)="onBlurQuantity(quantity.value)"
                                         required />
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-1">
                                     <label class="form-label">Item Rate</label>
                                     <input type="number" class="form-control form-control-sm" name="itemRate"
                                         #itemRate="ngModel" [(ngModel)]="newItem.itemRate" [disabled]="true">
                                 </div>
-                                <!-- <div class="col-md-2">
-                                    <label class="form-label">Retrun Qty</label>
-                                    <input type="number" class="form-control form-control-sm" name="returnQty"
-                                        #returnQty="ngModel" [(ngModel)]="newItem.returnQty" [disabled]="true" />
-                                </div> -->
-                            </div>
-
-                            <div class="row g-1 mt-1">
                                 <div class="col-md-2">
                                     <label class="form-label">Serial No</label>
                                     <input type="text" class="form-control form-control-sm" name="serialNo"
                                         #serialNo="ngModel" [(ngModel)]="newItem.serialNo" readonly>
                                 </div>
+                            </div>
+
+                            <div class="row g-1 mt-1">
                                 <div class="col-md-2">
                                     <label class="form-label">Remarks</label>
                                     <input type="text" class="form-control form-control-sm" name="remarks"
                                         #remarks="ngModel" [(ngModel)]="newItem.remarks">
                                 </div>
-                                <!-- <div class="col-md-1">
-                                    <label class="form-label">Item Rec.</label>
-                                    <input type="text" class="form-control form-control-sm" name="itemReceived"
-                                        #itemReceived="ngModel" [(ngModel)]="newItem.received" readonly>
-                                </div> -->
                                 <div class="col-md-3">
                                     <label class="form-label">Technician</label>
                                     <select class="form-select form-select-sm" name="technician" #technician="ngModel"
@@ -131,11 +119,6 @@
                                         </option>
                                     </select>
                                 </div>
-                                <!-- <div class="col-md-1">
-                                    <label class="form-label">Valid Days</label>
-                                    <input type="text" class="form-control form-control-sm" name="validDays"
-                                        #validDays="ngModel" [(ngModel)]="newItem.validdays" readonly>
-                                </div> -->
                                 <div class="col-md-1">
                                     <label class="form-label">Issue Type</label>
                                     <select class="form-select form-select-sm" name="issueType" #issueType="ngModel"
@@ -144,18 +127,6 @@
                                             {{ issue.name }}
                                         </option>
                                     </select>
-                                </div>
-                                <!-- <div class="col-md-1">
-                                    <label class="form-label">CIR/TAR</label>
-                                    <input type="text" class="form-control form-control-sm" name="cirTar"
-                                        #cirTar="ngModel" [(ngModel)]="newItem.cir" readonly>
-                                </div> -->
-                                <div class="col-md-1">
-                                    <label class="form-label">&nbsp;</label><br />
-                                    <button type="button" class="btn btn-primary btn-sm"
-                                        (click)="openLabourRateDialog()">
-                                        Labour
-                                    </button>
                                 </div>
                                 <div class="col-md-1">
                                     <label class="form-label">&nbsp;</label><br>
@@ -257,22 +228,6 @@
                             </tfoot>
 
                         </table>
-                    </div>
-
-                    <div class="accordion mt-3" id="accordionExample">
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button bg-primary text-white py-2" data-bs-toggle="collapse"
-                                    data-bs-target="#previouseMaterials" aria-expanded="false"
-                                    aria-controls="previouseMaterials">
-                                    Previously Issued Materials
-                                </button>
-                            </h2>
-
-                            <div id="previouseMaterials" class="accordion-collapse collapse show">
-                                <div class="accordion-body py-2"> </div>
-                            </div>
-                        </div>
                     </div>
 
                     <div>
