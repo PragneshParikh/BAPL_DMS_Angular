@@ -4,16 +4,15 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
-import { NewsBulletinService } from '../../core/services/news-bulletin';
-import { error } from 'console';
+import { CircularService } from '../../core/services/circular';
 
 @Component({
-  selector: 'app-add-news-bulletin',
+  selector: 'app-add-circular',
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
-  templateUrl: './add-news-bulletin.html',
-  styleUrl: './add-news-bulletin.scss',
+  templateUrl: './add-circular.html',
+  styleUrl: './add-circular.scss',
 })
-export class AddNewsBulletin implements OnInit {
+export class AddCircular implements OnInit {
 
   @Input() newsData: any;
 
@@ -37,18 +36,18 @@ export class AddNewsBulletin implements OnInit {
     public activeModal: NgbActiveModal,
     private loader: LoaderService,
     private toast: ToastService,
-    private newsBulletinService: NewsBulletinService
+    private circularService: CircularService,
   ) { }
 
   ngOnInit(): void {
     if (this.newsData) {
-      this.getNewsBulletinDataByDate();
+      this.getCircularDataByDate();
     }
   }
 
-  getNewsBulletinDataByDate() {
+  getCircularDataByDate() {
     this.loader.show();
-    this.newsBulletinService.getById(this.newsData.id).subscribe({
+    this.circularService.getById(this.newsData.id).subscribe({
       next: (res: any) => {
         this.formData = res;
         this.loader.hide();
