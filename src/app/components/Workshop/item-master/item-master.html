@@ -258,75 +258,92 @@
       </div>
       <div class="col-md-2">
         <label class="form-label">Min Bill QTY</label>
-        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+        <input class="form-control form-control-sm" [(ngModel)]="selectedItem.minBillQty">
       </div>
       <div class="col-md-2">
         <label class="form-label">Min Order QTY</label>
-        <input class="form-control form-control-sm" [value]="'1.00'" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.minOrderQty">
       </div>
       <div class="col-md-2">
         <label class="form-label">Warranty Period</label>
-        <input class="form-control form-control-sm" [value]="'0'" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.warrantyPeriod">
       </div>
       <div class="col-md-2">
         <label class="form-label">Month/Year</label>
-        <input class="form-control form-control-sm" [value]="'Month'" readonly>
+        <select class="form-select form-select-sm" name="durationType" [(ngModel)]="selectedItem.warrantyDurationType"
+          #durationType="ngModel">
+          <option *ngFor="let durationType of durationTypes" [value]="durationType.id">
+            {{ durationType.title }}
+          </option>
+        </select>
       </div>
       <div class="col-md-2">
         <label class="form-label">Warranty Kms.</label>
-        <input class="form-control form-control-sm" [value]="'0'" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.warrantyKms">
       </div>
       <div class="col-md-2">
-        <label class="form-label">Item Wrnt. Period</label>
-        <input class="form-control form-control-sm" [value]="'No'" readonly>
+        <label class="form-label">Item Wrnt. Approval</label> <br>
+        <div class="form-check form-switch d-inline-block">
+          <input type="checkbox" class="form-check-input" id="isWarrantyApproval" name="isWarrantyApproval"
+            #isWarrantyApproval="ngModel" [(ngModel)]="selectedItem.isWarrantyApproval">
+          <label class="form-check-label small" for="isWarrantyApproval">
+            {{ selectedItem.isWarrantyApproval ? 'Y' : 'N' }}
+          </label>
+        </div>
       </div>
       <div class="col-md-2">
         <label class="form-label">VOR Rate</label>
-        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.vorRate">
       </div>
       <div class="col-md-2">
-        <label class="form-label">VOR Specific</label>
-        <input class="form-control form-control-sm" [value]="'Yes'" readonly>
+        <label class="form-label">VOR Specific</label><br>
+        <div class="form-check form-switch d-inline-block">
+          <input type="checkbox" class="form-check-input" name="isVOR" #isVOR="ngModel"
+            [(ngModel)]="selectedItem.isVOR">
+          <label class="form-check-label small" for="isVOR">
+            {{ selectedItem.isVOR ? 'Y' : 'N' }}
+          </label>
+        </div>
       </div>
       <div class="col-md-12">
         <label class="form-label">Remarks</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [(ngModel)]="selectedItem.remarks">
       </div>
       <!-- Checkbox info -->
       <div class="row">
         <div class="col-md-2">
-          <label class="form-check-label" for="formCheck6">IS Exempted</label> |
-          <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
+          <input class="form-check-input" type="checkbox" id="isExempted" [(ngModel)]="selectedItem.isExempted">
+          <label class="form-check-label" for="isExempted">&nbsp; IS Exempted</label>
         </div>
         <div class="col-md-2">
-          <label class="form-check-label" for="formCheck6">ToolKit/First Aid.</label> |
-          <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
+          <input class="form-check-input" type="checkbox" id="toolkitFirstAid"
+            [(ngModel)]="selectedItem.isToolkitFirstAid">
+          <label class="form-check-label" for="toolkitFirstAid"> &nbsp; ToolKit/First Aid.</label>
         </div>
         <div class="col-md-2">
-          <label class="form-check-label" for="formCheck6">Must Stock</label> |
-          <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
+          <input class="form-check-input" type="checkbox" id="mustStock" [(ngModel)]="selectedItem.isStockRequired">
+          <label class="form-check-label" for="mustStock">&nbsp; Must Stock</label>
         </div>
         <div class="col-md-2">
-          <label class="form-check-label" for="formCheck6">Save as Helmet</label> |
-          <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
+          <input class="form-check-input" type="checkbox" id="isHelmet" [(ngModel)]="selectedItem.isHelmet">
+          <label class="form-check-label" for="isHelmet">&nbsp; Save as Helmet</label>
         </div>
         <div class="col-md-2">
-          <label class="form-check-label" for="formCheck6">Non-Inventory</label> |
-          <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
+          <input class="form-check-input" type="checkbox" id="isInventory" [(ngModel)]="selectedItem.isInventory">
+          <label class="form-check-label" for="isInventory">&nbsp; Non-Inventory</label>
         </div>
         <div class="col-md-2">
-          <label class="form-check-label" for="formCheck6">In-eligible Input</label> |
-          <input class="form-check-input" type="checkbox" id="formCheck6" checked [value]="" readonly>
+          <input class="form-check-input" type="checkbox" id="ineligibleInput"
+            [(ngModel)]="selectedItem.isInEligibleInput">
+          <label class="form-check-label" for="ineligibleInput"> &nbsp; In-eligible Input</label>
         </div>
       </div>
-
-
-
       <!-- end checkbox -->
     </div>
   </div>
   <div class="modal-footer">
-    <button class="btn btn-light" (click)="modal.close()">Close</button>
+    <button class="btn btn-primary btn-sm" (click)="updateItem()">Update</button>
+    <button class="btn btn-danger btn-sm" (click)="modal.close()">Close</button>
   </div>
 </ng-template>
 
