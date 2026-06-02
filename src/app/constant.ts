@@ -81,8 +81,8 @@ export const SaleTypeOptions = [
 ];
 
 export const BillingTypeOptions = [
-    { name: 'Dealer Sale/Institutional', value: 'Dealer Sale/Institutional' },
-    { name: 'Counter Sale[Single]', value: 'Counter Sale[single]' }
+    { id: 1, value: 'Dealer Sale/Institutional' },
+    { id: 2, value: 'Counter Sale[Single]' }
 ];
 
 export const BillFromOptions = [
