@@ -29,7 +29,7 @@ import { JobSearch } from '../../dialogs/job-search/job-search';
 })
 export class PartsPo implements OnInit {
   locationList: any[] = [];
-  jobId: number = 0;
+  jobId: number | null = null;
 
   itemList: any[] = [];
   kitList: any[] = [];
@@ -623,6 +623,10 @@ export class PartsPo implements OnInit {
   // ───────────────────────────────────────────────────────────────────────────
 
   onSave() {
+    if (this.partsPOData.subPoType === "VOR" && !this.jobId) {
+      this.toaster.show('Please select a Job Card for VOR orders.', { classname: 'bg-danger text-white', delay: 5000 });
+      return;
+    }
 
     if (this.isSaving) return;
     this.isSaving = true;
@@ -640,12 +644,9 @@ export class PartsPo implements OnInit {
       LocCode: this.partsPOData.selectedLocation,
       LedgerCode: this.partsPOData.partyName,
       IsAgainstKit: this.partsPOData.isKit,
+      jobId: this.jobId,
       createdBy: userId,
       createdDate: new Date(),
-      // Items: this.pagedPurchaseDetails.map((item) => ({
-      //   ItemCode: item.partNo,
-      //   Qty: item.quantity
-      // }))
       Items: this.partsPOData.isKit
         ? this.purchaseDetails.map((item: any) => ({
           ItemCode: item.partNo,
@@ -700,8 +701,6 @@ export class PartsPo implements OnInit {
     this.loader.show();
 
     const dealerCode = this.storageService.getDealerCode();
-
-    console.log(this.pagedPurchaseDetails);
 
     const soHeader = {
       soHeader: {
