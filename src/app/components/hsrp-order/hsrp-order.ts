@@ -20,7 +20,7 @@ import { log } from 'console';
   providers: [FlatpickrDefaults, FlatpickrModule],
 })
 export class HSRPOrder implements OnInit {
-selectedType:string="order";
+  selectedType: string = "order";
   selectAll = false;
 
   model = {
@@ -56,20 +56,20 @@ selectedType:string="order";
     private toasterService: ToastService,
     private loaderService: LoaderService,
     private route: ActivatedRoute,
-    private router:Router,
+    private router: Router,
     private prefixService: PrefixService
   ) { }
 
   async ngOnInit() {
 
-     const today = new Date();
-  const last7Days = new Date();
-  last7Days.setDate(today.getDate() - 7);
+    const today = new Date();
+    const last7Days = new Date();
+    last7Days.setDate(today.getDate() - 7);
 
-  this.filter = {
-    fromDate: last7Days,
-    toDate: today
-  };
+    this.filter = {
+      fromDate: last7Days,
+      toDate: today
+    };
     this.orderId = this.route.snapshot.paramMap.get('id');
 
     this.isSuperAdmin =
@@ -126,16 +126,15 @@ selectedType:string="order";
         }
       });
   }
-  onFilterChange(){
+  onFilterChange() {
     this.getPendingHSRPOrder();
   }
 
-  onTypeChange(){
-  if(this.selectedType ==="inward")
-    {
-this.router.navigate(['/hsrp-inward']);
+  onTypeChange() {
+    if (this.selectedType === "inward") {
+      this.router.navigate(['/hsrp-inward']);
+    }
   }
-}
   // ---------------- LIST ----------------
   getPendingHSRPOrder(): void {
 
@@ -148,12 +147,12 @@ this.router.navigate(['/hsrp-inward']);
     this.hsrpService.getPendingHSRPOrders(dealerCode, this.formatDate(this.filter.fromDate), this.formatDate(this.filter.toDate)).subscribe({
       next: (res: any) => {
         this.orders = (res || []).map(item => ({
-  ...item,
-  isFrontPlate: item.isFrontPlate ?? true,
-  isRearPlate: item.isRearPlate ?? true
-}));
+          ...item,
+          isFrontPlate: item.isFrontPlate ?? true,
+          isRearPlate: item.isRearPlate ?? true
+        }));
 
-this.filteredOrders = [...this.orders];
+        this.filteredOrders = [...this.orders];
         this.updatePagination();
       },
       error: (err) => {
@@ -163,11 +162,11 @@ this.filteredOrders = [...this.orders];
   }
 
   formatDate(date: Date | null): string | undefined {
-  if (!date) return undefined;
+    if (!date) return undefined;
 
-  const d = new Date(date);
-  return d.toISOString().split('T')[0]; // yyyy-MM-dd
-}
+    const d = new Date(date);
+    return d.toISOString().split('T')[0]; // yyyy-MM-dd
+  }
 
   // ---------------- EDIT ----------------
   loadOrderForEdit(id: any) {
@@ -208,13 +207,13 @@ this.filteredOrders = [...this.orders];
     this.filteredOrders = this.orders.filter(x =>
       x.saleBillNo?.toLowerCase().includes(term) ||
       x.customerName?.toLowerCase().includes(term) ||
-      x.chassisNo?.toLowerCase().includes(term)||
+      x.chassisNo?.toLowerCase().includes(term) ||
       x.regNo?.toLowerCase().includes(term) ||
-      x.invoiceNo?.toLowerCase().includes(term)||
-      x.supplierName?.toLowerCase().includes(term)||
-      x.orderNo?.toLowerCase().includes(term)||
-      x.hsrpstatus?.toLowerCase().includes(term)||
-      x.colour?.toLowerCase().includes(term)||
+      x.invoiceNo?.toLowerCase().includes(term) ||
+      x.supplierName?.toLowerCase().includes(term) ||
+      x.orderNo?.toLowerCase().includes(term) ||
+      x.hsrpstatus?.toLowerCase().includes(term) ||
+      x.colour?.toLowerCase().includes(term) ||
       x.customerMobile?.toLowerCase().includes(term)
     );
 
@@ -255,34 +254,33 @@ this.filteredOrders = [...this.orders];
 
     let hasError = false;
 
-  this.paginatedOrders.forEach(item => {
-    if (item.selected &&
+    this.paginatedOrders.forEach(item => {
+      if (item.selected &&
         (item.isFrontPlate == null || item.isRearPlate == null)) {
-      item.hasError = true;
-      hasError = true;
-    } else {
-      item.hasError = false;
-    }
-  });
-
-  if (hasError) {
-    this.toasterService.show('Please complete plate selection for highlighted rows.',{
-      classname:'bg-warning text-white',
-      delay:5000
+        item.hasError = true;
+        hasError = true;
+      } else {
+        item.hasError = false;
+      }
     });
-    return;
-  }
+
+    if (hasError) {
+      this.toasterService.show('Please complete plate selection for highlighted rows.', {
+        classname: 'bg-warning text-white',
+        delay: 5000
+      });
+      return;
+    }
 
     const dealerCode = this.storageService.getDealerCode();
     const selectedItems = this.paginatedOrders.filter(x => x.selected);
 
     const missingRegistration = selectedItems.filter(x => !x.regNo || x.regNo.trim() === '');
-    if(missingRegistration.length > 0)
-    {
-     const chassisList = selectedItems.filter(x => !x.regNo || x.regNo.trim() === '').map(x => x.chassisNo);
-      this.toasterService.show(`Registration number is missing for chassis: ${chassisList.join(', ')}`,{
-        classname:'bg-warning text-white',
-        delay:5000
+    if (missingRegistration.length > 0) {
+      const chassisList = selectedItems.filter(x => !x.regNo || x.regNo.trim() === '').map(x => x.chassisNo);
+      this.toasterService.show(`Registration number is missing for chassis: ${chassisList.join(', ')}`, {
+        classname: 'bg-warning text-white',
+        delay: 5000
       });
       return;
     }
@@ -296,7 +294,7 @@ this.filteredOrders = [...this.orders];
     }
 
     const payload = selectedItems.map(item => ({
-      id:item.id??null,
+      id: item.id ?? null,
       dealerCode: dealerCode,
       chassisNo: item.chassisNo,
       regNo: item.regNo,
@@ -311,52 +309,50 @@ this.filteredOrders = [...this.orders];
       orderDate: this.model.orderDate,
       orderNo: this.model.orderNo
     }));
-if(this.isEditMode)
-{
-this.hsrpService.updateBulkHSRPOrder(payload).subscribe({
-    next: () => {
-      this.toasterService.show('HSRP Order Saved', {
-        classname: 'bg-success text-white',
-        delay: 5000
-      });
+    if (this.isEditMode) {
+      this.hsrpService.updateBulkHSRPOrder(payload).subscribe({
+        next: () => {
+          this.toasterService.show('HSRP Order Saved', {
+            classname: 'bg-success text-white',
+            delay: 5000
+          });
 
-      this.getPendingHSRPOrder();
-    },
-    error: () => {
-      this.toasterService.show('Error saving order', {
-        classname: 'bg-danger text-white',
-        delay: 5000
+          this.getPendingHSRPOrder();
+        },
+        error: () => {
+          this.toasterService.show('Error saving order', {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          });
+        }
       });
     }
-  });
-}
-else{
+    else {
 
-  this.hsrpService.createBulkHSRPOrder(payload).subscribe({
-    next: () => {
-      this.toasterService.show('HSRP Order Saved', {
-        classname: 'bg-success text-white',
-        delay: 5000
-      });
+      this.hsrpService.createBulkHSRPOrder(payload).subscribe({
+        next: () => {
+          this.toasterService.show('HSRP Order Saved', {
+            classname: 'bg-success text-white',
+            delay: 5000
+          });
 
-      this.getPendingHSRPOrder();
-    },
-    error: () => {
-      this.toasterService.show('Error saving order', {
-        classname: 'bg-danger text-white',
-        delay: 5000
+          this.getPendingHSRPOrder();
+        },
+        error: () => {
+          this.toasterService.show('Error saving order', {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          });
+        }
       });
     }
-  });
-}
   }
 
   hasSelection(): boolean {
     return this.filteredOrders.some(x => x.selected);
   }
 
-  navigateToListingPage()
-  {
+  navigateToListingPage() {
     this.router.navigate(['/hsrp-order-list']);
   }
 }

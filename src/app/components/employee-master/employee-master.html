@@ -7,31 +7,27 @@
 <!-- PAGE HEADER -->
 <!-- ===================================================== -->
 
-<div
-    class="d-flex justify-content-between align-items-center mb-2">
+<div class="d-flex justify-content-between align-items-center mb-2">
 
-    <h4 class="fw-bold mb-0">
+  <h4 class="fw-bold mb-0">
 
-        {{
-          isEditMode
-          ? 'Edit Employee'
-          : 'Add Employee'
-        }}
+    {{
+    isEditMode
+    ? 'Edit Employee'
+    : 'Add Employee'
+    }}
 
-    </h4>
+  </h4>
 
-    <!-- BACK BUTTON -->
+  <!-- BACK BUTTON -->
 
-    <button
-        type="button"
-        class="btn btn-secondary btn-sm"
-        (click)="backToList()">
+  <button type="button" class="btn btn-secondary btn-sm" (click)="backToList()">
 
-        <i class="ri-arrow-left-line"></i>
+    <i class="ri-arrow-left-line"></i>
 
-        Back
+    Back
 
-    </button>
+  </button>
 
 </div>
 <!-- ===================================================== -->

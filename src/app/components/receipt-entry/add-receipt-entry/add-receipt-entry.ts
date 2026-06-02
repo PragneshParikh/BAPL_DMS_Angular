@@ -87,7 +87,7 @@ export class AddReceiptEntry implements OnInit {
     private navigation: Router,
     private loader: LoaderService,
     public toaster: ToastService,
-    private prefixService: PrefixService
+    public prefixService: PrefixService ,
   ) {
     this.router.paramMap.subscribe(params => {
       this.id = params.get('id');

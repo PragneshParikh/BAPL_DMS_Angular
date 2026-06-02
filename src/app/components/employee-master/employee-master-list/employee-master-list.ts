@@ -1,35 +1,22 @@
 import { Component, OnInit } from '@angular/core';
-
 import { CommonModule } from '@angular/common';
-
-import {
-  RouterLink
-} from '@angular/router';
-
-import { EmployeeMasterService }
-from '../../../core/services/employee-master.service';
-
-import { EmployeeMasterComponent }
-from '../employee-master';
+import { RouterLink } from '@angular/router';
+import { EmployeeMasterComponent } from '../employee-master';
+import { EmployeeMasterService } from '../../../core/services/employee-master';
 
 @Component({
   selector: 'app-employee-master-list',
-
-  standalone: true,
-
   imports: [
     CommonModule,
     RouterLink,
     EmployeeMasterComponent
   ],
-
   templateUrl: './employee-master-list.html',
-
   styleUrl: './employee-master-list.scss',
 })
 
 export class EmployeeMasterList
-implements OnInit {
+  implements OnInit {
 
   // =====================================
   // VARIABLES
@@ -45,10 +32,7 @@ implements OnInit {
   // CONSTRUCTOR
   // =====================================
 
-  constructor(
-    private employeeService:
-    EmployeeMasterService
-  ) { }
+  constructor(private employeeService: EmployeeMasterService) { }
 
   // =====================================
   // INIT
