@@ -136,4 +136,19 @@ export class AddCircular implements OnInit {
       this.formData.publishDate = null;
     }
   }
+
+  checkDuplicate(args: any) {
+    const category = args.target.value; // yyyy-MM-dd
+
+    const isDuplicate = this.circularDataList.some((x: any) =>
+      x.publishDate?.split('T')[0] === this.formData.publishDate &&
+      x.category === category &&
+      x.id !== this.formData.id
+    );
+
+    if (isDuplicate) {
+      this.toast.show(`${this.formData.category} circular already exists for this date.`, { classname: 'bg-warning text-dark', delay: 5000 });
+      this.formData.publishDate = null;
+    }
+  }
 }
