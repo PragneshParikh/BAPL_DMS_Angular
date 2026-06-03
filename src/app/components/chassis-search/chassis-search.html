@@ -17,13 +17,8 @@
                 <!-- ===================================== -->
 
                 <div class="row mb-4">
-
                     <div class="col-md-4">
-
-                        <label class="form-label">
-                            Upload Chassis Excel
-                        </label>
-
+                        <label class="form-label"> Upload Chassis Excel </label>
                         <input type="file" class="form-control form-control-sm" accept=".xlsx,.xls"
                             (change)="onFileSelect($event)">
                     </div>
@@ -35,9 +30,7 @@
                         </label>
 
                         <div>
-
                             <button type="button" class="btn btn-success btn-sm" (click)="uploadExcel()">
-
                                 Upload Excel
                             </button>
 
@@ -56,13 +49,7 @@
                 <form #chassisSearchForm="ngForm" (ngSubmit)="onSubmit(chassisSearchForm)">
 
                     <div class="row mb-2">
-
-                        <div class="col-md-3">
-
-                            <label class="form-label">
-                                Chassis Number
-                            </label>
-
+                        <div class="col-md-3"> <label class="form-label"> Chassis Number </label>
                             <input type="text" class="form-control form-control-sm" name="chassisNumber"
                                 #chassisNumber="ngModel" maxlength="17" minlength="17"
                                 [(ngModel)]="formData.chassisNumber" style="text-transform: uppercase;" required>
@@ -70,9 +57,7 @@
                             @if (chassisNumber.invalid && chassisNumber.touched) {
 
                             <small class="text-danger">
-
                                 Chassis Number is required.
-
                             </small>
 
                             }
@@ -81,18 +66,14 @@
                             || chassisNumber.errors?.['maxlength']) {
 
                             <small class="text-danger">
-
                                 Chassis Number must be exactly
                                 17 characters long.
-
                             </small>
-
                             }
 
                         </div>
 
                         <div class="col-md-3">
-
                             <label class="form-label">
                                 &nbsp;
                             </label>
@@ -101,12 +82,10 @@
 
                             <button type="submit" [disabled]="chassisSearchForm.invalid"
                                 class="btn btn-primary btn-sm me-1">
-
                                 Search
                             </button>
 
                             <button type="button" (click)="resetForms()" class="btn btn-primary btn-sm">
-
                                 Reset
                             </button>
 
@@ -125,88 +104,49 @@
                 <form>
 
                     <div class="row mb-2">
-
-                        <div class="col-md-3">
-
-                            <label class="form-label">
-                                Engine Number
-                            </label>
-
+                        <div class="col-md-3"> <label class="form-label"> Engine Number </label>
                             <input type="text" class="form-control form-control-sm" [value]="vinData.motorNo"
                                 style="text-transform: uppercase;" disabled>
-
                         </div>
 
                         <div class="col-md-3">
-
-                            <label class="form-label">
-                                Chassis Number
-                            </label>
-
+                            <label class="form-label"> Chassis Number </label>
                             <input type="text" class="form-control form-control-sm" [value]="vinData.chassisNo"
                                 style="text-transform: uppercase;" disabled>
-
                         </div>
 
                         <div class="col-md-3">
-
-                            <label class="form-label">
-                                Defects
-                            </label>
-
+                            <label class="form-label"> Defects </label>
                             <input type="text" class="form-control form-control-sm" [value]="vinData.pdiStatus"
                                 disabled>
-
                         </div>
 
                         <div class="col-md-3">
-
-                            <label class="form-label">
-                                Item Name
-                            </label>
-
+                            <label class="form-label"> Item Name </label>
                             <input type="text" class="form-control form-control-sm" [value]="vinData.itemname" disabled>
-
                         </div>
 
                         <div class="col-md-3">
-
-                            <label class="form-label">
-                                Color
-                            </label>
-
+                            <label class="form-label"> Color </label>
                             <input type="text" class="form-control form-control-sm" [value]="vinData.colorname"
                                 disabled>
-
                         </div>
 
                         <div class="col-md-3">
-
-                            <label class="form-label">
-                                Current Location
-                            </label>
-
+                            <label class="form-label">Current Location </label>
                             <input type="text" class="form-control form-control-sm" [value]="vinData.locname" disabled>
-
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label">
-                                Purchase Details
-                            </label>
-
+                            <label class="form-label"> Purchase Details </label>
                             <textarea class="form-control form-control-sm" rows="3" [value]="purchaseDetails" readonly>
-    </textarea>
+                               </textarea>
                         </div>
 
                         <div class="col-md-3">
-
-                            <label class="form-label">
-                                Sale Details
-                            </label>
-
-                            <textarea class="form-control form-control-sm" rows="3" [value]="saleDetails" disabled>
-</textarea>
+                            <label class="form-label"> Sale Details </label>
+                            <textarea class="form-control form-control-sm" rows="3" [value]="saleDetails"
+                                disabled></textarea>
                         </div>
 
                     </div>

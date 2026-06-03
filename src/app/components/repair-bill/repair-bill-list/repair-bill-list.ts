@@ -6,9 +6,9 @@ import { NgbPagination, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 import { RepairBillSearchModel } from '../../../ViewModels/RepairBillModel';
 import { StorageService } from '../../../core/services/storage';
-import { ReceiptEntryService } from '../../../core/services/receipt-entry-service';
 import { RepairBillService } from '../../../core/services/repair-bill-service';
 import { LocationName } from '../../../ViewModels/ReceiptEntryModel';
+import { LocationMasterService } from '../../../core/services/location-master-service';
 
 @Component({
   selector: 'app-repair-bill-list',
@@ -35,7 +35,7 @@ export class RepairBillList implements OnInit {
   constructor(
     private router: Router,
     private storageService: StorageService,
-    private receiptEntryService: ReceiptEntryService,
+    private locationService: LocationMasterService,
     private repairBillService: RepairBillService
   ) { }
 
@@ -59,7 +59,7 @@ export class RepairBillList implements OnInit {
 
     const dealerCode = this.storageService.getDealerCode();
 
-    this.receiptEntryService.getLocationList(dealerCode).subscribe({
+    this.locationService.getLocationList(dealerCode).subscribe({
       next: (data: LocationName[]) => {
         this.locations = data;
       },

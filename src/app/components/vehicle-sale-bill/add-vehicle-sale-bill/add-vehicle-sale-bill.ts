@@ -214,7 +214,6 @@ getInsuranceCompanies(){
   this.receiptEntryService.getLedgerByType('Insurance').subscribe({
       next: (res) => {
         this.insurance = res;
-console.log('Insurance API Response:', res);  
       }
     });
 }
@@ -253,7 +252,6 @@ onInsuranceBlur() {
 
   loadBillForEdit(bill: any) {
     this.loader.show();
-    console.log(bill,"is loading");
     
     //  Header fields
     this.model.saleBillNo = bill.saleBillNo;
@@ -361,8 +359,6 @@ this.model.location = locationObj
       .subscribe({
         next: (res) => {
           this.chassisList = res;
-          console.log('Chassis API Response:', res);
-
           if (callback) callback();
         },
         error: () => {
@@ -381,7 +377,6 @@ this.model.location = locationObj
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
         this.loader.hide();
-        console.log('Bill Data:', res);
         this.selectedCustomerId = res.ledgerId;
         this.Status = res.status || '';
         this.isErpLocked =
@@ -416,8 +411,6 @@ this.model.location = locationObj
 
     this.locationService.getLocationByDealerCode(dealerCode).subscribe({
       next: (data: any[]) => {
-        console.log("Locat",data);
-        
         this.locations = data;
 
         if (this.locations.length > 0 && !this.billId) {
@@ -480,7 +473,6 @@ this.model.location = locationObj
 
   saveVehicleDetailsOnly() {
     const payload = this.buildPayload();
-    console.log('Payload for Vehicle Details Only:', payload);
 
     this.vehicleSaleBillService.createVehicleSaleBill(payload).subscribe({
       next: (res: number) => {
@@ -524,9 +516,7 @@ this.model.location = locationObj
 
     const taxable = this.calculateAmount();
     this.calculateTaxes();
-    console.log(taxable, "in add");
     const gstTotal = this.model.sgst + this.model.cgst + this.model.igst;
-    console.log(gstTotal, "GST Total");
     const postGstDisc = this.model.postGSTDiscount || 0;
     const fameDisc = this.model.fameIIAmnt || 0;
     const totalPostDisc = postGstDisc + fameDisc;
@@ -591,7 +581,6 @@ this.model.location = locationObj
 
       finalAmount: finalAmount
     };
-    console.log(vehicle, "d");
 
     this.model.finalAmount = this.getGrandTotal();
     if (this.editingIndex > -1) {
@@ -619,7 +608,6 @@ this.model.location = locationObj
     const rate = this.model.itemRate || 0;
     const discount = this.model.preGSTDiscount || 0;
     const fameIIAmnt = this.model.fameIIAmnt || 0;
-    console.log(rate, discount, fameIIAmnt, "Amount Calculation");
 
     return rate - discount;
   }
@@ -628,7 +616,6 @@ this.model.location = locationObj
   editVehicle(dataRow: any) {
     this.editingIndex = this.vehicleList.findIndex(v => v.chassisNo === dataRow.chassisNo);
     const selected = dataRow;
-    console.log(selected, "sele");
     this.model.chassisNo = selected.chassisNo;
     this.model.itemName = selected.modelName || selected.model || '';
     this.model.itemRate = selected.rate ?? 0;
@@ -747,7 +734,6 @@ this.model.insuranceId = selected.insuranceId || null;
     });
   }
   buildPayload() {
-    console.log(this.vehicleList, "Vehicle List");
 
     return {
       saleDate: new Date(),
@@ -892,7 +878,6 @@ this.model.insuranceId = selected.insuranceId || null;
   getParties() {
     this.receiptEntryService.getLedgerByType('Party').subscribe({
       next: (res) => {
-        console.log(res, "ledger");
 
         this.parties = res.filter(p =>
           p.ledgerType?.toLowerCase() === 'party'
@@ -966,7 +951,6 @@ this.model.insuranceId = selected.insuranceId || null;
 
     forkJoin(requests).subscribe({
       next: (results) => {
-        console.log(results);
         this.loader.hide();
         this.redirectToSaleList();
       },
@@ -1066,9 +1050,6 @@ this.model.insuranceId = selected.insuranceId || null;
   calculateTaxes() {
     const taxable = this.calculateAmount();
 
-    console.log(taxable, "Taxable");
-
-    console.log(this.model, this.model.sgstper, this.model.cgstper, this.model.igstper, "GST Percentages");
 
     this.model.sgst = taxable * (this.model.sgstper || 0) / 100;
     this.model.cgst = taxable * (this.model.cgstper || 0) / 100;
@@ -1164,8 +1145,6 @@ this.model.insuranceId = selected.insuranceId || null;
 
     modalRef.componentInstance.vehicleList = this.vehicleList;
     modalRef.componentInstance.isInvoiced = this.isInvoiced;
-    console.log(this.isInvoiced ,"PArent");
-    
 
     modalRef.result.then((updatedList) => {
       if (updatedList) {
@@ -1242,7 +1221,6 @@ this.model.insuranceId = selected.insuranceId || null;
       const sgst = taxable * (v.sgstper || 0) / 100;
       const cgst = taxable * (v.cgstper || 0) / 100;
       const igst = taxable * (v.igstper || 0) / 100;
-      console.log(taxable, sgst, cgst, igst, "Recalculated Amounts");
 
       const finalAmount =
         taxable +
@@ -1301,8 +1279,7 @@ this.model.insuranceId = selected.insuranceId || null;
   printDeliverySlip() {
     if (!this.vehicleList.length) return;
 
-    const vehicle = this.vehicleList[0]; //
-    console.log(vehicle.motorNo, "dsa");
+    const vehicle = this.vehicleList[0];
 
     this.router.navigate(['/delivery-slip'], {
 

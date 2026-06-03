@@ -8,8 +8,8 @@ import { StorageService } from '../../../../core/services/storage';
 import { LoaderService } from '../../../../core/services/loader';
 import { ToastService } from '../../../../shared/toaster/toast-service';
 import { LocationName } from '../../../../ViewModels/ReceiptEntryModel';
-import { ReceiptEntryService } from '../../../../core/services/receipt-entry-service';
 import Swal from 'sweetalert2';
+import { LocationMasterService } from '../../../../core/services/location-master-service';
 
 @Component({
   selector: 'app-lot-inspection-details',
@@ -33,11 +33,11 @@ export class LotInspectionDetails implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private lotInspectionDetailservice: LotInspectionDetailsservice,
-    private receiptEntryService: ReceiptEntryService,
+    private locationService: LocationMasterService,
     public toaster: ToastService,
     private loader: LoaderService,
     private storageService: StorageService
-  ) { }
+  ) { } 
 
   ngOnInit(): void {
 
@@ -56,7 +56,7 @@ export class LotInspectionDetails implements OnInit {
 
   fetchLocations(): void {
     const dealerCode = this.storageService.getDealerCode();
-    this.receiptEntryService.getLocationList(dealerCode).subscribe({
+    this.locationService.getLocationList(dealerCode).subscribe({
       next: (data: any[]) => {
         // only Workshop (id = 2)
         this.locations = data.filter(x => x.locareadidNo === 2);

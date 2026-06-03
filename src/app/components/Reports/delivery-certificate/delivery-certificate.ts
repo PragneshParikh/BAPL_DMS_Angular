@@ -43,7 +43,6 @@ export class DeliveryCertificate {
 
   async ngOnInit() {
     this.saleBillId = this.route.snapshot.paramMap.get('id') || '';
-    console.log("sale bill id", this.saleBillId);
     if (this.saleBillId) {
       await this.getDealerDetails();
       this.getBillById(parseInt(this.saleBillId));
@@ -54,7 +53,6 @@ export class DeliveryCertificate {
       const dealerCode = this.storageService.getDealerCode();
 
       this.dealerService.getDealers(dealerCode).subscribe((res: any) => {
-        console.log(res, "Dealer Response");
         this.dealer = res?.data?.[0] || null;
         resolve(true);
       }, error => {
@@ -68,7 +66,6 @@ export class DeliveryCertificate {
       next: (res) => {
         this.saleBill = res;
         if (res) {
-          console.log("sale bill details", res);
           this.currentDate = this.currentDate;
           this.certificateNo = res.saleBillNo;
           this.variant = res.details[0].modelName;

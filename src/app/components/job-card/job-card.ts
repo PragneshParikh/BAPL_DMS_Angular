@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { publicDecrypt } from 'crypto';
-import { ReceiptEntryService } from '../../core/services/receipt-entry-service';
 import { StorageService } from '../../core/services/storage';
 import { LocationName } from '../../ViewModels/ReceiptEntryModel';
 import { CommonModule } from '@angular/common';
@@ -11,6 +10,7 @@ import { Router, RouterModule } from '@angular/router';
 import { JobCardService } from '../../core/services/job-card-service';
 import Swal from 'sweetalert2';
 import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
+import { LocationMasterService } from '../../core/services/location-master-service';
 
 @Component({
   selector: 'app-job-card',
@@ -52,7 +52,7 @@ export class JobCard {
   currentUserRole = userRole[0].value;
 
 
-  constructor(private receiptEntryService: ReceiptEntryService,
+  constructor(private locationService: LocationMasterService,
     private storageService: StorageService,
     private jobCardService: JobCardService,
     private router: Router
@@ -80,7 +80,7 @@ export class JobCard {
   //Fetech Dealer Location
   fetchLocations(): void {
     const dealerCode = this.storageService.getDealerCode();
-    this.receiptEntryService.getLocationList(dealerCode).subscribe({
+    this.locationService.getLocationList(dealerCode).subscribe({
       next: (data: LocationName[]) => {
         this.locations = data;
         // console.log("location data",data)
