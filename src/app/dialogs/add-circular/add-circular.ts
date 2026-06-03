@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, input, Input, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { LoaderService } from '../../core/services/loader';
@@ -14,12 +14,12 @@ import { CircularService } from '../../core/services/circular';
 })
 export class AddCircular implements OnInit {
 
-  @Input() newsData: any;
-
-  // selectedFiles: any[] = [];
+  @Input() circularData: any;
+  circularDataList: any[] = [];
 
   formData: any = {
     id: 0,
+    category: 'Sales',
     title: '',
     description: '',
     publishDate: '',
@@ -40,14 +40,30 @@ export class AddCircular implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    if (this.newsData) {
-      this.getCircularDataByDate();
+    this.getCircularDataList();
+    if (this.circularData) {
+      this.getCircularDataById();
     }
   }
 
-  getCircularDataByDate() {
+  getCircularDataList() {
     this.loader.show();
-    this.circularService.getById(this.newsData.id).subscribe({
+    this.circularService.getCircularList().subscribe({
+      next: (res: any) => {
+        this.circularDataList = res;
+        this.loader.hide();
+      },
+      error: (err) => {
+        console.error(err);
+        this.loader.hide();
+        this.toast.show('Something went wrong.', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  }
+
+  getCircularDataById() {
+    this.loader.show();
+    this.circularService.getById(this.circularData.id).subscribe({
       next: (res: any) => {
         this.formData = res;
         this.loader.hide();
@@ -96,8 +112,28 @@ export class AddCircular implements OnInit {
   }
 
   removeFile(index: number) {
-    // this.selectedFiles.splice(index, 1);
     this.formData.files[index].status = 'Deleted';
-    // this.formData.files.splice(index, 1);
+  }
+
+  checkDuplicateDate(args: any) {
+    const selectedDate = args.target.value; // yyyy-MM-dd
+
+    const isDuplicate = this.circularDataList.some((x: any) =>
+      x.publishDate?.split('T')[0] === selectedDate &&
+      x.category === this.formData.category &&
+      x.id !== this.formData.id
+    );
+
+    if (isDuplicate) {
+      this.toast.show(
+        `${this.formData.category} circular already exists for this date.`,
+        {
+          classname: 'bg-warning text-dark',
+          delay: 5000
+        }
+      );
+
+      this.formData.publishDate = null;
+    }
   }
 }

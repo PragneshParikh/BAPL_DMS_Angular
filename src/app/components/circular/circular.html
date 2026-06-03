@@ -20,41 +20,57 @@
                 </div>
 
                 <div class="card-body folder-scroll">
-                    <div *ngFor="let year of objectKeys(folderStructure)" class="mb-2">
-                        <div class="folder-box year-folder d-flex align-items-center" (click)="toggleYear(year)">
+                    <div *ngFor="let category of objectKeys(folderStructure)" class="mb-2">
+
+                        <!-- SALES / SERVICE -->
+                        <div class="folder-box d-flex align-items-center" (click)="toggleCategory(category)">
                             <span class="toggle-icon me-2">
-                                {{ openedYear === year ? '−' : '+' }}
+                                {{ openedCategory === category ? '−' : '+' }}
                             </span>
-                            📁 {{ year }}
+                            🗂️ {{ category }}
                         </div>
 
-                        <div *ngIf="openedYear === year" class="ms-3 mt-2">
-                            <!-- MONTH -->
-                            <div *ngFor="let month of objectKeys(folderStructure[year])" class="mb-2">
-                                <div class="folder-box month-folder d-flex align-items-center"
-                                    (click)="toggleMonth(month)">
-                                    <span class="toggle-icon me-2">
-                                        {{ openedMonth === month ? '−' : '+' }}
-                                    </span>
-                                    📂 {{ month }}
+                        <div *ngIf="openedCategory === category" class="ms-3 mt-2">
+
+                            <!-- YEAR -->
+                            <div *ngFor="let year of objectKeys(folderStructure[category])">
+
+                                <div class="folder-box year-folder" (click)="toggleYear(year)">
+                                    📁 {{ year }}
                                 </div>
 
-                                <!-- MONTH DATA -->
-                                <div *ngIf="openedMonth === month" class="ms-3 mt-2">
-                                    <!-- DATE -->
-                                    <div *ngFor="let date of objectKeys(folderStructure[year][month])" class="mb-2">
-                                        <div class="folder-box date-folder d-flex align-items-center"
-                                            [ngClass]="{'active-date': selectedDate === date }"
-                                            (click)="selectDate(year, month, date)">
-                                            <span class="toggle-icon me-2">
-                                                {{ selectedDate === date ? '' : ''}}
-                                            </span>
-                                            📅 {{ date }}
+                                <div *ngIf="openedYear === year" class="ms-3">
+
+                                    <!-- MONTH -->
+                                    <div *ngFor="let month of objectKeys(folderStructure[category][year])">
+
+                                        <div class="folder-box month-folder" (click)="toggleMonth(month)">
+                                            📂 {{ month }}
                                         </div>
+
+                                        <div *ngIf="openedMonth === month" class="ms-3">
+
+                                            <!-- DATE -->
+                                            <div
+                                                *ngFor="let date of objectKeys(folderStructure[category][year][month])">
+
+                                                <div class="folder-box date-folder"
+                                                    (click)="selectDate(category, year, month, date)">
+                                                    📅 {{ date }}
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
                                     </div>
+
                                 </div>
+
                             </div>
+
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -86,11 +102,22 @@
                     <div *ngIf="selectedDate && selectedFiles.length > 0"
                         class="border rounded p-3 mb-3 bg-light position-relative">
 
-                        <!-- EDIT ICON -->
-                        <button class="btn btn-sm btn-primary btn-outline-primary position-absolute top-0 end-0 m-2"
-                            *ngIf="isSuperAdmin" (click)="editNews(selectedFiles[0])">
-                            <i class="ri-pencil-line"></i>
-                        </button>
+                        <!-- BUTTONS -->
+                        <div class="position-absolute top-0 end-0 m-2 d-flex gap-2" *ngIf="isSuperAdmin">
+
+                            <!-- Configure -->
+                            <button class="btn btn-sm btn-primary" [ngbTooltip]="'Configure'"
+                                (click)="openCircularPermission(selectedFiles[0])">
+                                <i class="ri-settings-3-line"></i>
+                            </button>
+
+                            <!-- Edit -->
+                            <button class="btn btn-sm btn-primary" [ngbTooltip]="'Edit'"
+                                (click)="editNews(selectedFiles[0])">
+                                <i class="ri-pencil-line"></i>
+                            </button>
+
+                        </div>
 
                         <h5 class="text-primary mb-2">
                             {{ selectedFiles[0].title }}

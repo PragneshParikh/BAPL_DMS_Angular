@@ -22,18 +22,34 @@
                 <!-- LEFT SIDE : FORM -->
 
                 <div class="col-md-6 border-end">
-                    <form #newsFileUploadForm="ngForm">
+                    <form #circularUploadForm="ngForm">
 
                         <div class="row">
+                            <!-- Category -->
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold"> Category <span class="text-danger"> * </span>
+                                </label>
+                                <select class="form-select form-select-sm" name="category" #category="ngModel"
+                                    [(ngModel)]="formData.category" required>
+                                    <option value="Sales">Sales</option>
+                                    <option value="Service">Service</option>
+                                </select>
+                                <small class="text-danger"
+                                    *ngIf="category.invalid && (category.touched ||circularUploadForm.submitted)">
+                                    Category is required
+                                </small>
+                            </div>
+
                             <!-- DATE -->
                             <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold"> Select Date <span class="text-danger"> * </span>
                                 </label>
                                 <input type="date" class="form-control form-control-sm" name="publishDate"
                                     #publishDate="ngModel" [ngModel]="formData.publishDate | date:'yyyy-MM-dd'"
-                                    (ngModelChange)="formData.publishDate = $event" required>
+                                    (ngModelChange)="formData.publishDate = $event"
+                                    (change)="checkDuplicateDate($event)" required>
                                 <small class="text-danger"
-                                    *ngIf="publishDate.invalid && (publishDate.touched ||newsFileUploadForm.submitted)">
+                                    *ngIf="publishDate.invalid && (publishDate.touched ||circularUploadForm.submitted)">
                                     Date is required
                                 </small>
                             </div>
@@ -57,7 +73,7 @@
                                 <input type="text" class="form-control form-control-sm" name="title" #title="ngModel"
                                     [(ngModel)]="formData.title" placeholder="Enter title" required>
                                 <small class="text-danger"
-                                    *ngIf="title.invalid && (title.touched || newsFileUploadForm.submitted)">
+                                    *ngIf="title.invalid && (title.touched || circularUploadForm.submitted)">
                                     Title is required
                                 </small>
                             </div>
@@ -137,7 +153,7 @@
 
     <!-- FOOTER -->
     <div class="modal-footer py-2">
-        <button class="btn btn-sm btn-primary px-4" (click)="close(true)" [disabled]="newsFileUploadForm.invalid">
+        <button class="btn btn-sm btn-primary px-4" (click)="close(true)" [disabled]="circularUploadForm.invalid">
             Save
         </button>
         <button class="btn btn-sm btn-danger px-4" (click)="close(false)">
