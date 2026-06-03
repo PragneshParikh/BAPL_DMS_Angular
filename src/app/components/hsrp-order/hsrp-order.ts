@@ -94,7 +94,6 @@ export class HSRPOrder implements OnInit {
   // ---------------- SUPPLIER ----------------
   getSupplierList() {
     this.ledgerService.getLedgerByType('supplier').subscribe(res => {
-      console.log("supllier: ", res);
       this.Suppliers = res || [];
       if (!this.isEditMode) {
         this.model.supplierLedgerId = this.Suppliers[0].id;
@@ -172,7 +171,6 @@ export class HSRPOrder implements OnInit {
   loadOrderForEdit(id: any) {
     this.hsrpService.getHSRPById(id).subscribe({
       next: (res: any) => {
-        console.log(res);
 
         this.orders = Array.isArray(res) ? res : [res];
         this.filteredOrders = [...this.orders];

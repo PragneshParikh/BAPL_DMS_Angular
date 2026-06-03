@@ -63,7 +63,6 @@ ngOnInit(): void {
     this.activeModal.dismiss("closed");
   }
  editRow(row: any) {
-  console.log(row,"editRow called");
   
   this.selectedRow = row;
   this.editChassisNo = row.chassisNo;
@@ -125,7 +124,6 @@ getInsuranceCompanies(){
   this.receiptEntryService.getLedgerByType('Insurance').subscribe({
       next: (res) => {
         this.insurance = res;
-console.log('Insurance API Response:', res);  
       }
     });
 }

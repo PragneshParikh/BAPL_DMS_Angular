@@ -32,4 +32,8 @@ export class LocationMasterService {
     return this.http.get<any>(`${this.baseUrl}/LocationMaster/GetLocationByDealerByAreaId?dealerCode=${dealerCode}&areaId=${areaId}`);
   }
 
+  getLocationList(dealerCode: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/LocationMaster/GetLocationTypeWiseNameByDealerCode?dealerCode=${dealerCode}`);
+  }
+
 }

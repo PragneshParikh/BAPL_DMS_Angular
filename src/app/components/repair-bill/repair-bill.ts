@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ReceiptEntryService } from '../../core/services/receipt-entry-service';
 import { StorageService } from '../../core/services/storage';
 import { cashAccounts, IssueTypes } from '../../constant';
 import { SchemeName } from '../../constant';
@@ -19,6 +18,7 @@ import { VehicleSaleBillService } from '../../core/services/vehicle-sale-bill-se
 import { Router } from '@angular/router';
 import { icons } from '../../core/data';
 import { RepairBillService } from '../../core/services/repair-bill-service';
+import { LocationMasterService } from '../../core/services/location-master-service';
 
 @Component({
   selector: 'app-repair-bill',
@@ -135,7 +135,7 @@ export class RepairBill implements OnInit {
   remarks: string;
 
 
-  constructor(private receiptEntryService: ReceiptEntryService,
+  constructor(private locationService: LocationMasterService,
     private storageService: StorageService,
     private jobCardService: JobCardService,
     private labourMasterService: LabourmaasterService,
@@ -254,7 +254,7 @@ export class RepairBill implements OnInit {
   fetchLocations(): void {
     this.loader.show();
     const dealerCode = this.storageService.getDealerCode();
-    this.receiptEntryService.getLocationList(dealerCode).subscribe({
+    this.locationService.getLocationList(dealerCode).subscribe({
       next: (data: any[]) => {
         // only Workshop
         this.loader.hide();

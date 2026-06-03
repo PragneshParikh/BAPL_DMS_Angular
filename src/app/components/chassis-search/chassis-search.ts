@@ -1,72 +1,36 @@
 import { CommonModule } from '@angular/common';
-
 import { Component } from '@angular/core';
-
-import {
-  FormsModule,
-  ReactiveFormsModule
-} from '@angular/forms';
-
-import {
-  LoaderService
-} from '../../core/services/loader';
-
-import {
-  ToastService
-} from '../../shared/toaster/toast-service';
-
-import {
-  ChassisSearchService
-} from '../../core/services/chassis-search-service';
-
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { LoaderService } from '../../core/services/loader';
+import { ToastService } from '../../shared/toaster/toast-service';
+import { ChassisSearchService } from '../../core/services/chassis-search-service';
 @Component({
   selector: 'app-chassis-search',
-
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule
-  ],
-
-  templateUrl:
-    './chassis-search.html',
-
-  styleUrl:
-    './chassis-search.scss',
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  templateUrl: './chassis-search.html',
+  styleUrl: './chassis-search.scss',
 })
-export class ChassisSearch {
 
+export class ChassisSearch {
   // ============================================
   // FORM DATA
   // ============================================
 
-  formData: any = {
-
-    chassisNumber: '',
-  };
+  formData: any = { chassisNumber: '' };
 
   // ============================================
   // VIN DATA
   // ============================================
 
   vinData: any = {
-
     motorNo: '',
-
     chasisNo: '',
-
     defects: '',
-
     itemName: '',
-
     colrCode: '',
-
     currentLocation: '',
-
     customerName: '',
-
     saleDetails: '',
-
     purchaseDetails: ''
   };
 
@@ -77,16 +41,9 @@ export class ChassisSearch {
   selectedFile!: File;
 
   constructor(
-
-    private chassisSearchService:
-      ChassisSearchService,
-
-    private loader:
-      LoaderService,
-
-    private toastr:
-      ToastService
-
+    private chassisSearchService: ChassisSearchService,
+    private loader: LoaderService,
+    private toastr: ToastService
   ) { }
 
   // ============================================
@@ -100,41 +57,17 @@ export class ChassisSearch {
 
     this.loader.show();
 
-    this.chassisSearchService
-      .getChassisDetails(
-        this.formData.chassisNumber
-      )
-      .subscribe({
-
-        next: (response: any) => {
-          console.log(response);
-          
-
-          this.vinData = response;
-
-          this.loader.hide();
-        },
-
-        error: (error) => {
-
-          this.loader.hide();
-
-          console.error(
-            'Error fetching chassis details:',
-            error
-          );
-
-          this.toastr.show(
-            'Failed to fetch chassis details',
-            {
-              classname:
-                'bg-danger text-light',
-
-              delay: 5000
-            }
-          );
-        }
-      });
+    this.chassisSearchService.getChassisDetails(this.formData.chassisNumber).subscribe({
+      next: (response: any) => {
+        this.vinData = response;
+        this.loader.hide();
+      },
+      error: (error) => {
+        this.loader.hide();
+        console.error('Error fetching chassis details:', error);
+        this.toastr.show('Failed to fetch chassis details', { classname: 'bg-danger text-light', delay: 5000 });
+      }
+    });
   }
 
   // ============================================
@@ -142,12 +75,9 @@ export class ChassisSearch {
   // ============================================
 
   onFileSelect(event: any): void {
-
-    const file =
-      event.target.files[0];
+    const file = event.target.files[0];
 
     if (file) {
-
       this.selectedFile = file;
     }
   }
@@ -159,63 +89,22 @@ export class ChassisSearch {
   uploadExcel(): void {
 
     if (!this.selectedFile) {
-
-      this.toastr.show(
-        'Please select excel file',
-        {
-          classname:
-            'bg-danger text-light',
-
-          delay: 3000
-        }
-      );
-
+      this.toastr.show('Please select excel file', { classname: 'bg-danger text-light', delay: 3000 });
       return;
     }
 
     this.loader.show();
-
-    this.chassisSearchService
-      .importChassisExcel(
-        this.selectedFile
-      )
-      .subscribe({
-
-        next: (response: any) => {
-
-          this.loader.hide();
-
-          this.toastr.show(
-            'Excel imported successfully',
-            {
-              classname:
-                'bg-success text-light',
-
-              delay: 3000
-            }
-          );
-        },
-
-        error: (error) => {
-
-          this.loader.hide();
-
-          console.error(
-            'Excel upload error:',
-            error
-          );
-
-          this.toastr.show(
-            'Failed to import excel',
-            {
-              classname:
-                'bg-danger text-light',
-
-              delay: 5000
-            }
-          );
-        }
-      });
+    this.chassisSearchService.importChassisExcel(this.selectedFile).subscribe({
+      next: (response: any) => {
+        this.loader.hide();
+        this.toastr.show('Excel imported successfully', { classname: 'bg-success text-light', delay: 3000 });
+      },
+      error: (error) => {
+        this.loader.hide();
+        console.error('Excel upload error:', error);
+        this.toastr.show('Failed to import excel', { classname: 'bg-danger text-light', delay: 5000 });
+      }
+    });
   }
 
   // ============================================
@@ -223,30 +112,16 @@ export class ChassisSearch {
   // ============================================
 
   resetForms() {
-
-    this.formData = {
-
-      chassisNumber: '',
-    };
-
+    this.formData = { chassisNumber: '' };
     this.vinData = {
-
       motorNo: '',
-
       chasisNo: '',
-
       defects: '',
-
       itemName: '',
-
       colrCode: '',
-
       currentLocation: '',
-
       customerName: '',
-
       saleDetails: '',
-
       purchaseDetails: ''
     };
 
@@ -255,21 +130,21 @@ export class ChassisSearch {
   }
 
   get saleDetails(): string {
-  if (!this.vinData?.sh) {
-    return 'Not Sold';
+    if (!this.vinData?.sh) {
+      return 'Not Sold';
+    }
+
+    return `Bill No: ${this.vinData.sh.saleBillNo}
+    Date: ${this.vinData.sh.saleDate}
+    Party: ${this.vinData.cust?.ledgerName ?? ''}`;
   }
 
-  return `Bill No: ${this.vinData.sh.saleBillNo}
-Date: ${this.vinData.sh.saleDate}
-Party: ${this.vinData.cust?.ledgerName ?? ''}`;
-}
+  get purchaseDetails(): string {
+    if (!this.vinData?.vi) {
+      return 'Purchase Details Not Available';
+    }
 
-get purchaseDetails(): string {
-  if (!this.vinData?.vi) {
-    return 'Purchase Details Not Available';
+    return `Invoice No: ${this.vinData.vi.invoiceNo}
+    Invoice Date: ${this.vinData.vi.invoiceDate}`;
   }
-
-  return `Invoice No: ${this.vinData.vi.invoiceNo}
-Invoice Date: ${this.vinData.vi.invoiceDate}`;
-}
 }

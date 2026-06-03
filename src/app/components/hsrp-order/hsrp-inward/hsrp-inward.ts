@@ -119,7 +119,11 @@ export class HsrpInward implements OnInit {
   navigateToListingPage() {
     this.router.navigate(['/hsrp-order-list']);
   }
-
+get isSaveDisabled(): boolean {
+  return this.paginatedOrders.some(
+    item => item.selected && (!item.inwardStatus || item.inwardStatus === 'Pending' || item.inwardStatus === null)
+  );
+}
   onSearchChange(): void {
 
     const term = this.searchTerm.toLowerCase();
@@ -147,7 +151,6 @@ export class HsrpInward implements OnInit {
 
     this.hsrpService.updateBulkHSRPInward(payload).subscribe({
       next: (res) => {
-        console.log('Saved successfully', res);
         this.getInwardList(); // refresh
       },
       error: (err) => {
