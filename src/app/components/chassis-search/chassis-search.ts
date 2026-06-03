@@ -107,6 +107,8 @@ export class ChassisSearch {
       .subscribe({
 
         next: (response: any) => {
+          console.log(response);
+          
 
           this.vinData = response;
 
@@ -251,4 +253,23 @@ export class ChassisSearch {
     this.selectedFile =
       undefined as any;
   }
+
+  get saleDetails(): string {
+  if (!this.vinData?.sh) {
+    return 'Not Sold';
+  }
+
+  return `Bill No: ${this.vinData.sh.saleBillNo}
+Date: ${this.vinData.sh.saleDate}
+Party: ${this.vinData.cust?.ledgerName ?? ''}`;
+}
+
+get purchaseDetails(): string {
+  if (!this.vinData?.vi) {
+    return 'Purchase Details Not Available';
+  }
+
+  return `Invoice No: ${this.vinData.vi.invoiceNo}
+Invoice Date: ${this.vinData.vi.invoiceDate}`;
+}
 }
