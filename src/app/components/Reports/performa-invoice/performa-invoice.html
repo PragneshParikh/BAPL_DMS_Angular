@@ -174,7 +174,7 @@
 
       <ng-container *ngIf="invoiceType !== 'ex'">
 
-       <tr *ngIf="registrationAmount > 0">
+        <tr *ngIf="registrationAmount > 0">
           <td>
             Reg. Amount
           </td>
@@ -212,17 +212,17 @@
 
         <td>
 
-        <b>
-  {{
-    invoiceType === 'onroad'
-      ? 'On Road Total'
-      : (
-          isInvoiced
+          <b>
+            {{
+            invoiceType === 'onroad'
+            ? 'On Road Total'
+            : (
+            isInvoiced
             ? 'Ex-Showroom Total'
             : 'Proforma Total'
-        )
-  }}
-</b>
+            )
+            }}
+          </b>
 
         </td>
 
@@ -300,13 +300,12 @@
     </table>
 
     <!-- TERMS -->
-    <div class="small mt-2">
+    <div class="small mt-2" *ngIf="saleBill?.termsAndConditions?.length">
       <b>Terms & Conditions</b>
       <ol class="mb-1">
-        <li>Goods once sold will not be taken back.</li>
-        <li>Subject to respective jurisdiction only.</li>
-        <li>E & OE.</li>
-        <li>RTO, Accessories & other charges will be additional.</li>
+        <li *ngFor="let term of saleBill.termsAndConditions">
+          {{ term.conditionText }}
+        </li>
       </ol>
     </div>
 

@@ -20,6 +20,7 @@ import { VehicleSaleBillResponseViewModel } from '../../../ViewModels/VehicleSal
 import { text } from 'stream/consumers';
 import { log } from 'console';
 import { PrefixService } from '../../../core/services/prefix';
+import { forkJoin } from 'rxjs';
 
 
 @Component({
@@ -952,30 +953,30 @@ this.model.insuranceId = selected.insuranceId || null;
     }
 
     this.vehicleSaleBillService.sendToERP(dealerCode, saleBillNo).subscribe({
-      next: (res) => {
+  next: (res) => {
 
-        //To be added when json confirmed
-        // this.vehicleSaleBillService.sendSaleBillToERP(res).subscribe({
-        //   next: (erpRes) => {
+    const requests = res.vehicle.map((v: any) => {
+      const payload = {
+        user: res.user,
+        vehicle: v
+      };
 
-        //     console.log(erpRes, "Final ERP Response"); 
-        //   }});
-        console.log(res, "ERP Response");
+      return this.vehicleSaleBillService.sendSaleBillToERP(payload);
+    });
 
+    forkJoin(requests).subscribe({
+      next: (results) => {
+        console.log(results);
         this.loader.hide();
         this.redirectToSaleList();
-        // this.toaster.show('Successfully pushed to ERP', {
-        //   classname: 'bg-success text-white',
-        //   delay: 5000
-        // });
       },
       error: (err) => {
-        this.toaster.show('Failed to push to ERP', {
-          classname: 'bg-danger text-white',
-          delay: 5000
-        });
+        this.loader.hide();
+        console.error(err);
       }
     });
+  }
+});
   }
 
 
