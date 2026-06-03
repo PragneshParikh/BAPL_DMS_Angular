@@ -24,10 +24,7 @@
                             Upload Chassis Excel
                         </label>
 
-                        <input
-                            type="file"
-                            class="form-control form-control-sm"
-                            accept=".xlsx,.xls"
+                        <input type="file" class="form-control form-control-sm" accept=".xlsx,.xls"
                             (change)="onFileSelect($event)">
                     </div>
 
@@ -39,10 +36,7 @@
 
                         <div>
 
-                            <button
-                                type="button"
-                                class="btn btn-success btn-sm"
-                                (click)="uploadExcel()">
+                            <button type="button" class="btn btn-success btn-sm" (click)="uploadExcel()">
 
                                 Upload Excel
                             </button>
@@ -59,9 +53,7 @@
                 <!-- CHASSIS SEARCH -->
                 <!-- ===================================== -->
 
-                <form
-                    #chassisSearchForm="ngForm"
-                    (ngSubmit)="onSubmit(chassisSearchForm)">
+                <form #chassisSearchForm="ngForm" (ngSubmit)="onSubmit(chassisSearchForm)">
 
                     <div class="row mb-2">
 
@@ -71,16 +63,9 @@
                                 Chassis Number
                             </label>
 
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                name="chassisNumber"
-                                #chassisNumber="ngModel"
-                                maxlength="17"
-                                minlength="17"
-                                [(ngModel)]="formData.chassisNumber"
-                                style="text-transform: uppercase;"
-                                required>
+                            <input type="text" class="form-control form-control-sm" name="chassisNumber"
+                                #chassisNumber="ngModel" maxlength="17" minlength="17"
+                                [(ngModel)]="formData.chassisNumber" style="text-transform: uppercase;" required>
 
                             @if (chassisNumber.invalid && chassisNumber.touched) {
 
@@ -114,18 +99,13 @@
 
                             <br>
 
-                            <button
-                                type="submit"
-                                [disabled]="chassisSearchForm.invalid"
+                            <button type="submit" [disabled]="chassisSearchForm.invalid"
                                 class="btn btn-primary btn-sm me-1">
 
                                 Search
                             </button>
 
-                            <button
-                                type="button"
-                                (click)="resetForms()"
-                                class="btn btn-primary btn-sm">
+                            <button type="button" (click)="resetForms()" class="btn btn-primary btn-sm">
 
                                 Reset
                             </button>
@@ -152,12 +132,8 @@
                                 Engine Number
                             </label>
 
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                [value]="vinData.motorNo"
-                                style="text-transform: uppercase;"
-                                disabled>
+                            <input type="text" class="form-control form-control-sm" [value]="vinData.motorNo"
+                                style="text-transform: uppercase;" disabled>
 
                         </div>
 
@@ -167,12 +143,8 @@
                                 Chassis Number
                             </label>
 
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                [value]="vinData.chasisNo"
-                                style="text-transform: uppercase;"
-                                disabled>
+                            <input type="text" class="form-control form-control-sm" [value]="vinData.chassisNo"
+                                style="text-transform: uppercase;" disabled>
 
                         </div>
 
@@ -182,10 +154,7 @@
                                 Defects
                             </label>
 
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                [value]="vinData.defects"
+                            <input type="text" class="form-control form-control-sm" [value]="vinData.pdiStatus"
                                 disabled>
 
                         </div>
@@ -196,11 +165,7 @@
                                 Item Name
                             </label>
 
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                [value]="vinData.itemName"
-                                disabled>
+                            <input type="text" class="form-control form-control-sm" [value]="vinData.itemname" disabled>
 
                         </div>
 
@@ -210,10 +175,7 @@
                                 Color
                             </label>
 
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                [value]="vinData.colrCode"
+                            <input type="text" class="form-control form-control-sm" [value]="vinData.colorname"
                                 disabled>
 
                         </div>
@@ -224,26 +186,17 @@
                                 Current Location
                             </label>
 
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                [value]="vinData.currentLocation"
-                                disabled>
+                            <input type="text" class="form-control form-control-sm" [value]="vinData.locname" disabled>
 
                         </div>
 
                         <div class="col-md-3">
-
                             <label class="form-label">
                                 Purchase Details
                             </label>
 
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                [value]="vinData.purchaseDetails"
-                                disabled>
-
+                            <textarea class="form-control form-control-sm" rows="3" [value]="purchaseDetails" readonly>
+    </textarea>
                         </div>
 
                         <div class="col-md-3">
@@ -252,12 +205,8 @@
                                 Sale Details
                             </label>
 
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                [value]="vinData.customerName"
-                                disabled>
-
+                            <textarea class="form-control form-control-sm" rows="3" [value]="saleDetails" disabled>
+</textarea>
                         </div>
 
                     </div>
