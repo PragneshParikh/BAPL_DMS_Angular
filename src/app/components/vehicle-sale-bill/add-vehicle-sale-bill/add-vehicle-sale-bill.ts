@@ -20,6 +20,7 @@ import { VehicleSaleBillResponseViewModel } from '../../../ViewModels/VehicleSal
 import { text } from 'stream/consumers';
 import { log } from 'console';
 import { PrefixService } from '../../../core/services/prefix';
+import { forkJoin } from 'rxjs';
 
 
 @Component({
@@ -67,7 +68,7 @@ export class AddVehicleSaleBill implements OnInit {
 
   }
 
-  locations: LocationName[] = [];
+  locations: any[] = [];
   vehicleList: any[] = [];
   editingIndex: number = -1;
   billId: number | null = null;
@@ -213,7 +214,6 @@ getInsuranceCompanies(){
   this.receiptEntryService.getLedgerByType('Insurance').subscribe({
       next: (res) => {
         this.insurance = res;
-console.log('Insurance API Response:', res);  
       }
     });
 }
@@ -252,12 +252,18 @@ onInsuranceBlur() {
 
   loadBillForEdit(bill: any) {
     this.loader.show();
-    console.log(bill,"is loading");
     
     //  Header fields
     this.model.saleBillNo = bill.saleBillNo;
     this.model.saleDate = bill.saleDate ? bill.saleDate.split('T')[0] : '';
-    this.model.location = bill.location;
+    // this.model.location = bill.location;
+    const locationObj = this.locations.find(
+  x => x.locname === bill.location
+);
+
+this.model.location = locationObj
+  ? locationObj.locCode
+  : bill.location;
     this.model.saleType = bill.saleType;
     this.model.customerType = bill.customerType;
     this.model.billingType = bill.billType;
@@ -353,8 +359,6 @@ onInsuranceBlur() {
       .subscribe({
         next: (res) => {
           this.chassisList = res;
-          console.log('Chassis API Response:', res);
-
           if (callback) callback();
         },
         error: () => {
@@ -373,7 +377,6 @@ onInsuranceBlur() {
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
         this.loader.hide();
-        console.log('Bill Data:', res);
         this.selectedCustomerId = res.ledgerId;
         this.Status = res.status || '';
         this.isErpLocked =
@@ -411,7 +414,7 @@ onInsuranceBlur() {
         this.locations = data;
 
         if (this.locations.length > 0 && !this.billId) {
-          this.model.location = this.locations[0].locname || this.locations[0].locname;
+          this.model.location = this.locations[0].loccode || this.locations[0].loccode;
         }
       },
       error: (err) => {
@@ -470,7 +473,6 @@ onInsuranceBlur() {
 
   saveVehicleDetailsOnly() {
     const payload = this.buildPayload();
-    console.log('Payload for Vehicle Details Only:', payload);
 
     this.vehicleSaleBillService.createVehicleSaleBill(payload).subscribe({
       next: (res: number) => {
@@ -514,9 +516,7 @@ onInsuranceBlur() {
 
     const taxable = this.calculateAmount();
     this.calculateTaxes();
-    console.log(taxable, "in add");
     const gstTotal = this.model.sgst + this.model.cgst + this.model.igst;
-    console.log(gstTotal, "GST Total");
     const postGstDisc = this.model.postGSTDiscount || 0;
     const fameDisc = this.model.fameIIAmnt || 0;
     const totalPostDisc = postGstDisc + fameDisc;
@@ -581,7 +581,6 @@ onInsuranceBlur() {
 
       finalAmount: finalAmount
     };
-    console.log(vehicle, "d");
 
     this.model.finalAmount = this.getGrandTotal();
     if (this.editingIndex > -1) {
@@ -609,7 +608,6 @@ onInsuranceBlur() {
     const rate = this.model.itemRate || 0;
     const discount = this.model.preGSTDiscount || 0;
     const fameIIAmnt = this.model.fameIIAmnt || 0;
-    console.log(rate, discount, fameIIAmnt, "Amount Calculation");
 
     return rate - discount;
   }
@@ -618,7 +616,6 @@ onInsuranceBlur() {
   editVehicle(dataRow: any) {
     this.editingIndex = this.vehicleList.findIndex(v => v.chassisNo === dataRow.chassisNo);
     const selected = dataRow;
-    console.log(selected, "sele");
     this.model.chassisNo = selected.chassisNo;
     this.model.itemName = selected.modelName || selected.model || '';
     this.model.itemRate = selected.rate ?? 0;
@@ -737,7 +734,6 @@ this.model.insuranceId = selected.insuranceId || null;
     });
   }
   buildPayload() {
-    console.log(this.vehicleList, "Vehicle List");
 
     return {
       saleDate: new Date(),
@@ -882,7 +878,6 @@ this.model.insuranceId = selected.insuranceId || null;
   getParties() {
     this.receiptEntryService.getLedgerByType('Party').subscribe({
       next: (res) => {
-        console.log(res, "ledger");
 
         this.parties = res.filter(p =>
           p.ledgerType?.toLowerCase() === 'party'
@@ -932,6 +927,7 @@ this.model.insuranceId = selected.insuranceId || null;
   onSubmitToERP() {
     this.loader.show();
     const saleBillNo = this.billId;
+    const dealerCode = this.storageService.getDealerCode();
 
     if (!saleBillNo) {
       this.toaster.show('Sale No is required!', {
@@ -941,22 +937,30 @@ this.model.insuranceId = selected.insuranceId || null;
       return;
     }
 
-    this.vehicleSaleBillService.sendToERP(saleBillNo).subscribe({
-      next: (res) => {
+    this.vehicleSaleBillService.sendToERP(dealerCode, saleBillNo).subscribe({
+  next: (res) => {
+
+    const requests = res.vehicle.map((v: any) => {
+      const payload = {
+        user: res.user,
+        vehicle: v
+      };
+
+      return this.vehicleSaleBillService.sendSaleBillToERP(payload);
+    });
+
+    forkJoin(requests).subscribe({
+      next: (results) => {
         this.loader.hide();
         this.redirectToSaleList();
-        this.toaster.show('Successfully pushed to ERP', {
-          classname: 'bg-success text-white',
-          delay: 5000
-        });
       },
       error: (err) => {
-        this.toaster.show('Failed to push to ERP', {
-          classname: 'bg-danger text-white',
-          delay: 5000
-        });
+        this.loader.hide();
+        console.error(err);
       }
     });
+  }
+});
   }
 
 
@@ -1046,9 +1050,6 @@ this.model.insuranceId = selected.insuranceId || null;
   calculateTaxes() {
     const taxable = this.calculateAmount();
 
-    console.log(taxable, "Taxable");
-
-    console.log(this.model, this.model.sgstper, this.model.cgstper, this.model.igstper, "GST Percentages");
 
     this.model.sgst = taxable * (this.model.sgstper || 0) / 100;
     this.model.cgst = taxable * (this.model.cgstper || 0) / 100;
@@ -1144,8 +1145,6 @@ this.model.insuranceId = selected.insuranceId || null;
 
     modalRef.componentInstance.vehicleList = this.vehicleList;
     modalRef.componentInstance.isInvoiced = this.isInvoiced;
-    console.log(this.isInvoiced ,"PArent");
-    
 
     modalRef.result.then((updatedList) => {
       if (updatedList) {
@@ -1222,7 +1221,6 @@ this.model.insuranceId = selected.insuranceId || null;
       const sgst = taxable * (v.sgstper || 0) / 100;
       const cgst = taxable * (v.cgstper || 0) / 100;
       const igst = taxable * (v.igstper || 0) / 100;
-      console.log(taxable, sgst, cgst, igst, "Recalculated Amounts");
 
       const finalAmount =
         taxable +
@@ -1281,8 +1279,7 @@ this.model.insuranceId = selected.insuranceId || null;
   printDeliverySlip() {
     if (!this.vehicleList.length) return;
 
-    const vehicle = this.vehicleList[0]; //
-    console.log(vehicle.motorNo, "dsa");
+    const vehicle = this.vehicleList[0];
 
     this.router.navigate(['/delivery-slip'], {
 
@@ -1325,8 +1322,9 @@ this.model.insuranceId = selected.insuranceId || null;
     this.isInvoiced = true;
     this.vehicleSaleBillService.confirmInvoice(this.model.saleBillNo).subscribe({
       next: (res: number) => {
-        if (res !== 0) {
 
+        if (res !== 0) {
+          this.onSubmitToERP();
           this.toaster.show('Invoice Generated Successfully', { classname: 'bg-success text-light', delay: 3000 });
 
         }

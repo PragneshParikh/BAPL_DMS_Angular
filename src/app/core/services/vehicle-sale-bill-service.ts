@@ -11,6 +11,7 @@ import { Form22SlipViewModel } from '../../ViewModels/Form22SlipViewModel';
 })
 export class VehicleSaleBillService {
    private apiUrl = environment.apiUrl;
+   private erpBaseUrl = environment.ERPApiUrl;
   constructor(private http: HttpClient) { }
 
    getNextSaleBillNo(): Observable<string> {
@@ -53,12 +54,12 @@ export class VehicleSaleBillService {
   updateVehicleSaleBill(id: number, data: any) {
   return this.http.put(`${this.apiUrl}/VehicleSaleBill/${id}`, data);
 }
- sendToERP(saleBillNo: number): Observable<any> {
-    // Backend expects [FromBody] string poNumber
-    return this.http.post<any>(`${this.apiUrl}/VehicleSaleBill/SendToERP`, JSON.stringify(saleBillNo), {
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
+ sendToERP(dealerCode: string, saleBillId: number): Observable<any> {
+  return this.http.post(
+    `${this.apiUrl}/VehicleSaleBill/SendToERP?dealerCode=${dealerCode}&id=${saleBillId}`,
+    {}
+  );
+}
 
 getChassisListPDIOK(dealerCode: string, ledgerId: number): Observable<VehicleSaleListChasisResponse[]> {
   return this.http.get<VehicleSaleListChasisResponse[]>(
@@ -132,4 +133,9 @@ getPolicyNo(chassisNo:string) : Observable<any>{
   return this.http.get<any>(`${this.apiUrl}/VehicleSaleBill/PolicyNos/${chassisNo}`)
 }
 
+sendSaleBillToERP(saleBill: any): Observable<any> {
+    return this.http.post<any>(`${this.erpBaseUrl}/BAPLregistration`, JSON.stringify(saleBill), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 }

@@ -13,6 +13,8 @@ import { debounceTime, Subject } from 'rxjs';
 import { BillingTypeOptions, ErpOptions } from '../../constant';
 import { DealerService } from '../../core/services/dealer-service';
 import { StorageService } from '../../core/services/storage';
+import { LocationMasterService } from '../../core/services/location-master-service';
+import { LocationName } from '../../ViewModels/ReceiptEntryModel';
 
 @Component({
   selector: 'app-vehicle-sale-bill',
@@ -50,21 +52,25 @@ export class VehicleSaleBill {
   isSuperAdmin: boolean;
   dealerCode: string;
   billingTypeOptions = BillingTypeOptions;
+  locations: any[] = [];
 
   constructor(private service: VehicleSaleBillService,
     private router: Router,
     private loader: LoaderService,
     private toaster: ToastService,
-    private storageService: StorageService) { }
+    private storageService: StorageService,
+    private locationService: LocationMasterService  ,
+  ) { }
 
   ngOnInit() {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-
+this.fetchLocations();
     const today = new Date();
     const sevenDaysBefore = new Date(today);
     sevenDaysBefore.setDate(today.getDate() - 7);
     this.filter.fromDate = sevenDaysBefore;
     this.filter.toDate = today;
+    
     this.searchChanged.pipe(debounceTime(400)).subscribe(() => {
       this.loadData();
     });
@@ -177,10 +183,28 @@ export class VehicleSaleBill {
   }
 
   getStatusName(value: string | undefined): string {
-    console.log('Getting status name for value:', value);
     return ErpOptions.find(x => x.value === value)?.name || '';
   }
 
+  fetchLocations(): void {
+    const dealerCode: any = this.storageService.getDealerCode();
+
+    this.locationService.getLocationByDealerCode(dealerCode).subscribe({
+      next: (data: any[]) => {
+        
+        
+        this.locations = data;
+
+             },
+      error: (err) => {
+        console.error('Error fetching locations', err);
+      }
+    });
+  }
+  getLocationName(locCode: string): string {
+    debugger;
+  return this.locations.find(x => x.loccode === locCode)?.locname || locCode;
+}
   downloadDealerExcel(): void {
     this.loader.show();
 

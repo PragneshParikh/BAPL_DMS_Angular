@@ -15,9 +15,9 @@ import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { CustomerLedger } from '../../customer-ledger/customer-ledger';
 import { TRANSACTION_TYPES } from '../../../constant';
-import { thru } from 'lodash';
-import { log } from 'console';
 import { PrefixService } from '../../../core/services/prefix';
+import { LocationMasterService } from '../../../core/services/location-master-service';
+import { LMSLeadService } from '../../../core/services/lmslead-service';
 
 @Component({
   selector: 'app-add-receipt-entry',
@@ -82,6 +82,8 @@ export class AddReceiptEntry implements OnInit {
   isSearchMobileInvalid: boolean;
   constructor(private router: ActivatedRoute,
     private receiptEntryService: ReceiptEntryService,
+    private lmsService: LMSLeadService,
+    private locationService: LocationMasterService  ,
     private storageService: StorageService,
     private itemService: ItemMasterService, private modalService: NgbModal,
     private navigation: Router,
@@ -99,11 +101,9 @@ export class AddReceiptEntry implements OnInit {
 
   //  Get ID synchronously
   this.id = this.router.snapshot.paramMap.get('id');
-  console.log("id",this.id);
   
   this.isEditMode = !!this.id;
 
-  console.log(this.isEditMode);
   
 
   await this.getParties();
@@ -125,7 +125,6 @@ export class AddReceiptEntry implements OnInit {
     return new Promise((resolve) => {
       this.receiptEntryService.getReceiptById(id).subscribe({
         next: (res: ReceiptEntryEditModel) => {
-          console.log(res);
           
           this.apiResponse = res;
           this.formData = {
@@ -255,13 +254,12 @@ export class AddReceiptEntry implements OnInit {
     this.getNextReceiptNo();
     const dealerCode = this.storageService.getDealerCode();
 
-    this.receiptEntryService.getLocationList(dealerCode).subscribe({
+    this.locationService.getLocationList(dealerCode).subscribe({
       next: (data: LocationName[]) => {
         this.locations = data;
         if (!this.isEditMode && this.locations.length > 0) {
           this.formData.location = this.locations[0].locname;
         }
-        console.log('Fetched locations:', this.locations);
       },
       error: (err) => {
         console.error('Error fetching locations', err);
@@ -273,7 +271,6 @@ export class AddReceiptEntry implements OnInit {
     const dealerCode = this.storageService.getDealerCode();
     this.prefixService.getPrefixByDealerByModule(dealerCode, 'receipt_entry').subscribe({
       next: (data) => {
-        console.log('Next receipt no:', data);
         this.nextReceiptNo = data;
       }
     });
@@ -368,7 +365,7 @@ export class AddReceiptEntry implements OnInit {
         }
 
         //  MAIN API CALL
-        this.receiptEntryService.getLeadByMobileOrBooking(mobileNo, bookingIdNumber)
+        this.lmsService.getLeadByMobileOrBooking(mobileNo, bookingIdNumber)
           .subscribe({
             next: (res) => {
 
@@ -548,11 +545,9 @@ export class AddReceiptEntry implements OnInit {
       businessType: this.formData.customerType,
       totalAmount: this.formData.totalAmount
     };
-console.log(this.isEditMode,this.id);
 
     if (this.isEditMode && this.id) {
 
-      console.log(payload);
       
       // Call Update API
       this.receiptEntryService.updateReceipt(this.id, payload).subscribe({

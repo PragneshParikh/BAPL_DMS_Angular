@@ -179,7 +179,8 @@
 
                                 <!-- Location -->
                                 <td>
-                                    <ngb-highlight [result]="item.location" [term]="searchText"></ngb-highlight>
+                                    <ngb-highlight [result]="getLocationName(item.location)" [term]="searchText">
+                                    </ngb-highlight>
                                 </td>
 
                                 <!-- Sale Date -->

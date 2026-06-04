@@ -239,7 +239,6 @@ export class HsnCodeMaster implements OnInit {
 
       error: (err) => {
         this.loader.hide();
-        console.log(err);
 
         let message = 'Something went wrong';
 

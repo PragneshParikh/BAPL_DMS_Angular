@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { StorageService } from '../../core/services/storage';
-import { ReceiptEntryService } from '../../core/services/receipt-entry-service';
 import { LocationName } from '../../ViewModels/ReceiptEntryModel';
 import { JobCardService } from '../../core/services/job-card-service';
 import Swal from 'sweetalert2';
@@ -11,6 +10,7 @@ import { LoaderService } from '../../core/services/loader';
 import { FFIRService } from '../../core/services/ffirservice';
 import { FFIRIssueType, FFIRPresentVehicleStatus, FFIRPurposeofCIR, FFIRTypeRoadSurface } from '../../constant';
 import { number } from 'echarts';
+import { LocationMasterService } from '../../core/services/location-master-service';
 
 @Component({
   selector: 'app-ffir',
@@ -89,7 +89,7 @@ export class FFIR {
 
 
   constructor(private storageService: StorageService,
-    private receiptEntryService: ReceiptEntryService,
+    private locationService: LocationMasterService,
     private router: Router,
     private ffirService: FFIRService,
     private route: ActivatedRoute,
@@ -190,7 +190,7 @@ export class FFIR {
   const dealerCode =
     this.storageService.getDealerCode();
 
-  this.receiptEntryService
+  this.locationService
     .getLocationList(dealerCode)
     .subscribe({
 

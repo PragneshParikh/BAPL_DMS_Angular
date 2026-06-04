@@ -10,6 +10,7 @@ import { StorageService } from '../../core/services/storage';
 import { Router, RouterOutlet } from '@angular/router';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { debounceTime, Subject, switchMap } from 'rxjs';
+import { LocationMasterService } from '../../core/services/location-master-service';
 
 @Component({
   selector: 'app-receipt-entry',
@@ -49,6 +50,7 @@ export class ReceiptEntry implements OnInit {
   isSuperAdmin: boolean;
   constructor(
     private receiptEntryService: ReceiptEntryService,
+    private locationService: LocationMasterService,
     private loader: LoaderService,
     private toaster: ToastService,
     private storageService: StorageService,
@@ -68,8 +70,8 @@ export class ReceiptEntry implements OnInit {
      sevenDaysBefore.setDate(today.getDate() - 7);
 
    // this.loadReceiptEntries();
-  this.filter.fromDate = sevenDaysBefore;
-this.filter.toDate = today; 
+  this.filter.fromDate = sevenDaysBefore.toISOString().split('T')[0];
+this.filter.toDate = today.toISOString().split('T')[0]; 
     this.setupSearch(); 
     this.fetchLocations();
       this.searchSubject.next(''); // initial load
@@ -78,7 +80,7 @@ this.filter.toDate = today;
   fetchLocations(): void {
     const dealerCode = this.storageService.getDealerCode();
 
-    this.receiptEntryService.getLocationList(dealerCode).subscribe({
+    this.locationService.getLocationList(dealerCode).subscribe({
       next: (data: LocationName[]) => {
         this.locations = data;
       },
@@ -96,7 +98,6 @@ this.filter.toDate = today;
     const target = event.target as HTMLSelectElement;
     this.selectedLocation = target.value;
 
-    console.log('Selected Location:', this.selectedLocation);
   }
 
   refreshPage(): void {
@@ -109,7 +110,6 @@ this.filter.toDate = today;
   }
 
     loadReceiptEntries(): void {
-      console.log(this.isSuperAdmin);
       
       this.loader.show();
       if(!this.isSuperAdmin)
@@ -117,6 +117,13 @@ this.filter.toDate = today;
           this.filter.dealerCode =this.storageService.getDealerCode();
       }
     const cleanFilter = this.cleanFilter(this.filter);
+
+    // if (cleanFilter.fromDate) {
+    //   cleanFilter.fromDate = this.formatDate(cleanFilter.fromDate);
+    // }
+    // if (cleanFilter.toDate) {
+    //   cleanFilter.toDate = this.formatDate(cleanFilter.toDate);
+    // }
 
     this.receiptEntryService.getReceiptEntryList(cleanFilter)
       .subscribe({
@@ -327,11 +334,4 @@ downloadReceiptExcel(): void {
   this.updatePagination();
 }
 
-private formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = ('0' + (date.getMonth() + 1)).slice(-2);
-  const day = ('0' + date.getDate()).slice(-2);
-
-  return `${year}-${month}-${day}`; // matches 'Y-m-d'
-}
 }

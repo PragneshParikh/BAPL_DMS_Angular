@@ -49,11 +49,9 @@ export class SaleLetter  implements OnInit {
     const dealerCode = this.storageService.getDealerCode();
 
     this.dealerService.getDealers(dealerCode).subscribe((res: any) => {
-      console.log(res, "Dealer Response");
       this.dealer = res?.data?.[0] || null;
     });
 
-    console.log(this.dealer);
   }
 getBillById(id: number) {
   this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
@@ -63,16 +61,12 @@ getBillById(id: number) {
       {
        this.isInvoiced=true;
       }
-      console.log(res, "Sale Bill Response");
-      //this.calculateAmounts();
 
       if (this.saleBill?.ledgerId) {
-        console.log(this.saleBill.ledgerId);
 
         this.ledgerService.getLedgerById(this.saleBill.ledgerId).subscribe({
           next: (ledgerRes) => {
             this.CustomerLedger = ledgerRes;
-            console.log(ledgerRes, "Ledger inside");
           },
           error: (err) => console.error(err)
         });
