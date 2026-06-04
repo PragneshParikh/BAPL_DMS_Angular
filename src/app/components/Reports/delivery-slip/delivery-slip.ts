@@ -35,7 +35,6 @@ export class DeliverySlip implements OnInit {
       this.motorNo = params['motorNo'];
       this.regNo = params['regNo'];
 
-      console.log('Received Data:', params);
     });
   }
 
@@ -43,9 +42,7 @@ export class DeliverySlip implements OnInit {
     const dealerCode = this.storageService.getDealerCode();
 
     this.dealerService.getDealers(dealerCode).subscribe((res: any) => {
-      console.log(res, "Dealer Response");
       this.dealer = res?.data?.[0] || null;
-      console.log(this.dealer);
       
     });
   }

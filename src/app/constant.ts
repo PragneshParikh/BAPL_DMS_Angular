@@ -211,3 +211,11 @@ export const SchemeName = [
     { id: 6, value: 'Student' }
 ]
 
+export const zonesData = [
+    { id: 60, name: 'East' },
+    { id: 63, name: 'West' },
+    { id: 61, name: 'North' },
+    { id: 62, name: 'South' },
+    { id: 59, name: 'Central' }
+];
+

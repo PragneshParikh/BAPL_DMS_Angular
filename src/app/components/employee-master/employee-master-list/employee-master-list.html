@@ -1,0 +1,250 @@
+<!-- ===================================================== -->
+<!-- EMPLOYEE TABLE -->
+<!-- ===================================================== -->
+
+<div class="card mt-2 shadow-sm mx-2">
+
+    <!-- HEADER -->
+
+    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+
+        <h5 class="mb-0 fw-bold">
+
+            Employee List
+
+        </h5>
+
+        <!-- ADD EMPLOYEE -->
+
+        <button class="btn btn-primary btn-sm" routerLink="/employee/add">
+
+            <i class="ri-add-line"></i>
+
+            Add Employee
+
+        </button>
+
+    </div>
+
+    <!-- BODY -->
+
+    <div class="card-body table-responsive p-2" style="font-size:13px;">
+
+        <table class="table table-bordered table-hover table-sm align-middle mb-0">
+
+            <thead class="table-light text-nowrap">
+
+                <tr>
+
+                    <th>Sr No</th>
+
+                    <th>Profile</th>
+
+                    <th>Employee Code</th>
+
+                    <th>Name</th>
+
+                    <th>Gender</th>
+
+                    <th>Mobile</th>
+
+                    <th>Email</th>
+
+                    <th>Department</th>
+
+                    <th>Designation</th>
+
+                    <th>Dealer Code</th>
+
+                    <th>Status</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <!-- NO DATA -->
+
+                <tr *ngIf="employeeList.length === 0">
+
+                    <td colspan="11" class="text-center text-muted">
+
+                        No Employee Data Found
+
+                    </td>
+
+                </tr>
+
+                <!-- EMPLOYEE DATA -->
+
+                <tr *ngFor="
+                      let emp of employeeList;
+                      let i = index
+                    " class="cursor-pointer" (click)="openEditPopup(emp)">
+
+                    <!-- SR NO -->
+
+                    <td>
+
+                        {{ i + 1 }}
+
+                    </td>
+
+                    <!-- PROFILE -->
+
+                    <td class="text-center">
+
+                        <img *ngIf="emp.profileImage" [src]="emp.profileImage" width="35" height="35"
+                            class="rounded-circle border shadow-sm" style="object-fit:cover;" />
+
+                        <div *ngIf="!emp.profileImage"
+                            class="rounded-circle border bg-light d-flex align-items-center justify-content-center"
+                            style="
+                              width:35px;
+                              height:35px;
+                              margin:auto;
+                            ">
+
+                            <i class="ri-user-3-line text-muted">
+                            </i>
+
+                        </div>
+
+                    </td>
+
+                    <!-- EMPLOYEE CODE -->
+
+                    <td>
+
+                        {{ emp.employeeCode }}
+
+                    </td>
+
+                    <!-- NAME -->
+
+                    <td>
+
+                        {{ emp.firstName }}
+                        {{ emp.lastName }}
+
+                    </td>
+
+                    <!-- GENDER -->
+
+                    <td>
+
+                        {{ emp.gender }}
+
+                    </td>
+
+                    <!-- MOBILE -->
+
+                    <td>
+
+                        {{ emp.mobile }}
+
+                    </td>
+
+                    <!-- EMAIL -->
+
+                    <td>
+
+                        {{ emp.emailId }}
+
+                    </td>
+
+                    <!-- DEPARTMENT -->
+
+                    <td>
+
+                        {{ emp.department }}
+
+                    </td>
+
+                    <!-- DESIGNATION -->
+
+                    <td>
+
+                        {{ emp.designation }}
+
+                    </td>
+
+                    <!-- DEALER -->
+
+                    <td>
+
+                        {{ emp.dealerCode }}
+
+                    </td>
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        <span class="badge" [ngClass]="
+                              emp.isActive
+                              ? 'bg-success'
+                              : 'bg-danger'
+                            ">
+
+                            {{
+                            emp.isActive
+                            ? 'Active'
+                            : 'Inactive'
+                            }}
+
+                        </span>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<!-- ===================================================== -->
+<!-- EMPLOYEE MODAL -->
+<!-- ===================================================== -->
+
+<div *ngIf="showModal" class="modal fade show d-block" tabindex="-1" style="
+      background: rgba(0,0,0,0.5);
+    ">
+
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+
+        <div class="modal-content">
+
+            <!-- HEADER -->
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Edit Employee
+                </h5>
+
+                <button type="button" class="btn-close" (click)="closePopup()">
+                </button>
+
+            </div>
+
+            <!-- BODY -->
+
+            <div class="modal-body">
+
+                <app-employee-master *ngIf="selectedEmployee" [popupData]="selectedEmployee" [isPopupMode]="true">
+
+                </app-employee-master>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
