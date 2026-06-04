@@ -1,0 +1,72 @@
+<div id="circular-permission-model">
+    <!-- HEADER -->
+    <div class="modal-header bg-primary py-2">
+        <h5 class="modal-title text-white fw-bold">
+            Circular Permissions
+        </h5>
+
+        <button type="button" class="btn-close btn-close-white" aria-hidden="true" (click)="close(false)">
+        </button>
+
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+
+        <div class="container-fluid">
+            <div class="row">
+
+                <!-- Zones -->
+                <div class="col-md-3 border-end">
+                    <h5 class="mb-3">Zones</h5>
+
+                    <div class="list-group">
+                        <button *ngFor="let zone of zones" type="button" class="list-group-item list-group-item-action"
+                            [class.active]="selectedZone?.id === zone.id" (click)="selectZone(zone)">
+                            {{ zone.name }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Items -->
+                <div class="col-md-9">
+                    <h5 class="mb-3">
+                        {{ selectedZone?.name || 'Select a Zone' }}
+                    </h5>
+
+                    <div *ngIf="zoneItems.length > 0; else noData">
+
+                        <div class="form-check mb-2" *ngFor="let item of zoneItems">
+                            <input class="form-check-input" type="checkbox" [checked]="item.isSelected"
+                                (change)="onDealerSelectionChange(item, $event)" [id]="'item_' + item.id">
+                            <label class="form-check-label" [for]="'item_' + item.id">
+                                {{ item.dealercode }} - {{ item.dealerName }}
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <ng-template #noData>
+                        <div class="alert alert-light">
+                            No items found.
+                        </div>
+                    </ng-template>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-footer py-2">
+        <button class="btn btn-sm btn-primary px-4" (click)="close(true)" [disabled]="!selectedZone">
+            Save
+        </button>
+        <button class="btn btn-sm btn-danger px-4" (click)="close(false)">
+            Close
+        </button>
+
+    </div>
+
+</div>

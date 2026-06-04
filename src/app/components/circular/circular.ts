@@ -2,15 +2,18 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { StorageService } from '../../core/services/storage';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { CircularService } from '../../core/services/circular';
 import { AddCircular } from '../../dialogs/add-circular/add-circular';
+import { finalize } from 'rxjs/operators';
+import { CircularPermission } from '../../dialogs/circular-permission/circular-permission';
+import { CircularDealerAssignmentService } from '../../core/services/circular-dealer-assignment';
 
 @Component({
   selector: 'app-circular',
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbTooltipModule],
   templateUrl: './circular.html',
   styleUrl: './circular.scss',
 })
@@ -18,6 +21,7 @@ export class Circular {
 
   folderStructure: any = {};
 
+  openedCategory: string | null = null;
   openedYear: string | null = null;
   openedMonth: string | null = null;
   openedDate: string | null = null;
@@ -29,15 +33,21 @@ export class Circular {
   selectedFiles: any[] = [];
 
   isSuperAdmin: boolean = false;
+  dealerCode: string | null = null;
 
   constructor(
     private storageService: StorageService,
     private modalService: NgbModal,
     private loader: LoaderService,
     private toast: ToastService,
-    private curcularService: CircularService
+    private curcularService: CircularService,
+    private circularDealerAssignmentService: CircularDealerAssignmentService
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    }
   }
 
   ngOnInit(): void {
@@ -46,17 +56,13 @@ export class Circular {
 
   getCircular() {
     this.loader.show();
-    this.curcularService.get().subscribe({
+    this.curcularService.getByDealerCode(this.dealerCode).subscribe({
       next: (res) => {
         this.loader.hide();
         this.folderStructure = res;
 
-        if (
-          this.selectedYear &&
-          this.selectedMonth &&
-          this.selectedDate &&
-          this.folderStructure?.[this.selectedYear]?.[this.selectedMonth]?.[this.selectedDate]
-        ) {
+        if (this.selectedYear && this.selectedMonth && this.selectedDate
+          && this.folderStructure?.[this.selectedYear]?.[this.selectedMonth]?.[this.selectedDate]) {
           this.selectedFiles =
             this.folderStructure[this.selectedYear][this.selectedMonth][this.selectedDate];
         } else {
@@ -93,20 +99,9 @@ export class Circular {
     this.openedMonth = this.openedMonth === month ? null : month;
   }
 
-  // selectDate(year: string, month: string, date: string): void {
-  //   this.selectedDate = date;
-  //   this.selectedFiles = this.folderStructure[year][month][date];
-  // }
-  selectDate(year: string, month: string, date: string): void {
-
-    this.selectedYear = year;
-    this.selectedMonth = month;
+  selectDate(category: string, year: string, month: string, date: string) {
     this.selectedDate = date;
-
-    this.openedYear = year;
-    this.openedMonth = month;
-
-    this.selectedFiles = this.folderStructure[year][month][date];
+    this.selectedFiles = this.folderStructure[category][year][month][date];
   }
 
   onAddNewFile() {
@@ -131,53 +126,35 @@ export class Circular {
   uploadFiles(data: any) {
     this.loader.show();
 
-    if (data.id > 0) {
-      data.updatedBy = this.storageService.getUserId();
-      data.updatedDate = new Date();
-      // data.files = data.files.filter(x => x.status === 'Added');
-      this.curcularService.update(data).subscribe({
-        next: (res: any) => {
-          this.loader.hide();
+    const request$ = data.id > 0
+      ? this.curcularService.update({
+        ...data,
+        updatedBy: this.storageService.getUserId(),
+        updatedDate: new Date()
+      })
+      : this.curcularService.insert({
+        ...data,
+        createdBy: this.storageService.getUserId()
+      });
+
+    request$
+      .pipe(finalize(() => this.loader.hide()))
+      .subscribe({
+        next: () => {
           this.getCircular();
-          this.toast.show('records updated successfully.', { classname: 'bg-success text-white', delay: 5000 });
-        }, error: (err) => {
+          this.toast.show(data.id > 0 ? 'Records updated successfully.' : 'Files uploaded successfully.', {
+            classname: 'bg-success text-white', delay: 5000
+          });
+        },
+        error: (err) => {
           console.error(err);
-          this.loader.hide();
-          this.toast.show('Something went wrong.', { classname: 'bg-danger text-white', delay: 5000 });
+          this.toast.show('Something went wrong.', {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          });
         }
       });
-    } else {
-      data.createdBy = this.storageService.getUserId();
-      this.curcularService.insert(data).subscribe({
-        next: (res: any) => {
-          this.loader.hide();
-          this.getCircular();
-          this.toast.show('Files uploaded successfully.', { classname: 'bg-success text-white', delay: 5000 });
-        }, error: (err) => {
-          console.error(err);
-          this.loader.hide();
-          this.toast.show('Something went wrong.', { classname: 'bg-danger text-white', delay: 5000 });
-        }
-      });
-    }
   }
-
-  // deleteFile(file: any) {
-  //   this.loader.show();
-  //   this.curcularService.delete(file.id).subscribe({
-  //     next: () => {
-  //       this.loader.hide();
-  //       this.getCircular();
-  //       this.toast.show("File deleted sucessfully.", { classname: 'bg-sucess text-white', delay: 5000 });
-  //     },
-  //     error: (err) => {
-  //       this.loader.hide();
-  //       console.error(err);
-  //       this.toast.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
-  //     }
-
-  //   });
-  // }
 
   editNews(selectedFile: any) {
     const modalRef = this.modalService.open(AddCircular, {
@@ -186,7 +163,7 @@ export class Circular {
       keyboard: false
     });
 
-    modalRef.componentInstance.newsData = selectedFile;
+    modalRef.componentInstance.circularData = selectedFile;
 
     modalRef.result.then(
       (result) => {
@@ -221,4 +198,68 @@ export class Circular {
     window.open(fileURL, '_blank');
   }
 
+  toggleCategory(category: string) {
+    this.openedCategory =
+      this.openedCategory === category ? null : category;
+
+    this.openedYear = null;
+    this.openedMonth = null;
+  }
+
+  openCircularPermission(selectedFile: any) {
+    const modalRef = this.modalService.open(CircularPermission, {
+      size: 'xl',
+      backdrop: 'static',
+      keyboard: false
+    });
+
+    modalRef.componentInstance.selectedData = selectedFile;
+
+    modalRef.result.then(
+      (result) => {
+        if (result.isAccepted && (result.addAssignments.length > 0 || result.deleteAssignments.length > 0)) {
+          if (result.addAssignments.length > 0) {
+            this.addDealerPermissions(selectedFile.id, result.addAssignments);
+          }
+          if (result.deleteAssignments.length > 0) {
+            this.deleteDealerPermissions(selectedFile.id, result.deleteAssignments);
+          }
+        }
+      },
+      (reason) => {
+        console.log('Modal dismissed:', reason);
+      }
+    );
+  }
+
+  addDealerPermissions(circularId: number, selectedDealers: any[]) {
+    this.loader.show();
+    this.circularDealerAssignmentService.addDealerPermissions(circularId, selectedDealers).subscribe({
+      next: () => {
+        this.loader.hide();
+        this.toast.show('Dealer permissions updated successfully.', { classname: 'bg-success text-white', delay: 5000 });
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toast.show('Something went wrong while updating dealer permissions.', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+
+  }
+
+  deleteDealerPermissions(circularId: number, selectedDealers: any[]) {
+    this.loader.show();
+    this.circularDealerAssignmentService.deleteDealerPermissions(circularId, selectedDealers).subscribe({
+      next: () => {
+        this.loader.hide();
+        this.toast.show('Dealer permissions updated successfully.', { classname: 'bg-success text-white', delay: 5000 });
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toast.show('Something went wrong while updating dealer permissions.', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  }
 }

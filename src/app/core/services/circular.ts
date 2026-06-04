@@ -15,9 +15,14 @@ export class CircularService {
   get(): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/circular`);
   }
-  // getByDate(date: string): Observable<any> {
-  //   return this.httpClient.get(`${this.baseUrl}/circular/GetByDate?date=${date}`);
-  // }
+
+  getByDealerCode(dealerCode: string | null): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/circular/getByDealerCode/${dealerCode}`);
+  }
+
+  getCircularList(): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/circular/getCircularList`);
+  }
 
   getById(Id: number): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/circular/${Id}`);
