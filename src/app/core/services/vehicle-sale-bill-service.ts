@@ -102,14 +102,7 @@ updateRegistrationAndReserveChassis(
   }
 
 
-  getForm22(chassisNo: string): Observable<Form22SlipViewModel> {
-    const params = new HttpParams().set('chassisNo', chassisNo);
-
-    return this.http.get<Form22SlipViewModel>(
-      `${this.apiUrl}/VehicleSaleBill/Form22`,
-      { params }
-    );
-  }
+  
 
   downloadExcel(fromDate?: Date, toDate?: Date) {
      let params = new HttpParams();
