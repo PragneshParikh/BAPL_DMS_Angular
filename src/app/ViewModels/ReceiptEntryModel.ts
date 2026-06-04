@@ -48,8 +48,8 @@ export interface LocationName {
 }
 
 export interface ReceiptFilter {
-  fromDate?: Date;
-  toDate?: Date;
+  fromDate?: string;
+  toDate?: string;
   receiptNo?: string;
   partyName?: string;
   mobileNo?: string;

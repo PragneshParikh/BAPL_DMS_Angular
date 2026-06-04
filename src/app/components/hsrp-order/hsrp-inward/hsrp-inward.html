@@ -5,7 +5,7 @@
 <div class="row">
     <div class="col-lg-12">
 
-            <!--Filter Part-->
+        <!--Filter Part-->
         <div class="card">
             <div class="card-body">
                 <div class="row g-2 align-items-end">
@@ -149,11 +149,15 @@
                                 <td><strong>{{ item.orderNo || '-' }}</strong> <br>{{item.orderDate|date:'dd-MM-yyyy'}}
                                 </td>
 
-                                <td><ngb-highlight [result]="item.supplierName || '-'" [term]="searchTerm"></ngb-highlight></td>
+                                <td><ngb-highlight [result]="item.supplierName || '-'"
+                                        [term]="searchTerm"></ngb-highlight></td>
 
-                                <td><ngb-highlight [result]="item.customerName || '-'" [term]="searchTerm"></ngb-highlight></td>
+                                <td><ngb-highlight [result]="item.customerName || '-'"
+                                        [term]="searchTerm"></ngb-highlight></td>
 
-                                <td><ngb-highlight [result]="item.chassisNo || '-'" [term]="searchTerm"></ngb-highlight><br><ngb-highlight [result]="item.regNo || '-'" [term]="searchTerm"></ngb-highlight></td>
+                                <td><ngb-highlight [result]="item.chassisNo || '-'"
+                                        [term]="searchTerm"></ngb-highlight><br><ngb-highlight
+                                        [result]="item.regNo || '-'" [term]="searchTerm"></ngb-highlight></td>
 
                                 <!-- FRONT PLATE -->
                                 <td class="text-center">
@@ -241,11 +245,11 @@
                     </ngb-pagination>
                 </div>
                 <!-- SAVE BUTTON -->
-                 <div class="mt-3 d-flex justify-content-end">
+                <div class="mt-3 d-flex justify-content-end">
 
-                <button class="btn btn-primary btn-sm" (click)="submitHSRPInward()">
-                    Save
-                </button>
+                    <button class="btn btn-primary btn-sm" (click)="submitHSRPInward()" [disabled]="isSaveDisabled">
+                        Save
+                    </button>
                 </div>
 
             </div>

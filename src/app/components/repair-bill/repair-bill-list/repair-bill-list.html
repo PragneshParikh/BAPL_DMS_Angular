@@ -1,0 +1,204 @@
+<!--PAGE Title-->
+<div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
+    <h5 class="mb-0">Repair Bill List</h5>
+</div>
+<!--End-->
+<!-- Filter Card -->
+<div class="card">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <!-- Date From -->
+            <div class="col-md-3">
+                <label class="form-label">Date From</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="repairbillsearchModel.fromDate"
+                    (change)="search()">
+            </div>
+
+            <!-- Date To -->
+            <div class="col-md-3">
+                <label class="form-label">Date To</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="repairbillsearchModel.toDate"
+                    (change)="search()">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Service Location</label>
+                <select class="form-select form-select-sm text-truncate"
+                    [(ngModel)]="repairbillsearchModel.serviceLocation" (change)="search()">
+                    <option value="">Select Location</option>
+                    <option *ngFor="let loc of locations" [value]="loc.locname">
+                        {{ loc.locname }}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Bill No.</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="repairbillsearchModel.billNo"
+                    (ngModelChange)="onSearchChange()" placeholder="Enter Bill No." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Job No.</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="repairbillsearchModel.jobNo"
+                    (ngModelChange)="onSearchChange()" placeholder="Enter Job No." />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Chassis No.</label>
+                <select class="form-select form-select-sm" (change)="search()"
+                    [(ngModel)]="repairbillsearchModel.chassisNo">
+                    <option value="">Select Chassis</option>
+                    <option *ngFor="let item of chassisList" [value]="item.chassisNumber">
+                        {{ item.chassisNumber }}
+                    </option>
+                </select>
+            </div>
+            <!-- Search Button -->
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-sm btn-primary" (click)="search()">
+                    Search
+                </button>
+            </div>
+            <!--End search button-->
+            <!-- Download Excel Button (click)="downloadItemMasterExcel()" -->
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'">
+                    <i class="ri-file-excel-2-line"></i>
+                </button>
+            </div>
+            <!--End Excel button-->
+            <!-- Add Button-->
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-primary btn-sm" (click)="onNavigate()">
+                    Add
+                </button>
+            </div>
+            <!--End add button-->
+        </div>
+    </div>
+</div>
+<!--End-->
+
+
+
+
+<!--Table Card-->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive table-responsive-sm" style="max-height: 400px; overflow: auto;">
+
+            <table class="table table-sm table-hover table-bordered mb-0 text-nowrap">
+                <thead class="table-light">
+                    <tr>
+                        <!-- <th>Action</th> -->
+                        <th>SR.No</th>
+                        <th>Bill No</th>
+                        <th>Date</th>
+                        <th>Party Name</th>
+                        <th>Reg No</th>
+                        <th>ChassisNo</th>
+                        <th>Location</th>
+                        <th>Bill Type</th>
+                        <th>Job No</th>
+                        <th>Bill Amount</th>
+                        <th>Status</th>
+                        <th>Prepared by</th>
+                        <th>Modified by</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr *ngFor="let item of pagedData; let i = index" (dblclick)="editRepairBill(item.id)"
+                        style="cursor: pointer;">
+
+                        <!-- Action -->
+                        <!-- <td>
+                            <button class="btn btn-sm btn-soft-primary">
+                                <i class="ri-pencil-fill fs-12"></i>
+                            </button>
+                        </td> -->
+
+                        <!-- SR No -->
+                        <td>
+                            {{ ((page - 1) * pageSize) + i + 1 }}
+                        </td>
+
+                        <!-- Bill No -->
+                        <td>
+                            {{ item.billNo }}
+                        </td>
+
+                        <!-- Date -->
+                        <td>
+                            {{ item.createdDate | date:'dd-MM-yyyy' }}
+                        </td>
+
+                        <!-- Party Name -->
+                        <td>
+                            {{ item.partyName }}
+                        </td>
+
+                        <!-- Reg No -->
+                        <td>
+                            {{ item.registrationNo }}
+                        </td>
+
+                        <!-- Chassis No -->
+                        <td>
+                            {{ item.chassisNumber }}
+                        </td>
+
+                        <!-- Location -->
+                        <td>
+                            {{ item.locationCode }}
+                        </td>
+
+                        <!-- Bill Type -->
+                        <td>
+                            {{ item.billType }}
+                        </td>
+
+                        <!-- Job No -->
+                        <td>
+                            {{ item.jobCardNo }}
+                        </td>
+
+                        <!-- Bill Amount -->
+                        <td class="text-end">
+                            {{ item.totalNetAmount | number:'1.2-2' }}
+                        </td>
+                        <!--Repair Bill Status-->
+                        <td>
+                            {{item.repairBillStatus}}
+                        </td>
+                        <!-- Prepared By -->
+                        <td>
+                            {{ item.createdBy }}
+                        </td>
+
+                        <!-- Modified By -->
+                        <td>
+                            {{ item.updatedBy }}
+                        </td>
+
+                    </tr>
+
+                    <!-- No Data -->
+                    <tr *ngIf="pagedData.length === 0">
+                        <td colspan="13" class="text-center text-muted py-3">
+                            No Data Available
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+        <!-- PAGINATION -->
+        <div class="d-flex justify-content-end p-2">
+            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                (pageChange)="pageChange($event)" [boundaryLinks]="true">
+            </ngb-pagination>
+        </div>
+        <!--End Pagination-->
+    </div>
+</div>
+<!--End-->

@@ -64,7 +64,6 @@ filter:{
       next: (res: any) => {
 
 
-        console.log(res);
         
 
         this.orders = (res || []).map((x: any) => ({
@@ -147,7 +146,6 @@ filter:{
   }
 
  goToDetails(item: any) {
-  console.log(item);
   
   this.router.navigate(['/hsrp-order', item.id]);
 }
@@ -160,7 +158,6 @@ onFilterChange() {
 }
 
 downloadHSRPExcel(){
-  console.log('Downloading receipt excel...');
   this.isSuperAdmin = this.storageService.getRole() === 'SuperAdmin';
   const dealerCode =  this.storageService.getDealerCode();
   

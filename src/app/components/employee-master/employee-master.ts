@@ -17,9 +17,8 @@ import {
 } from '@angular/router';
 
 import { Gender } from '../../constant';
+import { EmployeeMasterService } from '../../core/services/employee-master';
 
-import { EmployeeMasterService }
-from '../../core/services/employee-master.service';
 
 @Component({
   selector: 'app-employee-master',
@@ -38,7 +37,7 @@ from '../../core/services/employee-master.service';
 })
 
 export class EmployeeMasterComponent
-implements OnInit {
+  implements OnInit {
 
   // =====================================
   // INPUTS
@@ -75,11 +74,8 @@ implements OnInit {
   // =====================================
 
   constructor(
-    private employeeService:
-    EmployeeMasterService,
-
+    private employeeService: EmployeeMasterService,
     private router: Router,
-
     private route: ActivatedRoute
   ) { }
 

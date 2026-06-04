@@ -3,7 +3,6 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { JobType, locationAreaMaster } from '../../../../constant';
 import { StorageService } from '../../../../core/services/storage';
-import { ReceiptEntryService } from '../../../../core/services/receipt-entry-service';
 import { LocationName } from '../../../../ViewModels/ReceiptEntryModel';
 import { JobCardService } from '../../../../core/services/job-card-service';
 import { selectLeadData } from '../../../../store/CRM/crm_selector';
@@ -17,6 +16,7 @@ import { Route, Router } from '@angular/router';
 import { ToastService } from '../../../../shared/toaster/toast-service';
 import { delay } from 'lodash';
 import { LoaderService } from '../../../../core/services/loader';
+import { LocationMasterService } from '../../../../core/services/location-master-service';
 
 @Component({
   selector: 'app-job-card-add-form',
@@ -125,7 +125,7 @@ export class JobCardAddForm {
   dealerCode: string = '';
 
   constructor(private storageService: StorageService,
-    private receiptEntryService: ReceiptEntryService,
+    private locationService: LocationMasterService,
     private router: Router,
     private jobCardService: JobCardService,
     public toastr: ToastService,
@@ -157,7 +157,7 @@ export class JobCardAddForm {
   //Fetech Dealer Location
   fetchLocations(): void {
     const dealerCode = this.storageService.getDealerCode();
-    this.receiptEntryService.getLocationList(dealerCode).subscribe({
+    this.locationService.getLocationList(dealerCode).subscribe({
       next: (data: any[]) => {
         // only Workshop (id = 2)
         this.locations = data.filter(x => x.locareadidNo === 2);

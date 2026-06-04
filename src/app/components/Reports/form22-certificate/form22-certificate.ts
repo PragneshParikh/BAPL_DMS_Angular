@@ -20,11 +20,10 @@ export class Form22Certificate implements OnInit {
     private vehicleService: VehicleSaleBillService
   ) {}
 
-  // ✅ FIXED HERE
+  
   ngOnInit(): void {
     const chassisNo = this.route.snapshot.paramMap.get('chassisNo');
 
-    console.log("ChassisNo:", chassisNo);
 
     if (chassisNo) {
       this.getForm22(chassisNo);
@@ -39,7 +38,6 @@ export class Form22Certificate implements OnInit {
     this.vehicleService.getForm22(chassisNo).subscribe({
       next: (res) => {
         this.form22Data = res;
-        console.log('Form22 Data:', this.form22Data);
       },
       error: (err) => {
         console.error(err);

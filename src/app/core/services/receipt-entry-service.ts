@@ -18,7 +18,7 @@ export class ReceiptEntryService {
    */
   constructor(private http: HttpClient) { }
 
-  getReceiptList(searchTerm: string, fromDate?: Date, toDate?: Date,dealerCode?: string): Observable<any[]> {
+  getReceiptList(searchTerm: string, fromDate?: string, toDate?: string,dealerCode?: string): Observable<any[]> {
     let params = new HttpParams();
     if (dealerCode) {
       params = params.set('dealerCode', dealerCode);
@@ -28,11 +28,11 @@ export class ReceiptEntryService {
     }
 
     if (fromDate) {
-      params = params.set('fromDate', this.formatDate(fromDate));
+      params = params.set('fromDate', fromDate);
     }
 
     if (toDate) {
-      params = params.set('toDate', this.formatDate(toDate));
+      params = params.set('toDate', toDate);
     }
 
     return this.http.get<any[]>(
@@ -51,10 +51,7 @@ export class ReceiptEntryService {
 
       if (value !== null && value !== undefined && value !== '') {
 
-        // Convert Date to string
-        if (value instanceof Date) {
-          value = this.formatDate(value);
-        }
+      
 
         params = params.set(key, value as string);
       }
@@ -66,9 +63,7 @@ export class ReceiptEntryService {
     );
   }
 
-  getLocationList(dealerCode: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/LocationMaster/GetLocationTypeWiseNameByDealerCode?dealerCode=${dealerCode}`);
-  }
+  
   getNextReceiptNo(): Observable<string> {
     return this.http.get(`${this.apiUrl}/ReceiptEntry/getNextReceiptNo`, {
       responseType: 'text'
@@ -81,14 +76,7 @@ export class ReceiptEntryService {
     );
   }
 
-  getLeadByMobileOrBooking(mobileNo: string | null, bookingId: number | null): Observable<LeadResponse> {
-    let params = new HttpParams();
-    if (mobileNo) params = params.set('mobileNo', mobileNo);
-    if (bookingId !== null) params = params.set('bookingId', bookingId.toString());
-
-    return this.http.get<LeadResponse>(`${this.apiUrl}/LMSLeadMaster/lmsLeadbyMob`, { params });
-  }
-
+  
   addReceiptEntry(data: ReceiptEntryAddViewModel) {
     return this.http.post(
       `${this.apiUrl}/ReceiptEntry/addReceiptEntry`,
@@ -116,12 +104,12 @@ export class ReceiptEntryService {
       { responseType: 'blob' }
     );
   }
-  private formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = ('0' + (date.getMonth() + 1)).slice(-2);
-    const day = ('0' + date.getDate()).slice(-2);
+  // private formatDate(date: Date): string {
+  //   const year = date.getFullYear();
+  //   const month = ('0' + (date.getMonth() + 1)).slice(-2);
+  //   const day = ('0' + date.getDate()).slice(-2);
 
-    return `${year}-${month}-${day}`;
-  }
+  //   return `${year}-${month}-${day}`;
+  // }
 
 }
