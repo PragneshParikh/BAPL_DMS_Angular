@@ -187,7 +187,7 @@ debugger
 
   //   return;
   // }
-   if (item.repairBillStatus === 'Invoiced') {
+   if (item.repairBillStatus === 'Billed') {
 
     this.toaster.show('Invoiced Repair Bill cannot be edited.', {
       classname: 'bg-warning text-dark',

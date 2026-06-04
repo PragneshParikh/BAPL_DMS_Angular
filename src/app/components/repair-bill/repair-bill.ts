@@ -1283,7 +1283,7 @@ export class RepairBill implements OnInit {
 
         amountRecived: this.amountReceived || 0,
         isSavedInvoice: true,
-        repairBillStatus: "Invoiced",
+        repairBillStatus: "Billed",
         isActive: true
       },
 
