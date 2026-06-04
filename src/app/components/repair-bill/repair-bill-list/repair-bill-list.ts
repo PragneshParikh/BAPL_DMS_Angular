@@ -38,7 +38,7 @@ export class RepairBillList implements OnInit {
     private router: Router,
     private storageService: StorageService,
     private repairBillService: RepairBillService,
-    private toaster : ToastService
+    private toaster : ToastService,
     private locationService: LocationMasterService
   ) { }
 
