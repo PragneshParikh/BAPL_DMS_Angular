@@ -141,6 +141,7 @@ export const routes: Routes = [
       { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] },
       { path: 'repair-bill', component: RepairBill, data: [51] },
       { path: 'repair-bill-list', component: RepairBillList, data: [51] },
+      {path:'repair-bill/:id',component:RepairBill,data:[51]},
       { path: 'labour-master-import', component: LabourMaster, data: [54] },
       { path: 'labour-rate-master', component: LabourRateMaster, data: [55] },
 

@@ -8,6 +8,7 @@ import { RepairBillSearchModel } from '../../../ViewModels/RepairBillModel';
 import { StorageService } from '../../../core/services/storage';
 import { RepairBillService } from '../../../core/services/repair-bill-service';
 import { LocationName } from '../../../ViewModels/ReceiptEntryModel';
+import { ToastService } from '../../../shared/toaster/toast-service';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 
 @Component({
@@ -29,14 +30,16 @@ export class RepairBillList implements OnInit {
   page = 1;
   pageSize = 10;
   collectionSize = 0;
+   isSuperAdmin: boolean = false;
 
   private searchTimeout: any;
 
   constructor(
     private router: Router,
     private storageService: StorageService,
-    private locationService: LocationMasterService,
-    private repairBillService: RepairBillService
+    private repairBillService: RepairBillService,
+    private toaster : ToastService,
+    private locationService: LocationMasterService
   ) { }
 
   repairbillsearchModel: RepairBillSearchModel = {
@@ -173,7 +176,18 @@ export class RepairBillList implements OnInit {
 
   // Edit Repair Bill
   editRepairBill(id: number): void {
+debugger
+  // if (!this.isSuperAdmin) {
 
-    this.router.navigate(['/repair-bill', id]);
-  }
+  //   this.toaster.show('Only SuperAdmin can be Update.', {
+  //       classname: 'bg-warning text-dark',
+  //       icons: 'Warning',
+  //       delay: 5000
+  //     });
+
+  //   return;
+  // }
+
+  this.router.navigate(['/repair-bill', id]);
+}
 }

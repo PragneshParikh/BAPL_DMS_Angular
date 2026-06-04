@@ -88,7 +88,7 @@
             <table class="table table-sm table-hover table-bordered mb-0 text-nowrap">
                 <thead class="table-light">
                     <tr>
-                        <th>Action</th>
+                        <!-- <th>Action</th> -->
                         <th>SR.No</th>
                         <th>Bill No</th>
                         <th>Date</th>
@@ -99,6 +99,7 @@
                         <th>Bill Type</th>
                         <th>Job No</th>
                         <th>Bill Amount</th>
+                        <th>Status</th>
                         <th>Prepared by</th>
                         <th>Modified by</th>
                     </tr>
@@ -106,14 +107,15 @@
 
                 <tbody>
 
-                    <tr *ngFor="let item of pagedData; let i = index">
+                    <tr *ngFor="let item of pagedData; let i = index" (dblclick)="editRepairBill(item.id)"
+                        style="cursor: pointer;">
 
                         <!-- Action -->
-                        <td>
-                            <button class="btn btn-sm btn-soft-primary" (click)="editRepairBill(item.id)">
+                        <!-- <td>
+                            <button class="btn btn-sm btn-soft-primary">
                                 <i class="ri-pencil-fill fs-12"></i>
                             </button>
-                        </td>
+                        </td> -->
 
                         <!-- SR No -->
                         <td>
@@ -164,7 +166,10 @@
                         <td class="text-end">
                             {{ item.totalNetAmount | number:'1.2-2' }}
                         </td>
-
+                        <!--Repair Bill Status-->
+                        <td>
+                            {{item.repairBillStatus}}
+                        </td>
                         <!-- Prepared By -->
                         <td>
                             {{ item.createdBy }}
