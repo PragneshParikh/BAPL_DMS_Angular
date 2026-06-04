@@ -1258,6 +1258,8 @@ export class RepairBill implements OnInit {
 
         partyName: this.selectedJobCard?.partyName || '',
         mobileNumber: this.selectedJobCard?.partyMobileNo || '',
+        
+        customerLedgerId: this.selectedJobCard.customerLedgerId || 0,
 
         jobId: this.selectedJobCard?.jobCardHeader?.id || 0,
 
