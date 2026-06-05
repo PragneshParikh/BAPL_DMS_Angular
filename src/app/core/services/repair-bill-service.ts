@@ -25,5 +25,5 @@ updateRepairBill(model:any):Observable<any>{
 getRepairBillById(id: number): Observable<any> {
   return this.httpClient.get<any>(`${this.baseUrl}/RepairBill/GetRepairBillById/${id}`);
 }
-  
+
 }
