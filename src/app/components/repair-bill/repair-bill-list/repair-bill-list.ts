@@ -175,7 +175,7 @@ export class RepairBillList implements OnInit {
   }
 
   // Edit Repair Bill
-  editRepairBill(id: number): void {
+  editRepairBill(item: any): void {
 debugger
   // if (!this.isSuperAdmin) {
 
@@ -187,7 +187,16 @@ debugger
 
   //   return;
   // }
+   if (item.repairBillStatus === 'Billed') {
 
-  this.router.navigate(['/repair-bill', id]);
+    this.toaster.show('Invoiced Repair Bill cannot be edited.', {
+      classname: 'bg-warning text-dark',
+      delay: 3000
+    });
+
+    return;
+  }
+
+  this.router.navigate(['/repair-bill', item.id]);
 }
 }
