@@ -57,6 +57,7 @@
                                         <select class="form-select form-select-sm" [class.is-invalid]="orderTypeInvalid"
                                             name="orderType" #orderType="ngModel" [(ngModel)]="partsPOData.subPoType"
                                             (change)="onPoTypeChange()" [disabled]="isEdit">
+                                            <option value="">-- Select --</option>
                                             <option value="VOR">VOR</option>
                                             <option value="SSOMSO">SSO/MSO</option>
                                             <option value="Accessories">Accessories</option>
@@ -82,15 +83,17 @@
                                 </div>
 
                                 <div class="col-md-1 text-center">
-                                    <label class="form-label mb-0 d-block small">Against KIT</label>
-                                    <div class="form-check form-switch d-inline-block">
+                                    <label class="form-label mb-0 small">Against KIT</label>
+                                    <div
+                                        class="form-control-sm border-0 form-check form-switch d-inline-block switch-lg">
                                         <input type="checkbox" class="form-check-input" id="isKit" name="isKit"
                                             #isKit="ngModel" [(ngModel)]="partsPOData.isKit"
                                             (change)="onKitToggleChange()"
                                             [disabled]="isSubmitted || partsPOData.subPoType !== 'SSOMSO' || isEdit">
-                                        <label class="form-check-label small" for="isKit">{{ partsPOData.isKit ? 'Y' :
-                                            'N'
-                                            }}</label>
+
+                                        <label class="form-check-label ms-2" for="isKit">
+                                            {{ partsPOData.isKit ? 'Y' : 'N' }}
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -119,23 +122,42 @@
                             <!-- Part No -->
                             <div class="col-md-3">
                                 <label class="form-label mb-0 small">Part No.</label>
-                                <!-- Models Dropdown -->
-                                <select *ngIf="!partsPOData.isKit"
-                                    class="form-select form-select-sm border-start border-2"
-                                    [class.is-invalid]="partNoInvalid" [(ngModel)]="currentItem.partNo"
-                                    (change)="onModelChange()">
-                                    <option value="">--Select--</option>
-                                    <option *ngFor="let item of itemList" [value]="item.itemcode">{{item.itemname}}
-                                    </option>
-                                </select>
-                                <!-- Kits Dropdown -->
-                                <select *ngIf="partsPOData.isKit"
-                                    class="form-select form-select-sm border-start border-2"
-                                    [class.is-invalid]="partNoInvalid" [(ngModel)]="currentItem.partNo"
-                                    (change)="onModelChange()">
-                                    <option value="">--Select--</option>
-                                    <option *ngFor="let kit of kitList" [value]="kit.id">{{kit.kitName}}</option>
-                                </select>
+
+                                <!-- Part -->
+                                <ng-select *ngIf="!partsPOData.isKit" class="ng-select-sm" [items]="itemList"
+                                    bindValue="itemcode" [(ngModel)]="currentItem.partNo" [searchFn]="customSearchFn"
+                                    [clearable]="false" (change)="onModelChange()"
+                                    placeholder="Search Part No or Description" name="itemName_select"
+                                    #itemName_select="ngModel" required>
+
+                                    <ng-template ng-label-tmp let-item="item">
+                                        <span [title]="item.itemcode + ' - ' + item.itemdesc">
+                                            {{ item.itemcode }} - {{ item.itemdesc }}
+                                        </span>
+                                    </ng-template>
+
+                                    <ng-template ng-option-tmp let-item="item">
+                                        <span [title]="item.itemcode + ' - ' + item.itemdesc">
+                                            {{ item.itemcode }} - {{ item.itemdesc }}
+                                        </span>
+                                    </ng-template>
+
+                                </ng-select>
+
+                                <!-- Kit -->
+                                <ng-select *ngIf="partsPOData.isKit" class="ng-select-sm" [items]="kitList"
+                                    bindValue="id" [(ngModel)]="currentItem.partNo" [clearable]="false"
+                                    (change)="onModelChange()" placeholder="Search Kit" name="kit_select" required>
+
+                                    <ng-template ng-label-tmp let-item="item">
+                                        {{ item.kitName }}
+                                    </ng-template>
+
+                                    <ng-template ng-option-tmp let-item="item">
+                                        {{ item.kitName }}
+                                    </ng-template>
+
+                                </ng-select>
                             </div>
 
                             <!-- Last Price -->

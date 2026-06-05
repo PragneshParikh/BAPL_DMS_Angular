@@ -19,11 +19,12 @@ import { PurchaseService } from '../../core/services/purchase-service';
 import { LedgerMaster } from '../../core/services/ledger-master';
 import _ from 'lodash';
 import { JobSearch } from '../../dialogs/job-search/job-search';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @Component({
   selector: 'app-parts-po',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbPaginationModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbPaginationModule, NgSelectModule],
   templateUrl: './parts-po.html',
   styleUrl: './parts-po.scss',
 })
@@ -66,7 +67,7 @@ export class PartsPo implements OnInit {
 
   currentItem: any = {
     id: 0,
-    partNo: '',
+    partNo: null,
     description: '',
     quantity: 0,
     rate: 0,
@@ -88,7 +89,7 @@ export class PartsPo implements OnInit {
     selectedLocation: '',
     prefixNo: '',
     orderNo: '',
-    subPoType: 'VOR',
+    subPoType: '',
     transactionType: 'B2C',
     isKit: false,
     partyName: '',
@@ -894,4 +895,12 @@ export class PartsPo implements OnInit {
       }
     );
   }
+
+  customSearchFn(term: string, item: any): boolean {
+    term = term.toLowerCase();
+
+    return item.itemcode?.toLowerCase().includes(term) ||
+      item.itemdesc?.toLowerCase().includes(term);
+  }
+
 }
