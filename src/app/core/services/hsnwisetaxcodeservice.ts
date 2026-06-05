@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class Hsnwisetaxcodeservice {
+export class HsnWiseTaxCodeService {
   protected baseUrl = environment.apiUrl;
 
   constructor(private httpClient: HttpClient) { }

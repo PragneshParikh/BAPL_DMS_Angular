@@ -8,18 +8,16 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class LMSLeadService {
-
   private apiUrl = environment.apiUrl;
-  /**
-   *
-   */
+
   constructor(private http: HttpClient) { }
+
   getLeadByMobileOrBooking(mobileNo: string | null, bookingId: number | null): Observable<LeadResponse> {
-      let params = new HttpParams();
-      if (mobileNo) params = params.set('mobileNo', mobileNo);
-      if (bookingId !== null) params = params.set('bookingId', bookingId.toString());
-  
-      return this.http.get<LeadResponse>(`${this.apiUrl}/LMSLeadMaster/lmsLeadbyMob`, { params });
-    }
-  
+    let params = new HttpParams();
+    if (mobileNo) params = params.set('mobileNo', mobileNo);
+    if (bookingId !== null) params = params.set('bookingId', bookingId.toString());
+
+    return this.http.get<LeadResponse>(`${this.apiUrl}/LMSLeadMaster/lmsLeadbyMob`, { params });
+  }
+
 }

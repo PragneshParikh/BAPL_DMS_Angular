@@ -7,7 +7,6 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class CircularService {
-
   protected baseUrl = environment.apiUrl;
 
   constructor(private httpClient: HttpClient) { }

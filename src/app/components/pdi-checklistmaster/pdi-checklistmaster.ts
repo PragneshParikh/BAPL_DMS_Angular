@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { NgbModal, NgbModule, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
-import { PdiChecklistmasterService } from '../../core/services/pdi-checklistmaster-service';
+import { PdiChecklistMasterService } from '../../core/services/pdi-checklistmaster-service';
 import Swal from 'sweetalert2';
 import { LoaderService } from '../../core/services/loader';
 
@@ -28,7 +28,7 @@ export class PdiChecklistmaster {
   };
 
 
-  constructor(private Pdichecklistmasterservice: PdiChecklistmasterService,
+  constructor(private Pdichecklistmasterservice: PdiChecklistMasterService,
     private modalService: NgbModal,
     private loader: LoaderService
   ) { }

@@ -6,8 +6,7 @@ import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class LotInspectionDetailsservice {
-
+export class LotInspectionDetailsService {
   protected baseUrl = environment.apiUrl;
 
   constructor(private httpClient: HttpClient) { }

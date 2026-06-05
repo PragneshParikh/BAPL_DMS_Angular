@@ -8,14 +8,14 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root',
 })
 export class ProformaInvoiceService {
-   private apiUrl = environment.apiUrl;
+  private apiUrl = environment.apiUrl;
 
-   constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   generatePerformaInvoice(request: PerformaInvoiceRequest): Observable<any> {
     return this.http.post(`${this.apiUrl}/PerformaInvoice/createPerformaInvoice`, request);
   }
-  
+
   getAll(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/PerformaInvoice`);
   }
