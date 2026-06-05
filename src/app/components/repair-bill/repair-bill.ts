@@ -139,6 +139,7 @@ export class RepairBill implements OnInit {
   remarks: string;
   labourId: any;
   partwiseLabourId: any;
+  customerLedgerId: any;
 
 
 
@@ -917,7 +918,7 @@ export class RepairBill implements OnInit {
         billType: this.billType,
         cashAccount: this.selectedCashAccount || 0,
 
-        customerLedgerId: this.selectedJobCard.customerLedgerId || 0,
+        customerLedgerId: this.selectedJobCard?.jobCardCustomer?.customerLedgerId || 0,
 
         jobId: this.selectedJobCard?.jobCardHeader?.id || 0,
 
@@ -1067,7 +1068,7 @@ export class RepairBill implements OnInit {
   getRepairBillById(id: number): void {
 
     this.loader.show();
-
+  console.log("testcustomerdetail",this.selectedJobCard.customerLedgerId);
     this.repairBillService.getRepairBillById(id).subscribe({
 
       next: (res: any) => {
@@ -1085,12 +1086,13 @@ export class RepairBill implements OnInit {
         this.RepairBillprefix = header.prefix;
         this.billNo = header.billNo;
         this.billType = header.billType;
-
+        this.customerLedgerId = header.customerLedgerId;
         this.selectedCashAccount = header.cashAccount;
         this.selectedJobCard.partyName = header.partyName;
         this.selectedJobCard.partyMobileNo = header.mobileNumber;
         this.selectedJobCard.partyState = header.partyState;
         this.remarks = header.remarks;
+        
 
         // Insurance
         this.selectedInsuranceId = header.insuranceId;
@@ -1123,8 +1125,8 @@ export class RepairBill implements OnInit {
             const partItem: PartItem = {
 
               id: d.id,
-              materialId : d.materialId,
-              partItemId : d.partItemId,
+              materialId: d.materialId,
+              partItemId: d.partItemId,
               partCode: d.partCode || '',
               partDesc: d.partDesc || '',
 
@@ -1153,7 +1155,7 @@ export class RepairBill implements OnInit {
             this.partItems.push(partItem);
             this.materialedJobCarDList = [...this.partItems];
           });
-       // console.log('Mapped Part Items', this.partItems);
+        // console.log('Mapped Part Items', this.partItems);
 
         // =====================
         // LABOUR DETAILS
@@ -1210,7 +1212,7 @@ export class RepairBill implements OnInit {
             });
 
           });
-//console.log('Mapped Part Items', this.partItems);
+        //console.log('Mapped Part Items', this.partItems);
         this.isPartSelected = this.partItems.length > 0;
         this.isLabourSelected = this.labourItems.length > 0;
 
@@ -1233,6 +1235,8 @@ export class RepairBill implements OnInit {
   updateRepairBill(): void {
     debugger;
     let dealerCode = this.storageService.getDealerCode();
+    //console.log("testcustomerdetail",this.selectedJobCard);
+    
     // if (!this.isSuperAdmin) {
 
     //   this.toaster.show('Only SuperAdmin can be Update.', {
@@ -1256,10 +1260,9 @@ export class RepairBill implements OnInit {
         billType: this.billType,
         cashAccount: this.selectedCashAccount || 0,
 
-        partyName: this.selectedJobCard?.partyName || '',
-        mobileNumber: this.selectedJobCard?.partyMobileNo || '',
-        
-        customerLedgerId: this.selectedJobCard.customerLedgerId || 0,
+       // partyName: this.selectedJobCard?.partyName || '',
+       // mobileNumber: this.selectedJobCard?.partyMobileNo || '',
+        customerLedgerId: this.customerLedgerId || 0,
 
         jobId: this.selectedJobCard?.jobCardHeader?.id || 0,
 
@@ -1293,11 +1296,11 @@ export class RepairBill implements OnInit {
 
         // PART ITEMS
         ...this.partItems.map((item: any) => ({
-          id:item.id,
+          id: item.id,
           itemType: 'Part',
 
           materialId: item.materialId || 0,
-          partItemId : item.partItemId ||0,
+          partItemId: item.partItemId || 0,
 
           labourId: item.labourId || 0,
           partWiseLabourId: item.partWiseLabourId || 0,
@@ -1333,7 +1336,7 @@ export class RepairBill implements OnInit {
 
         // LABOUR ITEMS
         ...this.labourItems.map((item: any) => ({
-          id:item.id,
+          id: item.id,
           itemType: 'Labour',
 
           materialId: 0,
@@ -1368,6 +1371,7 @@ export class RepairBill implements OnInit {
         }))
       ]
     };
+    console.log(payload)
     this.loader.show();
 
     this.repairBillService.updateRepairBill(payload)

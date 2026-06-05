@@ -10,10 +10,11 @@ import { RepairBillService } from '../../../core/services/repair-bill-service';
 import { LocationName } from '../../../ViewModels/ReceiptEntryModel';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { LocationMasterService } from '../../../core/services/location-master-service';
+import { LoaderService } from '../../../core/services/loader';
 
 @Component({
   selector: 'app-repair-bill-list',
-  imports: [FormsModule, CommonModule, NgbTooltip,NgbPagination],
+  imports: [FormsModule, CommonModule, NgbTooltip, NgbPagination],
   templateUrl: './repair-bill-list.html',
   styleUrl: './repair-bill-list.scss',
 })
@@ -22,7 +23,7 @@ export class RepairBillList implements OnInit {
   locations: LocationName[] = [];
 
   repairBillList: any[] = [];
-  chassisList : any[]=[];
+  chassisList: any[] = [];
 
   filteredData: any[] = [];
   pagedData: any[] = [];
@@ -30,7 +31,7 @@ export class RepairBillList implements OnInit {
   page = 1;
   pageSize = 10;
   collectionSize = 0;
-   isSuperAdmin: boolean = false;
+  isSuperAdmin: boolean = false;
 
   private searchTimeout: any;
 
@@ -38,8 +39,9 @@ export class RepairBillList implements OnInit {
     private router: Router,
     private storageService: StorageService,
     private repairBillService: RepairBillService,
-    private toaster : ToastService,
-    private locationService: LocationMasterService
+    private toaster: ToastService,
+    private locationService: LocationMasterService,
+    private loader: LoaderService
   ) { }
 
   repairbillsearchModel: RepairBillSearchModel = {
@@ -107,6 +109,7 @@ export class RepairBillList implements OnInit {
         this.repairbillsearchModel.toDate || null
     };
 
+    this.loader.show();
     this.repairBillService
       .getAllRepairBillList(payload)
       .subscribe({
@@ -119,14 +122,14 @@ export class RepairBillList implements OnInit {
           this.filteredData = [...res];
 
           this.collectionSize = this.filteredData.length;
-
+          this.loader.hide();
           this.refreshTable();
         },
 
         error: (err) => {
 
           console.error('Repair Bill Search Error', err);
-
+          this.loader.hide();
           this.repairBillList = [];
           this.filteredData = [];
           this.pagedData = [];
@@ -176,27 +179,27 @@ export class RepairBillList implements OnInit {
 
   // Edit Repair Bill
   editRepairBill(item: any): void {
-debugger
-  // if (!this.isSuperAdmin) {
+    debugger
+    // if (!this.isSuperAdmin) {
 
-  //   this.toaster.show('Only SuperAdmin can be Update.', {
-  //       classname: 'bg-warning text-dark',
-  //       icons: 'Warning',
-  //       delay: 5000
-  //     });
+    //   this.toaster.show('Only SuperAdmin can be Update.', {
+    //       classname: 'bg-warning text-dark',
+    //       icons: 'Warning',
+    //       delay: 5000
+    //     });
 
-  //   return;
-  // }
-   if (item.repairBillStatus === 'Billed') {
+    //   return;
+    // }
+    if (item.repairBillStatus === 'Billed') {
 
-    this.toaster.show('Invoiced Repair Bill cannot be edited.', {
-      classname: 'bg-warning text-dark',
-      delay: 3000
-    });
+      this.toaster.show('Invoiced Repair Bill cannot be edited.', {
+        classname: 'bg-warning text-dark',
+        delay: 3000
+      });
 
-    return;
+      return;
+    }
+
+    this.router.navigate(['/repair-bill', item.id]);
   }
-
-  this.router.navigate(['/repair-bill', item.id]);
-}
 }
