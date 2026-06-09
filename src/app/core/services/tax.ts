@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 })
 export class TaxService {
   protected baseUrl = environment.apiUrl;
+
   constructor(private http: HttpClient) { }
 
   getTaxList(itemCode: string, dealerLocation: string, customerLocation: string): Observable<any> {

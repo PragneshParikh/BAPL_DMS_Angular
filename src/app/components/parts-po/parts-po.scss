@@ -3,4 +3,13 @@
     flex: 0 0 12.5%;
     max-width: 12.5%;
   }
+  .switch-lg .form-check-input {
+    transform: scale(1.5);
+    cursor: pointer;
+}
+}
+
+:host ::ng-deep .ng-select.ng-select-sm .ng-select-container {
+    min-height: 27px !important;
+    height: 27px !important;
 }

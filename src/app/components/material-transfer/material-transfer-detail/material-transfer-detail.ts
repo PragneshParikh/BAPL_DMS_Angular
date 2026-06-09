@@ -50,7 +50,7 @@ export class MaterialTransferDetail implements OnInit {
     //#region Item Table Field
     id: 0,
     jobId: 0,
-    itemId: 0,
+    itemId: null,
     itemname: '',
     itemdesc: '',
     quantity: 0,
@@ -403,6 +403,7 @@ export class MaterialTransferDetail implements OnInit {
       const _item = this.itemList.find(x => x.id === Number(this.newItem.itemId));
 
       if (_item.batchClosingQty < value) {
+        this.newItem.quantity = 0;
         this.toast.show(`Stock limit exceeded. Please reduce the quantity.`, { classname: 'bg-warning text-white', delay: 5000 });
         return;
       }
@@ -413,12 +414,12 @@ export class MaterialTransferDetail implements OnInit {
     }
   }
 
-  onChangeItem(itemId: number) {
+  onChangeItem(itemId: any) {
     if (!itemId) return;
 
     this.resetNewItem();
 
-    const selectedItem = this.itemList.find(item => item.id === Number(itemId));
+    const selectedItem = this.itemList.find(item => item.id === Number(itemId.id));
     if (selectedItem) {
       this.loader.show();
       this.taxService.getTaxList(selectedItem.itemcode.toString(), 'CUS0435S1', '').subscribe({
@@ -527,6 +528,16 @@ export class MaterialTransferDetail implements OnInit {
 
     event.target.value = input;
   }
+
+  customSearchFn(term: string, item: any): boolean {
+    term = term.toLowerCase();
+
+    return (
+      item.itemcode?.toLowerCase().includes(term) ||
+      item.itemdesc?.toLowerCase().includes(term)
+    );
+  }
+
 }
 
 export const TechnicianList = [

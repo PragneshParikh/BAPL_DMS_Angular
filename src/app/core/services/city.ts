@@ -7,7 +7,6 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class CityService {
-
   private baseUrl = environment.apiUrl;
 
   constructor(private httpClient: HttpClient) { }
@@ -16,28 +15,27 @@ export class CityService {
     return this.httpClient.get(`${this.baseUrl}/city`);
   }
 
-    getAllWithState(): Observable<any> {
+  getAllWithState(): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/city/CitiesWithStateName`);
   }
 
-    getById(id: number): Observable<any> {
+  getById(id: number): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/city/${id}`);
   }
 
- 
   create(data: any): Observable<any> {
     return this.httpClient.post(`${this.baseUrl}/city`, data);
   }
 
-   update(id: number, data: any): Observable<any> {
+  update(id: number, data: any): Observable<any> {
     return this.httpClient.put(`${this.baseUrl}/city/${id}`, data);
   }
 
-   downloadExcel() {
+  downloadExcel() {
     return this.httpClient.get(
       `${this.baseUrl}/city/download`,
       { responseType: 'blob' }
     );
   }
-  
+
 }

@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, Optional } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LedgerMaster } from '../../core/services/ledger-master';
+import { LedgerMasterService } from '../../core/services/ledger-master';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
@@ -55,7 +55,7 @@ export class CustomerLedger {
   lstUsers: any[] = [];
 
   constructor(
-    private ledgerService: LedgerMaster,
+    private ledgerService: LedgerMasterService,
     private activatedRoute: ActivatedRoute,
     private loader: LoaderService,
     private toaster: ToastService,
