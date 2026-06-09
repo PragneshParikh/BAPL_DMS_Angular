@@ -37,6 +37,7 @@
     "@angular/platform-browser": "^20.3.12",
     "@angular/platform-browser-dynamic": "^20.3.12",
     "@angular/router": "^20.3.12",
+    "@azure/storage-blob": "^12.31.0",
     "@bluehalo/ngx-leaflet": "^19.0.0",
     "@ckeditor/ckeditor5-angular": "^9.0.0",
     "@ckeditor/ckeditor5-build-classic": "^43.2.0",

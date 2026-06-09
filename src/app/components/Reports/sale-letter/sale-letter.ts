@@ -4,7 +4,7 @@ import { DealerMasterViewModel } from '../../../ViewModels/Dealer/DealerMasterVi
 import { CommonModule } from '@angular/common';
 import { DealerService } from '../../../core/services/dealer-service';
 import { StorageService } from '../../../core/services/storage';
-import { LedgerMaster } from '../../../core/services/ledger-master';
+import { LedgerMasterService } from '../../../core/services/ledger-master';
 import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
 
 @Component({
@@ -13,8 +13,8 @@ import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill
   templateUrl: './sale-letter.html',
   styleUrl: './sale-letter.scss',
 })
-export class SaleLetter  implements OnInit {
-  dealer:DealerMasterViewModel;
+export class SaleLetter implements OnInit {
+  dealer: DealerMasterViewModel;
   partyName!: string;
   modelName!: string;
   chassisNo!: string;
@@ -30,17 +30,17 @@ export class SaleLetter  implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private dealerService:DealerService,
-    private storageService:StorageService,
-    private ledgerService: LedgerMaster,
-    private vehicleSaleBillService:VehicleSaleBillService
-  ) {}
+    private dealerService: DealerService,
+    private storageService: StorageService,
+    private ledgerService: LedgerMasterService,
+    private vehicleSaleBillService: VehicleSaleBillService
+  ) { }
 
   ngOnInit(): void {
- this.getDealerDetails();
+    this.getDealerDetails();
 
     this.saleBillId = this.route.snapshot.paramMap.get('saleBillNo') || '';
-      if (this.saleBillId) {
+    if (this.saleBillId) {
       this.getBillById(parseInt(this.saleBillId));
     }
 
@@ -53,30 +53,29 @@ export class SaleLetter  implements OnInit {
     });
 
   }
-getBillById(id: number) {
-  this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
-    next: (res) => {
-      this.saleBill = res;
-      if(this.saleBill.erpStatus == "Invoiced")
-      {
-       this.isInvoiced=true;
-      }
+  getBillById(id: number) {
+    this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
+      next: (res) => {
+        this.saleBill = res;
+        if (this.saleBill.erpStatus == "Invoiced") {
+          this.isInvoiced = true;
+        }
 
-      if (this.saleBill?.ledgerId) {
+        if (this.saleBill?.ledgerId) {
 
-        this.ledgerService.getLedgerById(this.saleBill.ledgerId).subscribe({
-          next: (ledgerRes) => {
-            this.CustomerLedger = ledgerRes;
-          },
-          error: (err) => console.error(err)
-        });
-      }
-    },
-    error: (err) => console.error(err)
-  });
+          this.ledgerService.getLedgerById(this.saleBill.ledgerId).subscribe({
+            next: (ledgerRes) => {
+              this.CustomerLedger = ledgerRes;
+            },
+            error: (err) => console.error(err)
+          });
+        }
+      },
+      error: (err) => console.error(err)
+    });
 
-  
-}
+
+  }
 
 
 }

@@ -5,17 +5,14 @@ import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class Form22masterservice {
+export class Form22MasterService {
   protected baseUrl = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private httpClient: HttpClient) { }
 
-  }
-
-  getForm22masterdetails(search: string=''): Observable<any> {
-
+  getForm22masterdetails(search: string = ''): Observable<any> {
     let params = new HttpParams()
-      .set('search',search ?? '');
+      .set('search', search ?? '');
 
     if (search && search.trim() !== '') {
       params = params.set('search', search.trim());
@@ -23,8 +20,8 @@ export class Form22masterservice {
     return this.httpClient.get<any[]>(`${this.baseUrl}/Form22Master`, { params });
   }
 
-  getOemModelList():Observable<any>{
-     return this.httpClient.get<any[]>(`${this.baseUrl}/Form22Master/GetOemModelList`);
+  getOemModelList(): Observable<any> {
+    return this.httpClient.get<any[]>(`${this.baseUrl}/Form22Master/GetOemModelList`);
   }
 
   insertForm22Master(data: any) {
@@ -48,11 +45,9 @@ export class Form22masterservice {
   }
 
   downloadForm22MasterExcel() {
-  return this.httpClient.get(`${this.baseUrl}/Form22Master/download`, {
-    responseType: 'blob'
-  });
-}
-
-
+    return this.httpClient.get(`${this.baseUrl}/Form22Master/download`, {
+      responseType: 'blob'
+    });
+  }
 
 }

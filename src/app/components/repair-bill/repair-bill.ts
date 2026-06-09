@@ -5,18 +5,16 @@ import { StorageService } from '../../core/services/storage';
 import { cashAccounts, IssueTypes } from '../../constant';
 import { SchemeName } from '../../constant';
 import { JobCardService } from '../../core/services/job-card-service';
-import { LabourmaasterService } from '../../core/services/labourmaaster-service';
+import { LabourMasterService } from '../../core/services/labourmaaster-service';
 import { LabourItem, PartItem } from '../../ViewModels/RepairBillModel';
 import Swal from 'sweetalert2';
 import { ItemMasterService } from '../../core/services/item-master-service';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
-import { it } from 'node:test';
 import { PrefixService } from '../../core/services/prefix';
-import { LedgerMaster } from '../../core/services/ledger-master';
+import { LedgerMasterService } from '../../core/services/ledger-master';
 import { VehicleSaleBillService } from '../../core/services/vehicle-sale-bill-service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { icons } from '../../core/data';
 import { RepairBillService } from '../../core/services/repair-bill-service';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
@@ -148,10 +146,10 @@ export class RepairBill implements OnInit {
   constructor(private locationService: LocationMasterService,
     private storageService: StorageService,
     private jobCardService: JobCardService,
-    private labourMasterService: LabourmaasterService,
+    private labourMasterService: LabourMasterService,
     private itemService: ItemMasterService,
     private prefixService: PrefixService,
-    private ledgerMasterService: LedgerMaster,
+    private ledgerMasterService: LedgerMasterService,
     private vehicleSaleBillService: VehicleSaleBillService,
     private repairBillService: RepairBillService,
     private route: ActivatedRoute,

@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
-import { LedgerMaster } from '../../core/services/ledger-master';
+import { LedgerMasterService } from '../../core/services/ledger-master';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
 import { ActivatedRoute, Route, Router } from '@angular/router';
@@ -52,7 +52,7 @@ export class HSRPOrder implements OnInit {
   constructor(
     private hsrpService: HsrpService,
     private storageService: StorageService,
-    private ledgerService: LedgerMaster,
+    private ledgerService: LedgerMasterService,
     private toasterService: ToastService,
     private loaderService: LoaderService,
     private route: ActivatedRoute,

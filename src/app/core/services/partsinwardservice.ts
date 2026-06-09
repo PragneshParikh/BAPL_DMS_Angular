@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 @Injectable({
   providedIn: 'root',
 })
-export class PartsInwardservice {
+export class PartsInwardService {
   protected baseUrl = environment.apiUrl;
 
   constructor(private httpClient: HttpClient) { }

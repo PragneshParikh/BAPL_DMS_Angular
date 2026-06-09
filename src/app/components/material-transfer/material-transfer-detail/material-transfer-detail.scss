@@ -22,3 +22,8 @@
         gap: 6px;
     }
 }
+
+:host ::ng-deep .ng-select.ng-select-sm .ng-select-container {
+    min-height: 27px !important;
+    height: 27px !important;
+}

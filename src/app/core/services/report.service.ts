@@ -29,7 +29,7 @@ import {
 
 import {
   PartDispatchKitReportViewModel
-  
+
 } from '../../ViewModels/models/part-dispatch-kit-report.model';
 
 import {
@@ -44,6 +44,7 @@ import {
 
 import { environment }
   from '../../../environments/environment';
+import { Form22SlipViewModel } from '../../ViewModels/Form22SlipViewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -93,7 +94,7 @@ export class ReportService {
     );
   }
 
-  
+
 
   // =====================================================
   // JOB REPORT
@@ -248,71 +249,71 @@ export class ReportService {
       filter
     );
   }
-getDealerList() {
+  getDealerList() {
 
     return this.http.get<any[]>(
-        `${environment.apiUrl}/Report/dealer-list`
+      `${environment.apiUrl}/Report/dealer-list`
     );
-}
+  }
 
-getModelList() {
+  getModelList() {
 
     return this.http.get<any[]>(
-        `${environment.apiUrl}/Report/model-list`
+      `${environment.apiUrl}/Report/model-list`
     );
-}
-getModelListByDealer(
+  }
+  getModelListByDealer(
     dealerCode: string
-) {
+  ) {
 
     return this.http.get<any[]>(
-        `${environment.apiUrl}/Report/model-list/${dealerCode}`
+      `${environment.apiUrl}/Report/model-list/${dealerCode}`
     );
-}
+  }
 
-getChassisList() {
+  getChassisList() {
 
     return this.http.get<string[]>(
-        `${environment.apiUrl}/Report/chassis-list`
+      `${environment.apiUrl}/Report/chassis-list`
     );
-}
+  }
   // =====================================================
   // PO TRACKING REPORT
   // =====================================================
 
-    getPOTrackingReport(
-      filter: POTrackingFilterModel
-    ): Observable<
+  getPOTrackingReport(
+    filter: POTrackingFilterModel
+  ): Observable<
+    PagedResponse<POTrackingReportViewModel>
+  > {
+
+    return this.http.post<
       PagedResponse<POTrackingReportViewModel>
-    > {
+    >(
+      `${this.apiUrl}/po-tracking`,
+      filter
+    );
+  }
 
-      return this.http.post<
-        PagedResponse<POTrackingReportViewModel>
-      >(
-        `${this.apiUrl}/po-tracking`,
-        filter
-      );
-    }
+  // =====================================================
+  // PO TRACKING DROPDOWNS
+  // =====================================================
 
-    // =====================================================
-    // PO TRACKING DROPDOWNS
-    // =====================================================
+  getPOTypeDropdown(): Observable<string[]> {
+    return this.http.get<string[]>(
+      `${this.apiUrl}/po-tracking/dropdown/po-type`
+    );
+  }
 
-    getPOTypeDropdown(): Observable<string[]> {
-      return this.http.get<string[]>(
-        `${this.apiUrl}/po-tracking/dropdown/po-type`
-      );
-    }
+  getPOStatusDropdown(): Observable<string[]> {
+    return this.http.get<string[]>(
+      `${this.apiUrl}/po-tracking/dropdown/po-status`
+    );
+  }
 
-    getPOStatusDropdown(): Observable<string[]> {
-      return this.http.get<string[]>(
-        `${this.apiUrl}/po-tracking/dropdown/po-status`
-      );
-    }
-
-     // =====================================================
-    // PARTS DISPATCH REPORT
-    // =====================================================
+  // =====================================================
+  // PARTS DISPATCH REPORT
+  // =====================================================
 
   getPartsDispatchReport(
     dealerCode?: string,
@@ -353,8 +354,8 @@ getChassisList() {
   }
 
   //=====================================================
- //PART DISPATCH KIT REPORT
- //=====================================================
+  //PART DISPATCH KIT REPORT
+  //=====================================================
 
   getPartDispatchKitReport(
     dealerCode?: string,
@@ -409,5 +410,13 @@ getChassisList() {
     );
   }
 
-  
+  getForm22(chassisNo: string): Observable<Form22SlipViewModel> {
+    const params = new HttpParams().set('chassisNo', chassisNo);
+
+    return this.http.get<Form22SlipViewModel>(
+      `${this.apiUrl}/Form22`,
+      { params }
+    );
+  }
+
 }

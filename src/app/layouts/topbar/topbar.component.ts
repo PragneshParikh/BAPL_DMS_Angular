@@ -18,10 +18,10 @@ import { map, Observable, of } from 'rxjs';
 import { LoaderService } from '../../core/services/loader';
 import { InvoiceDetail } from '../../dialogs/invoice-detail/invoice-detail';
 import { StorageService } from '../../core/services/storage';
-import { Lotinspectionservice } from '../../core/services/lotinspectionservice';
+import { LotInspectionService } from '../../core/services/lotinspectionservice';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { VehicleInwardService } from '../../core/services/vehicle-inwardservice';
-import { PartsInwardservice } from '../../core/services/partsinwardservice';
+import { PartsInwardService } from '../../core/services/partsinwardservice';
 @Component({
   selector: 'app-topbar',
   templateUrl: './topbar.component.html',
@@ -80,9 +80,9 @@ export class TopbarComponent implements OnInit {
     private vehicleInwardService: VehicleInwardService,
     private loader: LoaderService,
     private storageService: StorageService,
-    private lotInspectionService: Lotinspectionservice,
+    private lotInspectionService: LotInspectionService,
     private toastService: ToastService,
-    private partInwardService: PartsInwardservice
+    private partInwardService: PartsInwardService
   ) { }
 
   ngOnInit(): void {

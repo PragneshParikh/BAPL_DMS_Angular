@@ -16,14 +16,15 @@ import Swal from 'sweetalert2';
 import { PrefixService } from '../../core/services/prefix';
 import { TaxService } from '../../core/services/tax';
 import { PurchaseService } from '../../core/services/purchase-service';
-import { LedgerMaster } from '../../core/services/ledger-master';
+import { LedgerMasterService } from '../../core/services/ledger-master';
 import _ from 'lodash';
 import { JobSearch } from '../../dialogs/job-search/job-search';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @Component({
   selector: 'app-parts-po',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbPaginationModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbPaginationModule, NgSelectModule],
   templateUrl: './parts-po.html',
   styleUrl: './parts-po.scss',
 })
@@ -51,22 +52,10 @@ export class PartsPo implements OnInit {
 
   jobCardList: any[] = [];
   activeJobCards: any[] = [];
-  // vorDetails: any = {
-  //   jobNo: '',
-  //   chassisNo: '',
-  //   registerNo: '',
-  //   engineNo: '',
-  //   jobType: '',
-  //   serviceHead: '',
-  //   serviceType: '',
-  //   partyName: '',
-  //   mobileNo: '',
-  //   modelNo: ''
-  // };
 
   currentItem: any = {
     id: 0,
-    partNo: '',
+    partNo: null,
     description: '',
     quantity: 0,
     rate: 0,
@@ -88,7 +77,7 @@ export class PartsPo implements OnInit {
     selectedLocation: '',
     prefixNo: '',
     orderNo: '',
-    subPoType: 'VOR',
+    subPoType: '',
     transactionType: 'B2C',
     isKit: false,
     partyName: '',
@@ -115,7 +104,7 @@ export class PartsPo implements OnInit {
     private jobCardService: JobCardService,
     private prefixService: PrefixService,
     private taxService: TaxService,
-    private ledgerService: LedgerMaster,
+    private ledgerService: LedgerMasterService,
     private modalService: NgbModal
   ) {
     this.dealerCode = this.storageService.getDealerCode();
@@ -894,4 +883,12 @@ export class PartsPo implements OnInit {
       }
     );
   }
+
+  customSearchFn(term: string, item: any): boolean {
+    term = term.toLowerCase();
+
+    return item.itemcode?.toLowerCase().includes(term) ||
+      item.itemdesc?.toLowerCase().includes(term);
+  }
+
 }

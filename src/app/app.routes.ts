@@ -52,6 +52,8 @@ import { HSRPOrder } from './components/hsrp-order/hsrp-order';
 import { EmployeeMasterList } from './components/employee-master/employee-master-list/employee-master-list';
 import { RepairBillPerforma } from './components/Reports/repair-bill-performa/repair-bill-performa';
 import { ComplaintMaster } from './components/complaint-master/complaint-master';
+import { AddVehicleStockTransfer } from './components/vehicle-stock-transfer/add-vehicle-stock-transfer';
+import { VehicleStockTransferList } from './components/vehicle-stock-transfer/vehicle-stock-transfer-list/vehicle-stock-transfer-list';
 
 
 export const routes: Routes = [
@@ -115,9 +117,9 @@ export const routes: Routes = [
       { path: 'vehicle-po', component: VehiclePO, data: [17] },
       { path: 'vehicle-po/:ponumber', component: VehiclePO, data: [17] },
       { path: 'vehicle-po-list', component: VehiclePoList, data: [17] },
-      { path: 'parts-po-list', component: PartsPoList, data: [32] },
-      { path: 'parts-po', component: PartsPo, data: [32] },
-      { path: 'parts-po/:ponumber', component: PartsPo, data: [32] },
+      { path: 'parts-po-list', component: PartsPoList, data: [33] },
+      { path: 'parts-po', component: PartsPo, data: [33] },
+      { path: 'parts-po/:ponumber', component: PartsPo, data: [33] },
       { path: 'prefix', data: [26], loadComponent: () => import('./components/prefix-master/prefix-master').then(m => m.PrefixMaster) },
       { path: 'prefix/:id', data: [26], loadComponent: () => import('./components/prefix-master/prefix-master-details/prefix-master-details').then(m => m.PrefixMasterDetails) },
       { path: 'material-transfer', data: [29], loadComponent: () => import('./components/material-transfer/material-transfer').then(m => m.MaterialTransfer) },
@@ -170,8 +172,11 @@ export const routes: Routes = [
 
       { path: 'repair-bill-performa', component: RepairBillPerforma, data: [51] },
 
-      { path: 'complaint-master', component: ComplaintMaster, data: [56] }
+      { path: 'complaint-master', component: ComplaintMaster, data: [56] },
 
+      { path: 'add-vehicle-stock-transfer', component: AddVehicleStockTransfer, data: [57] },
+      { path: 'vehicle-stock-transfer', component: VehicleStockTransferList, data: [57] },
+      { path: 'vehicle-stock-transfer/edit/:id', component: AddVehicleStockTransfer, data: [57] },
     ]
   },
   { path: '**', component: WorkInProgress }
