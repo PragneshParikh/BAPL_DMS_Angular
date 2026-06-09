@@ -150,9 +150,14 @@ export const ModuleTypes = [
     { name: 'Repair_bill', moduleName: 'Repair Bill' },
     { name: 'hsrp_order', moduleName: 'HSRP Order' },
     { name: 'sale_bill', moduleName: 'Vehicle Sale Bill' },
-    { name: 'receipt_entry', moduleName: 'Receipt Entry' }
+    { name: 'receipt_entry', moduleName: 'Receipt Entry' },
+    {name:'vehicle_transfer', moduleName:'Vehicle Stock Transfer' },
 ]
 
+export const EmployeeDesignations = [
+    { id: 1, value: 'SalesExecutive' },
+    
+]
 export const FFIRPresentVehicleStatus = [
     { id: 1, value: 'Complaint Resolved' },
     { id: 2, value: 'Running with Problem' },
