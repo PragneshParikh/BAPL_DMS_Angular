@@ -5,34 +5,37 @@
         <div class="card-header text-white py-2 d-flex justify-content-between align-items-center">
 
             <h6 class="mb-0">Repair Bill [GST]</h6>
-            <!-- Vertical Variation -->
-            
 
-            <div class="btn-group" role="group">
+            <div class="d-flex align-items-center gap-2">
 
-                <button class="btn btn-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="ri-printer-line"></i>
+                <div ngbDropdown>
+
+                    <button class="btn btn-primary btn-sm" ngbDropdownToggle>
+
+                        <i class="ri-printer-line"></i>
+                    </button>
+
+                    <div ngbDropdownMenu>
+
+                        <button ngbDropdownItem (click)="printPerforma()">
+                            <i class="ri-file-text-line me-2"></i>
+                            Performa Print
+                        </button>
+
+                        <button ngbDropdownItem (click)="printInvoice()">
+                            <i class="ri-bill-line me-2"></i>
+                            Invoice Print
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <button class="btn btn-light btn-sm" (click)="onNavigate()">
+                    <i class="ri-menu-line"></i>
                 </button>
-                <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                    <li><a class="dropdown-item" (click)="printPerforma()"> Performa Print</a></li>
-                    <li><a class="dropdown-item" (click)="printInvoice()">Invoice Print</a></li>
-                </ul>
-                <!-- <div ngbDropdownMenu>
-
-                    <button ngbDropdownItem (click)="printPerforma()">
-                        <i class="ri-file-text-line me-2"></i>
-                        Performa Print
-                    </button>
-
-                    <button ngbDropdownItem (click)="printInvoice()">
-                        <i class="ri-bill-line me-2"></i>
-                        Invoice Print
-                    </button>
-
-                </div> -->
 
             </div>
-
         </div>
 
         <div class="card-body p-2">

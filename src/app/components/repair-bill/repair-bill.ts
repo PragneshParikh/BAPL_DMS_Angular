@@ -17,10 +17,12 @@ import { VehicleSaleBillService } from '../../core/services/vehicle-sale-bill-se
 import { ActivatedRoute, Router } from '@angular/router';
 import { RepairBillService } from '../../core/services/repair-bill-service';
 import { LocationMasterService } from '../../core/services/location-master-service';
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { Console } from 'console';
 
 @Component({
   selector: 'app-repair-bill',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule,NgbDropdownModule],
   templateUrl: './repair-bill.html',
   styleUrl: './repair-bill.scss',
 })
