@@ -36,6 +36,7 @@
               "node_modules/slick-carousel/slick/slick.scss",
               "node_modules/slick-carousel/slick/slick-theme.scss",
               "node_modules/@ctrl/ngx-emoji-mart/picker.css",
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/assets/scss/bootstrap.scss",
               "src/assets/scss/icons.scss",
               "src/assets/scss/app.scss"
