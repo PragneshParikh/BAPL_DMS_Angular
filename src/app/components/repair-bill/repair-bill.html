@@ -5,31 +5,31 @@
         <div class="card-header text-white py-2 d-flex justify-content-between align-items-center">
 
             <h6 class="mb-0">Repair Bill [GST]</h6>
+            <!-- Vertical Variation -->
+            
 
-             <div class="dropdown">
+            <div class="btn-group" role="group">
 
-                <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                    <i class="ri-printer-line me-1"></i>
+                <button class="btn btn-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="ri-printer-line"></i>
                 </button>
-
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li>
-                        <a class="dropdown-item" href="javascript:void(0)" (click)="printPerforma()">
-                            <i class="ri-file-text-line me-2"></i>
-                            Performa Print
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="javascript:void(0)" (click)="printInvoice()">
-                            <i class="ri-bill-line me-2"></i>
-                            Invoice Print
-                        </a>
-                    </li>
+                <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                    <li><a class="dropdown-item" (click)="printPerforma()"> Performa Print</a></li>
+                    <li><a class="dropdown-item" (click)="printInvoice()">Invoice Print</a></li>
                 </ul>
-                <button class="btn btn-light btn-sm" (click)="onNavigate()">
-                    <i class="ri-menu-line"></i>
-                </button>
+                <!-- <div ngbDropdownMenu>
+
+                    <button ngbDropdownItem (click)="printPerforma()">
+                        <i class="ri-file-text-line me-2"></i>
+                        Performa Print
+                    </button>
+
+                    <button ngbDropdownItem (click)="printInvoice()">
+                        <i class="ri-bill-line me-2"></i>
+                        Invoice Print
+                    </button>
+
+                </div> -->
 
             </div>
 
