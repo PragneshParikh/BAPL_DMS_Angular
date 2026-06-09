@@ -44,6 +44,7 @@ import {
 
 import { environment }
   from '../../../environments/environment';
+import { Form22SlipViewModel } from '../../ViewModels/Form22SlipViewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -409,5 +410,13 @@ export class ReportService {
     );
   }
 
+  getForm22(chassisNo: string): Observable<Form22SlipViewModel> {
+    const params = new HttpParams().set('chassisNo', chassisNo);
+
+    return this.http.get<Form22SlipViewModel>(
+      `${this.apiUrl}/Form22`,
+      { params }
+    );
+  }
 
 }
