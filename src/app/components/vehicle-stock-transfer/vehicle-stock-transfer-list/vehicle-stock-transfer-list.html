@@ -1,0 +1,217 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">Vehicle Stock Transfer List</h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <!-- FILTER -->
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Date From</label>
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.fromDate">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Date To</label>
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.toDate">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Issuing Location</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="filter.issuingLocation">
+                            <option value="">All</option>
+                            <option *ngFor="let loc of locationList" [value]="loc.locCode">
+                                {{ loc.locname }}
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-0 small">Receiving Location</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="filter.receivingLocation">
+                            <option value="">All</option>
+                            <option *ngFor="let loc of locationList" [value]="loc.locCode">
+                                {{ loc.locname }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-auto ms-auto d-flex align-items-end gap-1">
+                        <button class="btn btn-primary btn-sm" (click)="onSearch()">
+                            Search
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- LIST -->
+        <div class="card">
+
+            <div class="card-header">
+
+                <div class="d-flex justify-content-end align-items-center">
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="d-flex gap-2">
+
+                            <button class="btn btn-primary btn-sm" (click)="navigateToAddTransfer()">
+                                Add
+                            </button>
+
+                            <button class="btn btn-success btn-sm" (click)="downloadExcel()">
+                                <i class="ri-file-excel-2-line"></i>
+                            </button>
+
+                        </div>
+
+                        <div class="search-box">
+                            <input type="text" class="form-control search" placeholder="Search..."
+                                [(ngModel)]="searchTerm" (input)="onSearchChange()">
+                            <i class="ri-search-line search-icon"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="table-responsive fixed-table" id="transferTable">
+
+                  <table class="table table-bordered table-sm table-striped transferTable " style="font-size: 12px;">
+
+                        <thead>
+                            <tr>
+                                <th>Sl No</th>
+                                <th>Transfer No</th>
+                                <th>Transfer Date</th>
+                                <th>Chassis Details</th>
+                                <th>Issuing Location</th>
+                                <th>Issuing Staff</th>
+                                <th>Receiving Location</th>
+                                <th>Receiving Staff</th>
+                                <!-- <th>Transfer Total</th> -->
+                                <!-- <th>Remarks</th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngIf="paginatedTransfers.length === 0">
+                                <td colspan="10" class="text-center">
+                                    No data available
+                                </td>
+                            </tr>
+
+                            <tr *ngFor="let item of paginatedTransfers; let i=index" (dblclick)="editTransfer(item)"
+                                style="cursor:pointer">
+
+                                <td>
+                                    {{ i + 1 + ((page - 1) * pageSize) }}
+                                </td>
+
+                                <td>
+                                    {{ item.transferNo }}
+                                </td>
+
+                                <td>
+                                    {{ item.transferDate | date:'dd/MM/yyyy' }}
+                                </td>
+                                <td class="text-center position-relative">
+
+                                    <button type="button" class="btn btn-primary btn-sm"
+                                        (click)="toggleChassis(item, $event)">
+                                        <i class="ri-information-line"></i>
+                                    </button>
+
+                                    <!-- Small Popup -->
+                                    <div *ngIf="expandedTransfer === item" class="chassis-popup" (click)="$event.stopPropagation()">
+
+                                        <table class="table table-bordered table-sm mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>S.No.</th>
+                                                    <th>Item Name</th>
+                                                    <th>Chassis</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                <tr *ngFor="let ch of item.vehicleStockTransferDetailsViewModel; let i=index">
+                                                    <td>{{ i + 1 }}</td>
+                                                    <td>{{ ch.modelName }}</td>
+                                                    <td>{{ ch.chassisNo }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+
+                                </td>
+
+                                <td>
+                                    {{ item.issuingLocationName }}
+                                </td>
+
+                                <td>
+                                    {{ item.issuingStaffName }}
+                                </td>
+
+                                <td>
+                                    {{ item.receivingLocationName }}
+                                </td>
+
+                                <td>
+                                    {{ item.receivingStaffName }}
+                                </td>
+
+                                <!-- <td>
+                                    {{ item.transferTotal }}
+                                </td> -->
+
+                                <!-- <td>
+                                    {{ item.remarks }}
+                                </td> -->
+
+                            </tr>
+                            <!-- Details Row -->
+
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <!-- PAGINATION -->
+
+                <div class="row mt-3">
+
+                    <div class="col-sm-12">
+
+                        <div class="float-end">
+
+                            <ngb-pagination [collectionSize]="filteredTransfers.length" [(page)]="page"
+                                [pageSize]="pageSize" (pageChange)="onPageChange($event)" [boundaryLinks]="true">
+                            </ngb-pagination>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

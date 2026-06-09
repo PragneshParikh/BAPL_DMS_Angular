@@ -1,0 +1,282 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">
+        Add Vehicle Stock Transfer
+    </h4>
+</div>
+<div class="card">
+
+    <div class="card-body">
+
+        <form #stockTransferForm="ngForm" (ngSubmit)="onSubmit(stockTransferForm)">
+            <div class="card card-body mb-2">
+                <!-- Header Row -->
+                <div class="row g-2 mb-2">
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Date</label>
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="model.transferDate"
+                            name="transferDate" readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Transfer No.</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="model.transferNo"
+                            name="transferNo" #transferNo readonly>
+                    </div>
+
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Issuing Location<span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" [(ngModel)]="model.issuingLocation"
+                            name="issuingLocation" (change)="onIssuingLocationChange()" [disabled]="isEditMode"
+                            required>
+                            <option [value]="null">Select Location</option>
+                            <option *ngFor="let location of filteredIssuingLocationList" [value]="location.locCode">
+                                {{ location.locname }} {{ location.locCode }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Issuing Staff<span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" [(ngModel)]="model.issuingStaff" name="issuingStaff"
+                            [disabled]="isEditMode" required>
+                            <option [value]="null">Select Employee</option>
+                            <option *ngFor="let employee of filteredIssueEmployeeList" [value]="employee.employeeCode">
+                                {{ employee.firstName }} {{ employee.lastName }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Receiving Location<span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" [(ngModel)]="model.receivingLocation"
+                            name="receivingLocation" [disabled]="isEditMode" (change)="onReceivingLocationChange()"
+                            required>
+                            <option [value]="null">Select Location</option>
+                            <option *ngFor="let location of filteredReceivingLocationList" [value]="location.locCode">
+                                {{ location.locname }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Receiving Staff<span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" [(ngModel)]="model.receivingStaff"
+                            name="receivingStaff" [disabled]="isEditMode" required>
+                            <option [value]="null">Select Employee</option>
+                            <option *ngFor="let employee of filteredReceiveEmployeeList"
+                                [value]="employee.employeeCode">
+                                {{ employee.firstName }} {{ employee.lastName }}
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Vehicle Details -->
+            <h3 class="fs-14 text-primary mb-0">{{ isEditMode ? 'View Vehicle Details' : 'Add Vehicle Details' }}</h3>
+            <small class="text-danger d-block mb-1"
+                *ngIf="!model.issuingLocation || !model.issuingStaff || !model.receivingLocation || !model.receivingStaff">
+                Please select all required fields above before selecting Chassis No.
+            </small>
+            <div class="mt-2">
+                <fieldset class="border rounded p-2 mb-2">
+
+
+                    <div class="row g-2">
+
+                        <div class="col-md-3 position-relative">
+                            <label class="form-label-sm mb-1"> Chassis No <span class="text-danger">*</span> </label>
+
+                            <input type="text" class="form-control form-control-sm" name="chassisNo"
+                                [disabled]="isEditMode" [(ngModel)]="model.chassisNo" (input)="filterChassis()"
+                                (focus)="onFocusChassis()" (blur)="onBlurChassis()" autocomplete="off" required
+                                #chassisNo="ngModel"
+                                [disabled]="isEditMode||!model.issuingLocation ||!model.issuingStaff||!model.receivingLocation ||!model.receivingStaff">
+
+                            <!-- Dropdown -->
+                            <div *ngIf="showChassisDropdown" class="dropdown-menu show w-100"
+                                style="max-height: 200px; overflow-y: auto;">
+
+                                <button type="button" class="dropdown-item" *ngFor="let c of filteredChassis"
+                                    [disabled]="isChassisAdded(c.chassisNo)" (click)="selectChassis(c)"
+                                    [ngClass]="{'disabled':isEditMode}">
+                                    {{ c.chassisNo }} - {{ c.modelName}} - {{ c.mfgYear }}
+                                </button>
+                                <span *ngIf="showChassisNotFound" class="dropdown-item text-danger">
+                                    Chassis not found
+                                </span>
+                            </div>
+
+
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label mb-1">Model</label>
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.modelName"
+                                name="modelName" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label mb-1">Colour</label>
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.colour"
+                                name="colour" readonly>
+                        </div>
+
+                        <div class="col-md-1">
+                            <label class="form-label mb-1">MFG Year</label>
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.mfgYear"
+                                name="mfgYear" readonly>
+                        </div>
+
+                        <div class="col-md-1">
+                            <label class="form-label mb-1">Key No.</label>
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.keyNo"
+                                name="keyNo" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label mb-1">Battery Make</label>
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.batteryMake"
+                                name="batteryMake" readonly>
+                        </div>
+
+                    </div>
+
+                    <div class="row g-2 mt-1">
+
+                        <div class="col-md-2">
+                            <label class="form-label mb-1">Battery Capacity</label>
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.batteryCapacity"
+                                name="batteryCapacity" readonly>
+                        </div>
+
+
+                        <div class="col-md-2">
+                            <label class="form-label mb-1">Battery No.</label>
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.batteryNo"
+                                name="batteryNo" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label mb-1">Charger</label>
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.charger"
+                                name="charger" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label mb-1">Converter</label>
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.convertor"
+                                name="convertor" readonly>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label mb-1">Controller</label>
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.controller"
+                                name="controller" readonly>
+                        </div>
+
+                        <!-- <div class="col-md-1">
+                            <label class="form-label mb-1">FAME II</label>
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.fameII"
+                                name="fameII" readonly>
+                        </div>
+
+                        <div class="col-md-1">
+                            <label class="form-label mb-1">Rate</label>
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.rate"
+                                name="rate" readonly>
+                        </div> -->
+
+                    </div>
+
+                    <div class="mt-2 justify-content-end d-flex">
+                        <button *ngIf="!isEditMode" type="button" class="btn btn-primary btn-sm me-2"
+                            (click)="addVehicle()" [disabled]="!model.chassisNo || !model.modelName">
+                            Add
+                        </button>
+
+                        <button *ngIf="!isEditMode" type="button" class="btn btn-primary btn-sm" (click)="onRefresh()"
+                            [disabled]="!model.chassisNo && !model.modelName">
+                            Refresh
+                        </button>
+                    </div>
+
+                </fieldset>
+            </div>
+            <div *ngIf="vehicleList.length > 0" class="mt-3">
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Sr No</th>
+                                <th>Chassis No /<br> Model Name</th>
+                                <th>Colour/ <br> Mfg Year</th>
+                                <th>Battery Make/ <br>Battery Capacity</th>
+                                <th>Battery No/ <br>Charger No</th>
+                                <th>Controller No/ <br>Convertor No</th>
+                                <th>Key</th>
+                                <!-- <th>Rate</th> -->
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngFor="let row of vehicleList; let i = index">
+
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-soft-info py-0 px-1 me-1"
+                                        (click)="editVehicle(row, i)"> <i class="ri-pencil-line"></i>
+                                    </button>
+                                    <button *ngIf="!isEditMode" type="button"
+                                        class="btn  btn-danger btn-sm py-0 px-1 me-1" (click)="deleteVehicle(i)">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </td>
+
+                                <td style="font-size: 12px;">{{ i + 1 }}</td>
+                                <td style="font-size: 12px;">{{ row.chassisNo }}/<br>{{row.modelName}}</td>
+                                <td style="font-size: 12px;">{{ row.colour }}/<br>{{ row.mfgYear }}</td>
+                                <td style="font-size: 12px;">{{ row.batteryMake }}/<br>{{row.batteryCapacity}}</td>
+                                <td style="font-size: 12px;">{{ row.batteryNo }}/<br>{{row.charger}}</td>
+                                <td style="font-size: 12px;">{{ row.controller }}/<br>{{row.convertor}}</td>
+                                <td style="font-size: 12px;">{{ row.key }}</td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <!-- Remark -->
+            <!-- <div class="row mb-3">
+                <div class="col-md-12">
+                    <label class="form-label mb-1">Remark</label>
+                    <textarea rows="2" class="form-control form-control-sm"></textarea>
+                </div>
+            </div> -->
+
+            <!-- Bottom Buttons -->
+            <div class="d-flex justify-content-end">
+
+
+                <div>
+                    <button *ngIf="!isEditMode" type="submit" class="btn btn-primary btn-sm me-2"
+                        [disabled]="vehicleList.length === 0 ">
+                        Save
+                    </button>
+
+                    <button type="button" class="btn btn-light btn-sm" (click)="goToList()">
+                        Close
+                    </button>
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>

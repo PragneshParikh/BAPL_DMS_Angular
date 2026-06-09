@@ -1,0 +1,257 @@
+<div class="modal-header" style="background-color: #405189; padding: 5px;">
+    <h5 class="modal-title text-white">Vehicle Item Details
+    </h5>
+    <!-- <button type="button" class="btn-close btn-close-white" aria-hidden="true" (click)="close()">
+    </button> -->
+    <button type="button" class="btn-close close-white" aria-hidden="true" (click)="close()">
+    </button>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <!-- <div class="card-header"
+                style="background: #c9e7f2;background: linear-gradient(90deg, rgba(201, 231, 242, 1) 0%, rgba(193, 247, 216, 1) 100%, rgba(237, 221, 83, 1) 100%);"> -->
+            <div class="card-header" style="background-color: #F5F5F5;">
+                <form class="m-100">
+                    <div class="modal-body">
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <label class="form-label">Model Type</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.modelType">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label">Veh. Type</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.vehType">
+                            </div>
+                            <div class=" col-md-2">
+                                <label class="form-label">Speed Type</label>
+                                <input class="form-control form-control-sm" [value]="'XYZ'">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label">Model Name</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.itemName">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label">Model Description</label>
+                                <textarea class="form-control form-control-sm" rows="1"
+                                    readonly>{{selectedItem?.itemDesc}}</textarea>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label">Model Code</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.itemCode">
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <label class="form-label">Electric Vehicle</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.isElectric">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">No. Of Batteries</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.noOfBatteries">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Battery Type</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.batteryType">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">System Voltage</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.batteryVoltage">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Motor Type</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.motorType">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Motor Watt</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.motorWatt">
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <label class="form-label">Select Group</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.selectedGroup"
+                                    readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">UOM</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.uom" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">HSN Code</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.hsncode">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">TAX[%]</label>
+                                <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">SGST</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.sgst" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">CGST</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.cgst" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <label class="form-label">IGST</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.igst" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">UGST</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.ugst" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">GST Cess</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.gstCess" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">TCS</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.tcs" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Item Category</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.itemCategory"
+                                    readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Accsry Billing</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.accessaryBilling"
+                                    readonly>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <label class="form-label">Item CC</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.itemcc" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">EX-Showroom Price</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.showRoomPrice"
+                                    readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Purchase Rate</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.ipurrate" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Sale Rate</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.custprice" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Service Days</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.serviceDays" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Handling Charges</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.handlingCharge"
+                                    readonly>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <label class="form-label">EX. Wrnty Amnt</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.warrantyAmount"
+                                    readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Insurance Amnt</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.insuranceAmount"
+                                    readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Regist. Amnt</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.registerAmount"
+                                    readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Remark</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.remarks" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Variant</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.variant" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Vehicle Color</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.colorName" readonly>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <label class="form-label">Vehicle Model Name</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.itemname" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">FAME || INCENTIVE</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.fame2amount"
+                                    readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">OEM Model Name</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem?.oemModelName"
+                                    readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Vehicle Category</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.vehicleCategory"
+                                    readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">HSRP</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.hsrp" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Warranty Period</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.warrantyPeriod"
+                                    readonly>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-2">
+                                <label class="form-label">Month/Year</label>
+                                <input class="form-control form-control-sm" [value]="selectedItem.warrantyPeriodUnit"
+                                    readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Warranty Kms.</label>
+                                <input class="form-control form-control-sm" [value]="'0'" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Form-22 Header</label>
+                                <input class="form-control form-control-sm" [value]="'0'" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">No. Of Charger</label>
+                                <input class="form-control form-control-sm" [value]="'0'" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Vehicle Journey</label>
+                                <input class="form-control form-control-sm" [value]="'select value'" readonly>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">No. Of Tyres</label>
+                                <input class="form-control form-control-sm" [value]="'0'" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-danger btn-sm" (click)="close()">Close</button>
+</div>
