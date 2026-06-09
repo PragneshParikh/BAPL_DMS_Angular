@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { LotInspectionUpdate, Header, Detail } from '../../../../ViewModels/LotInspectionViewModel';
-import { LotInspectionDetailsservice } from '../../../../core/services/lot-inspection-details-service';
+import { LotInspectionDetailsService } from '../../../../core/services/lot-inspection-details-service';
 import { StorageService } from '../../../../core/services/storage';
 import { LoaderService } from '../../../../core/services/loader';
 import { ToastService } from '../../../../shared/toaster/toast-service';
@@ -32,12 +32,12 @@ export class LotInspectionDetails implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private lotInspectionDetailservice: LotInspectionDetailsservice,
+    private lotInspectionDetailservice: LotInspectionDetailsService,
     private locationService: LocationMasterService,
     public toaster: ToastService,
     private loader: LoaderService,
     private storageService: StorageService
-  ) { } 
+  ) { }
 
   ngOnInit(): void {
 

@@ -10,7 +10,7 @@ import { IssueTypes, TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import Swal from 'sweetalert2';
-import { LedgerMaster } from '../../core/services/ledger-master';
+import { LedgerMasterService } from '../../core/services/ledger-master';
 import { PrefixService } from '../../core/services/prefix';
 import { PurchaseService } from '../../core/services/purchase-service';
 export interface PurchaseOrderItemViewModel {
@@ -29,8 +29,6 @@ export interface PurchaseOrderViewModel {
   LedgerCode?: string;
   Items: PurchaseOrderItemViewModel[];
 }
-
-
 
 @Component({
   selector: 'app-vehicle-po',
@@ -104,7 +102,7 @@ export class VehiclePO implements OnInit {
     private router: Router,
     private loader: LoaderService,
     public toaster: ToastService,
-    private ledgerService: LedgerMaster,
+    private ledgerService: LedgerMasterService,
     private prefixService: PrefixService
   ) {
     this.dealerCode = this.storageService.getDealerCode();

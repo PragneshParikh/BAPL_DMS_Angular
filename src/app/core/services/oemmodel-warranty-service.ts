@@ -9,22 +9,23 @@ import { Observable } from 'rxjs';
 })
 export class OemmodelWarrantyService {
   private apiUrl = environment.apiUrl;
+
   constructor(private http: HttpClient) { }
 
- getAll(filter: any) {
-  let params: any = {};
+  getAll(filter: any) {
+    let params: any = {};
 
-  if (filter.searchTerm)
-    params.searchTerm = filter.searchTerm;
+    if (filter.searchTerm)
+      params.searchTerm = filter.searchTerm;
 
-  if (filter.effectiveDateFrom)
-    params.effectiveDateFrom = filter.effectiveDateFrom;
+    if (filter.effectiveDateFrom)
+      params.effectiveDateFrom = filter.effectiveDateFrom;
 
-  if (filter.effectiveDateTo)
-    params.effectiveDateTo = filter.effectiveDateTo;
+    if (filter.effectiveDateTo)
+      params.effectiveDateTo = filter.effectiveDateTo;
 
-  return this.http.get<any[]>(`${this.apiUrl}/oemmodelwarranty`, { params });
-}
+    return this.http.get<any[]>(`${this.apiUrl}/oemmodelwarranty`, { params });
+  }
 
   //   GET BY ID
   getById(id: number): Observable<any> {
@@ -47,14 +48,16 @@ export class OemmodelWarrantyService {
   }
 
   getLastEffectiveDate(oemmodelId: number) {
-  return this.http.get(
-    `${this.apiUrl}/OEMModelWarranty/last-effective-date`,
-    { params: { oemmodelId } ,
-  responseType:'text'}
-  );
-}
+    return this.http.get(
+      `${this.apiUrl}/OEMModelWarranty/last-effective-date`,
+      {
+        params: { oemmodelId },
+        responseType: 'text'
+      }
+    );
+  }
 
- downloadExcel() {
+  downloadExcel() {
     return this.http.get(
       `${this.apiUrl}/OEMModelWarranty/download`,
       { responseType: 'blob' }

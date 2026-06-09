@@ -12,7 +12,7 @@ export class StockReportService {
 
   private apiUrl = `${environment.apiUrl}/Report`; // ✅ matches controller route
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getDealerWiseReport(): Observable<StockReport[]> {
     return this.http.get<StockReport[]>(`${this.apiUrl}/dealer-wise`);

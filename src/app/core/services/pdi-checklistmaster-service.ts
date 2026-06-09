@@ -7,32 +7,33 @@ import { debug } from 'console';
 @Injectable({
   providedIn: 'root',
 })
-export class PdiChecklistmasterService {
+export class PdiChecklistMasterService {
   private baseUrl = environment.apiUrl
 
   constructor(private httpClient: HttpClient) { }
-  getPdiChecklistMasterList(pdicheckName?: string): Observable<any> {
-    //debugger;
-    let params: any = {};
 
+  getPdiChecklistMasterList(pdicheckName?: string): Observable<any> {
+    let params: any = {};
     if (pdicheckName) params.pdiCheckName = pdicheckName;
 
     return this.httpClient.get<any[]>(`${this.baseUrl}/PdiCheclistMaster/GetPdiChecklistMasterList`, { params });
   }
-  insertPdiChecklistMaster(payload:any):Observable<any>{
-    return this.httpClient.post<any[]>(`${this.baseUrl}/PdiCheclistMaster/InsertPdiChecklistMaster`,payload)
-  }
-  updatePdiChecklistMaster(payload: any): Observable<any> {
-  return this.httpClient.put<any>(
-    `${this.baseUrl}/PdiCheclistMaster/UpdatePdiChecklistMaster`,
-    payload
-  );
-}
 
-deletePdiChecklistMaster(pdicheckId: number): Observable<any> {
-  return this.httpClient.delete<any>(
-    `${this.baseUrl}/PdiCheclistMaster/DeletePdiChecklistMaster/${pdicheckId}`
-  );
-}
+  insertPdiChecklistMaster(payload: any): Observable<any> {
+    return this.httpClient.post<any[]>(`${this.baseUrl}/PdiCheclistMaster/InsertPdiChecklistMaster`, payload)
+  }
+
+  updatePdiChecklistMaster(payload: any): Observable<any> {
+    return this.httpClient.put<any>(
+      `${this.baseUrl}/PdiCheclistMaster/UpdatePdiChecklistMaster`,
+      payload
+    );
+  }
+
+  deletePdiChecklistMaster(pdicheckId: number): Observable<any> {
+    return this.httpClient.delete<any>(
+      `${this.baseUrl}/PdiCheclistMaster/DeletePdiChecklistMaster/${pdicheckId}`
+    );
+  }
 
 }

@@ -1,12 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
 import Swal from 'sweetalert2';
-
-import { LabourmaasterService } from '../../core/services/labourmaaster-service';
-
-import { Form22masterservice } from '../../core/services/form22masterservice';
+import { LabourMasterService } from '../../core/services/labourmaaster-service';
+import { Form22MasterService } from '../../core/services/form22masterservice';
 
 @Component({
   selector: 'app-labour-master',
@@ -21,8 +18,8 @@ import { Form22masterservice } from '../../core/services/form22masterservice';
 
 export class LabourMaster implements OnInit {
 
-  constructor(private labourmasterService: LabourmaasterService,
-    private form22service: Form22masterservice) { }
+  constructor(private labourmasterService: LabourMasterService,
+    private form22service: Form22MasterService) { }
 
   ngOnInit(): void {
     this.loadOemModels();

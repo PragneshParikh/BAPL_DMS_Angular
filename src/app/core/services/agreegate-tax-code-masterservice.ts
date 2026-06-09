@@ -6,17 +6,15 @@ import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class AgreegateTaxCodeMasterservice {
+export class AgreegateTaxCodeMasterService {
   protected baseUrl = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private httpClient: HttpClient) { }
 
-  }
-
-  getAggregateTaxcodesAsync(search: string=''): Observable<any> {
+  getAggregateTaxcodesAsync(search: string = ''): Observable<any> {
 
     let params = new HttpParams()
-      .set('search',search ?? '');
+      .set('search', search ?? '');
 
     if (search && search.trim() !== '') {
       params = params.set('search', search.trim());
@@ -24,16 +22,14 @@ export class AgreegateTaxCodeMasterservice {
     return this.httpClient.get<any[]>(`${this.baseUrl}/AgreegateTaxCode`, { params });
   }
 
-  getAggregateTaxCodesByAtaxCode(ataxCode: string): Observable<any>{
+  getAggregateTaxCodesByAtaxCode(ataxCode: string): Observable<any> {
     return this.httpClient.get<any[]>(`${this.baseUrl}/AgreegateTaxCode/details/${ataxCode}`);
   }
 
-  getTaxCodesWithRate(): Observable<any>{
+  getTaxCodesWithRate(): Observable<any> {
     return this.httpClient.get<any[]>(`${this.baseUrl}/AgreegateTaxCode/taxcodes-with-rate`);
   }
-  
 
-  
   insertAggregateTaxCode(data: any): Observable<any> {
     return this.httpClient.post(
       `${this.baseUrl}/AgreegateTaxCode`,
@@ -44,7 +40,6 @@ export class AgreegateTaxCodeMasterservice {
     );
   }
 
-  
   UpdateAggregateTaxCode(id: number, data: any) {
     return this.httpClient.put(
       `${this.baseUrl}/AgreegateTaxCode/${id}`,

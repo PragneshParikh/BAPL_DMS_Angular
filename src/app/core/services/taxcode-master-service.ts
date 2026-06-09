@@ -7,8 +7,6 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class TaxCodeMasterService {
-
-  // private apiUrl = 'http://localhost:5215/api/TaxCodeMaster';
   private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
