@@ -422,19 +422,34 @@
         <h6 class="mb-0">Customer Voice</h6>
         <i [class]="isOpen.voice ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
       </div>
+
       <div class="section-body" *ngIf="isOpen.voice">
         <div class="row g-3">
+
           <div class="col-md-3">
             <label>Customer Voice</label>
             <input class="form-control form-control-sm" [(ngModel)]="complaintObj.customerVoice">
           </div>
-          <div class="col-md-3">
+
+          <div class="col-md-3 position-relative">
             <label>Complaint Code</label>
-            <input class="form-control form-control-sm" [(ngModel)]="complaintObj.complaintCode">
+            <input class="form-control form-control-sm" [(ngModel)]="complaintObj.complaintCode"
+              (input)="onComplaintSearch($event)" autocomplete="off">
+
+            <div class="dropdown-menu show w-100" *ngIf="showComplaintDropdown">
+              <button type="button" class="dropdown-item" *ngFor="let item of filteredComplaints"
+                (click)="selectComplaint(item)">
+                {{ item.complaintName }}
+              </button>
+            </div>
           </div>
+
           <div class="col-md-3">
             <label>Complaint Description</label>
-            <input class="form-control form-control-sm" [(ngModel)]="complaintObj.complaint">
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="complaintObj.complaint"
+              (input)="onComplaintSearch($event)" autocomplete="off">
+
+            <!-- <input class="form-control form-control-sm" [(ngModel)]="complaintObj.complaint"> -->
           </div>
           <div class="col-md-3">
             <button type="button" class="btn btn-primary btn-sm commonbtnAdd"
