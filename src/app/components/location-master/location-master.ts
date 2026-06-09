@@ -9,6 +9,7 @@ import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { StorageService } from '../../core/services/storage';
 import { locationAreaMaster } from '../../constant';
+import { DealerService } from '../../core/services/dealer-service';
 
 declare var bootstrap: any;
 
@@ -38,8 +39,9 @@ export class LocationMasterComponent implements OnInit {
   sortColumn = 'rrglocationidno';
   sortDirection = 'desc';
 
-
-  constructor(private locationService: LocationMasterService,
+  constructor(
+    private locationService: LocationMasterService,
+    private dealerMasterService: DealerService,
     private loader: LoaderService,
     private storageService: StorageService,
     public toastr: ToastService) { }
@@ -228,7 +230,7 @@ export class LocationMasterComponent implements OnInit {
   }
   loadDealerDropdown() {
     this.loader.show();
-    this.locationService.getDealerDropdown().subscribe({
+    this.dealerMasterService.getDealerDropdown().subscribe({
       next: (res: any) => {
         this.loader.hide();
         console.log("Dealer API Response:", res);

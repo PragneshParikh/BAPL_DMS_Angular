@@ -16,10 +16,6 @@ export class LocationMasterService {
     return this.http.get<any>(`${this.baseUrl}/LocationMaster/GetAllLocationMaster`);
   }
 
-  getDealerDropdown(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/DealerMaster/GetDealerDropdown`);
-  }
-
   downloadLocationMasterExcel(): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/LocationMaster/DownloadLocationMasterExcel`, { responseType: 'blob' });
   }
