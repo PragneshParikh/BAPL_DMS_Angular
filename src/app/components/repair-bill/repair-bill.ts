@@ -78,6 +78,7 @@ export class RepairBill implements OnInit {
   isLabourSelected = false;
   isAccessorySelected = false;
   showValidation = false;
+  repairBillStatus = ''
 
   repairBillId: number = 0;
   isEditMode = false;
@@ -169,7 +170,6 @@ export class RepairBill implements OnInit {
     this.route.params.subscribe(params => {
 
       if (params['id']) {
-
         this.repairBillId = +params['id'];
         this.isEditMode = true;
 
@@ -1068,7 +1068,7 @@ export class RepairBill implements OnInit {
   getRepairBillById(id: number): void {
 
     this.loader.show();
-  console.log("testcustomerdetail",this.selectedJobCard.customerLedgerId);
+    console.log("testcustomerdetail", this.selectedJobCard.customerLedgerId);
     this.repairBillService.getRepairBillById(id).subscribe({
 
       next: (res: any) => {
@@ -1091,8 +1091,9 @@ export class RepairBill implements OnInit {
         this.selectedJobCard.partyName = header.partyName;
         this.selectedJobCard.partyMobileNo = header.mobileNumber;
         this.selectedJobCard.partyState = header.partyState;
+        this.repairBillStatus = header.repairBillStatus;
         this.remarks = header.remarks;
-        
+
 
         // Insurance
         this.selectedInsuranceId = header.insuranceId;
@@ -1216,7 +1217,10 @@ export class RepairBill implements OnInit {
         this.isPartSelected = this.partItems.length > 0;
         this.isLabourSelected = this.labourItems.length > 0;
 
+        console.log(this.repairBillStatus)
+        this.applyLabourDiscount();
         this.calculateTotals();
+
         this.loader.hide();
 
       },
@@ -1236,7 +1240,7 @@ export class RepairBill implements OnInit {
     debugger;
     let dealerCode = this.storageService.getDealerCode();
     //console.log("testcustomerdetail",this.selectedJobCard);
-    
+
     // if (!this.isSuperAdmin) {
 
     //   this.toaster.show('Only SuperAdmin can be Update.', {
@@ -1260,8 +1264,8 @@ export class RepairBill implements OnInit {
         billType: this.billType,
         cashAccount: this.selectedCashAccount || 0,
 
-       // partyName: this.selectedJobCard?.partyName || '',
-       // mobileNumber: this.selectedJobCard?.partyMobileNo || '',
+        // partyName: this.selectedJobCard?.partyName || '',
+        // mobileNumber: this.selectedJobCard?.partyMobileNo || '',
         customerLedgerId: this.customerLedgerId || 0,
 
         jobId: this.selectedJobCard?.jobCardHeader?.id || 0,
@@ -1402,6 +1406,18 @@ export class RepairBill implements OnInit {
           });
         }
       });
+  }
+
+  printPerforma() {
+    this.router.navigate(
+      ['/repair-bill-performa']
+    )
+  }
+
+  printInvoice() {
+    this.router.navigate(
+      ['/repair-bill-invoice', this.repairBillId]
+    );
   }
 
 }

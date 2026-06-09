@@ -50,6 +50,8 @@ import { HsrpInward } from './components/hsrp-order/hsrp-inward/hsrp-inward';
 import { HSRPOrderList } from './components/hsrp-order/hsrporder-list/hsrporder-list';
 import { HSRPOrder } from './components/hsrp-order/hsrp-order';
 import { EmployeeMasterList } from './components/employee-master/employee-master-list/employee-master-list';
+import { RepairBillPerforma } from './components/Reports/repair-bill-performa/repair-bill-performa';
+import { ComplaintMaster } from './components/complaint-master/complaint-master';
 
 
 export const routes: Routes = [
@@ -165,6 +167,10 @@ export const routes: Routes = [
       { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
 
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
+
+      { path: 'repair-bill-performa', component: RepairBillPerforma, data: [51] },
+
+      { path: 'complaint-master', component: ComplaintMaster, data: [56] }
 
     ]
   },

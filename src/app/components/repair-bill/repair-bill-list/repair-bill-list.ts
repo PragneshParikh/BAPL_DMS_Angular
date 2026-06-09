@@ -190,15 +190,16 @@ export class RepairBillList implements OnInit {
 
     //   return;
     // }
-    if (item.repairBillStatus === 'Billed') {
+     //if (item.repairBillStatus === 'Billed') {
 
-      this.toaster.show('Invoiced Repair Bill cannot be edited.', {
-        classname: 'bg-warning text-dark',
-        delay: 3000
-      });
+    //   this.toaster.show('Invoiced Repair Bill cannot be edited.', {
+    //     classname: 'bg-warning text-dark',
+    //     delay: 3000
+    //   });
 
-      return;
-    }
+    //   return;
+      
+    // }
 
     this.router.navigate(['/repair-bill', item.id]);
   }

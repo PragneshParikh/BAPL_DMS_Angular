@@ -1,0 +1,209 @@
+<div>
+    <!-- SEARCH CARD -->
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+        <h4 class="mb-sm-0">Complaint Master</h4>
+    </div>
+    <!--Add details-->
+    <ng-template #complaintAdd let-modal>
+        <form [formGroup]="complaintForm">
+            <div class="card">
+                <div class="modal-header item-modal-header">
+                    <h5 class="modal-title">Add Complaint Master</h5>
+                    <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Complaint Name</label>
+                            <input type="text" class="form-control form-control-md" formControlName="complaintName"
+                                placeholder="please enter complaint">
+                            <div *ngIf="complaintForm.get('complaintName')?.invalid && complaintForm.get('complaintName')?.touched"
+                                class="text-danger mt-1">
+                                Complaint Name is required.
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Group Name</label>
+                            <input type="text" class="form-control form-control-md bg-light text-muted"
+                                formControlName="groupName" value="Complaint" />
+                        </div>
+                        <div class="col-md-3">
+                            <!-- <label class="form-label d-block">Active</label> -->
+
+                            <div class="form-check form-switch form-switch-success">
+                                <input class="form-check-input" type="checkbox" formControlName="isActive"
+                                    id="isActive">
+                                <label class="form-check-label ms-2" for="isActive">
+                                    {{ complaintForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 d-flex align-items-end justify-content-end">
+                            <button type="button" class="btn btn-primary" (click)="saveComplaint(modal)">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </ng-template>
+    <!--End Add details-->
+</div>
+
+<!-- view details -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-end align-items-center">
+                    <!-- Add Form22master Button -->
+                    <button class="btn btn-primary btn-sm me-3" (click)="openAddDetails()">
+                        Add
+                    </button>
+                    <!-- Download Excel Button -->
+                    <button class="btn btn-success btn-sm me-3" (click)="downloadComplaintMasterExcel()">
+                        <i class="ri-file-excel-2-line"></i>
+                    </button>
+                    <!-- Search Box -->
+                    <div class="search-box">
+                        <input type="text" class="form-control search" placeholder="Search..." />
+                        <i class="ri-search-line search-icon"></i>
+                    </div>
+                </div>
+            </div>
+            <!-- end card header -->
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered mb-0 table-sm">
+                        <thead class="table-bgColor">
+                            <tr>
+                                <th>Sr No.</th>
+                                <th class="sort" (click)="sort('complaintName')" style="cursor:pointer">
+                                    Complaint Name
+                                </th>
+
+                                <th class="sort" (click)="sort('groupName')" style="cursor:pointer">
+                                    Group Name
+                                </th>
+
+                                <th  class="sort" (click)="sort('isActive')" style="cursor:pointer">
+                                    Active
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of pagedData; let i = index" (click)="openEditPopup(item)"
+                                style="cursor: pointer;">
+
+                                <td>{{ i + 1 }}</td>
+
+                                <td>{{ item.complaintName }}</td>
+
+                                <td>{{ item.groupName }}</td>
+
+                                <td>
+                                    <span class="badge" [ngClass]="item.isActive ? 'bg-success' : 'bg-danger'">
+                                        {{ item.isActive ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <!-- No Data Row -->
+                            <tr *ngIf="!pagedData || pagedData.length === 0">
+                                <td colspan="2" class="text-center">No Data Available</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row justify-content-md-between align-items-md-center">
+                    <div class="col-sm-12 col-md-5">
+                        <div class="dataTables_info mb-2" id="tickets-table_info" role="status" aria-live="polite">
+
+                        </div>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="col-sm-12 col-md-5">
+                        <div class="text-md-right float-md-end gridjs-pagination">
+                            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                                (pageChange)="pageChange($event)">
+                            </ngb-pagination>
+                        </div>
+                    </div>
+                    <!-- End Pagination -->
+                </div>
+            </div><!-- end card-body -->
+        </div><!-- end card -->
+    </div>
+    <!-- end col -->
+</div>
+<!-- end row -->
+<!--Edit details-->
+<ng-template #complaintitemModal let-modal>
+
+    <div class="modal-header item-modal-header">
+        <h5 class="modal-title">
+            Edit Complaint Master
+        </h5>
+
+        <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()">
+        </button>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="row">
+
+            <div class="col-md-4">
+                <label class="form-label">
+                    Complaint Name
+                </label>
+
+                <input class="form-control form-control-sm" [(ngModel)]="selectedComplaint.complaintName">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">
+                    Group Name
+                </label>
+
+                <input class="form-control form-control-sm" [(ngModel)]="selectedComplaint.groupName">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label d-block">
+                    Active
+                </label>
+
+                <div class="form-check form-switch form-switch-success">
+
+                    <input class="form-check-input" type="checkbox" [(ngModel)]="selectedComplaint.isActive">
+
+                    <label class="form-check-label ms-2">
+
+                        {{ selectedComplaint.isActive ? 'Active' : 'Inactive' }}
+
+                    </label>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="modal-footer">
+
+        <button class="btn btn-primary btn-sm" (click)="updateComplaint(modal)">
+            Save
+        </button>
+
+        <button class="btn btn-light btn-sm" (click)="modal.close()">
+            Close
+        </button>
+
+    </div>
+
+</ng-template>
+<!--End Edit-->
