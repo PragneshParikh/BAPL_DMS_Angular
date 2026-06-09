@@ -10,11 +10,12 @@ import { Form22SlipViewModel } from '../../ViewModels/Form22SlipViewModel';
   providedIn: 'root',
 })
 export class VehicleSaleBillService {
-   private apiUrl = environment.apiUrl;
-   private erpBaseUrl = environment.ERPApiUrl;
+  private apiUrl = environment.apiUrl;
+  private erpBaseUrl = environment.ERPApiUrl;
+
   constructor(private http: HttpClient) { }
 
-   getNextSaleBillNo(): Observable<string> {
+  getNextSaleBillNo(): Observable<string> {
     return this.http.get(`${this.apiUrl}/VehicleSaleBill/getNextSaleBillNo`, {
       responseType: 'text'
     });
@@ -23,71 +24,66 @@ export class VehicleSaleBillService {
   createVehicleSaleBill(data: any) {
     return this.http.post(`${this.apiUrl}/VehicleSaleBill`, data);
   }
-  // getAllVehicleSaleBills(): Observable<any[]> {
-  //   return this.http.get<any[]>(`${this.apiUrl}/VehicleSaleBill`);
-  // }
 
- getAllVehicleSaleBills(dealerCode?:string,search?: string, fromDate?: Date, toDate?: Date, erpStatus?: string): Observable<any[]> {
-  let params = new HttpParams();
+  getAllVehicleSaleBills(dealerCode?: string, search?: string, fromDate?: Date, toDate?: Date, erpStatus?: string): Observable<any[]> {
+    let params = new HttpParams();
 
-  if (search) {
-    params = params.set('search', search);
+    if (search) {
+      params = params.set('search', search);
+    }
+
+    if (fromDate) {
+      params = params.set('fromDate', fromDate.toISOString());
+    }
+
+    if (toDate) {
+      params = params.set('toDate', toDate.toISOString());
+    }
+    if (erpStatus) {
+      params = params.set('erpStatus', erpStatus);
+    }
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode)
+    }
+
+    return this.http.get<any[]>(`${this.apiUrl}/VehicleSaleBill`, { params });
   }
 
-  if (fromDate) {
-    params = params.set('fromDate', fromDate.toISOString());
-  }
-
-  if (toDate) {
-    params = params.set('toDate', toDate.toISOString());
-  }
-  if (erpStatus) {
-    params = params.set('erpStatus', erpStatus);
-  }
-  if(dealerCode)
-  {
-    params =params.set('dealerCode',dealerCode)
-  }
-
-  return this.http.get<any[]>(`${this.apiUrl}/VehicleSaleBill`, { params });
-}
   updateVehicleSaleBill(id: number, data: any) {
-  return this.http.put(`${this.apiUrl}/VehicleSaleBill/${id}`, data);
-}
- sendToERP(dealerCode: string, saleBillId: number): Observable<any> {
-  return this.http.post(
-    `${this.apiUrl}/VehicleSaleBill/SendToERP?dealerCode=${dealerCode}&id=${saleBillId}`,
-    {}
-  );
-}
+    return this.http.put(`${this.apiUrl}/VehicleSaleBill/${id}`, data);
+  }
 
-getChassisListPDIOK(dealerCode: string, ledgerId: number): Observable<VehicleSaleListChasisResponse[]> {
-  return this.http.get<VehicleSaleListChasisResponse[]>(
-    `${this.apiUrl}/VehicleSaleBill/ChassisListPDIOK?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
-  );
-}
+  sendToERP(dealerCode: string, saleBillId: number): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/VehicleSaleBill/SendToERP?dealerCode=${dealerCode}&id=${saleBillId}`,
+      {}
+    );
+  }
 
-getAllChassisWithPDIStatus(dealerCode: string, ledgerId: number): Observable<VehicleSaleListChasisResponse[]> {
-  return this.http.get<VehicleSaleListChasisResponse[]>(
-    `${this.apiUrl}/VehicleSaleBill/ChassisList?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
-  );
-}
+  getChassisListPDIOK(dealerCode: string, ledgerId: number): Observable<VehicleSaleListChasisResponse[]> {
+    return this.http.get<VehicleSaleListChasisResponse[]>(
+      `${this.apiUrl}/VehicleSaleBill/ChassisListPDIOK?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
+    );
+  }
 
-getVehicleSaleBillById(id: number): Observable<any> {
-  return this.http.get<any>(`${this.apiUrl}/VehicleSaleBill/${id}`);
-}
+  getAllChassisWithPDIStatus(dealerCode: string, ledgerId: number): Observable<VehicleSaleListChasisResponse[]> {
+    return this.http.get<VehicleSaleListChasisResponse[]>(
+      `${this.apiUrl}/VehicleSaleBill/ChassisList?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
+    );
+  }
 
+  getVehicleSaleBillById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/VehicleSaleBill/${id}`);
+  }
 
-//To be modified when SaleBill is created
+  confirmInvoice(saleBillNo: string) {
+    return this.http.put<number>(
+      `${this.apiUrl}/VehicleSaleBill/ConfirmInvoice?saleBillNo=${saleBillNo}`,
+      null
+    );
+  }
 
-confirmInvoice(saleBillNo: string) {
-  return this.http.put<number>(
-    `${this.apiUrl}/VehicleSaleBill/ConfirmInvoice?saleBillNo=${saleBillNo}`,
-    null  
-  );
-}
-
-updateRegistrationAndReserveChassis(
+  updateRegistrationAndReserveChassis(
     saleBillNo: string,
     details: UpdateSaleDetailsVM[]
   ): Observable<any> {
@@ -105,28 +101,30 @@ updateRegistrationAndReserveChassis(
   
 
   downloadExcel(fromDate?: Date, toDate?: Date) {
-     let params = new HttpParams();
+    let params = new HttpParams();
 
-   if (fromDate) {
-    params = params.set('fromDate', fromDate.toISOString());
+    if (fromDate) {
+      params = params.set('fromDate', fromDate.toISOString());
+    }
+
+    if (toDate) {
+      params = params.set('toDate', toDate.toISOString());
+    }
+
+    return this.http.get(
+      `${this.apiUrl}/VehicleSaleBill/download`,
+      {
+        params: params,
+        responseType: 'blob'
+      }
+    );
   }
 
-  if (toDate) {
-    params = params.set('toDate', toDate.toISOString());
+  getPolicyNo(chassisNo: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/VehicleSaleBill/PolicyNos/${chassisNo}`)
   }
-  
-  return this.http.get(
-    `${this.apiUrl}/VehicleSaleBill/download`,
-    {params:params,
-      responseType: 'blob' }
-  );
-}
 
-getPolicyNo(chassisNo:string) : Observable<any>{
-  return this.http.get<any>(`${this.apiUrl}/VehicleSaleBill/PolicyNos/${chassisNo}`)
-}
-
-sendSaleBillToERP(saleBill: any): Observable<any> {
+  sendSaleBillToERP(saleBill: any): Observable<any> {
     return this.http.post<any>(`${this.erpBaseUrl}/BAPLregistration`, JSON.stringify(saleBill), {
       headers: { 'Content-Type': 'application/json' },
     });

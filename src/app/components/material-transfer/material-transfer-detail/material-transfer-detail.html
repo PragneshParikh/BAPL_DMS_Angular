@@ -67,14 +67,26 @@
                                         <span class="fs-10">(Stock @ Location {{newItem.batchClosingQty}})(GST%
                                             0.0)</span>
                                     </label>
-                                    <div class="input-group input-group-sm">
-                                        <select class="form-select form-select-sm" name="itemName"
-                                            [(ngModel)]="newItem.itemId" (ngModelChange)="onChangeItem($event)">
-                                            <option *ngFor="let item of itemList;" [value]="item.id">
-                                                {{item.itemcode}} - {{ item.itemdesc }}
-                                            </option>
-                                        </select>
-                                    </div>
+
+                                    <ng-select class="ng-select-sm" [items]="itemList" bindValue="id"
+                                        [(ngModel)]="newItem.itemId" [searchFn]="customSearchFn" [clearable]="false"
+                                        (change)="onChangeItem($event)" placeholder="Search Part No or Description"
+                                        name="itemName_select" #itemName_select="ngModel" required>
+
+                                        <ng-template ng-label-tmp let-item="item">
+                                            <span [title]="item.itemcode + ' - ' + item.itemdesc">
+                                                {{ item.itemcode }} - {{ item.itemdesc }}
+                                            </span>
+                                        </ng-template>
+
+                                        <ng-template ng-option-tmp let-item="item">
+                                            <span [title]="item.itemcode + ' - ' + item.itemdesc">
+                                                {{ item.itemcode }} - {{ item.itemdesc }}
+                                            </span>
+                                        </ng-template>
+
+                                    </ng-select>
+
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Rack No.</label>

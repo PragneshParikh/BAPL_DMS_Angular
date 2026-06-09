@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
-import { Lotinspectionservice } from '../../core/services/lotinspectionservice';
+import { LotInspectionService } from '../../core/services/lotinspectionservice';
 import { ActivatedRoute, Route, Router, RouterModule } from '@angular/router';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
@@ -41,7 +41,7 @@ export class Lotinspection implements OnInit {
   isSuperAdmin: boolean;
 
 
-  constructor(private lotinspectionService: Lotinspectionservice,
+  constructor(private lotinspectionService: LotInspectionService,
     private loader: LoaderService,
     public toaster: ToastService,
     private router: Router,

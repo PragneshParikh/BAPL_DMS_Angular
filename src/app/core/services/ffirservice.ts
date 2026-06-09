@@ -14,40 +14,42 @@ export class FFIRService {
   getPartDropdownlist(): Observable<any> {
     return this.httpClient.get<any[]>(`${this.baseUrl}/FFIR/GetPartDropdownlist`);
   }
+
   getComplaintCodeList(): Observable<any> {
     return this.httpClient.get<any[]>(`${this.baseUrl}/FFIR/GetComplaintCodeList`)
   }
+
   getJobCardHistory(chassisNo: string): Observable<any> {
     return this.httpClient.get<any[]>(`${this.baseUrl}/FFIR/GetJobCardHistory/${chassisNo}`)
   }
+
   insertFFIR(data: any) {
     return this.httpClient.post(`${this.baseUrl}/FFIR/InsertFFIR`, data);
   }
+
   getFFIRDetailListing(dealerCode: string, search: string) {
-
-  return this.httpClient.get<any[]>(
-    `${this.baseUrl}/FFIR/GetFFIRDetailListing`,
-    {
-      params: {
-        dealerCode: dealerCode,
-        search: search || ''
+    return this.httpClient.get<any[]>(
+      `${this.baseUrl}/FFIR/GetFFIRDetailListing`,
+      {
+        params: {
+          dealerCode: dealerCode,
+          search: search || ''
+        }
       }
-    }
-  );
+    );
+  }
 
-}
-getFFIRById(id: number): Observable<any> {
+  getFFIRById(id: number): Observable<any> {
+    return this.httpClient.get(
+      `${environment.apiUrl}/FFIR/GetFFIRById/${id}`
+    );
+  }
 
-  return this.httpClient.get(
-    `${environment.apiUrl}/FFIR/GetFFIRById/${id}`
-  );
-
-}
-updateFFIR(id: number, payload: any): Observable<any> {
-  return this.httpClient.put(
-    `${environment.apiUrl}/FFIR/UpdateFFIR/${id}`,
-    payload
-  );
-}
+  updateFFIR(id: number, payload: any): Observable<any> {
+    return this.httpClient.put(
+      `${environment.apiUrl}/FFIR/UpdateFFIR/${id}`,
+      payload
+    );
+  }
 
 }

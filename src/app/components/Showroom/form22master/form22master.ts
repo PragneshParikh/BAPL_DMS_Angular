@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Form22masterservice } from '../../../core/services/form22masterservice';
+import { Form22MasterService } from '../../../core/services/form22masterservice';
 import { NgbHighlight, NgbModal, NgbPagination, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { Form22MasterModel } from '../../../ViewModels/Form22MasterModel';
@@ -54,7 +54,7 @@ export class Form22master implements OnInit {
   sortDirection: 'asc' | 'desc' = 'asc';
 
 
-  constructor(private form22service: Form22masterservice,
+  constructor(private form22service: Form22MasterService,
     public toaster: ToastService,
     private loader: LoaderService,
     private modalService: NgbModal

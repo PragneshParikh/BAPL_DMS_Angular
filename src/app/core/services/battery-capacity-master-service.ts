@@ -9,6 +9,7 @@ import { BatteryApiResponse } from '../../ViewModels/BatteryCapacityMaster/Batte
 })
 export class BatteryCapacityMasterService {
   private apiUrl = environment.apiUrl;
+
   constructor(private http: HttpClient) { }
 
   getBatteryCapcityMaster(): Observable<BatteryApiResponse> {
@@ -16,7 +17,6 @@ export class BatteryCapacityMasterService {
   }
 
   updateBatteryCapacityMaster(id: number, data: any): Observable<any> {
-
     return this.http.put(`${this.apiUrl}/BatteryCapacityMaster/update/${id}`, data);
   }
 

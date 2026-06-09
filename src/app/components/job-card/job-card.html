@@ -197,12 +197,12 @@
 
                         <!-- Reg / Chassis -->
                         <td>
-                            <b>R:</b>{{ item.jobCardCustomer.registerNo }} <br>
-                            <b>C:</b>{{ item.jobCardCustomer.chassisNo }}
+                            <b>R:</b> {{ item.jobCardCustomer?.registerNo || '-' }} <br>
+                            <b>C:</b> {{ item.jobCardCustomer?.chassisNo || '-' }}
                         </td>
 
                         <!-- Vehicle Type -->
-                        <td>{{ item.jobCardCustomer.modelName }}</td>
+                        <td>{{ item.jobCardCustomer?.modelName || '-'  }}</td>
 
                         <!-- Service Head / Type -->
                         <td>
@@ -212,8 +212,8 @@
 
                         <!-- Customer -->
                         <td>
-                            {{ item.jobCardCustomer.customerName }} <br>
-                            {{ item.jobCardCustomer.customerMobile }}
+                            {{ item.jobCardCustomer?.customerName || '-' }} <br>
+                            {{ item.jobCardCustomer?.customerMobile || '-' }}
                         </td>
 
                     </tr>

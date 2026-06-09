@@ -3,13 +3,36 @@
     <!-- Header -->
     <div class="card shadow-sm mb-2">
         <div class="card-header text-white py-2 d-flex justify-content-between align-items-center">
+
             <h6 class="mb-0">Repair Bill [GST]</h6>
 
             <div class="d-flex align-items-center gap-2">
+
+                <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="ri-printer-line me-1"></i>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="javascript:void(0)" (click)="printPerforma()">
+                            <i class="ri-file-text-line me-2"></i>
+                            Performa Print
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="javascript:void(0)" (click)="printInvoice()">
+                            <i class="ri-bill-line me-2"></i>
+                            Invoice Print
+                        </a>
+                    </li>
+                </ul>
                 <button class="btn btn-light btn-sm" (click)="onNavigate()">
                     <i class="ri-menu-line"></i>
                 </button>
+
             </div>
+
         </div>
 
         <div class="card-body p-2">
@@ -397,7 +420,7 @@
                                     <th>Issue Type</th>
                                     <th>FOC Rate</th>
                                     <th>GST %</th>
-                                   
+
                                 </tr>
                             </thead>
 
@@ -486,73 +509,6 @@
                 <hr />
 
                 <!-- Part Grid -->
-                <div *ngIf="selectedItemType === 'Part'">
-
-                    <h6 class="mb-2">Part Details List</h6>
-
-                    <div class="table-responsive">
-
-                        <table class="table table-bordered table-sm">
-
-                            <thead class="table-secondary">
-                                <tr>
-                                    <th>Sr.No</th>
-                                    <th>Part Code</th>
-                                    <th>Description</th>
-                                    <th>Qty</th>
-                                    <th>Rate</th>
-                                    <th>Issue Type</th>
-                                    <th>IGST %</th>
-                                    <th>Amount</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-
-                                <tr *ngFor="let item of partItems; let i=index">
-                                    
-                                    <td>{{i+1}}</td>
-
-                                    <td>{{item.partCode}}</td>
-
-                                    <td>{{item.partDesc}}</td>
-
-                                    <td class="text-end">
-                                        {{item.partQty}}
-                                    </td>
-
-                                    <td class="text-end">
-                                        {{item.partRate | number:'1.2-2'}}
-                                    </td>
-
-                                    <td>
-                                        {{item.issuetypeId}}
-                                    </td>
-
-                                    <td class="text-end">
-                                        {{item.igst}}
-                                    </td>
-
-                                    <td class="text-end">
-                                        {{(item.partQty * item.partRate) | number:'1.2-2'}}
-                                    </td>
-
-                                </tr>
-
-                                <tr *ngIf="partItems.length === 0">
-                                    <td colspan="8" class="text-center">
-                                        No Parts Found
-                                    </td>
-                                </tr>
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
                 <div class="table-responsive" *ngIf="isPartSelected === true">
 
                     <table class="table table-bordered table-sm">
@@ -589,7 +545,7 @@
                                 <td>{{item.igstAmount | number:'1.2-2'}}</td>
                                 <td>{{item.netAmount | number:'1.2-2'}}</td>
                                 <td>{{item.issuetypeName}}</td>
-                                <td>{{item.rate | number:'1.2-2'}}</td>
+                                <td>{{item.fscRate | number:'1.2-2'}}</td>
                                 <td>{{item.igst | number:'1.2-2'}}</td>
 
                             </tr>
@@ -701,10 +657,11 @@
                 </div>
 
                 <div class="d-flex gap-2">
-                    <button class="btn btn-primary btn-sm" (click)="saveRepairBill()">
+                    <button *ngIf="!isEditMode" class="btn btn-primary btn-sm" (click)="saveRepairBill()">
                         <i class="ri-save-line"></i> Save As Performa
                     </button>
-                    <button class="btn btn-primary btn-sm">
+                    <button class="btn btn-primary btn-sm" [disabled]="repairBillStatus === 'Billed'"
+                        (click)="updateRepairBill()">
                         <i class="ri-save-line"></i> Save As Invoice
                     </button>
 
@@ -1110,7 +1067,7 @@
                     <div class="col-md-3">
                         <label class="form-label"> Valid Till </label>
                         <input type="date" class="form-control form-control-sm bg-light text-muted"
-                            [value]="selectedJobCard?.jobCardCustomer?.insuranceExpDate | date:'yyyy-MM-dd'" readonly>
+                            [ngModel]="insValidTill | date:'yyyy-MM-dd'" readonly>
                     </div>
 
                     <!-- Zero Dep -->

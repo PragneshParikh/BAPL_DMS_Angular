@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbHighlight, NgbModal, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { Hsnwisetaxcodeservice } from '../../core/services/hsnwisetaxcodeservice';
+import { HsnWiseTaxCodeService } from '../../core/services/hsnwisetaxcodeservice';
 import { AddHsnTaxPayload, HsnTaxFormModel } from '../../ViewModels/HSNWiseTaxcodeModel';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
@@ -13,9 +13,8 @@ import { ToastService } from '../../shared/toaster/toast-service';
   imports: [
     CommonModule,
     FormsModule,
-    NgbHighlight,
     NgbPaginationModule,
-    NgbTooltipModule 
+    NgbTooltipModule
   ],
   templateUrl: './hsnwisetaxcode.html',
   styleUrl: './hsnwisetaxcode.scss',
@@ -23,7 +22,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 export class Hsnwisetaxcode implements OnInit {
 
   constructor(
-    private hsnwisetaxcodeservice: Hsnwisetaxcodeservice,
+    private hsnwisetaxcodeservice: HsnWiseTaxCodeService,
     private loader: LoaderService,
     public toaster: ToastService,
     private modalService: NgbModal

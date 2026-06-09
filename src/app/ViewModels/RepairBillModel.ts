@@ -33,19 +33,20 @@ export interface LabourItem {
 
 export interface PartItem {
 
-  id:number;
- 
+  id: number;
+
   partCode?: string;
   partDesc?: string;
   discountType: string;
-
+  materialId?: number;
+  partItemId?:number;
   partQty: number;
   partRate: number;
   discount: number;
   taxableAmount: number;
   netAmount: number;
-  //issuetypeName: string;
-  issueType:string;
+  issuetypeName: string;
+  issueType: string;
   issuetypeId?: number;
 
   cgst: number;
