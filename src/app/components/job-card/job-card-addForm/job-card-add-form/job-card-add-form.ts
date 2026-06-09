@@ -10,13 +10,14 @@ import { NgbModal, NgbTimepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { icons } from '../../../../core/data';
 import { Console, error, info } from 'console';
-import { title } from 'process';
+import { constrainedMemory, title } from 'process';
 import { text } from 'stream/consumers';
 import { Route, Router } from '@angular/router';
 import { ToastService } from '../../../../shared/toaster/toast-service';
 import { delay } from 'lodash';
 import { LoaderService } from '../../../../core/services/loader';
 import { LocationMasterService } from '../../../../core/services/location-master-service';
+import { ComplaintmasterService } from '../../../../core/services/complaintmaster-service';
 
 @Component({
   selector: 'app-job-card-add-form',
@@ -118,16 +119,21 @@ export class JobCardAddForm {
   complaintObj = {
     customerVoice: '',
     complaintCode: '',
-    complaint: ''
+    complaint: '',
+    complaintId: 0
   };
   isPdiSaved = false;
 
   dealerCode: string = '';
+  complaintMasterList: any[] = [];
+  filteredComplaints: any[] = [];
+  showComplaintDropdown = false;
 
   constructor(private storageService: StorageService,
     private locationService: LocationMasterService,
     private router: Router,
     private jobCardService: JobCardService,
+    private complaintMasterService: ComplaintmasterService,
     public toastr: ToastService,
     private modalService: NgbModal,
     private loader: LoaderService,
@@ -147,6 +153,7 @@ export class JobCardAddForm {
     this.loadJobTypes();
     this.loadChassisList();
     this.loadJobSorces();
+    this.loadComplaintMaster();
     this.loadPdiData();
 
     if (!this.isEditMode) {
@@ -179,6 +186,40 @@ export class JobCardAddForm {
       }
     });
   }
+
+  loadComplaintMaster(): void {
+    this.complaintMasterService.getComplaintMasterList().subscribe({
+      next: (res: any) => {
+        this.complaintMasterList = res;
+      }
+    });
+  }
+
+  onComplaintSearch(event: any): void {
+
+    const value = event.target.value?.trim().toLowerCase();
+
+    if (!value) {
+      this.filteredComplaints = [];
+      this.showComplaintDropdown = false;
+      return;
+    }
+
+    this.filteredComplaints = this.complaintMasterList.filter(x =>
+      x.complaintName?.toLowerCase().includes(value)
+    );
+
+    this.showComplaintDropdown = this.filteredComplaints.length > 0;
+  }
+
+  selectComplaint(item: any): void {
+
+  this.complaintObj.complaintCode = item.complaintName;
+  this.complaintObj.complaint = item.complaintName;
+
+  this.filteredComplaints = [];
+  this.showComplaintDropdown = false;
+}
 
   loadJobTypes() {
     this.selectedJobtype = '';
@@ -271,36 +312,7 @@ export class JobCardAddForm {
     this.selectedLocation = target.value;
   }
 
-  // onJobType(isEdit = false) {
 
-  //   if (!this.selectedJobtype) return;   // 👈 IMPORTANT
-
-  //   const dealerCode = this.storageService.getDealerCode();
-
-  //   this.jobCardService
-  //     .getAllInspectedChassis(dealerCode, this.selectedJobtype)
-  //     .subscribe(res => {
-  //       this.chassisList = res;
-  //     });
-
-
-
-  //   this.jobCardService.getServiceHead(this.selectedJobtype).subscribe(res => {
-
-  //     this.serviceHeadList = res;
-
-  //     if (isEdit) {
-  //       this.selectedServiceHead = this.chassiseditData.jobCardHeader.servicehead;
-
-  //       //  load service type for edit
-  //       this.loadServiceType(this.selectedServiceHead, true);
-  //     } else {
-  //       this.selectedServiceHead = '';
-  //       this.serviceTypeList = [];
-  //       this.selectedServiceType = '';
-  //     }
-  //   });
-  // }
   onJobType(isEdit = false) {
 
     if (!this.selectedJobtype) return;
@@ -389,9 +401,7 @@ export class JobCardAddForm {
 
       });
   }
-  // onServiceTypeChange() {
-  //   //this.selectedServiceType = '';
-  // }
+
 
 
   onChassisChange() {
@@ -517,6 +527,7 @@ export class JobCardAddForm {
     this.complaintObj = {
       customerVoice: '',
       complaintCode: '',
+      complaintId: 0,
       complaint: ''
     };
   }
@@ -857,7 +868,8 @@ export class JobCardAddForm {
     this.complaintObj = {
       customerVoice: '',
       complaintCode: '',
-      complaint: ''
+      complaint: '',
+      complaintId: 0
     };
 
     // PDI
