@@ -52,7 +52,7 @@ export class DeliveryCertificate {
     return new Promise((resolve, reject) => {
       const dealerCode = this.storageService.getDealerCode();
 
-      this.dealerService.getDealers(dealerCode).subscribe((res: any) => {
+      this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
         this.dealer = res?.data?.[0] || null;
         resolve(true);
       }, error => {

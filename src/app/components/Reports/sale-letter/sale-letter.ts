@@ -13,8 +13,8 @@ import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill
   templateUrl: './sale-letter.html',
   styleUrl: './sale-letter.scss',
 })
-export class SaleLetter  implements OnInit {
-  dealer:DealerMasterViewModel;
+export class SaleLetter implements OnInit {
+  dealer: DealerMasterViewModel;
   partyName!: string;
   modelName!: string;
   chassisNo!: string;
@@ -30,17 +30,17 @@ export class SaleLetter  implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private dealerService:DealerService,
-    private storageService:StorageService,
+    private dealerService: DealerService,
+    private storageService: StorageService,
     private ledgerService: LedgerMaster,
-    private vehicleSaleBillService:VehicleSaleBillService
-  ) {}
+    private vehicleSaleBillService: VehicleSaleBillService
+  ) { }
 
   ngOnInit(): void {
- this.getDealerDetails();
+    this.getDealerDetails();
 
     this.saleBillId = this.route.snapshot.paramMap.get('saleBillNo') || '';
-      if (this.saleBillId) {
+    if (this.saleBillId) {
       this.getBillById(parseInt(this.saleBillId));
     }
 
@@ -48,35 +48,34 @@ export class SaleLetter  implements OnInit {
   getDealerDetails() {
     const dealerCode = this.storageService.getDealerCode();
 
-    this.dealerService.getDealers(dealerCode).subscribe((res: any) => {
+    this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
       this.dealer = res?.data?.[0] || null;
     });
 
   }
-getBillById(id: number) {
-  this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
-    next: (res) => {
-      this.saleBill = res;
-      if(this.saleBill.erpStatus == "Invoiced")
-      {
-       this.isInvoiced=true;
-      }
+  getBillById(id: number) {
+    this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
+      next: (res) => {
+        this.saleBill = res;
+        if (this.saleBill.erpStatus == "Invoiced") {
+          this.isInvoiced = true;
+        }
 
-      if (this.saleBill?.ledgerId) {
+        if (this.saleBill?.ledgerId) {
 
-        this.ledgerService.getLedgerById(this.saleBill.ledgerId).subscribe({
-          next: (ledgerRes) => {
-            this.CustomerLedger = ledgerRes;
-          },
-          error: (err) => console.error(err)
-        });
-      }
-    },
-    error: (err) => console.error(err)
-  });
+          this.ledgerService.getLedgerById(this.saleBill.ledgerId).subscribe({
+            next: (ledgerRes) => {
+              this.CustomerLedger = ledgerRes;
+            },
+            error: (err) => console.error(err)
+          });
+        }
+      },
+      error: (err) => console.error(err)
+    });
 
-  
-}
+
+  }
 
 
 }

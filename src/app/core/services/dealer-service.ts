@@ -9,28 +9,39 @@ import { environment } from '../../../environments/environment';
 export class DealerService {
   protected baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(private httpClient: HttpClient) { }
 
-  getDealers(search?: string): Observable<any> {
+  getDealerByPaged(
+    searchTerm: string | null = null,
+    pageIndex: number,
+    pageSize: number,
+    dealer: string | null = null
+  ): Observable<any> {
 
-    let params = new HttpParams();
+    let params = new HttpParams()
+      .set('pageIndex', pageIndex)
+      .set('pageSize', pageSize);
 
-    if (search && search.trim()) {
-      params = params.set('search', search);
+    if (searchTerm) {
+      params = params.set('searchTerm', searchTerm);
     }
 
-    return this.http.get(`${this.baseUrl}/DealerMaster/list`, { params });
+    if (dealer) {
+      params = params.set('dealerCode', dealer);
+    }
+
+    return this.httpClient.get(`${this.baseUrl}/DealerMaster/paged`, { params });
   }
 
   downloadDealerExcel() {
-    return this.http.get(
+    return this.httpClient.get(
       `${this.baseUrl}/DealerMaster/download`,
       { responseType: 'blob' }
     );
   }
 
   updateTradeCertificate(dealerId: number, tradeCertificate: string) {
-    return this.http.put(
+    return this.httpClient.put(
       `${this.baseUrl}/DealerMaster/updateTradeCertificate?dealerId=${dealerId}`,
       JSON.stringify(tradeCertificate),
       {
@@ -39,7 +50,7 @@ export class DealerService {
     );
   }
 
-  getByDealerId(dealerId: string | null): Observable<any> {
-    return this.http.get(`${this.baseUrl}/DealerMaster/dealerCode?dealerCode=${dealerId}`);
+  getByDealerCode(dealerCode: string | null): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/DealerMaster/GetByDealerCode?dealerCode=${dealerCode}`);
   }
 }

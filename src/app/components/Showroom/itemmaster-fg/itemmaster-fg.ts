@@ -7,10 +7,11 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { LoaderService } from '../../../core/services/loader';
 import { error } from 'console';
 import { BatteryType, BatteryVoltage } from '../../../constant';
+import { NewDesignPrototype } from '../../../dialogs/new-design-prototype/new-design-prototype';
 @Component({
   selector: 'app-itemmaster-fg',
   standalone: true,
-  imports: [CommonModule, NgbHighlight, NgbPaginationModule,NgbTooltipModule],
+  imports: [CommonModule, NgbHighlight, NgbPaginationModule, NgbTooltipModule],
   templateUrl: './itemmaster-fg.html',
   styleUrl: './itemmaster-fg.scss',
 })
@@ -66,14 +67,14 @@ export class ItemmasterFG implements OnInit {
 
   // get battery type 
   getBatteryTypeName(id: number): string {
-  const battery = BatteryType.find(x => x.batterytypeidno === id);
-  return battery ? battery.value : '';
-}
-getBatteryVoltageName(id: number): string {
-  id=1
-  const batteryVoltage = BatteryVoltage.find(x => x.batteryVoltageidno === id);
-  return batteryVoltage ? batteryVoltage.value : '';
-}
+    const battery = BatteryType.find(x => x.batterytypeidno === id);
+    return battery ? battery.value : '';
+  }
+  getBatteryVoltageName(id: number): string {
+    id = 1
+    const batteryVoltage = BatteryVoltage.find(x => x.batteryVoltageidno === id);
+    return batteryVoltage ? batteryVoltage.value : '';
+  }
   //  SEARCH FUNCTION
   searchItems(event: any) {
 
@@ -141,7 +142,25 @@ getBatteryVoltageName(id: number): string {
   }
 
   openDetails(modal: any, item: any) {
-    this.selectedItem = item;   // ✅ IMPORTANT
-    this.modalService.open(modal, { size: 'xl' });
+    // this.selectedItem = item;   // ✅ IMPORTANT
+    // this.modalService.open(modal, { size: 'xl' });
+
+    const modalRef = this.modalService.open(NewDesignPrototype, {
+      size: 'xl',
+      backdrop: 'static',
+      keyboard: false
+    });
+
+    modalRef.result.then(
+      (result) => {
+        if (result && result.isAccepted) {
+          alert('result ok');
+        }
+      },
+      (reason) => {
+        console.log('Modal dismissed:', reason);
+      }
+    );
+
   }
 }

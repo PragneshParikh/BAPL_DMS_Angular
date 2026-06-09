@@ -12,7 +12,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class DeliverySlip implements OnInit {
   dealer: DealerMasterViewModel;
-   partyName!: string;
+  partyName!: string;
   modelName!: string;
   chassisNo!: string;
   motorNo!: string;
@@ -20,11 +20,11 @@ export class DeliverySlip implements OnInit {
   /**
    *
    */
-  constructor(private storageService:StorageService,
-    private dealerService:DealerService,
-    private route:ActivatedRoute
+  constructor(private storageService: StorageService,
+    private dealerService: DealerService,
+    private route: ActivatedRoute
   ) {
-    
+
   }
   ngOnInit(): void {
     this.getDealerDetails();
@@ -38,12 +38,12 @@ export class DeliverySlip implements OnInit {
     });
   }
 
-   getDealerDetails() {
+  getDealerDetails() {
     const dealerCode = this.storageService.getDealerCode();
 
-    this.dealerService.getDealers(dealerCode).subscribe((res: any) => {
+    this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
       this.dealer = res?.data?.[0] || null;
-      
+
     });
   }
 }
