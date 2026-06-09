@@ -52,6 +52,8 @@ import { HSRPOrder } from './components/hsrp-order/hsrp-order';
 import { EmployeeMasterList } from './components/employee-master/employee-master-list/employee-master-list';
 import { RepairBillPerforma } from './components/Reports/repair-bill-performa/repair-bill-performa';
 import { ComplaintMaster } from './components/complaint-master/complaint-master';
+import { AddVehicleStockTransfer } from './components/vehicle-stock-transfer/add-vehicle-stock-transfer';
+import { VehicleStockTransferList } from './components/vehicle-stock-transfer/vehicle-stock-transfer-list/vehicle-stock-transfer-list';
 
 
 export const routes: Routes = [
@@ -170,8 +172,11 @@ export const routes: Routes = [
 
       { path: 'repair-bill-performa', component: RepairBillPerforma, data: [51] },
 
-      { path: 'complaint-master', component: ComplaintMaster, data: [56] }
+      { path: 'complaint-master', component: ComplaintMaster, data: [56] },
 
+      { path: 'add-vehicle-stock-transfer', component: AddVehicleStockTransfer, data: [57] },
+      { path: 'vehicle-stock-transfer', component: VehicleStockTransferList, data: [57] },
+      { path: 'vehicle-stock-transfer/edit/:id', component: AddVehicleStockTransfer, data: [57] },
     ]
   },
   { path: '**', component: WorkInProgress }

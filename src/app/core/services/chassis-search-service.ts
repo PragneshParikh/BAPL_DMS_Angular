@@ -50,4 +50,8 @@ export class ChassisSearchService {
       formData
     );
   }
+
+  getChassisDetailsByLocationCode(locationCode: string) {
+    return this.httpClient.get<any[]>(`${this.baseUrl}/chassis-details/chassisList?locationCode=${locationCode}`);
+  }
 }
