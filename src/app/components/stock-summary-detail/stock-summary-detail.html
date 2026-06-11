@@ -1,0 +1,148 @@
+<div>
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+        <h4 class="mb-sm-0">Stock Summary Details</h4>
+    </div>
+
+    <!-- SEARCH CARD -->
+    <div class="card">
+        <div class="card-body">
+            <form #stockFilterForm="ngForm" (ngSubmit)="onSearch()">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-3 dropdown-wrapper">
+                        <label class="form-label">Dealer Name</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="stockFilterdFormData.dealerCode"
+                            name="dealerName">
+                            <option value="">-- Select Dealer --</option>
+                            <option *ngFor="let d of dealerList" [value]="d.dealercode">
+                                {{d.compname}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Part No</label>
+                        <div class="dropdown">
+                            <!-- <button class="btn dropdown-toggle w-100 text-start btn-sm border"
+                                data-bs-toggle="dropdown">
+                                Select item
+                            </button> -->
+                            <button class="btn btn-sm border w-100 d-flex justify-content-between align-items-center"
+                                data-bs-toggle="dropdown">
+                                <span>Select item</span>
+                                <i class="ri-arrow-down-s-line"></i>
+                            </button>
+
+                            <div class="dropdown-menu p-2 w-100">
+                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Search..."
+                                    [(ngModel)]="searchText" name="itemCodeDropdown">
+
+                                <div class="item-list">
+                                    <div class="form-check" *ngFor="let dealer of filteredDealers()">
+                                        <div class="p-1">
+                                            <input class="form-check-input" type="checkbox" [value]="dealer.itemcode"
+                                                (change)="onDealerChange($event, dealer.itemcode)">
+
+                                            <label class="form-check-label">
+                                                {{ dealer.itemdesc }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Date from</label>
+                        <input type="date" class="form-control form-control-sm"
+                            [(ngModel)]="stockFilterdFormData.dateFrom" name="dateFrom">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Date to</label>
+                        <input type="date" class="form-control form-control-sm "
+                            [(ngModel)]="stockFilterdFormData.dateTo" name="dateTo">
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <button type="submit" class="btn btn-primary btn-sm me-1">
+                            <i class="align-bottom me-1"></i> Search
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm ms-2" (click)="resetFilters()">
+                            <i class="align-bottom me-1"></i> Reset
+                        </button>
+                        <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'"
+                            (click)="downloadPurchaseOrderExcel()">
+                            <i class="ri-file-excel-2-line"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- TABLE CARD -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <div class="table-responsive border rounded">
+                    <table
+                        class="table table-bordered table-hover table-striped align-middle table-nowrap mb-0 table-sm">
+                        <thead>
+                            <tr style="cursor: pointer;">
+                                <th> Sr.No </th>
+                                <th class="sort" (click)="sort('itemCode')"> Part No. </th>
+                                <th class="sort" (click)="sort('date')"> Description </th>
+                                <th class="sort" (click)="sort('transactionType')"> Item Type </th>
+                                <th class="sort" (click)="sort('partyName')"> Item Group </th>
+                                <th class="sort" (click)="sort('partyName')"> HSN Code </th>
+                                <th class="sort" (click)="sort('partyName')"> Op. Bal </th>
+                                <th class="sort" (click)="sort('partyName')"> Pur. </th>
+                                <th class="sort" (click)="sort('partyName')"> Rcpt. </th>
+                                <th class="sort" (click)="sort('partyName')"> P.Pur.Chln </th>
+                                <th class="sort" (click)="sort('partyName')"> Sale Retn. </th>
+                                <th class="sort" (click)="sort('partyName')"> Total </th>
+                                <th class="sort" (click)="sort('partyName')"> Sale </th>
+                                <th class="sort" (click)="sort('partyName')"> Sale Chln </th>
+                                <th class="sort" (click)="sort('partyName')"> Br.Iss. </th>
+                                <th class="sort" (click)="sort('partyName')"> Mtrl.Iss </th>
+                                <th class="sort" (click)="sort('partyName')"> St.Adj. </th>
+                                <th class="sort" (click)="sort('partyName')"> Parts Chln </th>
+                                <th class="sort" (click)="sort('partyName')"> Pur Retn. </th>
+                                <th class="sort" (click)="sort('partyName')"> Bal. Qty </th>
+                                <th class="sort" (click)="sort('partyName')"> Pur.Rate </th>
+                                <th class="sort" (click)="sort('partyName')"> Bal.Amnt. </th>
+                                <th class="sort" (click)="sort('partyName')"> Qty Reqd. </th>
+                                <th class="sort" (click)="sort('partyName')"> Min.Ordr. </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let stock of stockDetails; let i=index" style="cursor: pointer;"
+                                class="hover-row">
+                                <td>{{ stock.srNo }}.</td>
+                                <td>{{ stock.itemCode }}</td>
+                                <td>{{ stock.itemdesc}}</td>
+                                <td>{{ stock.itemType }}</td>
+                                <td>{{ stock.groupName }}</td>
+                                <td>{{ stock.hsncode }}</td>
+                                <td>{{ stock.batchOpeningQty }}</td>
+                                <td>{{ stock.dlrprice }}</td>
+                                <td>{{ stock.batchOpeningQty }}</td>
+                            </tr>
+                            <tr *ngIf="stockDetails.length == 0">
+                                <td colspan="13" class="text-center p-3">No Records Found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="col-sm-12 col-md-12 mt-2">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+                        <ngb-pagination [collectionSize]="totalRecords" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="pageChange($event)" [maxSize]="5" [boundaryLinks]="true">
+                        </ngb-pagination>
+                    </div>
+                </div>
+                <!-- End Pagination -->
+
+            </div>
+        </div>
+    </div>
+</div>
