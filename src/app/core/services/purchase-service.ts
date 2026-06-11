@@ -12,11 +12,27 @@ export class PurchaseService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getPOList(orderType: string, dealerCode?: string): Observable<any[]> {
+  getPOList(orderType: string, dealerCode?: string, pageIndex?: number, pageSize?: number, poFilterForm?: any): Observable<any[]> {
     let params = new HttpParams();
+
     if (dealerCode) {
       params = params.set('dealerCode', dealerCode);
     }
+
+    if (poFilterForm.dateFrom) {
+      params = params.set('dateFrom', poFilterForm.dateFrom);
+      params = params.set('dateTo', poFilterForm.dateTo);
+    }
+
+    if (poFilterForm.purchaseNo) {
+      params = params.set('purchaseNo', poFilterForm.purchaseNo);
+    }
+    if (poFilterForm.isSubmitted) {
+      params = params.set('isSubmitted', poFilterForm.isSubmitted);
+    }
+
+    params = params.set('pageIndex', pageIndex);
+    params = params.set('pageSize', pageSize);
     params = params.set('orderType', orderType);
 
     return this.httpClient.get<any[]>(`${this.baseUrl}/PurchaseOrder/Polist`, { params });

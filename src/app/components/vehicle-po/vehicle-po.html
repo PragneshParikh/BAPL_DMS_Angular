@@ -75,7 +75,8 @@
                         <label class="form-label mb-0 small">Transaction Type</label>
                         <select class="form-select form-select-sm border-start border-2"
                             [class.is-invalid]="transactionTypeInvalid" [(ngModel)]="selectedTransactionType"
-                            (change)="onChangeTransactionType($event)" [disabled]="isSubmitted">
+                            (change)="onChangeTransactionType($event)"
+                            [disabled]="isSubmitted || pagedPurchaseDetails.length > 0">
                             <option *ngFor="let type of transactionTypeList" [value]="type.type">
                                 {{type.name}}
                             </option>
@@ -92,12 +93,12 @@
                             <option value="Famell It">Famell It</option>
                         </select>
                     </div>
-                    <div class="col-6">
+                    <!-- <div class="col-6">
                         <label class="form-label mb-0 small">Remarks</label>
                         <textarea class="form-control form-control-sm" rows="1" [(ngModel)]="remarks"
                             [disabled]="isSubmitted">
                         </textarea>
-                    </div>
+                    </div> -->
 
                 </div>
 
@@ -108,11 +109,11 @@
                     <h5 class="fs-14 text-primary mb-0">
                         <i class="ri-list-settings-line me-1"></i>Purchase Detail(s)
                     </h5>
-                    <button class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"
+                    <!-- <button class="btn btn-sm btn-primary d-flex align-items-center justify-content-center"
                         type="button" data-bs-toggle="collapse" data-bs-target="#purchaseDetails" aria-expanded="true"
                         aria-controls="purchaseDetails">
                         <i id="collapseIcon" class="ri-arrow-down-s-line"></i>
-                    </button>
+                    </button> -->
                 </div>
 
                 <!-- Collapse Body -->
@@ -257,7 +258,8 @@
 
             <div class="card-footer bg-white border-top py-2">
                 <div class="d-flex justify-content-end gap-1">
-                    <button class="btn btn-sm btn-primary" (click)="onSubmitToERP()" [disabled]="isSubmitted">Submit
+                    <button class="btn btn-sm btn-primary" (click)="onSubmitToERP()"
+                        [disabled]="isSubmitted || !PODetails?.id || PODetails.id <= 0">Submit
                         To ERP
                     </button>
                     <button class="btn btn-sm btn-primary" (click)="onSave()" [disabled]="isSubmitted">Save

@@ -1,4 +1,16 @@
 #page-topbar{
+    // .navbar-header{
+    //     height: 50px;
+    // }
+
+    .app-search .form-control{
+        height: 30px;
+    }
+
+    .app-search span.search-widget-icon{
+        line-height: 30px;
+    }
+
     @media (min-width: 600px) {
         .dropdown-menu-lg {
              width: 395px ;
