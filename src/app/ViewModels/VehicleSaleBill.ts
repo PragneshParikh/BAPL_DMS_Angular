@@ -79,6 +79,12 @@ export interface VehicleSaleBillResponseViewModel {
   cashAccount?: string;
   status?: string;
   details: VehicleSaleBillDetailVM[];
+  selected?: boolean;
+  selectedForm22?: boolean;
+  selectedInvoice?: boolean;
+  customerType?: string;
+  
+  
 }
 
 export interface VehicleSaleChasisRequest {

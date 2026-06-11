@@ -35,6 +35,16 @@
                         </select>
                     </div>
 
+                <div class="col-md-2">
+                    <label class="form-label mb-0 small">Customer Type</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="filter.customerType">
+                        <option value="">All</option>
+                        <option *ngFor="let ct of customerTypeOptions" [value]="ct.value">
+                            {{ ct.name }}
+                        </option>
+                    </select>
+                </div>
+
                     <!-- SEARCH BUTTON -->
                     <div class="col-md-auto ms-auto d-flex align-items-end gap-1">
                         <button class="btn btn-primary btn-sm" (click)="onSearch()">
@@ -61,16 +71,23 @@
                     <div class="d-flex align-items-center gap-3">
 
                         <!-- Buttons -->
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-primary btn-sm" (click)="navigateToAdd()">
-                                Add
-                            </button>
+                     <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" (click)="navigateToAdd()">
+                            Add
+                        </button>
 
-                            <button class="btn btn-success btn-sm" (click)="downloadDealerExcel()"
-                                [ngbTooltip]="'Export to Excel' ">
-                                <i class="ri-file-excel-2-line"></i>
-                            </button>
-                        </div>
+                        <button
+                            class="btn btn-success btn-sm"
+                            (click)="downloadSelectedBills()"
+                            [disabled]="!hasAnySelection">
+                            <i class="ri-download-2-line"></i> Download Selected
+                        </button>
+
+                        <button class="btn btn-success btn-sm" (click)="downloadDealerExcel()"
+                            [ngbTooltip]="'Export to Excel'">
+                            <i class="ri-file-excel-2-line"></i>
+                        </button>
+                    </div>
 
                         <!-- Search -->
                         <div class="search-box">
@@ -93,24 +110,41 @@
 
                         <!-- HEADER -->
                         <thead class="table-light">
-                            <tr>
-                                <th>Sl No.</th>
-                                <th class="sort" (click)="onSort('saleBillNo')" style="cursor:pointer">Sale Bill No</th>
-                                <!-- <th>Action</th> -->
-                                <th class="sort" (click)="onSort('status')" style="cursor:pointer">Status</th>
-                                <th class="sort" (click)="onSort('location')" style="cursor:pointer">Location</th>
-                                <th class="sort" (click)="onSort('saleDate')" style="cursor:pointer">Sale Date</th>
-                                <th class="sort" (click)="onSort('saleType')" style="cursor:pointer">Sale Type</th>
-                                <th class="sort" (click)="onSort('billType')" style="cursor:pointer">Bill Type</th>
-                                <th class="sort" (click)="onSort('customerName')" style="cursor:pointer">Customer Name
-                                </th>
-                                <th class="sort" (click)="onSort('billingName')" style="cursor:pointer">Billing Name
-                                </th>
-                                <th class="sort" (click)="onSort('totalAmount')" style="cursor:pointer">Total Amount
-                                </th>
-                                <th class="sort" (click)="onSort('totalItems')" style="cursor:pointer;">Total Items</th>
-                            </tr>
-                        </thead>
+                        <tr>
+                           
+
+                            <th class="text-center">
+                                <div class="d-flex flex-column align-items-center gap-1">
+                                    <small style="font-size:10px; white-space:nowrap">Form 22</small>
+                                    <input type="checkbox"
+                                        [(ngModel)]="selectAllForm22"
+                                        (change)="toggleSelectAllForm22()" />
+                                </div>
+                            </th>
+
+                            <th class="text-center">
+                                <div class="d-flex flex-column align-items-center gap-1">
+                                    <small style="font-size:10px; white-space:nowrap">Ex-Showroom</small>
+                                    <input type="checkbox"
+                                        [(ngModel)]="selectAllInvoice"
+                                        (change)="toggleSelectAllInvoice()" />
+                                </div>
+                            </th>
+
+                            <th>Sl No.</th>
+                            <th class="sort" (click)="onSort('saleBillNo')" style="cursor:pointer">Sale Bill No</th>
+                            <th class="sort" (click)="onSort('status')" style="cursor:pointer">Status</th>
+                            <th class="sort" (click)="onSort('location')" style="cursor:pointer">Location</th>
+                            <th class="sort" (click)="onSort('saleDate')" style="cursor:pointer">Sale Date</th>
+                            <th class="sort" (click)="onSort('saleType')" style="cursor:pointer">Sale Type</th>
+                            <th class="sort" (click)="onSort('billType')" style="cursor:pointer">Bill Type</th>
+                            <th class="sort" (click)="onSort('customerName')" style="cursor:pointer">Customer Name</th>
+                            <th class="sort" (click)="onSort('billingName')" style="cursor:pointer">Billing Name</th>
+                            <th class="sort" (click)="onSort('customerType')" style="cursor:pointer">Customer Type</th>
+                            <th class="sort" (click)="onSort('totalAmount')" style="cursor:pointer">Total Amount</th>
+                            <th class="sort" (click)="onSort('totalItems')" style="cursor:pointer">Total Items</th>
+                        </tr>
+                    </thead>
 
                         <!-- BODY -->
                         <tbody>
@@ -123,101 +157,35 @@
                             </tr>
                             }
 
-                            @for (item of paginatedBills; track $index) {
+                                @for (item of paginatedBills; track $index) {
                             <tr style="cursor: pointer" (dblclick)="viewDetails(item)">
 
-                                <!-- Serial -->
-                                <td>
-                                    {{ ($index + 1) + ((page - 1) * pageSize) }}
+                                <!-- Form 22 checkbox only -->
+                                <td class="text-center">
+                                    <input type="checkbox"
+                                        [(ngModel)]="item.selectedForm22"
+                                        (change)="updateSelection()" />
                                 </td>
 
-                                <!-- Sale Bill No -->
-                                <td>
-                                    <ngb-highlight [result]="item.saleBillNo" [term]="searchText"></ngb-highlight>
+                                <!-- Ex-Showroom checkbox only -->
+                                <td class="text-center">
+                                    <input type="checkbox"
+                                        [(ngModel)]="item.selectedInvoice"
+                                        (change)="updateSelection()" />
                                 </td>
 
-                                <!-- <td class="position-relative">
-    <div class="dropdown">
-        <button class="btn btn-sm dropdown-toggle" 
-                type="button" 
-                data-bs-toggle="dropdown" 
-                aria-expanded="false">
-            <i class="ri-printer-line"></i> Print
-        </button>
-
-        <ul class="dropdown-menu">
-            <li>
-                <a class="dropdown-item" href="#">
-                    Option 1
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="#">
-                    Option 2
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="#">
-                    Option 3
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="#">
-                    Option 4
-                </a>
-            </li>
-        </ul>
-    </div>
-</td> -->
-
-                                <td>
-
-                                    <ngb-highlight [result]="getStatusName(item.status)" [term]="searchText">
-
-                                    </ngb-highlight>
-                                </td>
-
-                                <!-- Location -->
-                                <td>
-                                    <ngb-highlight [result]="getLocationName(item.location)" [term]="searchText">
-                                    </ngb-highlight>
-                                </td>
-
-                                <!-- Sale Date -->
-                                <td>
-                                    {{ item.saleDate | date:'dd-MM-yyyy' }}
-                                </td>
-
-                                <!-- Sale Type -->
-                                <td>
-                                    {{ item.saleType }}
-                                </td>
-
-                                <!-- Bill Type -->
-                                <td>
-                                    {{ getBillingTypeName(item.billType) }}
-                                </td>
-
-                                <!-- Customer -->
-                                <td>
-                                    <ngb-highlight [result]="item.customerName" [term]="searchText"></ngb-highlight>
-                                </td>
-
-                                <!-- Billing Name -->
-                                <td>
-                                    {{ item.billingName }}
-                                </td>
-
-                                <!-- Total Amount -->
-                                <td>
-                                    ₹ {{ item.totalAmount }}
-                                </td>
-
-                                <!-- Items Count -->
-                                <td>
-                                    {{ item.details?.length || 0 }}
-                                </td>
-
+                                <td>{{ ($index + 1) + ((page - 1) * pageSize) }}</td>
+                                <td><ngb-highlight [result]="item.saleBillNo" [term]="searchText"></ngb-highlight></td>
+                                <td><ngb-highlight [result]="getStatusName(item.status)" [term]="searchText"></ngb-highlight></td>
+                                <td><ngb-highlight [result]="getLocationName(item.location)" [term]="searchText"></ngb-highlight></td>
+                                <td>{{ item.saleDate | date:'dd-MM-yyyy' }}</td>
+                                <td>{{ item.saleType }}</td>
+                                <td>{{ getBillingTypeName(item.billType) }}</td>
+                                <td><ngb-highlight [result]="item.customerName" [term]="searchText"></ngb-highlight></td>
+                                <td>{{ item.billingName }}</td>
+                                <td>{{ getCustomerTypeName(item.customerType) }}</td>
+                                <td>₹ {{ item.totalAmount }}</td>
+                                <td>{{ item.details?.length || 0 }}</td>
                             </tr>
                             }
 
@@ -300,6 +268,7 @@
                         <span class="badge bg-success" *ngIf="d.isDelivered">Delivered</span>
                         <span class="badge bg-warning" *ngIf="!d.isDelivered">Pending</span>
                     </td>
+                    
                 </tr>
                 }
 
