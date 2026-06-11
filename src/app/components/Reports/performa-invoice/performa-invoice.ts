@@ -268,7 +268,7 @@ export class PerformaInvoice implements OnInit {
   getDealerDetails() {
     const dealerCode = this.storageService.getDealerCode();
 
-    this.dealerService.getDealers(dealerCode).subscribe((res: any) => {
+    this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
       this.dealer = res?.data?.[0] || null;
     });
   }

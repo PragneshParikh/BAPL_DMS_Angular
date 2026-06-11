@@ -3,15 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ItemMasterService } from '../../../core/services/item-master-service';
 import { NgbHighlight, NgbModal, NgbPaginationModule, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { LoaderService } from '../../../core/services/loader';
-import { error } from 'console';
 import { BatteryType, BatteryVoltage } from '../../../constant';
-import { NewDesignPrototype } from '../../../dialogs/new-design-prototype/new-design-prototype';
+
 @Component({
   selector: 'app-itemmaster-fg',
   standalone: true,
-  imports: [CommonModule, NgbHighlight, NgbPaginationModule, NgbTooltipModule],
+  imports: [CommonModule, NgbPaginationModule, NgbTooltipModule],
   templateUrl: './itemmaster-fg.html',
   styleUrl: './itemmaster-fg.scss',
 })

@@ -61,29 +61,29 @@ export class DealerMasterBulkDataDipatch implements OnInit {
 
   loadDealers() {
 
-    this.dealerService.getDealers().subscribe({
+    // this.dealerService.getDealers().subscribe({
 
-      next: (res: any) => {
+    //   next: (res: any) => {
 
-        const data = res.data || [];
+    //     const data = res.data || [];
 
-        this.dealerList = data.map((dealer: any, index: number) => ({
-          ...dealer,
-          slNo: index + 1,
-          selected: false
-        }));
+    //     this.dealerList = data.map((dealer: any, index: number) => ({
+    //       ...dealer,
+    //       slNo: index + 1,
+    //       selected: false
+    //     }));
 
-        this.originalDealerList = [...this.dealerList];
+    //     this.originalDealerList = [...this.dealerList];
 
-        this.paginatedDealerList = [...this.dealerList];
+    //     this.paginatedDealerList = [...this.dealerList];
 
-      },
+    //   },
 
-      error: (err) => {
-        console.error(err);
-      }
+    //   error: (err) => {
+    //     console.error(err);
+    //   }
 
-    });
+    // });
 
   }
   updatePagination() {

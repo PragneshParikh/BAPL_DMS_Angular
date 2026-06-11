@@ -235,7 +235,9 @@ export class VehiclePoList implements OnInit {
       dateFrom: this.dateFrom,
       dateTo: this.dateTo,
       transactionType: this.transactionType,
-      isSubmitted: this.isSubmitted
+      isSubmitted: this.isSubmitted,
+      orderType: 'Vehicle',
+      dealerCode: this.isSuperAdmin ? null : this.dealerCode
     };
 
     this.purchaseService.downloadPurchaseOrderExcel(filters).subscribe({

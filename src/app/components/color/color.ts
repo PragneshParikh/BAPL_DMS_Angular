@@ -140,24 +140,33 @@ export class Color implements OnInit {
   }
 
   downloadColorExcel() {
+    this.loader.show();
 
-    this.colorMasterService.getExcelDownload().subscribe((data: Blob) => {
+    this.colorMasterService.getExcelDownload().subscribe({
+      next: (data: Blob) => {
+        const blob = new Blob([data], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
 
-      const blob = new Blob([data], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
+        const downloadURL = window.URL.createObjectURL(blob);
 
-      const downloadURL = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadURL;
+        link.download = 'ColorList.xlsx';
 
-      const link = document.createElement('a');
-      link.href = downloadURL;
-      link.download = 'ColorList.xlsx';
+        document.body.appendChild(link);
+        link.click();
 
-      link.click();
-
-      window.URL.revokeObjectURL(downloadURL);
-
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadURL);
+      },
+      error: (err) => {
+        console.error(err);
+        this.toaster.show('Failed to download file', { classname: 'bg-danger text-white', delay: 5000 });
+      },
+      complete: () => {
+        this.loader.hide();
+      }
     });
-
   }
 }

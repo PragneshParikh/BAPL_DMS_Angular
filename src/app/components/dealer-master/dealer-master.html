@@ -69,59 +69,64 @@
                         </thead>
 
                         <tbody>
-                            @if (paginatedDealerList.length === 0) {
-                            <tr>
-                                <td colspan="17" class="text-center">No data available</td>
-                            </tr>
-                            }
-                            @for (dealer of paginatedDealerList; track $index) {
+
+                            @for (dealer of dealerList; track $index) {
                             <tr (dblclick)="openDealerModal(dealer)" style="cursor: pointer">
                                 <td>{{ (page - 1) * pageSize + $index + 1 }}</td>
-                                <td><ngb-highlight [result]="dealer.compname" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.dealercode" [term]="searchTerm"></ngb-highlight>
-                                </td>
-                                <td><ngb-highlight [result]="dealer.city" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.state" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.mobile" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.email" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.compcode" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.adress1" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.adress2" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.pin" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.pan" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.contactperson" [term]="searchTerm"></ngb-highlight>
-                                </td>
-                                <td><ngb-highlight [result]="dealer.phoneOff" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.compgstinNo" [term]="searchTerm"></ngb-highlight>
-                                </td>
-                                <td><ngb-highlight [result]="dealer.tradCert" [term]="searchTerm"></ngb-highlight></td>
+                                <td>{{ dealer.compname }}</td>
+                                <td>{{ dealer.dealercode }} </td>
+                                <td>{{ dealer.city }}</td>
+                                <td>{{ dealer.state }}</td>
+                                <td>{{ dealer.mobile }}</td>
+                                <td>{{ dealer.email }}</td>
+                                <td>{{ dealer.compcode }}</td>
+                                <td>{{ dealer.adress1 }}</td>
+                                <td>{{ dealer.adress2 }}</td>
+                                <td>{{ dealer.pin }}</td>
+                                <td>{{ dealer.pan }}</td>
+                                <td>{{ dealer.contactperson }}</td>
+                                <td>{{ dealer.phoneOff }}</td>
+                                <td>{{ dealer.compgstinNo }} </td>
+                                <td>{{ dealer.tradCert }}</td>
                                 <td>
                                     <span class="badge" [ngClass]="dealer.b2b ? 'bg-success' : 'bg-danger'">
                                         {{ dealer.b2b ? 'Yes' : 'No' }}
                                     </span>
                                 </td>
-                                <td><ngb-highlight [result]="dealer.regDate" [term]="searchTerm"></ngb-highlight></td>
+                                <td>{{ dealer.regDate }}</td>
                             </tr>
-
                             }
+                            <!-- No Data Row -->
+                            <tr *ngIf="dealerList.length === 0">
+                                <td colspan="6" class="text-center">No Data Available</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Pagination -->
 
-                <div class="row mt-3">
+                <!-- <div class="row mt-3">
                     <div class="col-sm-12 col-md-20">
                         <div class="text-md-right float-md-end gridjs-pagination">
 
-                            <ngb-pagination [collectionSize]="dealerList.length" [(page)]="page" [pageSize]="pageSize"
+                            <ngb-pagination [collectionSize]="" [(page)]="page" [pageSize]="pageSize"
                                 (pageChange)="refreshPage()" [boundaryLinks]="true">
-
                             </ngb-pagination>
 
                         </div>
                     </div>
+                </div> -->
+
+                <!-- Pagination -->
+                <div class="col-sm-12 col-md-12">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+                        <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="onPageChange($event)" [maxSize]="5" [boundaryLinks]="true">
+                        </ngb-pagination>
+                    </div>
                 </div>
+                <!-- End Pagination -->
 
             </div> <!-- card-body -->
 
