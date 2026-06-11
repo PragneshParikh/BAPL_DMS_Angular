@@ -2,42 +2,32 @@
 
     <!-- Header -->
     <div class="card shadow-sm mb-2">
-        <div class="card-header text-white py-2 d-flex justify-content-between align-items-center">
-
+        <div class="card-header">
             <h6 class="mb-0">Repair Bill [GST]</h6>
-
-            <div class="d-flex align-items-center gap-2">
-
-                <div ngbDropdown>
-
-                    <button class="btn btn-primary btn-sm" ngbDropdownToggle>
-
+            <div class="text-white py-2 d-flex justify-content-end">
+                <div class="btn-group gap-2 me-3" ngbDropdown>
+                    <button class="btn btn-primary btn-sm gap-2 dropdown-toggle" type="button" ngbDropdownToggle>
                         <i class="ri-printer-line"></i>
                     </button>
 
-                    <div ngbDropdownMenu>
-
-                        <button ngbDropdownItem (click)="printPerforma()">
+                    <div class="dropdown-menu" ngbDropdownMenu>
+                        <button class="dropdown-item" ngbDropdownItem (click)="printPerforma()">
                             <i class="ri-file-text-line me-2"></i>
                             Performa Print
                         </button>
 
-                        <button ngbDropdownItem (click)="printInvoice()">
+                        <button class="dropdown-item" ngbDropdownItem (click)="printInvoice()">
                             <i class="ri-bill-line me-2"></i>
                             Invoice Print
                         </button>
-
                     </div>
-
                 </div>
 
                 <button class="btn btn-light btn-sm" (click)="onNavigate()">
                     <i class="ri-menu-line"></i>
                 </button>
-
             </div>
         </div>
-
         <div class="card-body p-2">
 
             <!-- Row 1 -->
@@ -663,11 +653,13 @@
                     <button *ngIf="!isEditMode" class="btn btn-primary btn-sm" (click)="saveRepairBill()">
                         <i class="ri-save-line"></i> Save As Performa
                     </button>
-                    <button class="btn btn-primary btn-sm" [disabled]="repairBillStatus === 'Billed'"
+                    <button class="btn btn-primary btn-sm" [disabled]="!isEditMode || repairBillStatus === 'Billed'"
                         (click)="updateRepairBill()">
-                        <i class="ri-save-line"></i> Save As Invoice
-                    </button>
 
+                        <i class="ri-save-line"></i>
+                        Save As Invoice
+
+                    </button>
 
                     <button class="btn btn-light btn-sm" (click)="onNavigate()">
                         <i class="ri-close-line"></i> Close

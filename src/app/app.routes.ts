@@ -170,7 +170,7 @@ export const routes: Routes = [
 
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
 
-      { path: 'repair-bill-performa', component: RepairBillPerforma, data: [51] },
+      { path: 'repair-bill-performa/:repairBillId', component: RepairBillPerforma, data: [51] },
 
       { path: 'complaint-master', component: ComplaintMaster, data: [56] },
 

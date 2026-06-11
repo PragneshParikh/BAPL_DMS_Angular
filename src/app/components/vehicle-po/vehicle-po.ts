@@ -92,6 +92,7 @@ export class VehiclePO implements OnInit {
     itemType: 0
   };
   dealerCode: string = '';
+  PODetails: any = {};
 
   constructor(
     private locationService: LocationMasterService,
@@ -165,7 +166,7 @@ export class VehiclePO implements OnInit {
       next: (response: any) => {
         this.loader.hide();
         const res = Array.isArray(response) ? response[0] : response;
-
+        this.PODetails = res;
         if (res) {
           // Robust property resolution
           this.orderNo = res.PONumber || res.poNumber || res.ponumber || res.purchaseNo || res.PurchaseNo || poNumber;
@@ -411,6 +412,7 @@ export class VehiclePO implements OnInit {
           this.currentItem.rate = getVal(res, 'Ipurrate', 'ipurrate', 'IPURRATE', 'rate');
           this.currentItem.rawSubsidy = getVal(res, 'Fame2amount', 'fame2amount', 'fame2Amount');
           this.currentItem.itemType = res.itemtype || res.itemType || 0;
+          this.currentItem.qty = 1;
 
           // Re-calculate totals immediately
           this.calculateRowTotals();

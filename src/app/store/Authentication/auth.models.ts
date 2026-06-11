@@ -6,4 +6,6 @@ export class User {
   lastName?: string;
   token?: string;
   email?: string;
+  dealerCode?: string;  
+  role?: string; 
 }

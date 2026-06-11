@@ -8,6 +8,7 @@ import { privateDecrypt } from 'crypto';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { Router, RouterOutlet } from "@angular/router";
+import { error } from 'console';
 
 @Component({
   selector: 'app-kit-creation',
@@ -103,12 +104,44 @@ export class KitCreation implements OnInit {
     this.router.navigate(['/kit-creation', 0]);
   }
   onSearchChange() {
-
+    this.page = 1; // Reset to first page on new search
+    this.getKitCreationData();
   }
   onKitClick(rowData: any) {
     if (rowData) {
       this.router.navigate(['/kit-creation', rowData.id]);
     }
+  }
+
+  onDownloadExcel() {
+    this.loader.show();
+
+    this.kitCreationService.downloadExcel().subscribe({
+      next: (data: Blob) => {
+        const blob = new Blob([data], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const downloadURL = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = downloadURL;
+        link.download = 'KitDetails.xlsx';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        window.URL.revokeObjectURL(downloadURL);
+
+        this.loader.hide();
+      },
+      error: (error) => {
+        console.error(error);
+        this.loader.hide();
+        this.toaster.show('Something went wrong.', { calssname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
   }
 
 }

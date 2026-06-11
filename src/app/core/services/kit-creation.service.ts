@@ -32,4 +32,8 @@ export class KitCreationService {
     return this.httpClient.put(`${this.baseURL}/kit-header`, data);
   }
 
+  downloadExcel(): Observable<any> {
+    return this.httpClient.get(`${this.baseURL}/kit-header/downloadExcel`, { responseType: 'blob' });
+  }
+
 }

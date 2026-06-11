@@ -80,12 +80,13 @@ export class ReportService {
   // STOCK REPORT
   // =====================================================
 
-  getDealerWiseStockReport():
-    Observable<StockReport[]> {
-    return this.http.get<StockReport[]>(
-      `${this.apiUrl}/dealer-wise`
-    );
-  }
+getDealerWiseStockReport(dealerCode?: string):
+  Observable<StockReport[]> {
+  const params = dealerCode ? `?dealerCode=${dealerCode}` : '';
+  return this.http.get<StockReport[]>(
+    `${this.apiUrl}/dealer-wise${params}`
+  );
+}
 
   getColourWiseStockReport():
     Observable<StockReport[]> {

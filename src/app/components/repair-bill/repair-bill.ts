@@ -1027,7 +1027,7 @@ export class RepairBill implements OnInit {
         }))
       ]
     };
-    //console.log("Savetime partitems", ...this.partItems)
+    console.log("Savetime partitems", ...this.partItems)
     //console.log("Savetime labouritems", ...this.labourItems)
     console.log(payload);
 
@@ -1212,7 +1212,7 @@ export class RepairBill implements OnInit {
             });
 
           });
-        //console.log('Mapped Part Items', this.partItems);
+       // console.log('Mapped Part Items', this.partItems);
         this.isPartSelected = this.partItems.length > 0;
         this.isLabourSelected = this.labourItems.length > 0;
 
@@ -1408,8 +1408,9 @@ export class RepairBill implements OnInit {
   }
 
   printPerforma() {
+   
     this.router.navigate(
-      ['/repair-bill-performa']
+      ['/repair-bill-performa',this.repairBillId]
     )
   }
 
