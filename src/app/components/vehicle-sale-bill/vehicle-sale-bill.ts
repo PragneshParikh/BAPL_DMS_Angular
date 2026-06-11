@@ -46,13 +46,20 @@ export class VehicleSaleBill {
   filter: any = {
     fromDate: null,
     toDate: null,
-    status: ""
+    status: "",
+    customerType: ''
+
   };
   searchChanged: Subject<string> = new Subject();
   isSuperAdmin: boolean;
   dealerCode: string;
+  customerTypeOptions: { value: string; name: string }[] = [];
   billingTypeOptions = BillingTypeOptions;
   locations: any[] = [];
+  selectAllForm22 = false;
+  selectAllInvoice = false;
+  selectedForm22Bills: any[] = [];
+  selectedInvoiceBills: any[] = [];
 
   constructor(private service: VehicleSaleBillService,
     private router: Router,
@@ -64,7 +71,7 @@ export class VehicleSaleBill {
 
   ngOnInit() {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-this.fetchLocations();
+  this.fetchLocations();
     const today = new Date();
     const sevenDaysBefore = new Date(today);
     sevenDaysBefore.setDate(today.getDate() - 7);
@@ -75,7 +82,6 @@ this.fetchLocations();
       this.loadData();
     });
     this.loadData();
-
   }
 
 
@@ -132,9 +138,6 @@ this.fetchLocations();
     this.page = page;
     this.updatePagination();
   }
-
-
-
 
   onSort(field: string) {
     this.sortField = field;
@@ -249,7 +252,73 @@ this.fetchLocations();
       }
     });
   }
+
+  get hasAnySelection(): boolean {
+    return this.selectedForm22Bills.length > 0 || this.selectedInvoiceBills.length > 0;
+  }
+
+  toggleSelectAllForm22() {
+    this.paginatedBills.forEach(x => x.selectedForm22 = this.selectAllForm22);
+    this.updateSelection();
+  }
+
+  toggleSelectAllInvoice() {
+    this.paginatedBills.forEach(x => x.selectedInvoice = this.selectAllInvoice);
+    this.updateSelection();
+  }
+
+  updateSelection() {
+    this.selectedForm22Bills = this.vehicleBills.filter(x => x.selectedForm22);
+    this.selectedInvoiceBills = this.vehicleBills.filter(x => x.selectedInvoice);
+  }
+
+  getCustomerTypeName(value: string): string {
+  return this.customerTypeOptions.find(ct => ct.value === value)?.name ?? value ?? '-';
+}
+
+  downloadSelectedBills() {
+    const form22Ids = this.selectedForm22Bills.map(x => x.id);
+    const invoiceIds = this.selectedInvoiceBills.map(x => x.id);
+
+    if (form22Ids.length === 0 && invoiceIds.length === 0) return;
+
+    this.loader.show();
+
+    this.service.downloadMultipleCombined(form22Ids, invoiceIds).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'SaleBills.zip';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.loader.hide();
+        this.toaster.show('Downloaded successfully', {
+          classname: 'bg-success text-light',
+          delay: 3000
+        });
+      },
+      error: () => {
+        this.loader.hide();
+        this.toaster.show('Download failed', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+      }
+    });
+  }
   getBillingTypeName(id: number): string {
     return this.billingTypeOptions.find(x => x.id === id)?.value ?? '';
   }
+
+    downloadSaleBill(id: number) {
+    this.service.downloadSaleBillPdf(id).subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `SaleBill_${id}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }  
 }

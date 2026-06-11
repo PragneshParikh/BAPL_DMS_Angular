@@ -129,4 +129,42 @@ export class VehicleSaleBillService {
       headers: { 'Content-Type': 'application/json' },
     });
   }
+
+    downloadSaleBillPdf(id: number) {
+
+    return this.http.get(
+      `${this.apiUrl}/VehicleSaleBill/Download/${id}`,
+      {
+        responseType: 'blob'
+      }
+    );
+  }
+
+  downloadMultipleSaleBills(ids: number[]) {
+
+  return this.http.post(
+    `${this.apiUrl}/VehicleSaleBill/DownloadMultiple`,
+    ids,
+    {
+      responseType: 'blob'
+    }
+  );
+
+  
+}
+downloadMultipleForm22(ids: number[]) {
+  return this.http.post(
+    `${this.apiUrl}/VehicleSaleBill/DownloadMultipleForm22`,
+    ids,
+    { responseType: 'blob' }
+  );
+}
+
+downloadMultipleCombined(form22Ids: number[], invoiceIds: number[]) {
+  return this.http.post(
+    `${this.apiUrl}/VehicleSaleBill/DownloadMultipleCombined`,
+    { form22Ids, invoiceIds },
+    { responseType: 'blob' }
+  );
+}
 }
