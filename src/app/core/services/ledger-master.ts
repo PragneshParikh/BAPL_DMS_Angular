@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class LedgerMaster {
+export class LedgerMasterService {
   protected baseUrl = environment.apiUrl;
 
   constructor(private httpClient: HttpClient) { }
@@ -34,7 +34,7 @@ export class LedgerMaster {
   insert(data: any): Observable<any> {
     return this.httpClient.post(`${this.baseUrl}/ledger-master`, data);
   }
-  getInsuranceLedgers():Observable<any>{
+  getInsuranceLedgers(): Observable<any> {
     return this.httpClient.get<[]>(`${this.baseUrl}/ledger-master/insurance`);
   }
 

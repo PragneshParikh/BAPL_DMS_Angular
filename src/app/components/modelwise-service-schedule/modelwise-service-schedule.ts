@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Form22masterservice } from '../../core/services/form22masterservice';
+import { Form22MasterService } from '../../core/services/form22masterservice';
 import { OemmodelServiceFrom, OemmodelServiceSeq } from '../../constant';
-import { ModewiseServicescheduleservice } from '../../core/services/modewise-servicescheduleservice';
+import { ModewiseServiceScheduleService } from '../../core/services/modewise-servicescheduleservice';
 import { JobCardService } from '../../core/services/job-card-service';
 import { Router } from '@angular/router';
 import { ToastService } from '../../shared/toaster/toast-service';
@@ -14,15 +14,15 @@ import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-modelwise-service-schedule',
   standalone: true,
-  imports: [CommonModule, FormsModule,NgbPagination],
+  imports: [CommonModule, FormsModule, NgbPagination],
   templateUrl: './modelwise-service-schedule.html',
   styleUrl: './modelwise-service-schedule.scss',
 })
 export class ModelwiseServiceSchedule {
 
-  constructor(private form22service: Form22masterservice,
+  constructor(private form22service: Form22MasterService,
     private jobCardService: JobCardService,
-    private modelwiseservicescheduleservice: ModewiseServicescheduleservice,
+    private modelwiseservicescheduleservice: ModewiseServiceScheduleService,
     public toaster: ToastService,
     private router: Router
   ) { }
@@ -309,15 +309,15 @@ export class ModelwiseServiceSchedule {
       });
   }
   refreshPagedData() {
-  const start = (this.page - 1) * this.pageSize;
-  const end = start + this.pageSize;
+    const start = (this.page - 1) * this.pageSize;
+    const end = start + this.pageSize;
 
-  this.pagedList = this.scheduleList.slice(start, end);
-}
-pageChange(page: number) {
-  this.page = page;
-  this.refreshPagedData();
-}
+    this.pagedList = this.scheduleList.slice(start, end);
+  }
+  pageChange(page: number) {
+    this.page = page;
+    this.refreshPagedData();
+  }
   edit(item: any) {
 
     this.isEditMode = true;

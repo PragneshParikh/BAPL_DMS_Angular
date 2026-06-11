@@ -10,7 +10,7 @@ import { IssueTypes, TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import Swal from 'sweetalert2';
-import { LedgerMaster } from '../../core/services/ledger-master';
+import { LedgerMasterService } from '../../core/services/ledger-master';
 import { PrefixService } from '../../core/services/prefix';
 import { PurchaseService } from '../../core/services/purchase-service';
 export interface PurchaseOrderItemViewModel {
@@ -29,8 +29,6 @@ export interface PurchaseOrderViewModel {
   LedgerCode?: string;
   Items: PurchaseOrderItemViewModel[];
 }
-
-
 
 @Component({
   selector: 'app-vehicle-po',
@@ -94,6 +92,7 @@ export class VehiclePO implements OnInit {
     itemType: 0
   };
   dealerCode: string = '';
+  PODetails: any = {};
 
   constructor(
     private locationService: LocationMasterService,
@@ -104,7 +103,7 @@ export class VehiclePO implements OnInit {
     private router: Router,
     private loader: LoaderService,
     public toaster: ToastService,
-    private ledgerService: LedgerMaster,
+    private ledgerService: LedgerMasterService,
     private prefixService: PrefixService
   ) {
     this.dealerCode = this.storageService.getDealerCode();
@@ -167,7 +166,7 @@ export class VehiclePO implements OnInit {
       next: (response: any) => {
         this.loader.hide();
         const res = Array.isArray(response) ? response[0] : response;
-
+        this.PODetails = res;
         if (res) {
           // Robust property resolution
           this.orderNo = res.PONumber || res.poNumber || res.ponumber || res.purchaseNo || res.PurchaseNo || poNumber;
@@ -413,6 +412,7 @@ export class VehiclePO implements OnInit {
           this.currentItem.rate = getVal(res, 'Ipurrate', 'ipurrate', 'IPURRATE', 'rate');
           this.currentItem.rawSubsidy = getVal(res, 'Fame2amount', 'fame2amount', 'fame2Amount');
           this.currentItem.itemType = res.itemtype || res.itemType || 0;
+          this.currentItem.qty = 1;
 
           // Re-calculate totals immediately
           this.calculateRowTotals();

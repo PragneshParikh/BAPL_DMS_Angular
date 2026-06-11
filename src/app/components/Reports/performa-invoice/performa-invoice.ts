@@ -6,7 +6,7 @@ import { DealerMasterViewModel } from '../../../ViewModels/Dealer/DealerMasterVi
 import { ProformaInvoiceService } from '../../../core/services/proforma-invoice-service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
-import { LedgerMaster } from '../../../core/services/ledger-master';
+import { LedgerMasterService } from '../../../core/services/ledger-master';
 import { CurrencyService } from '../../../core/services/currency-service';
 import { ReceiptEntryService } from '../../../core/services/receipt-entry-service';
 import { BillingTypeOptions } from '../../../constant';
@@ -60,7 +60,7 @@ export class PerformaInvoice implements OnInit {
     private route: ActivatedRoute,
     private vehicleSaleBillService: VehicleSaleBillService,
     private router: Router,
-    private ledgerService: LedgerMaster,
+    private ledgerService: LedgerMasterService,
     private currencyService: CurrencyService,
     private receiptEntryService: ReceiptEntryService,
 

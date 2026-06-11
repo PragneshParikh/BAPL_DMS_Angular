@@ -140,7 +140,22 @@ export class ItemmasterFG implements OnInit {
   }
 
   openDetails(modal: any, item: any) {
-    this.selectedItem = item;   // ✅ IMPORTANT
-    this.modalService.open(modal, { size: 'xl' });
+    // this.selectedItem = item;   // ✅ IMPORTANT
+    // this.modalService.open(modal, { size: 'xl' });
+
+    const modalRef = this.modalService.open(NewDesignPrototype, {
+      size: 'xl',
+      backdrop: 'static',
+      keyboard: false
+    });
+
+    modalRef.result.then(
+      (result) => {
+        alert('Result ok');
+      },
+      (reason) => {
+        console.log('Modal dismissed:', reason);
+      }
+    );
   }
 }

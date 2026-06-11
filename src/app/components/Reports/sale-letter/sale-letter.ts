@@ -4,7 +4,7 @@ import { DealerMasterViewModel } from '../../../ViewModels/Dealer/DealerMasterVi
 import { CommonModule } from '@angular/common';
 import { DealerService } from '../../../core/services/dealer-service';
 import { StorageService } from '../../../core/services/storage';
-import { LedgerMaster } from '../../../core/services/ledger-master';
+import { LedgerMasterService } from '../../../core/services/ledger-master';
 import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
 
 @Component({
@@ -32,7 +32,7 @@ export class SaleLetter implements OnInit {
     private route: ActivatedRoute,
     private dealerService: DealerService,
     private storageService: StorageService,
-    private ledgerService: LedgerMaster,
+    private ledgerService: LedgerMasterService,
     private vehicleSaleBillService: VehicleSaleBillService
   ) { }
 

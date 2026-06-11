@@ -6,12 +6,12 @@ import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class Lotinspectionservice {
+export class LotInspectionService {
   protected baseUrl = environment.apiUrl;
 
   constructor(private httpClient: HttpClient) { }
 
-  getAllLotInspectionHeaderDetails(search: string = '',dealerCode?:string): Observable<any> {
+  getAllLotInspectionHeaderDetails(search: string = '', dealerCode?: string): Observable<any> {
     let params = new HttpParams().set('search', search ?? '');
 
 

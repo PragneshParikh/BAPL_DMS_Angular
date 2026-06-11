@@ -1,0 +1,567 @@
+<div class="print-container" *ngIf="performaData">
+
+    <!-- Header -->
+    <div>
+        <span>{{ currentDate | date:'dd/MM/yyyy hh:mm a' }}</span>
+    </div>
+    <div class="text-end">
+        <img src="\assets\images\BGaussLightLogo.png" class="print-logo" alt="Logo" class="company-logo">
+    </div>
+    <div class="text-center border-bottom pb-2 mb-3">
+        <h3 class="fw-bold mb-1">{{ performaData.dealerName }}</h3>
+        <div>{{ performaData.dealerAddress }}</div>
+        <div>{{ performaData.dealerCity }}, {{ performaData.dealerState }} - {{ performaData.dealerPinNo }}</div>
+        <div>Phone No : {{ performaData.dealerPhoneNo }}</div>
+        <div>Email : {{ performaData.dealerEmail}}</div>
+        <div>GSTIN No : {{ performaData.dealergstNo }}</div>
+        <div>PAN No : {{ performaData.dealerPanNo }}</div>
+
+        <h4 class="mt-2 fw-bold text-decoration-underline">
+            PERFORMA INVOICE
+        </h4>
+    </div>
+
+    <!-- Customer & Invoice -->
+
+    <div class="row mb-3">
+        <table class="table table-bordered mb-0">
+            <tr>
+                <!-- Left Side -->
+                <td width="10%" valign="top">
+                    <div class="fw-bold border-bottom mb-1">
+                        Bill To :-
+                    </div>
+
+                    <div class="small">
+                        <div><strong>Insurance Detail :</strong> {{ performaData.insuranceName }}</div>
+                        <div><strong>GSTIN No :</strong> {{ performaData.insGSTINNo }}</div>
+                        <div>
+                            <strong>Address :</strong>
+                            {{ performaData.insAddress }},
+                            {{ performaData.insState }},
+                            {{ performaData.insCity }}
+                        </div>
+                    </div>
+
+                    <div class="border-top mt-2 pt-1"></div>
+                    <div class="fw-bold border-bottom mb-1">
+                        Ship To :-
+                    </div>
+
+                    <div class="small">
+                        <div><strong>Customer Name :</strong> {{ performaData.customerName }}</div>
+                        <div><strong>Contact No. :</strong> {{ performaData.customerPhoneNo }}</div>
+                        <div>
+                            <strong>Address :</strong>
+                            {{ performaData.customerAddress }}
+                            {{ performaData.customerCity }} -
+                            {{ performaData.customerPincode }}
+                        </div>
+                        <div><strong>City :</strong> {{ performaData.customerCity }}</div>
+                        <div><strong>State :</strong> {{ performaData.customerState }}</div>
+                        <div><strong>PinCode :</strong> {{ performaData.customerPincode }}</div>
+                        <div><strong>Technician :</strong> {{ performaData.technicianName }}</div>
+                    </div>
+                    <!-- <p class="mb-0"><strong>Advisor :</strong> Sandeep</p> -->
+                </td>
+
+                <!-- Right Side -->
+
+                <td width="10%" valign="top">
+
+                    <table class="table table-borderless table-sm mb-0">
+                        <tr>
+                            <td><strong>Invoice Number</strong>: {{ performaData.invoiceNo }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Invoice Date</strong>:{{ performaData.jobInDate }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Chassis Number</strong>: {{ performaData.chassisNo }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Registration Number</strong>: {{ performaData.registerationNo }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Motor No.</strong>: {{ performaData.motorNo }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Vehicle Info</strong>: {{ performaData.modelName }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Color</strong>: {{ performaData.color }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Job Card Number</strong>: {{ performaData.jobNo }}</td>
+                        </tr>
+
+                        <tr>
+                            <td><strong>Job Card Date</strong>: {{ performaData.jobInDate }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Type Of Service</strong>: {{ performaData.jobTypeName }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ODO Reading</strong>: {{ performaData.odoReading }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Job Source</strong>: {{ performaData.jobSourceName }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Place of Supply</strong>: {{ performaData.dealerState }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Claim No</strong>:{{ performaData.claimNo }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Start & ExpiryDate</strong>: {{ performaData.vehicleSaleDate | date :
+                                'dd-MM-yyyy' }} - {{ performaData.vehicleExpiryDate | date : 'dd-MM-yyyy' }}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <!-- Parts -->
+
+    <h5 class="fw-bold mb-2">PART DETAILS</h5>
+
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr class="table-light">
+                <th>Sr No.</th>
+                <th>Part - Description</th>
+                <th>HSNCode</th>
+                <th>Qty</th>
+                <th>Rate</th>
+                <th>Disc.</th>
+                <th>Disc Val.</th>
+                <th>IssueType</th>
+                <th>Taxable Amount</th>
+                <th>SGST</th>
+                <th>CGST</th>
+                <th>Net Amount</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr *ngFor="let item of partDetails; let i=index">
+
+                <td>{{i+1}}</td>
+
+                <td>{{item.partCode}} - {{item.partDesc}}</td>
+
+                <td>{{item.partHSNCode}}</td>
+
+                <td>{{item.partQty}}</td>
+
+                <td>{{item.partRate | number:'1.2-2'}}</td>
+
+                <td>{{item.discountType}}</td>
+
+                <td>{{item.partDiscount | number:'1.2-2'}}</td>
+
+                <td>{{ getIssueTypeName(item.issueType) }}</td>
+
+                <td>{{item.partTaxbleAmount | number:'1.2-2'}}</td>
+
+                <td>{{item.sgstAmount | number:'1.2-2'}}</td>
+
+                <td>{{item.cgstAmount | number:'1.2-2'}}</td>
+
+                <td>{{item.partNetAmount | number:'1.2-2'}}</td>
+
+            </tr>
+            <tr class="fw-bold bg-light">
+                <td></td>
+                <td class="text-end">
+                    Sub Total Of Parts
+                </td>
+                <td></td>
+                <td>{{performaData.totalPartQty}}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+
+                <td>{{performaData.totalPartTaxbleAmount | number:'1.2-2'}}</td>
+
+                <td>{{performaData.totalPartSGST | number:'1.2-2'}}</td>
+
+                <td>{{performaData.totalPartCGST | number:'1.2-2'}}</td>
+
+                <td>{{performaData.totalPartNetAmount | number:'1.2-2'}}</td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <!-- Labour -->
+
+    <h5 class="fw-bold mt-4 mb-2">LABOUR DETAILS</h5>
+
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr class="table-light">
+                <th>Sr</th>
+                <th>Labour</th>
+                <th>HSNCode</th>
+                <th>Qty</th>
+                <th>Rate</th>
+                <th>Disc.</th>
+                <th>Disc Val.</th>
+                <th>IssueType</th>
+                <th>Taxable Amount</th>
+                <th>SGST</th>
+                <th>CGST</th>
+                <th>Net Amount</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr *ngFor="let item of labourDetails; let i=index">
+
+                <td>{{i+1}}</td>
+
+                <td>{{item.labourCode}} - {{item.labourDescription}}</td>
+                <td>{{item.labourHSNCode}}</td>
+                <td>{{item.qty}}</td>
+                <td>{{item.rate | number:'1.2-2'}}</td>
+                <td>{{item.discountType}}</td>
+                <td>{{item.discount}}</td>
+                <td>{{getIssueTypeName(item.issueType)}}</td>
+                <td>{{item.taxableAmount | number:'1.2-2'}}</td>
+                <td>{{item.sgstAmount | number:'1.2-2' }}</td>
+                <td>{{item.cgstAmount | number:'1.2-2'}}</td>
+                <td>{{item.netAmount | number:'1.2-2'}}</td>
+
+            </tr>
+
+            <tr class="fw-bold bg-light">
+                <td></td>
+                <td class="text-end">
+                    Sub Total Of Labour
+                </td>
+                <td></td>
+                <td>{{performaData.totalLabourQty}}</td>
+
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+
+                <td>{{performaData.totalLabourTaxbleAmount | number:'1.2-2'}}</td>
+
+                <td>{{performaData.totalLabourSGST | number:'1.2-2'}}</td>
+
+                <td>{{performaData.totalLabourCGST | number:'1.2-2'}}</td>
+
+                <td>{{performaData.totalLabourNetAmount | number:'1.2-2'}}</td>
+            </tr>
+
+
+        </tbody>
+
+    </table>
+
+    <!-- Summary -->
+
+    <div class="row mt-4">
+
+        <div class="col-7">
+            <div class="border p-2">
+                <strong>On Account of:</strong><br>
+                {{performaData.customerName}} {{performaData.customerName}}
+                {{performaData.customerPhoneNo}}
+                {{performaData.customerAddress}}, PO.-{{performaData.customerCity}}({{performaData.customerPincode}})
+                GSTIN No. : {{performaData.customerGSTINNo}}
+            </div>
+            <div class="border p-2">
+                <strong>Amount In Words :</strong><br>
+                {{invoiceTotalInWords}}
+            </div>
+            <div>
+                <p>Payment Mode:{{performaData.billType}}</p>
+            </div>
+
+        </div>
+
+        <div class="col-5">
+
+            <table class="table table-bordered">
+                <tr>
+                    <th>Sub Total</th>
+                    <td class="text-end">{{performaData.subTotal}}</td>
+                </tr>
+
+                <tr>
+                    <th>Round Off</th>
+                    <td class="text-end">{{performaData.roundOff}}</td>
+                </tr>
+
+                <tr class="fw-bold">
+                    <th>Invoice Total</th>
+                    <td class="text-end">{{ invoiceTotal | number:'1.2-2' }}</td>
+                </tr>
+            </table>
+
+        </div>
+
+    </div>
+
+    <!--Tax HSNWise Summary-->
+    <h5 class="fw-bold mt-3">Tax HSNWise Summary</h5>
+
+    <table class="table table-bordered table-sm">
+
+        <thead>
+            <tr>
+                <th rowspan="2">Sr No.</th>
+                <th rowspan="2">HSN Code</th>
+                <th rowspan="2">Taxable Value</th>
+
+                <th colspan="2">SGST Tax</th>
+                <th colspan="2">CGST Tax</th>
+                <th colspan="2">IGST Tax</th>
+            </tr>
+
+            <tr>
+                <th>Rate%</th>
+                <th>Amount</th>
+
+                <th>Rate%</th>
+                <th>Amount</th>
+
+                <th>Rate%</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr *ngFor="let item of performaData.hsncoDeTaxSummary; let i=index">
+
+                <td>{{i+1}}</td>
+
+                <td>{{item.hsnCode}}</td>
+
+                <td class="text-end">
+                    {{item.taxableValue | number:'1.2-3'}}
+                </td>
+
+                <td>{{item.sgstRate}}%</td>
+
+                <td class="text-end">
+                    {{item.sgstAmount | number:'1.2-3'}}
+                </td>
+
+                <td>{{item.cgstRate}}%</td>
+
+                <td class="text-end">
+                    {{item.cgstAmount | number:'1.2-3'}}
+                </td>
+
+                <td>{{item.igstRate}}%</td>
+
+                <td class="text-end">
+                    {{item.igstAmount | number:'1.2-3'}}
+                </td>
+
+            </tr>
+
+            <tr class="fw-bold">
+                <td colspan="2" class="text-center">Total</td>
+
+                <td class="text-end">
+                    {{ totalTaxable | number:'1.2-3' }}
+                </td>
+
+                <td></td>
+
+                <td class="text-end">
+                    {{ totalSGST | number:'1.2-3' }}
+                </td>
+
+                <td></td>
+
+                <td class="text-end">
+                    {{ totalCGST | number:'1.2-3' }}
+                </td>
+
+                <td></td>
+
+                <td class="text-end">
+                    {{ totalIGST | number:'1.2-3' }}
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <!-- Tax Summary -->
+
+    <h5 class="fw-bold mt-3">Tax Summary GST Wise</h5>
+
+    <table class="table table-bordered gst-summary-table">
+
+        <thead>
+            <tr>
+                <th rowspan="2">Sr. No.</th>
+                <th rowspan="2"></th>
+                <th rowspan="2">Taxable Value</th>
+
+                <th colspan="2">SGST Tax</th>
+                <th colspan="2">CGST Tax</th>
+                <th colspan="2">IGST Tax</th>
+            </tr>
+
+            <tr>
+                <th>Rate%</th>
+                <th>Amount</th>
+
+                <th>Rate%</th>
+                <th>Amount</th>
+
+                <th>Rate%</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr *ngFor="let item of taxSummary; let i=index">
+                <td>{{i+1}}</td>
+                <td></td>
+                <td class="text-end">
+                    {{item.taxableValue | number:'1.3-3'}}
+                </td>
+
+                <td class="text-center">
+                    {{item.sgstRate}}%
+                </td>
+
+                <td class="text-end">
+                    {{item.sgstAmount | number:'1.3-3'}}
+                </td>
+
+                <td class="text-center">
+                    {{item.cgstRate}}%
+                </td>
+
+                <td class="text-end">
+                    {{item.cgstAmount | number:'1.3-3'}}
+                </td>
+
+                <td class="text-center">
+                    {{item.igstRate}}%
+                </td>
+
+                <td class="text-end">
+                    {{item.igstAmount | number:'1.3-3'}}
+                </td>
+            </tr>
+
+            <!-- EXACT IMAGE STYLE TOTAL ROW -->
+            <tr class="gst-total-row">
+                <td></td>
+                <td class="text-center">Total:</td>
+                <td class="text-end">
+                    {{ totalTaxable | number:'1.3-3' }}
+                </td>
+
+                <td></td>
+
+                <td class="text-end">
+                    {{ totalSGST | number:'1.3-3' }}
+                </td>
+
+                <td></td>
+                <td class="text-end">
+                    {{ totalCGST | number:'1.3-3' }}
+                </td>
+
+                <td></td>
+                <td class="text-end">
+                    {{ totalIGST | number:'1.3-3' }}
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <!-- Remarks -->
+
+    <div class="border p-2 mt-3">
+        <strong>Remarks :{{performaData.remarks}}</strong><br>
+        Next service due on 25-06-2026 or 14300 ODO Reading whichever is earlier.
+    </div>
+
+
+    <!-- Signature -->
+
+    <div class="row mt-5">
+
+        <div class="text-end">
+            <strong>For : {{performaData.dealerName}} </strong>
+        </div>
+        <div class="col-6 text">
+            <br><br>
+            <div>Customer Signature</div>
+        </div>
+
+        <div class="col-6 text-end">
+            <br><br>
+
+            <div>Authorized Signatory</div>
+        </div>
+
+    </div>
+
+    <div class="row mt-5">
+        <h5 class="fw-bold text-center">
+            THANKS VISIT AGAIN
+            <br><br>
+            <strong>
+                <hr />
+            </strong>
+        </h5>
+    </div>
+    <!-- Gate Pass -->
+
+    <div class="border mt-5 p-2">
+
+        <h5 class="fw-bold text-center">
+            GATE PASS
+        </h5>
+
+        <div class="row">
+
+            <div class="col-6">
+                Customer : {{ performaData.customerName }}
+            </div>
+
+            <div class="col-6">
+                Vehicle No : {{ performaData.customerName }}
+            </div>
+
+            <div class="col-6 mt-2">
+                Job Date : {{ performaData.jobInDate }}
+            </div>
+
+            <div class="col-6 mt-2">
+                Chassis No : {{ performaData.chassisNo }}
+            </div>
+            <div class="col-6 mt-2">
+                Job No : {{ performaData.jobNo }}
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

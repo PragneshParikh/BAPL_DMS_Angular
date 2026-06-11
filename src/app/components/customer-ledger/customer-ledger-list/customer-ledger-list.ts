@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Route, Router, RouterOutlet } from "@angular/router";
 import { SharedModule } from '../../../shared/shared.module';
-import { LedgerMaster } from '../../../core/services/ledger-master';
+import { LedgerMasterService } from '../../../core/services/ledger-master';
 import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -27,7 +27,7 @@ export class CustomerLedgerList implements OnInit {
   collectionSize = 0;
 
   constructor(
-    private ledgerMasterService: LedgerMaster,
+    private ledgerMasterService: LedgerMasterService,
     private route: Router,
     private loader: LoaderService,
     private toaster: ToastService,

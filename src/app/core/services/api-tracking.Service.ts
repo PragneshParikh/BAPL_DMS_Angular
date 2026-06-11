@@ -7,12 +7,9 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class ApiTrackingService {
-
   protected baseURL = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient) {
-
-  }
+  constructor(private httpClient: HttpClient) { }
 
   getApiTracking(): Observable<any> {
     return this.httpClient.get(`${this.baseURL}/api-tracking`);
@@ -31,6 +28,7 @@ export class ApiTrackingService {
     return this.httpClient.get(`${this.baseURL}/api-tracking/FilterData`, { params });
 
   }
+
   getExcelDownload(): Observable<any> {
     return this.httpClient.get(`${this.baseURL}/api-tracking/DownloadExcel`, { responseType: 'blob' });
   }

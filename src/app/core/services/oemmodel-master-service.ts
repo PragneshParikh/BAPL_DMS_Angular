@@ -7,7 +7,6 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class OemmodelMasterService {
-
   private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }

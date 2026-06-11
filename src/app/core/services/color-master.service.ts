@@ -8,9 +8,7 @@ import { Observable } from 'rxjs';
 })
 export class ColorMasterService {
   protected baseUrl = environment.apiUrl;
-  /**
-   *
-   */
+
   constructor(private httpClient: HttpClient) { }
 
   getColor(): Observable<any> {

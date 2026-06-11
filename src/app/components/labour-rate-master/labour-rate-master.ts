@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LabourmaasterService } from '../../core/services/labourmaaster-service';
+import { LabourMasterService } from '../../core/services/labourmaaster-service';
 import Swal from 'sweetalert2';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
-import { Form22masterservice } from '../../core/services/form22masterservice';
+import { Form22MasterService } from '../../core/services/form22masterservice';
 import { StorageService } from '../../core/services/storage';
 import { JobCardService } from '../../core/services/job-card-service';
 import { debug } from 'console';
@@ -18,10 +18,10 @@ import { debug } from 'console';
 })
 export class LabourRateMaster implements OnInit {
 
-  constructor(private LabourMasterService: LabourmaasterService,
+  constructor(private LabourMasterService: LabourMasterService,
     private storageService: StorageService,
     private jobCardService: JobCardService,
-    private form22service: Form22masterservice,
+    private form22service: Form22MasterService,
     private loader: LoaderService
   ) { }
 
@@ -198,55 +198,55 @@ export class LabourRateMaster implements OnInit {
   }
 
   onJobType(type: 'model' | 'part'): void {
-debugger;
-  console.log(type);
+    debugger;
+    console.log(type);
 
-  if (type === 'model') {
+    if (type === 'model') {
 
-    console.log(this.selectedLabour.jobType);
+      console.log(this.selectedLabour.jobType);
 
-    if (!this.selectedLabour.jobType) {
-      return;
+      if (!this.selectedLabour.jobType) {
+        return;
+      }
+
+      this.jobCardService
+        .getServiceHead(
+          this.selectedLabour.jobType
+        )
+        .subscribe({
+          next: (res: any) => {
+
+            this.serviceHeadList = res;
+
+          }
+        });
+
     }
 
-    this.jobCardService
-      .getServiceHead(
-        this.selectedLabour.jobType
-      )
-      .subscribe({
-        next: (res: any) => {
-
-          this.serviceHeadList = res;
-
-        }
-      });
-
-  }
-
-  else {
-    console.log(
-      this.selectedPartwiseLabour.jobType
-    );
-   
-    if (!this.selectedPartwiseLabour.jobType) {
-      return;
-    }
-
-    this.jobCardService
-      .getServiceHead(
+    else {
+      console.log(
         this.selectedPartwiseLabour.jobType
-      )
-      .subscribe({
-        next: (res: any) => {
+      );
 
-          this.serviceHeadList = res;
+      if (!this.selectedPartwiseLabour.jobType) {
+        return;
+      }
 
-        }
-      });
+      this.jobCardService
+        .getServiceHead(
+          this.selectedPartwiseLabour.jobType
+        )
+        .subscribe({
+          next: (res: any) => {
+
+            this.serviceHeadList = res;
+
+          }
+        });
+
+    }
 
   }
-
-}
 
 
   // =========================================
@@ -254,7 +254,7 @@ debugger;
   // =========================================
 
   onServiceHeadChange(type: 'model' | 'part'): void {
-  debugger;
+    debugger;
     this.serviceTypeList = [];
 
     // MODELWISE

@@ -4,21 +4,16 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ReceiptEntryAddViewModel, ReceiptEntryEditModel, ReceiptEntryModel, ReceiptFilter } from '../../ViewModels/ReceiptEntryModel';
 import { LedgerMaster } from '../../ViewModels/LedgerMasterViewModel';
-import { LmsleadMaster } from '../../ViewModels/LmsleadMaster';
-import { LeadResponse } from '../../ViewModels/LedgerResponse';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReceiptEntryService {
-
   private apiUrl = environment.apiUrl;
-  /**
-   *
-   */
+
   constructor(private http: HttpClient) { }
 
-  getReceiptList(searchTerm: string, fromDate?: string, toDate?: string,dealerCode?: string): Observable<any[]> {
+  getReceiptList(searchTerm: string, fromDate?: string, toDate?: string, dealerCode?: string): Observable<any[]> {
     let params = new HttpParams();
     if (dealerCode) {
       params = params.set('dealerCode', dealerCode);
@@ -41,7 +36,6 @@ export class ReceiptEntryService {
     );
   }
 
-
   getReceiptEntryList(filter: ReceiptFilter): Observable<ReceiptEntryModel[]> {
 
     let params = new HttpParams();
@@ -51,7 +45,7 @@ export class ReceiptEntryService {
 
       if (value !== null && value !== undefined && value !== '') {
 
-      
+
 
         params = params.set(key, value as string);
       }
@@ -63,7 +57,6 @@ export class ReceiptEntryService {
     );
   }
 
-  
   getNextReceiptNo(): Observable<string> {
     return this.http.get(`${this.apiUrl}/ReceiptEntry/getNextReceiptNo`, {
       responseType: 'text'
@@ -76,7 +69,6 @@ export class ReceiptEntryService {
     );
   }
 
-  
   addReceiptEntry(data: ReceiptEntryAddViewModel) {
     return this.http.post(
       `${this.apiUrl}/ReceiptEntry/addReceiptEntry`,

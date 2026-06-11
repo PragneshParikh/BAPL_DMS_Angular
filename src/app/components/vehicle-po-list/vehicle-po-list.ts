@@ -28,7 +28,7 @@ export class VehiclePoList implements OnInit {
   transactionTypeList = TRANSACTION_TYPES;
 
   purchaseOrders: any[] = [];
-  originalPurchaseOrders: any[] = [];
+  // originalPurchaseOrders: any[] = [];
   pagedPurchaseOrders: any[] = [];
 
   page = 1;
@@ -36,6 +36,13 @@ export class VehiclePoList implements OnInit {
   totalRecords = 0;
   isSuperAdmin: boolean;
   dealerCode: any;
+
+  poFilterField = {
+    purchaseNo: '',
+    dateFrom: '',
+    dateTo: '',
+    isSubmitted: ''
+  }
 
   constructor(
     private router: Router,
@@ -57,8 +64,8 @@ export class VehiclePoList implements OnInit {
     from.setDate(to.getDate() - 7);
 
     // Format as YYYY-MM-DD for input type="date"
-    this.dateTo = to.toISOString().split('T')[0];
-    this.dateFrom = from.toISOString().split('T')[0];
+    this.poFilterField.dateTo = to.toISOString().split('T')[0];
+    this.poFilterField.dateFrom = from.toISOString().split('T')[0];
   }
 
   loadPOList() {
@@ -66,12 +73,13 @@ export class VehiclePoList implements OnInit {
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
     }
-    this.purchaseService.getPOList('Vehicle', this.dealerCode).subscribe({
+    this.purchaseService.getPOList('Vehicle', this.dealerCode, this.page, this.pageSize, this.poFilterField).subscribe({
       next: (res: any[]) => {
         this.loader.hide();
         const flattened = this.flattenPOList(res);
-        this.originalPurchaseOrders = flattened;
-        this.onSearch(); // Apply the default 7-day filter and sorting
+        // this.originalPurchaseOrders = flattened;
+        this.pagedPurchaseOrders = flattened;
+        // this.onSearch(); // Apply the default 7-day filter and sorting
       },
       error: (err) => {
         this.loader.hide();
@@ -139,59 +147,63 @@ export class VehiclePoList implements OnInit {
   }
 
   onSearch() {
-    let filtered = this.originalPurchaseOrders;
+    // let filtered = this.originalPurchaseOrders;
 
-    if (this.purchaseNo) {
-      filtered = filtered.filter(x => x.purchaseNo?.toLowerCase().includes(this.purchaseNo.toLowerCase()));
-    }
+    // if (this.purchaseNo) {
+    //   filtered = filtered.filter(x => x.purchaseNo?.toLowerCase().includes(this.purchaseNo.toLowerCase()));
+    // }
 
-    if (this.partyName) {
-      filtered = filtered.filter(x => x.partyName?.toLowerCase().includes(this.partyName.toLowerCase()));
-    }
+    // if (this.partyName) {
+    //   filtered = filtered.filter(x => x.partyName?.toLowerCase().includes(this.partyName.toLowerCase()));
+    // }
 
-    if (this.transactionType) {
-      filtered = filtered.filter(x => x.transactionType === this.transactionType);
-    }
+    // if (this.transactionType) {
+    //   filtered = filtered.filter(x => x.transactionType === this.transactionType);
+    // }
 
-    if (this.isSubmitted) {
-      filtered = filtered.filter(x => x.isSubmitted === this.isSubmitted);
-    }
+    // if (this.isSubmitted) {
+    //   filtered = filtered.filter(x => x.isSubmitted === this.isSubmitted);
+    // }
 
-    if (this.dateFrom && this.dateTo) {
-      const from = new Date(this.dateFrom);
-      from.setHours(0, 0, 0, 0);
-      const to = new Date(this.dateTo);
-      to.setHours(23, 59, 59, 999);
-      filtered = filtered.filter(x => x.rawDate >= from && x.rawDate <= to);
-    }
+    // if (this.dateFrom && this.dateTo) {
+    //   const from = new Date(this.dateFrom);
+    //   from.setHours(0, 0, 0, 0);
+    //   const to = new Date(this.dateTo);
+    //   to.setHours(23, 59, 59, 999);
+    //   filtered = filtered.filter(x => x.rawDate >= from && x.rawDate <= to);
+    // }
 
-    this.purchaseOrders = filtered;
+    // this.purchaseOrders = filtered;
+    // this.page = 1;
+    // this.totalRecords = this.purchaseOrders.length;
+
+    // // Maintain sort order after filtering
+    // if (this.sortColumn) {
+    //   this.purchaseOrders.sort((a: any, b: any) => {
+    //     let valueA = a[this.sortColumn] || '';
+    //     let valueB = b[this.sortColumn] || '';
+
+    //     if (valueA < valueB) return this.sortDirection === 'asc' ? -1 : 1;
+    //     if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
+    //     return 0;
+    //   });
+    // }
+
+    // this.loadPage();
     this.page = 1;
-    this.totalRecords = this.purchaseOrders.length;
-
-    // Maintain sort order after filtering
-    if (this.sortColumn) {
-      this.purchaseOrders.sort((a: any, b: any) => {
-        let valueA = a[this.sortColumn] || '';
-        let valueB = b[this.sortColumn] || '';
-
-        if (valueA < valueB) return this.sortDirection === 'asc' ? -1 : 1;
-        if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-
-    this.loadPage();
+    this.loadPOList();
   }
 
-  loadPage() {
-    const start = (this.page - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    this.pagedPurchaseOrders = this.purchaseOrders.slice(start, end);
-  }
+  // loadPage() {
+  //   const start = (this.page - 1) * this.pageSize;
+  //   const end = start + this.pageSize;
+  //   this.pagedPurchaseOrders = this.purchaseOrders.slice(start, end);
+  // }
 
   refreshPage() {
-    this.loadPage();
+    // this.loadPage();
+    this.page = 1;
+    this.loadPOList();
   }
 
   // ================= SORT =================
@@ -252,10 +264,10 @@ export class VehiclePoList implements OnInit {
   }
 
   resetFilters() {
-    this.purchaseNo = '';
-    this.partyName = '';
-    this.transactionType = '';
-    this.isSubmitted = '';
+    this.poFilterField.purchaseNo = '';
+    this.poFilterField.dateFrom = '';
+    this.poFilterField.dateTo = '';
+    this.poFilterField.isSubmitted = '';
     this.initDefaultDates();
     this.onSearch();
   }

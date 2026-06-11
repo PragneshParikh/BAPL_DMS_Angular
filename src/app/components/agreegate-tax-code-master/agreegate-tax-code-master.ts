@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { AgreegateTaxCodeMasterservice } from '../../core/services/agreegate-tax-code-masterservice';
+import { AgreegateTaxCodeMasterService } from '../../core/services/agreegate-tax-code-masterservice';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 
@@ -20,7 +20,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 export class AgreegateTaxCodeMaster implements OnInit {
 
   constructor(
-    private agreegatetaxService: AgreegateTaxCodeMasterservice,
+    private agreegatetaxService: AgreegateTaxCodeMasterService,
     private loader: LoaderService,
     public toaster: ToastService,
     private modalService: NgbModal

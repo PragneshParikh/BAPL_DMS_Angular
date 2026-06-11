@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReportService } from '../../core/services/report.service';
+import { AuthenticationService } from '../../core/services/auth.service';
 import { StockReport, DealerStockGroup } from '../../ViewModels/models/stock-report.model';
 
 @Component({
@@ -15,7 +16,9 @@ export class StockReportComponent implements OnInit {
   grandTotal: number = 0;
   isLoading = false;
 
-  constructor(private ReportService: ReportService) {}
+  constructor(private ReportService: ReportService,
+              private authService: AuthenticationService
+  ) {}
 
   ngOnInit(): void {
     this.loadDealerWiseReport();
@@ -23,7 +26,13 @@ export class StockReportComponent implements OnInit {
 
   loadDealerWiseReport(): void {
     this.isLoading = true;
-    this.ReportService.getDealerWiseStockReport().subscribe({
+
+    const currentUser = this.authService.currentUserValue;
+
+    const dealerCode = currentUser?.role === 'SuperAdmin'
+    ? undefined
+    : currentUser?.dealerCode ?? undefined;
+    this.ReportService.getDealerWiseStockReport(dealerCode).subscribe({
       next: (data) => {
         const map = new Map<string, DealerStockGroup>();
         data.forEach(row => {

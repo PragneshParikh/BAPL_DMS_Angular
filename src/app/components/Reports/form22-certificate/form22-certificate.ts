@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
 import { Form22SlipViewModel } from '../../../ViewModels/Form22SlipViewModel';
+import { ReportService } from '../../../core/services/report.service';
 
 @Component({
   selector: 'app-form22-certificate',
@@ -17,7 +18,7 @@ export class Form22Certificate implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private vehicleService: VehicleSaleBillService
+    private reportService: ReportService
   ) {}
 
   
@@ -35,7 +36,7 @@ export class Form22Certificate implements OnInit {
   }
 
   getForm22(chassisNo: string) {
-    this.vehicleService.getForm22(chassisNo).subscribe({
+    this.reportService.getForm22(chassisNo).subscribe({
       next: (res) => {
         this.form22Data = res;
       },
