@@ -11,19 +11,23 @@
                     <div class="col-md-2">
                         <label class="form-label">Purchase No</label>
                         <input type="text" class="form-control form-control-sm" placeholder="Enter No."
-                            [(ngModel)]="purchaseNo" name="purchaseNo">
+                            [(ngModel)]="poFilterField.purchaseNo" name="purchaseNo">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Date from</label>
-                        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateFrom" name="dateFrom">
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="poFilterField.dateFrom"
+                            name="dateFrom">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Date to</label>
-                        <input type="date" class="form-control form-control-sm " [(ngModel)]="dateTo" name="dateTo">
+                        <input type="date" class="form-control form-control-sm " [(ngModel)]="poFilterField.dateTo"
+                            name="dateTo">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Submitted To Erp</label>
-                        <select class="form-select form-select-sm" [(ngModel)]="isSubmitted" name="isSubmitted">
+                        <select class="form-select form-select-sm" [(ngModel)]="poFilterField.isSubmitted"
+                            name="isSubmitted">
+                            <option value=""> --Select-- </option>
                             <option *ngFor="let status of poStatuses" [value]="status.value">
                                 {{status.name}}
                             </option>
@@ -108,8 +112,8 @@
                 <!-- Pagination -->
                 <div class="col-sm-12 col-md-12">
                     <div class="text-md-right float-md-end gridjs-pagination">
-                        <ngb-pagination [collectionSize]="purchaseOrders.length" [(page)]="page" [pageSize]="pageSize"
-                            (pageChange)="refreshPage()" [boundaryLinks]="true">
+                        <ngb-pagination [collectionSize]="pagedPurchaseOrders.length" [(page)]="page"
+                            [pageSize]="pageSize" (pageChange)="refreshPage()" [boundaryLinks]="true">
                         </ngb-pagination>
                     </div>
                 </div>
