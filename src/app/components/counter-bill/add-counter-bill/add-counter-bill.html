@@ -1,0 +1,310 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0"> Counter Bill </h4>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form>
+            <!-- Header Section -->
+            <div class="card card-body mb-2">
+                <div class="row g-1">
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Counter Bill No</label>
+
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="model.counterBillNo"
+                            [value]="model.counterBillNo" name="counterBillNo" readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Bill Date</label>
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="model.conterBillDate"
+                            [value]="model.conterBillDate" name="conterBillDate" readonly>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Location<span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" [(ngModel)]="model.locationCode" name=locationCode>
+                            <option *ngFor="let location of locationList" [value]="location.locCode">
+                                {{ location.locname }} ({{ location.locCode }})
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Bill Type</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="model.billType"
+                            name="billType" value="Cash" readonly>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Cash Acc.<span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" [(ngModel)]="model.cashAccount" name="cashAccount">
+                            <option value="">Select Cash A/C</option>
+                            <option *ngFor="let option of CashTypeOptions" [value]="option.value">
+                                {{ option.name }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-1 mt-1">
+                    <div class="col-md-3">
+                        <label class="form-label mb-1"> Party Name </label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control" name="
+                            " [(ngModel)]="model.partyName" (input)="onPartySearch()" #partyName="ngModel">
+
+                            <button type="button" class="btn btn-primary" (click)="openCustomerLedgerAdd()"
+                                [ngbTooltip]="'Add New Party'">
+                                <i class="ri-add-line"></i>
+                            </button>
+
+                        </div>
+
+                        <small class="invalid-feedback d-block"
+                            *ngIf="model.partyName.invalid && model.partyName.touched">
+                            Customer Name is required.
+                        </small>
+
+                        <div class="text-danger small" *ngIf="partyName.touched &&
+            model.partyName &&
+            !isCustomerValid()">
+                            Party not found. Please click + to add new party.
+                        </div>
+
+                        <!-- Dropdown -->
+                        <ul *ngIf="showPartyDropdown" class="list-group position-absolute w-100 small-dropdown mt-1"
+                            style="z-index:1000;">
+
+                            <li class="list-group-item list-group-item-action" *ngFor="let party of filteredParties"
+                                (click)="selectParty(party)">
+
+                                {{ party.ledgerName }}
+
+                            </li>
+
+                        </ul>
+
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Party State</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="model.partyState"
+                            name="partyState" value="model.partyState" #partyState="ngModel" readonly>
+                    </div>
+
+
+                    <!-- Concept to be implemeted after global chassis seraach -->
+                    <!-- <div class="col-md-3">
+                        <label class="form-label mb-1">Chassis No</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control">
+                            <button type="button" class="btn btn-primary"> <i class="ri-add-line"></i> </button>
+                        </div>
+                    </div> -->
+
+                    <!-- <div class="col-md-2">
+                        <label class="form-label mb-1">ODO Reading</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div> -->
+
+                    <!-- <div class="col-md-2">
+                        <label class="form-label mb-1">Category</label>
+                        <select class="form-select form-select-sm">
+                            <option>--Select--</option>
+                        </select>
+                    </div> -->
+
+                </div>
+
+            </div>
+
+            <!-- Item Details -->
+            <h3 class="fs-14 text-primary mb-0"> {{ isEditMode ? 'View Item Details' : 'Add Item Details'
+                }} </h3>
+            <small class="text-danger d-block mb-1"
+                *ngIf="!model.locationCode || !model.cashAccount ||!model.partyName">
+                Please select all required fields (*) above before selecting Item
+            </small>
+            <fieldset class="border rounded p-2 mb-2">
+
+
+
+                <div class="row g-1">
+
+                    <div class="col-md-4 position-relative">
+
+                        <label class="form-label mb-1">
+                            Item Name
+                            <span *ngIf="selectedItem">
+                                (Stock : {{ selectedItem.itemStock }})
+                            </span>
+                        </label>
+
+                        <input type="text" name="itemSearch" class="form-control form-control-sm"
+                            [(ngModel)]="itemSearch" (input)="filterItems()" (focus)="showDropdown = true"
+                            [disabled]="!model.locationCode || !model.cashAccount || !model.partyName">
+
+                        <div *ngIf="showDropdown" class="dropdown-menu show w-100"
+                            style="max-height:250px;overflow-y:auto">
+
+                            <button type="button" class="dropdown-item" *ngFor="let item of filteredItems"
+                                (click)="selectItem(item)">
+
+                                <div>
+                                    <strong>{{ item.itemName }}</strong>
+                                </div>
+
+                                <small>
+                                    {{ item.itemCode }}
+                                    | Stock : {{ item.itemStock }}
+                                    | ₹{{ item.itemRate }}
+                                </small>
+
+                            </button>
+
+                            <div *ngIf="filteredItems.length === 0" class="dropdown-item text-muted">
+                                No items found
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label mb-1">Sale Type</label>
+                        <input type="text" class="form-control form-control-sm" [value]="model.saleType" disabled>
+                    </div>
+
+                    <!-- <div class="col-md-1">
+                        <label class="form-label mb-1">Rack No</label>
+                        <select class="form-select form-select-sm"></select>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-1">Bin No</label>
+                        <select class="form-select form-select-sm"></select>
+                    </div> -->
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-1">Qty</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.qty" name="qty" #qty="ngModel">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-1">Rate</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.rate" name="rate" #rate="ngModel">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-1">Discount</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Disc Type</label>
+                        <select class="form-select form-select-sm">
+                            <option>Value</option>
+                        </select>
+                    </div>
+
+
+
+                </div>
+
+                <div class="row g-1 mt-1">
+
+                    <!-- <div class="col-md-1">
+                        <label class="form-label mb-1">Margin</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-1">Valid Days</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-1">Valid Kms</label>
+                        <input type="number" class="form-control form-control-sm">
+                    </div> -->
+                    <div class="col-md-auto ms-auto d-flex align-items-end">
+                        <button type="button" class="btn btn-primary btn-sm">
+                            Add
+                        </button>
+                    </div>
+                </div>
+
+            </fieldset>
+
+            <!-- Grid -->
+            <div *ngIf="showTable" class="table-responsive mb-2">
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th width="60">Action</th>
+                            <th>Item Name</th>
+                            <th width="80">Qty</th>
+                            <th width="100">Rate</th>
+                            <th width="100">Discount</th>
+                            <th width="120">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td colspan="6" class="text-center"> Record(s) not found. </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Amount Section -->
+            <div class="card card-body mb-2">
+                <div class="row g-1">
+                    <div class="col-md-2">
+                        <label class="form-label mb-1"> Disc Amount (-) </label>
+                        <input type="number" class="form-control form-control-sm" value="0.00">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1"> Rcpt Amt </label>
+                        <input type="number" class="form-control form-control-sm" value="0.00">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1"> Receiving Mode </label>
+                        <select class="form-select form-select-sm">
+                            <option>--Select--</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1"> Parts Disc. </label>
+                        <input type="number" class="form-control form-control-sm" value="0">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1"> Parts Amount </label>
+                        <input type="number" class="form-control form-control-sm" value="0.00">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label mb-1"> Net Amount </label>
+                        <input type="number" class="form-control form-control-sm" value="0.00">
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-md-12">
+                        <label class="form-label mb-1"> Remarks </label>
+                        <textarea rows="2" class="form-control form-control-sm"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary btn-sm me-2"> Save </button>
+                <button type="button" class="btn btn-light btn-sm" (click)="navigateToListPage()"> Close </button>
+            </div>
+        </form>
+    </div>
+</div>

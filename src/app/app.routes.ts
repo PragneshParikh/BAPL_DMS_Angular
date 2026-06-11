@@ -69,6 +69,8 @@ import { JobSourceMaster } from './components/job-source-master/job-source-maste
 import { RoleMasterList } from './components/role-master/role-list-master/role-list-master';
 import { RoleMaster } from './components/role-master/role-master';
 import { WarrantyJobCardClaim } from './components/warranty-job-card-claim/warranty-job-card-claim';
+import { CounterBill } from './components/counter-bill/counter-bill';
+import { AddCounterBill } from './components/counter-bill/add-counter-bill/add-counter-bill';
 
 
 export const routes: Routes = [
@@ -224,6 +226,9 @@ export const routes: Routes = [
       { path: 'job-source-master', component: JobSourceMaster, data: [71] },
       { path: 'warranty-job-card-claim', component: WarrantyJobCardClaim, data: [74] },
       { path: 'vehicle-info', component: VehicleInfoUpdate, data: [73] },
+
+      { path: 'counter-bill', component: CounterBill, data: [57] },
+      { path: 'add-counter-bill', component:AddCounterBill, data: [57] },
     ]
   },
   { path: '**', component: WorkInProgress }

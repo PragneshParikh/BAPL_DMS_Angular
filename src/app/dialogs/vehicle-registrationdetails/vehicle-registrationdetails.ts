@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LedgerMaster } from '../../ViewModels/LedgerMasterViewModel';
 import { ReceiptEntryService } from '../../core/services/receipt-entry-service';
+import { LedgerMasterService } from '../../core/services/ledger-master';
 
 @Component({
   selector: 'app-vehicle-registrationdetails',
@@ -19,7 +20,7 @@ export class VehicleRegistrationdetails implements OnInit {
   showInsuranceDropdown: boolean = false;
   filteredInsurance: LedgerMaster[];
   constructor(private activeModal: NgbActiveModal,
-    private receiptEntryService: ReceiptEntryService
+    private ledgerService: LedgerMasterService
     
   ) { }
   vehicleList: any[] = [];
@@ -121,7 +122,7 @@ addRow() {
   this.selectedRow = null;
 }
 getInsuranceCompanies(){
-  this.receiptEntryService.getLedgerByType('Insurance').subscribe({
+  this.ledgerService.getLedgerByType('Insurance').subscribe({
       next: (res) => {
         this.insurance = res;
       }

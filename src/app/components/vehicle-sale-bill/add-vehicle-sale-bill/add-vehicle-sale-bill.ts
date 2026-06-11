@@ -227,8 +227,8 @@ export class AddVehicleSaleBill implements OnInit {
     date.setFullYear(date.getFullYear() + 1);
     return date.toISOString().split('T')[0];
   }
-  getInsuranceCompanies() {
-    this.receiptEntryService.getLedgerByType('Insurance').subscribe({
+getInsuranceCompanies(){
+  this.ledgerService.getLedgerByType('Insurance').subscribe({
       next: (res) => {
         this.insurance = res;
       }
@@ -451,7 +451,7 @@ export class AddVehicleSaleBill implements OnInit {
   }
   getFinanciers() {
 
-    this.receiptEntryService.getLedgerByType('Financier').subscribe({
+    this.ledgerService.getLedgerByType('Financier').subscribe({
       next: (res) => {
         this.financiers = res;
 
