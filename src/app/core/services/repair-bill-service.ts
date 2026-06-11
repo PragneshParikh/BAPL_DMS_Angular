@@ -10,7 +10,8 @@ export class RepairBillService {
 
   private baseUrl = environment.apiUrl
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient) {
+  }
 
   insertRepairBill(model: any): Observable<any> {
     return this.httpClient.post(`${this.baseUrl}/RepairBill/InsertRepairBill`, model);
