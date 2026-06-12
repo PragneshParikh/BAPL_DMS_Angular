@@ -2,7 +2,7 @@
     <h4 class="mb-sm-0">Group Master</h4>
 </div>
 
-<!-- Add / Edit Modal -->
+<!-- Add  Modal -->
 <ng-template #groupAdd let-modal>
 
     <form [formGroup]="groupForm">
@@ -198,3 +198,71 @@
     </div>
 
 </div>
+
+<ng-template #groupUpdate let-modal>
+
+    <form [formGroup]="groupForm">
+
+        <div class="card">
+
+            <div class="modal-header item-modal-header">
+                <h5 class="modal-title">
+                    Edit Group Master
+                </h5>
+
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        (click)="modal.dismiss()">
+                </button>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Group Name
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            formControlName="groupName"
+                            placeholder="Enter Group Name">
+
+                        <small class="text-danger"
+                               *ngIf="groupForm.get('groupName')?.touched &&
+                                      groupForm.get('groupName')?.invalid">
+
+                            Group Name is required
+                        </small>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    (click)="updateGroup(modal)">
+                    Save
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-light"
+                    (click)="modal.dismiss()">
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</ng-template>
