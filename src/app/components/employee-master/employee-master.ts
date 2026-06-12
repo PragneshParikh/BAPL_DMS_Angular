@@ -69,6 +69,10 @@ export class EmployeeMasterComponent
 
   isEditMode: boolean = false;
 
+  departments: any[] = [];
+
+  designations: any[] = [];
+
   // =====================================
   // CONSTRUCTOR
   // =====================================
@@ -308,7 +312,6 @@ export class EmployeeMasterComponent
       );
     }
   }
-
   // =====================================
   // BACK
   // =====================================
@@ -319,4 +322,6 @@ export class EmployeeMasterComponent
       '/employee'
     ]);
   }
+
+
 }
