@@ -221,27 +221,51 @@
 
             </div>
 
-            <div class="col-md-3">
+          <div class="col-md-3">
 
-              <label class="form-label mb-1">
-                Department
-              </label>
+            <label class="form-label mb-1">
+              Department
+            </label>
 
-              <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.department"
-                name="department">
+            <select class="form-select form-select-sm py-1" [(ngModel)]="employeeData.department"
+              name="department">
 
-            </div>
+              <option value="">
+                Select Department
+              </option>
 
-            <div class="col-md-3">
+              <option *ngFor="let dept of departments" [value]="dept.departmentId">
 
-              <label class="form-label mb-1">
-                Designation
-              </label>
+                {{ dept.departmentName }}
 
-              <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.designation"
-                name="designation">
+              </option>
 
-            </div>
+            </select>
+
+          </div>
+
+        <div class="col-md-3">
+
+          <label class="form-label mb-1">
+            Designation
+          </label>
+
+          <select class="form-select form-select-sm py-1" [(ngModel)]="employeeData.designation"
+            name="designation">
+
+            <option value="">
+              Select Designation
+            </option>
+
+            <option *ngFor="let desg of designations" [value]="desg.designationId">
+
+              {{ desg.designationName }}
+
+            </option>
+
+          </select>
+
+        </div>
 
             <div class="col-md-3">
 
