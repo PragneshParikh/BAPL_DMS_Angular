@@ -93,6 +93,7 @@ export class VehiclePO implements OnInit {
   };
   dealerCode: string = '';
   PODetails: any = {};
+  isSuperAdmin: boolean = false;
 
   constructor(
     private locationService: LocationMasterService,
@@ -106,7 +107,10 @@ export class VehiclePO implements OnInit {
     private ledgerService: LedgerMasterService,
     private prefixService: PrefixService
   ) {
-    this.dealerCode = this.storageService.getDealerCode();
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    }
   }
 
   ngOnInit() {
@@ -120,7 +124,7 @@ export class VehiclePO implements OnInit {
       if (this.ponumber) {
         this.loadPODetails(this.ponumber);
       } else {
-        this.generateNewOrderNo();
+        // this.generateNewOrderNo();
         // For new PO: apply default ledger (list may already be loaded)
         this.applyDefaultLedger();
       }
@@ -301,58 +305,70 @@ export class VehiclePO implements OnInit {
   }
 
   loadShowroomLocations() {
-    const dealerCode = this.storageService.getDealerCode();
 
     // First fetch the full location master to get all metadata (especially State)
-    this.locationService.getAllLocationMaster().subscribe({
-      next: (allLocs: any[]) => {
-        const fullLocationMap = Array.isArray(allLocs) ? allLocs : [];
+    // this.locationService.getAllLocationMaster().subscribe({
+    //   next: (allLocs: any[]) => {
+    //     const fullLocationMap = Array.isArray(allLocs) ? allLocs : [];
 
-        // Now fetch specific locations for this dealer
-        this.locationService.getLocationByDealerCode(dealerCode).subscribe({
-          next: (res: any) => {
-            const dealerLocs = Array.isArray(res) ? res : [];
+    //     // Now fetch specific locations for this dealer
+    //     this.locationService.getLocationByDealerCode(dealerCode).subscribe({
+    //       next: (res: any) => {
+    //         const dealerLocs = Array.isArray(res) ? res : [];
 
-            // Enrich dealer locations with 'state' from the full master list
-            this.locationList = dealerLocs.map(loc => {
-              const matchedLoc = fullLocationMap.find(m =>
-                (m.locname || '').trim().toLowerCase() === (loc.locname || '').trim().toLowerCase()
-              );
-              return {
-                ...loc,
-                state: matchedLoc?.state || matchedLoc?.State || loc.state || loc.State || ''
-              };
-            });
+    //         // Enrich dealer locations with 'state' from the full master list
+    //         this.locationList = dealerLocs.map(loc => {
+    //           const matchedLoc = fullLocationMap.find(m =>
+    //             (m.locname || '').trim().toLowerCase() === (loc.locname || '').trim().toLowerCase()
+    //           );
+    //           return {
+    //             ...loc,
+    //             state: matchedLoc?.state || matchedLoc?.State || loc.state || loc.State || ''
+    //           };
+    //         });
 
-            // Set default if not already set by loadPODetails
-            if (this.locationList.length > 0 && !this.selectedLocation) {
-              this.selectedLocation = this.locationList[0].loccode || this.locationList[0].Loccode || this.locationList[0].locname;
-            }
+    //         // Set default if not already set by loadPODetails
+    //         if (this.locationList.length > 0 && !this.selectedLocation) {
+    //           this.selectedLocation = this.locationList[0].loccode || this.locationList[0].Loccode || this.locationList[0].locname;
+    //         }
 
-            // Recalculate if there's an item in progress
-            if (this.currentItem.modelNo) {
-              this.calculateRowTotals();
-            }
-          },
-          error: (err) => console.error('Error fetching dealer locations:', err)
-        });
+    //         // Recalculate if there's an item in progress
+    //         if (this.currentItem.modelNo) {
+    //           this.calculateRowTotals();
+    //         }
+    //       },
+    //       error: (err) => console.error('Error fetching dealer locations:', err)
+    //     });
+    //   },
+    //   error: (err) => {
+    //     console.error('Error fetching full location master:', err);
+    //     // Fallback to specific locations if full list fails (but state detection will be limited)
+    //     this.locationService.getLocationByDealerCode(dealerCode).subscribe({
+    //       next: (res: any) => {
+    //         this.locationList = res;
+    //         if (this.locationList.length > 0 && !this.selectedLocation) {
+    //           this.selectedLocation = this.locationList[0].loccode || this.locationList[0].Loccode || this.locationList[0].locname;
+    //         }
+    //       }
+    //     });
+    //   }
+    // });
+    this.loader.show();
+    this.locationService.GetDealerPrimaryLocationByAreaId(1, 'S1', this.dealerCode).subscribe({
+      next: (res) => {
+        this.loader.hide();
+        this.locationList = res;
       },
       error: (err) => {
-        console.error('Error fetching full location master:', err);
-        // Fallback to specific locations if full list fails (but state detection will be limited)
-        this.locationService.getLocationByDealerCode(dealerCode).subscribe({
-          next: (res: any) => {
-            this.locationList = res;
-            if (this.locationList.length > 0 && !this.selectedLocation) {
-              this.selectedLocation = this.locationList[0].loccode || this.locationList[0].Loccode || this.locationList[0].locname;
-            }
-          }
-        });
+        this.loader.hide();
+        console.error(err);
+        this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
   }
 
   onLocationChange() {
+    this.generateNewOrderNo();
     // Refresh calculations for the current item if a model is already selected
     if (this.currentItem.modelNo) {
       this.calculateRowTotals();
