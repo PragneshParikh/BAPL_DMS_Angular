@@ -151,12 +151,12 @@ export const ModuleTypes = [
     { name: 'hsrp_order', moduleName: 'HSRP Order' },
     { name: 'sale_bill', moduleName: 'Vehicle Sale Bill' },
     { name: 'receipt_entry', moduleName: 'Receipt Entry' },
-    {name:'vehicle_transfer', moduleName:'Vehicle Stock Transfer' },
+    { name: 'vehicle_transfer', moduleName: 'Vehicle Stock Transfer' },
 ]
 
 export const EmployeeDesignations = [
     { id: 1, value: 'SalesExecutive' },
-    
+
 ]
 export const FFIRPresentVehicleStatus = [
     { id: 1, value: 'Complaint Resolved' },
@@ -222,5 +222,16 @@ export const zonesData = [
     { id: 61, name: 'North' },
     { id: 62, name: 'South' },
     { id: 59, name: 'Central' }
+];
+
+export const conditionModule = [
+    { Id: 1, ConditionName: 'Job Card' },
+    { Id: 2, ConditionName: 'Repair Bill' },
+    { Id: 3, ConditionName: 'Receipt Entry' },
+    { Id: 4, ConditionName: 'FFIR' },
+    { Id: 5, ConditionName: 'Warranty Claim' },
+    { Id: 6, ConditionName: 'Vehicle Sale Bill' },
+    { Id: 7, ConditionName: 'Counter Bill' },
+    { Id: 8, ConditionName: 'EBW Invoice Creation' }
 ];
 
