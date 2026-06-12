@@ -54,6 +54,8 @@ import { RepairBillPerforma } from './components/Reports/repair-bill-performa/re
 import { ComplaintMaster } from './components/complaint-master/complaint-master';
 import { AddVehicleStockTransfer } from './components/vehicle-stock-transfer/add-vehicle-stock-transfer';
 import { VehicleStockTransferList } from './components/vehicle-stock-transfer/vehicle-stock-transfer-list/vehicle-stock-transfer-list';
+import { GroupMaster } from './components/group-master/group-master';
+import { TermConditionMaster } from './components/term-condition-master/term-condition-master';
 
 
 export const routes: Routes = [
@@ -177,6 +179,8 @@ export const routes: Routes = [
       { path: 'add-vehicle-stock-transfer', component: AddVehicleStockTransfer, data: [57] },
       { path: 'vehicle-stock-transfer', component: VehicleStockTransferList, data: [57] },
       { path: 'vehicle-stock-transfer/edit/:id', component: AddVehicleStockTransfer, data: [57] },
+      { path: 'group-master', component: GroupMaster, data: [59] },
+      { path: 'term-condition-master', component: TermConditionMaster, data: [60] }
     ]
   },
   { path: '**', component: WorkInProgress }
