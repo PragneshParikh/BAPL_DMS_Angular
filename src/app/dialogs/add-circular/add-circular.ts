@@ -6,7 +6,6 @@ import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { CircularService } from '../../core/services/circular';
 import { BlobUploadService } from '../../core/services/blob-upload';
-import { BlockBlobClient } from '@azure/storage-blob';
 
 @Component({
   selector: 'app-add-circular',
@@ -241,16 +240,16 @@ export class AddCircular implements OnInit {
       this.blobUploadService.getUploadSasUrl(file.name).subscribe({
         next: async (res: any) => {
           console.log('SAS URL:', res.sasUri);
-          const blobClient = new BlockBlobClient(res.sasUri);
+          // const blobClient = new BlockBlobClient(res.sasUri);
 
-          await blobClient.uploadData(file, {
-            blockSize: 4 * 1024 * 1024, // 4MB chunks
-            concurrency: 5,
-            onProgress: (progress) => {
-              const percent = Math.round((progress.loadedBytes / file.size) * 100);
-              console.log(`Upload Progress: ${percent}%`);
-            }
-          });
+          // await blobClient.uploadData(file, {
+          //   blockSize: 4 * 1024 * 1024, // 4MB chunks
+          //   concurrency: 5,
+          //   onProgress: (progress) => {
+          //     const percent = Math.round((progress.loadedBytes / file.size) * 100);
+          //     console.log(`Upload Progress: ${percent}%`);
+          //   }
+          // });
           return res.blobUrl;
         },
         error: (err) => {

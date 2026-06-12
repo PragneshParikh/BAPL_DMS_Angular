@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { BlobClient, BlockBlobClient } from '@azure/storage-blob';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 
