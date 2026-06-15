@@ -56,3 +56,10 @@ color: white;
 .btn-close-white{
   color: white;
 }
+
+.dropdown-menu-chassis {
+  display: block;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1050;
+}

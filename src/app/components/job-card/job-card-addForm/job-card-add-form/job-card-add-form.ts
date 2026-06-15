@@ -18,6 +18,7 @@ import { delay } from 'lodash';
 import { LoaderService } from '../../../../core/services/loader';
 import { LocationMasterService } from '../../../../core/services/location-master-service';
 import { ComplaintmasterService } from '../../../../core/services/complaintmaster-service';
+import { PrefixService } from '../../../../core/services/prefix';
 
 @Component({
   selector: 'app-job-card-add-form',
@@ -38,6 +39,7 @@ export class JobCardAddForm {
   complaintList: any[] = [];
   jobCardDetailsView: any[] = []
   serviceHistoryList: any[] = []
+  filteredChassisList: any[] = [];
   jobTypeId: number = 0
 
   selectedJobtype: any;
@@ -51,7 +53,7 @@ export class JobCardAddForm {
   modelName = '';
   registerNo = '';
   vehicleKms: number = 0;
-  jobPrefix: '';
+  jobPrefix: string = '';
   jobInDate: any = new Date().toISOString().split('T')[0];
   jobInTime: any = this.getCurrentTime();
   jobNo: number = 0;
@@ -129,11 +131,13 @@ export class JobCardAddForm {
   filteredComplaints: any[] = [];
   showComplaintDropdown = false;
 
+
   constructor(private storageService: StorageService,
     private locationService: LocationMasterService,
     private router: Router,
     private jobCardService: JobCardService,
     private complaintMasterService: ComplaintmasterService,
+    private prefixService: PrefixService,
     public toastr: ToastService,
     private modalService: NgbModal,
     private loader: LoaderService,
@@ -149,6 +153,7 @@ export class JobCardAddForm {
       this.chassiseditData = data;
       this.patchEditData(data);
     }
+    this.loadPrefix();
     this.fetchLocations();
     this.loadJobTypes();
     this.loadChassisList();
@@ -156,11 +161,31 @@ export class JobCardAddForm {
     this.loadComplaintMaster();
     this.loadPdiData();
 
+
     if (!this.isEditMode) {
       this.getJobNo();
     }
   }
 
+  loadPrefix(): void {
+    this.loader.show();
+    const dealerCode = this.storageService.getDealerCode();
+    const module = 'job_card';
+    this.prefixService.getPrefixByDealerByModule(dealerCode, module).subscribe({
+      next: (res: string) => {
+        this.loader.hide();
+        this.jobPrefix = res;
+        this.jobNo = Number(res.split('/').pop());
+      }, error: (err) => {
+        this.loader.hide();
+        console.log(err);
+
+      }
+    })
+  }
+  get isBatteryReadOnly(): boolean {
+    return this.selectedJobtype == 1;
+  }
   //Fetech Dealer Location
   fetchLocations(): void {
     const dealerCode = this.storageService.getDealerCode();
@@ -195,6 +220,40 @@ export class JobCardAddForm {
     });
   }
 
+  filterChassis() {
+    const value = (this.selectedChassis || '').toLowerCase();
+
+    this.filteredChassisList = this.chassisList
+      .filter(x =>
+        x.chassisNumber?.toLowerCase().includes(value)
+      )
+      .slice(0, 10);
+  }
+
+  selectChassis(item: any) {
+    this.selectedChassis = item.chassisNumber;
+    this.filteredChassisList = [];
+
+    this.onChassisChange(); // existing method call
+  }
+
+  hideChassisDropdown() {
+    setTimeout(() => {
+      this.filteredChassisList = [];
+    }, 200);
+  }
+
+  allowOnlyNumbers(event: any, field: 'rear' | 'front') {
+    const value = event.target.value.replace(/[^0-9]/g, '');
+    event.target.value = value;
+
+    if (field === 'rear') {
+      this.airPressureRear = value;
+    } else {
+      this.airPressureFront = value;
+    }
+  }
+
   onComplaintSearch(event: any): void {
 
     const value = event.target.value?.trim().toLowerCase();
@@ -214,12 +273,12 @@ export class JobCardAddForm {
 
   selectComplaint(item: any): void {
 
-  this.complaintObj.complaintCode = item.complaintName;
-  this.complaintObj.complaint = item.complaintName;
+    this.complaintObj.complaintCode = item.complaintName;
+    this.complaintObj.complaint = item.complaintName;
 
-  this.filteredComplaints = [];
-  this.showComplaintDropdown = false;
-}
+    this.filteredComplaints = [];
+    this.showComplaintDropdown = false;
+  }
 
   loadJobTypes() {
     this.selectedJobtype = '';

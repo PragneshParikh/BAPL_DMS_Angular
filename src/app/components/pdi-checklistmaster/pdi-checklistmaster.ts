@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { NgbModal, NgbModule, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { PdiChecklistMasterService } from '../../core/services/pdi-checklistmaster-service';
 import Swal from 'sweetalert2';
 import { LoaderService } from '../../core/services/loader';
+import { Form22MasterService } from '../../core/services/form22masterservice';
+import * as bootstrap from 'bootstrap';
 
 
 @Component({
@@ -14,13 +16,17 @@ import { LoaderService } from '../../core/services/loader';
   templateUrl: './pdi-checklistmaster.html',
   styleUrl: './pdi-checklistmaster.scss',
 })
-export class PdiChecklistmaster {
+export class PdiChecklistmaster implements OnInit {
   checklistList: any[] = [];
   searchText: string = '';
   isEditMode: boolean = false;
   isLoading: boolean = false;
+  oemModelList: any[] = [];
+  selectedOemModelId: number | null = null;
+
 
   PdiChecklistmastermodel: any = {
+    oemmodelId: 0,
     checklistName: '',
     description: '',
     isActive: true,
@@ -29,11 +35,13 @@ export class PdiChecklistmaster {
 
 
   constructor(private Pdichecklistmasterservice: PdiChecklistMasterService,
+    private form22service: Form22MasterService,
     private modalService: NgbModal,
     private loader: LoaderService
   ) { }
   ngOnInit() {
     this.loadPdiChecklistList();
+    this.loadOemModels();
   }
   //pagination
   page = 1;
@@ -44,33 +52,57 @@ export class PdiChecklistmaster {
     this.isEditMode = false;
 
     this.PdiChecklistmastermodel = {
+      oemmodelId: 0,
       checklistName: '',
       isActive: true
     };
 
   }
   openEdit(item: any) {
-    debugger;
-    this.isEditMode = true;
 
-    this.PdiChecklistmastermodel = {
-      id: item.id,
-      checklistName: item.checklistName,
-      isActive: item.isActive
-    };
+  this.isEditMode = true;
+
+  this.PdiChecklistmastermodel = {
+    ...item
+  };
+
+  const modal = document.getElementById('pdiChecklistmasterModal');
+  if (modal) {
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
   }
-  loadPdiChecklistList() {
-    this.loader.show()
-    this.Pdichecklistmasterservice.getPdiChecklistMasterList(this.searchText).subscribe({
-      next: (res) => {
-        this.loader.hide()
-        this.checklistList = res;
+}
+
+  loadOemModels() {
+    this.form22service.getOemModelList().subscribe({
+      next: (res: any) => {
+        //  Direct assign (API already gives ID + Name)
+        this.oemModelList = res;
       },
       error: (err) => {
-        this.loader.hide()
-        console.error('Error loading list', err);
+        console.error('Error fetching OEM Models', err);
       }
     });
+  }
+
+  loadPdiChecklistList() {
+    this.loader.show();
+    this.Pdichecklistmasterservice.getPdiChecklistMasterList(this.searchText)
+      .subscribe({
+        next: (res: any[]) => {
+
+          this.checklistList = res;
+          console.log("9999", this.checklistList);
+
+          this.loader.hide();
+        },
+        error: (err) => {
+
+          this.loader.hide();
+
+          console.error('Error loading list', err);
+        }
+      });
   }
 
   onSearch() {
@@ -85,6 +117,7 @@ export class PdiChecklistmaster {
 
     const payload = {
       id: this.PdiChecklistmastermodel.id,
+      oemmodelId : this.PdiChecklistmastermodel.oemmodelId,
       checklistName: this.PdiChecklistmastermodel.checklistName,
       description: this.PdiChecklistmastermodel.description,
       isactive: this.PdiChecklistmastermodel.isActive
@@ -141,7 +174,8 @@ export class PdiChecklistmaster {
       text: 'Something went wrong'
     });
   }
-  deletePdiCheclistMaster(pdicheckId: number) {
+  deletePdiCheclistMaster(pdicheckId: number, event: Event) {
+    event.stopPropagation();
     debugger;
     Swal.fire({
       title: 'Are you sure?',
