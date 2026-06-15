@@ -125,15 +125,24 @@
                   </option>
                 </select>
               </div>
-              <div class="col-md-5">
+              <div class="col-md-5 position-relative">
                 <label>Select Chassis</label>
-                <select *ngIf="!isEditMode" class="form-select form-select-sm" (change)="onChassisChange()"
-                  [(ngModel)]="selectedChassis">
-                  <option value="">Select Chassis</option>
-                  <option *ngFor="let item of chassisList" [value]="item.chassisNumber">
-                    {{ item.chassisNumber }}
-                  </option>
-                </select>
+
+                <!-- Add Mode -->
+                <div *ngIf="!isEditMode">
+                  <input type="text" class="form-control form-control-sm" placeholder="Type Chassis No."
+                    [(ngModel)]="selectedChassis" (input)="filterChassis()" (focus)="filterChassis()"
+                    (blur)="hideChassisDropdown()">
+
+                  <div class="dropdown-menu dropdown-menu-chassis show w-100" *ngIf="filteredChassisList.length > 0">
+                    <button type="button" class="dropdown-item" *ngFor="let item of filteredChassisList"
+                      (mousedown)="selectChassis(item)">
+                      {{ item.chassisNumber }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Edit Mode -->
                 <input *ngIf="isEditMode" type="text" class="form-control form-control-sm bg-light"
                   [value]="selectedChassis" readonly>
               </div>
@@ -195,11 +204,11 @@
               <h6>Job Details</h6>
               <hr class="custom-line">
 
-              <div class="col-md-3">
+              <div class="col-md-5">
                 <label>Job Prefix</label>
                 <input class="form-control form-control-sm" [(ngModel)]="jobPrefix">
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <label>Job In Date</label>
                 <input type="date" class="form-control form-control-sm" [(ngModel)]="jobInDate" [disabled]="true">
               </div>
@@ -235,7 +244,7 @@
                   </option>
                 </select>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-5">
                 <label>Supervisor/Advisor</label>
                 <select class="form-select form-select-sm" [(ngModel)]="supervisor">
                   <option value="">Select Supervisor</option>
@@ -244,7 +253,7 @@
                   <option value="Vishal">Vishal</option>
                 </select>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-5">
                 <label>Technician</label>
                 <select class="form-select form-select-sm" [(ngModel)]="technician">
                   <option value="">Select Technician</option>
@@ -259,11 +268,13 @@
               </div>
               <div class="col-md-4">
                 <label>Air Pressure Rear Tyre</label>
-                <input class="form-control form-control-sm" [(ngModel)]="airPressureRear">
+                <input class="form-control form-control-sm" maxlength="2" [(ngModel)]="airPressureRear"
+                  (input)="allowOnlyNumbers($event,'rear')">
               </div>
               <div class="col-md-4">
                 <label>Air Pressure Front Tyre</label>
-                <input class="form-control form-control-sm" [(ngModel)]="airPressureFront">
+                <input class="form-control form-control-sm" maxlength="2" [(ngModel)]="airPressureFront"
+                  (input)="allowOnlyNumbers($event,'front')">
               </div>
 
             </div>
@@ -278,12 +289,14 @@
 
               <div class="col-md-8">
                 <label>Customer Name</label>
-                <input class="form-control form-control-sm" [(ngModel)]="customerObj.customerName">
+                <input class="form-control form-control-sm bg-light text-muted" [(ngModel)]="customerObj.customerName"
+                  readonly>
               </div>
 
               <div class="col-md-4">
                 <label>Mobile No.</label>
-                <input class="form-control form-control-sm" [(ngModel)]="customerObj.customerMobile">
+                <input class="form-control form-control-sm bg-light text-muted" [(ngModel)]="customerObj.customerMobile"
+                  readonly>
               </div>
 
               <div class="col-md-4">
@@ -293,12 +306,12 @@
 
               <div class="col-md-4">
                 <label>Model Name</label>
-                <input class="form-control form-control-sm" [(ngModel)]="modelName">
+                <input class="form-control form-control-sm bg-light text-muted" [(ngModel)]="modelName" readonly>
               </div>
 
               <div class="col-md-4">
                 <label>Chassis No.</label>
-                <input class="form-control form-control-sm" [(ngModel)]="selectedChassis">
+                <input class="form-control form-control-sm bg-light text-muted" [(ngModel)]="selectedChassis" readonly>
               </div>
 
               <div class="col-md-4">
@@ -308,22 +321,24 @@
 
               <div class="col-md-4">
                 <label>Motor No.</label>
-                <input class="form-control form-control-sm" [(ngModel)]="motorNo">
+                <input class="form-control form-control-sm bg-light text-muted" [(ngModel)]="motorNo" readonly>
               </div>
 
               <div class="col-md-4">
                 <label>Battery No.</label>
-                <input class="form-control form-control-sm" [(ngModel)]="batteryNumber">
+                <input class="form-control form-control-sm bg-light text-muted" [(ngModel)]="batteryNumber" readonly>
               </div>
 
               <div class="col-md-4">
                 <label>Sale Date</label>
-                <input type="date" class="form-control form-control-sm" [(ngModel)]="customerObj.saleDate">
+                <input type="date" class="form-control form-control-sm bg-light text-muted"
+                  [(ngModel)]="customerObj.saleDate" readonly>
               </div>
 
               <div class="col-md-4">
                 <label>Insurance Expiry</label>
-                <input type="date" class="form-control form-control-sm" [(ngModel)]="customerObj.insuranceExpDate">
+                <input type="date" class="form-control form-control-sm bg-light text-muted"
+                  [(ngModel)]="customerObj.insuranceExpDate" readonly>
               </div>
 
               <div class="col-md-4">
@@ -359,11 +374,15 @@
         <div class="row g-3">
           <div class="col-md-3">
             <label>Battery Make</label>
-            <input class="form-control form-control-sm" [(ngModel)]="batteryMake">
+            <input class="form-control form-control-sm" [(ngModel)]="batteryMake"  [readonly]="isBatteryReadOnly" [ngClass]="{
+         'bg-light text-muted': isBatteryReadOnly
+       }">
           </div>
           <div class="col-md-3">
             <label>Battery Serial No(s)</label>
-            <input class="form-control form-control-sm" [(ngModel)]="batteryNumber">
+            <input class="form-control form-control-sm" [(ngModel)]="batteryNumber"  [readonly]="isBatteryReadOnly" [ngClass]="{
+         'bg-light text-muted': isBatteryReadOnly
+       }">
           </div>
           <div class="col-md-3">
             <label>Battery Voltage at Full Charge(OCV)</label>
@@ -387,31 +406,45 @@
           </div>
           <div class="col-md-3">
             <label>Motor Drawing Current(At No Load)</label>
-            <input class="form-control form-control-sm" [(ngModel)]="motorNo">
+            <input class="form-control form-control-sm" [(ngModel)]="motorNo"  [readonly]="isBatteryReadOnly" [ngClass]="{
+         'bg-light text-muted': isBatteryReadOnly
+       }"> 
           </div>
           <div class="col-md-3">
             <label>Charger Make</label>
-            <input class="form-control form-control-sm" [(ngModel)]="chargerMake">
+            <input class="form-control form-control-sm" [(ngModel)]="chargerMake"  [readonly]="isBatteryReadOnly" [ngClass]="{
+         'bg-light text-muted': isBatteryReadOnly
+       }">
           </div>
           <div class="col-md-3">
             <label>Charger No.</label>
-            <input class="form-control form-control-sm" [(ngModel)]="chargerNumber">
+            <input class="form-control form-control-sm" [(ngModel)]="chargerNumber"  [readonly]="isBatteryReadOnly" [ngClass]="{
+         'bg-light text-muted': isBatteryReadOnly
+       }">
           </div>
           <div class="col-md-3">
             <label>Coverter No.</label>
-            <input class="form-control form-control-sm" [(ngModel)]="converterNo">
+            <input class="form-control form-control-sm" [(ngModel)]="converterNo"  [readonly]="isBatteryReadOnly" [ngClass]="{
+         'bg-light text-muted': isBatteryReadOnly
+       }">
           </div>
           <div class="col-md-3">
             <label>Controller No. Make</label>
-            <input class="form-control form-control-sm" [(ngModel)]="controllerNo">
+            <input class="form-control form-control-sm" [(ngModel)]="controllerNo"  [readonly]="isBatteryReadOnly" [ngClass]="{
+         'bg-light text-muted': isBatteryReadOnly
+       }">
           </div>
           <div class="col-md-3">
             <label>Battery Chemical</label>
-            <input class="form-control form-control-sm" [(ngModel)]="batteryChemestry">
+            <input class="form-control form-control-sm" [(ngModel)]="batteryChemestry"  [readonly]="isBatteryReadOnly" [ngClass]="{
+         'bg-light text-muted': isBatteryReadOnly
+       }">
           </div>
           <div class="col-md-3">
             <label>Battery Capacity</label>
-            <input class="form-control form-control-sm" [(ngModel)]="batteryCapacity">
+            <input class="form-control form-control-sm" [(ngModel)]="batteryCapacity"  [readonly]="isBatteryReadOnly" [ngClass]="{
+         'bg-light text-muted': isBatteryReadOnly
+       }">
           </div>
         </div>
       </div>

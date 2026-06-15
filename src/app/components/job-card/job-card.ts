@@ -36,7 +36,7 @@ export class JobCard {
   searchTimeout: any;
   jobTypeId: number = 0;
   isSuperAdmin: boolean;
-
+  filteredChassisList: any[] = [];
 
   //Pagination
   page = 1;
@@ -68,14 +68,32 @@ export class JobCard {
     chassisNo: ''
   };
   ngOnInit(): void {
+
     this.isSuperAdmin = this.storageService.getRole().toLocaleLowerCase() === 'superadmin';
+    const today = new Date();
+
+    // Current month first date
+    const firstDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    );
+
+    this.searchModel.fromDate = this.formatDate(firstDayOfMonth);
+    this.searchModel.toDate = this.formatDate(today);
     this.setUserRole();
     this.fetchLocations();
     this.loadChassisList();
     this.loadJobCardList();
   }
 
+  formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
 
+  return `${year}-${month}-${day}`;
+}
 
   //Fetech Dealer Location
   fetchLocations(): void {
@@ -108,6 +126,25 @@ export class JobCard {
       }
     });
   }
+
+  filterChassis() {
+  const searchText = (this.searchModel.chassisNo || '').toLowerCase();
+
+  this.filteredChassisList = this.chassisList.filter(x =>
+    x.chassisNumber.toLowerCase().includes(searchText)
+  ).slice(0, 10); // maximum 10 suggestions
+}
+hideDropdown() {
+  setTimeout(() => {
+    this.filteredChassisList = [];
+  }, 200);
+}
+
+selectChassis(item: any) {
+  this.searchModel.chassisNo = item.chassisNumber;
+  this.filteredChassisList = [];
+  this.search();
+}
 
   loadJobCardList() {
     // this.lodder = true;
