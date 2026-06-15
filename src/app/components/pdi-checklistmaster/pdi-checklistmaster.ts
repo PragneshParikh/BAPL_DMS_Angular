@@ -60,18 +60,18 @@ export class PdiChecklistmaster implements OnInit {
   }
   openEdit(item: any) {
 
-  this.isEditMode = true;
+    this.isEditMode = true;
 
-  this.PdiChecklistmastermodel = {
-    ...item
-  };
+    this.PdiChecklistmastermodel = {
+      ...item
+    };
 
-  const modal = document.getElementById('pdiChecklistmasterModal');
-  if (modal) {
-    const bsModal = new bootstrap.Modal(modal);
-    bsModal.show();
+    const modal = document.getElementById('pdiChecklistmasterModal');
+    if (modal) {
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+    }
   }
-}
 
   loadOemModels() {
     this.form22service.getOemModelList().subscribe({
@@ -90,16 +90,11 @@ export class PdiChecklistmaster implements OnInit {
     this.Pdichecklistmasterservice.getPdiChecklistMasterList(this.searchText)
       .subscribe({
         next: (res: any[]) => {
-
-          this.checklistList = res;
-          console.log("9999", this.checklistList);
-
           this.loader.hide();
+          this.checklistList = res;
         },
         error: (err) => {
-
           this.loader.hide();
-
           console.error('Error loading list', err);
         }
       });
@@ -112,12 +107,10 @@ export class PdiChecklistmaster implements OnInit {
 
   savePdiChecklistmaster(form: any) {
     debugger
-    this.loader.hide();
     if (form.invalid) return;
-
     const payload = {
       id: this.PdiChecklistmastermodel.id,
-      oemmodelId : this.PdiChecklistmastermodel.oemmodelId,
+      oemmodelId: this.PdiChecklistmastermodel.oemmodelId,
       checklistName: this.PdiChecklistmastermodel.checklistName,
       description: this.PdiChecklistmastermodel.description,
       isactive: this.PdiChecklistmastermodel.isActive
@@ -131,7 +124,10 @@ export class PdiChecklistmaster implements OnInit {
           this.loader.hide();
           this.afterSave(form, 'Updated successfully');
         },
-        error: () => this.showError()
+        error: () => {
+          this.loader.hide();
+          this.showError()
+        }
       });
     } else {
       //  INSERT
@@ -141,33 +137,41 @@ export class PdiChecklistmaster implements OnInit {
           this.loader.hide();
           this.afterSave(form, 'Inserted successfully');
         },
-        error: () => this.showError()
+        error: () => {
+          this.loader.hide();
+          this.showError()
+        }
       });
     }
   }
   afterSave(form: any, message: string) {
-    this.loader.show();
+
     Swal.fire({
       icon: 'success',
       title: message,
       timer: 1500,
       showConfirmButton: false
     }).then(() => {
+
       const modalEl = document.getElementById('pdiChecklistmasterModal');
 
       if (modalEl) {
-        const modal = (window as any).bootstrap?.Modal.getInstance(modalEl);
+        const modal = bootstrap.Modal.getInstance(modalEl);
         modal?.hide();
-      }
-    });
-    this.loader.hide();
-    form.resetForm();
-    this.isEditMode = false;
 
-    this.loadPdiChecklistList();
+        document.body.classList.remove('modal-open');
+
+        document.querySelectorAll('.modal-backdrop')
+          .forEach(el => el.remove());
+      }
+
+      form.resetForm();
+      this.isEditMode = false;
+
+      this.loadPdiChecklistList();
+    });
   }
   showError() {
-    this.loader.hide();
     Swal.fire({
       icon: 'error',
       title: 'Error',

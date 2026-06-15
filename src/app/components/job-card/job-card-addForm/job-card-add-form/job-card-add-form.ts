@@ -243,16 +243,32 @@ export class JobCardAddForm {
     }, 200);
   }
 
-  allowOnlyNumbers(event: any, field: 'rear' | 'front') {
-    const value = event.target.value.replace(/[^0-9]/g, '');
-    event.target.value = value;
+allowOnlyNumbers(
+  event: any,
+  field: 'rear' | 'front' | 'altMobile' | 'manualno'
+) {
+  const value = event.target.value.replace(/\D/g, '');
+  event.target.value = value;
 
-    if (field === 'rear') {
+  switch (field) {
+    case 'rear':
       this.airPressureRear = value;
-    } else {
+      break;
+
+    case 'front':
       this.airPressureFront = value;
-    }
+      break;
+
+    case 'altMobile':
+      this.customerObj.customerAltMobile = value;
+      break;
+
+    case 'manualno':
+      this.manualJobNo = value;
+      break;
   }
+}
+  
 
   onComplaintSearch(event: any): void {
 

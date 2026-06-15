@@ -201,10 +201,12 @@
                 <input class="form-control form-control-sm" [(ngModel)]="couponNo" readonly>
               </div>
 
-              <h6>Job Details</h6>
+              <h6 class="section-title">
+                <strong>Job Details</strong>
+              </h6>
               <hr class="custom-line">
 
-              <div class="col-md-5">
+              <div class="col-md-3">
                 <label>Job Prefix</label>
                 <input class="form-control form-control-sm" [(ngModel)]="jobPrefix">
               </div>
@@ -222,18 +224,19 @@
               </div>
               <div class="col-md-3">
                 <label>Manual Job No.</label>
-                <input class="form-control form-control-sm" [(ngModel)]="manualJobNo">
+                <input type="text" class="form-control form-control-sm" maxlength="5"
+                  (input)="allowOnlyNumbers($event,'manualno')" [(ngModel)]="manualJobNo">
               </div>
 
-              <div class="col-md-5">
+              <div class="col-md-3">
                 <label>Est.Delivery Date</label>
                 <input type="date" class="form-control form-control-sm" [(ngModel)]="estDelDate">
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <label>Est.Delivery Time</label>
                 <input type="time" class="form-control form-control-sm" [(ngModel)]="estDelTime">
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <label class="form-lael">Job Source</label>
                 <select class="form-select form-select-sm" [(ngModel)]="selectedJobSources">
 
@@ -253,7 +256,7 @@
                   <option value="Vishal">Vishal</option>
                 </select>
               </div>
-              <div class="col-md-5">
+              <div class="col-md-4">
                 <label>Technician</label>
                 <select class="form-select form-select-sm" [(ngModel)]="technician">
                   <option value="">Select Technician</option>
@@ -287,7 +290,7 @@
 
             <div class="row g-3">
 
-              <div class="col-md-8">
+              <div class="col-md-12">
                 <label>Customer Name</label>
                 <input class="form-control form-control-sm bg-light text-muted" [(ngModel)]="customerObj.customerName"
                   readonly>
@@ -301,7 +304,8 @@
 
               <div class="col-md-4">
                 <label>Alternate Mobile</label>
-                <input class="form-control form-control-sm" [(ngModel)]="customerObj.customerAltMobile">
+                <input type="text" class="form-control form-control-sm" maxlength="10"
+                  (input)="allowOnlyNumbers($event,'altMobile')" [(ngModel)]="customerObj.customerAltMobile">
               </div>
 
               <div class="col-md-4">
@@ -351,7 +355,7 @@
                 <input type="date" class="form-control form-control-sm" [(ngModel)]="customerObj.rsaRenewalDate">
               </div>
 
-              <div class="col-md-8">
+              <div class="col-md-12">
                 <label>Remarks</label>
                 <textarea class="form-control form-control-sm" rows="4" [(ngModel)]="customerObj.remarks"></textarea>
               </div>
@@ -374,13 +378,15 @@
         <div class="row g-3">
           <div class="col-md-3">
             <label>Battery Make</label>
-            <input class="form-control form-control-sm" [(ngModel)]="batteryMake"  [readonly]="isBatteryReadOnly" [ngClass]="{
+            <input class="form-control form-control-sm" [(ngModel)]="batteryMake" [readonly]="isBatteryReadOnly"
+              [ngClass]="{
          'bg-light text-muted': isBatteryReadOnly
        }">
           </div>
           <div class="col-md-3">
             <label>Battery Serial No(s)</label>
-            <input class="form-control form-control-sm" [(ngModel)]="batteryNumber"  [readonly]="isBatteryReadOnly" [ngClass]="{
+            <input class="form-control form-control-sm" [(ngModel)]="batteryNumber" [readonly]="isBatteryReadOnly"
+              [ngClass]="{
          'bg-light text-muted': isBatteryReadOnly
        }">
           </div>
@@ -406,43 +412,49 @@
           </div>
           <div class="col-md-3">
             <label>Motor Drawing Current(At No Load)</label>
-            <input class="form-control form-control-sm" [(ngModel)]="motorNo"  [readonly]="isBatteryReadOnly" [ngClass]="{
+            <input class="form-control form-control-sm" [(ngModel)]="motorNo" [readonly]="isBatteryReadOnly" [ngClass]="{
          'bg-light text-muted': isBatteryReadOnly
-       }"> 
+       }">
           </div>
           <div class="col-md-3">
             <label>Charger Make</label>
-            <input class="form-control form-control-sm" [(ngModel)]="chargerMake"  [readonly]="isBatteryReadOnly" [ngClass]="{
+            <input class="form-control form-control-sm" [(ngModel)]="chargerMake" [readonly]="isBatteryReadOnly"
+              [ngClass]="{
          'bg-light text-muted': isBatteryReadOnly
        }">
           </div>
           <div class="col-md-3">
             <label>Charger No.</label>
-            <input class="form-control form-control-sm" [(ngModel)]="chargerNumber"  [readonly]="isBatteryReadOnly" [ngClass]="{
+            <input class="form-control form-control-sm" [(ngModel)]="chargerNumber" [readonly]="isBatteryReadOnly"
+              [ngClass]="{
          'bg-light text-muted': isBatteryReadOnly
        }">
           </div>
           <div class="col-md-3">
             <label>Coverter No.</label>
-            <input class="form-control form-control-sm" [(ngModel)]="converterNo"  [readonly]="isBatteryReadOnly" [ngClass]="{
+            <input class="form-control form-control-sm" [(ngModel)]="converterNo" [readonly]="isBatteryReadOnly"
+              [ngClass]="{
          'bg-light text-muted': isBatteryReadOnly
        }">
           </div>
           <div class="col-md-3">
             <label>Controller No. Make</label>
-            <input class="form-control form-control-sm" [(ngModel)]="controllerNo"  [readonly]="isBatteryReadOnly" [ngClass]="{
+            <input class="form-control form-control-sm" [(ngModel)]="controllerNo" [readonly]="isBatteryReadOnly"
+              [ngClass]="{
          'bg-light text-muted': isBatteryReadOnly
        }">
           </div>
           <div class="col-md-3">
             <label>Battery Chemical</label>
-            <input class="form-control form-control-sm" [(ngModel)]="batteryChemestry"  [readonly]="isBatteryReadOnly" [ngClass]="{
+            <input class="form-control form-control-sm" [(ngModel)]="batteryChemestry" [readonly]="isBatteryReadOnly"
+              [ngClass]="{
          'bg-light text-muted': isBatteryReadOnly
        }">
           </div>
           <div class="col-md-3">
             <label>Battery Capacity</label>
-            <input class="form-control form-control-sm" [(ngModel)]="batteryCapacity"  [readonly]="isBatteryReadOnly" [ngClass]="{
+            <input class="form-control form-control-sm" [(ngModel)]="batteryCapacity" [readonly]="isBatteryReadOnly"
+              [ngClass]="{
          'bg-light text-muted': isBatteryReadOnly
        }">
           </div>
