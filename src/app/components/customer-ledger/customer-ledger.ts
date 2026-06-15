@@ -78,6 +78,7 @@ export class CustomerLedger {
   @Input() ledgerId!: number;
   @Input() fromReceiptEntry: boolean = false;
   @Input() defaultLedgerType: string = '';
+  @Input() leadData: any;
 
   async ngOnInit() {
 
@@ -99,7 +100,11 @@ export class CustomerLedger {
       this.getCustomerLedgerDetails(this.ledgerId);
       return;
     }
-
+ if (this.leadData) {
+  console.log(this.leadData);
+  
+    this.populateLeadData();
+  }
     // ROUTE MODE
     this.activatedRoute.paramMap.subscribe(params => {
       const id = Number(params.get('id'));
@@ -109,7 +114,42 @@ export class CustomerLedger {
       }
     });
   }
+populateLeadData() {
 
+  if (!this.leadData) return;
+
+  this.formData.ledgerName = this.leadData.name || '';
+  this.formData.mobileNumber = this.leadData.mobile || '';
+  this.formData.email =
+    this.leadData.email && this.leadData.email !== 'null'
+      ? this.leadData.email
+      : '';
+
+  this.formData.address = this.leadData.brancharea || '';
+  this.formData.pin = this.leadData.branchpin?.toString() || '';
+
+  this.formData.ledgerType = this.defaultLedgerType || 'Party';
+
+  // Auto-select state
+  const state = this.states.find(
+    x => x.stateName?.toLowerCase() === this.leadData.state?.toLowerCase()
+  );
+
+  if (state) {
+
+    this.formData.state = state.id;
+
+    this.changeCityOptions(state.id);
+
+    const city = this.cities.find(
+      x => x.cityName?.toLowerCase() === this.leadData.city?.toLowerCase()
+    );
+
+    if (city) {
+      this.formData.city = city.id;
+    }
+  }
+}
   getCustomerLedgerDetails(id: any) {
     this.loader.show();
     this.ledgerService.getLedgerById(id).subscribe({

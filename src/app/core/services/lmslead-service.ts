@@ -12,12 +12,12 @@ export class LMSLeadService {
 
   constructor(private http: HttpClient) { }
 
-  getLeadByMobileOrBooking(mobileNo: string | null, bookingId: number | null): Observable<LeadResponse> {
+  getLeadByMobileOrBooking(mobileNo: string | null, bookingId: number | null): Observable<any> {
     let params = new HttpParams();
     if (mobileNo) params = params.set('mobileNo', mobileNo);
     if (bookingId !== null) params = params.set('bookingId', bookingId.toString());
 
-    return this.http.get<LeadResponse>(`${this.apiUrl}/LMSLeadMaster/lmsLeadbyMob`, { params });
+    return this.http.get<any>(`${this.apiUrl}/LMSLeadMaster/lmsLeadbyMob`, { params });
   }
 
 }

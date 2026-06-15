@@ -34,23 +34,23 @@
                                             </div>
                                         </div>
 
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label>Receipt No.</label>
                                             <input type="text" class="form-control form-control-sm" name="receiptNo"
                                                 [(ngModel)]="receiptNo" readonly>
                                         </div>
 
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label>Receipt Date</label>
                                             <input type="date" class="form-control form-control-sm"
                                                 [(ngModel)]="formData.receiptDate" name="receiptDate">
                                         </div>
 
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label>Sale Type<span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm" [(ngModel)]="formData.saleType"
                                                 name="saleType" #saleType="ngModel" required
-                                                (change)="onSaleTypeChange()">
+                                                (change)="onSaleTypeChange()" [disabled]="isEditMode">
                                                 <option value="">--Select Sale Type--</option>
                                                 <option value="Against Lead">Against Lead</option>
                                                 <option value="Receipt">Receipt</option>
@@ -59,50 +59,20 @@
                                                 class="text-danger mt-1">
                                                 Sale Type is required.
                                             </div>
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Booking ID</label>
+                                            <input type="text" class="form-control form-control-sm" name="bookingId"
+                                                [(ngModel)]="formData.bookingId"
+                                                [disabled]="formData.saleType === 'Receipt'"
+                                                [readonly]="formData.saleType === 'Against Lead'">
                                         </div>
                                     </div>
 
                                     <!--    Row 2 -->
                                     <div class="row mb-2">
-                                        <div class="col-md-3">
-                                            <label>Booking ID</label>
-                                            <input type="text" class="form-control form-control-sm" name="bookingId"
-                                                [(ngModel)]="formData.bookingId"
-                                                [readonly]="formData.saleType === 'Against Lead'">
-                                        </div>
-
-                                        <div class="col-md-3">
-                                            <label>Mobile No</label>
-                                            <input type="text" class="form-control form-control-sm" name="mobileNo"
-                                                (input)="sanitizeMobile($event)" [(ngModel)]="formData.mobileNo"
-                                                #mobileNo="ngModel" pattern="^[0-9]{10}$" maxlength="10"
-                                                [readonly]="formData.saleType === 'Against Lead'">
-                                            <small class="text-danger" *ngIf="mobileNo?.invalid && mobileNo?.touched">
-                                                Enter valid 10-digit mobile number
-                                            </small>
-                                        </div>
-
-                                        <!-- <div class="col-md-3">
-                                            <label>Customer Type</label><br>
-                                            <div class="d-flex gap-3 mt-1">
-                                                <label>
-                                                    <input type="radio" value="b2b" name="customerType"
-                                                        [(ngModel)]="formData.customerType"
-                                                        (change)="onCustomerTypeChange()" required>
-                                                    B2B
-                                                </label>
-
-                                                <label>
-                                                    <input type="radio" value="b2c" name="customerType"
-                                                        [(ngModel)]="formData.customerType"
-                                                        (change)="onCustomerTypeChange()" required>
-                                                    B2C
-                                                </label>
-                                            </div>
-                                        </div> -->
-
-
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label>Customer Type</label><br>
 
                                             <div class="d-flex gap-3 mt-1">
@@ -128,31 +98,74 @@
                                                 <small>Customer Type is required.</small>
                                             </div> -->
                                         </div>
+
+                                        
+
+                                        <!-- <div class="col-md-3">
+                                            <label>Customer Type</label><br>
+                                            <div class="d-flex gap-3 mt-1">
+                                                <label>
+                                                    <input type="radio" value="b2b" name="customerType"
+                                                        [(ngModel)]="formData.customerType"
+                                                        (change)="onCustomerTypeChange()" required>
+                                                    B2B
+                                                </label>
+
+                                                <label>
+                                                    <input type="radio" value="b2c" name="customerType"
+                                                        [(ngModel)]="formData.customerType"
+                                                        (change)="onCustomerTypeChange()" required>
+                                                    B2C
+                                                </label>
+                                            </div>
+                                        </div> -->
+
+
+
                                         <div class="col-md-3">
-                                            <label>Party Name<span class="text-danger">*</span></label>
+                                            <label>
+                                                Party Name <span class="text-danger">*</span>
+                                            </label>
+
                                             <ng-container
                                                 *ngIf="formData.saleType === 'Receipt'; else againstLeadInput">
-                                                <div class="d-flex align-items-center">
-                                                    <select class="form-select form-select-sm"
-                                                        [(ngModel)]="formData.partyName" name="partyNameInput"
-                                                        #partyName="ngModel" required>
-                                                        <option value="">--Select Party Name--</option>
-                                                        <option *ngFor="let p of filteredParties"
-                                                            [value]="p.ledgerName">
-                                                            {{ p.ledgerName }}
-                                                        </option>
-                                                    </select>
-                                                    <!-- Add Button -->
 
-                                                    <button type="button" class="btn btn-sm btn-primary"
-                                                        (click)="openCustomerLedgerAdd('Party')"
-                                                        [ngbTooltip]="'Add New Party'">
+                                                <div class="input-group input-group-sm position-relative">
+
+                                                    <input type="text" class="form-control"
+                                                        [(ngModel)]="formData.partyName" name="partyNameInput"
+                                                        #partyName="ngModel" required (input)="filterPartyList()"
+                                                        (focus)="showPartyDropdown = true" readonly="isEditMode">
+
+                                                    <button type="button" class="btn btn-primary"
+                                                        (click)="openCustomerLedgerAdd('Receipt')"
+                                                        ngbTooltip="Add New Party">
                                                         +
                                                     </button>
+
+                                                    <!-- Dropdown -->
+                                                    <ul *ngIf="showPartyDropdown && filteredParties.length > 0"
+                                                        class="list-group position-absolute w-100 small-dropdown"
+                                                        style="top:100%; z-index:1000; max-height:200px; overflow-y:auto;">
+
+                                                        <li class="list-group-item list-group-item-action"
+                                                            *ngFor="let party of filteredParties"
+                                                            (click)="selectParty(party)">
+                                                            {{ party.ledgerName }}
+                                                        </li>
+
+                                                    </ul>
+
                                                 </div>
+
                                                 <div class="text-danger mt-1"
                                                     *ngIf="partyName.invalid && (partyName.touched || receiptForm.submitted)">
                                                     <small>Party Name is required.</small>
+                                                </div>
+
+                                                <div class="text-danger small"
+                                                    *ngIf="formData.partyName && !isPartyValid()">
+                                                    Party not found. Please click + to add new party.
                                                 </div>
 
                                             </ng-container>
@@ -162,13 +175,17 @@
                                                     [(ngModel)]="formData.partyName" name="partyNameInput" readonly
                                                     required>
                                             </ng-template>
-
-
                                         </div>
-                                    </div>
-
-                                    <!--    Row 3 -->
-                                    <div class="row mb-2">
+<div class="col-md-3">
+                                            <label>Mobile No</label>
+                                            <input type="text" class="form-control form-control-sm" name="mobileNo"
+                                                (input)="sanitizeMobile($event)" [(ngModel)]="formData.mobileNo"
+                                                #mobileNo="ngModel" pattern="^[0-9]{10}$" maxlength="10"
+                                                 (change)="checkNo(formData.mobileNo)" readonly>
+                                            <small class="text-danger" *ngIf="mobileNo?.invalid && mobileNo?.touched">
+                                                Enter valid 10-digit mobile number
+                                            </small>
+                                        </div>
                                         <div class="col-md-3">
                                             <label>Financier</label>
                                             <div class="d-flex align-items-center">
@@ -198,6 +215,11 @@
                                             </div>
 
                                         </div>
+                                    </div>
+
+                                    <!--    Row 3 -->
+                                    <div class="row mb-2">
+
 
                                         <div class="col-md-3">
                                             <label>Sales Executive</label>
@@ -234,17 +256,18 @@
                                             <input class="form-control form-control-sm"
                                                 [value]="selectedProduct?.itemdesc || ''" readonly>
                                         </div>
-                                    </div>
-
-                                    <!--    Row 4 -->
-                                    <div class="row mb-2">
                                         <div class="col-md-3">
                                             <label>Product Color</label>
                                             <input class="form-control form-control-sm"
                                                 [value]="selectedProduct?.colorName || ''" readonly>
                                         </div>
+                                    </div>
 
-                                        <div class="col-md-3">
+                                    <!--    Row 4 -->
+                                    <div class="row mb-2">
+
+
+                                        <!-- <div class="col-md-3">
                                             <label>Receipt Type<span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm"
                                                 [(ngModel)]="formData.receiptType" name="receiptType"
@@ -261,26 +284,157 @@
                                                     Receipt Type is required.
                                                 </small>
                                             </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label>Total Amount<span class="text-danger">*</span></label>
+                                        </div> -->
 
-                                            <input type="number" class="form-control form-control-sm"
-                                                [(ngModel)]="formData.totalAmount" name="amount" #amount="ngModel"
-                                                required step="0.01" min="0.01"
-                                                [class.is-invalid]="amount.invalid && (amount.touched || receiptForm.submitted)">
 
-                                            <div class="text-danger mt-1"
-                                                *ngIf="amount.invalid && (amount.touched || receiptForm.submitted)">
+                                        <!-- Add Receipt Details -->
+                                        <div class="border rounded p-2 mt-3">
 
-                                                <small *ngIf="amount.errors?.['required']">
-                                                    Amount is required.
-                                                </small>
-                                                <small *ngIf="amount.errors?.['min']">
-                                                    Amount is required.
-                                                </small>
+                                            <h6 class="mb-2 text-primary">Add Receipt Details</h6>
+
+                                            <div class="row g-2">
+
+                                                <div class="col-md-2">
+                                                    <label>Receipt Type</label>
+                                                    <select class="form-select form-select-sm"
+                                                        [(ngModel)]="receiptRow.receiptType" name="receiptTypeRow">
+
+                                                        <option value="">--Select--</option>
+                                                        <option value="Cash">Cash</option>
+                                                        <option value="Cheque">Cheque</option>
+                                                        <option value="UPI">UPI</option>
+                                                        <option value="Bank Transfer">Bank Transfer</option>
+
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-2">
+                                                    <label>Amount</label>
+                                                    <input type="number" class="form-control form-control-sm"
+                                                        [(ngModel)]="receiptRow.amount" name="amountRow">
+                                                </div>
+
+                                                <!-- <div class="col-md-1">
+                                                    <label>Inst Type</label>
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        [(ngModel)]="receiptRow.instType" name="instType">
+                                                </div> -->
+
+                                                <!-- <div class="col-md-1">
+                                                    <label>Inst No</label>
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        [(ngModel)]="receiptRow.instNo" name="instNo">
+                                                </div> -->
+
+                                                <div class="col-md-2">
+                                                    <label>Inst Date</label>
+                                                    <input type="date" class="form-control form-control-sm"
+                                                        [(ngModel)]="receiptRow.lineDate" name="lineDate" readonly>
+                                                </div>
+
+                                                <!-- <div class="col-md-2">
+            <label>Customer Bank Name</label>
+            <input type="text"
+                   class="form-control form-control-sm"
+                   [(ngModel)]="receiptRow.bankName"
+                   name="bankName">
+        </div> -->
+
+                                                <!-- <div class="col-md-2">
+            <label>Reference No</label>
+            <input type="text"
+                   class="form-control form-control-sm"
+                   [(ngModel)]="receiptRow.refNo"
+                   name="refNoRow">
+        </div> -->
+                                                <div class="col-md-2 d-flex align-items-end justify-content-end">
+
+                                                    <button type="button" class="btn btn-primary btn-sm px-3"
+                                                        [disabled]="!receiptRow.receiptType || receiptRow.amount <= 0"
+                                                        (click)="addReceiptRow()">
+
+                                                       {{ isRowEditMode ? 'Update' : 'Add' }}
+
+                                                    </button>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-2">
+
+                                                <!-- <div class="col-md-10">
+            <label>Narration</label>
+            <input type="text"
+                   class="form-control form-control-sm"
+                   [(ngModel)]="formData.narration"
+                   name="narration">
+        </div> -->
+
+
 
                                             </div>
+                                            <div *ngIf="receiptDetails.length > 0" class="mt-3">
+
+                                                <div class="table-responsive">
+
+                                                    <table class="table table-bordered table-sm"
+                                                        style="font-size: 12px;">
+
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>Action</th>
+                                                                <th>Sr No</th>
+                                                                <th>Receipt Type</th>
+                                                                <th>Amount</th>
+                                                                <th>Date</th>
+                                                                <!-- <th>Reference No</th> -->
+                                                            </tr>
+                                                        </thead>
+
+                                                        <tbody>
+
+                                                            <tr *ngFor="let row of receiptDetails; let i = index">
+
+                                                                <td>
+                                                                    <button
+                                                                        class="btn btn-sm btn-soft-info py-0 px-1 me-1" type="button"
+                                                                        (click)="editReceiptRow(i)">
+                                                                        <i class="ri-pencil-line"></i>
+                                                                    </button>
+                                                                    <button class="btn btn-danger btn-sm py-0 px-1 me-1"
+                                                                        type="button" (click)="deleteReceiptRow(i)">
+                                                                        <i class="ri-delete-bin-line"></i>
+                                                                    </button>
+                                                                </td>
+
+                                                                <td>{{ i + 1 }}</td>
+
+                                                                <td>{{ row.receiptType }}</td>
+
+                                                                <td>{{ row.amount | number:'1.2-2' }}</td>
+                                                                    <td>{{ row.lineDate ??row.insDate | date:'dd-MM-yyyy' }}</td>
+
+
+                                                                <!-- <td>{{ row.refNo }}</td> -->
+
+                                                            </tr>
+
+                                                        </tbody>
+
+                                                        <!-- <tfoot>
+                                                            <tr class="fw-bold">
+                                                                <td colspan="3">Total</td>
+                                                                <td>{{ getReceiptTotal() | number:'1.2-2' }}</td>
+                                                                <td></td>
+                                                            </tr>
+                                                        </tfoot> -->
+
+                                                    </table>
+
+                                                </div>
+
+                                            </div>
+
                                         </div>
 
                                         <div class="col-md-3"></div>
@@ -293,12 +447,20 @@
                                             <input type="text" class="form-control form-control-sm"
                                                 [(ngModel)]="formData.refNo" name="refNo">
                                         </div>
+                                        <div class="col-md-3">
+                                            <label>
+                                                Total Amount <span class="text-danger">*</span>
+                                            </label>
 
-                                        <div class="col-md-6">
+                                            <input type="number" class="form-control form-control-sm"
+                                                [value]="getReceiptTotal()" readonly>
+                                        </div>
+
+                                        <!-- <div class="col-md-6">
                                             <label>Narration</label>
                                             <textarea class="form-control form-control-sm" rows="1"
                                                 [(ngModel)]="formData.narration" name="narration"></textarea>
-                                        </div>
+                                        </div> -->
                                     </div>
 
                                     <!--    Button -->
@@ -352,9 +514,9 @@
                 <label>Search Text</label>
                 <input type="text" class="form-control" [(ngModel)]="searchText" (input)="onSearchInput($event)"
                     [class.is-invalid]="searchType === 'Mobile No' && isSearchMobileInvalid" />
-                    <div *ngIf="searchType === 'Mobile No' && isSearchMobileInvalid" class="text-danger mt-1">
-                        Enter valid 10-digit mobile number
-                    </div>
+                <div *ngIf="searchType === 'Mobile No' && isSearchMobileInvalid" class="text-danger mt-1">
+                    Enter valid 10-digit mobile number
+                </div>
             </div>
             <div class="col-md-2 d-flex align-items-end">
                 <button class="btn btn-primary" (click)="searchLead()">Search</button>
