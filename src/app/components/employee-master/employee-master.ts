@@ -73,6 +73,10 @@ export class EmployeeMasterComponent
 
   designations: any[] = [];
 
+  dealerInfo: any = null;
+
+  dealerLocations: any[] = [];
+
   // =====================================
   // CONSTRUCTOR
   // =====================================
@@ -87,38 +91,130 @@ export class EmployeeMasterComponent
   // INIT
   // =====================================
 
-  ngOnInit(): void {
+ ngOnInit(): void {
 
-    this.loadStates();
+  this.loadStates();
 
-    this.loadCities();
+  this.loadCities();
 
-    // =====================================
-    // POPUP EDIT MODE
-    // =====================================
+  // =====================================
+  // POPUP EDIT MODE
+  // =====================================
 
-    if (this.popupData) {
+  if (this.popupData) {
 
-      this.employeeData = {
-        ...this.popupData
-      };
+    this.employeeData = {
+      ...this.popupData
+    };
 
-      this.imagePreview =
-        this.popupData.profileImage;
+    this.imagePreview =
+      this.popupData.profileImage;
 
-      this.isEditMode = true;
+    this.isEditMode = true;
 
-      setTimeout(() => {
+    // Fetch THIS employee's dealer status
+    if (this.popupData.dealerCode) {
 
-        this.onStateChange();
-
-        this.employeeData.city =
-          this.popupData.city;
-
-      }, 300);
+      this.loadDealerInfo(
+        this.popupData.dealerCode
+      );
     }
+
+    setTimeout(() => {
+
+      this.onStateChange();
+
+      this.employeeData.city =
+        this.popupData.city;
+
+    }, 300);
   }
 
+  // =====================================
+  // ADD MODE — LOGGED-IN DEALER
+  // =====================================
+
+  else {
+
+    this.loadLoggedInDealer();
+  }
+}
+
+ // =====================================
+// LOAD DEALER INFO BY CODE
+// =====================================
+
+loadDealerInfo(dealerCode: string): void {
+
+  this.employeeService
+    .getDealerByCode(dealerCode)
+
+    .subscribe({
+
+      next: (response) => {
+
+        this.dealerInfo = response;
+
+        this.loadDealerLocations(
+          response.dealerCode
+        );
+      },
+
+      error: () => {
+
+        this.dealerInfo = null;
+      }
+    });
+}
+
+// =====================================
+// LOAD LOGGED-IN DEALER
+// =====================================
+
+loadLoggedInDealer(): void {
+
+  const dealerCode =
+    localStorage.getItem('dealerCode');
+
+  if (!dealerCode) {
+    return;
+  }
+
+  this.employeeService
+    .getDealerByCode(dealerCode)
+
+    .subscribe({
+
+      next: (response) => {
+
+        this.dealerInfo = response;
+
+        this.employeeData.dealerCode =
+          response.dealerCode;
+
+        this.loadDealerLocations(
+          response.dealerCode
+        );
+      }
+    });
+}
+// =====================================
+// LOAD DEALER LOCATIONS
+// =====================================
+
+  loadDealerLocations(dealerCode: string): void {
+
+    this.employeeService
+      .getDealerLocations(dealerCode)
+
+      .subscribe({
+
+        next: (response) => {
+
+          this.dealerLocations = response;
+        }
+      });
+  }
   // =====================================
   // LOAD STATES
   // =====================================
@@ -239,6 +335,9 @@ export class EmployeeMasterComponent
 
       notes:
         this.employeeData.notes,
+
+      location:
+        this.employeeData.location,
 
       createdBy: 'admin',
 
