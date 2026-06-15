@@ -185,7 +185,7 @@
 
             <div class="col-md-3">
 
-              
+
               <label class="form-label mb-1">
                 Password
               </label>
@@ -213,7 +213,7 @@
 
             <div class="col-md-3">
               <label class="form-label mb-1">
-                  Dealer Code
+                Dealer Code
               </label>
 
               <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.dealerCode"
@@ -228,7 +228,7 @@
               </label>
 
               <select class="form-select form-select-sm py-1" [ngModel]="employeeData.location ?? ''"
-              (ngModelChange)="employeeData.location = $event" name="location">
+                (ngModelChange)="employeeData.location = $event" name="location">
 
                 <option value="">
                   Select Location
@@ -244,14 +244,14 @@
 
             </div>
 
-          <div class="col-md-3">
+            <div class="col-md-3">
 
-            <label class="form-label mb-1">
-              Department
-            </label>
+              <label class="form-label mb-1">
+                Department
+              </label>
 
-             <select class="form-select form-select-sm py-1" [ngModel]="employeeData.department ?? ''"
-                            (ngModelChange)="employeeData.department = $event" name="department">
+              <select class="form-select form-select-sm py-1" [ngModel]="employeeData.department ?? ''"
+                (ngModelChange)="employeeData.department = $event" name="department">
 
                 <option value="">
                   Select Department
@@ -265,28 +265,16 @@
 
               </select>
 
-              <option value="">
-                Select Department
-              </option>
+            </div>
 
-              <option *ngFor="let dept of departments" [value]="dept.departmentId">
+            <div class="col-md-3">
 
-                {{ dept.departmentName }}
-
-              </option>
-
-            </select>
-
-          </div>
-
-        <div class="col-md-3">
-
-          <label class="form-label mb-1">
-            Designation
-          </label>
+              <label class="form-label mb-1">
+                Designation
+              </label>
 
               <select class="form-select form-select-sm py-1" [ngModel]="employeeData.designation ?? ''"
-                            (ngModelChange)="employeeData.designation = $event" name="designation">
+                (ngModelChange)="employeeData.designation = $event" name="designation">
 
                 <option value="">
                   Select Designation
@@ -325,8 +313,8 @@
                 State
               </label>
 
-                <select class="form-select form-select-sm py-1" [ngModel]="employeeData.state ?? ''"
-                          (ngModelChange)="employeeData.state = $event; onStateChange()" name="state">
+              <select class="form-select form-select-sm py-1" [ngModel]="employeeData.state ?? ''"
+                (ngModelChange)="employeeData.state = $event; onStateChange()" name="state">
 
                 <option value="">
                   Select State
@@ -348,8 +336,8 @@
                 City
               </label>
 
-             <select class="form-select form-select-sm py-1" [ngModel]="employeeData.city ?? ''"
-                          (ngModelChange)="employeeData.city = $event" name="city">
+              <select class="form-select form-select-sm py-1" [ngModel]="employeeData.city ?? ''"
+                (ngModelChange)="employeeData.city = $event" name="city">
 
                 <option value="">
                   Select City
@@ -379,9 +367,9 @@
           </div>
 
           <!-- ROW 5 -->
-           <div class="row mb-2" *ngIf="isEditMode">
+          <div class="row mb-2" *ngIf="isEditMode">
 
-            
+
 
           </div>
 
