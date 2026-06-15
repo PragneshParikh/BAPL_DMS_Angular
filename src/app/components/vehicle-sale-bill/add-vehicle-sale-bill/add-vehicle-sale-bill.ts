@@ -464,7 +464,6 @@ this.model.location = locationObj
 
   isCustomerValid(): boolean {
     if (!this.model.customerName) return false;
-
     return this.parties.some(
       p => p.ledgerName.toLowerCase() === this.model.customerName.toLowerCase()
     );

@@ -24,9 +24,9 @@
                     <div class="row mb-2">
                         <div class="col-md-3">
                             <label class="form-label">Ledger Type</label>
-                            <select class="form-select form-select-sm" name="ledgerType"
-                                [(ngModel)]="formData.ledgerType" required>
-                                <option *ngFor="let lt of ledgerTypes" [value]="lt.value">
+                            <select class="form-select form-select-sm" name="ledgerType" 
+                                [(ngModel)]="formData.ledgerType" [disabled]="isExternalCall" required>
+                                <option *ngFor="let lt of ledgerTypes" [value]="lt.value" >
                                     {{ lt.name }}
                                 </option>
                             </select>

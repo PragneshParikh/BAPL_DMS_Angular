@@ -66,7 +66,8 @@ export const LedgerTypes = [
     { name: 'Institutional', value: 'Institutional' },
     { name: 'Insurance', value: 'Insurance' },
     { name: 'Party', value: 'Party' },
-    { name: 'Supplier', value: 'Supplier' }
+    { name: 'Supplier', value: 'Supplier' },
+    {name:'Receipt Party',value:'Receipt'}
 ]
 
 export const PrefixTypes = [
