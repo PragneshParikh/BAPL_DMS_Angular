@@ -14,6 +14,17 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3">
+                            <label class="form-label">Group Name</label>
+
+                            <select class="form-select form-select-md" formControlName="groupName">
+                                <option value="">Select Group</option>
+
+                                <option *ngFor="let item of groupNameList" [value]="item.id">
+                                    {{ item.groupName }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label">Complaint Name</label>
                             <input type="text" class="form-control form-control-md" formControlName="complaintName"
                                 placeholder="please enter complaint">
@@ -22,11 +33,7 @@
                                 Complaint Name is required.
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Group Name</label>
-                            <input type="text" class="form-control form-control-md bg-light text-muted"
-                                formControlName="groupName" value="Complaint" />
-                        </div>
+
                         <div class="col-md-3">
                             <!-- <label class="form-label d-block">Active</label> -->
 
@@ -88,7 +95,7 @@
                                     Group Name
                                 </th>
 
-                                <th  class="sort" (click)="sort('isActive')" style="cursor:pointer">
+                                <th class="sort" (click)="sort('isActive')" style="cursor:pointer">
                                     Active
                                 </th>
                             </tr>
@@ -101,7 +108,7 @@
 
                                 <td>{{ item.complaintName }}</td>
 
-                                <td>{{ item.groupName }}</td>
+                                <td>{{ item.complaintGroupName }}</td>
 
                                 <td>
                                     <span class="badge" [ngClass]="item.isActive ? 'bg-success' : 'bg-danger'">
@@ -111,7 +118,7 @@
                             </tr>
                             <!-- No Data Row -->
                             <tr *ngIf="!pagedData || pagedData.length === 0">
-                                <td colspan="2" class="text-center">No Data Available</td>
+                                <td colspan="4" class="text-center">No Data Available</td>
                             </tr>
 
                         </tbody>
@@ -157,19 +164,25 @@
 
             <div class="col-md-4">
                 <label class="form-label">
+                    Group Name
+                </label>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedComplaint.groupName">
+                    <option value="">Select Group</option>
+
+                    <option *ngFor="let item of groupNameList" [ngValue]="item.id">
+                        {{ item.groupName }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">
                     Complaint Name
                 </label>
 
                 <input class="form-control form-control-sm" [(ngModel)]="selectedComplaint.complaintName">
             </div>
 
-            <div class="col-md-4">
-                <label class="form-label">
-                    Group Name
-                </label>
-
-                <input class="form-control form-control-sm" [(ngModel)]="selectedComplaint.groupName">
-            </div>
 
             <div class="col-md-4">
                 <label class="form-label d-block">
