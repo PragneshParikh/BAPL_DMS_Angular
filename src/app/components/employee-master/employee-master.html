@@ -244,11 +244,11 @@
 
             </div>
 
-            <div class="col-md-3">
+          <div class="col-md-3">
 
-              <label class="form-label mb-1">
-                Department
-              </label>
+            <label class="form-label mb-1">
+              Department
+            </label>
 
              <select class="form-select form-select-sm py-1" [ngModel]="employeeData.department ?? ''"
                             (ngModelChange)="employeeData.department = $event" name="department">
@@ -265,13 +265,25 @@
 
               </select>
 
-            </div>
+              <option value="">
+                Select Department
+              </option>
 
-            <div class="col-md-3">
+              <option *ngFor="let dept of departments" [value]="dept.departmentId">
 
-              <label class="form-label mb-1">
-                Designation
-              </label>
+                {{ dept.departmentName }}
+
+              </option>
+
+            </select>
+
+          </div>
+
+        <div class="col-md-3">
+
+          <label class="form-label mb-1">
+            Designation
+          </label>
 
               <select class="form-select form-select-sm py-1" [ngModel]="employeeData.designation ?? ''"
                             (ngModelChange)="employeeData.designation = $event" name="designation">
