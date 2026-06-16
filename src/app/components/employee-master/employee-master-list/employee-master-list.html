@@ -180,23 +180,24 @@
 
                     <!-- STATUS -->
 
-                    <td>
+                 <td>
 
-                        <span class="badge" [ngClass]="
-                              emp.isActive
-                              ? 'bg-success'
-                              : 'bg-danger'
-                            ">
+                    <span class="badge cursor-pointer" [ngClass]="
+                        emp.isActive
+                        ? 'bg-success'
+                        : 'bg-danger'
+                        " title="Click to change status"
+                        (click)="toggleStatus(emp, $event)">
 
-                            {{
-                            emp.isActive
-                            ? 'Active'
-                            : 'Inactive'
-                            }}
+                        {{
+                        emp.isActive
+                        ? 'Active'
+                        : 'Inactive'
+                        }}
 
-                        </span>
+                    </span>
 
-                    </td>
+                </td>
 
                 </tr>
 
