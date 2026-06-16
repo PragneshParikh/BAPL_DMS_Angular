@@ -86,11 +86,10 @@ export class JobCard {
 
     this.searchModel.fromDate = this.formatDate(firstDayOfMonth);
     this.searchModel.toDate = this.formatDate(today);
-     this.loadJobCardList();
+    this.loadJobCardList();
     this.setUserRole();
     this.fetchLocations();
-   
-    this.loadChassisList();
+   this.loadChassisList();
     
   }
 
@@ -154,7 +153,9 @@ export class JobCard {
   }
 
  loadJobCardList() {
-
+debugger;
+  //console.log("dealercode testing",this.searchModel.dealerCode);
+  this.searchModel.dealerCode = this.storageService.getDealerCode();
   this.jobCardService.getJobCardList(this.searchModel)
     .subscribe({
       next: (res) => {
@@ -281,8 +282,7 @@ const dealerCode = this.storageService.getDealerCode();
       customerName: this.searchModel.customerName || null,
       chassisNo: this.searchModel.chassisNo || null
     };
-
-    this.jobCardService.searchJobCard(payload).subscribe(res => {
+    this.jobCardService.getJobCardList(payload).subscribe(res => {
       this.jobCardList = res;
     });
   }
