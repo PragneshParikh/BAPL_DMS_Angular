@@ -86,9 +86,10 @@ export class JobCard {
 
     this.searchModel.fromDate = this.formatDate(firstDayOfMonth);
     this.searchModel.toDate = this.formatDate(today);
+     this.loadJobCardList();
     this.setUserRole();
     this.fetchLocations();
-    this.loadJobCardList();
+   
     this.loadChassisList();
     
   }
@@ -158,6 +159,7 @@ export class JobCard {
     .subscribe({
       next: (res) => {
         this.jobCardList = res;
+        console.log("listing",this.jobCardList)
       },
       error: (err) => {
         console.error('Error fetching job cards', err);
