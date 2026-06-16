@@ -93,11 +93,11 @@
           </select>
       </div>
 
-      <!-- Stock Status -->
+      <!-- Vehicle Status -->
 
       <div class="col-md-2">
           <label class="form-label mb-1">
-              Stock Status
+              Vehicle Status
           </label>
 
           <select
@@ -108,12 +108,12 @@
                   All
               </option>
 
-              <option value="In Stock">
-                  In Stock
+              <option value="Available">
+                  Available
               </option>
 
-              <option value="Billed">
-                  Billed
+              <option value="Allocated">
+                  Allocated
               </option>
 
           </select>
@@ -196,7 +196,6 @@
             <th>Stock Status</th>
             <th>Vehicle Status</th>
             <th>Location</th>
-            
 
           </tr>
 
@@ -232,9 +231,17 @@
             <td>{{ formatDate(item.dispatchDate) }}</td>
             <td>{{ formatDate(item.receiveDate) }}</td>
             <td>{{ item.stockStatus }}</td>
-            <td>{{ item.vehicleStatus }}</td>
+            <td>
+              <span
+                class="badge"
+                [ngClass]="{
+                  'bg-success': item.vehicleStatus === 'Available',
+                  'bg-warning': item.vehicleStatus === 'Allocated'
+                }">
+                {{ item.vehicleStatus }}
+              </span>
+            </td>
             <td>{{ item.location }}</td>
-            
 
           </tr>
 
