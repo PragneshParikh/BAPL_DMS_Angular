@@ -381,7 +381,11 @@ export class VehiclePO implements OnInit {
   loadItemMasterList() {
     this.itemService.getItems(6, '', 11).subscribe({
       next: (res: any[]) => {
-        this.modelList = Array.isArray(res) ? res.filter(item => item.grpid === 6 || item.grppid === 6 || !item.grpid) : [];
+        this.modelList = Array.isArray(res)
+          ? res
+            .filter(item => item.grpid === 6 || item.grppid === 6 || !item.grpid)
+            .sort((a, b) => a.itemdesc.localeCompare(b.itemdesc))
+          : [];
         // Supplement missing info in purchaseDetails if needed
         if (this.purchaseDetails.length > 0) {
           this.purchaseDetails.forEach(item => {
