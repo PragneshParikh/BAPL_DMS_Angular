@@ -104,13 +104,22 @@
       <div class="section-header" (click)="toggle('job')">
         <h6 class="mb-0">Job Basic Information</h6>
         <div>
-          Valid till : {{odoReading || 0}} Vehicle Journey.
-          & {{duration || 0}} {{durationType || 0}} |
-          Previous : 0
+          Valid till :
+          {{ selectedJobtype == 1 ? 0 : (odoReading || 0) }}
+          Vehicle Journey.
+
+          &
+
+          {{ selectedJobtype == 1 ? 0 : (duration || 0) }}
+          {{ selectedJobtype == 1 ? '' : (durationType || '') }}
+
+          |
+
+          Previous Kms : 0
         </div>
 
         <div *ngIf="selectedJobtype != 1">
-          In Warranty Expired on {{expireWarrentyDate || ''}}
+          In Warranty Expired on {{ expireWarrentyDate || '' }}
         </div>
         <i [class]="isOpen.job ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
       </div>
