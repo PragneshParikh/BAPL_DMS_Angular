@@ -70,7 +70,8 @@
                 <label class="form-label">Chassis No.</label>
 
                 <input type="text" class="form-control form-control-sm" placeholder="Enter Chassis No."
-                    [(ngModel)]="searchModel.chassisNo" (input)="filterChassis()" (focus)="filterChassis()" (blur)="hideDropdown()">
+                    [(ngModel)]="searchModel.chassisNo" (input)="filterChassis()" (focus)="filterChassis()"
+                    (blur)="hideDropdown()">
 
                 <div class="dropdown-menu show w-100" *ngIf="filteredChassisList.length > 0">
                     <button type="button" class="dropdown-item" *ngFor="let item of filteredChassisList"
@@ -140,7 +141,7 @@
                         <th>SR.No.</th>
                         <th>Action</th>
                         <th>JobNo / JobDate</th>
-                        <th>JobStatus</th>
+                        <th>JobStatus/InvoiceNo</th>
                         <th>ManualJobNo.</th>
                         <th>LocationBooking</th>
                         <th>JobType / JobSource</th>
@@ -154,15 +155,15 @@
                 </thead>
 
                 <tbody>
-                    <tr *ngFor="let item of jobCardList; let i = index">
+                    <tr *ngFor="let item of jobCardList; let i = index" (dblclick)="onEdit(item)">
 
                         <!-- SR NO -->
                         <td>{{ i + 1 }}</td>
 
                         <!-- ACTION -->
                         <td>
-                            <button class="btn btn-sm btn-soft-primary" (click)="onEdit(item)"><i
-                                    class="ri-pencil-fill fs-12"></i></button>
+                            <!-- <button class="btn btn-sm btn-soft-primary" (click)="onEdit(item)"><i
+                                    class="ri-pencil-fill fs-12"></i></button> -->
                             <button class="btn btn-sm btn-soft-danger" [disabled]="currentUserRole !== 'SuperAdmin'"
                                 title="Only SuperAdmin can delete" (click)="deleteJobCard(item.id)">
                                 <i class="ri-delete-bin-fill fs-12"></i>
@@ -176,7 +177,7 @@
                         </td>
 
                         <!-- Job Status -->
-                        <td>{{ item.jobStatus }} <br>
+                        <td>{{ item.jobCardHeader.jobStatus }}<br>
                             {{ item.jobCardHeader.invoiceNo }}
                         </td>
 

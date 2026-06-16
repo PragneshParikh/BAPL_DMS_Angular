@@ -47,6 +47,7 @@ export class JobCard {
   serviceTypeList: any;
   selectedServiceType: string;
   chassisList: any[] = [];
+
   // userRole: string = ''; when userrole api done then this var use
 
   currentUserRole = userRole[0].value;
@@ -70,6 +71,10 @@ export class JobCard {
   ngOnInit(): void {
 
     this.isSuperAdmin = this.storageService.getRole().toLocaleLowerCase() === 'superadmin';
+    let dealerCode = '';
+    if (!this.isSuperAdmin) {
+      dealerCode = this.storageService.getDealerCode();
+    }
     const today = new Date();
 
     // Current month first date
@@ -81,19 +86,21 @@ export class JobCard {
 
     this.searchModel.fromDate = this.formatDate(firstDayOfMonth);
     this.searchModel.toDate = this.formatDate(today);
+     this.loadJobCardList();
     this.setUserRole();
     this.fetchLocations();
+   
     this.loadChassisList();
-    this.loadJobCardList();
+    
   }
 
   formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
 
-  return `${year}-${month}-${day}`;
-}
+    return `${year}-${month}-${day}`;
+  }
 
   //Fetech Dealer Location
   fetchLocations(): void {
@@ -116,7 +123,7 @@ export class JobCard {
     this.jobTypeId = this.selectedJobtype;
     this.jobCardService.getAllInspectedChassis(dealerCode, this.jobTypeId).subscribe({
       next: (res: any) => {
-        console.log(res);
+        console.log("list", res);
 
         // a duplicate chassis no remove (optional)
         this.chassisList = res;
@@ -128,43 +135,37 @@ export class JobCard {
   }
 
   filterChassis() {
-  const searchText = (this.searchModel.chassisNo || '').toLowerCase();
+    const searchText = (this.searchModel.chassisNo || '').toLowerCase();
 
-  this.filteredChassisList = this.chassisList.filter(x =>
-    x.chassisNumber.toLowerCase().includes(searchText)
-  ).slice(0, 10); // maximum 10 suggestions
-}
-hideDropdown() {
-  setTimeout(() => {
+    this.filteredChassisList = this.chassisList.filter(x =>
+      x.chassisNumber.toLowerCase().includes(searchText)
+    ).slice(0, 10); // maximum 10 suggestions
+  }
+  hideDropdown() {
+    setTimeout(() => {
+      this.filteredChassisList = [];
+    }, 200);
+  }
+
+  selectChassis(item: any) {
+    this.searchModel.chassisNo = item.chassisNumber;
     this.filteredChassisList = [];
-  }, 200);
-}
+    this.search();
+  }
 
-selectChassis(item: any) {
-  this.searchModel.chassisNo = item.chassisNumber;
-  this.filteredChassisList = [];
-  this.search();
-}
+ loadJobCardList() {
 
-  loadJobCardList() {
-    // this.lodder = true;
-    let dealerCode = '';
-    if (!this.isSuperAdmin) {
-      dealerCode = this.storageService.getDealerCode();
-    }
-
-    this.jobCardService.getJobCardList(dealerCode).subscribe({
+  this.jobCardService.getJobCardList(this.searchModel)
+    .subscribe({
       next: (res) => {
         this.jobCardList = res;
-        console.log("listing : ", res)
-        // this.loading = false;
+        console.log("listing",this.jobCardList)
       },
       error: (err) => {
         console.error('Error fetching job cards', err);
-        // this.loading = false;
       }
     });
-  }
+}
 
   onEdit(row: any) {
     this.router.navigate(['/job-card-addForm/job-card-add-form'], {
@@ -172,8 +173,9 @@ selectChassis(item: any) {
     });
   }
 
+  
   deleteJobCard(id: number) {
-
+const dealerCode = this.storageService.getDealerCode();
     Swal.fire({
       title: 'Are you sure?',
       text: 'You will not be able to recover this Job Card!',

@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
+import { StorageService } from '../../../core/services/storage';
 
 @Component({
   selector: 'app-customer-ledger-list',
@@ -25,12 +26,14 @@ export class CustomerLedgerList implements OnInit {
   page = 1;
   pageSize = 10;
   collectionSize = 0;
+  isSuperAdmin: boolean;
 
   constructor(
     private ledgerMasterService: LedgerMasterService,
     private route: Router,
     private loader: LoaderService,
     private toaster: ToastService,
+    private storageService: StorageService
   ) { }
 
   ngOnInit(): void {
@@ -105,4 +108,35 @@ export class CustomerLedgerList implements OnInit {
     this.getCustomerLedgerDetails();
   }
 
+
+  downloadExcel(): void {
+    this.loader.show();
+    const isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    const dealerCode = isSuperAdmin ? null : this.storageService.getDealerCode();
+
+    this.ledgerMasterService.downloadExcel(dealerCode).subscribe({
+      next: (data: Blob) => {
+        const blob = new Blob([data], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'LedgerList.xlsx';
+        link.click();
+
+        window.URL.revokeObjectURL(url);
+        this.loader.hide();
+
+        this.toaster.show('Excel downloaded successfully', {
+          classname: 'bg-success text-light',
+          delay: 3000
+        });
+      },
+      error: () => {
+        this.loader.hide();
+      }
+    });
+  }
 }

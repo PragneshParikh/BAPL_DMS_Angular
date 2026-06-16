@@ -32,51 +32,43 @@ export class JobCardService {
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetJobSource`);
   }
 
-  getPdiChecklist(): Observable<any> {
-    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetPdiChecklist`)
+  getPdiChecklist(oemModelId:number): Observable<any> {
+    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetPdiChecklist?oemModelId=${oemModelId}`)
   }
 
-  // getJobCardList(dealerCode: string): Observable<any> {
-  //   return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetJobCardList?dealerCode=${dealerCode}`);
-  // }
+ getJobCardList(search: any): Observable<any> {
 
-  getJobCardList(dealerCode?: string,
-    dateFrom?: string,
-    dateTo?: string,
-    jobNo?: string,
-    registerNo?: string,
-    chassisNo?: string): Observable<any> {
-    let params = new HttpParams();
+  let params = new HttpParams();
 
-    if (dealerCode) {
-      params = params.set('dealerCode', dealerCode);
-    }
-
-    if (dateFrom) {
-      params = params.set('dateFrom', dateFrom);
-    }
-
-    if (dateTo) {
-      params = params.set('dateTo', dateTo);
-    }
-
-    if (jobNo) {
-      params = params.set('jobNo', jobNo);
-    }
-
-    if (registerNo) {
-      params = params.set('registerNo', registerNo);
-    }
-
-    if (chassisNo) {
-      params = params.set('chassisNo', chassisNo);
-    }
-    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetJobCardList`,
-      {
-        params
-      }
-    );
+  if (search.dealerCode) {
+    params = params.set('dealerCode', search.dealerCode);
   }
+
+  if (search.fromDate) {
+    params = params.set('dateFrom', search.fromDate);
+  }
+
+  if (search.toDate) {
+    params = params.set('dateTo', search.toDate);
+  }
+
+  if (search.jobNo) {
+    params = params.set('jobNo', search.jobNo);
+  }
+
+  if (search.registerNo) {
+    params = params.set('registerNo', search.registerNo);
+  }
+
+  if (search.chassisNo) {
+    params = params.set('chassisNo', search.chassisNo);
+  }
+
+  return this.httpClient.get<any[]>(
+    `${this.baseUrl}/JobCard/GetJobCardList`,
+    { params }
+  );
+}
 
   insertJobCard(data: any) {
     return this.httpClient.post(`${this.baseUrl}/JobCard/SaveJobCardDetails`, data);

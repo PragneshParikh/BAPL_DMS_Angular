@@ -130,6 +130,7 @@ export class JobCardAddForm {
   complaintMasterList: any[] = [];
   filteredComplaints: any[] = [];
   showComplaintDropdown = false;
+  oemModelId: any;
 
 
   constructor(private storageService: StorageService,
@@ -146,6 +147,13 @@ export class JobCardAddForm {
   ngOnInit(): void {
     console.log('Date :', new Date().toISOString().split('T')[0]);
     this.dealerCode = this.storageService.getDealerCode();
+    this.loadPrefix();
+    this.fetchLocations();
+    this.loadJobTypes();
+    this.loadChassisList();
+    this.loadJobSorces();
+    this.loadComplaintMaster();
+    
     const data = history.state.data;
 
     if (data) {
@@ -153,15 +161,8 @@ export class JobCardAddForm {
       this.chassiseditData = data;
       this.patchEditData(data);
     }
-    this.loadPrefix();
-    this.fetchLocations();
-    this.loadJobTypes();
-    this.loadChassisList();
-    this.loadJobSorces();
-    this.loadComplaintMaster();
-    this.loadPdiData();
-
-
+    
+    //this.loadPdiData(this.oemModelId);
     if (!this.isEditMode) {
       this.getJobNo();
     }
@@ -243,32 +244,32 @@ export class JobCardAddForm {
     }, 200);
   }
 
-allowOnlyNumbers(
-  event: any,
-  field: 'rear' | 'front' | 'altMobile' | 'manualno'
-) {
-  const value = event.target.value.replace(/\D/g, '');
-  event.target.value = value;
+  allowOnlyNumbers(
+    event: any,
+    field: 'rear' | 'front' | 'altMobile' | 'manualno'
+  ) {
+    const value = event.target.value.replace(/\D/g, '');
+    event.target.value = value;
 
-  switch (field) {
-    case 'rear':
-      this.airPressureRear = value;
-      break;
+    switch (field) {
+      case 'rear':
+        this.airPressureRear = value;
+        break;
 
-    case 'front':
-      this.airPressureFront = value;
-      break;
+      case 'front':
+        this.airPressureFront = value;
+        break;
 
-    case 'altMobile':
-      this.customerObj.customerAltMobile = value;
-      break;
+      case 'altMobile':
+        this.customerObj.customerAltMobile = value;
+        break;
 
-    case 'manualno':
-      this.manualJobNo = value;
-      break;
+      case 'manualno':
+        this.manualJobNo = value;
+        break;
+    }
   }
-}
-  
+
 
   onComplaintSearch(event: any): void {
 
@@ -369,9 +370,11 @@ allowOnlyNumbers(
     });
   }
 
-  loadPdiData() {
-    this.jobCardService.getPdiChecklist().subscribe(res => {
+  loadPdiData(oemModelId: number) {
+
+    this.jobCardService.getPdiChecklist(oemModelId).subscribe(res => {
       this.pdiCheckList = res
+      console.log("pdichecklist",this.pdiCheckList)
     });
   }
   toggle(section: string) {
@@ -485,7 +488,8 @@ allowOnlyNumbers(
     this.loadServiceHistory(this.selectedChassis);
 
     const selected = this.chassisList.find(
-      x => x.chassisNumber == this.selectedChassis   //  use ==
+      x => x.chassisNumber == this.selectedChassis
+      //  use ==
     );
 
     if (!selected) return;
@@ -515,6 +519,10 @@ allowOnlyNumbers(
     this.duration = selected.duration;
     this.durationType = selected.durationType;
     this.expireWarrentyDate = selected.expireWarrentyDate;
+    this.oemModelId = selected.oemModelId;
+    if (this.oemModelId) {
+      this.loadPdiData(this.oemModelId);
+    }
   }
 
   // PDiChecklist popup
@@ -610,23 +618,33 @@ allowOnlyNumbers(
     this.complaintList.splice(index, 1);
   }
   savePdi() {
-    this.pdiCheckList = this.pdiCheckList.map(x => ({
-      ...x,
-      isStatus: x.isStatus === true,   // normalize
-      remarks: x.remarks || ''
-    }));
 
-    this.isPdiSaved = true; // optional flag
+  this.pdiCheckList = this.pdiCheckList.map(x => ({
+    ...x,
+    isStatus: x.isStatus === true,
+    remarks: x.remarks || ''
+  }));
 
+  console.log("Save PDIChecklist",this.pdiCheckList)
+  this.isPdiSaved = true;
+
+  Swal.fire({
+    icon: 'success',
+    title: 'PDI Checklist has been done.',
+    timer: 1500,
+    showConfirmButton: false
+  }).then(() => {
     this.modalService.dismissAll();
-  }
+  });
+}
   //insert jobcard
   saveJobCard() {
+    debugger
     //  VALIDATION (recommended)
-    // if (!this.isPdiSaved) {
-    //   Swal.fire('Error', 'Please complete PDI first', 'error');
-    //   return;
-    // }
+    if (!this.isPdiSaved) {
+      Swal.fire('Error', 'Please complete PDI first', 'error');
+      return;
+    }
 
     if (!this.selectedChassis || this.selectedChassis.trim() === '') {
       this.toaster.show("Please select chassis number.", { classname: 'bg-warning text-white', delay: 5000 })
@@ -726,10 +744,11 @@ allowOnlyNumbers(
     }));
 
     //  PDI (USE STORED DATA )
-
+ 
     const JobCardpdiChecklist = this.pdiCheckList.map(x => ({
-
+     
       pdichecklistMasterId: x.id,
+      oemModelId : x.oemModelId,
       isStatus: x.isStatus,   // use normalized value
       remarks: x.remarks,
       createdBy: userId,
@@ -951,7 +970,7 @@ allowOnlyNumbers(
     this.isPdiSaved = false;
 
     // IMPORTANT: reload PDI checklist (not empty)
-    this.loadPdiData();
+    this.loadPdiData(0);
   }
   goToFFIR() {
 

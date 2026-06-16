@@ -56,6 +56,7 @@ import { AddVehicleStockTransfer } from './components/vehicle-stock-transfer/add
 import { VehicleStockTransferList } from './components/vehicle-stock-transfer/vehicle-stock-transfer-list/vehicle-stock-transfer-list';
 import { GroupMaster } from './components/group-master/group-master';
 import { TermConditionMaster } from './components/term-condition-master/term-condition-master';
+import { OccupationMaster } from './components/occupation-master/occupation-master';
 
 
 export const routes: Routes = [
@@ -183,6 +184,7 @@ export const routes: Routes = [
       { path: 'term-condition-master', component: TermConditionMaster, data: [60] },
       { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
  
+      { path: 'occupation-master', component: OccupationMaster, data: [62] },
     ]
   },
   { path: '**', component: WorkInProgress }
