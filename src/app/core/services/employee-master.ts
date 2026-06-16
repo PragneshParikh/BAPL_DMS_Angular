@@ -94,17 +94,39 @@ export class EmployeeMasterService {
     );
   }
 
-   getEmployeesByDesignation(dealerCode?: string, designation?: string): Observable<any[]> {
-  let params = new HttpParams();
-  if (dealerCode) {
-    params = params.set('dealerCode', dealerCode);
+  getEmployeesByDesignation(dealerCode?: string, designation?: string): Observable<any[]> {
+    let params = new HttpParams();
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
+    }
+    if (designation) {
+      params = params.set('designation', designation);
+    }
+    return this.http.get<any[]>(
+      `${this.apiUrl}/Employee/employeeByDesignation`,
+      { params }
+    );
   }
-  if (designation) {
-    params = params.set('designation', designation);
+
+  // =========================================
+  // GET DEALER BY CODE
+  // =========================================
+
+  getDealerByCode(dealerCode: string): Observable<any> {
+
+    return this.http.get<any>(
+      `${this.apiUrl}/GetDealerByCode/${dealerCode}`
+    );
   }
-  return this.http.get<any[]>(
-    `${this.apiUrl}/Employee/employeeByDesignation`,
-    { params }
-  );
-}
+
+  // =========================================
+  // GET DEALER LOCATIONS
+  // =========================================
+
+  getDealerLocations(dealerCode: string): Observable<any[]> {
+
+    return this.http.get<any[]>(
+      `${this.apiUrl}/GetLocationsByDealer/${dealerCode}`
+    );
+  }
 }

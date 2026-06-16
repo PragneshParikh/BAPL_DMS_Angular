@@ -99,4 +99,50 @@ export class EmployeeMasterList
 
     this.getEmployees();
   }
+
+  // =====================================
+// TOGGLE ACTIVE / INACTIVE
+// =====================================
+
+  toggleStatus(emp: any, event: Event): void {
+
+    // Prevent row click from opening edit popup
+    event.stopPropagation();
+
+    const newStatus = !emp.isActive;
+
+    const confirmMsg = newStatus
+      ? 'Make this employee Active?'
+      : 'Make this employee Inactive?';
+
+    if (!confirm(confirmMsg)) {
+      return;
+    }
+
+    const employeeObj = {
+      ...emp,
+      isActive: newStatus
+    };
+
+    this.employeeService
+      .updateEmployee(employeeObj)
+
+      .subscribe({
+
+        next: () => {
+
+          emp.isActive = newStatus;
+        },
+
+        error: (error) => {
+
+          console.error(
+            'Status Update Error',
+            error
+          );
+
+          alert('Failed to update status');
+        }
+      });
+  }
 }

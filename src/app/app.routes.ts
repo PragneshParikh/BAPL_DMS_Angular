@@ -180,7 +180,9 @@ export const routes: Routes = [
       { path: 'vehicle-stock-transfer', component: VehicleStockTransferList, data: [57] },
       { path: 'vehicle-stock-transfer/edit/:id', component: AddVehicleStockTransfer, data: [57] },
       { path: 'group-master', component: GroupMaster, data: [59] },
-      { path: 'term-condition-master', component: TermConditionMaster, data: [60] }
+      { path: 'term-condition-master', component: TermConditionMaster, data: [60] },
+      { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
+ 
     ]
   },
   { path: '**', component: WorkInProgress }
