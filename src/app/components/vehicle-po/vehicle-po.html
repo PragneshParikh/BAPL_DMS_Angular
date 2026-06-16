@@ -33,7 +33,7 @@
                         <label class="form-label mb-0 small">Location</label>
                         <select class="form-select form-select-sm border-start border-2"
                             [class.is-invalid]="locationInvalid" [(ngModel)]="selectedLocation"
-                            (change)="onLocationChange(); locationInvalid = false" [disabled]="isSubmitted">
+                            (change)="onLocationChange($event); locationInvalid = false" [disabled]="isSubmitted">
                             <option value="">--Select Location--</option>
                             <option *ngFor="let loc of locationList" [value]="loc.loccode">
                                 {{loc.locname}}

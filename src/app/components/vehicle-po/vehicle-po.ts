@@ -148,11 +148,11 @@ export class VehiclePO implements OnInit {
     });
   }
 
-  generateNewOrderNo() {
+  generateNewOrderNo(dealerCode: string) {
     // this.orderNo = 'P0-7'; // Logic for new order number
     // this.orderNo = 'TEMP-' + Date.now();
     this.loader.show();
-    this.prefixService.getPrefixByDealerByModule(this.dealerCode, 'purchase_order').subscribe({
+    this.prefixService.getPrefixByDealerByModule(dealerCode, 'purchase_order').subscribe({
       next: (res: string) => {
         this.loader.hide();
         this.orderNo = res;
@@ -367,8 +367,11 @@ export class VehiclePO implements OnInit {
     });
   }
 
-  onLocationChange() {
-    this.generateNewOrderNo();
+  onLocationChange(event: any) {
+    if (event) {
+      const dealerCode = this.locationList.filter(x => x.loccode === event.target.value)[0].dealercode;
+      this.generateNewOrderNo(dealerCode);
+    }
     // Refresh calculations for the current item if a model is already selected
     if (this.currentItem.modelNo) {
       this.calculateRowTotals();
