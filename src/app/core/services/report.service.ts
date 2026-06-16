@@ -46,6 +46,10 @@ import { environment }
   from '../../../environments/environment';
 import { Form22SlipViewModel } from '../../ViewModels/Form22SlipViewModel';
 
+import {
+  VehicleSaleBillReportFilterModel,
+  VehicleSaleBillReportResponse
+} from '../../ViewModels/models/vehicle-sale-bill-report.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -420,4 +424,16 @@ getDealerWiseStockReport(dealerCode?: string):
     );
   }
 
+  // =====================================================
+  // VEHICLE SALE BILL REPORT
+  // =====================================================
+
+  getVehicleSaleBillReport(
+    filter: VehicleSaleBillReportFilterModel
+  ): Observable<VehicleSaleBillReportResponse> {
+    return this.http.post<VehicleSaleBillReportResponse>(
+      `${this.apiUrl}/vehicle-sale-bill`,
+      filter
+    );
+  }
 }
