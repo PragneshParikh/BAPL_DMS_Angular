@@ -359,9 +359,8 @@ console.log(res);
     const bookingIdNumber = bookingId ? Number(bookingId) : null;
 const dealerCode = this.storageService.getDealerCode();
     this.loader.show();
-debugger;
     // Check duplicate receipt
-    this.receiptEntryService.checkLeadExist(mobileNo, bookingId,this.formData.saleType,dealerCode).subscribe({
+    this.receiptEntryService.checkReceiptExist(mobileNo, bookingId,this.formData.saleType,dealerCode).subscribe({
       next: (exists: boolean) => {
         if (exists) {
           this.loader.hide();
@@ -744,9 +743,8 @@ console.log(payload);
     };
   }
   checkNo(mobileNo: string ) {
-    debugger;
 const dealerCode= this.storageService.getDealerCode();
-  this.receiptEntryService.checkLeadExist(mobileNo, null,this.formData.saleType,dealerCode).subscribe({
+  this.receiptEntryService.checkReceiptExist(mobileNo, null,this.formData.saleType,dealerCode).subscribe({
     next: (exists: boolean) => {
 
       if (exists) {

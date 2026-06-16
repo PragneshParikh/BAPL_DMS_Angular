@@ -343,7 +343,6 @@ export class RepairBill implements OnInit {
   }
 
   onSelect(item: any) {
-    debugger;
     if (item.isMaterialTransfer === false || item.isMaterialTransfer === "null") {
       this.toaster.show('Material Transfer is not completed for this Job Card', {
         classname: 'bg-warning text-dark',
