@@ -104,8 +104,12 @@
       <div class="section-header" (click)="toggle('job')">
         <h6 class="mb-0">Job Basic Information</h6>
         <div>
-          Valid till : {{odoReading || 0}} Vehicle Journey. & {{duration || 0}} {{durationType || 0}} |
-          Previous : 0 <br>
+          Valid till : {{odoReading || 0}} Vehicle Journey.
+          & {{duration || 0}} {{durationType || 0}} |
+          Previous : 0
+        </div>
+
+        <div *ngIf="selectedJobtype != 1">
           In Warranty Expired on {{expireWarrentyDate || ''}}
         </div>
         <i [class]="isOpen.job ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
@@ -267,7 +271,7 @@
               </div>
               <div class="col-md-3">
                 <label>Job Estimate</label>
-                <input class="form-control form-control-sm" [(ngModel)]="jobEstimate">
+                <input type="number" class="form-control form-control-sm" [(ngModel)]="jobEstimate">
               </div>
               <div class="col-md-4">
                 <label>Air Pressure Rear Tyre</label>
@@ -320,7 +324,10 @@
 
               <div class="col-md-4">
                 <label>Reg. No.</label>
-                <input class="form-control form-control-sm" [(ngModel)]="registerNo">
+                <input class="form-control form-control-sm" [(ngModel)]="registerNo" [readonly]="selectedJobtype == 1"
+                  [ngClass]="{
+         'bg-light text-muted': selectedJobtype == 1
+       }">
               </div>
 
               <div class="col-md-4">
@@ -347,12 +354,18 @@
 
               <div class="col-md-4">
                 <label>Next Service Due</label>
-                <input type="date" class="form-control form-control-sm" [(ngModel)]="customerObj.nextServiceDueDate">
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="customerObj.nextServiceDueDate"
+                  [readonly]="selectedJobtype == 1" [ngClass]="{
+         'bg-light text-muted': selectedJobtype == 1
+       }">
               </div>
 
               <div class="col-md-4">
                 <label>RSA Renewal Date</label>
-                <input type="date" class="form-control form-control-sm" [(ngModel)]="customerObj.rsaRenewalDate">
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="customerObj.rsaRenewalDate"
+                  [readonly]="selectedJobtype == 1" [ngClass]="{
+         'bg-light text-muted': selectedJobtype == 1
+       }">
               </div>
 
               <div class="col-md-12">
@@ -549,14 +562,15 @@
       <div class="section-body" *ngIf="isOpen.comments">
         <div class="row g-3">
           <div class="col-md-3">
-            <label>Observation(s)</label>
-            <textarea class="form-control form-control-sm" [(ngModel)]="observation" placeholder="Enter observation">
+            <label>Observation(s)<span class="text-danger">*</span></label>
+            <textarea class="form-control form-control-sm" [(ngModel)]="observation" placeholder="Enter observation"
+              required>
             </textarea>
           </div>
           <div class="col-md-3">
-            <label>Supervisor Comment</label>
+            <label>Supervisor Comment<span class="text-danger">*</span></label>
             <textarea class="form-control form-control-sm" rows="3" [(ngModel)]="supervisorComment"
-              placeholder="Enter supervisor comment">
+              placeholder="Enter supervisor comment" required>
             </textarea>
           </div>
         </div>
@@ -685,7 +699,7 @@
   </div>
   <!-- FOOTER -->
   <div class="card-footer d-flex justify-content-end gap-2">
-    <button type="button" class="btn btn-primary btn-sm" (click)="saveJobCard()">Save</button>
+    <button type="button" class="btn btn-primary btn-sm" [disabled]="!isPdiSaved" (click)="saveJobCard()">Save</button>
     <button class="btn btn-primary btn-sm" (click)="openPdiModal(PdiModelChecklist)">PDI Checklist</button>
     <button class="btn btn-danger btn-sm">Cancel</button>
   </div>
