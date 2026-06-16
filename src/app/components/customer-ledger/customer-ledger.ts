@@ -13,6 +13,7 @@ import { StateService } from '../../core/services/state';
 import { StorageService } from '../../core/services/storage';
 import { AuthenticationService } from '../../core/services/auth.service';
 import { GetUserNameByIdPipe } from '../../core/pipe/get-user-name-by-id-pipe';
+import { OccupationService } from '../../core/services/occupation-service';
 
 @Component({
   selector: 'app-customer-ledger',
@@ -26,10 +27,12 @@ export class CustomerLedger {
   ledgerTypes = LedgerTypes;
   formData = {
     id: 0,
+    dealerCode:'',
     ledgerCode: '',
     ledgerName: '',
     ledgerType: 'Party',
     gstNo: '',
+    occupationId: null as number | null,
     pan: '',
     aadharNumber: '',
     mobileNumber: '',
@@ -53,6 +56,9 @@ export class CustomerLedger {
   cities: any[] = [];
   states: any[] = [];
   lstUsers: any[] = [];
+  occupationList: any;
+  mobileList: string[];
+  mobileExist: boolean;
 
   constructor(
     private ledgerService: LedgerMasterService,
@@ -63,6 +69,7 @@ export class CustomerLedger {
     private cityService: CityService,
     private stateService: StateService,
     private storageService: StorageService,
+    private occupationService: OccupationService,
     private authService: AuthenticationService,
     @Optional() public activeModal: NgbActiveModal
   ) {
@@ -81,8 +88,10 @@ export class CustomerLedger {
   @Input() leadData: any;
 
   async ngOnInit() {
-
+await this.getMobileList();
+await this.getNextLedCode();
     await this.getUserList();
+    await this.getOccupationList();
     await this.getCity();
     await this.getState();
 
@@ -100,11 +109,11 @@ export class CustomerLedger {
       this.getCustomerLedgerDetails(this.ledgerId);
       return;
     }
- if (this.leadData) {
-  console.log(this.leadData);
-  
-    this.populateLeadData();
-  }
+    if (this.leadData) {
+      console.log(this.leadData);
+
+      this.populateLeadData();
+    }
     // ROUTE MODE
     this.activatedRoute.paramMap.subscribe(params => {
       const id = Number(params.get('id'));
@@ -114,48 +123,94 @@ export class CustomerLedger {
       }
     });
   }
-populateLeadData() {
-
-  if (!this.leadData) return;
-
-  this.formData.ledgerName = this.leadData.name || '';
-  this.formData.mobileNumber = this.leadData.mobile || '';
-  this.formData.email =
-    this.leadData.email && this.leadData.email !== 'null'
-      ? this.leadData.email
-      : '';
-
-  this.formData.address = this.leadData.brancharea || '';
-  this.formData.pin = this.leadData.branchpin?.toString() || '';
-
-  this.formData.ledgerType = this.defaultLedgerType || 'Party';
-
-  // Auto-select state
-  const state = this.states.find(
-    x => x.stateName?.toLowerCase() === this.leadData.state?.toLowerCase()
-  );
-
-  if (state) {
-
-    this.formData.state = state.id;
-
-    this.changeCityOptions(state.id);
-
-    const city = this.cities.find(
-      x => x.cityName?.toLowerCase() === this.leadData.city?.toLowerCase()
+  getMobileList() {
+    const dealerCode = this.storageService.getDealerCode();
+    this.ledgerService.getLedgerMobileList(dealerCode).subscribe(
+      (res)=>{
+        this.mobileList=res;
+        console.log(res);
+        
+      }
     );
+  }
+  getNextLedCode() {
+     const dealerCode = this.storageService.getDealerCode();
+    this.ledgerService.getNextLedId(dealerCode).subscribe(
+      (res)=>{
+        console.log(res);
+        if(!this.isModify)
+        {
+          this.formData.ledgerCode =res;
+        }
+      }
+    );
+  }
+ checkPhoneNumberExist(mobileNo: string): void {
+  if (this.mobileList?.includes(mobileNo)) {
+    this.mobileExist =true;
+    this.toaster.show('Mobile number already exists', {
+      classname: 'bg-danger text-white',
+      delay: 5000
+    });
 
-    if (city) {
-      this.formData.city = city.id;
-    }
+    return;
   }
 }
+  getOccupationList() {
+    this.occupationService.getActiveOccupations().subscribe((res) => {
+      console.log(res);
+
+      this.occupationList = res;
+      console.log(this.occupationList);
+
+
+    });
+  }
+  populateLeadData() {
+
+    if (!this.leadData) return;
+
+    this.formData.ledgerName = this.leadData.name || '';
+    this.formData.mobileNumber = this.leadData.mobile || '';
+    this.formData.email =
+      this.leadData.email && this.leadData.email !== 'null'
+        ? this.leadData.email
+        : '';
+
+    this.formData.address = this.leadData.brancharea || '';
+    this.formData.pin = this.leadData.branchpin?.toString() || '';
+
+    this.formData.ledgerType = this.defaultLedgerType || 'Party';
+
+    // Auto-select state
+    const state = this.states.find(
+      x => x.stateName?.toLowerCase() === this.leadData.state?.toLowerCase()
+    );
+
+    if (state) {
+
+      this.formData.state = state.id;
+
+      this.changeCityOptions(state.id);
+
+      const city = this.cities.find(
+        x => x.cityName?.toLowerCase() === this.leadData.city?.toLowerCase()
+      );
+
+      if (city) {
+        this.formData.city = city.id;
+      }
+    }
+  }
   getCustomerLedgerDetails(id: any) {
     this.loader.show();
     this.ledgerService.getLedgerById(id).subscribe({
       next: (res) => {
+        console.log(res);
+        
         this.formData = {
           id: res.id,
+          dealerCode:res.dealerCode,
           ledgerCode: res.ledgerCode,
           ledgerName: res.ledgerName,
           ledgerType: res.ledgerType,
@@ -169,6 +224,7 @@ populateLeadData() {
           pin: res.pin,
           email: res.eMail,
           gender: res.gender,
+          occupationId: res.occupationId,
           dateOfBirth: res.dateOfBirth,
           createdBy: res.createdBy,
           createdDate: res.createdDate,
@@ -200,10 +256,10 @@ populateLeadData() {
   }
 
   onSubmit(form: any) {
+    const dealerCode = this.storageService.getDealerCode();
+    this.formData.dealerCode=dealerCode;
     if (!form.valid) return;
-
     this.loader.show();
-
     const request$ = this.isModify
       ? this.ledgerService.update(this.formData)
       : this.ledgerService.insert(this.formData);

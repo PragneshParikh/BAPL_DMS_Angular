@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -42,5 +42,35 @@ export class LedgerMasterService {
     return this.httpClient.get(`${this.baseUrl}/ledger-master/ledgerByType?ledgerType=${ledgerType}`);
   }
 
+ getNextLedId(dealerCode: string): Observable<string> {
+  return this.httpClient.get<string>(
+    `${this.baseUrl}/ledger-master/getNextLed`,
+    {
+      params: { dealerCode },
+      responseType: 'text' as 'json'
+    }
+  );
+}
+  getLedgerMobileList(dealerCode: string): Observable<string[]> {
+    return this.httpClient.get<string[]>(`${this.baseUrl}/ledger-master/getLedgerMobileList`, {
+      params: {
+        dealerCode: dealerCode
+      }
+    }
+    );
+  }
 
+downloadExcel(dealerCode: string | null = null) {
+  let params = new HttpParams();
+  if (dealerCode) {
+    params = params.set('dealerCode', dealerCode);
+  }
+  return this.httpClient.get(
+    `${this.baseUrl}/ledger-master/download`,
+    {
+      params,
+      responseType: 'blob'
+    }
+  );
+}
 }

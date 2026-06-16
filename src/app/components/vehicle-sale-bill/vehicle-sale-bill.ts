@@ -66,18 +66,18 @@ export class VehicleSaleBill {
     private loader: LoaderService,
     private toaster: ToastService,
     private storageService: StorageService,
-    private locationService: LocationMasterService  ,
+    private locationService: LocationMasterService,
   ) { }
 
   ngOnInit() {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-  this.fetchLocations();
+    this.fetchLocations();
     const today = new Date();
     const sevenDaysBefore = new Date(today);
     sevenDaysBefore.setDate(today.getDate() - 7);
     this.filter.fromDate = sevenDaysBefore;
     this.filter.toDate = today;
-    
+
     this.searchChanged.pipe(debounceTime(400)).subscribe(() => {
       this.loadData();
     });
@@ -194,53 +194,38 @@ export class VehicleSaleBill {
 
     this.locationService.getLocationByDealerCode(dealerCode).subscribe({
       next: (data: any[]) => {
-        
-        
+
+
         this.locations = data;
 
-             },
+      },
       error: (err) => {
         console.error('Error fetching locations', err);
       }
     });
   }
   getLocationName(locCode: string): string {
-    debugger;
-  return this.locations.find(x => x.loccode === locCode)?.locname || locCode;
-}
+    return this.locations.find(x => x.loccode === locCode)?.locname || locCode;
+  }
   downloadDealerExcel(): void {
     this.loader.show();
 
-    const from = this.filter.fromDate
-      ? new Date(this.filter.fromDate)
-      : undefined;
-
-    const to = this.filter.toDate
-      ? new Date(this.filter.toDate)
-      : undefined;
-
+    const from = this.filter.fromDate ? new Date(this.filter.fromDate) : undefined;
+    const to = this.filter.toDate ? new Date(this.filter.toDate) : undefined;
     this.loader.show();
-
     this.service.downloadExcel(from, to).subscribe({
       next: (data: Blob) => {
-
         const blob = new Blob([data], {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
-
         const url = window.URL.createObjectURL(blob);
-
         const link = document.createElement('a');
         link.href = url;
         link.download = 'SaleBillList.xlsx';
         link.click();
-
         window.URL.revokeObjectURL(url);
-
         this.loader.hide();
-
-        this.toaster.show(
-          'Excel downloaded successfully',
+        this.toaster.show('Excel downloaded successfully',
           {
             classname: 'bg-success text-light',
             delay: 3000
@@ -273,8 +258,8 @@ export class VehicleSaleBill {
   }
 
   getCustomerTypeName(value: string): string {
-  return this.customerTypeOptions.find(ct => ct.value === value)?.name ?? value ?? '-';
-}
+    return this.customerTypeOptions.find(ct => ct.value === value)?.name ?? value ?? '-';
+  }
 
   downloadSelectedBills() {
     const form22Ids = this.selectedForm22Bills.map(x => x.id);
@@ -311,7 +296,7 @@ export class VehicleSaleBill {
     return this.billingTypeOptions.find(x => x.id === id)?.value ?? '';
   }
 
-    downloadSaleBill(id: number) {
+  downloadSaleBill(id: number) {
     this.service.downloadSaleBillPdf(id).subscribe(blob => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -320,5 +305,5 @@ export class VehicleSaleBill {
       a.click();
       window.URL.revokeObjectURL(url);
     });
-  }  
+  }
 }
