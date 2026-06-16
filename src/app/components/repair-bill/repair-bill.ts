@@ -19,6 +19,7 @@ import { RepairBillService } from '../../core/services/repair-bill-service';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { Console } from 'console';
+import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
 
 @Component({
   selector: 'app-repair-bill',
@@ -140,6 +141,15 @@ export class RepairBill implements OnInit {
   labourId: any;
   partwiseLabourId: any;
   customerLedgerId: any;
+  searchModel: JobCardSearchModel = {
+      dealerCode: '',
+      fromDate: '',
+      toDate: '',
+      serviceLocation: '',
+      jobNo: null,
+      customerName: '',
+      chassisNo: ''
+    };
 
 
 
@@ -310,12 +320,7 @@ export class RepairBill implements OnInit {
     }
     this.loader.show();
 
-    this.jobCardService.getJobCardList(dealerCode,
-      this.dateFrom,
-      this.dateTo,
-      this.jobNo,
-      this.registerNo,
-      this.chassisNo
+    this.jobCardService.getJobCardList(this.searchModel
     ).subscribe({
       next: (res) => {
         this.loader.hide();
@@ -343,7 +348,6 @@ export class RepairBill implements OnInit {
   }
 
   onSelect(item: any) {
-    debugger;
     if (item.isMaterialTransfer === false || item.isMaterialTransfer === "null") {
       this.toaster.show('Material Transfer is not completed for this Job Card', {
         classname: 'bg-warning text-dark',

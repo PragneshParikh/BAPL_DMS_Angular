@@ -84,7 +84,7 @@ export class ReceiptEntryService {
     return this.http.put(`${this.apiUrl}/ReceiptEntry/editReceiptEntry?id=${id}`, payload);
   }
 
-  checkLeadExist(mobileNo: string | null, bookingId: string | null,recType:string | null,dealerCode:string | null) {
+  checkReceiptExist(mobileNo: string | null, bookingId: string | null,recType:string | null,dealerCode:string | null) {
     return this.http.get<boolean>(
       `${this.apiUrl}/ReceiptEntry/checkReceiptExist?mobileNo=${mobileNo ?? ''}&bookingId=${bookingId ?? ''}&recType=${recType ?? ''}&dealerCode=${dealerCode ?? ''}`
     );
