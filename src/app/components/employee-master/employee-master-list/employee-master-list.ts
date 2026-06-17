@@ -3,6 +3,11 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { EmployeeMasterComponent } from '../employee-master';
 import { EmployeeMasterService } from '../../../core/services/employee-master';
+import { LocationMasterService } from '../../../core/services/location-master-service';
+import { DepartmentService } from '../../../core/services/department';
+import { DesignationService } from '../../../core/services/designation';
+
+
 
 @Component({
   selector: 'app-employee-master-list',
@@ -27,12 +32,20 @@ export class EmployeeMasterList
   selectedEmployee: any = null;
 
   showModal: boolean = false;
+  locationMap: { [code: string]: string } = {};
+
+  departmentMap: { [id: string]: string } = {};
+  designationMap: { [id: string]: string } = {};
 
   // =====================================
   // CONSTRUCTOR
   // =====================================
 
-  constructor(private employeeService: EmployeeMasterService) { }
+  constructor(private employeeService: EmployeeMasterService,
+    private locationService: LocationMasterService,
+    private departmentService: DepartmentService,
+    private designationService: DesignationService
+  ) { }
 
   // =====================================
   // INIT
@@ -41,8 +54,46 @@ export class EmployeeMasterList
   ngOnInit(): void {
 
     this.getEmployees();
+    this.loadLocations();
+    this.loadDepartments();      
+    this.loadDesignations();     
   }
 
+  loadDepartments(): void {
+  this.departmentService.get().subscribe({
+    next: (response: any[]) => {
+      this.departmentMap = {};
+      (response ?? []).forEach(d => {
+        if (d.departmentId != null) {
+          this.departmentMap[String(d.departmentId)] = d.departmentName;
+        }
+      });
+    },
+    error: (error) => console.error('Department load error', error)
+  });
+}
+
+loadDesignations(): void {
+  this.designationService.get().subscribe({
+    next: (response: any[]) => {
+      this.designationMap = {};
+      (response ?? []).forEach(d => {
+        if (d.designationId != null) {
+          this.designationMap[String(d.designationId)] = d.designationName;
+        }
+      });
+    },
+    error: (error) => console.error('Designation load error', error)
+  });
+}
+
+getDepartmentName(id: any): string {
+  return this.departmentMap[String(id)] ?? '';
+}
+
+getDesignationName(id: any): string {
+  return this.designationMap[String(id)] ?? '';
+}
   // =====================================
   // GET EMPLOYEES
   // =====================================
@@ -74,6 +125,26 @@ export class EmployeeMasterList
       });
   }
 
+  loadLocations(): void {
+  const dealerCode = localStorage.getItem('dealerCode');
+  if (!dealerCode) return;
+
+  this.locationService.getLocationByDealerCode(dealerCode).subscribe({
+    next: (response: any[]) => {
+      this.locationMap = {};
+      (response ?? []).forEach(l => {
+        const code = l.locCode ?? l.loccode ?? l.Loccode;
+        const name = l.locName ?? l.locname ?? l.Locname;
+        if (code != null) this.locationMap[code] = name;
+      });
+    },
+    error: (error) => console.error('Location load error', error)
+  });
+}
+
+getLocationName(code: string): string {
+  return this.locationMap[code] ?? '';
+}
   // =====================================
   // OPEN EDIT POPUP
   // =====================================
@@ -146,3 +217,4 @@ export class EmployeeMasterList
       });
   }
 }
+

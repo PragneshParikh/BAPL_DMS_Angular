@@ -11,6 +11,7 @@ import { JobCardService } from '../../core/services/job-card-service';
 import Swal from 'sweetalert2';
 import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
 import { LocationMasterService } from '../../core/services/location-master-service';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-job-card',
@@ -304,6 +305,46 @@ debugger
 
     this.pagedData = this.filteredData.slice(start, end);
   }
+
+  downloadExcel(): void {
+  if (!this.jobCardList || this.jobCardList.length === 0) {
+    return;
+  }
+
+  const headers = [
+    'Sr No', 'Job No', 'Job Date', 'Job Status', 'Manual Job No',
+    'Location', 'Job Type', 'Job Source', 'Complaint', 'Supervisor',
+    'Register No', 'Chassis No', 'Vehicle Name', 'Service Head',
+    'Service Type', 'Customer Name', 'Customer Mobile'
+  ];
+
+  const rows = this.jobCardList.map((item, i) => [
+    i + 1,
+    item.jobCardHeader?.jobNo ?? '',
+    item.jobCardHeader?.jobinDate
+      ? new Date(item.jobCardHeader.jobinDate).toLocaleDateString('en-GB')
+      : '',
+    item.jobStatus ?? '',
+    item.jobCardHeader?.manualjobNo ?? '',
+    item.location ?? '',
+    item.jobtype ?? '',
+    item.jobsource ?? '',
+    item.complaint ?? '',
+    item.jobCardHeader?.supervisor ?? '',
+    item.jobCardCustomer?.registerNo ?? '',
+    item.jobCardCustomer?.chassisNo ?? '',
+    item.jobCardCustomer?.modelName ?? '',
+    item.serviceHead ?? '',
+    item.serviceType ?? '',
+    item.jobCardCustomer?.customerName ?? '',
+    item.jobCardCustomer?.customerMobile ?? ''
+  ]);
+
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'JobCards');
+  XLSX.writeFile(wb, `JobCardList_${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
 
   //Navigate Job Card Add form
   onNavigate() {
