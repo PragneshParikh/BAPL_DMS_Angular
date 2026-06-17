@@ -113,23 +113,31 @@
                         <tr>
                            
 
-                            <th class="text-center">
-                                <div class="d-flex flex-column align-items-center gap-1">
-                                    <small style="font-size:10px; white-space:nowrap">Form 22</small>
-                                    <input type="checkbox"
-                                        [(ngModel)]="selectAllForm22"
-                                        (change)="toggleSelectAllForm22()" />
-                                </div>
-                            </th>
+                          <th class="text-center">
+    <div class="d-flex align-items-center justify-content-center gap-1">
+        <input
+            type="checkbox"
+            [(ngModel)]="selectAllForm22"
+            (change)="toggleSelectAllForm22()" />
 
-                            <th class="text-center">
-                                <div class="d-flex flex-column align-items-center gap-1">
-                                    <small style="font-size:10px; white-space:nowrap">Ex-Showroom</small>
-                                    <input type="checkbox"
-                                        [(ngModel)]="selectAllInvoice"
-                                        (change)="toggleSelectAllInvoice()" />
-                                </div>
-                            </th>
+        <small style="font-size:10px; white-space:nowrap">
+            Form 22
+        </small>
+    </div>
+</th>
+
+                           <th class="text-center">
+    <div class="d-flex align-items-center justify-content-center gap-1">
+        <input
+            type="checkbox"
+            [(ngModel)]="selectAllInvoice"
+            (change)="toggleSelectAllInvoice()" />
+
+        <small style="font-size:10px; white-space:nowrap">
+            Ex-Showroom
+        </small>
+    </div>
+</th>
 
                             <th>Sl No.</th>
                             <th class="sort" (click)="onSort('saleBillNo')" style="cursor:pointer">Sale Bill No</th>

@@ -51,7 +51,7 @@ export class DealerService {
   }
 
   getByDealerCode(dealerCode: string | null): Observable<any> {
-    return this.httpClient.get(`${this.baseUrl}/DealerMaster/GetByDealerCode?dealerCode=${dealerCode}`);
+    return this.httpClient.get(`${this.baseUrl}/DealerMaster/GetByDealerCode/${dealerCode}`);
   }
 
   getDealerDropdown(dealerCode: string | null): Observable<any> {

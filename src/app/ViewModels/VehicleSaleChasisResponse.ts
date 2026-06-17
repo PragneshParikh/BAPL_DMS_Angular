@@ -68,4 +68,5 @@ export interface VehicleSaleListChasisResponse {
   fameIIAmnt?: number;
   postGstDisc?: number;
   proformaCreated?: string;
+  locationCode?:string;
 }
