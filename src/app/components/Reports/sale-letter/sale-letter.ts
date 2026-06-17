@@ -37,7 +37,7 @@ export class SaleLetter implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.getDealerDetails();
+    //this.getDealerDetails();
 
     this.saleBillId = this.route.snapshot.paramMap.get('saleBillNo') || '';
     if (this.saleBillId) {
@@ -45,11 +45,11 @@ export class SaleLetter implements OnInit {
     }
 
   }
-  getDealerDetails() {
-    const dealerCode = this.storageService.getDealerCode();
+  getDealerDetails(dealerCode:string) {
+ //   const dealerCode = this.storageService.getDealerCode();
 
     this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
-      this.dealer = res?.data?.[0] || null;
+      this.dealer = res?.data|| null;
     });
 
   }
@@ -57,6 +57,7 @@ export class SaleLetter implements OnInit {
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
         this.saleBill = res;
+        this.getDealerDetails(res.dealerCode);
         if (this.saleBill.erpStatus == "Invoiced") {
           this.isInvoiced = true;
         }

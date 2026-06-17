@@ -21,42 +21,42 @@
                         <i class="ri-printer-line me-2"></i> Print Proforma Invoice
                     </a>
                 </li>
-                <li>
+                <li *ngIf="isInvoiced">
                     <a class="dropdown-item" (click)="printExShowroomInvoice()">
                         <i class="ri-printer-line me-2"></i> Print Ex-Showroom Invoice
                     </a>
                 </li>
-                <li>
+                <li *ngIf="isInvoiced">
                     <a class="dropdown-item" (click)="printOnRoadInvoice()">
                         <i class="ri-printer-line me-2"></i> Print On Road Invoice
                     </a>
                 </li>
 
-                <li>
+                <li *ngIf="isInvoiced">
                     <a class="dropdown-item" (click)="printDeliverySlip()">
                         <i class="ri-printer-line me-2"></i> Print Delivery Slip
                     </a>
                 </li>
 
-                <li>
+                <li *ngIf="isInvoiced">
                     <a class="dropdown-item" (click)="printSaleLetter()">
                         <i class="ri-printer-line me-2"></i> Print Sale Letter
                     </a>
                 </li>
 
-                <li>
+                <li *ngIf="isInvoiced">
                     <a class="dropdown-item" (click)="printForm22()">
                         <i class="ri-printer-line me-2"></i> Print Form 22
                     </a>
                 </li>
 
-                <li>
+                <li *ngIf="isInvoiced">
                     <a class="dropdown-item" (click)="printDeliveryChecklist()">
                         <i class="ri-printer-line me-2"></i> Print Delivery Check List
                     </a>
                 </li>
 
-                <li>
+                <li *ngIf="isInvoiced">
                     <a class="dropdown-item" (click)="printDeliveryCertificate()">
                         <i class="ri-printer-line me-2"></i> Print Delivery Certificate
                     </a>
@@ -77,8 +77,8 @@
             </button>
 
             <!-- <button *ngIf="!isErpLocked && billId && !isInvoiced" class="btn btn-sm btn-primary" -->
-            <button *ngIf="billId && isInvoiced" class="btn btn-sm btn-primary" (click)="openRegistrationModal()">
-                Open Regn./ Ins.
+            <button *ngIf="billId" class="btn btn-sm btn-primary" (click)="openRegistrationModal()">
+               Open VDN Form
             </button>
 
             <!-- <button *ngIf="!isErpLocked && billId && !isInvoiced && erpStatus !== 'Reserved'"
@@ -135,9 +135,9 @@
                                     Location <span class="text-danger">*</span>
                                 </label>
                                 <select class="form-select form-select-sm" [(ngModel)]="model.location" name="location"
-                                    #location="ngModel" required>
+                                    #location="ngModel" (change)="onLocationChange()" required>
                                     <option value="">Select Location</option>
-                                    <option *ngFor="let loc of locations" [value]="loc.loccode">
+                                    <option *ngFor="let loc of locations" [value]="loc.locCode">
                                         {{ loc.locname }}
                                     </option>
                                 </select>
@@ -215,10 +215,13 @@
                                         [(ngModel)]="model.financier" name="financier" #financier="ngModel"
                                         [disabled]="model.saleType !== 'Credit'"
                                         [required]="model.saleType === 'Credit'">
-                                        <button type="button" class="btn btn-sm btn-primary"
-                                            (click)="openCustomerLedgerAdd()" [ngbTooltip]="'Add New Party'">
-                                            +
-                                        </button>
+                                       <button
+    type="button"
+    class="btn btn-sm btn-warning"
+    (click)="openCustomerLedgerAdd(selectedCustomerId)"
+    [ngbTooltip]="'Edit Party'">
+    <i class="ri-edit-line"></i>
+</button>
                                         <option class="dropdown-list" value="">Select Financier</option>
 
                                         <option *ngFor="let f of financiers" [value]="f.id" class="dropdown-list">
@@ -269,12 +272,12 @@
 
                                     <option value="">Select Billing Type</option>
 
-                                    <option *ngFor="let option of billingTypeOptions" [ngValue]="option.id" [disabled]="
-          (model.customerType === 'B2B' && option.id !== 1) ||
-          (model.customerType === 'B2C' && option.id !== 2)
-        ">
-                                        {{ option.value }}
-                                    </option>
+                                   <option
+  *ngFor="let option of billingTypeOptions"
+  [ngValue]="option.id"
+  [disabled]="model.customerType === 'B2B' && option.id !== 1">
+  {{ option.value }}
+</option>
 
                                 </select>
                             </div>
@@ -300,19 +303,21 @@
                                         (input)="filterParties()"
                                         [class.is-invalid]="customerName.invalid && (customerName.touched || vehicleSaleForm.submitted)" />
 
-                                    <button type="button" class="btn btn-sm btn-primary ms-1"
+                                    <button type="button" class="btn btn-sm btn-primary"
                                         (click)="openCustomerLedgerAdd()" [ngbTooltip]="'Add New Party'">
                                         +
                                     </button>
 
                                     <!-- AUTOCOMPLETE DROPDOWN -->
                                     <ul *ngIf="filteredParties.length > 0"
-                                        class="list-group position-absolute w-100 small-dropdown"
-                                        style="top: 100%; z-index: 1000;">
-                                        <li class="list-group-item list-group-item-action"
+                                        class="list-group position-absolute w-100 shadow-sm small-dropdown"
+                                        style="top:100%; z-index:1000; max-height:200px; overflow-y:auto;">
+
+                                        <li class="list-group-item list-group-item-action py-1 px-2 small text-dark"
                                             *ngFor="let party of filteredParties" (click)="selectParty(party)">
                                             {{ party.ledgerName }}
                                         </li>
+
                                     </ul>
                                 </div>
 
@@ -459,8 +464,8 @@
 
                             </div> -->
 
-                            <div class="col-md-2">
-                                <label class="form-label-sm mb-1">FameII Amount</label>
+                            <div class="col-md-1">
+                                <label class="form-label-sm mb-1">FameII</label>
                                 <input class="form-control form-control-sm" [(ngModel)]="model.fameIIAmnt"
                                     name="fameIIAmnt" readonly>
                             </div>
@@ -478,85 +483,19 @@
 
                             <!-- THESE FIELDS NEED TO BE SHOWN AFTER SALE -->
 
-                            <div class="col-md-2">
-                                <label class="form-label-sm mb-1">Regn No</label>
-                                <input type="text" class="form-control form-control-sm" #regNo="ngModel"
-                                    [(ngModel)]="model.regNo" name="regNo">
-
-                            </div>
-                            <div class="col-md-1">
+                           
+ <div class="col-md-1">
                                 <label class="form-label-sm mb-1">Reg Amt.</label>
                                 <input type="number" class="form-control form-control-sm" #regAmount="ngModel"
                                     [(ngModel)]="model.regAmount" name="regAmount">
 
                             </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label form-label-sm">
-                                    Insurance Party
-                                </label>
-
-                                <div class="d-flex position-relative">
-
-                                    <input type="text" class="form-control form-control-sm" name="insuranceName"
-                                        [(ngModel)]="model.insuranceName" #insuranceName="ngModel"
-                                        (input)="filterInsurance()" (focus)="onInsuranceFocus()"
-                                        (blur)="onInsuranceBlur()" autocomplete="off" />
-
-                                    <!-- AUTOCOMPLETE DROPDOWN -->
-                                    <ul *ngIf="showInsuranceDropdown && filteredInsurance?.length > 0"
-                                        class="list-group position-absolute w-100 small-dropdown"
-                                        style="top:100%; z-index:1000;">
-
-                                        <li class="list-group-item list-group-item-action"
-                                            *ngFor="let party of filteredInsurance"
-                                            (mousedown)="selectInsurance(party)">
-                                            {{ party.ledgerName }}
-                                        </li>
-
-                                    </ul>
-                                    <div *ngIf="insuranceNotFound"
-                                        class="list-group-item position-absolute w-100 bg-white border text-danger text-center small-dropdown"
-                                        style="top:100%; z-index:1000;">
-                                        No insurance found
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-
-
-                            <div class="col-md-2">
-                                <label class="form-label-sm mb-1">Ins. No</label>
-                                <input type="text" class="form-control form-control-sm" #insNo="ngModel"
-                                    [(ngModel)]="model.insNo" name="insNo">
-
-                            </div>
-                            <div class="col-md-1">
+                             <div class="col-md-1">
                                 <label class="form-label-sm mb-1">Ins. Amt</label>
                                 <input type="number" class="form-control form-control-sm" #insAmount="ngModel"
                                     [(ngModel)]="model.insAmount" name="insAmount">
 
                             </div>
-                            <div class="col-md-2">
-                                <label class="form-label-sm mb-1">Ins Start Date</label>
-                                <input type="date" class="form-control form-control-sm" #insStartDate="ngModel"
-                                    [(ngModel)]="model.insStartDate" name="insStartDate " required>
-
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label-sm mb-1">Ins Exp Date</label>
-                                <input type="date" class="form-control form-control-sm" #insExpDate="ngModel"
-                                    [(ngModel)]="model.insExpDate" name="insExpDate" required>
-                                <div *ngIf="insExpDate.invalid && (insExpDate.touched || vehicleSaleForm.submitted)"
-                                    class="text-danger text-xs mt-1">
-                                    Ins Exp Date is required.
-                                </div>
-                            </div>
-
                             <!-- </ng-container> -->
 
 
@@ -598,7 +537,7 @@
                                             <th>Charger No</th>
                                             <th>Controller No</th>
                                             <th>Key/Book No</th>
-                                            <th>Kit</th>
+                                            <!-- <th>Kit</th> -->
                                             <th>ItemRate</th>
                                             <th>Regn Amt</th>
                                             <th>Ins Amt</th>
@@ -614,8 +553,8 @@
                                             <th>IGST Amnt</th>
                                             <th>Post-GST Disc.</th>
                                             <th>Final Amount</th>
-                                            <th>Cess</th>
-                                            <th>TCS</th>
+                                            <!-- <th>Cess</th>
+                                            <th>TCS</th> -->
                                             <th>Delivered</th>
                                             <th>Battery Chemical</th>
                                             <th>Battery Capacity</th>
@@ -653,9 +592,9 @@
                                             <td>{{ row.controllerNo }}</td>
                                             <td>{{ row.key }}/{{ row.bookNo }}</td>
 
-                                            <td>
+                                            <!-- <td>
                                                 {{ row.kit }}
-                                            </td>
+                                            </td> -->
 
                                             <td>{{ row.rate }}</td>
                                             <td>{{ row.regAmount }}</td>
@@ -675,8 +614,8 @@
                                             <td>{{ row.igst || row.igstamnt ?? 0 }}</td>
                                             <td>{{ row.postGstDiscount }}</td>
                                             <td>{{ row.finalAmount }}</td>
-                                            <td>{{ row.cess }}</td>
-                                            <td>{{ row.tcs }}</td>
+                                            <!-- <td>{{ row.cess }}</td>
+                                            <td>{{ row.tcs }}</td> -->
 
                                             <td>
                                                 {{ row.delivered }}

@@ -17,6 +17,7 @@ export class DeliverySlip implements OnInit {
   chassisNo!: string;
   motorNo!: string;
   regNo!: string;
+  dealerCode: any;
   /**
    *
    */
@@ -27,22 +28,24 @@ export class DeliverySlip implements OnInit {
 
   }
   ngOnInit(): void {
-    this.getDealerDetails();
+   
     this.route.queryParams.subscribe(params => {
       this.partyName = params['partyName'];
       this.modelName = params['modelName'];
       this.chassisNo = params['chassisNo'];
       this.motorNo = params['motorNo'];
       this.regNo = params['regNo'];
-
+      this.dealerCode =params['dealerCode'];
     });
+     this.getDealerDetails(this.dealerCode);
   }
 
-  getDealerDetails() {
-    const dealerCode = this.storageService.getDealerCode();
+  getDealerDetails(dealerCode:string) {
 
     this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
-      this.dealer = res?.data?.[0] || null;
+      this.dealer = res?.data|| null;
+      console.log(this.dealer);
+      
 
     });
   }
