@@ -40,9 +40,9 @@ export class DealerService {
     );
   }
 
-  updateTradeCertificate(dealerId: number, tradeCertificate: string) {
+  updateTradeCertificate(dealerCode: string, tradeCertificate: string) {
     return this.httpClient.put(
-      `${this.baseUrl}/DealerMaster/updateTradeCertificate?dealerId=${dealerId}`,
+      `${this.baseUrl}/DealerMaster/updateTradeCertificate?dealerCode=${dealerCode}`,
       JSON.stringify(tradeCertificate),
       {
         headers: { 'Content-Type': 'application/json' }
@@ -54,7 +54,9 @@ export class DealerService {
     return this.httpClient.get(`${this.baseUrl}/DealerMaster/GetByDealerCode?dealerCode=${dealerCode}`);
   }
 
-  getDealerDropdown(): Observable<any> {
-    return this.httpClient.get<any>(`${this.baseUrl}/DealerMaster/GetDealerDropdown`);
+  getDealerDropdown(dealerCode: string | null): Observable<any> {
+    let params = new HttpParams().set('dealerCode', dealerCode)
+
+    return this.httpClient.get<any>(`${this.baseUrl}/DealerMaster/GetDealerDropdown`, { params });
   }
 }
