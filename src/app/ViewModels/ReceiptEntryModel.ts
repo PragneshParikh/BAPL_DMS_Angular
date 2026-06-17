@@ -78,6 +78,7 @@ export interface ReceiptEntryAddViewModel {
   narration?: string;
   totalAmount?: number;
   dealerCode?:string;
+  receiptEntryDetail:ReceiptDetail[];
 }
 
 export interface ReceiptEntryEditModel {
@@ -96,7 +97,7 @@ export interface ReceiptEntryEditModel {
   productDescription?: string;
   businessType?: string;
   salesExecutive?: string;
-  receiptType?: string;
+ // receiptType?: string;
   refNo?: string;
   narration?: string;
   totalAmount?: number;
@@ -104,4 +105,11 @@ export interface ReceiptEntryEditModel {
   createdDate: string;
   updatedBy?: string;
   updatedDate?: string;
+  receiptEntryDetail: ReceiptDetail[];
+}
+export interface ReceiptDetail {
+  lineItemNo: number;
+  amount: number;
+  receiptType: string;
+  lineDate:string;
 }

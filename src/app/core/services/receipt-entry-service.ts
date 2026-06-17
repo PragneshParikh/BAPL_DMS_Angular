@@ -84,9 +84,9 @@ export class ReceiptEntryService {
     return this.http.put(`${this.apiUrl}/ReceiptEntry/editReceiptEntry?id=${id}`, payload);
   }
 
-  checkLeadExist(mobileNo: string | null, bookingId: string | null) {
+  checkReceiptExist(mobileNo: string | null, bookingId: string | null,recType:string | null,dealerCode:string | null) {
     return this.http.get<boolean>(
-      `${this.apiUrl}/ReceiptEntry/checkLeadExist?mobileNo=${mobileNo ?? ''}&bookingId=${bookingId ?? ''}`
+      `${this.apiUrl}/ReceiptEntry/checkReceiptExist?mobileNo=${mobileNo ?? ''}&bookingId=${bookingId ?? ''}&recType=${recType ?? ''}&dealerCode=${dealerCode ?? ''}`
     );
   }
 
@@ -96,12 +96,5 @@ export class ReceiptEntryService {
       { responseType: 'blob' }
     );
   }
-  // private formatDate(date: Date): string {
-  //   const year = date.getFullYear();
-  //   const month = ('0' + (date.getMonth() + 1)).slice(-2);
-  //   const day = ('0' + date.getDate()).slice(-2);
-
-  //   return `${year}-${month}-${day}`;
-  // }
-
+  
 }

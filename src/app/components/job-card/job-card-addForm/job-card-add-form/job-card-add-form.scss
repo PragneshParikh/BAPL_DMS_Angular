@@ -56,3 +56,19 @@ color: white;
 .btn-close-white{
   color: white;
 }
+
+.dropdown-menu-chassis {
+  display: block;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1050;
+}
+
+.section-title {
+    background-color: #dfe2e6; /* grey */
+    padding: 8px 12px;
+    margin-bottom: 0;
+    border-radius: 3px;
+    font-weight: 600;
+    color: #495057;
+}

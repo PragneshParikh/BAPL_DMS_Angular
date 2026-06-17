@@ -25,7 +25,7 @@
                         <div class="col-md-3">
                             <label class="form-label">Ledger Type</label>
                             <select class="form-select form-select-sm" name="ledgerType"
-                                [(ngModel)]="formData.ledgerType" required>
+                                [(ngModel)]="formData.ledgerType" [disabled]="isExternalCall" required>
                                 <option *ngFor="let lt of ledgerTypes" [value]="lt.value">
                                     {{ lt.name }}
                                 </option>
@@ -36,7 +36,7 @@
                                     *ngIf="!isLedgerCodeOptional()">*</span></label>
                             <input type="text" class="form-control form-control-sm" name="ledgerCode"
                                 #ledgerCode="ngModel" [(ngModel)]="formData.ledgerCode"
-                                [required]="!isLedgerCodeOptional()">
+                                [required]="!isLedgerCodeOptional()" readonly>
                             @if (ledgerCode.invalid && ledgerCode.touched && !isLedgerCodeOptional()) {
                             <small class="text-danger">
                                 Ledger Code is required
@@ -101,6 +101,17 @@
                             <input type="text" class="form-control form-control-sm" name="gst"
                                 [(ngModel)]="formData.gstNo">
                         </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Occupation</label>
+                            <select class="form-select form-select-sm" name="occupationId" [(ngModel)]="formData.occupationId"
+                                #occupationId="ngModel">
+                                <option [ngValue]="null">Select Occupation</option>
+                                <option *ngFor="let o of occupationList" [ngValue]="o.id">
+                                    {{ o.occupationName  }}
+                                </option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Third Row -->
@@ -109,17 +120,20 @@
                             <label class="form-label">Mobile No <span class="text-danger">*</span></label>
                             <input type="text" class="form-control form-control-sm" name="mobile"
                                 [(ngModel)]="formData.mobileNumber" maxlength="10" inputmode="numeric"
-                                (input)="sanitizeMobile($event)" #mobile="ngModel" required>
+                                (input)="sanitizeMobile($event)" #mobile="ngModel" (change)="checkPhoneNumberExist(formData.mobileNumber)" required>
                             @if (mobile.invalid && mobile.touched) {
                             <small class="text-danger">
                                 Enter valid 10-digit mobile number
                             </small>
                             }
+                            @if (mobileExist) {
+                            <small class="text-danger">Mobile number already exist</small>
+                            }
                         </div>
                         <div class="col-md-3">
                             <label class="form-label"> Email </label>
                             <input type="text" class="form-control form-control-sm" name="email"
-                                [(ngModel)]="formData.email" pattern="^[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                                [(ngModel)]="formData.email" pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
                                 #email="ngModel">
                             @if (email.invalid && email.touched && formData.email) {
                             <small class="text-danger">
@@ -158,9 +172,8 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">PIN Code</label>
-                            <input type="text" class="form-control form-control-sm" name="pinCode" 
-                            inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')" pattern="^[0-9]{6}$"
-                            maxlength="6" 
+                            <input type="text" class="form-control form-control-sm" name="pinCode" inputmode="numeric"
+                                oninput="this.value=this.value.replace(/[^0-9]/g,'')" pattern="^[0-9]{6}$" maxlength="6"
                                 #pinCode="ngModel" [(ngModel)]="formData.pin">
                             @if (pinCode.invalid && pinCode.touched) {
                             <small class="text-danger">
@@ -204,9 +217,10 @@
                             <button type="button" class="btn btn-primary btn-sm float-end" (click)="backToList()">
                                 Cancel
                             </button>
-                            <button type="submit" [disabled]="customerLedgerForm.invalid"
+                            <button type="submit" [disabled]="customerLedgerForm.invalid || mobileExist"
                                 class="btn btn-primary btn-sm float-end me-1">
-                                Save
+                                    {{ isModify ? 'Update' : 'Save' }}
+
                             </button>
 
                         </div>

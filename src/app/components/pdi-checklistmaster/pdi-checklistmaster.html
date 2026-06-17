@@ -38,23 +38,27 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Sr. No.</th>
-                                <th>Bill No</th>
+                                <th>OemModel Name</th>
+                                <th>ChecklistName</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let item of checklistList let i = index">
+                            <tr *ngFor="let item of checklistList; let i = index" (dblclick)="openEdit(item)"
+                                style="cursor:pointer">
                                 <td>{{i + 1}}</td>
+                                <td>{{item.oemModelName }}</td>
                                 <td>{{item.checklistName}}</td>
                                 <td>{{item.isActive ? 'Yes' : 'No'}}</td>
-                                <td> <button class="btn btn-sm btn-soft-sm btn-soft-primary me-1" data-bs-toggle="modal"
+                                 <td>
+                                 <!--<button class="btn btn-sm btn-soft-sm btn-soft-primary me-1" data-bs-toggle="modal"
                                         data-bs-target="#pdiChecklistmasterModal" (click)="openEdit(item)">
                                         <i class="ri-pencil-line"></i>
-                                    </button>
+                                    </button> -->
                                     <!-- (click)="edit(item)" -->
                                     <button class="btn btn-sm btn-soft-sm btn-soft-danger me-1"
-                                        (click)="deletePdiCheclistMaster(item.id)">
+                                        (click)="deletePdiCheclistMaster(item.id,$event)">
                                         <i class="ri-delete-bin-line"></i>
                                     </button>
                                 </td>
@@ -107,16 +111,31 @@
                 <form #pdichecklistmaster="ngForm" (ngSubmit)="savePdiChecklistmaster(pdichecklistmaster)">
 
                     <div class="row mb-3">
+                        <!-- OEM Model -->
+                        <div class="col-md-3 dropdown-wrapper">
+                            <label class="form-label">OEM Model Name</label>
+                            <span class="text-danger">*</span>
+                            <select class="form-select form-select-sm" name="oemmodelId"
+                                [(ngModel)]="PdiChecklistmastermodel.oemmodelId">
+
+                                <option [ngValue]="null">-- Select Oemmodel name --</option>
+
+                                <option *ngFor="let o of oemModelList" [ngValue]="o.oemmodelId">
+                                    {{ o.oemModelName }}
+                                </option>
+
+                            </select>
+                            <!-- <small class="text-danger"
+                                *ngIf="oemmodelId.invalid && (oemmodelId.touched || pdichecklistmaster.submitted)">
+                                OEM Model Name is required
+                            </small> -->
+                        </div>
                         <div class="col-md-4">
                             <label>Check List</label>
                             <input type="text" class="form-control form-control-sm" name="checklistName"
                                 [(ngModel)]="PdiChecklistmastermodel.checklistName" required>
                         </div>
-                        <!-- <div class="col-md-3">
-                            <label>Description</label>
-                            <input type="text" class="form-control form-control-sm" name="description"
-                                [(ngModel)]="PdiChecklistmastermodel.description">
-                        </div> -->
+
                         <div class="col-md-4 form-check form-switch form-switch-sm form-switch-success">
 
                             <input class="form-check-input form-check-input-sm" type="checkbox" id="isActive"

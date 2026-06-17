@@ -150,37 +150,18 @@
                                 <th class="sort" (click)="onSort('receiptDate')" style="cursor:pointer">
                                     Receipt Date
                                 </th>
-
-                                <th class="sort" (click)="onSort('bookingId')" style="cursor:pointer">
-                                    Booking ID
-                                </th>
-
-                                <th class="sort" (click)="onSort('refNo')" style="cursor:pointer">
-                                    Ref No</th>
-
-
                                 <th class="sort" (click)="onSort('saleType')" style="cursor:pointer">
                                     Sale Type
                                 </th>
-
-                                <th class="sort" (click)="onSort('productCode')" style="cursor:pointer">
-                                    Product Name
-                                </th>
-
                                 <th class="sort" (click)="onSort('partyName')" style="cursor:pointer">
                                     Party Name
                                 </th>
-                                <th class="sort" (click)="onSort('location')" style="cursor:pointer">
-                                    Location
-                                </th>
-
                                 <th class="sort" (click)="onSort('mobileNo')" style="cursor:pointer">
                                     Mobile
                                 </th>
-                                <!-- <th class="sort" (click)="onSort('location')" style="cursor:pointer">
-                            E-Mail
-                        </th> -->
-
+                                <th class="sort" (click)="onSort('productCode')" style="cursor:pointer">
+                                    Product Name
+                                </th>
                                 <th class="sort" (click)="onSort('salesExecutive')" style="cursor:pointer">
                                     Sales Executive
                                 </th>
@@ -189,10 +170,32 @@
                                     Financer
                                 </th>
 
-
-                                <th class="sort" (click)="onSort('narration')" style="cursor:pointer">
-                                    Narration
+                                <th class="sort" (click)="onSort('location')" style="cursor:pointer">
+                                    Location
                                 </th>
+                                <th class="sort" (click)="onSort('bookingId')" style="cursor:pointer">
+                                    Booking ID
+                                </th>
+
+                                <!-- <th class="sort" (click)="onSort('refNo')" style="cursor:pointer">
+                                    Ref No</th> -->
+
+
+
+
+
+
+
+                                <!-- <th class="sort" (click)="onSort('location')" style="cursor:pointer">
+                            E-Mail
+                        </th> -->
+
+
+
+
+                                <!-- <th class="sort" (click)="onSort('narration')" style="cursor:pointer">
+                                    Narration
+                                </th> -->
 
                                 <th class="sort" (click)="onSort('totalAmount')" style="cursor:pointer">
                                     Total Cost
@@ -225,40 +228,21 @@
                                         [term]="searchTerm">
                                     </ngb-highlight>
                                 </td>
-
-                                <td>
-                                    <ngb-highlight [result]="item.bookingId" [term]="searchTerm">
-                                    </ngb-highlight>
-                                </td>
-
-                                <td>
-                                    <ngb-highlight [result]="item.refNo" [term]="searchTerm">
-                                    </ngb-highlight>
-                                </td>
-
-
-
                                 <td>
                                     <ngb-highlight [result]="item.saleType || ''" [term]="searchTerm">
                                     </ngb-highlight>
                                 </td>
-                                <td>
-                                    <ngb-highlight [result]="item.productName" [term]="searchTerm"></ngb-highlight>
-                                </td>
-
 
                                 <td>
                                     <ngb-highlight [result]="item.partyName" [term]="searchTerm"></ngb-highlight>
                                 </td>
                                 <td>
-                                    <ngb-highlight [result]="item.location" [term]="searchTerm"></ngb-highlight>
-                                </td>
-                                <td>
                                     <ngb-highlight [result]="item.mobileNo" [term]="searchTerm"></ngb-highlight>
                                 </td>
-                                <!-- <td>
-<ngb-highlight [result]="item.email" [term]="searchTerm"></ngb-highlight>
-</td> -->
+                                <td>
+                                    <ngb-highlight [result]="item.productName" [term]="searchTerm"></ngb-highlight>
+                                </td>
+
                                 <td>
                                     <ngb-highlight [result]="item.salesExecutive" [term]="searchTerm"></ngb-highlight>
                                 </td>
@@ -268,12 +252,35 @@
                                     <ngb-highlight [result]="item.financier" [term]="searchTerm"></ngb-highlight>
                                 </td>
 
-
-
-
                                 <td>
-                                    <ngb-highlight [result]="item.narration" [term]="searchTerm"></ngb-highlight>
+                                    <ngb-highlight [result]="item.location" [term]="searchTerm"></ngb-highlight>
                                 </td>
+                                <td>
+                                    <ngb-highlight [result]="item.bookingId" [term]="searchTerm">
+                                    </ngb-highlight>
+                                </td>
+
+                                <!-- <td>
+                                    <ngb-highlight [result]="item.refNo" [term]="searchTerm">
+                                    </ngb-highlight>
+                                </td> -->
+
+
+
+
+
+
+                                <!-- <td>
+<ngb-highlight [result]="item.email" [term]="searchTerm"></ngb-highlight>
+</td> -->
+
+
+
+
+
+                                <!-- <td>
+                                    <ngb-highlight [result]="item.narration" [term]="searchTerm"></ngb-highlight>
+                                </td> -->
 
                                 <td>
                                     <ngb-highlight [result]="item.totalAmount?.toString() || ''" [term]="searchTerm">

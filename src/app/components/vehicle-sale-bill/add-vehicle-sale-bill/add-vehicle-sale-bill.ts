@@ -464,7 +464,6 @@ this.model.location = locationObj
 
   isCustomerValid(): boolean {
     if (!this.model.customerName) return false;
-
     return this.parties.some(
       p => p.ledgerName.toLowerCase() === this.model.customerName.toLowerCase()
     );
@@ -878,12 +877,9 @@ this.model.insuranceId = selected.insuranceId || null;
   getParties() {
     this.receiptEntryService.getLedgerByType('Party').subscribe({
       next: (res) => {
+console.log(res);
 
-        this.parties = res.filter(p =>
-          p.ledgerType?.toLowerCase() === 'party'
-        );
-
-        //       FIX: Rebind selectedCustomerId using name
+        this.parties = res;
         if (this.model.customerName && !this.selectedCustomerId) {
           const match = this.parties.find(p =>
             p.ledgerName?.toLowerCase() === this.model.customerName?.toLowerCase()

@@ -52,6 +52,9 @@ import {
   VehicleSaleBillReportPagedResponse
 } from '../../ViewModels/models/sale-bill-report.model';
 
+  VehicleSaleBillReportFilterModel,
+  VehicleSaleBillReportResponse
+} from '../../ViewModels/models/vehicle-sale-bill-report.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -473,6 +476,15 @@ getDealerWiseStockReport(dealerCode?: string):
   getSaleBillStatusDropdown(): Observable<string[]> {
     return this.http.get<string[]>(
       `${this.apiUrl}/sale-bill/dropdown/status`
+    );
+  }
+
+  getVehicleSaleBillReport(
+    filter: VehicleSaleBillReportFilterModel
+  ): Observable<VehicleSaleBillReportResponse> {
+    return this.http.post<VehicleSaleBillReportResponse>(
+      `${this.apiUrl}/vehicle-sale-bill`,
+      filter
     );
   }
 }
