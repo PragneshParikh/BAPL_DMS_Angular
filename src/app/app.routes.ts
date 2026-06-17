@@ -170,7 +170,9 @@ export const routes: Routes = [
       { path: 'parts-dispatch-report', data: [50], loadComponent: () => import('./components/Reports/parts-dispatch-report/parts-dispatch-report').then(m => m.PartsDispatchReport) },
 
       { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
-
+      
+      { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/sale-bill-report/sale-bill-report').then(m => m.SaleBillReportComponent) },
+      
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
 
       { path: 'repair-bill-performa/:repairBillId', component: RepairBillPerforma, data: [51] },

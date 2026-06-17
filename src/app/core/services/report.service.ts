@@ -47,6 +47,11 @@ import { environment }
 import { Form22SlipViewModel } from '../../ViewModels/Form22SlipViewModel';
 
 import {
+  VehicleSaleBillReportViewModel,
+  VehicleSaleBillReportFilterModel,
+  VehicleSaleBillReportPagedResponse
+} from '../../ViewModels/models/sale-bill-report.model';
+
   VehicleSaleBillReportFilterModel,
   VehicleSaleBillReportResponse
 } from '../../ViewModels/models/vehicle-sale-bill-report.model';
@@ -427,6 +432,52 @@ getDealerWiseStockReport(dealerCode?: string):
   // =====================================================
   // VEHICLE SALE BILL REPORT
   // =====================================================
+ 
+  getVehicleSaleBillReport(
+    filter: VehicleSaleBillReportFilterModel
+  ): Observable<VehicleSaleBillReportPagedResponse> {
+    return this.http.post<VehicleSaleBillReportPagedResponse>(
+      `${this.apiUrl}/sale-bill`,
+      filter
+    );
+  }
+ 
+  exportVehicleSaleBillReport(
+    dealerCode?: string,
+    fromDate?: Date,
+    toDate?: Date
+  ): Observable<VehicleSaleBillReportViewModel[]> {
+    let params = new HttpParams();
+ 
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
+    }
+ 
+    if (fromDate) {
+      params = params.set('fromDate', fromDate.toISOString());
+    }
+ 
+    if (toDate) {
+      params = params.set('toDate', toDate.toISOString());
+    }
+ 
+    return this.http.get<VehicleSaleBillReportViewModel[]>(
+      `${this.apiUrl}/sale-bill/export`,
+      { params }
+    );
+  }
+ 
+  getSaleTypeDropdown(): Observable<string[]> {
+    return this.http.get<string[]>(
+      `${this.apiUrl}/sale-bill/dropdown/sale-type`
+    );
+  }
+ 
+  getSaleBillStatusDropdown(): Observable<string[]> {
+    return this.http.get<string[]>(
+      `${this.apiUrl}/sale-bill/dropdown/status`
+    );
+  }
 
   getVehicleSaleBillReport(
     filter: VehicleSaleBillReportFilterModel

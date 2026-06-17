@@ -1,0 +1,369 @@
+<div class="sale-bill-report">
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <header class="page-header">
+    <div class="title-block">
+      <h1>Vehicle Sale Bill Report</h1>
+      <p class="subtitle">Dealer-wise vehicle sale billing with GST &amp; subsidy breakup</p>
+    </div>
+    <button mat-flat-button color="primary"
+            (click)="onExport()"
+            [disabled]="isExporting || isLoading">
+      <mat-icon>download</mat-icon>
+      <span>{{ isExporting ? 'Exporting…' : 'Export CSV' }}</span>
+    </button>
+  </header>
+
+  <!-- ── Filters ────────────────────────────────────────── -->
+  <mat-card class="filter-card" appearance="outlined">
+    <form [formGroup]="filterForm" class="filter-grid" (ngSubmit)="onApply()">
+
+      <mat-form-field appearance="outline">
+        <mat-label>Dealer</mat-label>
+        <mat-select formControlName="dealerCode">
+          <mat-option [value]="null">All dealers</mat-option>
+          <mat-option *ngFor="let d of dealers" [value]="d.code">{{ d.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Model</mat-label>
+        <mat-select formControlName="itemCode">
+          <mat-option [value]="null">All models</mat-option>
+          <mat-option *ngFor="let m of models" [value]="m.code">{{ m.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Sale type</mat-label>
+        <mat-select formControlName="saleType">
+          <mat-option [value]="null">All</mat-option>
+          <mat-option *ngFor="let s of saleTypes" [value]="s">{{ s }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+          <mat-option [value]="null">All</mat-option>
+          <mat-option *ngFor="let s of statuses" [value]="s">{{ s }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>From date</mat-label>
+        <input matInput [matDatepicker]="fromPicker" formControlName="fromDate">
+        <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>To date</mat-label>
+        <input matInput [matDatepicker]="toPicker" formControlName="toDate">
+        <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+        <mat-datepicker #toPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Location</mat-label>
+        <input matInput formControlName="location" placeholder="Location code">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search</mat-label>
+        <input matInput formControlName="search"
+               placeholder="Bill no, party, chassis, reg no, model">
+        <mat-icon matIconSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-stroked-button type="button" (click)="onReset()" [disabled]="isLoading">
+          <mat-icon>refresh</mat-icon> Reset
+        </button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="isLoading">
+          <mat-icon>filter_alt</mat-icon> Apply filters
+        </button>
+      </div>
+
+    </form>
+  </mat-card>
+
+  <!-- ── Summary tiles ──────────────────────────────────── -->
+  <section class="summary-grid">
+    <mat-card class="stat-card" appearance="outlined">
+      <span class="stat-label">Total vehicles</span>
+      <span class="stat-value">{{ totalVehicles | number }}</span>
+    </mat-card>
+    <mat-card class="stat-card" appearance="outlined">
+      <span class="stat-label">Sale amount</span>
+      <span class="stat-value">₹{{ totalSaleAmount | number:'1.2-2' }}</span>
+    </mat-card>
+    <mat-card class="stat-card" appearance="outlined">
+      <span class="stat-label">GST amount</span>
+      <span class="stat-value">₹{{ totalGstAmount | number:'1.2-2' }}</span>
+    </mat-card>
+    <mat-card class="stat-card" appearance="outlined">
+      <span class="stat-label">Subsidy amount</span>
+      <span class="stat-value">₹{{ totalSubsidyAmount | number:'1.2-2' }}</span>
+    </mat-card>
+    <mat-card class="stat-card highlight" appearance="outlined">
+      <span class="stat-label">Net amount</span>
+      <span class="stat-value">₹{{ totalNetAmount | number:'1.2-2' }}</span>
+    </mat-card>
+  </section>
+
+  <!-- ── Table ──────────────────────────────────────────── -->
+  <mat-card class="table-card" appearance="outlined">
+    <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
+
+    <div class="table-scroll">
+      <table mat-table [dataSource]="data" [trackBy]="trackByRow" class="report-table">
+
+        <ng-container matColumnDef="srNo" sticky>
+          <th mat-header-cell *matHeaderCellDef class="num">Sr No</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.srNo }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="billNo">
+          <th mat-header-cell *matHeaderCellDef>Bill No</th>
+          <td mat-cell *matCellDef="let r">{{ r.billNo || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="billDate">
+          <th mat-header-cell *matHeaderCellDef>Bill Date</th>
+          <td mat-cell *matCellDef="let r">{{ r.billDate | date:'dd-MM-yyyy' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="bookingId">
+          <th mat-header-cell *matHeaderCellDef>Booking Id</th>
+          <td mat-cell *matCellDef="let r">{{ r.bookingId || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="partyName">
+          <th mat-header-cell *matHeaderCellDef>Party Name</th>
+          <td mat-cell *matCellDef="let r">{{ r.partyName || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="contactPerson">
+          <th mat-header-cell *matHeaderCellDef>Contact Person</th>
+          <td mat-cell *matCellDef="let r">{{ r.contactPerson || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="partyAddress">
+          <th mat-header-cell *matHeaderCellDef>Party Address</th>
+          <td mat-cell *matCellDef="let r">{{ r.partyAddress || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="location">
+          <th mat-header-cell *matHeaderCellDef>Location</th>
+          <td mat-cell *matCellDef="let r">{{ r.location || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="partyMobile">
+          <th mat-header-cell *matHeaderCellDef>Party Mobile</th>
+          <td mat-cell *matCellDef="let r">{{ r.partyMobile || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="partyEmail">
+          <th mat-header-cell *matHeaderCellDef>Party Email</th>
+          <td mat-cell *matCellDef="let r">{{ r.partyEmail || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="executiveName">
+          <th mat-header-cell *matHeaderCellDef>Executive Name</th>
+          <td mat-cell *matCellDef="let r">{{ r.executiveName || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="gstnNo">
+          <th mat-header-cell *matHeaderCellDef>GSTN No</th>
+          <td mat-cell *matCellDef="let r">{{ r.gstnNo || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="itemModel">
+          <th mat-header-cell *matHeaderCellDef>Item Model</th>
+          <td mat-cell *matCellDef="let r">{{ r.itemModel || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let r">{{ r.description || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="oemModelName">
+          <th mat-header-cell *matHeaderCellDef>OEM Model Name</th>
+          <td mat-cell *matCellDef="let r">{{ r.oemModelName || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="hsnSacCode">
+          <th mat-header-cell *matHeaderCellDef>HSN/SAC Code</th>
+          <td mat-cell *matCellDef="let r">{{ r.hsnSacCode || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="salesType">
+          <th mat-header-cell *matHeaderCellDef>Sales Type</th>
+          <td mat-cell *matCellDef="let r">{{ r.salesType || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="itemRate">
+          <th mat-header-cell *matHeaderCellDef class="num">Item Rate</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.itemRate | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="insuAmnt">
+          <th mat-header-cell *matHeaderCellDef class="num">Insu. Amnt</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.insuAmnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="regnAmnt">
+          <th mat-header-cell *matHeaderCellDef class="num">Regn. Amnt</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.regnAmnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="acsryAmnt">
+          <th mat-header-cell *matHeaderCellDef class="num">Acsry Amnt</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.acsryAmnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="finAmnt">
+          <th mat-header-cell *matHeaderCellDef class="num">Fin. Amnt</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.finAmnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="processingFee">
+          <th mat-header-cell *matHeaderCellDef class="num">Processing Fee</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.processingFee | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="hypAmnt">
+          <th mat-header-cell *matHeaderCellDef class="num">Hyp Amnt</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.hypAmnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="otherCharge">
+          <th mat-header-cell *matHeaderCellDef class="num">Other Charge</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.otherCharge | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="smartCardAmnt">
+          <th mat-header-cell *matHeaderCellDef class="num">SmartCard Amnt</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.smartCardAmnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="postGstDiscAmnt">
+          <th mat-header-cell *matHeaderCellDef class="num">PostGST Disc</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.postGstDiscAmnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="preGstDiscAmnt">
+          <th mat-header-cell *matHeaderCellDef class="num">PreGST Disc</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.preGstDiscAmnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="sgstper">
+          <th mat-header-cell *matHeaderCellDef class="num">SGST %</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.sgstper | number:'1.0-2' }}%</td>
+        </ng-container>
+
+        <ng-container matColumnDef="sgstamnt">
+          <th mat-header-cell *matHeaderCellDef class="num">SGST Amnt</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.sgstamnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="cgstper">
+          <th mat-header-cell *matHeaderCellDef class="num">CGST %</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.cgstper | number:'1.0-2' }}%</td>
+        </ng-container>
+
+        <ng-container matColumnDef="cgstamnt">
+          <th mat-header-cell *matHeaderCellDef class="num">CGST Amnt</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.cgstamnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="igstper">
+          <th mat-header-cell *matHeaderCellDef class="num">IGST %</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.igstper | number:'1.0-2' }}%</td>
+        </ng-container>
+
+        <ng-container matColumnDef="igstamnt">
+          <th mat-header-cell *matHeaderCellDef class="num">IGST Amnt</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.igstamnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="subsidyAmnt">
+          <th mat-header-cell *matHeaderCellDef class="num">Subsidy Amnt</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.subsidyAmnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="stateSubsidyAmnt">
+          <th mat-header-cell *matHeaderCellDef class="num">State Subsidy</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.stateSubsidyAmnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="numPlateAmnt">
+          <th mat-header-cell *matHeaderCellDef class="num">NumPlate Amnt</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.numPlateAmnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="handlingCharges">
+          <th mat-header-cell *matHeaderCellDef class="num">Handling Charges</th>
+          <td mat-cell *matCellDef="let r" class="num">{{ r.handlingCharges | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="netAmnt">
+          <th mat-header-cell *matHeaderCellDef class="num">Net Amnt</th>
+          <td mat-cell *matCellDef="let r" class="num strong">{{ r.netAmnt | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="regNo">
+          <th mat-header-cell *matHeaderCellDef>Reg No</th>
+          <td mat-cell *matCellDef="let r">{{ r.regNo || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="chasisNo">
+          <th mat-header-cell *matHeaderCellDef>Chassis No</th>
+          <td mat-cell *matCellDef="let r">{{ r.chasisNo || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="color">
+          <th mat-header-cell *matHeaderCellDef>Color</th>
+          <td mat-cell *matCellDef="let r">{{ r.color || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="financerName">
+          <th mat-header-cell *matHeaderCellDef>Financer Name</th>
+          <td mat-cell *matCellDef="let r">{{ r.financerName || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let r">
+            <span *ngIf="r.status; else noStatus" class="status-chip">{{ r.status }}</span>
+            <ng-template #noStatus>—</ng-template>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <tr class="no-data-row" *matNoDataRow>
+          <td class="no-data-cell" [attr.colspan]="displayedColumns.length">
+            <ng-container *ngIf="!isLoading">
+              No sale bills match these filters. Adjust the date range or clear a filter to see more.
+            </ng-container>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="totalRecords"
+      [pageIndex]="pageIndex - 1"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      (page)="onPage($event)"
+      showFirstLastButtons
+      aria-label="Select page of sale bills">
+    </mat-paginator>
+  </mat-card>
+
+</div>
