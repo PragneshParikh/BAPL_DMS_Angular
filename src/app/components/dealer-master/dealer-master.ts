@@ -201,7 +201,7 @@ export class DealerMaster implements OnInit {
     this.loader.show();
 
     this.dealerService.updateTradeCertificate(
-      this.selectedDealer.id,
+      this.selectedDealer.dealercode,
       this.selectedDealer.tradCert
     ).subscribe({
       next: (res: any) => {

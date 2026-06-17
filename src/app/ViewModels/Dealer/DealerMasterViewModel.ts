@@ -28,7 +28,7 @@ export interface DealerMasterViewModel {
   ceditLimit: number;
   regAddress?: string;
   b2b: boolean;
-
+  isActive: boolean;
   slNo?: number;
   selected?: boolean;
 }
