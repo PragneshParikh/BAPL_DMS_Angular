@@ -119,4 +119,42 @@ export class JobCardService {
   getJobNo(dealerCode: string): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetNextJobNo/${dealerCode}`);
   }
+
+  getInspectedChassisListDropDown(dealerCode: string):Observable<any>{
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetInspectedChassisListDropDown/${dealerCode}`)
+  }
+
+ getJobCardListRepairBill(search: any): Observable<any> {
+
+  let params = new HttpParams();
+
+  if (search.dealerCode) {
+    params = params.set('dealerCode', search.dealerCode);
+  }
+
+  if (search.fromDate) {
+    params = params.set('dateFrom', search.fromDate);
+  }
+
+  if (search.toDate) {
+    params = params.set('dateTo', search.toDate);
+  }
+
+  if (search.jobNo) {
+    params = params.set('jobNo', search.jobNo);
+  }
+
+  if (search.registerNo) {
+    params = params.set('registerNo', search.registerNo);
+  }
+
+  if (search.chassisNo) {
+    params = params.set('chassisNo', search.chassisNo);
+  }
+
+  return this.httpClient.get<any[]>(
+    `${this.baseUrl}/JobCard/GetJobCardListRepairBill`,
+    { params }
+  );
+}
 }
