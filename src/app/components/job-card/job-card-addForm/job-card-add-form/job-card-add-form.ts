@@ -218,6 +218,7 @@ export class JobCardAddForm {
     this.complaintMasterService.getComplaintMasterList().subscribe({
       next: (res: any) => {
         this.complaintMasterList = res;
+        
       }
     });
   }
@@ -273,26 +274,32 @@ export class JobCardAddForm {
 
 
   onComplaintSearch(event: any): void {
-    debugger;
-    const value = event.target.value?.trim().toLowerCase();
 
-    if (!value) {
-      this.filteredComplaints = [];
-      this.showComplaintDropdown = false;
-      return;
-    }
+  const value = event.target.value?.trim().toLowerCase();
 
-    this.filteredComplaints = this.complaintMasterList.filter(x =>
-      x.complaintName?.toLowerCase().includes(value)
-    );
+  // User ne typing start ki -> previous selection invalid
+  this.complaintObj.complaintId = 0;
 
-    this.showComplaintDropdown = this.filteredComplaints.length > 0;
+  if (!value) {
+    this.filteredComplaints = [];
+    this.showComplaintDropdown = false;
+    return;
   }
 
-  selectComplaint(item: any): void {
+  this.filteredComplaints = this.complaintMasterList.filter(x =>
+    x.complaintName?.toLowerCase().includes(value)
+  );
 
+  this.showComplaintDropdown = this.filteredComplaints.length > 0;
+}
+
+ 
+
+  selectComplaint(item: any): void {
+console.log("complaintmaster",item)
     this.complaintObj.complaintCode = item.complaintName;
     this.complaintObj.complaint = item.complaintName;
+     this.complaintObj.complaintId = item.id;
 
     this.filteredComplaints = [];
     this.showComplaintDropdown = false;
@@ -595,26 +602,35 @@ export class JobCardAddForm {
   // add complain section 
   addComplaint() {
 
-    if (!this.complaintObj.customerVoice || !this.complaintObj.complaint) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Validation',
-        text: 'Please fill required fields',
-        width: '300px'
-      });
-      return;
-    }
-
-    this.complaintList.push({ ...this.complaintObj });
-
-    // Reset fields
-    this.complaintObj = {
-      customerVoice: '',
-      complaintCode: '',
-      complaintId: 0,
-      complaint: ''
-    };
+  if (!this.complaintObj.customerVoice || !this.complaintObj.complaint) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Validation',
+      text: 'Please fill required fields',
+      width: '300px'
+    });
+    return;
   }
+
+  // Complaint Code Validation
+  if (!this.complaintObj.complaintId) {
+    this.toastr.show('Please select a valid Complaint Code from dropdown', {
+           classname: 'bg-warning text-white',
+            delay: 2000
+          });
+    return;
+  }
+
+  this.complaintList.push({ ...this.complaintObj });
+
+  // Reset fields
+  this.complaintObj = {
+    customerVoice: '',
+    complaintCode: '',
+    complaintId: 0,
+    complaint: ''
+  };
+}
   deleteComplaint(index: number) {
     this.complaintList.splice(index, 1);
   }
