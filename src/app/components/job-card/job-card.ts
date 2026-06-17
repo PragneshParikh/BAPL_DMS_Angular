@@ -89,8 +89,8 @@ export class JobCard {
     this.loadJobCardList();
     this.setUserRole();
     this.fetchLocations();
-   this.loadChassisList();
-    
+    this.loadChassisList();
+
   }
 
   formatDate(date: Date): string {
@@ -120,12 +120,12 @@ export class JobCard {
   loadChassisList() {
     const dealerCode = this.storageService.getDealerCode();
     this.jobTypeId = this.selectedJobtype;
-    this.jobCardService.getAllInspectedChassis(dealerCode, this.jobTypeId).subscribe({
+    this.jobCardService.getInspectedChassisListDropDown(dealerCode).subscribe({
       next: (res: any) => {
         console.log("list", res);
 
         // a duplicate chassis no remove (optional)
-        this.chassisList = res;
+          this.chassisList = res.chassisNo || [];
       },
       error: (err) => {
         console.error('Error fetching chassis', err);
@@ -134,39 +134,43 @@ export class JobCard {
   }
 
   filterChassis() {
-    const searchText = (this.searchModel.chassisNo || '').toLowerCase();
+  const searchText = (this.searchModel.chassisNo || '').toLowerCase();
 
-    this.filteredChassisList = this.chassisList.filter(x =>
-      x.chassisNumber.toLowerCase().includes(searchText)
-    ).slice(0, 10); // maximum 10 suggestions
-  }
+  this.filteredChassisList = this.chassisList
+    .filter((x: string) =>
+      x.toLowerCase().includes(searchText)
+    )
+    .slice(0, 10);
+}
   hideDropdown() {
     setTimeout(() => {
       this.filteredChassisList = [];
     }, 200);
   }
 
-  selectChassis(item: any) {
-    this.searchModel.chassisNo = item.chassisNumber;
-    this.filteredChassisList = [];
-    this.search();
-  }
+  selectChassis(item: string) {
+  console.log('Selected:', item);
 
- loadJobCardList() {
-debugger;
-  //console.log("dealercode testing",this.searchModel.dealerCode);
-  this.searchModel.dealerCode = this.storageService.getDealerCode();
-  this.jobCardService.getJobCardList(this.searchModel)
-    .subscribe({
-      next: (res) => {
-        this.jobCardList = res;
-        console.log("listing",this.jobCardList)
-      },
-      error: (err) => {
-        console.error('Error fetching job cards', err);
-      }
-    });
+  this.searchModel.chassisNo = item;
+  this.filteredChassisList = [];
+  this.search();
 }
+
+  loadJobCardList() {
+   // debugger;
+    //console.log("dealercode testing",this.searchModel.dealerCode);
+    this.searchModel.dealerCode = this.storageService.getDealerCode();
+    this.jobCardService.getJobCardList(this.searchModel)
+      .subscribe({
+        next: (res) => {
+          this.jobCardList = res;
+          console.log("listing", this.jobCardList)
+        },
+        error: (err) => {
+          console.error('Error fetching job cards', err);
+        }
+      });
+  }
 
   onEdit(row: any) {
     this.router.navigate(['/job-card-addForm/job-card-add-form'], {
@@ -174,9 +178,9 @@ debugger;
     });
   }
 
-  
+
   deleteJobCard(id: number) {
-const dealerCode = this.storageService.getDealerCode();
+    const dealerCode = this.storageService.getDealerCode();
     Swal.fire({
       title: 'Are you sure?',
       text: 'You will not be able to recover this Job Card!',
@@ -272,7 +276,7 @@ const dealerCode = this.storageService.getDealerCode();
     this.selectedChassis = '';
   }
   search() {
-
+debugger
     const payload = {
       dealerCode: this.storageService.getDealerCode(),
       fromDate: this.searchModel.fromDate || null,

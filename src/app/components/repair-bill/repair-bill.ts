@@ -356,7 +356,7 @@ export class RepairBill implements OnInit {
 
     }
     this.selectedJobCard = item;
-
+console.log("onselect",this.selectedJobCard)
     this.chassisNo = this.selectedJobCard.jobCardHeader.chassisno;
     this.insValidTill = this.selectedJobCard.jobCardCustomer.insuranceExpDate;
     console.log("testvalidtill", this.insValidTill)
@@ -1044,7 +1044,7 @@ export class RepairBill implements OnInit {
 
           this.loader.hide();
 
-          this.toaster.show('Repair Bill Saved Successfully', {
+          this.toaster.show('Proforma Saved Successfully', {
             classname: 'bg-success text-dark',
             icons: 'Sucess',
             delay: 5000
@@ -1387,7 +1387,7 @@ export class RepairBill implements OnInit {
 
           this.loader.hide();
 
-          this.toaster.show('Repair Bill Updated Successfully', {
+          this.toaster.show('Repair Bill Saved Successfully', {
             classname: 'bg-success text-dark',
             icons: 'Sucess',
             delay: 5000
