@@ -42,7 +42,7 @@ export class VehicleSaleBillReport implements OnInit {
   constructor(
     private fb: FormBuilder,
     private reportService: ReportService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.filterForm = this.fb.group({
@@ -152,13 +152,13 @@ export class VehicleSaleBillReport implements OnInit {
     if (!this.reportData.length) return;
 
     const headers = [
-      'Sr No','Sale Bill No','Sale Date','Status','Location','Dealer Code','Dealer Name',
-      'Customer Name','Billing Name','Customer Type','Sale Type','Bill Type','Financier',
-      'Sales Executive','Mobile','City','State','Invoice No','Chassis No','Motor No',
-      'Item Code','Model','OEM Model','Colour','HSN','Mfg Year','Reg No','Ins No',
-      'Item Rate','Pre-GST Disc','Taxable','SGST %','SGST Amt','CGST %','CGST Amt',
-      'IGST %','IGST Amt','FAME II','Reg Amt','Insurance','Post-GST Disc','Final Amount',
-      'Battery','Charger No','Controller No','VCU'
+      'Sr No', 'Sale Bill No', 'Sale Date', 'Status', 'Location', 'Dealer Code', 'Dealer Name',
+      'Customer Name', 'Billing Name', 'Customer Type', 'Sale Type', 'Bill Type', 'Financier',
+      'Sales Executive', 'Mobile', 'City', 'State', 'Invoice No', 'Chassis No', 'Motor No',
+      'Item Code', 'Model', 'OEM Model', 'Colour', 'HSN', 'Mfg Year', 'Reg No', 'Ins No',
+      'Item Rate', 'Pre-GST Disc', 'Taxable', 'SGST %', 'SGST Amt', 'CGST %', 'CGST Amt',
+      'IGST %', 'IGST Amt', 'FAME II', 'Reg Amt', 'Insurance', 'Post-GST Disc', 'Final Amount',
+      'Battery', 'Charger No', 'Controller No', 'VCU'
     ];
 
     const rows = this.reportData.map(x => [
