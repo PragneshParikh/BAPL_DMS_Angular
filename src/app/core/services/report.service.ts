@@ -47,7 +47,12 @@ import { environment }
 import { Form22SlipViewModel } from '../../ViewModels/Form22SlipViewModel';
 
 import {
+  VehicleSaleBillReportViewModel,
   VehicleSaleBillReportFilterModel,
+  VehicleSaleBillReportPagedResponse
+} from '../../ViewModels/models/sale-bill-report.model';
+
+import {
   VehicleSaleBillReportResponse
 } from '../../ViewModels/models/vehicle-sale-bill-report.model';
 @Injectable({
@@ -84,13 +89,13 @@ export class ReportService {
   // STOCK REPORT
   // =====================================================
 
-getDealerWiseStockReport(dealerCode?: string):
-  Observable<StockReport[]> {
-  const params = dealerCode ? `?dealerCode=${dealerCode}` : '';
-  return this.http.get<StockReport[]>(
-    `${this.apiUrl}/dealer-wise${params}`
-  );
-}
+  getDealerWiseStockReport(dealerCode?: string):
+    Observable<StockReport[]> {
+    const params = dealerCode ? `?dealerCode=${dealerCode}` : '';
+    return this.http.get<StockReport[]>(
+      `${this.apiUrl}/dealer-wise${params}`
+    );
+  }
 
   getColourWiseStockReport():
     Observable<StockReport[]> {
@@ -436,4 +441,50 @@ getDealerWiseStockReport(dealerCode?: string):
       filter
     );
   }
+
+  exportVehicleSaleBillReport(
+    dealerCode?: string,
+    fromDate?: Date,
+    toDate?: Date
+  ): Observable<VehicleSaleBillReportViewModel[]> {
+    let params = new HttpParams();
+
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
+    }
+
+    if (fromDate) {
+      params = params.set('fromDate', fromDate.toISOString());
+    }
+
+    if (toDate) {
+      params = params.set('toDate', toDate.toISOString());
+    }
+
+    return this.http.get<VehicleSaleBillReportViewModel[]>(
+      `${this.apiUrl}/sale-bill/export`,
+      { params }
+    );
+  }
+
+  getSaleTypeDropdown(): Observable<string[]> {
+    return this.http.get<string[]>(
+      `${this.apiUrl}/sale-bill/dropdown/sale-type`
+    );
+  }
+
+  getSaleBillStatusDropdown(): Observable<string[]> {
+    return this.http.get<string[]>(
+      `${this.apiUrl}/sale-bill/dropdown/status`
+    );
+  }
+
+  // getVehicleSaleBillReport(
+  //   filter: VehicleSaleBillReportFilterModel
+  // ): Observable<VehicleSaleBillReportPagedResponse> {
+  //   return this.http.post<VehicleSaleBillReportPagedResponse>(
+  //     `${this.apiUrl}/vehicle-sale-bill`,
+  //     filter
+  //   );
+  // }
 }

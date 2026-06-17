@@ -159,22 +159,22 @@
 
             <div class="col-md-3">
                 <label class="form-label">Company Name</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.compname" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.compname" [disabled]="true">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Company Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.compcode" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.compcode" [disabled]="true">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Dealer Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.dealercode" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.dealercode" [disabled]="true">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Credit Limit</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.ceditLimit" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.ceditLimit" [disabled]="true">
             </div>
 
         </div>
@@ -183,12 +183,14 @@
 
             <div class="col-md-6">
                 <label class="form-label">Address 1</label>
-                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress1" readonly></textarea>
+                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress1"
+                    [disabled]="true"></textarea>
             </div>
 
             <div class="col-md-6">
                 <label class="form-label">Address 2</label>
-                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress2" readonly></textarea>
+                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress2"
+                    [disabled]="true"></textarea>
             </div>
 
         </div>
@@ -197,22 +199,34 @@
 
             <div class="col-md-3">
                 <label class="form-label">City</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.city" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.city" [disabled]="true">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">State</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.state" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.state" [disabled]="true">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Pin Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.pin" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.pin" [disabled]="true">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Mobile</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.mobile" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.mobile" [disabled]="true">
+            </div>
+
+        </div>
+
+        <div class="row mt-3">
+
+            <div class="col-md-3">
+                <label class="form-label">Active</label>
+                <select class="form-select form-select-sm" [value]="selectedDealer?.isActive" [disabled]="true">
+                    <option value="true"> Yes </option>
+                    <option value="false"> No </option>
+                </select>
             </div>
 
         </div>
@@ -227,17 +241,17 @@
 
             <div class="col-md-4">
                 <label class="form-label">Email</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.email" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.email" [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Contact Person</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.contactperson" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.contactperson" [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Phone Office</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.phoneOff" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.phoneOff" [disabled]="true">
             </div>
 
         </div>
@@ -252,17 +266,17 @@
 
             <div class="col-md-4">
                 <label class="form-label">Brand Name</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.brandName" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.brandName" [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">GSTIN</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.compgstinNo" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.compgstinNo" [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">PAN</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.pan" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.pan" [disabled]="true">
             </div>
 
         </div>
@@ -271,7 +285,7 @@
 
             <div class="col-md-4">
                 <label class="form-label">CIN No</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.cinNo" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.cinNo" [disabled]="true">
             </div>
 
             <div class="col-md-4">
@@ -281,7 +295,7 @@
 
             <div class="col-md-4">
                 <label class="form-label">Area Office Id</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.areaofficeid" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.areaofficeid" [disabled]="true">
             </div>
 
         </div>
@@ -290,17 +304,18 @@
 
             <div class="col-md-4">
                 <label class="form-label">VAT No</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.vatNo" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.vatNo" [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Is TCS</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.isTcs ? 'Yes' : 'No'" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.isTcs ? 'Yes' : 'No'"
+                    [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">TCS Percent</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.tcsPercent" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.tcsPercent" [disabled]="true">
             </div>
 
         </div>
@@ -309,17 +324,18 @@
 
             <div class="col-md-4">
                 <label class="form-label">FameII Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.fameiiCode" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.fameiiCode" [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">B2B</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.b2b ? 'Yes' : 'No'" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.b2b ? 'Yes' : 'No'"
+                    [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Registration Date</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.regDate" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.regDate" [disabled]="true">
             </div>
 
         </div>
@@ -328,7 +344,7 @@
 
             <div class="col-md-12">
                 <label class="form-label">Registration Address</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.regAddress" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.regAddress" [disabled]="true">
             </div>
 
         </div>
@@ -339,7 +355,7 @@
         <button class="btn btn-primary btn-sm" (click)="updateTradeCertificate()">
             Save
         </button>
-        <button class="btn btn-light btn-sm" (click)="modal.close()">Close</button>
+        <button class="btn btn-danger btn-sm" (click)="modal.close()">Close</button>
     </div>
 
 </ng-template>

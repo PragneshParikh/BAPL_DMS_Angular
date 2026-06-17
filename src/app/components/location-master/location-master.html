@@ -9,8 +9,8 @@
                 <div class="col-md-3 dropdown-wrapper">
                     <label class="form-label">Dealer Name</label>
                     <select class="form-select form-select-sm" [(ngModel)]="dealerCode"
-                        (ngModelChange)="checkSearchReset()" [disabled]="isDealer">
-                        <option value="">-- Select Dealer --</option>
+                        (ngModelChange)="checkSearchReset($event)" [disabled]="isDealer">
+                        <option value=null>-- Select Dealer --</option>
                         <option *ngFor="let d of dealerList" [value]="d.dealerCode">
                             {{d.dealerName}}
                         </option>

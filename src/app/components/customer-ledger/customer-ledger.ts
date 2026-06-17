@@ -100,6 +100,7 @@ await this.getNextLedCode();
 
     //SET DEFAULT TYPE (ONLY ADD MODE)
     if (!this.ledgerId && this.defaultLedgerType) {
+      debugger
       this.formData.ledgerType = this.defaultLedgerType;
     }
 

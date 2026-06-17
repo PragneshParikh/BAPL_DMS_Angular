@@ -68,7 +68,7 @@ export class PerformaInvoice implements OnInit {
 
   ngOnInit() {
     this.getFinanciers();
-    this.getDealerDetails();
+//    this.getDealerDetails();
 
     this.saleBillId = this.route.snapshot.paramMap.get('saleBillNo') || '';
 
@@ -96,69 +96,7 @@ export class PerformaInvoice implements OnInit {
   getFinancierName(id: number): string {
     return this.financiers.find(x => x.id === id)?.ledgerName || '-';
   }
-  //  // CALCULATE FOR MULTIPLE ROWS
-  //   calculateAmounts() {
-  //     const details = this.saleBill?.details || [];
-
-  //     this.amounts.taxable = 0;
-  //     this.amounts.cgst = 0;
-  //     this.amounts.sgst = 0;
-  //     this.amounts.igst = 0;
-  //     this.amounts.discount = 0;
-  //     this.amounts.total = 0;
-  //     this.amounts.postGstDiscount=0;
-  //     this.amounts.fameII=0;
-  //     this.amounts.preGstDiscount=0;
-
-  //     this.registrationAmount = 0;
-  //     this.insuranceAmount = 0;
-  //     this.preGstDiscount = 0;
-
-  //     details.forEach((item: any) => {
-  //       this.amounts.taxable += item.itemRate || 0;
-
-  //       this.amounts.cgst += item.cgstamnt || 0;
-  //       this.amounts.sgst += item.sgstamnt || 0;
-  //       this.amounts.igst += item.igstamnt || 0;
-
-  //       this.amounts.cgstPercent = item.cgstper || 0;
-  //       this.amounts.sgstPercent = item.sgstper || 0;
-  //       this.amounts.igstPercent = item.igstper || 0;
-  //         this.amounts.fameII += item.fameIIDisc || 0;
-  //         this.amounts.preGstDiscount += item.preGstDiscount || 0;
-  //           this.amounts.postGstDiscount += item.postGstDiscount || 0;
-
-  //       this.amounts.discount += item.preGstDiscount || 0;
-
-
-  //       //  Use finalAmount directly (already calculated in backend)
-  //       // this.amounts.total += item.finalAmount || 0;
-
-  //       this.preGstDiscount += item.preGstDiscount || 0;
-
-  //       this.registrationAmount += item.regAmount || 0;
-
-  //       this.insuranceAmount += item.insuranceAmount || 0;
-
-  //       this.amounts.total += item.finalAmount || 0;
-  //     });
-
-  //     // Ex-showroom = taxable + taxes
-  //     this.amounts.exShowroom =
-  //       this.amounts.taxable +
-  //       this.amounts.cgst +
-  //       this.amounts.sgst +
-  //       this.amounts.igst;
-  //     this.convert();
-
-  //     this.onRoadTotal =
-  //       this.amounts.total +
-  //       this.registrationAmount +
-  //       this.insuranceAmount;
-
-  //     this.convert();
-  //   }
-
+ 
   calculateAmounts() {
     const details = this.saleBill?.details || [];
 
@@ -265,19 +203,22 @@ export class PerformaInvoice implements OnInit {
     this.convert();
   }
 
-  getDealerDetails() {
-    const dealerCode = this.storageService.getDealerCode();
+  getDealerDetails(dealerCode: string) {
+  this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
+    console.log(res);
 
-    this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
-      this.dealer = res?.data?.[0] || null;
-    });
-  }
+    this.dealer = res?.data || null;
+
+    console.log(this.dealer);
+  });
+}
 
   getBillById(id: number) {
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
         this.saleBill = res;
-
+        console.log(this.saleBill);
+        this.getDealerDetails(this.saleBill.dealerCode);
         if (this.saleBill.erpStatus == "Invoiced") {
           this.isInvoiced = true;
         }

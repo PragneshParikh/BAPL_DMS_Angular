@@ -18,9 +18,10 @@ import { VehicleSaleListChasisResponse } from '../../../ViewModels/VehicleSaleCh
 import { VehicleRegistrationdetails } from '../../../dialogs/vehicle-registrationdetails/vehicle-registrationdetails';
 import { VehicleSaleBillResponseViewModel } from '../../../ViewModels/VehicleSaleBill';
 import { text } from 'stream/consumers';
-import { log } from 'console';
+import { debug, log } from 'console';
 import { PrefixService } from '../../../core/services/prefix';
 import { forkJoin } from 'rxjs';
+import { LedgerMasterService } from '../../../core/services/ledger-master';
 
 
 @Component({
@@ -50,6 +51,8 @@ export class AddVehicleSaleBill implements OnInit {
   showInsuranceDropdown: boolean;
   insuranceParties: any;
   insuranceNotFound: boolean;
+  isSuperAdmin: boolean;
+  filterChassisList: VehicleSaleListChasisResponse[];
 
 
   /**
@@ -64,6 +67,7 @@ export class AddVehicleSaleBill implements OnInit {
     private toaster: ToastService,
     private router: Router,
     private prefixService: PrefixService,
+    private ledgerService:LedgerMasterService
   ) {
 
   }
@@ -87,6 +91,7 @@ export class AddVehicleSaleBill implements OnInit {
   today = new Date().toISOString().split('T')[0];
   model = {
     itemCode: '',
+    dealerCode:'',
     colour: '',
     amount: null,
     stockDetailNo: '',
@@ -110,6 +115,7 @@ export class AddVehicleSaleBill implements OnInit {
     customerType: 'B2C',
     cashAccount: '',
     customerName: '',
+    ledgerId:null,
     billingName: '',
     billingType: null,
     billFrom: '',
@@ -232,7 +238,12 @@ filterInsurance() {
 
   this.insuranceNotFound = this.filteredInsurance.length === 0;
 }
-
+onLocationChange()
+{
+  console.log("dsdaa");
+  debugger;
+   this.filteredChassis = this.chassisList.filter(p=>p.locationCode === this.model.location);
+}
 selectInsurance(party: LedgerMaster) {
   this.model.insuranceName = party.ledgerName;
   this.model.insuranceId = party.id;
@@ -251,11 +262,19 @@ onInsuranceBlur() {
 }
 
   loadBillForEdit(bill: any) {
+    console.log(bill);
+    if(bill.status === 'invoiced')
+    {
+      
+      this.isInvoiced =true;
+    }
     this.loader.show();
     
     //  Header fields
     this.model.saleBillNo = bill.saleBillNo;
+    this.model.ledgerId=bill.ledgerId;
     this.model.saleDate = bill.saleDate ? bill.saleDate.split('T')[0] : '';
+    this.model.dealerCode =bill.dealerCode;
     // this.model.location = bill.location;
     const locationObj = this.locations.find(
   x => x.locname === bill.location
@@ -348,6 +367,8 @@ this.model.location = locationObj
 
     this.model.finalAmount = this.getGrandTotal();
     this.loader.hide();
+    console.log(this.model);
+    
   }
 
 
@@ -358,7 +379,10 @@ this.model.location = locationObj
     this.vehicleSaleBillService.getAllChassisWithPDIStatus(dealerCode, this.selectedCustomerId)
       .subscribe({
         next: (res) => {
-          this.chassisList = res;
+          this.chassisList=res;;
+          console.log(this.chassisList);
+          
+          this.filteredChassis = res.filter(p=>p.locationCode === this.model.location);
           if (callback) callback();
         },
         error: () => {
@@ -376,6 +400,8 @@ this.model.location = locationObj
     this.loader.show();
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
+        console.log(res);
+        
         this.loader.hide();
         this.selectedCustomerId = res.ledgerId;
         this.Status = res.status || '';
@@ -409,12 +435,14 @@ this.model.location = locationObj
   fetchLocations(): void {
     const dealerCode: any = this.storageService.getDealerCode();
 
-    this.locationService.getLocationByDealerCode(dealerCode).subscribe({
+    this.locationService.getLocationList(dealerCode).subscribe({
       next: (data: any[]) => {
-        this.locations = data;
+        console.log(data);
+        
+        this.locations = data.filter(i=>i.locareadidNo ===1);
 
         if (this.locations.length > 0 && !this.billId) {
-          this.model.location = this.locations[0].loccode || this.locations[0].loccode;
+          this.model.location = this.locations[0].locCode || this.locations[0].locCode;
         }
       },
       error: (err) => {
@@ -497,8 +525,12 @@ this.model.location = locationObj
     }, 0);
   }
   onD2DChange() {
-    this.onChassisChange(); // reapply rate + GST logic
-  }
+  this.model.customerName = '';
+  this.model.billingName = '';
+  this.selectedCustomerId = null;
+  this.getParties();
+  this.onChassisChange();
+}
 
   addVehicle(form: NgForm) {
     if (
@@ -842,44 +874,84 @@ this.model.insuranceId = selected.insuranceId || null;
   isChassisUsed(chassisNo: string): boolean {
     return this.vehicleList.some(v => v.chassisNo === chassisNo);
   }
-  openCustomerLedgerAdd() {
-    const modalRef = this.modalService.open(CustomerLedger, {
-      size: 'lg',
-      backdrop: 'static'
-    });
+  // openCustomerLedgerAdd() {
+  //   const modalRef = this.modalService.open(CustomerLedger, {
+  //     size: 'lg',
+  //     backdrop: 'static'
+  //   });
 
-    modalRef.componentInstance.defaultLedgerType = 'Party';
+  //   modalRef.componentInstance.defaultLedgerType = 'Party';
 
-    modalRef.result.then((newId) => {
-      if (newId) {
+  //   modalRef.result.then((newId) => {
+  //     if (newId) {
 
-        // subscribe and act AFTER data comes
-        this.receiptEntryService.getLedgerByType('Party').subscribe({
-          next: (res) => {
-            this.parties = res;
+  //       // subscribe and act AFTER data comes
+  //       this.receiptEntryService.getLedgerByType('Party').subscribe({
+  //         next: (res) => {
+  //           this.parties = res;
 
-            // Force change detection via new reference
-            this.parties = [...this.parties];
+  //           // Force change detection via new reference
+  //           this.parties = [...this.parties];
 
-            //  OPTIONAL: auto-select newly added
-            const added = this.parties.find(f => f.id === newId);
-            if (added) {
-              this.model.customerName = added.ledgerName;
-              this.model.billingName = added.ledgerName;
-            }
-          }
-        });
-      }
-    }).catch(() => { });
+  //           //  OPTIONAL: auto-select newly added
+  //           const added = this.parties.find(f => f.id === newId);
+  //           if (added) {
+  //             this.model.customerName = added.ledgerName;
+  //             this.model.billingName = added.ledgerName;
+  //           }
+  //         }
+  //       });
+  //     }
+  //   }).catch(() => { });
+  // }
+
+  openCustomerLedgerAdd(ledgerId?: number) {
+    debugger
+  const modalRef = this.modalService.open(CustomerLedger, {
+    size: 'lg',
+    backdrop: 'static'
+  });
+
+  modalRef.componentInstance.defaultLedgerType = 'Party';
+  modalRef.componentInstance.fromReceiptEntry = true;
+
+  // Edit mode
+  if (this.billId) {
+    modalRef.componentInstance.ledgerId = this.model.ledgerId;
   }
+
+  modalRef.result.then((resultId) => {
+    if (resultId) {
+      this.receiptEntryService.getLedgerByType('Party').subscribe({
+        next: (res) => {
+          this.parties = [...res];
+
+          const party = this.parties.find(x => x.id === resultId);
+          if (party) {
+            this.model.customerName = party.ledgerName;
+            this.model.billingName = party.ledgerName;
+          }
+        }
+      });
+    }
+  }).catch(() => {});
+}
 
 
   getParties() {
-    this.receiptEntryService.getLedgerByType('Party').subscribe({
+    const dealerCode =this.storageService.getDealerCode();
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    this.ledgerService.getLedgerForSale(dealerCode,this.isSuperAdmin).subscribe({
       next: (res) => {
-console.log(res);
-
-        this.parties = res;
+       if (this.model.isD2D) {
+        this.parties = res.filter(
+          p => p.ledgerType?.toLowerCase() === 'dealer'
+        );
+      } else {
+        this.parties = res.filter(
+          p => p.ledgerType?.toLowerCase() !== 'dealer'
+        );
+      }
         if (this.model.customerName && !this.selectedCustomerId) {
           const match = this.parties.find(p =>
             p.ledgerName?.toLowerCase() === this.model.customerName?.toLowerCase()
@@ -962,21 +1034,17 @@ console.log(res);
 
 
   onChassisChange() {
-    if (!this.isCustomerValid()) {
-      this.toaster.show('Select customer name before choosing chassis', {
-        classname: 'bg-warning text-dark',
-        delay: 3000
-      });
+    // if (!this.isCustomerValid()) {
+    //   this.toaster.show('Select customer name before choosing chassis', {
+    //     classname: 'bg-warning text-dark',
+    //     delay: 3000
+    //   });
 
-      this.model.chassisNo = '';
-      return;
-    }
+    //   this.model.chassisNo = '';
+    //   return;
+    // }
 
-
-
-    const selected = this.chassisList.find(
-      c => c.chassisNo === this.model.chassisNo
-    );
+    const selected = this.chassisList.find(      c => c.chassisNo === this.model.chassisNo    );
 
     if (!selected) return;
 
@@ -992,7 +1060,7 @@ console.log(res);
 
     if (selected.proformaCreated) {
       this.toaster.show(
-        `Proforma already generated f(Bill No: ${selected.proformaCreated}). Please select another chassis.`,
+        `Proforma already generated fOR(Bill No: ${selected.proformaCreated}). Please select another chassis.`,
         {
           classname: 'bg-warning text-dark',
           delay: 5000
@@ -1273,6 +1341,7 @@ console.log(res);
   }
 
   printDeliverySlip() {
+    debugger
     if (!this.vehicleList.length) return;
 
     const vehicle = this.vehicleList[0];
@@ -1284,7 +1353,8 @@ console.log(res);
         modelName: vehicle.modelName,
         chassisNo: vehicle.chassisNo,
         motorNo: vehicle.motorNo,
-        regNo: vehicle.regNo
+        regNo: vehicle.regNo,
+        dealerCode:this.model.dealerCode
       }
     });
   }
@@ -1342,8 +1412,10 @@ console.log(res);
 
   filterChassis() {
     const search = (this.model.chassisNo || '').toLowerCase();
-
-    this.filteredChassis = this.chassisList.filter(c =>
+ const locationWiseChassis = this.chassisList.filter(
+    p => p.locationCode === this.model.location
+  );
+    this.filteredChassis = locationWiseChassis.filter(c =>
       c.chassisNo.toLowerCase().includes(search)
     );
 
@@ -1371,7 +1443,9 @@ console.log(res);
     this.showDropdown = true;
 
     // show all options initially
-    this.filteredChassis = [...this.chassisList];
+   this.filteredChassis = this.chassisList.filter(
+    p => p.locationCode === this.model.location
+  );
 
     this.showNotFound = false;
   }

@@ -25,7 +25,7 @@ export class LocationMasterComponent implements OnInit {
   locationList: any[] = [];
   originalLocationList: any[] = [];
   dealerList: any[] = [];
-  dealerCode: string = '';
+  // dealerCode: string = '';
   isDealer: boolean = false;
   locationArea: string = '';
   locationName: string = '';
@@ -39,6 +39,9 @@ export class LocationMasterComponent implements OnInit {
   sortColumn = 'rrglocationidno';
   sortDirection = 'desc';
 
+  isSuperAdmin: boolean = false;
+  dealerCode: string | null = null;
+
   constructor(
     private locationService: LocationMasterService,
     private dealerMasterService: DealerService,
@@ -47,15 +50,21 @@ export class LocationMasterComponent implements OnInit {
     public toastr: ToastService) { }
 
   ngOnInit(): void {
-    const storedDealerCode = this.storageService.getDealerCode();
-    // Assuming if dealerCode is present and not 'admin', it's a dealer
-    if (storedDealerCode && storedDealerCode.toLowerCase() !== 'admin') {
-      this.isDealer = true;
-      this.dealerCode = storedDealerCode;
+    // const storedDealerCode = this.storageService.getDealerCode();
+    // // Assuming if dealerCode is present and not 'admin', it's a dealer
+    // if (storedDealerCode && storedDealerCode.toLowerCase() !== 'admin') {
+    //   this.isDealer = true;
+    //   this.dealerCode = storedDealerCode;
+    // }
+
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
     }
 
-    this.loadLocations();
     this.loadDealerDropdown();
+    this.loadLocations();
   }
 
   loadLocations() {
@@ -67,16 +76,15 @@ export class LocationMasterComponent implements OnInit {
         const data = res?.data || res;
         this.originalLocationList = data;
 
-        if (this.isDealer && this.dealerCode) {
-          this.locationList = data.filter((x: any) => x.dealercode == this.dealerCode);
-        } else {
-          this.locationList = data;
-        }
+        // if (this.isDealer && this.dealerCode) {
+        //   this.locationList = data.filter((x: any) => x.dealercode == this.dealerCode);
+        // } else {
+        //   this.locationList = data;
+        // }
 
         this.loadPage();// for pagination
         this.sort(this.sortColumn, true);
       },
-
       error: (err) => {
         this.loader.hide();
         console.log(err);
@@ -180,14 +188,19 @@ export class LocationMasterComponent implements OnInit {
       : 'sort-desc';
   }
 
-  checkSearchReset() {
+  checkSearchReset(event: any) {
+    // if (!this.dealerCode && !this.locationArea && !this.locationName) {
+    //   if (this.isDealer && this.dealerCode) {
+    //     this.locationList = this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode);
+    //   } else {
+    //     this.locationList = [...this.originalLocationList];
+    //   }
+    //   this.page = 1;
+    //   this.loadPage();
+    // }
 
-    if (!this.dealerCode && !this.locationArea && !this.locationName) {
-      if (this.isDealer && this.dealerCode) {
-        this.locationList = this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode);
-      } else {
-        this.locationList = [...this.originalLocationList];
-      }
+    if (event) {
+      this.locationList = this.originalLocationList.filter((x: any) => x.dealercode == event);
       this.page = 1;
       this.loadPage();
     }
@@ -230,23 +243,35 @@ export class LocationMasterComponent implements OnInit {
   }
   loadDealerDropdown() {
     this.loader.show();
-    this.dealerMasterService.getDealerDropdown().subscribe({
-      next: (res: any) => {
-        this.loader.hide();
-        console.log("Dealer API Response:", res);
-        const dealers = res?.data || res;
 
-        if (this.isDealer && this.dealerCode) {
-          this.dealerList = dealers.filter((d: any) => d.dealerCode == this.dealerCode);
-        } else {
-          this.dealerList = dealers;
-        }
+    // this.dealerMasterService.getDealerDropdown().subscribe({
+    //   next: (res: any) => {
+    //     this.loader.hide();
+    //     const dealers = res?.data || res;
+
+    //     if (this.isDealer && this.dealerCode) {
+    //       this.dealerList = dealers.filter((d: any) => d.dealerCode == this.dealerCode);
+    //     } else {
+    //       this.dealerList = dealers;
+    //     }
+    //   },
+    //   error: (err) => {
+    //     this.loader.hide();
+    //     console.error("Dealer Dropdown Error:", err);
+    //   }
+    // });
+    this.dealerMasterService.getDealerDropdown(this.dealerCode).subscribe({
+      next: (res: any) => {
+        this.dealerList = res.data;
+        this.loader.hide();
+        console.log(res);
       },
       error: (err) => {
         this.loader.hide();
         console.error("Dealer Dropdown Error:", err);
       }
-    });
+    })
+
   }
   downloadLocationExcel() {
     this.loader.show();

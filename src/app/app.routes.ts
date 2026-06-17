@@ -171,6 +171,8 @@ export const routes: Routes = [
 
       { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
 
+      { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
+
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
 
       { path: 'repair-bill-performa/:repairBillId', component: RepairBillPerforma, data: [51] },
@@ -183,7 +185,7 @@ export const routes: Routes = [
       { path: 'group-master', component: GroupMaster, data: [59] },
       { path: 'term-condition-master', component: TermConditionMaster, data: [60] },
       { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
- 
+
       { path: 'occupation-master', component: OccupationMaster, data: [62] },
     ]
   },
