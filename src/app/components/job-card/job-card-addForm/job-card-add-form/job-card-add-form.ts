@@ -103,6 +103,7 @@ export class JobCardAddForm {
   };
 
   customerObj = {
+    customerLedgerId: 0,
     customerName: '',
     customerMobile: '',
     customerAltMobile: '',
@@ -153,7 +154,7 @@ export class JobCardAddForm {
     this.loadChassisList();
     this.loadJobSorces();
     this.loadComplaintMaster();
-    
+
     const data = history.state.data;
 
     if (data) {
@@ -161,7 +162,7 @@ export class JobCardAddForm {
       this.chassiseditData = data;
       this.patchEditData(data);
     }
-    
+
     //this.loadPdiData(this.oemModelId);
     if (!this.isEditMode) {
       this.getJobNo();
@@ -272,7 +273,7 @@ export class JobCardAddForm {
 
 
   onComplaintSearch(event: any): void {
-
+    debugger;
     const value = event.target.value?.trim().toLowerCase();
 
     if (!value) {
@@ -358,7 +359,7 @@ export class JobCardAddForm {
 
     this.jobCardService.getAllInspectedChassis(dealerCode, this.jobTypeId).subscribe(res => {
       this.chassisList = res;
-
+      console.log("AddloadingChassisdetails", this.chassisList)
       if (this.isEditMode && this.chassiseditData) {
         this.selectedChassis = this.chassiseditData.jobCardHeader.chassisno;
 
@@ -374,7 +375,7 @@ export class JobCardAddForm {
 
     this.jobCardService.getPdiChecklist(oemModelId).subscribe(res => {
       this.pdiCheckList = res
-      console.log("pdichecklist",this.pdiCheckList)
+      console.log("pdichecklist", this.pdiCheckList)
     });
   }
   toggle(section: string) {
@@ -497,7 +498,7 @@ export class JobCardAddForm {
     // ALWAYS FILL (EDIT + ADD)
     this.invoiceNo = selected.invoiceNo;
     this.couponNo = this.selectedChassis.slice(-13);
-
+    this.customerObj.customerLedgerId = selected.customerLedgerId;
     this.customerObj.customerName = selected.customerName;
     this.customerObj.customerMobile = selected.customerMobile;
     this.customerObj.customerAltMobile = selected.customerAltMobile;
@@ -619,24 +620,24 @@ export class JobCardAddForm {
   }
   savePdi() {
 
-  this.pdiCheckList = this.pdiCheckList.map(x => ({
-    ...x,
-    isStatus: x.isStatus === true,
-    remarks: x.remarks || ''
-  }));
+    this.pdiCheckList = this.pdiCheckList.map(x => ({
+      ...x,
+      isStatus: x.isStatus === true,
+      remarks: x.remarks || ''
+    }));
 
-  console.log("Save PDIChecklist",this.pdiCheckList)
-  this.isPdiSaved = true;
+    console.log("Save PDIChecklist", this.pdiCheckList)
+    this.isPdiSaved = true;
 
-  Swal.fire({
-    icon: 'success',
-    title: 'PDI Checklist has been done.',
-    timer: 1500,
-    showConfirmButton: false
-  }).then(() => {
-    this.modalService.dismissAll();
-  });
-}
+    Swal.fire({
+      icon: 'success',
+      title: 'PDI Checklist has been done.',
+      timer: 1500,
+      showConfirmButton: false
+    }).then(() => {
+      this.modalService.dismissAll();
+    });
+  }
   //insert jobcard
   saveJobCard() {
     debugger
@@ -712,6 +713,7 @@ export class JobCardAddForm {
 
     //  CUSTOMER
     const jobCardCustomer = {
+      customerLedgerId: this.customerObj.customerLedgerId || 0,
       customerName: this.customerObj.customerName || null,
       customerMobile: this.customerObj.customerMobile || null,
       customerAltMobile: this.customerObj.customerAltMobile || null,
@@ -744,11 +746,11 @@ export class JobCardAddForm {
     }));
 
     //  PDI (USE STORED DATA )
- 
+
     const JobCardpdiChecklist = this.pdiCheckList.map(x => ({
-     
+
       pdichecklistMasterId: x.id,
-      oemModelId : x.oemModelId,
+      oemModelId: x.oemModelId,
       isStatus: x.isStatus,   // use normalized value
       remarks: x.remarks,
       createdBy: userId,
@@ -819,6 +821,7 @@ export class JobCardAddForm {
 
     // ================= CUSTOMER =================
     this.customerObj = {
+      customerLedgerId: data.jobCardCustomer?.customerLedgerId || 0,
       customerName: data.jobCardCustomer?.customerName || '',
       customerMobile: data.jobCardCustomer?.customerMobile || '',
       customerAltMobile: data.jobCardCustomer?.customerAltMobile || '',
@@ -942,6 +945,7 @@ export class JobCardAddForm {
 
     // CUSTOMER
     this.customerObj = {
+      customerLedgerId: 0,
       customerName: '',
       customerMobile: '',
       customerAltMobile: '',
