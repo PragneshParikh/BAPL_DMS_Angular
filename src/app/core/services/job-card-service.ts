@@ -119,4 +119,8 @@ export class JobCardService {
   getJobNo(dealerCode: string): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetNextJobNo/${dealerCode}`);
   }
+
+  getInspectedChassisListDropDown(dealerCode: string):Observable<any>{
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetInspectedChassisListDropDown/${dealerCode}`)
+  }
 }
