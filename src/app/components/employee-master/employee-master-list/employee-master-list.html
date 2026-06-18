@@ -42,6 +42,10 @@
 
                     <th>Employee Code</th>
 
+                    <th>Location Code</th>
+                    
+                    <th>Location Name</th>
+
                     <th>Name</th>
 
                     <th>Gender</th>
@@ -121,6 +125,12 @@
 
                     </td>
 
+                        <!-- LOCATION CODE -->
+                        <td>{{ emp.locationCode }}</td>
+
+                        <!-- LOCATION NAME -->
+                        <td>{{ getLocationName(emp.locationCode) }}</td>
+
                     <!-- NAME -->
 
                     <td>
@@ -156,18 +166,14 @@
 
                     <!-- DEPARTMENT -->
 
+                    <!-- DEPARTMENT -->
                     <td>
-
-                        {{ emp.department }}
-
+                    {{ getDepartmentName(emp.department) }}
                     </td>
 
                     <!-- DESIGNATION -->
-
                     <td>
-
-                        {{ emp.designation }}
-
+                    {{ getDesignationName(emp.designation) }}
                     </td>
 
                     <!-- DEALER -->
