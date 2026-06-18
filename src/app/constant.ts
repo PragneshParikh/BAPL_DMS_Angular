@@ -60,15 +60,15 @@ export const locationAreaMaster = [
 ];
 
 export const LedgerTypes = [
-    { name: 'Company', value: 'Company' },
-    { name: 'Dealer', value: 'Dealer' },
-    { name: 'Financier', value: 'Financier' },
-    { name: 'Institutional', value: 'Institutional' },
-    { name: 'Insurance', value: 'Insurance' },
-    { name: 'Party', value: 'Party' },
-    { name: 'Supplier', value: 'Supplier' },
-    {name:'Receipt Party',value:'Receipt'}
-]
+    { name: 'Company', value: 'Company', isAdmin: true },
+    { name: 'Dealer', value: 'Dealer', isAdmin: true },
+    { name: 'Financier', value: 'Financier', isAdmin: false },
+    { name: 'Institutional', value: 'Institutional', isAdmin: false },
+    { name: 'Insurance', value: 'Insurance', isAdmin: false },
+    { name: 'Party', value: 'Party', isAdmin: false },
+    { name: 'Supplier', value: 'Supplier', isAdmin: false },
+    { name: 'Receipt Party', value: 'Receipt', isAdmin: true }
+];
 
 export const PrefixTypes = [
     { name: 'Invoice', value: 'Invoice' },

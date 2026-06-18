@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
 import { Form22SlipViewModel } from '../../../ViewModels/Form22SlipViewModel';
 import { ReportService } from '../../../core/services/report.service';
@@ -15,15 +15,19 @@ import { ReportService } from '../../../core/services/report.service';
 export class Form22Certificate implements OnInit {
 
   form22Data!: Form22SlipViewModel; 
+  saleBillId: string;
 
   constructor(
     private route: ActivatedRoute,
-    private reportService: ReportService
+    private reportService: ReportService,
+    private router:Router
   ) {}
 
   
   ngOnInit(): void {
     const chassisNo = this.route.snapshot.paramMap.get('chassisNo');
+    this.saleBillId = this.route.snapshot.paramMap.get('saleBillId');
+
 
 
     if (chassisNo) {
@@ -45,4 +49,11 @@ export class Form22Certificate implements OnInit {
       }
     });
   }
+   goBack(): void {
+  this.router.navigate(['/vehicle-sale-bill/edit', this.saleBillId]);
+}
+
+printInvoice(): void {
+  window.print();
+}
 }

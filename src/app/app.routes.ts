@@ -99,8 +99,8 @@ export const routes: Routes = [
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
       { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-search/chassis-search').then(m => m.ChassisSearch) },
       { path: 'proforma-invoice', component: ProformaInvoice, data: [22] },
-      { path: 'form22-certificate/:chassisNo', component: Form22Certificate, data: [22] },
-      { path: 'delivery-checkList', component: DeliveryChecklist, data: [22] },
+      {path: 'form22-certificate/:saleBillId/:chassisNo', component: Form22Certificate, data: [22] },
+      { path: 'delivery-checkList/:saleBillId', component: DeliveryChecklist, data: [22] },
       { path: 'delivery-slip', component: DeliverySlip, data: [22] },
       { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] },
 
