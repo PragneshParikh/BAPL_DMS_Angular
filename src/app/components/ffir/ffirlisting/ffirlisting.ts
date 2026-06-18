@@ -44,10 +44,28 @@ export class Ffirlisting {
 
   ngOnInit(): void {
 
+    const today = new Date();
+
+    // Current month first date
+    const firstDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    );
+
+    this.searchModel.fromDate = this.formatDate(firstDayOfMonth);
+    this.searchModel.toDate = this.formatDate(today);
     this.loadFFIRList();
 
   }
 
+   formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
   loadFFIRList() {
 
     const dealerCode = this.storageService.getDealerCode();
