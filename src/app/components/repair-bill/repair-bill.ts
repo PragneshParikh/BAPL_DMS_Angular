@@ -171,6 +171,17 @@ export class RepairBill implements OnInit {
   }
   ngOnInit(): void {
     debugger
+    const today = new Date();
+
+    // Current month first date
+    const firstDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    );
+
+    this.searchModel.fromDate = this.formatDate(firstDayOfMonth);
+    this.searchModel.toDate = this.formatDate(today);
     this.loadPrefix();
     this.fetchLocations();
     this.loadPartNo();
