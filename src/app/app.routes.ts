@@ -187,6 +187,12 @@ export const routes: Routes = [
       { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
 
       { path: 'occupation-master', component: OccupationMaster, data: [62] },
+      { path: 'free-service-claim', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim-list/free-service-claim-list').then(m => m.FreeServiceClaimList) },
+      { path: 'free-service-claim:id', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim').then(m => m.FreeServiceClaim) },
+
+      { path: 'free-service-rate', data: [67], loadComponent: () => import('./components/free-service-rate/free-service-rate-list/free-service-rate-list').then(m => m.FreeServiceRateList) },
+      { path: 'free-service-rate/:id', data: [67], loadComponent: () => import('./components/free-service-rate/free-service-rate').then(m => m.FreeServiceRate) },
+
     ]
   },
   { path: '**', component: WorkInProgress }
