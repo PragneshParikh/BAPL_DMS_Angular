@@ -106,9 +106,8 @@
               <label class="form-label mb-1">
                 Employee Code
               </label>
-
-              <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.employeeCode"
-                name="employeeCode">
+              <input type="text" class="form-control form-control-sm py-1"
+                [(ngModel)]="employeeData.employeeCode" name="employeeCode" readonly>
 
             </div>
 
@@ -216,8 +215,9 @@
                 Dealer Code
               </label>
 
-              <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="employeeData.dealerCode"
-                name="dealerCode" readonly>
+          <!-- Dealer Code -->
+          <input type="text" class="form-control form-control-sm py-1"
+            [(ngModel)]="employeeData.dealerCode" name="dealerCode" readonly>
 
             </div>
 

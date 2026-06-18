@@ -12,17 +12,14 @@
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
 
-                            <div class="text-muted">
-                                Total Record(s): {{ collectionSize }}
-                            </div>
-
                             <div class="d-flex align-items-center gap-2">
 
                                 <button class="btn btn-sm btn-primary" (click)="newLedger()">
                                     Add
                                 </button>
 
-                                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'" (click)="downloadExcel()">
+                                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                                    (click)="downloadExcel()">
                                     <i class="ri-file-excel-2-line"></i>
                                 </button>
 
