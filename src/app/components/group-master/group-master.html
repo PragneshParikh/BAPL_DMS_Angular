@@ -98,7 +98,8 @@
                         <input
                             type="text"
                             class="form-control"
-                            placeholder="Search...">
+                            placeholder="Search..." [(ngModel)]="searchText"
+                            (input)="applySearch()">
                         <i class="ri-search-line search-icon"></i>
                     </div>
 
@@ -118,7 +119,7 @@
                                 <th width="80">Sr No.</th>
 
                                 <th
-                                    
+                                    class="sort"
                                     (click)="sort('groupName')"
                                     style="cursor:pointer">
                                     Group Name
@@ -150,7 +151,7 @@
                                     <button
                                         class="btn btn-danger btn-sm"
                                         (click)="deleteGroup(item.id, $event)">
-                                         <i class="ri-delete-bin-5-line fs-18"></i>
+                                         <i class="ri-delete-bin-5-line"></i>
                                     </button>
 
                                 </td>

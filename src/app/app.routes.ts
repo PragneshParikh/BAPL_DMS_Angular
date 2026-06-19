@@ -57,6 +57,10 @@ import { VehicleStockTransferList } from './components/vehicle-stock-transfer/ve
 import { GroupMaster } from './components/group-master/group-master';
 import { TermConditionMaster } from './components/term-condition-master/term-condition-master';
 import { OccupationMaster } from './components/occupation-master/occupation-master';
+import { JobTypeMaster } from './components/job-type-master/job-type-master';
+import { ServiceHeadMaster } from './components/service-head-master/service-head-master';
+import { ServiceTypeMaster } from './components/service-type-master/service-type-master';
+import { JobSourceMaster } from './components/job-source-master/job-source-master';
 
 
 export const routes: Routes = [
@@ -99,8 +103,8 @@ export const routes: Routes = [
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
       { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-search/chassis-search').then(m => m.ChassisSearch) },
       { path: 'proforma-invoice', component: ProformaInvoice, data: [22] },
-      { path: 'form22-certificate/:chassisNo', component: Form22Certificate, data: [22] },
-      { path: 'delivery-checkList', component: DeliveryChecklist, data: [22] },
+      {path: 'form22-certificate/:saleBillId/:chassisNo', component: Form22Certificate, data: [22] },
+      { path: 'delivery-checkList/:saleBillId', component: DeliveryChecklist, data: [22] },
       { path: 'delivery-slip', component: DeliverySlip, data: [22] },
       { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] },
 
@@ -187,6 +191,16 @@ export const routes: Routes = [
       { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
 
       { path: 'occupation-master', component: OccupationMaster, data: [62] },
+      { path: 'free-service-claim', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim-list/free-service-claim-list').then(m => m.FreeServiceClaimList) },
+      { path: 'free-service-claim:id', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim').then(m => m.FreeServiceClaim) },
+
+      { path: 'free-service-rate', data: [67], loadComponent: () => import('./components/free-service-rate/free-service-rate-list/free-service-rate-list').then(m => m.FreeServiceRateList) },
+      { path: 'free-service-rate/:id', data: [67], loadComponent: () => import('./components/free-service-rate/free-service-rate').then(m => m.FreeServiceRate) },
+
+      { path: 'job-type-master', component: JobTypeMaster, data: [68] },
+      { path: 'service-head-master', component: ServiceHeadMaster, data: [69] },
+      { path: 'service-type-master', component: ServiceTypeMaster, data: [70] },
+      { path: 'job-source-master', component: JobSourceMaster, data: [71] },
     ]
   },
   { path: '**', component: WorkInProgress }

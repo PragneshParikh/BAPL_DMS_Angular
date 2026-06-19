@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbModal, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { GroupMasterService } from '../../core/services/group-master-service';
 import Swal from 'sweetalert2';
@@ -11,6 +11,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     NgbPagination
   ],
@@ -25,7 +26,9 @@ export class GroupMaster implements OnInit {
   groupForm!: FormGroup;
 
   groupNameList: any[] = [];
+  filteredList: any[] = [];
   pagedData: any[] = [];
+  searchText: string = '';
 
   page = 1;
   pageSize = 10;
@@ -59,6 +62,8 @@ export class GroupMaster implements OnInit {
       next: (response: any) => {
 
         this.groupNameList = response || [];
+        console.log(this.groupNameList)
+          this.filteredList = [...this.groupNameList];
 
         this.refreshGrid();
       },
@@ -226,7 +231,7 @@ export class GroupMaster implements OnInit {
       this.sortDirection = 'asc';
     }
 
-    this.groupNameList.sort((a, b) => {
+    this.filteredList.sort((a, b) => {
 
       const valueA = (a[column] ?? '').toString().toLowerCase();
       const valueB = (b[column] ?? '').toString().toLowerCase();
@@ -243,6 +248,22 @@ export class GroupMaster implements OnInit {
 
   //#endregion
 
+   applySearch(): void {
+
+  const search = this.searchText.toLowerCase().trim();
+
+  if (!search) {
+    this.filteredList = [...this.groupNameList];
+  } else {
+    this.filteredList = this.groupNameList.filter(x =>
+      x.groupName?.toLowerCase().includes(search)
+    );
+  }
+
+  this.page = 1;
+  this.refreshGrid();
+}
+
   //#region Pagination
 
   pageChange(page: number): void {
@@ -251,16 +272,15 @@ export class GroupMaster implements OnInit {
 
     this.refreshGrid();
   }
+ refreshGrid(): void {
 
-  refreshGrid(): void {
+  this.collectionSize = this.filteredList.length;
 
-    this.collectionSize = this.groupNameList.length;
-
-    this.pagedData = this.groupNameList.slice(
-      (this.page - 1) * this.pageSize,
-      (this.page - 1) * this.pageSize + this.pageSize
-    );
-  }
+  this.pagedData = this.filteredList.slice(
+    (this.page - 1) * this.pageSize,
+    (this.page - 1) * this.pageSize + this.pageSize
+  );
+}
 
   //#endregion
 

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { VehicleSaleBillService } from '../../../core/services/vehicle-sale-bill-service';
 import { error, log } from 'console';
 import { DealerService } from '../../../core/services/dealer-service';
@@ -38,11 +38,14 @@ export class DeliveryCertificate {
   constructor(private route: ActivatedRoute,
     private vehicleSaleBillService: VehicleSaleBillService,
     private storageService: StorageService,
-    private dealerService: DealerService) { }
+    private dealerService: DealerService,
+  private router:Router) { }
 
 
   async ngOnInit() {
     this.saleBillId = this.route.snapshot.paramMap.get('id') || '';
+    console.log(this.saleBillId);
+    
     if (this.saleBillId) {
       await this.getDealerDetails();
       this.getBillById(parseInt(this.saleBillId));
@@ -75,8 +78,8 @@ export class DeliveryCertificate {
           this.dealerCode = res.dealerCode;
           this.saleDate = res.saleDate;
           this.deliveryDate = this.currentDate;
-          this.saleBillId = '';
-          this.saleBill = {};
+          // this.saleBillId = '';
+          // this.saleBill = {};
           this.invoiceNo = res.details[0].invoiceNo;
           this.regNo = res.details[0].regNo;
           this.customerName = res.customerName;
@@ -117,4 +120,12 @@ export class DeliveryCertificate {
     popupWindow.focus();
 
   }
+
+   goBack(): void {
+  this.router.navigate(['/vehicle-sale-bill/edit', this.saleBillId]);
+}
+
+printInvoice(): void {
+  window.print();
+}
 }
