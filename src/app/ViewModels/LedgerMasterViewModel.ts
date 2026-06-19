@@ -18,4 +18,5 @@ export interface LedgerMaster {
   createdDate: string;
   updatedBy?: string;
   updatedDate?: string;
+  dealerCode?:string;
 }

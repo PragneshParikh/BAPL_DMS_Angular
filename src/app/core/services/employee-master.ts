@@ -40,25 +40,15 @@ export class EmployeeMasterService {
   // =========================================
   // INSERT EMPLOYEE
   // =========================================
-
   saveEmployee(employeeObj: any): Observable<any> {
-
-    return this.http.post<any>(
-      this.apiUrl,
-      employeeObj
-    );
+    return this.http.post<any>(`${this.apiUrl}/Employee`, employeeObj);
   }
 
   // =========================================
   // UPDATE EMPLOYEE
   // =========================================
-
   updateEmployee(employeeObj: any): Observable<any> {
-
-    return this.http.put<any>(
-      this.apiUrl,
-      employeeObj
-    );
+    return this.http.put<any>(`${this.apiUrl}/Employee`, employeeObj);
   }
 
   // =========================================
@@ -105,28 +95,6 @@ export class EmployeeMasterService {
     return this.http.get<any[]>(
       `${this.apiUrl}/Employee/employeeByDesignation`,
       { params }
-    );
-  }
-
-  // =========================================
-  // GET DEALER BY CODE
-  // =========================================
-
-  getDealerByCode(dealerCode: string): Observable<any> {
-
-    return this.http.get<any>(
-      `${this.apiUrl}/GetDealerByCode/${dealerCode}`
-    );
-  }
-
-  // =========================================
-  // GET DEALER LOCATIONS
-  // =========================================
-
-  getDealerLocations(dealerCode: string): Observable<any[]> {
-
-    return this.http.get<any[]>(
-      `${this.apiUrl}/GetLocationsByDealer/${dealerCode}`
     );
   }
 }

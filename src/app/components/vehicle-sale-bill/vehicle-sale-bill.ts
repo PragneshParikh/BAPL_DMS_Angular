@@ -190,14 +190,15 @@ export class VehicleSaleBill {
   }
 
   fetchLocations(): void {
-    const dealerCode: any = this.storageService.getDealerCode();
-
-    this.locationService.getLocationByDealerCode(dealerCode).subscribe({
-      next: (data: any[]) => {
-
-
-        this.locations = data;
-
+    this.isSuperAdmin = this.storageService.getRole()?.toLowerCase() === 'superadmin';
+    let dealerCode: string | null = null;
+    if (!this.isSuperAdmin) {
+      dealerCode = this.storageService.getDealerCode();
+    }
+    this.locationService.getLocationDropdownByDealerCode(dealerCode).subscribe({
+      next: (res: any[]) => {
+        this.locations = res;
+        console.log(this.locations);
       },
       error: (err) => {
         console.error('Error fetching locations', err);

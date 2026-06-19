@@ -59,8 +59,8 @@ export interface PartItem {
 
 export interface RepairBillSearchModel {
   dealerCode: '',
-  fromDate: '',
-  toDate: '',
+  fromDate?:string,
+  toDate?: string,
   serviceLocation: '',
   jobNo: null,
   billNo: null,

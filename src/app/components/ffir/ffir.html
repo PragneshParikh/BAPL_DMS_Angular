@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center text-white">
-            <h5 class="mb-sm-0">PCR/CIR</h5>
+            <h5 class="mb-sm-0">FFIR</h5>
             <h5 class="mb-sm-0">Job No. {{ffirData?.jobNo || ffirObj?.jobCardHeaderId}}</h5>
         </div>
 
@@ -33,12 +33,12 @@
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label>CIR No.</label>
+                                    <label>FFIR No.</label>
                                     <input type="text" class="form-control form-control-sm" [(ngModel)]="ffirObj.cirNo">
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label>CIR Date</label>
+                                    <label>FFIR Date</label>
                                     <input type="date" class="form-control form-control-sm"
                                         [(ngModel)]="ffirObj.cirDate">
                                 </div>
@@ -50,7 +50,7 @@
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label>Purpose of CIR</label>
+                                    <label>Purpose of FFIR</label>
                                     <select class="form-select form-select-sm" [(ngModel)]="ffirObj.purposeOfCIR">
                                         <option value="">-- Select Type --</option>
 
@@ -84,12 +84,12 @@
 
                                 <div class="col-md-3">
                                     <label>Reg. No.</label>
-                                    <input type="text" class="form-control form-control-sm"
+                                    <input type="text" class="form-control form-control-sm bg-light text-muted"
                                         [value]="ffirData?.registerNo" readonly>
                                 </div>
                                 <div class="col-md-3">
                                     <label>Vehicle Sales Date</label>
-                                    <input type="date" class="form-control form-control-sm"
+                                    <input type="date" class="form-control form-control-sm bg-light text-muted"
                                         [value]="ffirData.vehicleSaleDate | date:'yyyy-MM-dd'" readonly>
                                 </div>
                                 <div class="col-md-3">
@@ -109,12 +109,12 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label>Vehicle Model</label>
-                                    <input type="text" class="form-control form-control-sm"
+                                    <input type="text" class="form-control form-control-sm bg-light text-muted"
                                         [value]="ffirData?.modelName" readonly>
                                 </div>
                                 <div class="col-md-3">
                                     <label>Vehicle Journey</label>
-                                    <input type="text" class="form-control form-control-sm"
+                                    <input type="text" class="form-control form-control-sm bg-light text-muted"
                                         [value]="ffirData?.vehiclekms" readonly>
                                 </div>
                                 <div class="col-md-3">
@@ -172,14 +172,14 @@
                                         <input type="radio" class="btn-check btn-check-sm" name="repeatFailure" id="rN"
                                             [value]="false" [(ngModel)]="ffirObj.repeatFailure">
 
-                                        <label class="btn btn-outline-secondary" for="rN">
+                                        <label class="btn btn-sm btn-outline-primary" for="rN">
                                             N
                                         </label>
 
                                         <input type="radio" class="btn-check btn-check-sm" name="repeatFailure" id="rY"
                                             [value]="true" [(ngModel)]="ffirObj.repeatFailure">
 
-                                        <label class="btn btn-outline-secondary" for="rY">
+                                        <label class="btn btn-sm btn-outline-primary" for="rY">
                                             Y
                                         </label>
 
@@ -196,14 +196,14 @@
                                         <input type="radio" class="btn-check btn-check-sm" name="chassisModified"
                                             id="cN" [value]="false" [(ngModel)]="ffirObj.chassisModified">
 
-                                        <label class="btn btn-outline-secondary" for="cN">
+                                        <label class="btn btn-sm btn-outline-primary" for="cN">
                                             N
                                         </label>
 
                                         <input type="radio" class="btn-check btn-check-sm" name="chassisModified"
                                             id="cY" [value]="true" [(ngModel)]="ffirObj.chassisModified">
 
-                                        <label class="btn btn-outline-secondary" for="cY">
+                                        <label class="btn btn-sm btn-outline-primary" for="cY">
                                             Y
                                         </label>
 
