@@ -1,1 +1,271 @@
-<p>service-type-master works!</p>
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">ServiceType Master</h4>
+</div>
+
+<!-- Add  Modal -->
+<ng-template #serviceTypeAdd let-modal>
+
+    <form [formGroup]="serviceTypeForm">
+
+        <div class="card">
+
+            <div class="modal-header item-modal-header">
+                <h5 class="modal-title">
+                    {{ serviceTypeForm.value.serviceTypeId > 0 ? 'Edit serviceType Master' : 'Add serviceType Master' }}
+                </h5>
+
+                <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()">
+                </button>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <label class="form-label">Service Head</label>
+
+                        <select class="form-select" formControlName="serviceHeadId">
+
+                            <option [ngValue]="0">Select Service Head</option>
+
+                            <option *ngFor="let item of serviceHeadNameList" [value]="item.id">
+
+                                {{ item.serviceHeadName }}
+
+                            </option>
+
+                        </select>
+                         <small class="text-danger" *ngIf="serviceTypeForm.get('jobtypeId')?.touched &&
+                      serviceTypeForm.get('jobtypeId')?.invalid">
+
+                            Service Head is required
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            ServiceType Name
+                        </label>
+
+                        <input type="text" class="form-control" formControlName="ServiceTypeName"
+                            placeholder="Enter ServiceType Name">
+
+                        <small class="text-danger" *ngIf="serviceTypeForm.get('ServiceTypeName')?.touched &&
+                                      serviceTypeForm.get('ServiceTypeName')?.invalid">
+
+                            ServiceType Name is required
+                        </small>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-primary" (click)="saveServiceType(modal)">
+                    Save
+                </button>
+
+                <button type="button" class="btn btn-light" (click)="modal.dismiss()">
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</ng-template>
+
+<!-- Grid -->
+<div class="row">
+
+    <div class="col-lg-12">
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <div class="d-flex justify-content-end align-items-center">
+
+                    <button class="btn btn-primary btn-sm me-2" (click)="openAddDetails()">
+                        Add
+                    </button>
+
+                    <button class="btn btn-success btn-sm me-3" (click)="downloadServiceTypeMasterExcel()">
+                        <i class="ri-file-excel-2-line"></i>
+                    </button>
+
+                    <div class="search-box">
+                        <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchText"
+                            (input)="applySearch()">
+                        <i class="ri-search-line search-icon"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-hover table-sm">
+
+                        <thead class="table-bgColor">
+
+                            <tr>
+                                <th width="80">Sr No.</th>
+                                <th class="sort">  ServiceHead Name </th>
+                                <th class="sort" (click)="sort('serviceTypeName')" style="cursor:pointer">
+                                    ServiceType Name
+                                </th>
+
+                                <th width="120">
+                                    Action
+                                </th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr *ngFor="let item of pagedData; let i = index" (click)="openEditPopup(item)"
+                                style="cursor:pointer">
+
+                                <td>
+                                    {{ ((page - 1) * pageSize) + i + 1 }}
+                                </td>
+
+                                <td>{{item.serviceHeadName}}</td>
+                                <td>
+                                    {{ item.serviceTypeName }}
+                                </td>
+
+                                <td>
+
+                                    <button class="btn btn-danger btn-sm" (click)="deleteServiceType(item.id, $event)">
+                                        <i class="ri-delete-bin-5-line"></i>
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+                            <tr *ngIf="pagedData.length === 0">
+
+                                <td colspan="3" class="text-center">
+                                    No Data Available
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-12">
+
+                        <div class="float-end">
+
+                            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                                (pageChange)="pageChange($event)">
+                            </ngb-pagination>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<ng-template #serviceTypeUpdate let-modal>
+
+    <form [formGroup]="serviceTypeForm">
+
+        <div class="card">
+
+            <div class="modal-header item-modal-header">
+                <h5 class="modal-title">
+                    Edit ServiceType Master
+                </h5>
+
+                <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()">
+                </button>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Service Head <span class="text-danger">*</span>
+                        </label>
+
+                        <select class="form-select form-select-sm" formControlName="serviceHeadId">
+
+                            <option [ngValue]="0">Select Service Head</option>
+
+                            <option *ngFor="let item of serviceHeadNameList" [value]="item.id">
+
+                                {{ item.serviceHeadName }}
+
+                            </option>
+
+                        </select>
+
+                        <small class="text-danger" *ngIf="serviceTypeForm.get('jobtypeId')?.touched &&
+                      serviceTypeForm.get('jobtypeId')?.invalid">
+
+                            Service Type is required
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            ServiceType Name
+                        </label>
+
+                        <input type="text" class="form-control form-control-sm" formControlName="ServiceTypeName"
+                            placeholder="Enter ServiceType Name">
+
+                        <small class="text-danger" *ngIf="serviceTypeForm.get('ServiceTypeName')?.touched &&
+                                      serviceTypeForm.get('ServiceTypeName')?.invalid">
+
+                            ServiceType Name is required
+                        </small>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-primary" (click)="updateServiceType(modal)">
+                    Save
+                </button>
+
+                <button type="button" class="btn btn-light" (click)="modal.dismiss()">
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</ng-template>
