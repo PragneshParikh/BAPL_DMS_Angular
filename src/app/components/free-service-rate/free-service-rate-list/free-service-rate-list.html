@@ -15,8 +15,9 @@
                         <form #freeServiceRateFilterForm="ngForm" (ngSubmit)="onSearch()">
                             <div class="row g-2 align-items-end">
                                 <div class="col-md-3">
-                                    <label class="form-label">Oem Model</label>
-                                    <select class="form-select form-select-sm" name="modelType" [(ngModel)]="oemModel">
+                                    <label class="form-label">OEM Model</label>
+                                    <select class="form-select form-select-sm" name="modelType" [(ngModel)]="oemModel"
+                                        (change)="onChangeModel($event)">
                                         <option value=""> -- Select -- </option>
                                         <option *ngFor="let model of oemModelList" [value]="model.id">
                                             {{ model.modelName }}
@@ -44,23 +45,15 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th> Sr. No. </th>
-                                        <th> Claim Prefix </th>
-                                        <th> Mobile No.</th>
-                                        <th> Claim No / Claim Date </th>
-                                        <th> Location Name </th>
-                                        <th> Supplier Name </th>
-                                        <th> JobFrom/JobTo Date </th>
+                                        <th> Model Name </th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
-                                    <tr *ngFor="let claim of dataSource;" class="table-row">
-                                        <td>{{ claim?.sr.no }}</td>
-                                        <td>{{ claim?.preifx }}</td>
-                                        <td>{{ claim?.claimDate }}</td>
-                                        <td>{{ claim?.location }}</td>
-                                        <td>{{ claim?.supllier }}</td>
-                                        <td>{{ claim?.jobDate }}</td>
+                                    <tr *ngFor="let group of dataSource;" class="table-row"
+                                        (dblclick)="openFreeServiceRateInfo(group)">
+                                        <td>{{ group?.srNo }}</td>
+                                        <td>{{ group?.oemModelName }}</td>
                                     </tr>
 
                                     <!-- No Data -->

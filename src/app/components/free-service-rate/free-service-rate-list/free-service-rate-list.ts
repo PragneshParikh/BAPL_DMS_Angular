@@ -8,6 +8,7 @@ import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { FreeServiceRate } from '../free-service-rate';
 import { Route, Router } from '@angular/router';
+import { FreeServiceRateService } from '../../../core/services/free-service-rate';
 
 @Component({
   selector: 'app-free-service-rate-list',
@@ -18,6 +19,7 @@ import { Route, Router } from '@angular/router';
 export class FreeServiceRateList implements OnInit {
   public searchTerm: string = '';
   dataSource: any[] = [];
+  originalList: any[] = [];
 
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -37,11 +39,14 @@ export class FreeServiceRateList implements OnInit {
     private oemModelMasterService: OemmodelMasterService,
     private loader: LoaderService,
     private toast: ToastService,
-    private route: Router
+    private router: Router,
+    private freeServiceRateService: FreeServiceRateService,
+
   ) { }
 
   ngOnInit(): void {
     this.getOEMModelList();
+    this.getFreeServiceModelList();
   }
 
   newFreeServiceRate() {
@@ -59,7 +64,7 @@ export class FreeServiceRateList implements OnInit {
   addNewOEMRate() {
     const value = Date.now() + '|' + 0;
     const encPO = btoa(value);
-    this.route.navigate(['/free-service-rate', encPO], { state: { oemModelList: this.oemModelList } });
+    this.router.navigate(['/free-service-rate', encPO], { state: { oemModelList: this.oemModelList } });
   }
 
   getOEMModelList() {
@@ -75,5 +80,34 @@ export class FreeServiceRateList implements OnInit {
         this.toast.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
+  }
+
+  getFreeServiceModelList() {
+    this.loader.show();
+    this.freeServiceRateService.getByOEMModelId(null).subscribe({
+      next: (res) => {
+        this.originalList = res;
+        this.dataSource = res;
+        this.loader.hide();
+      },
+      error: (err) => {
+        console.error(err);
+        this.loader.hide();
+        this.toast.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  }
+
+  openFreeServiceRateInfo(group) {
+    const OEMModelId = group?.oemModelId || '0';
+    const value = Date.now() + '|' + OEMModelId;
+    const encPO = btoa(value);
+    this.router.navigate(['/free-service-rate', encPO], { state: { oemModelList: this.oemModelList } });
+  }
+
+  onChangeModel(event: any) {
+    if (event) {
+      this.dataSource = this.originalList.filter(x => x.oemModelId === Number(event.target.value));
+    }
   }
 }
