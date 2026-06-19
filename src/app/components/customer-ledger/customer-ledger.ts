@@ -27,7 +27,8 @@ export class CustomerLedger {
   ledgerTypes = LedgerTypes;
   formData = {
     id: 0,
-    dealerCode:'',
+    ledgerVisibility: '',
+    dealerCode: '',
     ledgerCode: '',
     ledgerName: '',
     ledgerType: 'Party',
@@ -59,6 +60,7 @@ export class CustomerLedger {
   occupationList: any;
   mobileList: string[];
   mobileExist: boolean;
+  role: string;
 
   constructor(
     private ledgerService: LedgerMasterService,
@@ -88,8 +90,10 @@ export class CustomerLedger {
   @Input() leadData: any;
 
   async ngOnInit() {
-await this.getMobileList();
-await this.getNextLedCode();
+    this.role = this.storageService.getRole();
+    this.ledgerTypes = this.role?.toLowerCase() === 'superadmin' ? LedgerTypes : LedgerTypes.filter(x => !x.isAdmin);
+    await this.getMobileList();
+    await this.getNextLedCode();
     await this.getUserList();
     await this.getOccupationList();
     await this.getCity();
@@ -98,9 +102,13 @@ await this.getNextLedCode();
     this.isExternalCall = !!this.activeModal || !!this.ledgerId;
     this.isExternalCall = this.fromReceiptEntry;
 
+    if (this.fromReceiptEntry) {
+      this.ledgerTypes = LedgerTypes.filter(x => !x.isAdmin || x.value === 'Receipt');
+      this.formData.ledgerType = 'Receipt';
+    }
+
     //SET DEFAULT TYPE (ONLY ADD MODE)
     if (!this.ledgerId && this.defaultLedgerType) {
-      debugger
       this.formData.ledgerType = this.defaultLedgerType;
     }
 
@@ -127,36 +135,36 @@ await this.getNextLedCode();
   getMobileList() {
     const dealerCode = this.storageService.getDealerCode();
     this.ledgerService.getLedgerMobileList(dealerCode).subscribe(
-      (res)=>{
-        this.mobileList=res;
+      (res) => {
+        this.mobileList = res;
         console.log(res);
-        
+
       }
     );
   }
   getNextLedCode() {
-     const dealerCode = this.storageService.getDealerCode();
+    const dealerCode = this.storageService.getDealerCode();
     this.ledgerService.getNextLedId(dealerCode).subscribe(
-      (res)=>{
+      (res) => {
         console.log(res);
-        if(!this.isModify)
-        {
-          this.formData.ledgerCode =res;
+        if (!this.isModify) {
+          this.formData.ledgerCode = res;
         }
       }
     );
   }
- checkPhoneNumberExist(mobileNo: string): void {
-  if (this.mobileList?.includes(mobileNo)) {
-    this.mobileExist =true;
-    this.toaster.show('Mobile number already exists', {
-      classname: 'bg-danger text-white',
-      delay: 5000
-    });
+  checkPhoneNumberExist(mobileNo: string): void {
+    if (this.mobileList?.includes(mobileNo)) {
+      this.mobileExist = true;
+      this.toaster.show('Mobile number already exists', {
+        classname: 'bg-danger text-white',
+        delay: 5000
+      });
 
-    return;
+      return;
+    }
+    this.mobileExist = false;
   }
-}
   getOccupationList() {
     this.occupationService.getActiveOccupations().subscribe((res) => {
       console.log(res);
@@ -208,10 +216,10 @@ await this.getNextLedCode();
     this.ledgerService.getLedgerById(id).subscribe({
       next: (res) => {
         console.log(res);
-        
+
         this.formData = {
           id: res.id,
-          dealerCode:res.dealerCode,
+          dealerCode: res.dealerCode,
           ledgerCode: res.ledgerCode,
           ledgerName: res.ledgerName,
           ledgerType: res.ledgerType,
@@ -231,6 +239,7 @@ await this.getNextLedCode();
           createdDate: res.createdDate,
           updatedBy: res.updatedBy,
           updatedDate: res.updatedDate,
+          ledgerVisibility: res.ledgerVisibility
         }
         this.loader.hide();
         this.changeCityOptions(this.formData.state);
@@ -258,7 +267,10 @@ await this.getNextLedCode();
 
   onSubmit(form: any) {
     const dealerCode = this.storageService.getDealerCode();
-    this.formData.dealerCode=dealerCode;
+    this.formData.dealerCode = dealerCode;
+    const isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    this.formData.ledgerVisibility = (isSuperAdmin && !this.isExternalCall) ? 'All' : dealerCode;
     if (!form.valid) return;
     this.loader.show();
     const request$ = this.isModify

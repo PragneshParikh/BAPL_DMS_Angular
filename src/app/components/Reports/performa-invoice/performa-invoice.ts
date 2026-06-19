@@ -219,7 +219,7 @@ export class PerformaInvoice implements OnInit {
         this.saleBill = res;
         console.log(this.saleBill);
         this.getDealerDetails(this.saleBill.dealerCode);
-        if (this.saleBill.erpStatus == "Invoiced") {
+        if (this.saleBill.status == "Invoiced") {
           this.isInvoiced = true;
         }
         this.calculateAmounts();
@@ -273,5 +273,14 @@ export class PerformaInvoice implements OnInit {
       this.currencyService.convertToWords(amount);
 
   }
+goBack(): void {
+  this.router.navigate(['/vehicle-sale-bill/edit', this.saleBillId]);
+}
 
+printInvoice(): void {
+  window.print();
+}
+formatTerms(text: string): string {
+  return text.replace(/(\d+\.)/g, '<br>$1');
+}
 }

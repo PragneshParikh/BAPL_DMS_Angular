@@ -12,16 +12,26 @@ export class LedgerMasterService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getLedger(): Observable<any> {
-    return this.httpClient.get(`${this.baseUrl}/ledger-master`)
-  }
+  // getLedger(): Observable<any> {
+  //   return this.httpClient.get(`${this.baseUrl}/ledger-master`)
+  // }
 
   getCompanyLedgers(): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/ledger-master/companies`)
   }
 
-  getLedgerByPaged(searchTerm: string = null, pageIndex: number, pageSize: number): Observable<any> {
-    return this.httpClient.get(`${this.baseUrl}/ledger-master/paged?searchTerm=${searchTerm}&pageIndex=${pageIndex}&pageSize=${pageSize}`);
+  getLedgerByPaged(searchTerm: string | null = null, pageIndex: number, pageSize: number, dealerCode: string | null = null, filter: string | null = null): Observable<any> {
+    let params = new HttpParams().set('pageIndex', pageIndex).set('pageSize', pageSize);
+    if (searchTerm) {
+      params = params.set('searchTerm', searchTerm);
+    }
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
+    }
+    if (filter) {
+      params = params.set('filter', filter);
+    }
+    return this.httpClient.get(`${this.baseUrl}/ledger-master/paged`, { params });
   }
 
   getLedgerById(id: number): Observable<any> {

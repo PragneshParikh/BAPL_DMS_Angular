@@ -12,7 +12,23 @@
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
 
-                            <div class="d-flex align-items-center gap-2">
+
+                            <div class="col-md-2 mb-0">
+                                <label class="form-label form-label-sm">Select Dealer Code</label>
+
+                                <ng-select class="ng-select-sm" style="width:180px;" [items]="dealers" 
+                                    bindLabel="dealerName" bindValue="dealerCode" [(ngModel)]="selectedDealerCode"
+                                    [searchable]="true" [clearable]="false" placeholder="Select Dealer Code" (change)="onDealerChange()">
+
+                                    <ng-template ng-option-tmp let-item="item">
+                                        {{ item.dealerCode }} - {{ item.dealerName }}
+                                    </ng-template>
+
+                                </ng-select>
+                            </div>
+
+
+                            <div class="d-flex align-items-end justify-content-end gap-2 w-100">
 
                                 <button class="btn btn-sm btn-primary" (click)="newLedger()">
                                     Add
@@ -37,7 +53,7 @@
 
                         <div class="table-responsive">
 
-                            <table class="table table-hover table-bordered mb-0 table-sm">
+                            <table class="table table-hover  table-bordered mb-0 table-sm" style="font-size: 12px;">
                                 <thead class="table-light">
                                     <tr>
                                         <th class="sort" (click)="onSort('ledgerType')">
@@ -45,6 +61,15 @@
                                         <th class="sort" (click)="onSort('ledgerName')">
                                             Ledger
                                             Name</th>
+                                        <ng-container *ngIf="isSuperAdmin">
+                                            <th class="sort" (click)="onSort('dealerCode')">
+                                                Dealer Code
+                                            </th>
+
+                                            <th class="sort" (click)="onSort('dealerName')">
+                                                Dealer Name
+                                            </th>
+                                        </ng-container>
                                         <th class="sort" (click)="onSort('mobileNumber')">
                                             Mobile No.</th>
                                         <th class="sort" (click)="onSort('email')">Email
@@ -60,6 +85,9 @@
                                         (dblclick)="onCustomerClick(customer)">
                                         <td>{{ customer?.ledgerType }}</td>
                                         <td>{{ customer?.ledgerName }}</td>
+
+                                        <td *ngIf="isSuperAdmin">{{ customer?.dealerCode }}</td>
+                                        <td *ngIf="isSuperAdmin">{{ customer?.dealerName }}</td>
                                         <td>{{ customer?.mobileNumber }}</td>
                                         <td>{{ customer?.eMail }}</td>
                                         <td>{{ customer?.cityName }}</td>
