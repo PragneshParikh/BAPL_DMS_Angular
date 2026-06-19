@@ -57,6 +57,10 @@ import { VehicleStockTransferList } from './components/vehicle-stock-transfer/ve
 import { GroupMaster } from './components/group-master/group-master';
 import { TermConditionMaster } from './components/term-condition-master/term-condition-master';
 import { OccupationMaster } from './components/occupation-master/occupation-master';
+import { JobTypeMaster } from './components/job-type-master/job-type-master';
+import { ServiceHeadMaster } from './components/service-head-master/service-head-master';
+import { ServiceTypeMaster } from './components/service-type-master/service-type-master';
+import { JobSourceMaster } from './components/job-source-master/job-source-master';
 
 
 export const routes: Routes = [
@@ -187,6 +191,10 @@ export const routes: Routes = [
       { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
 
       { path: 'occupation-master', component: OccupationMaster, data: [62] },
+      { path: 'job-type-master', component: JobTypeMaster, data: [68] },
+      { path: 'service-head-master', component: ServiceHeadMaster, data: [69] },
+      { path: 'service-type-master', component: ServiceTypeMaster, data: [70] },
+      { path: 'job-source-master', component: JobSourceMaster, data: [71] },
     ]
   },
   { path: '**', component: WorkInProgress }

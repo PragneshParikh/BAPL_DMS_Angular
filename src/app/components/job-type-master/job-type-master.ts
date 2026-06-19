@@ -1,31 +1,27 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbModal, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
-import { GroupMasterService } from '../../core/services/group-master-service';
-import Swal from 'sweetalert2';
 import { ToastService } from '../../shared/toaster/toast-service';
+import Swal from 'sweetalert2';
+import { JobTypeService } from '../../core/services/job-type-service';
 
 @Component({
-  selector: 'app-group-master',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    NgbPagination
-  ],
-  templateUrl: './group-master.html',
-  styleUrl: './group-master.scss'
+  selector: 'app-job-type-master',
+  standalone:true,
+  imports: [CommonModule,FormsModule,ReactiveFormsModule,NgbPagination],
+  templateUrl: './job-type-master.html',
+  styleUrl: './job-type-master.scss',
 })
-export class GroupMaster implements OnInit {
+export class JobTypeMaster implements OnInit {
 
-  @ViewChild('groupAdd') groupAdd!: TemplateRef<any>;
-  @ViewChild('groupUpdate') groupUpdate!: TemplateRef<any>;
+  
+  @ViewChild('jobTypeAdd') jobTypeAdd!: TemplateRef<any>;
+  @ViewChild('jobTypeUpdate') jobtypeUpdate!: TemplateRef<any>;
 
-  groupForm!: FormGroup;
+  jobTypeForm!: FormGroup;
 
-  groupNameList: any[] = [];
+  JobTypeNameList: any[] = [];
   filteredList: any[] = [];
   pagedData: any[] = [];
   searchText: string = '';
@@ -41,29 +37,29 @@ export class GroupMaster implements OnInit {
     private fb: FormBuilder,
     private modalService: NgbModal,
     private toaster: ToastService,
-    private groupMasterService: GroupMasterService
+    private jobTypeMasterService: JobTypeService
   ) { }
 
   ngOnInit(): void {
 
-    this.groupForm = this.fb.group({
-      groupId: [0],
-      groupName: ['', Validators.required]
+    this.jobTypeForm = this.fb.group({
+      jobTypeId: [0],
+      JobTypeName: ['', Validators.required]
     });
 
-    this.getGroupMasterList();
+    this.getjobtypeMasterList();
   }
 
   //#region Get List
 
-  getGroupMasterList(): void {
+  getjobtypeMasterList(): void {
 
-    this.groupMasterService.getGroupMasterList().subscribe({
+    this.jobTypeMasterService.getJobTypepMasterList().subscribe({
       next: (response: any) => {
 
-        this.groupNameList = response || [];
-        console.log(this.groupNameList)
-          this.filteredList = [...this.groupNameList];
+        this.JobTypeNameList = response || [];
+        this.filteredList = [...this.JobTypeNameList];
+        console.log(this.JobTypeNameList)
 
         this.refreshGrid();
       },
@@ -75,42 +71,46 @@ export class GroupMaster implements OnInit {
 
   //#endregion
 
+  
+
+
+
   //#region Add
 
   openAddDetails(): void {
 
-    this.groupForm.reset({
-      groupId: 0,
-      groupName: ''
+    this.jobTypeForm.reset({
+      jobTypeId: 0,
+      JobTypeName: ''
     });
 
-    this.modalService.open(this.groupAdd, {
+    this.modalService.open(this.jobTypeAdd, {
       size: 'lg',
       backdrop: 'static'
     });
   }
 
-  saveGroup(modal: any): void {
+  saveJobType(modal: any): void {
 
-    if (this.groupForm.invalid) {
-      this.groupForm.markAllAsTouched();
+    if (this.jobTypeForm.invalid) {
+      this.jobTypeForm.markAllAsTouched();
       return;
     }
 
     const model = {
-      groupName: this.groupForm.value.groupName
+      JobTypeName: this.jobTypeForm.value.JobTypeName
     };
 
-    this.groupMasterService.insertGroupMaster(model)
+    this.jobTypeMasterService.insertJobtypeMaster(model)
       .subscribe({
         next: () => {
 
-          this.toaster.show('Group added successfully!', {
+          this.toaster.show('JobTypeName added successfully!', {
             classname: 'bg-success text-white',
             delay: 5000
           });
 
-          this.getGroupMasterList();
+          this.getjobtypeMasterList();
 
           modal.close();
         },
@@ -125,42 +125,42 @@ export class GroupMaster implements OnInit {
   //#region Edit
 
   openEditPopup(item: any): void {
-
-    this.groupForm.patchValue({
-      groupId: item.id,
-      groupName: item.groupName
+debugger
+    this.jobTypeForm.patchValue({
+      jobTypeId: item.id,
+      JobTypeName: item.jobTypeName
     });
 
-    this.modalService.open(this.groupUpdate, {
+    this.modalService.open(this.jobtypeUpdate, {
       size: 'lg',
       backdrop: 'static'
     });
   }
 
-  updateGroup(modal: any): void {
+  updateJobType(modal: any): void {
 
-    if (this.groupForm.invalid) {
-      this.groupForm.markAllAsTouched();
+    if (this.jobTypeForm.invalid) {
+      this.jobTypeForm.markAllAsTouched();
       return;
     }
 
     const model = {
-      id: this.groupForm.value.groupId,
-      groupName: this.groupForm.value.groupName
+      id: this.jobTypeForm.value.jobTypeId,
+      JobTypeName: this.jobTypeForm.value.JobTypeName
     };
 
     console.log('Update Payload:', model);
 
-    this.groupMasterService.updateGroupMaster(model)
+    this.jobTypeMasterService.updateJobTypeMaster(model)
       .subscribe({
         next: () => {
 
-          this.toaster.show('Group updated successfully!', {
+          this.toaster.show('JobTypeName updated successfully!', {
             classname: 'bg-success text-white',
             delay: 5000
           });
 
-          this.getGroupMasterList();
+          this.getjobtypeMasterList();
 
           modal.close();
         },
@@ -174,13 +174,13 @@ export class GroupMaster implements OnInit {
 
   //#region Delete
 
-  deleteGroup(groupId: number, event: Event): void {
+  deleteJobType(jobTypeId: number, event: Event): void {
 
     event.stopPropagation();
 
     Swal.fire({
       title: 'Are you sure?',
-      text: 'You want to delete this group.',
+      text: 'You want to delete this jobtype.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, Delete',
@@ -189,20 +189,20 @@ export class GroupMaster implements OnInit {
 
       if (result.isConfirmed) {
 
-        this.groupMasterService.deleteGroupMaster(groupId)
+        this.jobTypeMasterService.deleteJobTypeMaster(jobTypeId)
           .subscribe({
             next: () => {
 
-              this.toaster.show('Group deleted successfully!', {
+              this.toaster.show('JobTypeName deleted successfully!', {
                 classname: 'bg-success text-white',
                 delay: 5000
               });
 
-              this.getGroupMasterList();
+              this.getjobtypeMasterList();
             },
             error: () => {
 
-              this.toaster.show('Failed to delete group!', {
+              this.toaster.show('Failed to delete jobtype!', {
                 classname: 'bg-danger text-white',
                 delay: 5000
               });
@@ -248,22 +248,6 @@ export class GroupMaster implements OnInit {
 
   //#endregion
 
-   applySearch(): void {
-
-  const search = this.searchText.toLowerCase().trim();
-
-  if (!search) {
-    this.filteredList = [...this.groupNameList];
-  } else {
-    this.filteredList = this.groupNameList.filter(x =>
-      x.groupName?.toLowerCase().includes(search)
-    );
-  }
-
-  this.page = 1;
-  this.refreshGrid();
-}
-
   //#region Pagination
 
   pageChange(page: number): void {
@@ -272,6 +256,25 @@ export class GroupMaster implements OnInit {
 
     this.refreshGrid();
   }
+
+  //search method
+  applySearch(): void {
+
+  const search = this.searchText.toLowerCase().trim();
+
+  if (!search) {
+    this.filteredList = [...this.JobTypeNameList];
+  } else {
+    this.filteredList = this.JobTypeNameList.filter(x =>
+      x.jobTypeName?.toLowerCase().includes(search)
+    );
+  }
+
+  this.page = 1;
+  this.refreshGrid();
+}
+//end
+
  refreshGrid(): void {
 
   this.collectionSize = this.filteredList.length;
@@ -282,13 +285,14 @@ export class GroupMaster implements OnInit {
   );
 }
 
+
   //#endregion
 
   //#region Excel
 
-  downloadGroupMasterExcel(): void {
+  downloadJobTypeMasterExcel(): void {
 
-    this.groupMasterService.getGroupMasterExcel()
+    this.jobTypeMasterService.getJobTypeMasterExcel()
       .subscribe((response: Blob) => {
 
         const blob = new Blob(
@@ -302,7 +306,7 @@ export class GroupMaster implements OnInit {
         const link = document.createElement('a');
 
         link.href = url;
-        link.download = 'GroupMaster.xlsx';
+        link.download = 'JobTypeMaster.xlsx';
 
         link.click();
 
@@ -311,4 +315,5 @@ export class GroupMaster implements OnInit {
   }
 
   //#endregion
+
 }
