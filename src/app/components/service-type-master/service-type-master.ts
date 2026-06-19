@@ -1,31 +1,30 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbModal, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
-import { GroupMasterService } from '../../core/services/group-master-service';
-import Swal from 'sweetalert2';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { ServiceHeadService } from '../../core/services/service-head-service';
+import { ServiceTypeService } from '../../core/services/service-type-service';
+import Swal from 'sweetalert2';
 
 @Component({
-  selector: 'app-group-master',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    NgbPagination
-  ],
-  templateUrl: './group-master.html',
-  styleUrl: './group-master.scss'
+  selector: 'app-service-type-master',
+  imports: [CommonModule,FormsModule,ReactiveFormsModule,NgbPagination],
+  templateUrl: './service-type-master.html',
+  styleUrl: './service-type-master.scss',
 })
-export class GroupMaster implements OnInit {
+export class ServiceTypeMaster implements OnInit {
 
-  @ViewChild('groupAdd') groupAdd!: TemplateRef<any>;
-  @ViewChild('groupUpdate') groupUpdate!: TemplateRef<any>;
+  
+  @ViewChild('serviceTypeAdd') serviceTypeAdd!: TemplateRef<any>;
+  @ViewChild('serviceTypeUpdate') serviceTypeUpdate!: TemplateRef<any>;
 
-  groupForm!: FormGroup;
+  serviceTypeForm!: FormGroup;
 
-  groupNameList: any[] = [];
+  serviceTypeList: any[] = [];
+selectedserviceHeadId: number = 0;
+
+  serviceHeadNameList: any[] = [];
   filteredList: any[] = [];
   pagedData: any[] = [];
   searchText: string = '';
@@ -41,29 +40,41 @@ export class GroupMaster implements OnInit {
     private fb: FormBuilder,
     private modalService: NgbModal,
     private toaster: ToastService,
-    private groupMasterService: GroupMasterService
+    private ServiceTypeMasterService : ServiceTypeService,
+    private ServiceHeadMasterService : ServiceHeadService,
   ) { }
 
   ngOnInit(): void {
 
-    this.groupForm = this.fb.group({
-      groupId: [0],
-      groupName: ['', Validators.required]
+    this.serviceTypeForm = this.fb.group({
+      serviceTypeId: [0],
+      serviceHeadId: [0, Validators.required],
+      ServiceTypeName: ['', Validators.required]
     });
-
-    this.getGroupMasterList();
+    this.loadServiceHead();
+    this.getServiceTypeMasterList();
   }
 
+  loadServiceHead(): void {
+  this.ServiceHeadMasterService.getServiceHeadMasterList().subscribe({
+    next: (res: any) => {
+      this.serviceHeadNameList = res || [];
+    },
+    error: (err) => {
+      console.error(err);
+    }
+  });
+}
   //#region Get List
 
-  getGroupMasterList(): void {
+  getServiceTypeMasterList(): void {
 
-    this.groupMasterService.getGroupMasterList().subscribe({
+    this.ServiceTypeMasterService.getServiceTypeMasterList().subscribe({
       next: (response: any) => {
 
-        this.groupNameList = response || [];
-        console.log(this.groupNameList)
-          this.filteredList = [...this.groupNameList];
+        this.serviceTypeList = response || [];
+        this.filteredList = [...this.serviceTypeList];
+        console.log(this.serviceTypeList)
 
         this.refreshGrid();
       },
@@ -79,38 +90,39 @@ export class GroupMaster implements OnInit {
 
   openAddDetails(): void {
 
-    this.groupForm.reset({
-      groupId: 0,
-      groupName: ''
+    this.serviceTypeForm.reset({
+      serviceTypeId: 0,
+      ServiceTypeName: ''
     });
 
-    this.modalService.open(this.groupAdd, {
+    this.modalService.open(this.serviceTypeAdd, {
       size: 'lg',
       backdrop: 'static'
     });
   }
 
-  saveGroup(modal: any): void {
+  saveServiceType(modal: any): void {
 
-    if (this.groupForm.invalid) {
-      this.groupForm.markAllAsTouched();
+    if (this.serviceTypeForm.invalid) {
+      this.serviceTypeForm.markAllAsTouched();
       return;
     }
 
     const model = {
-      groupName: this.groupForm.value.groupName
+      serviceHeadId : this.serviceTypeForm.value.serviceHeadId,
+      ServiceTypeName: this.serviceTypeForm.value.ServiceTypeName
     };
 
-    this.groupMasterService.insertGroupMaster(model)
+    this.ServiceTypeMasterService.insertServiceTypeMaster(model)
       .subscribe({
         next: () => {
 
-          this.toaster.show('Group added successfully!', {
+          this.toaster.show('ServiceTypeName added successfully!', {
             classname: 'bg-success text-white',
             delay: 5000
           });
 
-          this.getGroupMasterList();
+          this.getServiceTypeMasterList();
 
           modal.close();
         },
@@ -125,42 +137,45 @@ export class GroupMaster implements OnInit {
   //#region Edit
 
   openEditPopup(item: any): void {
+    console.log("edit item",item)
 
-    this.groupForm.patchValue({
-      groupId: item.id,
-      groupName: item.groupName
+    this.serviceTypeForm.patchValue({
+      serviceHeadId: item.serviceHeadId,
+      serviceTypeId: item.id,
+      ServiceTypeName: item.serviceTypeName
     });
 
-    this.modalService.open(this.groupUpdate, {
+    this.modalService.open(this.serviceTypeUpdate, {
       size: 'lg',
       backdrop: 'static'
     });
   }
 
-  updateGroup(modal: any): void {
+  updateServiceType(modal: any): void {
 
-    if (this.groupForm.invalid) {
-      this.groupForm.markAllAsTouched();
+    if (this.serviceTypeForm.invalid) {
+      this.serviceTypeForm.markAllAsTouched();
       return;
     }
 
     const model = {
-      id: this.groupForm.value.groupId,
-      groupName: this.groupForm.value.groupName
+      id: this.serviceTypeForm.value.serviceTypeId,
+      serviceHeadId : this.serviceTypeForm.value.serviceHeadId,
+      ServiceTypeName: this.serviceTypeForm.value.ServiceTypeName
     };
 
     console.log('Update Payload:', model);
 
-    this.groupMasterService.updateGroupMaster(model)
+    this.ServiceTypeMasterService.updateServiceTypeMaster(model)
       .subscribe({
         next: () => {
 
-          this.toaster.show('Group updated successfully!', {
+          this.toaster.show('ServiceTypeName updated successfully!', {
             classname: 'bg-success text-white',
             delay: 5000
           });
 
-          this.getGroupMasterList();
+          this.getServiceTypeMasterList();
 
           modal.close();
         },
@@ -174,13 +189,13 @@ export class GroupMaster implements OnInit {
 
   //#region Delete
 
-  deleteGroup(groupId: number, event: Event): void {
+  deleteServiceType(serviceTypeId: number, event: Event): void {
 
     event.stopPropagation();
 
     Swal.fire({
       title: 'Are you sure?',
-      text: 'You want to delete this group.',
+      text: 'You want to delete this ServiceType.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, Delete',
@@ -189,20 +204,20 @@ export class GroupMaster implements OnInit {
 
       if (result.isConfirmed) {
 
-        this.groupMasterService.deleteGroupMaster(groupId)
+        this.ServiceTypeMasterService.deleteServiceTypeMaster(serviceTypeId)
           .subscribe({
             next: () => {
 
-              this.toaster.show('Group deleted successfully!', {
+              this.toaster.show('ServiceTypeName deleted successfully!', {
                 classname: 'bg-success text-white',
                 delay: 5000
               });
 
-              this.getGroupMasterList();
+              this.getServiceTypeMasterList();
             },
             error: () => {
 
-              this.toaster.show('Failed to delete group!', {
+              this.toaster.show('Failed to delete ServiceTypeName!', {
                 classname: 'bg-danger text-white',
                 delay: 5000
               });
@@ -248,22 +263,6 @@ export class GroupMaster implements OnInit {
 
   //#endregion
 
-   applySearch(): void {
-
-  const search = this.searchText.toLowerCase().trim();
-
-  if (!search) {
-    this.filteredList = [...this.groupNameList];
-  } else {
-    this.filteredList = this.groupNameList.filter(x =>
-      x.groupName?.toLowerCase().includes(search)
-    );
-  }
-
-  this.page = 1;
-  this.refreshGrid();
-}
-
   //#region Pagination
 
   pageChange(page: number): void {
@@ -272,6 +271,25 @@ export class GroupMaster implements OnInit {
 
     this.refreshGrid();
   }
+
+  //search method
+  applySearch(): void {
+
+  const search = this.searchText.toLowerCase().trim();
+
+  if (!search) {
+    this.filteredList = [...this.serviceTypeList];
+  } else {
+    this.filteredList = this.serviceTypeList.filter(x =>
+      x.serviceTypeName?.toLowerCase().includes(search)
+    );
+  }
+
+  this.page = 1;
+  this.refreshGrid();
+}
+//end
+
  refreshGrid(): void {
 
   this.collectionSize = this.filteredList.length;
@@ -282,13 +300,14 @@ export class GroupMaster implements OnInit {
   );
 }
 
+
   //#endregion
 
   //#region Excel
 
-  downloadGroupMasterExcel(): void {
+  downloadServiceTypeMasterExcel(): void {
 
-    this.groupMasterService.getGroupMasterExcel()
+    this.ServiceTypeMasterService.getServiceTypeMasterExcel()
       .subscribe((response: Blob) => {
 
         const blob = new Blob(
@@ -302,13 +321,13 @@ export class GroupMaster implements OnInit {
         const link = document.createElement('a');
 
         link.href = url;
-        link.download = 'GroupMaster.xlsx';
+        link.download = 'ServiceTypeMaster.xlsx';
 
         link.click();
 
         window.URL.revokeObjectURL(url);
       });
   }
-
   //#endregion
+
 }

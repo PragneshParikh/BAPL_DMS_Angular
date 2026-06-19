@@ -1,22 +1,20 @@
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-    <h4 class="mb-sm-0">Group Master</h4>
+    <h4 class="mb-sm-0">JobType Master</h4>
 </div>
 
 <!-- Add  Modal -->
-<ng-template #groupAdd let-modal>
+<ng-template #jobTypeAdd let-modal>
 
-    <form [formGroup]="groupForm">
+    <form [formGroup]="jobTypeForm">
 
         <div class="card">
 
             <div class="modal-header item-modal-header">
                 <h5 class="modal-title">
-                    {{ groupForm.value.groupId > 0 ? 'Edit Group Master' : 'Add Group Master' }}
+                    {{ jobTypeForm.value.jobTypeId > 0 ? 'Edit JobType Master' : 'Add JobType Master' }}
                 </h5>
 
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        (click)="modal.dismiss()">
+                <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()">
                 </button>
             </div>
 
@@ -26,20 +24,16 @@
 
                     <div class="col-md-6">
                         <label class="form-label">
-                            Group Name
+                            JobType Name
                         </label>
 
-                        <input
-                            type="text"
-                            class="form-control"
-                            formControlName="groupName"
-                            placeholder="Enter Group Name">
+                        <input type="text" class="form-control" formControlName="JobTypeName"
+                            placeholder="Enter JobType Name">
 
-                        <small class="text-danger"
-                               *ngIf="groupForm.get('groupName')?.touched &&
-                                      groupForm.get('groupName')?.invalid">
+                        <small class="text-danger" *ngIf="jobTypeForm.get('JobTypeName')?.touched &&
+                                      jobTypeForm.get('JobTypeName')?.invalid">
 
-                            Group Name is required
+                            JobType Name is required
                         </small>
                     </div>
 
@@ -49,17 +43,11 @@
 
             <div class="modal-footer">
 
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    (click)="saveGroup(modal)">
+                <button type="button" class="btn btn-primary" (click)="saveJobType(modal)">
                     Save
                 </button>
 
-                <button
-                    type="button"
-                    class="btn btn-light"
-                    (click)="modal.dismiss()">
+                <button type="button" class="btn btn-light" (click)="modal.dismiss()">
                     Close
                 </button>
 
@@ -82,23 +70,16 @@
 
                 <div class="d-flex justify-content-end align-items-center">
 
-                    <button
-                        class="btn btn-primary btn-sm me-2"
-                        (click)="openAddDetails()">
+                    <button class="btn btn-primary btn-sm me-2" (click)="openAddDetails()">
                         Add
                     </button>
 
-                    <button
-                        class="btn btn-success btn-sm me-3"
-                        (click)="downloadGroupMasterExcel()">
+                    <button class="btn btn-success btn-sm me-3" (click)="downloadJobTypeMasterExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
 
                     <div class="search-box">
-                        <input
-                            type="text"
-                            class="form-control"
-                            placeholder="Search..." [(ngModel)]="searchText"
+                        <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchText"
                             (input)="applySearch()">
                         <i class="ri-search-line search-icon"></i>
                     </div>
@@ -118,11 +99,8 @@
                             <tr>
                                 <th width="80">Sr No.</th>
 
-                                <th
-                                    class="sort"
-                                    (click)="sort('groupName')"
-                                    style="cursor:pointer">
-                                    Group Name
+                                <th class="sort" (click)="sort('jobTypeName')" style="cursor:pointer">
+                                    JobType Name
                                 </th>
 
                                 <th width="120">
@@ -134,8 +112,7 @@
 
                         <tbody>
 
-                            <tr *ngFor="let item of pagedData; let i = index"
-                                (click)="openEditPopup(item)"
+                            <tr *ngFor="let item of pagedData; let i = index" (click)="openEditPopup(item)"
                                 style="cursor:pointer">
 
                                 <td>
@@ -143,15 +120,13 @@
                                 </td>
 
                                 <td>
-                                    {{ item.groupName }}
+                                    {{ item.jobTypeName }}
                                 </td>
 
                                 <td>
 
-                                    <button
-                                        class="btn btn-danger btn-sm"
-                                        (click)="deleteGroup(item.id, $event)">
-                                         <i class="ri-delete-bin-5-line"></i>
+                                    <button class="btn btn-danger btn-sm" (click)="deleteJobType(item.id, $event)">
+                                        <i class="ri-delete-bin-5-line"></i>
                                     </button>
 
                                 </td>
@@ -160,8 +135,7 @@
 
                             <tr *ngIf="pagedData.length === 0">
 
-                                <td colspan="3"
-                                    class="text-center">
+                                <td colspan="3" class="text-center">
                                     No Data Available
                                 </td>
 
@@ -179,10 +153,7 @@
 
                         <div class="float-end">
 
-                            <ngb-pagination
-                                [collectionSize]="collectionSize"
-                                [(page)]="page"
-                                [pageSize]="pageSize"
+                            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
                                 (pageChange)="pageChange($event)">
                             </ngb-pagination>
 
@@ -200,20 +171,18 @@
 
 </div>
 
-<ng-template #groupUpdate let-modal>
+<ng-template #jobTypeUpdate let-modal>
 
-    <form [formGroup]="groupForm">
+    <form [formGroup]="jobTypeForm">
 
         <div class="card">
 
             <div class="modal-header item-modal-header">
                 <h5 class="modal-title">
-                    Edit Group Master
+                    Edit JobType Master
                 </h5>
 
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        (click)="modal.dismiss()">
+                <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()">
                 </button>
             </div>
 
@@ -223,20 +192,16 @@
 
                     <div class="col-md-6">
                         <label class="form-label">
-                            Group Name
+                            JobType Name
                         </label>
 
-                        <input
-                            type="text"
-                            class="form-control"
-                            formControlName="groupName"
-                            placeholder="Enter Group Name">
+                        <input type="text" class="form-control" formControlName="JobTypeName"
+                            placeholder="Enter JobType Name">
 
-                        <small class="text-danger"
-                               *ngIf="groupForm.get('groupName')?.touched &&
-                                      groupForm.get('groupName')?.invalid">
+                        <small class="text-danger" *ngIf="jobTypeForm.get('JobTypeName')?.touched &&
+                                      jobTypeForm.get('JobTypeName')?.invalid">
 
-                            Group Name is required
+                            JobType Name is required
                         </small>
                     </div>
 
@@ -246,17 +211,11 @@
 
             <div class="modal-footer">
 
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    (click)="updateGroup(modal)">
+                <button type="button" class="btn btn-primary" (click)="updateJobType(modal)">
                     Save
                 </button>
 
-                <button
-                    type="button"
-                    class="btn btn-light"
-                    (click)="modal.dismiss()">
+                <button type="button" class="btn btn-light" (click)="modal.dismiss()">
                     Close
                 </button>
 

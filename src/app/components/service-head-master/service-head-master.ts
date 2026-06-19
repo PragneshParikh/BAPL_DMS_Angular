@@ -1,31 +1,29 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbModal, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
-import { GroupMasterService } from '../../core/services/group-master-service';
-import Swal from 'sweetalert2';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { ServiceHeadService } from '../../core/services/service-head-service';
+import Swal from 'sweetalert2';
+import { CommonModule } from '@angular/common';
+import { JobTypeService } from '../../core/services/job-type-service';
 
 @Component({
-  selector: 'app-group-master',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    NgbPagination
-  ],
-  templateUrl: './group-master.html',
-  styleUrl: './group-master.scss'
+  selector: 'app-service-head-master',
+  imports: [CommonModule,FormsModule,ReactiveFormsModule,NgbPagination],
+  templateUrl: './service-head-master.html',
+  styleUrl: './service-head-master.scss',
 })
-export class GroupMaster implements OnInit {
+export class ServiceHeadMaster implements OnInit {
 
-  @ViewChild('groupAdd') groupAdd!: TemplateRef<any>;
-  @ViewChild('groupUpdate') groupUpdate!: TemplateRef<any>;
+  @ViewChild('serviceHeadAdd') serviceHeadAdd!: TemplateRef<any>;
+  @ViewChild('serviceHeadUpdate') serviceHeadUpdate!: TemplateRef<any>;
 
-  groupForm!: FormGroup;
+  serviceHeadForm!: FormGroup;
 
-  groupNameList: any[] = [];
+  jobTypeList: any[] = [];
+selectedJobTypeId: number = 0;
+
+  serviceHeadNameList: any[] = [];
   filteredList: any[] = [];
   pagedData: any[] = [];
   searchText: string = '';
@@ -41,29 +39,41 @@ export class GroupMaster implements OnInit {
     private fb: FormBuilder,
     private modalService: NgbModal,
     private toaster: ToastService,
-    private groupMasterService: GroupMasterService
+    private ServiceHeadMasterService : ServiceHeadService,
+    private jobTypeMasterService : JobTypeService
   ) { }
 
   ngOnInit(): void {
 
-    this.groupForm = this.fb.group({
-      groupId: [0],
-      groupName: ['', Validators.required]
+    this.serviceHeadForm = this.fb.group({
+      serviceHeadId: [0],
+      jobtypeId: [0, Validators.required],
+      ServiceHeadName: ['', Validators.required]
     });
-
-    this.getGroupMasterList();
+    this.loadJobTypes();
+    this.getServiceHeadMasterList();
   }
 
+  loadJobTypes(): void {
+  this.jobTypeMasterService.getJobTypepMasterList().subscribe({
+    next: (res: any) => {
+      this.jobTypeList = res || [];
+    },
+    error: (err) => {
+      console.error(err);
+    }
+  });
+}
   //#region Get List
 
-  getGroupMasterList(): void {
+  getServiceHeadMasterList(): void {
 
-    this.groupMasterService.getGroupMasterList().subscribe({
+    this.ServiceHeadMasterService.getServiceHeadMasterList().subscribe({
       next: (response: any) => {
 
-        this.groupNameList = response || [];
-        console.log(this.groupNameList)
-          this.filteredList = [...this.groupNameList];
+        this.serviceHeadNameList = response || [];
+        this.filteredList = [...this.serviceHeadNameList];
+        console.log(this.serviceHeadNameList)
 
         this.refreshGrid();
       },
@@ -79,38 +89,39 @@ export class GroupMaster implements OnInit {
 
   openAddDetails(): void {
 
-    this.groupForm.reset({
-      groupId: 0,
-      groupName: ''
+    this.serviceHeadForm.reset({
+      jobSourceId: 0,
+      JobSourceName: ''
     });
 
-    this.modalService.open(this.groupAdd, {
+    this.modalService.open(this.serviceHeadAdd, {
       size: 'lg',
       backdrop: 'static'
     });
   }
 
-  saveGroup(modal: any): void {
+  saveServiceHead(modal: any): void {
 
-    if (this.groupForm.invalid) {
-      this.groupForm.markAllAsTouched();
+    if (this.serviceHeadForm.invalid) {
+      this.serviceHeadForm.markAllAsTouched();
       return;
     }
 
     const model = {
-      groupName: this.groupForm.value.groupName
+      jobtypeId : this.serviceHeadForm.value.jobtypeId,
+      ServiceHeadName: this.serviceHeadForm.value.ServiceHeadName
     };
 
-    this.groupMasterService.insertGroupMaster(model)
+    this.ServiceHeadMasterService.insertServiceHeadMaster(model)
       .subscribe({
         next: () => {
 
-          this.toaster.show('Group added successfully!', {
+          this.toaster.show('ServiceHeadName added successfully!', {
             classname: 'bg-success text-white',
             delay: 5000
           });
 
-          this.getGroupMasterList();
+          this.getServiceHeadMasterList();
 
           modal.close();
         },
@@ -125,42 +136,45 @@ export class GroupMaster implements OnInit {
   //#region Edit
 
   openEditPopup(item: any): void {
+    console.log("edit item",item)
 
-    this.groupForm.patchValue({
-      groupId: item.id,
-      groupName: item.groupName
+    this.serviceHeadForm.patchValue({
+      jobtypeId: item.jobtypeId,
+      serviceHeadId: item.id,
+      ServiceHeadName: item.serviceHeadName
     });
 
-    this.modalService.open(this.groupUpdate, {
+    this.modalService.open(this.serviceHeadUpdate, {
       size: 'lg',
       backdrop: 'static'
     });
   }
 
-  updateGroup(modal: any): void {
+  updateServiceHead(modal: any): void {
 
-    if (this.groupForm.invalid) {
-      this.groupForm.markAllAsTouched();
+    if (this.serviceHeadForm.invalid) {
+      this.serviceHeadForm.markAllAsTouched();
       return;
     }
 
     const model = {
-      id: this.groupForm.value.groupId,
-      groupName: this.groupForm.value.groupName
+      id: this.serviceHeadForm.value.serviceHeadId,
+      jobtypeId : this.serviceHeadForm.value.jobtypeId,
+      ServiceHeadName: this.serviceHeadForm.value.ServiceHeadName
     };
 
     console.log('Update Payload:', model);
 
-    this.groupMasterService.updateGroupMaster(model)
+    this.ServiceHeadMasterService.updateServiceHeadMaster(model)
       .subscribe({
         next: () => {
 
-          this.toaster.show('Group updated successfully!', {
+          this.toaster.show('ServiceHeadName updated successfully!', {
             classname: 'bg-success text-white',
             delay: 5000
           });
 
-          this.getGroupMasterList();
+          this.getServiceHeadMasterList();
 
           modal.close();
         },
@@ -174,13 +188,13 @@ export class GroupMaster implements OnInit {
 
   //#region Delete
 
-  deleteGroup(groupId: number, event: Event): void {
+  deleteServiceHead(serviceHeadId: number, event: Event): void {
 
     event.stopPropagation();
 
     Swal.fire({
       title: 'Are you sure?',
-      text: 'You want to delete this group.',
+      text: 'You want to delete this ServiceHead.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, Delete',
@@ -189,20 +203,20 @@ export class GroupMaster implements OnInit {
 
       if (result.isConfirmed) {
 
-        this.groupMasterService.deleteGroupMaster(groupId)
+        this.ServiceHeadMasterService.deleteServiceHeadMaster(serviceHeadId)
           .subscribe({
             next: () => {
 
-              this.toaster.show('Group deleted successfully!', {
+              this.toaster.show('ServiceHeadName deleted successfully!', {
                 classname: 'bg-success text-white',
                 delay: 5000
               });
 
-              this.getGroupMasterList();
+              this.getServiceHeadMasterList();
             },
             error: () => {
 
-              this.toaster.show('Failed to delete group!', {
+              this.toaster.show('Failed to delete ServiceHeadName!', {
                 classname: 'bg-danger text-white',
                 delay: 5000
               });
@@ -248,22 +262,6 @@ export class GroupMaster implements OnInit {
 
   //#endregion
 
-   applySearch(): void {
-
-  const search = this.searchText.toLowerCase().trim();
-
-  if (!search) {
-    this.filteredList = [...this.groupNameList];
-  } else {
-    this.filteredList = this.groupNameList.filter(x =>
-      x.groupName?.toLowerCase().includes(search)
-    );
-  }
-
-  this.page = 1;
-  this.refreshGrid();
-}
-
   //#region Pagination
 
   pageChange(page: number): void {
@@ -272,6 +270,27 @@ export class GroupMaster implements OnInit {
 
     this.refreshGrid();
   }
+
+  //search method
+  applySearch(): void {
+
+  const search = this.searchText.toLowerCase().trim();
+
+  if (!search) {
+    this.filteredList = [...this.serviceHeadNameList];
+   
+  } else {
+    this.filteredList = this.serviceHeadNameList.filter(x =>
+      x.serviceHeadName?.toLowerCase().includes(search)||
+      x.jobTypeName?.toLowerCase().includes(search)
+    );
+  }
+
+  this.page = 1;
+  this.refreshGrid();
+}
+//end
+
  refreshGrid(): void {
 
   this.collectionSize = this.filteredList.length;
@@ -282,13 +301,14 @@ export class GroupMaster implements OnInit {
   );
 }
 
+
   //#endregion
 
   //#region Excel
 
-  downloadGroupMasterExcel(): void {
+  downloadServiceHeadMasterExcel(): void {
 
-    this.groupMasterService.getGroupMasterExcel()
+    this.ServiceHeadMasterService.getServiceHeadExcel()
       .subscribe((response: Blob) => {
 
         const blob = new Blob(
@@ -302,13 +322,14 @@ export class GroupMaster implements OnInit {
         const link = document.createElement('a');
 
         link.href = url;
-        link.download = 'GroupMaster.xlsx';
+        link.download = 'ServiceHeadMaster.xlsx';
 
         link.click();
 
         window.URL.revokeObjectURL(url);
       });
   }
-
   //#endregion
+
+
 }
