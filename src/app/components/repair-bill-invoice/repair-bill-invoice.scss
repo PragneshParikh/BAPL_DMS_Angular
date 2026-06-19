@@ -1,0 +1,53 @@
+.inv-page {
+  background: #fff;
+  padding: 15px;
+}
+
+.inv-title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.inv-items-tbl,
+.inv-tax-tbl {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inv-items-tbl th,
+.inv-items-tbl td,
+.inv-tax-tbl th,
+.inv-tax-tbl td {
+  border: 1px solid #000;
+  padding: 4px;
+}
+
+.tc {
+  text-align: center;
+}
+
+.tr {
+  text-align: right;
+}
+
+.inv-toolbar {
+  margin-bottom: 10px;
+}
+
+@media print {
+
+  .inv-toolbar {
+    display: none !important;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  @page {
+    size: A4;
+    margin: 8mm;
+  }
+}

@@ -53,8 +53,6 @@
             <div class="col-md-3 position-relative">
                 <label class="form-label">Chassis No.</label>
                 <input type="text" class="form-control form-control-sm" placeholder="Enter Chassis No."
-                    [(ngModel)]="searchModel.chassisNo" (input)="filterChassis()" (blur)="filteredChassisList=[]"
-                    (focus)="filterChassis()" (blur)="hideDropdown()">
                     [(ngModel)]="searchModel.chassisNo" (input)="filterChassis()" (focus)="filterChassis()"
                     (blur)="hideDropdown()">
 
@@ -119,14 +117,16 @@
 
                         <!-- ACTION -->
                         <td>
-                            <!-- <button class="btn btn-sm btn-soft-primary" (click)="onEdit(item)"><i
-                                    class="ri-pencil-fill fs-12"></i></button> -->
                             <button class="btn btn-sm btn-soft-primary" (click)="onEdit(item)">
                                 <i class="ri-pencil-fill fs-12"></i>
                             </button>
                             <button class="btn btn-sm btn-soft-danger" [disabled]="currentUserRole !== 'SuperAdmin'"
                                 title="Only SuperAdmin can delete" (click)="deleteJobCard(item.id)">
                                 <i class="ri-delete-bin-fill fs-12"></i>
+                            </button>
+                            <button class="btn btn-sm btn-soft-success" title="Print Invoice"
+                                (click)="printJobCard(item)">
+                                <i class="ri-printer-line fs-12"></i>
                             </button>
                         </td>
 

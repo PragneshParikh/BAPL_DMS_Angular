@@ -142,6 +142,7 @@ getDesignationName(id: any): string {
   });
 }
 
+
 getLocationName(code: string): string {
   return this.locationMap[code] ?? '';
 }
@@ -217,4 +218,6 @@ getLocationName(code: string): string {
       });
   }
 }
+
+
 
