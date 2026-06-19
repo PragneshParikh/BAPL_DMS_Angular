@@ -1,0 +1,105 @@
+<div id="free-service-claim-list">
+    <!-- Start Breadcrumbs -->
+    <app-breadcrumbs title="Free Service Rate"></app-breadcrumbs>
+    <!-- End Breadcrumbs -->
+
+    <div class="card-body">
+        <div class="page-content p-0">
+            <div class="container-fluid px-1">
+
+                <!-- Table Card -->
+                <div class="card">
+
+                    <fieldset [disabled]="isEdit">
+                        <!-- Filter Form -->
+                        <div class="card-body">
+                            <form>
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Effective Date</label>
+                                        <input type="date" class="form-control form-control-sm" name="dob"
+                                            [(ngModel)]="formData.effectiveDate" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">OEM Model</label>
+                                        <select class="form-select form-select-sm" name="modelType"
+                                            [(ngModel)]="formData.modelId">
+                                            <option value=""> -- Select -- </option>
+                                            <option *ngFor="let model of oemModelList" [value]="model.id">
+                                                {{ model.modelName }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </fieldset>
+
+                    <div class="card-body">
+                        <fieldset [disabled]="isEdit">
+                            <div class="table-responsive">
+
+                                <table class="table table-hover table-bordered mb-0 table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th> Sr. No. </th>
+                                            <th> Service Name </th>
+                                            <th> Metro Rate </th>
+                                            <th> Metro GST% </th>
+                                            <th> Non-metro Rate </th>
+                                            <th> Non-mertro GST% </th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr *ngFor="let rate of dataSource;" class="table-row">
+                                            <td>{{ rate?.srNo }}</td>
+                                            <td>{{ rate?.serviceName }}</td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm"
+                                                    [(ngModel)]="rate.metroRate">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm"
+                                                    [(ngModel)]="rate.metroGST">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm"
+                                                    [(ngModel)]="rate.nonMetroRate">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm"
+                                                    [(ngModel)]="rate.nonMetroGST">
+                                            </td>
+                                        </tr>
+
+                                        <!-- No Data -->
+                                        <tr *ngIf="!dataSource || dataSource.length === 0">
+                                            <td colspan="6" class="text-center text-muted py-3">
+                                                No Data Available
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </fieldset>
+                        <!-- Add Button -->
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <button type="button" class="btn btn-primary btn-sm float-end" (click)="backToList()">
+                                    Cancel
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm float-end me-1"
+                                    (click)="saveRates()" [disabled]="isEdit">
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

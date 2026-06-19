@@ -1,0 +1,83 @@
+<div id="free-service-claim-list">
+    <!-- Start Breadcrumbs -->
+    <app-breadcrumbs title="Free Service Rate"></app-breadcrumbs>
+    <!-- End Breadcrumbs -->
+
+    <div class="card-body">
+        <div class="page-content p-0">
+            <div class="container-fluid px-1">
+
+                <!-- Table Card -->
+                <div class="card">
+
+                    <!-- Filter Form -->
+                    <div class="card-body">
+                        <form #freeServiceRateFilterForm="ngForm" (ngSubmit)="onSearch()">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-3">
+                                    <label class="form-label">OEM Model</label>
+                                    <select class="form-select form-select-sm" name="modelType" [(ngModel)]="oemModel"
+                                        (change)="onChangeModel($event)">
+                                        <option value=""> -- Select -- </option>
+                                        <option *ngFor="let model of oemModelList" [value]="model.id">
+                                            {{ model.modelName }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3 mt-2">
+                                    <button type="submit" class="btn btn-primary btn-sm me-1">
+                                        <i class="align-bottom me-1"></i> Search
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-sm ms-2" (click)="addNewOEMRate()">
+                                        <i class="align-bottom me-1"></i> Add
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover table-bordered mb-0 table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th> Sr. No. </th>
+                                        <th> Model Name </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr *ngFor="let group of dataSource;" class="table-row"
+                                        (dblclick)="openFreeServiceRateInfo(group)">
+                                        <td>{{ group?.srNo }}</td>
+                                        <td>{{ group?.oemModelName }}</td>
+                                    </tr>
+
+                                    <!-- No Data -->
+                                    <tr *ngIf="!dataSource || dataSource.length === 0">
+                                        <td colspan="6" class="text-center text-muted py-3">
+                                            No Data Available
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <!-- PAGINATION -->
+                        <div class="col-sm-12 col-md-12 mt-2">
+                            <div class="text-md-right float-md-end gridjs-pagination">
+                                <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                                    (pageChange)="onPageChange($event)" [maxSize]="5" [boundaryLinks]="true">
+                                </ngb-pagination>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
