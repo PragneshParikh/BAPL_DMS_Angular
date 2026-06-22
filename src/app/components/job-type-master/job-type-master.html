@@ -1,0 +1,228 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">JobType Master</h4>
+</div>
+
+<!-- Add  Modal -->
+<ng-template #jobTypeAdd let-modal>
+
+    <form [formGroup]="jobTypeForm">
+
+        <div class="card">
+
+            <div class="modal-header item-modal-header">
+                <h5 class="modal-title">
+                    {{ jobTypeForm.value.jobTypeId > 0 ? 'Edit JobType Master' : 'Add JobType Master' }}
+                </h5>
+
+                <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()">
+                </button>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            JobType Name
+                        </label>
+
+                        <input type="text" class="form-control" formControlName="JobTypeName"
+                            placeholder="Enter JobType Name">
+
+                        <small class="text-danger" *ngIf="jobTypeForm.get('JobTypeName')?.touched &&
+                                      jobTypeForm.get('JobTypeName')?.invalid">
+
+                            JobType Name is required
+                        </small>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-primary" (click)="saveJobType(modal)">
+                    Save
+                </button>
+
+                <button type="button" class="btn btn-light" (click)="modal.dismiss()">
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</ng-template>
+
+<!-- Grid -->
+<div class="row">
+
+    <div class="col-lg-12">
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <div class="d-flex justify-content-end align-items-center">
+
+                    <button class="btn btn-primary btn-sm me-2" (click)="openAddDetails()">
+                        Add
+                    </button>
+
+                    <button class="btn btn-success btn-sm me-3" (click)="downloadJobTypeMasterExcel()">
+                        <i class="ri-file-excel-2-line"></i>
+                    </button>
+
+                    <div class="search-box">
+                        <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchText"
+                            (input)="applySearch()">
+                        <i class="ri-search-line search-icon"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-hover table-sm">
+
+                        <thead class="table-bgColor">
+
+                            <tr>
+                                <th width="80">Sr No.</th>
+
+                                <th class="sort" (click)="sort('jobTypeName')" style="cursor:pointer">
+                                    JobType Name
+                                </th>
+
+                                <th width="120">
+                                    Action
+                                </th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr *ngFor="let item of pagedData; let i = index" (click)="openEditPopup(item)"
+                                style="cursor:pointer">
+
+                                <td>
+                                    {{ ((page - 1) * pageSize) + i + 1 }}
+                                </td>
+
+                                <td>
+                                    {{ item.jobTypeName }}
+                                </td>
+
+                                <td>
+
+                                    <button class="btn btn-danger btn-sm" (click)="deleteJobType(item.id, $event)">
+                                        <i class="ri-delete-bin-5-line"></i>
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+                            <tr *ngIf="pagedData.length === 0">
+
+                                <td colspan="3" class="text-center">
+                                    No Data Available
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-12">
+
+                        <div class="float-end">
+
+                            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                                (pageChange)="pageChange($event)">
+                            </ngb-pagination>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<ng-template #jobTypeUpdate let-modal>
+
+    <form [formGroup]="jobTypeForm">
+
+        <div class="card">
+
+            <div class="modal-header item-modal-header">
+                <h5 class="modal-title">
+                    Edit JobType Master
+                </h5>
+
+                <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()">
+                </button>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            JobType Name
+                        </label>
+
+                        <input type="text" class="form-control" formControlName="JobTypeName"
+                            placeholder="Enter JobType Name">
+
+                        <small class="text-danger" *ngIf="jobTypeForm.get('JobTypeName')?.touched &&
+                                      jobTypeForm.get('JobTypeName')?.invalid">
+
+                            JobType Name is required
+                        </small>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-primary" (click)="updateJobType(modal)">
+                    Save
+                </button>
+
+                <button type="button" class="btn btn-light" (click)="modal.dismiss()">
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</ng-template>

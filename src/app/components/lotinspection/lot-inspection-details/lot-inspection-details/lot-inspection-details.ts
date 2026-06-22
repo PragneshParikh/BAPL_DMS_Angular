@@ -29,6 +29,7 @@ export class LotInspectionDetails implements OnInit {
   selectedPlastingcover: string = '';
   selectedSupervisor: string = '';
   router: any;
+  isLotInspected: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -108,8 +109,10 @@ export class LotInspectionDetails implements OnInit {
     this.lotInspectionDetailservice.getAllDetailsByInvoice(this.invoiceNo).subscribe({
       next: (res: any) => {
 
-        if (res?.data?.length) {
-
+        if (res?.data?.length > 0) {
+         
+            this.isLotInspected = res?.data[0]?.isLotInspected;
+          
           const first = res.data[0];
 
           // HEADER
@@ -265,6 +268,7 @@ export class LotInspectionDetails implements OnInit {
           classname: 'bg-success text-white',
           delay: 3000
         });
+        this.router.navigate(['/lotinspection']);
       },
       error: (err) => {
         console.error(err);

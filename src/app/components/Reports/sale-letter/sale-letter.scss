@@ -90,3 +90,15 @@ hr {
     }
 
 }
+@media print {
+
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+
+  .a4-page {
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+}

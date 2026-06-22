@@ -11,7 +11,6 @@ import { JobCardService } from '../../core/services/job-card-service';
 import Swal from 'sweetalert2';
 import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
 import { LocationMasterService } from '../../core/services/location-master-service';
-import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-job-card',
@@ -126,7 +125,7 @@ export class JobCard {
         console.log("list", res);
 
         // a duplicate chassis no remove (optional)
-          this.chassisList = res.chassisNo || [];
+        this.chassisList = res.chassisNo || [];
       },
       error: (err) => {
         console.error('Error fetching chassis', err);
@@ -135,14 +134,14 @@ export class JobCard {
   }
 
   filterChassis() {
-  const searchText = (this.searchModel.chassisNo || '').toLowerCase();
+    const searchText = (this.searchModel.chassisNo || '').toLowerCase();
 
-  this.filteredChassisList = this.chassisList
-    .filter((x: string) =>
-      x.toLowerCase().includes(searchText)
-    )
-    .slice(0, 10);
-}
+    this.filteredChassisList = this.chassisList
+      .filter((x: string) =>
+        x.toLowerCase().includes(searchText)
+      )
+      .slice(0, 10);
+  }
   hideDropdown() {
     setTimeout(() => {
       this.filteredChassisList = [];
@@ -150,15 +149,15 @@ export class JobCard {
   }
 
   selectChassis(item: string) {
-  console.log('Selected:', item);
+    console.log('Selected:', item);
 
-  this.searchModel.chassisNo = item;
-  this.filteredChassisList = [];
-  this.search();
-}
+    this.searchModel.chassisNo = item;
+    this.filteredChassisList = [];
+    this.search();
+  }
 
   loadJobCardList() {
-   // debugger;
+    // debugger;
     //console.log("dealercode testing",this.searchModel.dealerCode);
     this.searchModel.dealerCode = this.storageService.getDealerCode();
     this.jobCardService.getJobCardList(this.searchModel)
@@ -277,7 +276,7 @@ export class JobCard {
     this.selectedChassis = '';
   }
   search() {
-debugger
+    debugger
     const payload = {
       dealerCode: this.storageService.getDealerCode(),
       fromDate: this.searchModel.fromDate || null,
@@ -306,45 +305,45 @@ debugger
     this.pagedData = this.filteredData.slice(start, end);
   }
 
-  downloadExcel(): void {
-  if (!this.jobCardList || this.jobCardList.length === 0) {
-    return;
-  }
+  // downloadExcel(): void {
+  //   if (!this.jobCardList || this.jobCardList.length === 0) {
+  //     return;
+  //   }
 
-  const headers = [
-    'Sr No', 'Job No', 'Job Date', 'Job Status', 'Manual Job No',
-    'Location', 'Job Type', 'Job Source', 'Complaint', 'Supervisor',
-    'Register No', 'Chassis No', 'Vehicle Name', 'Service Head',
-    'Service Type', 'Customer Name', 'Customer Mobile'
-  ];
+  //   const headers = [
+  //     'Sr No', 'Job No', 'Job Date', 'Job Status', 'Manual Job No',
+  //     'Location', 'Job Type', 'Job Source', 'Complaint', 'Supervisor',
+  //     'Register No', 'Chassis No', 'Vehicle Name', 'Service Head',
+  //     'Service Type', 'Customer Name', 'Customer Mobile'
+  //   ];
 
-  const rows = this.jobCardList.map((item, i) => [
-    i + 1,
-    item.jobCardHeader?.jobNo ?? '',
-    item.jobCardHeader?.jobinDate
-      ? new Date(item.jobCardHeader.jobinDate).toLocaleDateString('en-GB')
-      : '',
-    item.jobStatus ?? '',
-    item.jobCardHeader?.manualjobNo ?? '',
-    item.location ?? '',
-    item.jobtype ?? '',
-    item.jobsource ?? '',
-    item.complaint ?? '',
-    item.jobCardHeader?.supervisor ?? '',
-    item.jobCardCustomer?.registerNo ?? '',
-    item.jobCardCustomer?.chassisNo ?? '',
-    item.jobCardCustomer?.modelName ?? '',
-    item.serviceHead ?? '',
-    item.serviceType ?? '',
-    item.jobCardCustomer?.customerName ?? '',
-    item.jobCardCustomer?.customerMobile ?? ''
-  ]);
+  //   const rows = this.jobCardList.map((item, i) => [
+  //     i + 1,
+  //     item.jobCardHeader?.jobNo ?? '',
+  //     item.jobCardHeader?.jobinDate
+  //       ? new Date(item.jobCardHeader.jobinDate).toLocaleDateString('en-GB')
+  //       : '',
+  //     item.jobStatus ?? '',
+  //     item.jobCardHeader?.manualjobNo ?? '',
+  //     item.location ?? '',
+  //     item.jobtype ?? '',
+  //     item.jobsource ?? '',
+  //     item.complaint ?? '',
+  //     item.jobCardHeader?.supervisor ?? '',
+  //     item.jobCardCustomer?.registerNo ?? '',
+  //     item.jobCardCustomer?.chassisNo ?? '',
+  //     item.jobCardCustomer?.modelName ?? '',
+  //     item.serviceHead ?? '',
+  //     item.serviceType ?? '',
+  //     item.jobCardCustomer?.customerName ?? '',
+  //     item.jobCardCustomer?.customerMobile ?? ''
+  //   ]);
 
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'JobCards');
-  XLSX.writeFile(wb, `JobCardList_${new Date().toISOString().slice(0, 10)}.xlsx`);
-}
+  //   const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  //   const wb = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(wb, ws, 'JobCards');
+  //   XLSX.writeFile(wb, `JobCardList_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  // }
 
 printJobCard(item: any): void {
   const html = this.buildInvoiceHtml(item);

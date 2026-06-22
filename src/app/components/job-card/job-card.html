@@ -53,8 +53,9 @@
             <div class="col-md-3 position-relative">
                 <label class="form-label">Chassis No.</label>
                 <input type="text" class="form-control form-control-sm" placeholder="Enter Chassis No."
-                    [(ngModel)]="searchModel.chassisNo" (input)="filterChassis()" (focus)="filterChassis()"
-                    (blur)="hideDropdown()">
+                    [(ngModel)]="searchModel.chassisNo" (input)="filterChassis()" (blur)="filteredChassisList=[]"
+                    (focus)="filterChassis()" (blur)="hideDropdown()">
+               
 
                 <div class="dropdown-menu show w-100" *ngIf="filteredChassisList.length > 0">
                     <button type="button" class="dropdown-item" *ngFor="let item of filteredChassisList"
@@ -70,7 +71,7 @@
                     Search
                 </button>
 
-                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'" (click)="downloadExcel()">
+                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'">
                     <i class="ri-file-excel-2-line"></i> Excel
                 </button>
 

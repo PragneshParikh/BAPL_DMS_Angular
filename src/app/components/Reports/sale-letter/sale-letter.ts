@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DealerMasterViewModel } from '../../../ViewModels/Dealer/DealerMasterViewModel';
 import { CommonModule } from '@angular/common';
 import { DealerService } from '../../../core/services/dealer-service';
@@ -33,7 +33,8 @@ export class SaleLetter implements OnInit {
     private dealerService: DealerService,
     private storageService: StorageService,
     private ledgerService: LedgerMasterService,
-    private vehicleSaleBillService: VehicleSaleBillService
+    private vehicleSaleBillService: VehicleSaleBillService,
+    private router:Router
   ) { }
 
   ngOnInit(): void {
@@ -77,6 +78,12 @@ export class SaleLetter implements OnInit {
 
 
   }
+goBack(): void {
+  this.router.navigate(['/vehicle-sale-bill/edit', this.saleBillId]);
+}
 
+printInvoice(): void {
+  window.print();
+}
 
 }

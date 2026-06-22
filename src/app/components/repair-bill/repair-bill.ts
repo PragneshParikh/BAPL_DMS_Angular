@@ -23,7 +23,7 @@ import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
 
 @Component({
   selector: 'app-repair-bill',
-  imports: [FormsModule, CommonModule,NgbDropdownModule],
+  imports: [FormsModule, CommonModule, NgbDropdownModule],
   templateUrl: './repair-bill.html',
   styleUrl: './repair-bill.scss',
 })
@@ -142,14 +142,14 @@ export class RepairBill implements OnInit {
   partwiseLabourId: any;
   customerLedgerId: any;
   searchModel: JobCardSearchModel = {
-      dealerCode: '',
-      fromDate: '',
-      toDate: '',
-      serviceLocation: '',
-      jobNo: null,
-      customerName: '',
-      chassisNo: ''
-    };
+    dealerCode: '',
+    fromDate: '',
+    toDate: '',
+    serviceLocation: '',
+    jobNo: null,
+    customerName: '',
+    chassisNo: ''
+  };
 
 
 
@@ -171,6 +171,17 @@ export class RepairBill implements OnInit {
   }
   ngOnInit(): void {
     debugger
+    const today = new Date();
+
+    // Current month first date
+    const firstDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    );
+
+    this.searchModel.fromDate = this.formatDate(firstDayOfMonth);
+    this.searchModel.toDate = this.formatDate(today);
     this.loadPrefix();
     this.fetchLocations();
     this.loadPartNo();
@@ -356,7 +367,7 @@ export class RepairBill implements OnInit {
 
     }
     this.selectedJobCard = item;
-console.log("onselect",this.selectedJobCard)
+    console.log("onselect", this.selectedJobCard)
     this.chassisNo = this.selectedJobCard.jobCardHeader.chassisno;
     this.insValidTill = this.selectedJobCard.jobCardCustomer.insuranceExpDate;
     console.log("testvalidtill", this.insValidTill)
@@ -1229,7 +1240,7 @@ console.log("onselect",this.selectedJobCard)
             });
 
           });
-       // console.log('Mapped Part Items', this.partItems);
+        // console.log('Mapped Part Items', this.partItems);
         this.isPartSelected = this.partItems.length > 0;
         this.isLabourSelected = this.labourItems.length > 0;
 
@@ -1425,9 +1436,9 @@ console.log("onselect",this.selectedJobCard)
   }
 
   printPerforma() {
-   
+
     this.router.navigate(
-      ['/repair-bill-performa',this.repairBillId]
+      ['/repair-bill-performa', this.repairBillId]
     )
   }
 
@@ -1449,5 +1460,12 @@ printInvoice(): void {
     '_blank'
   );
 }
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
 
 }

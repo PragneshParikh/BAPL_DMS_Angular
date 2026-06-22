@@ -55,8 +55,10 @@ export class DealerService {
   }
 
   getDealerDropdown(dealerCode: string | null): Observable<any> {
-    let params = new HttpParams().set('dealerCode', dealerCode)
-
+    let params = new HttpParams();
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode)
+    }
     return this.httpClient.get<any>(`${this.baseUrl}/DealerMaster/GetDealerDropdown`, { params });
   }
 }

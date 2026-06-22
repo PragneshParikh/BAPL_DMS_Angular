@@ -55,10 +55,23 @@ export class RepairBillList implements OnInit {
   };
 
   ngOnInit(): void {
+    const today = new Date();
+
+    // Current month first date
+    const firstDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    );
+
+    this.repairbillsearchModel.fromDate = this.formatDate(firstDayOfMonth);
+    this.repairbillsearchModel.toDate = this.formatDate(today);
     this.fetchLocations();
     this.search();
   }
 
+  
+  // Dealer Locations
   fetchLocations(): void {
     const dealerCode = this.storageService.getDealerCode();
     this.locationService.getLocationList(dealerCode).subscribe({
@@ -67,6 +80,15 @@ export class RepairBillList implements OnInit {
     });
   }
 
+   formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+  // Search Delay
   onSearchChange(): void {
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => { this.search(); }, 500);

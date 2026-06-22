@@ -35,4 +35,30 @@ export class LotInspectionService {
       headers: { 'Content-Type': 'application/json' }
     });
   }
+
+  getLotinspectedExcel(invoiceNo?: string,
+    fromDate?: string,
+    toDate?: string): Observable<Blob> {
+    debugger
+    let params = new HttpParams();
+
+    if (invoiceNo) {
+      params = params.set('invoiceNo', invoiceNo);
+    }
+
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+
+    if (toDate) {
+      params = params.set('toDate', toDate);
+    }
+    return this.httpClient.get(
+      `${this.baseUrl}/LOTInspection/GetLotinspectedExcel`,
+      {
+        params,
+        responseType: 'blob'
+      }
+    );
+  }
 }
