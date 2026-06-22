@@ -57,6 +57,10 @@ import { VehicleStockTransferList } from './components/vehicle-stock-transfer/ve
 import { GroupMaster } from './components/group-master/group-master';
 import { TermConditionMaster } from './components/term-condition-master/term-condition-master';
 import { OccupationMaster } from './components/occupation-master/occupation-master';
+import { DepartmentMasterList } from './components/department-master/department-master-list/department-master-list';
+import { DepartmentMaster } from './components/department-master/department-master';
+import { DesignationMasterList } from './components/designation-master/designation-master-list/designation-master-list';
+import { DesignationMaster } from './components/designation-master/designation-master';
 import { JobTypeMaster } from './components/job-type-master/job-type-master';
 import { ServiceHeadMaster } from './components/service-head-master/service-head-master';
 import { ServiceTypeMaster } from './components/service-type-master/service-type-master';
@@ -181,6 +185,8 @@ export const routes: Routes = [
 
       { path: 'repair-bill-performa/:repairBillId', component: RepairBillPerforma, data: [51] },
 
+      { path: 'repair-bill-invoice/:id', loadComponent: () => import('./components/repair-bill-invoice/repair-bill-invoice').then(m => m.RepairBillInvoiceComponent), data: [51] },
+
       { path: 'complaint-master', component: ComplaintMaster, data: [56] },
 
       { path: 'add-vehicle-stock-transfer', component: AddVehicleStockTransfer, data: [57] },
@@ -191,6 +197,15 @@ export const routes: Routes = [
       { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
 
       { path: 'occupation-master', component: OccupationMaster, data: [62] },
+
+      { path: 'department-master', component: DepartmentMasterList, data: [63] },
+      { path: 'department-master/add', component: DepartmentMaster, data: [63] },
+      { path: 'department-master/edit/:id', component: DepartmentMaster, data: [63] },
+      { path: 'designation-master', component: DesignationMasterList, data: [64] },
+      { path: 'designation-master/add', component: DesignationMaster, data: [64] },
+      { path: 'designation-master/edit/:id', component: DesignationMaster, data: [64] },
+
+
       { path: 'free-service-claim', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim-list/free-service-claim-list').then(m => m.FreeServiceClaimList) },
       { path: 'free-service-claim:id', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim').then(m => m.FreeServiceClaim) },
 

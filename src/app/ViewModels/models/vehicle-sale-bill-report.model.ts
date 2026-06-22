@@ -61,6 +61,18 @@ export interface VehicleSaleBillReportViewModel {
   chargerNo?: string;
   controllerNo?: string;
   vcu?: string;
+  dealerCity?: string;
+  dealerState?: string;
+  address1?: string;
+
+  batteryNo?: string;
+  batteryNo2?: string;
+  batteryNo3?: string;
+
+  batteryCapacity?: string;
+
+  subsidyAmount?: number;
+  fameIIRequired?: boolean;
 }
 
 export interface VehicleSaleBillReportResponse {

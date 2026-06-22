@@ -234,6 +234,7 @@ export const conditionModule = [
     { Id: 5, ConditionName: 'Warranty Claim' },
     { Id: 6, ConditionName: 'Vehicle Sale Bill' },
     { Id: 7, ConditionName: 'Counter Bill' },
-    { Id: 8, ConditionName: 'EBW Invoice Creation' }
+    { Id: 8, ConditionName: 'EBW Invoice Creation' },
+    { Id: 9, ConditionName: 'Form 22' }       // <-- NEW
 ];
 

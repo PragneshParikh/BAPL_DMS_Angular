@@ -490,49 +490,88 @@ export class JobCardAddForm {
 
 
 
-  onChassisChange() {
+  // onChassisChange() {
 
-    if (!this.selectedChassis) return;
-    this.loadServiceHistory(this.selectedChassis);
+  //   if (!this.selectedChassis) return;
+  //   this.loadServiceHistory(this.selectedChassis);
 
-    const selected = this.chassisList.find(
-      x => x.chassisNumber == this.selectedChassis
-      //  use ==
-    );
+  //   const selected = this.chassisList.find(
+  //     x => x.chassisNumber == this.selectedChassis
+  //     //  use ==
+  //   );
 
-    if (!selected) return;
+  //   if (!selected) return;
 
-    // ALWAYS FILL (EDIT + ADD)
-    this.invoiceNo = selected.invoiceNo;
-    this.couponNo = this.selectedChassis.slice(-13);
-    this.customerObj.customerLedgerId = selected.customerLedgerId;
-    this.customerObj.customerName = selected.customerName;
-    this.customerObj.customerMobile = selected.customerMobile;
-    this.customerObj.customerAltMobile = selected.customerAltMobile;
+  //   // ALWAYS FILL (EDIT + ADD)
+  //   this.invoiceNo = selected.invoiceNo;
+  //   this.couponNo = this.selectedChassis.slice(-13);
+  //   this.customerObj.customerLedgerId = selected.customerLedgerId;
+  //   this.customerObj.customerName = selected.customerName;
+  //   this.customerObj.customerMobile = selected.customerMobile;
+  //   this.customerObj.customerAltMobile = selected.customerAltMobile;
 
-    this.modelName = selected.modelName;
-    this.registerNo = selected.registerNo;
+  //   this.modelName = selected.modelName;
+  //   this.registerNo = selected.registerNo;
 
-    this.batteryCapacity = selected.batteryCapacity;
-    this.batteryMake = selected.batteryMake;
-    this.batteryChemestry = selected.batteryChemestry;
-    this.batteryNumber = selected.batteryNumber;
+  //   this.batteryCapacity = selected.batteryCapacity;
+  //   this.batteryMake = selected.batteryMake;
+  //   this.batteryChemestry = selected.batteryChemestry;
+  //   this.batteryNumber = selected.batteryNumber;
 
-    this.motorNo = selected.motorNo;
-    this.controllerNo = selected.controllerNo;
-    this.converterNo = selected.converterNo;
-    this.chargerNumber = selected.chargerNumber;
+  //   this.motorNo = selected.motorNo;
+  //   this.controllerNo = selected.controllerNo;
+  //   this.converterNo = selected.converterNo;
+  //   this.chargerNumber = selected.chargerNumber;
 
-    this.odoReading = selected.odoReading;
-    this.duration = selected.duration;
-    this.durationType = selected.durationType;
-    this.expireWarrentyDate = selected.expireWarrentyDate;
-    this.oemModelId = selected.oemModelId;
-    if (this.oemModelId) {
-      this.loadPdiData(this.oemModelId);
-    }
+  //   this.odoReading = selected.odoReading;
+  //   this.duration = selected.duration;
+  //   this.durationType = selected.durationType;
+  //   this.expireWarrentyDate = selected.expireWarrentyDate;
+  //   this.oemModelId = selected.oemModelId;
+  //   if (this.oemModelId) {
+  //     this.loadPdiData(this.oemModelId);
+  //   }
+  // }
+onChassisChange() {
+  if (!this.selectedChassis) return;
+  this.loadServiceHistory(this.selectedChassis);
+
+  const selected = this.chassisList.find(
+    x => x.chassisNumber == this.selectedChassis
+  );
+
+  if (!selected) return;
+
+  this.invoiceNo                     = selected.invoiceNo;
+  this.couponNo                      = this.selectedChassis.slice(-13);
+  this.customerObj.customerLedgerId  = selected.customerLedgerId;
+  this.customerObj.customerName      = selected.customerName;
+  this.customerObj.customerMobile    = selected.customerMobile;
+  this.customerObj.customerAltMobile = selected.customerAltMobile;
+
+  // Model + Colour combined
+  this.modelName = selected.modelName
+    + (selected.colourName ? ' (' + selected.colourName + ')' : '');
+
+  this.registerNo         = selected.registerNo;
+  this.batteryCapacity    = selected.batteryCapacity;
+  this.batteryMake        = selected.batteryMake;
+  this.batteryChemestry   = selected.batteryChemestry;
+  this.batteryNumber      = selected.batteryNumber;
+  this.motorNo            = selected.motorNo;
+  this.controllerNo       = selected.controllerNo;
+  this.converterNo        = selected.converterNo;
+  this.chargerNumber      = selected.chargerNumber;
+  this.odoReading         = selected.odoReading;
+  this.duration           = selected.duration;
+  this.durationType       = selected.durationType;
+  this.expireWarrentyDate = selected.expireWarrentyDate;
+  this.oemModelId         = selected.oemModelId;
+
+  if (this.oemModelId) {
+    this.loadPdiData(this.oemModelId);
   }
-
+}
   // PDiChecklist popup
   openPdiModal(content: any) {
 
