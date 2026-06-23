@@ -6,6 +6,7 @@ import { EmployeeMasterService } from '../../../core/services/employee-master';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 import { DepartmentService } from '../../../core/services/department';
 import { DesignationService } from '../../../core/services/designation';
+import { RoleService } from '../../../core/services/Deptrole';
 
 
 
@@ -37,6 +38,9 @@ export class EmployeeMasterList
   departmentMap: { [id: string]: string } = {};
   designationMap: { [id: string]: string } = {};
 
+  roles: { title: string; value: string }[] = [];
+  selectedRoles: string[] = ['Employee'];
+
   // =====================================
   // CONSTRUCTOR
   // =====================================
@@ -44,7 +48,8 @@ export class EmployeeMasterList
   constructor(private employeeService: EmployeeMasterService,
     private locationService: LocationMasterService,
     private departmentService: DepartmentService,
-    private designationService: DesignationService
+    private designationService: DesignationService,
+    private roleService: RoleService
   ) { }
 
   // =====================================
@@ -56,7 +61,8 @@ export class EmployeeMasterList
     this.getEmployees();
     this.loadLocations();
     this.loadDepartments();      
-    this.loadDesignations();     
+    this.loadDesignations();
+    this.loadRoles();   
   }
 
   loadDepartments(): void {
@@ -87,6 +93,17 @@ loadDesignations(): void {
   });
 }
 
+loadRoles(): void {
+  this.roleService.getRoles().subscribe({
+    next: (response: any[]) => {
+      this.roles = (response ?? []).map(r => ({
+        title: r.name ?? r.Name,
+        value: r.name ?? r.Name
+      }));
+    },
+    error: (error) => console.error('Role load error', error)
+  });
+}
 getDepartmentName(id: any): string {
   return this.departmentMap[String(id)] ?? '';
 }
@@ -149,26 +166,29 @@ getLocationName(code: string): string {
   // =====================================
   // OPEN EDIT POPUP
   // =====================================
+    openEditPopup(employee: any): void {
 
-  openEditPopup(employee: any): void {
-
-    this.selectedEmployee = {
-      ...employee
-    };
-
-    this.showModal = true;
-  }
+        // fetch the full record (includes selectedDepartments + roles from mappings)
+        this.employeeService.getEmployeeById(employee.id).subscribe({
+          next: (full: any) => {
+            this.selectedEmployee = { ...full };
+            this.showModal = true;
+          },
+          error: (err) => {
+            console.error('GetById error', err);
+            // fallback: open with the row data we already have
+            this.selectedEmployee = { ...employee };
+            this.showModal = true;
+          }
+        });
+      }
 
   // =====================================
   // CLOSE POPUP
   // =====================================
-
   closePopup(): void {
-
     this.showModal = false;
-
     this.selectedEmployee = null;
-
     this.getEmployees();
   }
 

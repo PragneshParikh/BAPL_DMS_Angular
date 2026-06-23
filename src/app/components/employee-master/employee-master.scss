@@ -99,3 +99,8 @@
   padding: 4px 10px;
 
 }
+
+.location-scroll.scrollable {
+  max-height: 110px;
+  overflow-y: auto;
+}

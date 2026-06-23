@@ -1,8 +1,4 @@
-import {
-  Component,
-  Input,
-  OnInit
-} from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -14,6 +10,8 @@ import { DealerService } from '../../core/services/dealer-service';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { DepartmentService } from '../../core/services/department';
 import { DesignationService } from '../../core/services/designation';
+import { RoleService } from '../../core/services/Deptrole';
+
 
 @Component({
   selector: 'app-employee-master',
@@ -23,9 +21,9 @@ import { DesignationService } from '../../core/services/designation';
   styleUrls: ['./employee-master.scss']
 })
 export class EmployeeMasterComponent implements OnInit {
-
   @Input() popupData: any;
   @Input() isPopupMode: boolean = false;
+  @Output() closed = new EventEmitter<void>();
 
   genders = Gender;
   employeeData: any = {};
@@ -39,7 +37,23 @@ export class EmployeeMasterComponent implements OnInit {
   designations: any[] = [];
   dealerInfo: any = null;
   dealerLocations: any[] = [];
+  selectedLocations: string[] = []; 
 
+  // ============================
+  // DEPARTMENT -> ROLES (cascading)
+  // ============================
+  departmentOptions: { id: string; name: string }[] = [];   // top-level checkboxes (DepartmentMaster)
+  selectedDepartments: string[] = [];                        // checked department names
+  allRoles: { name: string }[] = [];                         // all AspNetRoles
+  rolesByDepartment: { [dept: string]: { name: string }[] } = {};  // roles revealed per dept
+  selectedRoles: string[] = [];   
+  
+  // validation error messages
+  errors: { mobile?: string; pincode?: string; password?: string } = {};// checked role names (sent on save)
+
+  // =====================================
+  // CONSTRUCTOR
+  // =====================================
   constructor(
     private employeeService: EmployeeMasterService,
     private router: Router,
@@ -47,7 +61,8 @@ export class EmployeeMasterComponent implements OnInit {
     private dealerMasterService: DealerService,
     private locationService: LocationMasterService,
     private departmentService: DepartmentService,
-    private designationService: DesignationService
+    private designationService: DesignationService,
+    private roleService: RoleService
   ) { }
 
   ngOnInit(): void {
@@ -56,17 +71,17 @@ export class EmployeeMasterComponent implements OnInit {
     this.loadCities();
     this.loadDepartments();
     this.loadDesignations();
+    this.loadDepartmentOptions();   // department checkboxes
+    this.loadAllRoles();            // AspNet roles (filtered on department check)
 
     // =====================================
-    // POPUP / EDIT MODE
+    // POPUP EDIT MODE
     // =====================================
     if (this.popupData) {
 
-      this.isEditMode = true;                       // set FIRST so async callbacks see it
-
       this.employeeData = { ...this.popupData };
 
-      // normalise dropdown values to trimmed strings so they preselect
+      // make dropdown values match the string option values so they preselect
       this.employeeData.department =
         this.popupData.department != null ? String(this.popupData.department) : '';
 
@@ -78,11 +93,32 @@ export class EmployeeMasterComponent implements OnInit {
 
       this.employeeData.dateOfJoin = this.formatDate(this.popupData.dateOfJoin);
       this.imagePreview = this.popupData.profileImage;
+     // show login fields if this employee already has a login email
+      this.employeeData.createLogin = !!this.popupData.emailId;
+      this.selectedRoles = this.popupData.roles?.length ? [...this.popupData.roles] : [];
+      this.selectedDepartments = this.popupData.selectedDepartments?.length
+    ? [...this.popupData.selectedDepartments] : [];
+      this.selectedRoles = this.popupData.roles?.length
+        ? [...this.popupData.roles] : [];
+
+      this.selectedDepartments.forEach(dept => {
+        this.roleService.getByCategory(dept).subscribe({
+          next: (res: any[]) => {
+            this.rolesByDepartment[dept] = (res ?? []).map(r => ({ name: r.name ?? r.Name }));
+          },
+          error: () => { this.rolesByDepartment[dept] = []; }
+        });
+      });
 
       if (this.popupData.dealerCode) {
-        this.loadDealerInfo(this.popupData.dealerCode);                      // dealer status/info only
-        this.loadDealerLocations(this.popupData.dealerCode, this.employeeData.location); // options + preselect
+        this.loadDealerInfo(this.popupData.dealerCode);
+        this.loadDealerLocations(this.popupData.dealerCode);
       }
+    const savedLoc = this.popupData.locationCode;
+    this.selectedLocations = savedLoc
+      ? String(savedLoc).split(',').map((c: string) => c.trim()).filter(Boolean)
+      : [];
+      this.isEditMode = true;
 
       setTimeout(() => {
         this.onStateChange();
@@ -94,6 +130,7 @@ export class EmployeeMasterComponent implements OnInit {
     // ADD MODE — LOGGED-IN DEALER
     // =====================================
     else {
+      this.employeeData.createLogin = false;
       this.loadLoggedInDealer();
     }
   }
@@ -112,7 +149,7 @@ export class EmployeeMasterComponent implements OnInit {
   }
 
   // =====================================
-  // LOAD DEALER INFO BY CODE  (info only — does NOT load locations)
+  // LOAD DEALER INFO BY CODE (info only)
   // =====================================
   loadDealerInfo(dealerCode: string): void {
     this.dealerMasterService.getByDealerCode(dealerCode).subscribe({
@@ -122,10 +159,10 @@ export class EmployeeMasterComponent implements OnInit {
   }
 
   // =====================================
-  // LOAD LOGGED-IN DEALER (add mode)
+  // LOAD LOGGED-IN DEALER
   // =====================================
   loadLoggedInDealer(): void {
-    const dealerCode = localStorage.getItem('dealerCode');
+    const dealerCode = localStorage.getItem('dealerCode');   // e.g. "CUS0435"
     if (!dealerCode) return;
 
     this.employeeData.dealerCode = dealerCode;
@@ -142,10 +179,10 @@ export class EmployeeMasterComponent implements OnInit {
   }
 
   // =====================================
-  // LOAD DEALER LOCATIONS  (+ preselect saved location in edit)
+  // LOAD DEALER LOCATIONS
   // =====================================
-  loadDealerLocations(dealerCode: string, selectedCode?: string): void {
-    this.locationService.getLocationByDealerCode(dealerCode).subscribe({
+  loadDealerLocations(dealerCode: string): void {
+    this.locationService.getAllLocationByDealerCode(dealerCode).subscribe({
       next: (response: any[]) => {
 
         this.dealerLocations = (response ?? []).map(l => ({
@@ -153,16 +190,12 @@ export class EmployeeMasterComponent implements OnInit {
           locName: l.locName ?? l.locname ?? l.Locname ?? ''
         }));
 
-        // figure out which code should be selected (trimmed on both sides)
         const saved =
-          selectedCode != null
-            ? String(selectedCode).trim()
-            : (this.isEditMode && this.popupData?.locationCode != null
-                ? String(this.popupData.locationCode).trim()
-                : '');
+          this.isEditMode && this.popupData?.locationCode != null
+            ? String(this.popupData.locationCode).trim()
+            : '';
 
         if (saved) {
-          // defer so the <option> elements exist before we set the value
           setTimeout(() => {
             const match = this.dealerLocations.find(l => l.locCode === saved);
             this.employeeData.location = match ? match.locCode : '';
@@ -200,9 +233,185 @@ export class EmployeeMasterComponent implements OnInit {
   }
 
   // =====================================
+  // DEPARTMENT OPTIONS (top-level checkboxes)
+  // =====================================
+  loadDepartmentOptions(): void {
+    this.departmentService.get().subscribe({
+      next: (res: any[]) => {
+        this.departmentOptions = (res ?? [])
+          .filter(d => d.isActive)
+          .map(d => ({ id: String(d.departmentId), name: d.departmentName }));
+      },
+      error: (e) => console.error('Department options load error', e)
+    });
+  }
+
+  // =====================================
+  // ALL ROLES (from AspNetRoles)
+  // =====================================
+  loadAllRoles(): void {
+    this.roleService.getRoles().subscribe({
+      next: (res: any[]) => {
+        this.allRoles = (res ?? []).map(r => ({ name: r.name ?? r.Name }));
+      },
+      error: (e) => console.error('Role load error', e)
+    });
+  }
+
+  // =====================================
+  // DEPARTMENT CHECKBOX HELPERS
+  // =====================================
+  isDepartmentSelected(dept: string): boolean {
+    return this.selectedDepartments.includes(dept);
+  }
+
+  onDepartmentToggle(dept: string, event: any): void {
+  if (event.target.checked) {
+    if (!this.selectedDepartments.includes(dept)) this.selectedDepartments.push(dept);
+
+    // pull roles mapped to this category from RoleCategoryMapping
+    this.roleService.getByCategory(dept).subscribe({
+      next: (res: any[]) => {
+        this.rolesByDepartment[dept] = (res ?? []).map(r => ({ name: r.name ?? r.Name }));
+      },
+      error: () => { this.rolesByDepartment[dept] = []; }
+    });
+  } else {
+    this.selectedDepartments = this.selectedDepartments.filter(d => d !== dept);
+
+    const removed = (this.rolesByDepartment[dept] ?? []).map(r => r.name);
+    delete this.rolesByDepartment[dept];
+    this.selectedRoles = this.selectedRoles.filter(r => !removed.includes(r));
+  }
+}
+
+  // =====================================
+  // ROLE CHECKBOX HELPERS
+  // =====================================
+  isRoleSelected(role: string): boolean {
+    return this.selectedRoles.includes(role);
+  }
+
+  toggleRole(role: string, event: any): void {
+    if (event.target.checked) {
+      if (!this.selectedRoles.includes(role)) this.selectedRoles.push(role);
+    } else {
+      this.selectedRoles = this.selectedRoles.filter(r => r !== role);
+    }
+  }
+  onlyDigits(event: any, field: 'mobile' | 'pincode', maxLen: number): void {
+    let value = String(event.target.value || '').replace(/\D/g, '');  // remove non-digits
+    if (value.length > maxLen) {
+      value = value.slice(0, maxLen);
+    }
+    this.employeeData[field] = value;
+    event.target.value = value;   // keep the input box in sync
+  }
+  // =====================================
+  // VALIDATION
+  // =====================================
+  validateForm(): boolean {
+    this.errors = {};
+    let valid = true;
+
+    // Mobile: exactly 10 digits
+    const mobile = String(this.employeeData.mobile ?? '').trim();
+    if (!mobile) {
+      this.errors.mobile = 'Mobile number is required.';
+      valid = false;
+    } else if (!/^\d{10}$/.test(mobile)) {
+      this.errors.mobile = 'Mobile number must be exactly 10 digits.';
+      valid = false;
+    }
+
+    // Pincode: exactly 6 digits
+    const pincode = String(this.employeeData.pincode ?? '').trim();
+    if (!pincode) {
+      this.errors.pincode = 'Pincode is required.';
+      valid = false;
+    } else if (!/^\d{6}$/.test(pincode)) {
+      this.errors.pincode = 'Pincode must be exactly 6 digits.';
+      valid = false;
+    }
+
+    // Password: only when creating a login. Min 6, upper, lower, digit, special.
+    if (this.employeeData.createLogin) {
+      const pwd = String(this.employeeData.password ?? '');
+      const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/;
+      if (!strong.test(pwd)) {
+        this.errors.password =
+          'Password must be at least 6 characters and include uppercase, lowercase, a digit, and a special character.';
+        valid = false;
+      }
+    }
+
+    // If anything failed, show a single alert summarizing the issues
+    if (!valid) {
+      const messages = [
+        this.errors.mobile,
+        this.errors.pincode,
+        this.errors.password
+      ].filter(Boolean);
+
+      alert(messages.join('\n'));
+    }
+
+    return valid;
+  }
+
+  // true only when all required fields are filled and valid
+  get isFormValid(): boolean {
+    const d = this.employeeData;
+
+    // core required fields
+    const coreFilled =
+      !!d.firstName?.trim() &&
+      !!d.lastName?.trim() &&
+      !!d.gender &&
+      /^\d{10}$/.test(String(d.mobile ?? '')) &&
+      !!d.dateOfJoin &&
+      this.selectedLocations.length > 0 && 
+      !!d.department &&
+      !!d.designation &&
+      !!d.state &&
+      !!d.city &&
+      /^\d{6}$/.test(String(d.pincode ?? ''));
+
+    if (!coreFilled) return false;
+
+    // if creating a login: email, strong password, a category, and at least one role
+    if (d.createLogin) {
+      const strongPwd =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/.test(String(d.password ?? ''));
+
+      const emailOk = !!d.emailId?.trim();
+      const categoryOk = this.selectedDepartments.length > 0;   // at least one category checked
+      const roleOk = this.selectedRoles.length > 0;             // at least one role checked
+
+      if (!emailOk || !strongPwd || !categoryOk || !roleOk) return false;
+    }
+
+    return true;
+  }
+  // =====================================
   // SAVE / UPDATE
   // =====================================
   onSubmit(form: any): void {
+
+    // validate before building the payload (shows alert + inline messages)
+    if (!this.validateForm()) {
+      return;
+    }
+
+    // build category→role pairs from what's actually checked under each category
+    const roleMappings: { category: string; roleName: string }[] = [];
+    this.selectedDepartments.forEach(dept => {
+      (this.rolesByDepartment[dept] ?? []).forEach(r => {
+        if (this.selectedRoles.includes(r.name)) {
+          roleMappings.push({ category: dept, roleName: r.name });
+        }
+      });
+    });
 
     const employeeObj = {
       id: this.employeeData.id || 0,
@@ -211,8 +420,11 @@ export class EmployeeMasterComponent implements OnInit {
       lastName: this.employeeData.lastName,
       gender: this.employeeData.gender,
       mobile: this.employeeData.mobile,
-      emailId: this.employeeData.emailId,
-      password: this.employeeData.password,
+
+      // only send login credentials when "Create Login Account" is checked
+      emailId: this.employeeData.createLogin ? this.employeeData.emailId : null,
+      password: this.employeeData.createLogin ? this.employeeData.password : null,
+
       address: this.employeeData.address,
       state: Number(this.employeeData.state),
       city: Number(this.employeeData.city),
@@ -225,24 +437,57 @@ export class EmployeeMasterComponent implements OnInit {
       isActive: this.employeeData.isActive ?? true,
       profileImage: this.imagePreview as string,
       notes: this.employeeData.notes,
-      locationCode: this.employeeData.location,
+      locationCode: this.selectedLocations.join(','),              
+
       createdBy: 'admin',
       createdDate: new Date(),
       updatedBy: 'admin',
-      updatedDate: new Date()
+      updatedDate: new Date(),
+
+      // login toggle
+      createLogin: this.employeeData.createLogin ?? false,
+
+      // flat lists (still used to drive checkbox ticking on edit)
+      selectedDepartments: this.employeeData.createLogin ? this.selectedDepartments : [],
+      roles: this.employeeData.createLogin ? this.selectedRoles : [],
+
+      // exact category→role pairs (only the checked combinations)
+      roleMappings: this.employeeData.createLogin ? roleMappings : []
     };
 
     if (this.isEditMode) {
       this.employeeService.updateEmployee(employeeObj).subscribe({
-        next: () => { alert('Employee Updated Successfully'); }
+        next: () => {
+          alert('Employee Updated Successfully');
+          this.afterSave();
+        },
+        error: (err) => {
+          console.error('Update error', err);
+          alert('Failed to update employee');
+        }
       });
     } else {
       this.employeeService.saveEmployee(employeeObj).subscribe({
-        next: () => { alert('Employee Saved Successfully'); }
+        next: () => {
+          alert('Employee Saved Successfully');
+          this.afterSave();
+        },
+        error: (err) => {
+          console.error('Save error', err);
+          alert('Failed to save employee');
+        }
       });
     }
   }
 
+  // navigate to the list (or close the modal if used as a popup)
+  private afterSave(): void {
+    if (this.isPopupMode) {
+      this.closed.emit();
+    } else {
+      this.router.navigate(['/employee']);
+    }
+  }
   // =====================================
   // FILE SELECT
   // =====================================
@@ -256,7 +501,7 @@ export class EmployeeMasterComponent implements OnInit {
   }
 
   // =====================================
-  // LOAD DEPARTMENTS
+  // LOAD DEPARTMENTS (for the Department dropdown)
   // =====================================
   loadDepartments(): void {
     this.departmentService.get().subscribe({
@@ -300,15 +545,20 @@ export class EmployeeMasterComponent implements OnInit {
   // =====================================
   // BACK
   // =====================================
-  backToList(): void {
-    this.router.navigate(['/employee']);
+ backToList(): void {
+  if (this.isPopupMode) {
+    this.closed.emit();                  // edit modal: close it (list handles refresh)
+  } else {
+    this.router.navigate(['/employee']); // add page: navigate to list
   }
+}
 
   // =====================================
-  // GENERATE EMPLOYEE CODE
+  // AUTO EMPLOYEE CODE
   // =====================================
   generateEmployeeCode(dealerCode: string): void {
-    const baseCode = dealerCode;
+    const baseCode = dealerCode;   // pure dealer code, e.g. "CUS0435"
+
     this.employeeService.getEmployees().subscribe({
       next: (employees: any[]) => {
         let maxSeq = 0;
@@ -325,5 +575,38 @@ export class EmployeeMasterComponent implements OnInit {
       },
       error: (error) => console.error('Employee code generation error', error)
     });
+  }
+
+isLocationSelected(code: string): boolean {
+    return this.selectedLocations.includes(code);
+  }
+
+  onLocationToggle(code: string, event: any): void {
+    if (event.target.checked) {
+      if (!this.selectedLocations.includes(code)) this.selectedLocations.push(code);
+    } else {
+      this.selectedLocations = this.selectedLocations.filter(c => c !== code);
+    }
+  }
+
+  // SELECT ALL — true only when every location is checked
+  get allLocationsSelected(): boolean {
+    return this.dealerLocations.length > 0
+      && this.selectedLocations.length === this.dealerLocations.length;
+  }
+
+  // tri-state: some but not all checked (for the indeterminate dash)
+  get someLocationsSelected(): boolean {
+    return this.selectedLocations.length > 0 && !this.allLocationsSelected;
+  }
+
+  toggleAllLocations(event: any): void {
+    if (event.target.checked) {
+      // select every location
+      this.selectedLocations = this.dealerLocations.map(l => l.locCode);
+    } else {
+      // clear all
+      this.selectedLocations = [];
+    }
   }
 }
