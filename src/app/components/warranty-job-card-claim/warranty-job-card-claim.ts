@@ -1,0 +1,109 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { NgbModal,NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { LoaderService } from '../../core/services/loader';
+import { StorageService } from '../../core/services/storage';
+import { PrefixService } from '../../core/services/prefix';
+
+@Component({
+  selector: 'app-warranty-job-card-claim',
+  standalone:true,
+  imports: [FormsModule,CommonModule],
+  templateUrl: './warranty-job-card-claim.html',
+  styleUrl: './warranty-job-card-claim.scss',
+})
+export class WarrantyJobCardClaim implements OnInit {
+jobCardList: any[] = [];
+ WjobClaimprefix: string = '';
+
+jobSearch: any = {
+  jobNo: '',
+  rBillfromDate: '',
+  rBilltoDate: '',
+  locationId: ''
+};
+  claimNo: number = 0;
+  fromDate: string;
+  toDate: string;
+   constructor(
+  private loader : LoaderService,
+  private modalService : NgbModal,
+  private storageService : StorageService,
+  private prefixService : PrefixService
+) { }
+  ngOnInit(): void {
+
+     const today = new Date();
+
+    // Current month first date
+    const firstDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    );
+    const lastnintyDayeOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      90
+    )
+
+    this.fromDate = this.formatDate(lastnintyDayeOfMonth);
+    this.toDate = this.formatDate(today);
+
+    this.jobSearch.rBillfromDate = this.formatDate(firstDayOfMonth);
+    this.jobSearch.rBilltoDate = this.formatDate(today);
+
+    this.loadPrefix();
+    
+  }
+
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+   loadPrefix(): void {
+    this.loader.show();
+    const dealerCode = this.storageService.getDealerCode();
+    const module = 'wclaim_prefix';
+    this.prefixService.getPrefixByDealerByModule(dealerCode, module).subscribe({
+      next: (res: string) => {
+        this.loader.hide();
+        this.WjobClaimprefix = res;
+        this.claimNo = Number(res.split('/').pop());
+      }, error: (err) => {
+        this.loader.hide();
+        console.log(err);
+
+      }
+    })
+  }
+
+  openJobSearch(content: any) {
+
+  this.modalService.open(content, {
+    size: 'xl',
+    backdrop: 'static',
+    centered: true,
+    scrollable: true
+  });
+
+}
+//  selectJob(item: any, modal: any) {
+
+//   this.claimObj.jobNo = item.jobNo;
+
+//   this.claimObj.customerName = item.partyName;
+
+//   this.claimObj.chassisNo = item.chassisNo;
+
+//   this.claimObj.modelName = item.modelName;
+
+//   modal.close();
+// }
+
+}

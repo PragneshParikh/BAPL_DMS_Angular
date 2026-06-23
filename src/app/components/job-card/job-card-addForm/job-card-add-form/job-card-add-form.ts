@@ -6,7 +6,7 @@ import { StorageService } from '../../../../core/services/storage';
 import { LocationName } from '../../../../ViewModels/ReceiptEntryModel';
 import { JobCardService } from '../../../../core/services/job-card-service';
 import { selectLeadData } from '../../../../store/CRM/crm_selector';
-import { NgbModal, NgbTimepickerModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbModal, NgbTimepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { icons } from '../../../../core/data';
 import { Console, error, info } from 'console';
@@ -23,7 +23,7 @@ import { PrefixService } from '../../../../core/services/prefix';
 @Component({
   selector: 'app-job-card-add-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,NgbDropdownModule],
   templateUrl: './job-card-add-form.html',
   styleUrl: './job-card-add-form.scss',
 })
