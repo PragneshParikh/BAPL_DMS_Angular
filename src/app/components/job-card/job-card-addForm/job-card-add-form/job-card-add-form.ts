@@ -218,7 +218,7 @@ export class JobCardAddForm {
     this.complaintMasterService.getComplaintMasterList().subscribe({
       next: (res: any) => {
         this.complaintMasterList = res;
-        
+
       }
     });
   }
@@ -275,31 +275,31 @@ export class JobCardAddForm {
 
   onComplaintSearch(event: any): void {
 
-  const value = event.target.value?.trim().toLowerCase();
+    const value = event.target.value?.trim().toLowerCase();
 
-  // User ne typing start ki -> previous selection invalid
-  this.complaintObj.complaintId = 0;
+    // User ne typing start ki -> previous selection invalid
+    this.complaintObj.complaintId = 0;
 
-  if (!value) {
-    this.filteredComplaints = [];
-    this.showComplaintDropdown = false;
-    return;
+    if (!value) {
+      this.filteredComplaints = [];
+      this.showComplaintDropdown = false;
+      return;
+    }
+
+    this.filteredComplaints = this.complaintMasterList.filter(x =>
+      x.complaintName?.toLowerCase().includes(value)
+    );
+
+    this.showComplaintDropdown = this.filteredComplaints.length > 0;
   }
 
-  this.filteredComplaints = this.complaintMasterList.filter(x =>
-    x.complaintName?.toLowerCase().includes(value)
-  );
 
-  this.showComplaintDropdown = this.filteredComplaints.length > 0;
-}
-
- 
 
   selectComplaint(item: any): void {
-console.log("complaintmaster",item)
+    console.log("complaintmaster", item)
     this.complaintObj.complaintCode = item.complaintName;
     this.complaintObj.complaint = item.complaintName;
-     this.complaintObj.complaintId = item.id;
+    this.complaintObj.complaintId = item.id;
 
     this.filteredComplaints = [];
     this.showComplaintDropdown = false;
@@ -490,49 +490,88 @@ console.log("complaintmaster",item)
 
 
 
-  onChassisChange() {
+  // onChassisChange() {
 
-    if (!this.selectedChassis) return;
-    this.loadServiceHistory(this.selectedChassis);
+  //   if (!this.selectedChassis) return;
+  //   this.loadServiceHistory(this.selectedChassis);
 
-    const selected = this.chassisList.find(
-      x => x.chassisNumber == this.selectedChassis
-      //  use ==
-    );
+  //   const selected = this.chassisList.find(
+  //     x => x.chassisNumber == this.selectedChassis
+  //     //  use ==
+  //   );
 
-    if (!selected) return;
+  //   if (!selected) return;
 
-    // ALWAYS FILL (EDIT + ADD)
-    this.invoiceNo = selected.invoiceNo;
-    this.couponNo = this.selectedChassis.slice(-13);
-    this.customerObj.customerLedgerId = selected.customerLedgerId;
-    this.customerObj.customerName = selected.customerName;
-    this.customerObj.customerMobile = selected.customerMobile;
-    this.customerObj.customerAltMobile = selected.customerAltMobile;
+  //   // ALWAYS FILL (EDIT + ADD)
+  //   this.invoiceNo = selected.invoiceNo;
+  //   this.couponNo = this.selectedChassis.slice(-13);
+  //   this.customerObj.customerLedgerId = selected.customerLedgerId;
+  //   this.customerObj.customerName = selected.customerName;
+  //   this.customerObj.customerMobile = selected.customerMobile;
+  //   this.customerObj.customerAltMobile = selected.customerAltMobile;
 
-    this.modelName = selected.modelName;
-    this.registerNo = selected.registerNo;
+  //   this.modelName = selected.modelName;
+  //   this.registerNo = selected.registerNo;
 
-    this.batteryCapacity = selected.batteryCapacity;
-    this.batteryMake = selected.batteryMake;
-    this.batteryChemestry = selected.batteryChemestry;
-    this.batteryNumber = selected.batteryNumber;
+  //   this.batteryCapacity = selected.batteryCapacity;
+  //   this.batteryMake = selected.batteryMake;
+  //   this.batteryChemestry = selected.batteryChemestry;
+  //   this.batteryNumber = selected.batteryNumber;
 
-    this.motorNo = selected.motorNo;
-    this.controllerNo = selected.controllerNo;
-    this.converterNo = selected.converterNo;
-    this.chargerNumber = selected.chargerNumber;
+  //   this.motorNo = selected.motorNo;
+  //   this.controllerNo = selected.controllerNo;
+  //   this.converterNo = selected.converterNo;
+  //   this.chargerNumber = selected.chargerNumber;
 
-    this.odoReading = selected.odoReading;
-    this.duration = selected.duration;
-    this.durationType = selected.durationType;
-    this.expireWarrentyDate = selected.expireWarrentyDate;
-    this.oemModelId = selected.oemModelId;
-    if (this.oemModelId) {
-      this.loadPdiData(this.oemModelId);
-    }
+  //   this.odoReading = selected.odoReading;
+  //   this.duration = selected.duration;
+  //   this.durationType = selected.durationType;
+  //   this.expireWarrentyDate = selected.expireWarrentyDate;
+  //   this.oemModelId = selected.oemModelId;
+  //   if (this.oemModelId) {
+  //     this.loadPdiData(this.oemModelId);
+  //   }
+  // }
+onChassisChange() {
+  if (!this.selectedChassis) return;
+  this.loadServiceHistory(this.selectedChassis);
+
+  const selected = this.chassisList.find(
+    x => x.chassisNumber == this.selectedChassis
+  );
+
+  if (!selected) return;
+
+  this.invoiceNo                     = selected.invoiceNo;
+  this.couponNo                      = this.selectedChassis.slice(-13);
+  this.customerObj.customerLedgerId  = selected.customerLedgerId;
+  this.customerObj.customerName      = selected.customerName;
+  this.customerObj.customerMobile    = selected.customerMobile;
+  this.customerObj.customerAltMobile = selected.customerAltMobile;
+
+  // Model + Colour combined
+  this.modelName = selected.modelName
+    + (selected.colourName ? ' (' + selected.colourName + ')' : '');
+
+  this.registerNo         = selected.registerNo;
+  this.batteryCapacity    = selected.batteryCapacity;
+  this.batteryMake        = selected.batteryMake;
+  this.batteryChemestry   = selected.batteryChemestry;
+  this.batteryNumber      = selected.batteryNumber;
+  this.motorNo            = selected.motorNo;
+  this.controllerNo       = selected.controllerNo;
+  this.converterNo        = selected.converterNo;
+  this.chargerNumber      = selected.chargerNumber;
+  this.odoReading         = selected.odoReading;
+  this.duration           = selected.duration;
+  this.durationType       = selected.durationType;
+  this.expireWarrentyDate = selected.expireWarrentyDate;
+  this.oemModelId         = selected.oemModelId;
+
+  if (this.oemModelId) {
+    this.loadPdiData(this.oemModelId);
   }
-
+}
   // PDiChecklist popup
   openPdiModal(content: any) {
 
@@ -602,35 +641,35 @@ console.log("complaintmaster",item)
   // add complain section 
   addComplaint() {
 
-  if (!this.complaintObj.customerVoice || !this.complaintObj.complaint) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Validation',
-      text: 'Please fill required fields',
-      width: '300px'
-    });
-    return;
+    if (!this.complaintObj.customerVoice || !this.complaintObj.complaint) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation',
+        text: 'Please fill required fields',
+        width: '300px'
+      });
+      return;
+    }
+
+    // Complaint Code Validation
+    if (!this.complaintObj.complaintId) {
+      this.toastr.show('Please select a valid Complaint Code from dropdown', {
+        classname: 'bg-warning text-white',
+        delay: 2000
+      });
+      return;
+    }
+
+    this.complaintList.push({ ...this.complaintObj });
+
+    // Reset fields
+    this.complaintObj = {
+      customerVoice: '',
+      complaintCode: '',
+      complaintId: 0,
+      complaint: ''
+    };
   }
-
-  // Complaint Code Validation
-  if (!this.complaintObj.complaintId) {
-    this.toastr.show('Please select a valid Complaint Code from dropdown', {
-           classname: 'bg-warning text-white',
-            delay: 2000
-          });
-    return;
-  }
-
-  this.complaintList.push({ ...this.complaintObj });
-
-  // Reset fields
-  this.complaintObj = {
-    customerVoice: '',
-    complaintCode: '',
-    complaintId: 0,
-    complaint: ''
-  };
-}
   deleteComplaint(index: number) {
     this.complaintList.splice(index, 1);
   }
@@ -658,7 +697,7 @@ console.log("complaintmaster",item)
   saveJobCard() {
     debugger
     //  VALIDATION (recommended)
-    if (!this.isPdiSaved) {
+    if (this.selectedJobtype == 1 && !this.isPdiSaved) {
       Swal.fire('Error', 'Please complete PDI first', 'error');
       return;
     }

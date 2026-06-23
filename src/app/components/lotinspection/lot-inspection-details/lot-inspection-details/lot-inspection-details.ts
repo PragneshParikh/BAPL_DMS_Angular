@@ -29,6 +29,7 @@ export class LotInspectionDetails implements OnInit {
   selectedPlastingcover: string = '';
   selectedSupervisor: string = '';
   router: any;
+  isLotInspected: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -48,8 +49,7 @@ export class LotInspectionDetails implements OnInit {
       if (this.invoiceNo) {
         this.getInvoiceData();
       } else {
-        console.log('error')
-        //this.loader.hide(); // important if no invoiceNo
+        console.error('error')
       }
     });
   }
@@ -60,7 +60,6 @@ export class LotInspectionDetails implements OnInit {
       next: (data: any[]) => {
         // only Workshop (id = 2)
         this.locations = data.filter(x => x.locareadidNo === 2);
-        //console.log("Workshop Locations", this.locations);
       },
       error: (err) => {
         console.error('Error fetching locations', err);
@@ -70,26 +69,20 @@ export class LotInspectionDetails implements OnInit {
   onLocationChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedLocation = target.value;
-
-    console.log('Selected Location:', this.selectedLocation);
   }
+
   onvehiclefasteringcoverChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedvehiclefasteringcover = target.value;
-
-    console.log('Selected vehcilefasteringcover:', this.selectedvehiclefasteringcover);
   }
   onPlastingCoverChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedPlastingcover = target.value;
-
-    console.log('Selected Plastingcover:', this.selectedPlastingcover);
   }
+
   onSupervicsorChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedSupervisor = target.value;
-
-    console.log('Selected Supervisor:', this.selectedSupervisor);
   }
 
   // ================= GET DATA =================
@@ -108,7 +101,9 @@ export class LotInspectionDetails implements OnInit {
     this.lotInspectionDetailservice.getAllDetailsByInvoice(this.invoiceNo).subscribe({
       next: (res: any) => {
 
-        if (res?.data?.length) {
+        if (res?.data?.length > 0) {
+
+          this.isLotInspected = res?.data[0]?.isLotInspected;
 
           const first = res.data[0];
 
@@ -164,8 +159,6 @@ export class LotInspectionDetails implements OnInit {
             preview: null
           }));
           //this.loader.hide();
-          console.log("Header:", this.headerObj);
-          console.log("Details:", this.detailList);
         }
         setTimeout(() => {
           this.loader.hide();
@@ -265,6 +258,7 @@ export class LotInspectionDetails implements OnInit {
           classname: 'bg-success text-white',
           delay: 3000
         });
+        this.router.navigate(['/lotinspection']);
       },
       error: (err) => {
         console.error(err);

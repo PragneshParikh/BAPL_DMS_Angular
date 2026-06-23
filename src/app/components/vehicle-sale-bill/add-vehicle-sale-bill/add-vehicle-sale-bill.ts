@@ -192,9 +192,6 @@ export class AddVehicleSaleBill implements OnInit {
     }
   }
 
-
-
-
   ngOnInit(): void {
 
     this.model.customerType = 'B2C';
@@ -952,7 +949,7 @@ console.log(this.locations);
   getParties() {
     const dealerCode = this.storageService.getDealerCode();
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-    this.ledgerService.getLedgerForSale(dealerCode, this.isSuperAdmin).subscribe({
+    this.ledgerService.getLedgerForSale(dealerCode, true).subscribe({
       next: (res) => {
         if (this.model.isD2D) {
           console.log(res);
