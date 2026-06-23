@@ -6,83 +6,90 @@
     <div class="d-flex align-items-center gap-2">
 
       <!-- Service History Dropdown -->
-      <div class="dropdown">
-        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-          Service History
-        </button>
+    <div ngbDropdown class="d-inline-block">
 
-        <div class="dropdown-menu p-2 shadow-lg" style="min-width: 800px;" (click)="$event.stopPropagation()">
+  <button
+    class="btn btn-primary btn-sm"
+    ngbDropdownToggle>
+    Service History
+  </button>
 
-          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-            <table class="table table-bordered table-sm mb-0">
+  <div
+    ngbDropdownMenu
+    class="p-2 shadow-lg"
+    style="min-width: 900px;">
 
-              <thead class="table-light">
-                <tr>
-                  <th>Sr.No</th>
-                  <th>Service Head</th>
-                  <th>Service Type</th>
-                  <th>Service Seq</th>
-                  <th>Due Date</th>
-                  <th>Status</th>
-                  <th>Dealer Name</th>
-                  <th>Claim Date</th>
-                </tr>
-              </thead>
+    <div class="table-responsive service-history-table">
 
-              <tbody>
+      <table class="table table-bordered table-sm mb-0">
 
-                <!--  Dynamic Data -->
-                <tr *ngFor="let item of serviceHistoryList; let i = index">
-                  <td>{{ i + 1 }}</td>
-                  <td>{{ item.serviceHead }}</td>
-                  <td>{{ item.serviceType }}</td>
-                  <td>{{ item.serviceseq }}</td>
+        <thead class="table-light sticky-top">
+          <tr>
+            <th>Sr.No</th>
+            <th>Service Head</th>
+            <th>Service Type</th>
+            <th>Service Seq</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th>Dealer Name</th>
+            <th>Claim Date</th>
+          </tr>
+        </thead>
 
-                  <!-- Date Format -->
-                  <td>{{ item.dueDate | date:'dd/MM/yyyy' }}</td>
+        <tbody>
 
-                  <!-- Status Badge -->
-                  <td>
-                    <span class="badge" [ngClass]="{
-              'bg-primary':item.serviceStatus === 'Pending',       
-              'bg-success': item.serviceStatus === 'Availed',
-              'bg-warning text-dark': item.serviceStatus === 'Due',
-              'bg-danger': item.serviceStatus === 'Overdue'
-            }">
-                      {{ item.serviceStatus }}
-                    </span>
-                  </td>
+          <tr *ngFor="let item of serviceHistoryList; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.serviceHead }}</td>
+            <td>{{ item.serviceType }}</td>
+            <td>{{ item.serviceseq }}</td>
 
-                  <td>{{ item.dealerName }}</td>
-                  <td>{{ item.claimDate | date:'dd/MM/yyyy' }}</td>
-                </tr>
+            <td>{{ item.dueDate | date:'dd/MM/yyyy' }}</td>
 
-                <!--  No Data -->
-                <tr *ngIf="serviceHistoryList.length === 0">
-                  <td colspan="8" class="text-center text-muted">
-                    No service history available
-                  </td>
-                </tr>
+            <td>
+              <span class="badge"
+                [ngClass]="{
+                  'bg-primary': item.serviceStatus === 'Pending',
+                  'bg-success': item.serviceStatus === 'Availed',
+                  'bg-warning text-dark': item.serviceStatus === 'Due',
+                  'bg-danger': item.serviceStatus === 'Overdue'
+                }">
+                {{ item.serviceStatus }}
+              </span>
+            </td>
 
-              </tbody>
-            </table>
-          </div>
+            <td>{{ item.dealerName }}</td>
+            <td>{{ item.claimDate | date:'dd/MM/yyyy' }}</td>
+          </tr>
 
-        </div>
-      </div>
+          <tr *ngIf="serviceHistoryList.length === 0">
+            <td colspan="8" class="text-center text-muted">
+              No service history available
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
 
       <!-- Job Done Dropdown -->
-      <div class="dropdown">
-        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+      <div ngbDropdown class="d-inline-block">
+        <button type="button" class="btn btn-primary btn-sm" ngbDropdownToggle>
           Job Done
         </button>
 
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item">Today's(10)</a></li>
-          <li><a class="dropdown-item">This Month(20)</a></li>
-          <li><a class="dropdown-item">Last Month(30)</a></li>
-          <li><a class="dropdown-item">Total(60)</a></li>
-        </ul>
+        <div ngbDropdownMenu>
+          <button ngbDropdownItem>Today's (10)</button>
+          <button ngbDropdownItem>This Month (20)</button>
+          <button ngbDropdownItem>Last Month (30)</button>
+          <button ngbDropdownItem>Total (60)</button>
+        </div>
       </div>
       <div>
         <button class="btn btn-primary btn-sm" type="button" [disabled]="!isEditMode" (click)="goToFFIR()">
