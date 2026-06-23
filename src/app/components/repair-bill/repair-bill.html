@@ -5,22 +5,28 @@
         <div class="card-header">
             <h6 class="mb-0">Repair Bill [GST]</h6>
             <div class="text-white py-2 d-flex justify-content-end">
-                <div class="btn-group gap-2 me-3" ngbDropdown>
-                    <button class="btn btn-primary btn-sm gap-2 dropdown-toggle" type="button" ngbDropdownToggle>
+                <div ngbDropdown class="d-inline-block me-3">
+
+                    <button type="button" class="btn btn-primary btn-sm" ngbDropdownToggle>
                         <i class="ri-printer-line"></i>
                     </button>
 
-                    <div class="dropdown-menu" ngbDropdownMenu>
-                        <button class="dropdown-item" ngbDropdownItem (click)="printPerforma()">
+                    <div ngbDropdownMenu>
+
+                        <button ngbDropdownItem type="button" (click)="printPerforma()">
+
                             <i class="ri-file-text-line me-2"></i>
                             Performa Print
                         </button>
 
-                        <button class="dropdown-item" ngbDropdownItem (click)="printInvoice()">
+                        <button ngbDropdownItem type="button" (click)="printInvoice()">
+
                             <i class="ri-bill-line me-2"></i>
                             Invoice Print
                         </button>
+
                     </div>
+
                 </div>
 
                 <button class="btn btn-light btn-sm" (click)="onNavigate()">

@@ -57,6 +57,7 @@ import { VehicleStockTransferList } from './components/vehicle-stock-transfer/ve
 import { GroupMaster } from './components/group-master/group-master';
 import { TermConditionMaster } from './components/term-condition-master/term-condition-master';
 import { OccupationMaster } from './components/occupation-master/occupation-master';
+import { VehicleInfoUpdate } from './components/vehicle-info-update/vehicle-info-update';
 import { DepartmentMasterList } from './components/department-master/department-master-list/department-master-list';
 import { DepartmentMaster } from './components/department-master/department-master';
 import { DesignationMasterList } from './components/designation-master/designation-master-list/designation-master-list';
@@ -65,6 +66,7 @@ import { JobTypeMaster } from './components/job-type-master/job-type-master';
 import { ServiceHeadMaster } from './components/service-head-master/service-head-master';
 import { ServiceTypeMaster } from './components/service-type-master/service-type-master';
 import { JobSourceMaster } from './components/job-source-master/job-source-master';
+import { WarrantyJobCardClaim } from './components/warranty-job-card-claim/warranty-job-card-claim';
 
 
 export const routes: Routes = [
@@ -216,6 +218,8 @@ export const routes: Routes = [
       { path: 'service-head-master', component: ServiceHeadMaster, data: [69] },
       { path: 'service-type-master', component: ServiceTypeMaster, data: [70] },
       { path: 'job-source-master', component: JobSourceMaster, data: [71] },
+      { path: 'warranty-job-card-claim', component: WarrantyJobCardClaim, data: [74] },
+      { path: 'vehicle-info', component: VehicleInfoUpdate, data: [73] },
     ]
   },
   { path: '**', component: WorkInProgress }
