@@ -1,0 +1,58 @@
+/* Filter always visible */
+.sticky-filter {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #fff;
+}
+
+/* Scroll only table area */
+.table-scroll-container {
+    height: calc(100vh - 220px); /* adjust as needed */
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+/* Keep table header visible while scrolling */
+.sticky-header th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #f8f9fa;
+}
+
+/* Optional: compact row height */
+.table td,
+.table th {
+    vertical-align: middle;
+    padding: 4px 6px;
+}
+
+.insurance-dropdown-container {
+  position: relative;
+}
+
+.insurance-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+
+  background: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+
+  z-index: 999999;
+
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdown-item {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: #f5f5f5;
+}
