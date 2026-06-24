@@ -19,7 +19,6 @@ import { JobCardService } from '../../core/services/job-card-service';
 export class WarrantyJobCardClaim implements OnInit {
   jobCardList: any[] = [];
   WjobClaimprefix: string = '';
-  isPrevYear: boolean = false;
   supplierList: any[] = [];
   selectedSupplierId: number | null = null;
   selectedLocationId: number | null = null;

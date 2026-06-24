@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { LotInspectionUpdate, Header, Detail } from '../../../../ViewModels/LotInspectionViewModel';
 import { LotInspectionDetailsService } from '../../../../core/services/lot-inspection-details-service';
 import { StorageService } from '../../../../core/services/storage';
@@ -28,7 +29,7 @@ export class LotInspectionDetails implements OnInit {
   selectedvehiclefasteringcover: string = '';
   selectedPlastingcover: string = '';
   selectedSupervisor: string = '';
-  router: any;
+  
   isLotInspected: any;
 
   constructor(
@@ -37,6 +38,7 @@ export class LotInspectionDetails implements OnInit {
     private locationService: LocationMasterService,
     public toaster: ToastService,
     private loader: LoaderService,
+    private router: Router,
     private storageService: StorageService
   ) { }
 
@@ -176,7 +178,7 @@ export class LotInspectionDetails implements OnInit {
 
   // ================= SAVE DATA =================
   saveData() {
-
+debugger;
     // VALIDATION FIRST
     const invalidRows = this.detailList.filter(x => !x.vehicleStatus || x.vehicleStatus === '');
 
