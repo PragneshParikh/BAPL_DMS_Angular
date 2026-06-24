@@ -78,6 +78,9 @@ export class JobCardService {
     return this.httpClient.put(`${this.baseUrl}/JobCard/UpdateJobCardDetails`, data);
   }
 
+    getJobCardForPrint(jobId: number): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardForPrint/${jobId}`);
+  }
   getFilterdDataByPaged(fromDate: Date | null, toDate: Date | null, jobNo: number | null, manualJobNo: number | null, pageIndex: number, pageSize: number): Observable<any> {
 
     const params = {

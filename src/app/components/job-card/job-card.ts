@@ -346,20 +346,30 @@ export class JobCard {
   // }
 
 printJobCard(item: any): void {
-  const html = this.buildInvoiceHtml(item);
-  const win = window.open('', '_blank', 'width=900,height=650');
-  if (!win) {
-    Swal.fire('Popup blocked', 'Please allow popups to print the invoice.', 'warning');
+  const jobId = item?.jobCardHeader?.id;
+  if (!jobId) {
+    Swal.fire('Error', 'Job card id not found for printing.', 'error');
     return;
   }
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  win.onload = () => {
-    win.print();
-    // win.close(); // uncomment to auto-close after printing
-  };
+  this.jobCardService.getJobCardForPrint(jobId).subscribe({
+    next: (data: any) => {
+      const html = this.buildInvoiceHtml(data);
+      const win = window.open('', '_blank', 'width=900,height=650');
+      if (!win) {
+        Swal.fire('Popup blocked', 'Please allow popups to print the invoice.', 'warning');
+        return;
+      }
+      win.document.open();
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      win.onload = () => win.print();
+    },
+    error: (err) => {
+      console.error(err);
+      Swal.fire('Error', 'Failed to load job card for printing.', 'error');
+    }
+  });
 }
 
 private fmtDate(d: any): string {
@@ -368,48 +378,49 @@ private fmtDate(d: any): string {
   return isNaN(dt.getTime()) ? '-' : dt.toLocaleDateString('en-GB');
 }
 
-private buildInvoiceHtml(item: any): string {
+private buildInvoiceHtml(d: any): string {
 
-  /* ── DB source objects ─────────────────────────────────── */
-  const h  = item.jobCardHeader   ?? {};
-  const c  = item.jobCardCustomer ?? {};
-  const b  = item.jobCardBattery  ?? {};
-  const complaints: any[] = item.jobCardComplaint ?? [];
+  /* ── source objects ───────────────────────────────────── */
+  const b = d.battery ?? {};
+  const complaints: any[] = d.complaints ?? [];
 
-  /* ── Customer (LedgerMaster party* → fallback jobCardCustomer) ── */
-  const customerName   = item.partyName     ?? c.customerName   ?? '-';
-  const customerMobile = item.partyMobileNo ?? c.customerMobile ?? '-';
-  const altMobile      = c.customerAltMobile ?? '-';
-  const address        = item.partyAddress  ?? '';
-  const city           = item.partyCity     ?? '-';
-  const pin            = item.partyPin      ?? '';
-  const state          = item.partyState    ?? '-';
-  const gstNo          = item.partyGstNo    ?? '-';
-  const cityPin        = pin ? `${city} - ${pin}` : city;
+  /* ── helpers ──────────────────────────────────────────── */
+  const fd   = (x: any) => this.fmtDate(x);
+  const dash = (v: any) =>
+    (v !== null && v !== undefined && String(v).trim() !== '') ? String(v) : '-';
 
-  /* ── Vehicle ──────────────────────────────────────────── */
-  const modelName    = c.modelName        ?? item.oemModelName ?? '-';
-  const colour       = item.colour        ?? c.colourName      ?? '-';
-  const oemModel     = item.oemModelName  ?? '-';
-  const modelDisplay = (colour && colour !== '-') ? `${modelName} (${colour})` : modelName;
-  const chassisNo    = c.chassisNo        ?? h.chassisno       ?? '-';
-  const batteryNo    = c.batteryNo        ?? b.batterySerialNo ?? '-';
-  const chargerNo    = b.chargerNo        ?? '-';
-  const controllerNo = b.controllerNo     ?? '-';
-  const registerNo   = c.registerNo       ?? '-';
+  /* ── customer ─────────────────────────────────────────── */
+  const customerName   = dash(d.customerName);
+  const customerMobile = dash(d.customerMobile);
+  const altMobile      = dash(d.customerAltMobile);
+  const address        = d.address ?? '';
+  const city           = d.city ?? '';
+  const pin            = d.pincode ?? '';
+  const state          = dash(d.state);
+  const gstNo          = dash(d.gstNo);
+  const cityPin        = pin ? `${city || '-'} - ${pin}` : (city || '-');
 
-  /* ── Helpers ──────────────────────────────────────────── */
-  const fd   = (d: any)  => this.fmtDate(d);
-  const dash = (v: any)  => (v !== null && v !== undefined && String(v).trim() !== '') ? String(v) : '-';
+  /* ── vehicle ──────────────────────────────────────────── */
+  const modelName    = d.modelName    ?? '-';
+  const colour       = dash(d.colour);
+  const oemModel     = dash(d.oemModelName);
+  const modelDisplay = (colour && colour !== '-')
+    ? `${modelName} (${colour})` : modelName;
+  const chassisNo    = dash(d.chassisNo);
+  const batteryNo    = dash(b.batterySerialNo);
+  const chargerNo    = dash(b.chargerNo);
+  const controllerNo = dash(b.controllerNo);
+  const registerNo   = dash(d.registerNo);
+  const remarks      = dash(d.remarks);
 
-  /* ── Complaint rows (job card only) ──────────────────────────────────── */
+  /* ── complaint rows ───────────────────────────────────── */
   const complaintRows = complaints.length
     ? complaints.map((x: any, i: number) => `
         <tr>
           <td class="tc">${i + 1}</td>
-          <td>${x.customerVoice ?? '-'}</td>
-          <td>${x.complaintCode ?? '-'}</td>
-          <td>${x.complaint     ?? '-'}</td>
+          <td>${x.customerVoice  ?? '-'}</td>
+          <td>${x.complaintCode  ?? '-'}</td>
+          <td>${x.complaint      ?? '-'}</td>
         </tr>`).join('')
     : `<tr><td colspan="4" class="tc muted">No complaints recorded</td></tr>`;
 
@@ -420,7 +431,7 @@ private buildInvoiceHtml(item: any): string {
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Job Card – ${h.invoiceNo ?? ''}</title>
+<title>Job Card – ${d.invoiceNo ?? ''}</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -441,17 +452,38 @@ body{
   padding-bottom:7px;
   margin-bottom:8px;
 }
-.co-name{font-size:15px;font-weight:bold;color:#1a4f8b;letter-spacing:.2px}
+.co-name{
+  font-size:15px;
+  font-weight:bold;
+  color:#1a4f8b;
+  letter-spacing:.2px;
+}
 .co-sub{font-size:9px;color:#555;margin-top:3px}
 .doc-right{text-align:right}
-.doc-title{font-size:15px;font-weight:bold;color:#1a4f8b;letter-spacing:.5px;margin-bottom:5px}
-.doc-right table{margin-left:auto;border-collapse:collapse;font-size:9.5px;color:#333}
+.doc-title{
+  font-size:15px;
+  font-weight:bold;
+  color:#1a4f8b;
+  letter-spacing:.5px;
+  margin-bottom:5px;
+}
+.doc-right table{
+  margin-left:auto;
+  border-collapse:collapse;
+  font-size:9.5px;
+  color:#333;
+}
 .doc-right td{padding:1.5px 3px}
 .doc-right td.lbl{color:#666;text-align:right;padding-right:5px}
 .doc-right td.val{font-weight:bold}
 
 /* ── Section ──────────────────────────────────────── */
-.sec{border:1px solid #c8c8c8;border-radius:2px;margin-bottom:6px;page-break-inside:avoid}
+.sec{
+  border:1px solid #c8c8c8;
+  border-radius:2px;
+  margin-bottom:6px;
+  page-break-inside:avoid;
+}
 .sec-title{
   background:#1a4f8b;
   color:#fff;
@@ -463,16 +495,32 @@ body{
 }
 
 /* ── Side-by-side row ─────────────────────────────── */
-.row2{display:flex;gap:6px;margin-bottom:6px}
-.row2>.sec{flex:1;margin-bottom:0}
+.row2{
+  display:flex;
+  gap:6px;
+  margin-bottom:6px;
+}
+.row2>.sec{
+  flex:1;
+  margin-bottom:0;
+}
 
 /* ── KV table ─────────────────────────────────────── */
 .kv{width:100%;border-collapse:collapse}
 .kv tr{border-bottom:1px solid #eaeaea}
 .kv tr:last-child{border-bottom:none}
 .kv td{padding:3.5px 8px;vertical-align:top;line-height:1.45}
-.kv td.k{width:46%;font-size:9px;color:#555;white-space:nowrap}
-.kv td.v{font-size:10px;font-weight:bold;word-break:break-word}
+.kv td.k{
+  width:46%;
+  font-size:9px;
+  color:#555;
+  white-space:nowrap;
+}
+.kv td.v{
+  font-size:10px;
+  font-weight:bold;
+  word-break:break-word;
+}
 
 /* ── Two-column split inside one section ─────────── */
 .split{display:flex}
@@ -483,147 +531,259 @@ body{
 .cpl{width:100%;border-collapse:collapse;font-size:10px}
 .cpl thead tr{background:#eef2f9}
 .cpl th{
-  padding:5px 8px;text-align:left;
-  font-size:8.5px;font-weight:bold;color:#1a4f8b;
-  border-bottom:1px solid #c8c8c8;white-space:nowrap
+  padding:5px 8px;
+  text-align:left;
+  font-size:8.5px;
+  font-weight:bold;
+  color:#1a4f8b;
+  border-bottom:1px solid #c8c8c8;
+  white-space:nowrap;
 }
-.cpl td{padding:4.5px 8px;border-bottom:1px solid #eaeaea;vertical-align:top;line-height:1.4}
+.cpl td{
+  padding:4.5px 8px;
+  border-bottom:1px solid #eaeaea;
+  vertical-align:top;
+  line-height:1.4;
+}
 .cpl tbody tr:last-child td{border-bottom:none}
 
 /* ── Observation strip ────────────────────────────── */
 .obs-strip{
-  border:1px solid #c8c8c8;border-radius:2px;
-  padding:6px 10px;margin-bottom:6px;
-  font-size:10px;line-height:1.65;
-  display:flex;gap:20px;flex-wrap:wrap;
+  border:1px solid #c8c8c8;
+  border-radius:2px;
+  padding:0;
+  margin-bottom:6px;
+  display:flex;
+  page-break-inside:avoid;
 }
-.obs-item{flex:1;min-width:160px}
+.obs-item{
+  flex:1;
+  padding:6px 10px;
+  border-right:1px solid #e0e0e0;
+}
+.obs-item:last-child{border-right:none}
 .obs-lbl{
-  display:block;font-size:8px;font-weight:bold;
-  color:#1a4f8b;text-transform:uppercase;
-  letter-spacing:.5px;margin-bottom:2px;
+  display:block;
+  font-size:8px;
+  font-weight:bold;
+  color:#fff;
+  background:#1a4f8b;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  padding:3px 6px;
+  margin:-6px -10px 6px -10px;
 }
-.obs-val{font-size:10px}
+.obs-val{
+  font-size:10px;
+  line-height:1.5;
+  min-height:28px;
+  display:block;
+}
 
 /* ── Signatures ───────────────────────────────────── */
-.sigs{display:flex;justify-content:space-around;margin-top:28px}
+.sigs{
+  display:flex;
+  justify-content:space-around;
+  align-items:flex-end;
+  margin-top:24px;
+  margin-bottom:10px;
+  padding:0 20px;
+  page-break-inside:avoid;
+}
 .sig{
-  width:28%;text-align:center;font-size:9px;
-  color:#333;border-top:1px solid #333;padding-top:6px;
+  width:28%;
+  text-align:center;
+}
+.sig-space{height:40px}
+.sig-line{border-top:1px solid #333;margin:0 10px}
+.sig-label{
+  font-size:9px;
+  color:#333;
+  padding-top:5px;
+  font-weight:bold;
+  letter-spacing:.3px;
 }
 
 /* ── Utility ──────────────────────────────────────── */
 .tc   {text-align:center}
 .muted{color:#999;font-style:italic}
 
-/* ── Gate pass — matches download.pdf exactly ─────── */
-/* Dotted separator → centered "Gate Pass" heading → compact 2-col field rows */
-.gp-separator{
-  border:none;
-  border-top:1.5px dotted #555;
-  margin:20px 0 0;
+/* ══════════════════════════════════════════════════
+   TEAR LINE
+══════════════════════════════════════════════════ */
+.tear-line{
+  display:flex;
+  align-items:center;
+  margin:14px 0;
+  gap:8px;
+  page-break-inside:avoid;
+}
+.tear-line-border{
+  flex:1;
+  border-top:1.5px dashed #888;
+}
+.tear-line-label{
+  font-size:8.5px;
+  color:#888;
+  white-space:nowrap;
+  letter-spacing:.5px;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.tear-scissors{
+  font-size:12px;
+  color:#888;
+  transform:rotate(90deg);
+  display:inline-block;
+}
+
+/* ══════════════════════════════════════════════════
+   GATE PASS
+══════════════════════════════════════════════════ */
+.gp-section{
+  page-break-inside:avoid;
 }
 .gp-heading{
   text-align:center;
-  font-size:11px;
+  font-size:13px;
   font-weight:bold;
-  letter-spacing:.4px;
-  padding:5px 0 8px;
-  border-bottom:1px solid #ccc;
+  color:#1a4f8b;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:6px 0 10px;
   margin-bottom:10px;
+  border-bottom:1px solid #ccc;
 }
-/* 4-column table: lbl | val | lbl | val */
+.gp-sigs{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  padding:0 10px;
+  margin-bottom:12px;
+}
+.gp-sig-box{
+  width:220px;
+  text-align:center;
+}
+.gp-sig-space{height:40px}
+.gp-sig-line{
+  border-top:1px solid #333;
+  margin:0 10px;
+}
+.gp-sig-label{
+  font-size:10px;
+  color:#333;
+  padding-top:5px;
+  font-weight:bold;
+  letter-spacing:.3px;
+}
 .gp-tbl{
   width:100%;
   border-collapse:collapse;
-  font-size:10px;
+  font-size:11px;
 }
 .gp-tbl td{
-  padding:5px 8px;
+  padding:7px 10px;
   border:1px solid #ddd;
   vertical-align:middle;
-  line-height:1.4;
+  line-height:1.5;
 }
 .gp-tbl td.gl{
-  color:#333;
+  color:#555;
   font-size:9.5px;
   white-space:nowrap;
-  width:16%;
+  background:#f8f9fb;
+  width:20%;
 }
 .gp-tbl td.gv{
-  font-size:9.5px;
+  font-size:11px;
   font-weight:bold;
   word-break:break-word;
 }
+.gp-sigs-bottom{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  padding:0 10px;
+  margin-top:20px;
+}
 
 /* ── Print ────────────────────────────────────────── */
-.page-break{page-break-before:always}
 @media print{
   body{padding:0}
   @page{size:A4;margin:10mm 12mm}
   .sec{page-break-inside:avoid}
-  .gp-separator,.gp-heading,.gp-tbl{page-break-inside:avoid}
+  .obs-strip{page-break-inside:avoid}
+  .row2{page-break-inside:avoid}
+  .sigs{page-break-inside:avoid}
+  .tear-line{page-break-inside:avoid}
+  .gp-section{page-break-inside:avoid}
 }
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     PAGE 1 — JOB CARD
-══════════════════════════════════════ -->
-
-<!-- Document header -->
+<!-- ═══════════════════════════════════════════════════════
+     DOCUMENT HEADER
+════════════════════════════════════════════════════════ -->
 <div class="doc-head">
   <div>
     <div class="co-name">YOUR COMPANY NAME</div>
-    <div class="co-sub">Dealer Code: ${dash(h.dealerCode)} &nbsp;|&nbsp; ${dash(item.location)}</div>
+    <div class="co-sub">
+      Dealer Code: ${dash(d.dealerCode)} &nbsp;|&nbsp; ${dash(d.location)}
+    </div>
   </div>
   <div class="doc-right">
     <div class="doc-title">JOB CARD</div>
     <table>
       <tr>
         <td class="lbl">Invoice No:</td>
-        <td class="val">${dash(h.invoiceNo)}</td>
+        <td class="val">${dash(d.invoiceNo)}</td>
       </tr>
       <tr>
-        <td class="lbl">Job No:&nbsp;&nbsp;${dash(h.jobNo)}&nbsp;&nbsp;Date:</td>
-        <td class="val">${fd(h.jobinDate)}</td>
+        <td class="lbl">Job No:&nbsp;&nbsp;${dash(d.jobNo)}&nbsp;&nbsp;Date:</td>
+        <td class="val">${fd(d.jobinDate)}</td>
       </tr>
     </table>
   </div>
 </div>
 
-<!-- Row 1: Job Details + Customer Details -->
+<!-- ═══════════════════════════════════════════════════════
+     ROW 1 — JOB DETAILS + CUSTOMER DETAILS
+════════════════════════════════════════════════════════ -->
 <div class="row2">
 
+  <!-- JOB DETAILS -->
   <div class="sec">
     <div class="sec-title">Job Details</div>
     <div class="split">
       <div class="col">
         <table class="kv">
-          <tr><td class="k">Job Type</td>     <td class="v">${dash(item.jobtype)}</td></tr>
-          <tr><td class="k">Job Source</td>   <td class="v">${dash(item.jobsource)}</td></tr>
-          <tr><td class="k">Service Head</td> <td class="v">${dash(item.serviceHead)}</td></tr>
-          <tr><td class="k">Service Type</td> <td class="v">${dash(item.serviceType)}</td></tr>
-          <tr><td class="k">Est. Delivery</td><td class="v">${fd(h.estdelDate)}</td></tr>
+          <tr><td class="k">Job Type</td>     <td class="v">${dash(d.jobtype)}</td></tr>
+          <tr><td class="k">Job Source</td>   <td class="v">${dash(d.jobsource)}</td></tr>
+          <tr><td class="k">Service Head</td> <td class="v">${dash(d.serviceHead)}</td></tr>
+          <tr><td class="k">Service Type</td> <td class="v">${dash(d.serviceType)}</td></tr>
+          <tr><td class="k">Est. Delivery</td><td class="v">${fd(d.estdelDate)}</td></tr>
         </table>
       </div>
       <div class="col">
         <table class="kv">
-          <tr><td class="k">Vehicle Kms</td>   <td class="v">${dash(h.vehiclekms)}</td></tr>
-          <tr><td class="k">Manual Job No</td> <td class="v">${dash(h.manualjobNo)}</td></tr>
-          <tr><td class="k">Supervisor</td>    <td class="v">${dash(h.supervisor)}</td></tr>
-          <tr><td class="k">Technician</td>    <td class="v">${dash(h.technician)}</td></tr>
-          <tr><td class="k">Delivery Time</td> <td class="v">${dash(h.estdelTime)}</td></tr>
+          <tr><td class="k">Vehicle Kms</td>   <td class="v">${dash(d.vehiclekms)}</td></tr>
+          <tr><td class="k">Manual Job No</td> <td class="v">${dash(d.manualjobNo)}</td></tr>
+          <tr><td class="k">Supervisor</td>    <td class="v">${dash(d.supervisor)}</td></tr>
+          <tr><td class="k">Technician</td>    <td class="v">${dash(d.technician)}</td></tr>
+          <tr><td class="k">Delivery Time</td> <td class="v">${dash(d.estdelTime)}</td></tr>
         </table>
       </div>
     </div>
   </div>
 
+  <!-- CUSTOMER DETAILS -->
   <div class="sec">
     <div class="sec-title">Customer Details</div>
     <table class="kv">
-      <tr><td class="k">Customer Name</td><td class="v">${customerName}</td></tr>
+      <tr><td class="k">Customer Name</td> <td class="v">${customerName}</td></tr>
       <tr><td class="k">Address</td>       <td class="v">${address || '&nbsp;'}</td></tr>
       <tr><td class="k">City &amp; Pin</td><td class="v">${cityPin}</td></tr>
       <tr><td class="k">State</td>         <td class="v">${state}</td></tr>
@@ -635,58 +795,84 @@ body{
 
 </div>
 
-<!-- Vehicle Details -->
-<div class="sec">
-  <div class="sec-title">Vehicle Details</div>
-  <div class="split">
-    <div class="col">
-      <table class="kv">
-        <tr><td class="k">Chassis No</td>    <td class="v">${chassisNo}</td></tr>
-        <tr><td class="k">Battery No</td>    <td class="v">${batteryNo}</td></tr>
-        <tr><td class="k">Charger No</td>    <td class="v">${chargerNo}</td></tr>
-        <tr><td class="k">Controller No</td> <td class="v">${controllerNo}</td></tr>
-        <tr><td class="k">Register No</td>   <td class="v">${registerNo}</td></tr>
-      </table>
-    </div>
-    <div class="col">
-      <table class="kv">
-        <tr><td class="k">Model</td>          <td class="v">${modelDisplay}</td></tr>
-        <tr><td class="k">OEM Model</td>      <td class="v">${oemModel}</td></tr>
-        <tr><td class="k">Colour</td>         <td class="v">${colour}</td></tr>
-        <tr><td class="k">Sale Date</td>      <td class="v">${fd(c.saleDate)}</td></tr>
-        <tr><td class="k">Insurance Exp.</td> <td class="v">${fd(c.insuranceExpDate)}</td></tr>
-      </table>
-    </div>
+<!-- ═══════════════════════════════════════════════════════
+     ROW 2 — VEHICLE DETAILS + BATTERY DETAILS
+════════════════════════════════════════════════════════ -->
+<div class="row2">
+
+  <!-- VEHICLE DETAILS -->
+  <div class="sec">
+    <div class="sec-title">Vehicle Details</div>
+    <table class="kv">
+      <tr><td class="k">Chassis No</td>    <td class="v">${chassisNo}</td></tr>
+      <tr><td class="k">Battery No</td>    <td class="v">${batteryNo}</td></tr>
+      <tr><td class="k">Charger No</td>    <td class="v">${chargerNo}</td></tr>
+      <tr><td class="k">Controller No</td> <td class="v">${controllerNo}</td></tr>
+      <tr><td class="k">Register No</td>   <td class="v">${registerNo}</td></tr>
+      <tr><td class="k">Model</td>         <td class="v">${modelDisplay}</td></tr>
+      <tr><td class="k">OEM Model</td>     <td class="v">${oemModel}</td></tr>
+      <tr><td class="k">Colour</td>        <td class="v">${colour}</td></tr>
+      <tr><td class="k">Sale Date</td>     <td class="v">${fd(d.saleDate)}</td></tr>
+      <tr><td class="k">Insurance Exp.</td><td class="v">${fd(d.insuranceExpDate)}</td></tr>
+    </table>
   </div>
+
+  <!-- BATTERY DETAILS -->
+  <div class="sec">
+    <div class="sec-title">Battery Details</div>
+    <table class="kv">
+      <tr>
+        <td class="k">Battery Make</td>
+        <td class="v">${dash(b.batteryMake)}</td>
+      </tr>
+      <tr>
+        <td class="k">Battery Serial No(s)</td>
+        <td class="v">${dash(b.batterySerialNo)}</td>
+      </tr>
+      <tr>
+        <td class="k">Voltage at Full Charge (OCV)</td>
+        <td class="v">${dash(b.batteryOcv)}</td>
+      </tr>
+      <tr>
+        <td class="k">Voltage at Full Charge (CCV)</td>
+        <td class="v">${dash(b.batteryCcv)}</td>
+      </tr>
+      <tr>
+        <td class="k">Voltage at Discharge</td>
+        <td class="v">${dash(b.batteryDischarge)}</td>
+      </tr>
+      <tr>
+        <td class="k">Capacity (AH)</td>
+        <td class="v">${dash(b.batteryCapacityAh)}</td>
+      </tr>
+      <tr>
+        <td class="k">Battery Set Voltage</td>
+        <td class="v">${dash(b.batteryVoltage)}</td>
+      </tr>
+      <tr>
+        <td class="k">Motor Drawing (No Load)</td>
+        <td class="v">${dash(b.motorDrawing)}</td>
+      </tr>
+      <tr>
+        <td class="k">Controller No. Make</td>
+        <td class="v">${controllerNo}</td>
+      </tr>
+      <tr>
+        <td class="k">Battery Chemical</td>
+        <td class="v">${dash(b.batteryChemical)}</td>
+      </tr>
+      <tr>
+        <td class="k">Battery Capacity</td>
+        <td class="v">${dash(b.batteryCapacity)}</td>
+      </tr>
+    </table>
+  </div>
+
 </div>
 
-<!-- Battery Details -->
-<div class="sec">
-  <div class="sec-title">Battery Details</div>
-  <div class="split">
-    <div class="col">
-      <table class="kv">
-        <tr><td class="k">Battery Make</td>                <td class="v">${dash(b.batteryMake)}</td></tr>
-        <tr><td class="k">Battery Serial No(s)</td>        <td class="v">${dash(b.batterySerialNo)}</td></tr>
-        <tr><td class="k">Voltage at Full Charge (OCV)</td><td class="v">${dash(b.batteryOcv)}</td></tr>
-        <tr><td class="k">Voltage at Full Charge (CCV)</td><td class="v">${dash(b.batteryCcv)}</td></tr>
-        <tr><td class="k">Voltage at Discharge</td>        <td class="v">${dash(b.batteryDischarge)}</td></tr>
-      </table>
-    </div>
-    <div class="col">
-      <table class="kv">
-        <tr><td class="k">Capacity (AH)</td>              <td class="v">${dash(b.batteryCapacityAh)}</td></tr>
-        <tr><td class="k">Battery Set Voltage</td>        <td class="v">${dash(b.batteryVoltage)}</td></tr>
-        <tr><td class="k">Motor Drawing (No Load)</td>    <td class="v">${dash(b.motorDrawing)}</td></tr>
-        <tr><td class="k">Controller No. Make</td>        <td class="v">${controllerNo}</td></tr>
-        <tr><td class="k">Battery Chemical</td>           <td class="v">${dash(b.batteryChemical)}</td></tr>
-        <tr><td class="k">Battery Capacity</td>           <td class="v">${dash(b.batteryCapacity)}</td></tr>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- Customer Voice & Complaints -->
+<!-- ═══════════════════════════════════════════════════════
+     CUSTOMER VOICE & COMPLAINTS
+════════════════════════════════════════════════════════ -->
 <div class="sec">
   <div class="sec-title">Customer Voice &amp; Complaints</div>
   <table class="cpl">
@@ -702,60 +888,115 @@ body{
   </table>
 </div>
 
-<!-- Observation & Supervisor Comment -->
+<!-- ═══════════════════════════════════════════════════════
+     OBSERVATION | SUPERVISOR COMMENT | REMARKS
+════════════════════════════════════════════════════════ -->
 <div class="obs-strip">
   <div class="obs-item">
     <span class="obs-lbl">Observation</span>
-    <span class="obs-val">${dash(h.observation)}</span>
+    <span class="obs-val">${dash(d.observation)}</span>
   </div>
   <div class="obs-item">
     <span class="obs-lbl">Supervisor Comment</span>
-    <span class="obs-val">${dash(h.supervisorComment)}</span>
+    <span class="obs-val">${dash(d.supervisorComment)}</span>
+  </div>
+  <div class="obs-item">
+    <span class="obs-lbl">Remarks</span>
+    <span class="obs-val">${remarks}</span>
   </div>
 </div>
 
-<!-- Signatures -->
+<!-- ═══════════════════════════════════════════════════════
+     SIGNATURES — END OF JOB CARD
+════════════════════════════════════════════════════════ -->
 <div class="sigs">
-  <div class="sig">Technician</div>
-  <div class="sig">Supervisor / Advisor</div>
-  <div class="sig">Customer</div>
+  <div class="sig">
+    <div class="sig-space"></div>
+    <div class="sig-line"></div>
+    <div class="sig-label">Technician</div>
+  </div>
+  <div class="sig">
+    <div class="sig-space"></div>
+    <div class="sig-line"></div>
+    <div class="sig-label">Supervisor / Advisor</div>
+  </div>
+  <div class="sig">
+    <div class="sig-space"></div>
+    <div class="sig-line"></div>
+    <div class="sig-label">Customer</div>
+  </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════
+     TEAR LINE
+════════════════════════════════════════════════════════ -->
+<div class="tear-line">
+  <div class="tear-line-border"></div>
+  <div class="tear-line-label">
+    <span class="tear-scissors">&#9988;</span>
+    TEAR HERE
+    <span class="tear-scissors">&#9988;</span>
+  </div>
+  <div class="tear-line-border"></div>
+</div>
 
-<!-- ══════════════════════════════════════
-     GATE PASS — matches download.pdf
-     Dotted line separator → "Gate Pass" centered heading
-     → compact 2-row, 4-column label:value table
-══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════
+     GATE PASS — NO HEADER, SAME PAGE
+════════════════════════════════════════════════════════ -->
+<div class="gp-section">
 
-<!-- Dotted separator line (same as PDF) -->
-<hr class="gp-separator">
+  <!-- Gate Pass Title only -->
+  <div class="gp-heading">Gate Pass</div>
 
-<!-- Centered "Gate Pass" title -->
-<div class="gp-heading">Gate Pass</div>
+  <!-- Signatures TOP — below gate pass title -->
+  <div class="gp-sigs">
+    <div class="gp-sig-box">
+      <div class="gp-sig-space"></div>
+      <div class="gp-sig-line"></div>
+      <div class="gp-sig-label">Supervisor / Advisor</div>
+    </div>
+    <div class="gp-sig-box">
+      <div class="gp-sig-space"></div>
+      <div class="gp-sig-line"></div>
+      <div class="gp-sig-label">Customer</div>
+    </div>
+  </div>
 
-<!-- 5 fields in two rows, exactly as in the PDF:
-     Row 1: Customer Name | [value]  ||  Job Date  | [value]  ||  Job No | [value]
-     Row 2: Vehicle No.   | [value]  ||  Chassis No| [value]  ||  (empty span)
--->
-<table class="gp-tbl">
-  <tr>
-    <td class="gl">Customer Name</td>
-    <td class="gv">${customerName}</td>
-    <td class="gl">Job Date</td>
-    <td class="gv">${fd(h.jobinDate)}</td>
-    <td class="gl">Job No</td>
-    <td class="gv">${dash(h.jobNo)}</td>
-  </tr>
-  <tr>
-    <td class="gl">Vehicle No.</td>
-    <td class="gv">${registerNo !== '-' ? registerNo : ''}</td>
-    <td class="gl">Chassis No.</td>
-    <td class="gv">${chassisNo}</td>
-    <td class="gl"></td>
-    <td class="gv"></td>
-  </tr>
-</table>
+  <!-- Gate Pass Table -->
+  <table class="gp-tbl">
+    <tr>
+      <td class="gl">Customer Name</td>
+      <td class="gv">${customerName}</td>
+      <td class="gl">Job Date</td>
+      <td class="gv">${fd(d.jobinDate)}</td>
+      <td class="gl">Job No</td>
+      <td class="gv">${dash(d.jobNo)}</td>
+    </tr>
+    <tr>
+      <td class="gl">Vehicle No.</td>
+      <td class="gv">${registerNo !== '-' ? registerNo : '-'}</td>
+      <td class="gl">Chassis No.</td>
+      <td class="gv">${chassisNo}</td>
+      <td class="gl"></td>
+      <td class="gv"></td>
+    </tr>
+  </table>
+
+  <!-- Signatures BOTTOM — end of gate pass -->
+  <div class="gp-sigs-bottom">
+    <div class="gp-sig-box">
+      <div class="gp-sig-space"></div>
+      <div class="gp-sig-line"></div>
+      <div class="gp-sig-label">Supervisor / Advisor</div>
+    </div>
+    <div class="gp-sig-box">
+      <div class="gp-sig-space"></div>
+      <div class="gp-sig-line"></div>
+      <div class="gp-sig-label">Customer</div>
+    </div>
+  </div>
+
+</div>
 
 </body>
 </html>`;
