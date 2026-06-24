@@ -153,7 +153,8 @@ export const ModuleTypes = [
     { name: 'sale_bill', moduleName: 'Vehicle Sale Bill' },
     { name: 'receipt_entry', moduleName: 'Receipt Entry' },
     { name: 'vehicle_transfer', moduleName: 'Vehicle Stock Transfer' },
-    { name: 'job_card', moduleName: 'Job Card' }
+    { name: 'job_card', moduleName: 'Job Card' },
+    { name: 'wclaim_prefix', moduleName:'Warranty Claim Prefix'}
 ]
 
 export const EmployeeDesignations = [

@@ -1,0 +1,333 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-primary bg-gradient text-white py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-white">
+                <i class="ri-steering-2-line me-1"></i>
+                Warranty Claim (Through Job Card)
+            </h6>
+
+            <button class="btn btn-sm btn-light">
+                <i class="ri-menu-line"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        <!-- Row 1 -->
+        <div class="row g-2">
+
+            <div class="col-md-2">
+                <label class="form-label">Claim Type</label>
+                <select class="form-select form-select-sm">
+                    <option>Warranty</option>
+                </select>
+            </div>
+
+            <!-- Date From -->
+            <div class="col-md-2">
+                <label class="form-label">Date From</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="fromDate">
+            </div>
+
+            <!-- Date To -->
+            <div class="col-md-2">
+                <label class="form-label">Date To</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="toDate">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Claim Prefix</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="WjobClaimprefix">
+            </div>
+
+            <div class="col-md-1">
+                <label class="form-label">Claim No</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="claimNo">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Date</label>
+                <input type="date" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-1">
+                <label class="form-label">PrevYear</label>
+                <input type="text" class="form-control form-control-sm">
+            </div>
+
+        </div>
+
+        <!-- Row 2 -->
+        <div class="row g-2 mt-1">
+
+            <div class="col-md-2">
+                <label class="form-label">Supplier</label>
+                <select class="form-select form-select-sm">
+                    <option>--Select--</option>
+                    <option>Bgauss</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Service Head</label>
+                <select class="form-select form-select-sm">
+                    <option>Select Service Head</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Job No</label>
+
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control">
+
+                    <button class="btn btn-primary"
+                    (click)="openJobSearch(jobSearchPopup)">
+                        <i class="ri-add-line"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Invoice No</label>
+                <input type="text" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Invoice Date</label>
+                <input type="date" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Chassis No</label>
+                <input type="text" class="form-control form-control-sm">
+            </div>
+
+        </div>
+
+        <!-- Row 3 -->
+        <div class="row g-2 mt-1">
+
+            <div class="col-md-2">
+                <label class="form-label">Motor No</label>
+                <input type="text" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">KMs</label>
+                <input type="text" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Customer Name</label>
+                <input type="text" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Registration No.</label>
+                <input type="text" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Sale Date</label>
+                <input type="date" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Failure Date</label>
+                <input type="date" class="form-control form-control-sm">
+            </div>
+
+        </div>
+
+        <!-- Row 4 -->
+        <div class="row g-2 mt-1">
+
+            <div class="col-md-2">
+                <label class="form-label">LR/GR No</label>
+                <input type="text" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">LR/GR Date</label>
+                <input type="date" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Disp. Through</label>
+                <select class="form-select form-select-sm">
+                    <option>--Select--</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Claim Account</label>
+                <select class="form-select form-select-sm">
+                    <option>--Select--</option>
+                </select>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <!-- Footer Buttons -->
+        <div class="d-flex justify-content-between align-items-center">
+
+            <button class="btn btn-outline-primary btn-sm">
+                <i class="ri-image-line me-1"></i>
+                Images
+            </button>
+
+            <div>
+                <button class="btn btn-primary btn-sm me-2">
+                    <i class="ri-save-line me-1"></i>
+                    Save
+                </button>
+
+                <button class="btn btn-light btn-sm">
+                    <i class="ri-close-line me-1"></i>
+                    Cancel
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<ng-template #jobSearchPopup let-modal>
+
+    <div class="modal-header bg-primary">
+        <h5 class="modal-title text-white">Job Search</h5>
+
+        <button
+            type="button"
+            class="btn-close text-white"
+            (click)="modal.dismiss()">
+        </button>
+    </div>
+
+    <div class="modal-body">
+
+        <!-- Search Filters -->
+        <div class="row g-2 mb-3">
+
+            <div class="col-md-2">
+                <label>Job No</label>
+                <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    >
+            </div>
+
+            <div class="col-md-2">
+                <label>RBill Date From</label>
+                <input
+                    type="date"
+                    class="form-control form-control-sm"
+                    [(ngModel)]="jobSearch.rBillfromDate"
+                    >
+            </div>
+
+            <div class="col-md-2">
+                <label>RBill Date To</label>
+                <input
+                    type="date"
+                    class="form-control form-control-sm"
+                    [(ngModel)]="jobSearch.rBilltoDate"
+                    >
+            </div>
+
+            <div class="col-md-2">
+                <label>Location</label>
+                <select
+                    class="form-select form-select-sm"
+                   >
+
+                    <option value="">Select</option>
+
+                    <!-- <option *ngFor="let loc of locationList"
+                            [value]="loc.id">
+                        {{loc.locationName}}
+                    </option> -->
+
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+                <button
+                    class="btn btn-primary btn-sm"
+                    >
+
+                    <i class="ri-search-line me-1"></i>
+                    
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Result Grid -->
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-sm align-middle">
+
+                <thead class="table-light">
+
+                    <tr>
+                        <th>Sr.No</th>
+                        <th>Job Type</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Job No</th>
+                        <th>Service Name</th>
+                        <th>Party Name</th>
+                        <th>Chassis No</th>
+                        <th>Model Name</th>
+                        <th width="80">Action</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <!-- <tr *ngFor="let item of jobCardList; let i=index">
+
+                        <td>{{i+1}}</td>
+                        <td>{{item.jobType}}</td>
+                        <td>{{item.jobDate | date:'dd-MM-yyyy'}}</td>
+                        <td>{{item.locationName}}</td>
+                        <td>{{item.jobNo}}</td>
+                        <td>{{item.serviceName}}</td>
+                        <td>{{item.partyName}}</td>
+                        <td>{{item.chassisNo}}</td>
+                        <td>{{item.modelName}}</td>
+
+                        <td class="text-center">
+
+                            <button
+                                class="btn btn-success btn-sm"
+                                (click)="selectJob(item,modal)">
+
+                                <i class="ri-check-line"></i>
+                            </button>
+
+                        </td>
+
+                    </tr> -->
+
+                    <tr *ngIf="jobCardList.length==0">
+                        <td colspan="10" class="text-center">
+                            No Records Found
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</ng-template>

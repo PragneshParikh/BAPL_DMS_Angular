@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NgbPagination, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdown, NgbDropdownModule, NgbPagination, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 import { RepairBillSearchModel } from '../../../ViewModels/RepairBillModel';
 import { StorageService } from '../../../core/services/storage';
@@ -14,7 +14,7 @@ import { LoaderService } from '../../../core/services/loader';
 
 @Component({
   selector: 'app-repair-bill-list',
-  imports: [FormsModule, CommonModule, NgbTooltip, NgbPagination],
+  imports: [FormsModule, CommonModule, NgbTooltip, NgbPagination,NgbDropdownModule],
   templateUrl: './repair-bill-list.html',
   styleUrl: './repair-bill-list.scss',
 })

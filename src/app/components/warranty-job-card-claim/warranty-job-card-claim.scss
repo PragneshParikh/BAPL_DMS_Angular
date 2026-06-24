@@ -1,0 +1,51 @@
+.card-header {
+    min-height: 42px;
+}
+
+.form-label {
+    
+    font-size: 12px;
+    margin-bottom: 2px;
+    font-weight: 500;
+}
+
+.form-control-sm,
+.form-select-sm {
+    height: 28px;
+    font-size: 12px;
+}
+
+.card-body {
+    background: #f8f9fa;
+}
+
+.input-group-sm .btn {
+    padding: 0.25rem 0.6rem;
+}
+
+.btn-sm {
+    font-size: 12px;
+}
+
+hr {
+    margin: 15px 0;
+}
+
+.modal-xl {
+    max-width: 95%;
+}
+
+.modal-body {
+    max-height: 75vh;
+    overflow-y: auto;
+}
+
+.table th {
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.table td {
+    font-size: 12px;
+    white-space: nowrap;
+}
