@@ -23,7 +23,7 @@ import { PrefixService } from '../../../../core/services/prefix';
 @Component({
   selector: 'app-job-card-add-form',
   standalone: true,
-  imports: [CommonModule, FormsModule,NgbDropdownModule],
+  imports: [CommonModule, FormsModule, NgbDropdownModule],
   templateUrl: './job-card-add-form.html',
   styleUrl: './job-card-add-form.scss',
 })
@@ -234,6 +234,7 @@ export class JobCardAddForm {
   }
 
   selectChassis(item: any) {
+    console.log("selectedchassis", item);
     this.selectedChassis = item.chassisNumber;
     this.filteredChassisList = [];
 
@@ -324,8 +325,13 @@ export class JobCardAddForm {
     });
   }
   loadServiceHistory(chassisNo: string) {
+    debugger
+    let jobCardId: number | null = 0;
 
-    this.jobCardService.getJobCardServiceHistory(chassisNo).subscribe({
+    if (this.chassiseditData?.jobCardHeader?.id) {
+      jobCardId = this.chassiseditData.jobCardHeader.id;
+    }
+    this.jobCardService.getJobCardServiceHistory(chassisNo, jobCardId).subscribe({
       next: (res: any) => {
         if (!res || res.length === 0) {
           // this.toastr.show('This chassis number is not sold History not available', {
@@ -336,6 +342,7 @@ export class JobCardAddForm {
           return;
         }
         this.serviceHistoryList = res;
+        console.log("service histoery", this.serviceHistoryList);
       },
       error: (err) => {
         this.toastr.show("Something went wrong");
@@ -367,7 +374,11 @@ export class JobCardAddForm {
     this.jobCardService.getAllInspectedChassis(dealerCode, this.jobTypeId).subscribe(res => {
       this.chassisList = res;
       console.log("AddloadingChassisdetails", this.chassisList)
+
       if (this.isEditMode && this.chassiseditData) {
+        this.customerObj.saleDate = this.chassisList[0].saleDate?.split('T')[0];
+        this.customerObj.insuranceExpDate = this.chassisList[0].insuranceExpDate?.split('T')[0];
+        this.customerObj.nextServiceDueDate = this.chassisList[0].nextserviceDueDate?.split('T')[0];
         this.selectedChassis = this.chassiseditData.jobCardHeader.chassisno;
 
         setTimeout(() => {
@@ -532,46 +543,51 @@ export class JobCardAddForm {
   //     this.loadPdiData(this.oemModelId);
   //   }
   // }
-onChassisChange() {
-  if (!this.selectedChassis) return;
-  this.loadServiceHistory(this.selectedChassis);
+  onChassisChange() {
+    debugger;
+    if (!this.selectedChassis) return;
+    this.loadServiceHistory(this.selectedChassis);
 
-  const selected = this.chassisList.find(
-    x => x.chassisNumber == this.selectedChassis
-  );
+    const selected = this.chassisList.find(
+      x => x.chassisNumber == this.selectedChassis
+    );
 
-  if (!selected) return;
+    if (!selected) return;
 
-  this.invoiceNo                     = selected.invoiceNo;
-  this.couponNo                      = this.selectedChassis.slice(-13);
-  this.customerObj.customerLedgerId  = selected.customerLedgerId;
-  this.customerObj.customerName      = selected.customerName;
-  this.customerObj.customerMobile    = selected.customerMobile;
-  this.customerObj.customerAltMobile = selected.customerAltMobile;
+    this.invoiceNo = selected.invoiceNo;
+    this.couponNo = this.selectedChassis.slice(-13);
+    this.customerObj.customerLedgerId = selected.customerLedgerId;
+    this.customerObj.customerName = selected.customerName;
+    this.customerObj.customerMobile = selected.customerMobile;
+    this.customerObj.customerAltMobile = selected.customerAltMobile;
+    this.customerObj.saleDate = selected.saleDate?.split('T')[0];
+    this.customerObj.nextServiceDueDate = selected.nextserviceDueDate?.split('T')[0];
+    this.customerObj.insuranceExpDate = selected.insuranceExpDate?.split('T')[0];
 
-  // Model + Colour combined
-  this.modelName = selected.modelName
-    + (selected.colourName ? ' (' + selected.colourName + ')' : '');
+    // Model + Colour combined
+    this.modelName = selected.modelName
+      + (selected.colourName ? ' (' + selected.colourName + ')' : '');
 
-  this.registerNo         = selected.registerNo;
-  this.batteryCapacity    = selected.batteryCapacity;
-  this.batteryMake        = selected.batteryMake;
-  this.batteryChemestry   = selected.batteryChemestry;
-  this.batteryNumber      = selected.batteryNumber;
-  this.motorNo            = selected.motorNo;
-  this.controllerNo       = selected.controllerNo;
-  this.converterNo        = selected.converterNo;
-  this.chargerNumber      = selected.chargerNumber;
-  this.odoReading         = selected.odoReading;
-  this.duration           = selected.duration;
-  this.durationType       = selected.durationType;
-  this.expireWarrentyDate = selected.expireWarrentyDate;
-  this.oemModelId         = selected.oemModelId;
+    this.registerNo = selected.registerNo;
+   
+    this.batteryCapacity = selected.batteryCapacity;
+    this.batteryMake = selected.batteryMake;
+    this.batteryChemestry = selected.batteryChemestry;
+    this.batteryNumber = selected.batteryNumber;
+    this.motorNo = selected.motorNo;
+    this.controllerNo = selected.controllerNo;
+    this.converterNo = selected.converterNo;
+    this.chargerNumber = selected.chargerNumber;
+    this.odoReading = selected.odoReading;
+    this.duration = selected.duration;
+    this.durationType = selected.durationType;
+    this.expireWarrentyDate = selected.expireWarrentyDate;
+    this.oemModelId = selected.oemModelId;
 
-  if (this.oemModelId) {
-    this.loadPdiData(this.oemModelId);
+    if (this.oemModelId) {
+      this.loadPdiData(this.oemModelId);
+    }
   }
-}
   // PDiChecklist popup
   openPdiModal(content: any) {
 

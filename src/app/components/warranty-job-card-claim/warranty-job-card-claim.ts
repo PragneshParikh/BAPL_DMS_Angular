@@ -1,40 +1,51 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgbModal,NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { LoaderService } from '../../core/services/loader';
 import { StorageService } from '../../core/services/storage';
 import { PrefixService } from '../../core/services/prefix';
+import { LedgerMasterService } from '../../core/services/ledger-master';
+import { LocationMasterService } from '../../core/services/location-master-service';
+import { JobCardService } from '../../core/services/job-card-service';
 
 @Component({
   selector: 'app-warranty-job-card-claim',
-  standalone:true,
-  imports: [FormsModule,CommonModule],
+  standalone: true,
+  imports: [FormsModule, CommonModule],
   templateUrl: './warranty-job-card-claim.html',
   styleUrl: './warranty-job-card-claim.scss',
 })
 export class WarrantyJobCardClaim implements OnInit {
-jobCardList: any[] = [];
- WjobClaimprefix: string = '';
+  jobCardList: any[] = [];
+  WjobClaimprefix: string = '';
+  isPrevYear: boolean = false;
+  supplierList: any[] = [];
+  selectedSupplierId: number | null = null;
+  selectedLocationId: number | null = null;
 
-jobSearch: any = {
-  jobNo: '',
-  rBillfromDate: '',
-  rBilltoDate: '',
-  locationId: ''
-};
+  jobSearch: any = {
+    jobNo: '',
+    rBillfromDate: '',
+    rBilltoDate: '',
+    locationId: ''
+  };
   claimNo: number = 0;
   fromDate: string;
   toDate: string;
-   constructor(
-  private loader : LoaderService,
-  private modalService : NgbModal,
-  private storageService : StorageService,
-  private prefixService : PrefixService
-) { }
+  locationList: any[] = [];
+  constructor(
+    private loader: LoaderService,
+    private modalService: NgbModal,
+    private storageService: StorageService,
+    private ledgerService: LedgerMasterService,
+    private locationService: LocationMasterService,
+    private jobcardService: JobCardService,
+    private prefixService: PrefixService
+  ) { }
   ngOnInit(): void {
 
-     const today = new Date();
+    const today = new Date();
 
     // Current month first date
     const firstDayOfMonth = new Date(
@@ -55,7 +66,10 @@ jobSearch: any = {
     this.jobSearch.rBilltoDate = this.formatDate(today);
 
     this.loadPrefix();
-    
+    this.loadSuplier();
+    this.loadlocation();
+  
+
   }
 
   formatDate(date: Date): string {
@@ -66,7 +80,7 @@ jobSearch: any = {
     return `${year}-${month}-${day}`;
   }
 
-   loadPrefix(): void {
+  loadPrefix(): void {
     this.loader.show();
     const dealerCode = this.storageService.getDealerCode();
     const module = 'wclaim_prefix';
@@ -83,27 +97,62 @@ jobSearch: any = {
     })
   }
 
+  loadSuplier(): void {
+
+    this.loader.show();
+    this.ledgerService.getCompanyLedgers().subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        this.supplierList = res;
+      }, error: (err) => {
+        this.loader.hide();
+        console.log(err);
+      }
+    })
+
+  }
+
+  loadlocation(): void {
+    debugger;
+    this.loader.show();
+    const dealerCode = this.storageService.getDealerCode();
+
+    this.locationService.getLocationDropdownByDealerCode(dealerCode,).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        this.locationList = res;
+        console.log(this.locationList);
+        this.locationList = res.filter((x: any) => x.locareaidno === 2);
+      }, error: (err) => {
+        this.loader.hide();
+        console.log(err);
+      }
+    })
+  }
+
+  
+
   openJobSearch(content: any) {
+    this.loadlocation();
+    this.modalService.open(content, {
+      size: 'xl',
+      backdrop: 'static',
+      centered: true,
+      scrollable: true
+    });
 
-  this.modalService.open(content, {
-    size: 'xl',
-    backdrop: 'static',
-    centered: true,
-    scrollable: true
-  });
+  }
+  //  selectJob(item: any, modal: any) {
 
-}
-//  selectJob(item: any, modal: any) {
+  //   this.claimObj.jobNo = item.jobNo;
 
-//   this.claimObj.jobNo = item.jobNo;
+  //   this.claimObj.customerName = item.partyName;
 
-//   this.claimObj.customerName = item.partyName;
+  //   this.claimObj.chassisNo = item.chassisNo;
 
-//   this.claimObj.chassisNo = item.chassisNo;
+  //   this.claimObj.modelName = item.modelName;
 
-//   this.claimObj.modelName = item.modelName;
-
-//   modal.close();
-// }
+  //   modal.close();
+  // }
 
 }

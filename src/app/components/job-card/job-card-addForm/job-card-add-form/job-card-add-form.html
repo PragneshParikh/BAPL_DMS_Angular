@@ -29,7 +29,8 @@
             <th>Service Head</th>
             <th>Service Type</th>
             <th>Service Seq</th>
-            <th>Due Date</th>
+            <th>Service Date</th>
+            <th>Grace Date</th>
             <th>Status</th>
             <th>Dealer Name</th>
             <th>Claim Date</th>
@@ -45,14 +46,13 @@
             <td>{{ item.serviceseq }}</td>
 
             <td>{{ item.dueDate | date:'dd/MM/yyyy' }}</td>
-
+            <td>{{item.graceDate | date:'dd/MM/yyyy'}}</td>
             <td>
               <span class="badge"
                 [ngClass]="{
-                  'bg-primary': item.serviceStatus === 'Pending',
+                  'bg-primary': item.serviceStatus === 'Upcoming',
                   'bg-success': item.serviceStatus === 'Availed',
-                  'bg-warning text-dark': item.serviceStatus === 'Due',
-                  'bg-danger': item.serviceStatus === 'Overdue'
+                  'bg-danger': item.serviceStatus === 'Lapsed'
                 }">
                 {{ item.serviceStatus }}
               </span>
@@ -78,19 +78,7 @@
 
 </div>
 
-      <!-- Job Done Dropdown -->
-      <div ngbDropdown class="d-inline-block">
-        <button type="button" class="btn btn-primary btn-sm" ngbDropdownToggle>
-          Job Done
-        </button>
-
-        <div ngbDropdownMenu>
-          <button ngbDropdownItem>Today's (10)</button>
-          <button ngbDropdownItem>This Month (20)</button>
-          <button ngbDropdownItem>Last Month (30)</button>
-          <button ngbDropdownItem>Total (60)</button>
-        </div>
-      </div>
+     
       <div>
         <button class="btn btn-primary btn-sm" type="button" [disabled]="!isEditMode" (click)="goToFFIR()">
           FFIR
