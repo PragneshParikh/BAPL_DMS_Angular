@@ -9,29 +9,51 @@
 
                 <!-- Table Card -->
                 <div class="card">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center">
-
-                            <div class="text-muted">
-                                Total Record(s): {{ collectionSize }}
-                            </div>
-
-                            <div class="d-flex align-items-center gap-2">
-
-                                <button class="btn btn-sm btn-primary" (click)="newClaim()">
-                                    Add
-                                </button>
-
-                                <div class="search-box position-relative">
-                                    <input type="text" class="form-control" placeholder="Search..."
-                                        [(ngModel)]="searchTerm" (keyup)="onSearchChange()">
-                                    <i class="ri-search-line search-icon"></i>
+                    <div class="card-body">
+                        <form #poFilterForm="ngForm" (ngSubmit)="onSearch()">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-2">
+                                    <label class="form-label">Date from</label>
+                                    <input type="date" class="form-control form-control-sm"
+                                        [(ngModel)]="filterFormData.dateFrom" name="dateFrom">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Date to</label>
+                                    <input type="date" class="form-control form-control-sm "
+                                        [(ngModel)]="filterFormData.dateTo" name="dateTo">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Location</label>
+                                    <select class="form-select form-select-sm" [(ngModel)]="filterFormData.location"
+                                        name="location">
+                                        <option value=""> --Select-- </option>
+                                        <option *ngFor="let loc of locationList" [value]="loc.loccode">{{loc.locname}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label"> Claim No</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="filterFormData.claimNo" name="claimNo">
                                 </div>
 
+                                <div class="col-md-3 mt-2">
+                                    <button type="submit" class="btn btn-primary btn-sm me-1">
+                                        <i class="align-bottom me-1"></i> Search
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-sm ms-2"
+                                        (click)="addNewClaim(null)">
+                                        <i class="align-bottom me-1"></i> Add
+                                    </button>
+                                    <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'"
+                                        (click)="downloadExcel()">
+                                        <i class="ri-file-excel-2-line"></i>
+                                    </button>
+                                </div>
                             </div>
-
-                        </div>
+                        </form>
                     </div>
+
                     <div class="card-body">
 
                         <div class="table-responsive">
@@ -41,27 +63,26 @@
                                     <tr>
                                         <th> Sr. No. </th>
                                         <th> Claim Prefix </th>
-                                        <th> Mobile No.</th>
                                         <th> Claim No / Claim Date </th>
                                         <th> Location Name </th>
-                                        <th> Supplier Name </th>
-                                        <th> JobFrom/JobTo Date </th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
-                                    <tr *ngFor="let claim of dataSource;" class="table-row">
-                                        <td>{{ claim?.sr.no }}</td>
-                                        <td>{{ claim?.preifx }}</td>
-                                        <td>{{ claim?.claimDate }}</td>
-                                        <td>{{ claim?.location }}</td>
-                                        <td>{{ claim?.supllier }}</td>
-                                        <td>{{ claim?.jobDate }}</td>
+                                    <tr *ngFor="let claim of dataSource;" class="table-row"
+                                        (dblclick)="onDoubleClick(claim)">
+                                        <td>{{ claim?.id }}</td>
+                                        <td>{{ claim?.claimPrefix }}</td>
+                                        <td>
+                                            {{ claim?.claimNo }} <br>
+                                            {{ claim?.claimDate }}
+                                        </td>
+                                        <td>{{ claim?.locationCode }}</td>
                                     </tr>
 
                                     <!-- No Data -->
                                     <tr *ngIf="!dataSource || dataSource.length === 0">
-                                        <td colspan="6" class="text-center text-muted py-3">
+                                        <td colspan="7" class="text-center text-muted py-3">
                                             No Data Available
                                         </td>
                                     </tr>

@@ -213,7 +213,7 @@ export const routes: Routes = [
       { path: 'role-master/edit/:id', component: RoleMaster, data: [75] },
 
       { path: 'free-service-claim', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim-list/free-service-claim-list').then(m => m.FreeServiceClaimList) },
-      { path: 'free-service-claim:id', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim').then(m => m.FreeServiceClaim) },
+      { path: 'free-service-claim/:id', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim').then(m => m.FreeServiceClaim) },
 
       { path: 'free-service-rate', data: [67], loadComponent: () => import('./components/free-service-rate/free-service-rate-list/free-service-rate-list').then(m => m.FreeServiceRateList) },
       { path: 'free-service-rate/:id', data: [67], loadComponent: () => import('./components/free-service-rate/free-service-rate').then(m => m.FreeServiceRate) },
