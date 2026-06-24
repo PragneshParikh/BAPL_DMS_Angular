@@ -29,12 +29,8 @@ export class EmployeeMasterService {
   // =========================================
   // GET EMPLOYEE BY ID
   // =========================================
-
-  getEmployeeById(id: number): Observable<any> {
-
-    return this.http.get<any>(
-      `${this.apiUrl}/GetById/${id}`
-    );
+    getEmployeeById(id: number) {
+      return this.http.get<any>(`${environment.apiUrl}/Employee/GetById/${id}`);
   }
 
   // =========================================
@@ -97,4 +93,10 @@ export class EmployeeMasterService {
       { params }
     );
   }
+
+  getLocationByDealerCode(dealerCode: string) {
+    return this.http.get<any[]>(
+      `${environment.apiUrl}/LocationMaster/GetLocationByDealerCode/${dealerCode}`
+    );
+  } 
 }
