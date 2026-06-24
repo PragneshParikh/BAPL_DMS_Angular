@@ -42,9 +42,15 @@ export class Login {
     /**
      * Form Validatyion
      */
+    // this.loginForm = this.formBuilder.group({
+    //   username: ['CUS0435', [Validators.required]],
+    //   password: ['Dealer@123', [Validators.required]],
+      
+    // });
+
     this.loginForm = this.formBuilder.group({
-      username: ['CUS0435', [Validators.required]],
-      password: ['Dealer@123', [Validators.required]],
+      username: ['', [Validators.required]],
+      password: ['', [Validators.required]],
     });
     // get return url from route parameters or default to '/'
     // this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';

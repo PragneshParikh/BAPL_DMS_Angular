@@ -62,6 +62,8 @@
 
                     <th>Status</th>
 
+                    <th>Action</th>
+
                 </tr>
 
             </thead>
@@ -186,25 +188,22 @@
 
                     <!-- STATUS -->
 
-                 <td>
+                    <td>
+                        <span class="badge cursor-pointer" [ngClass]="
+                            emp.isActive ? 'bg-success' : 'bg-danger'"
+                            title="Click to change status"
+                            (click)="toggleStatus(emp, $event)">
+                            {{ emp.isActive ? 'Active' : 'Inactive' }}
+                        </span>
+                    </td>
 
-                    <span class="badge cursor-pointer" [ngClass]="
-                        emp.isActive
-                        ? 'bg-success'
-                        : 'bg-danger'
-                        " title="Click to change status"
-                        (click)="toggleStatus(emp, $event)">
-
-                        {{
-                        emp.isActive
-                        ? 'Active'
-                        : 'Inactive'
-                        }}
-
-                    </span>
-
-                </td>
-
+                    <!-- ACTION -->
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-soft-primary"
+                            (click)="openEditPopup(emp); $event.stopPropagation()">
+                            <i class="ri-pencil-fill fs-12"></i> Edit
+                        </button>
+                    </td>
                 </tr>
 
             </tbody>
@@ -244,9 +243,11 @@
 
             <div class="modal-body">
 
-                <app-employee-master *ngIf="selectedEmployee" [popupData]="selectedEmployee" [isPopupMode]="true">
-
-                </app-employee-master>
+              <app-employee-master *ngIf="selectedEmployee"
+                [popupData]="selectedEmployee"
+                [isPopupMode]="true"
+                (closed)="closePopup()">
+            </app-employee-master>
 
             </div>
 

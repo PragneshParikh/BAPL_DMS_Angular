@@ -22,6 +22,12 @@ export class LocationMasterService {
   getLocationByDealerCode(dealerCode: string): Observable<any> {
     return this.httpClient.get<any>(`${this.baseUrl}/LocationMaster/GetLocationByDealerCode/${dealerCode}`);
   }
+
+
+  getAllLocationByDealerCode(dealerCode: string): Observable<any> {
+    return this.httpClient.get<any>(`${this.baseUrl}/LocationMaster/GetAllLocationByDealerCode/${dealerCode}`);
+  }
+  
   getLocationDropdownByDealerCode(dealerCode: string | null): Observable<any> {
     let params = new HttpParams();
     if (dealerCode) {

@@ -66,6 +66,8 @@ import { JobTypeMaster } from './components/job-type-master/job-type-master';
 import { ServiceHeadMaster } from './components/service-head-master/service-head-master';
 import { ServiceTypeMaster } from './components/service-type-master/service-type-master';
 import { JobSourceMaster } from './components/job-source-master/job-source-master';
+import { RoleMasterList } from './components/role-master/role-list-master/role-list-master';
+import { RoleMaster } from './components/role-master/role-master';
 import { WarrantyJobCardClaim } from './components/warranty-job-card-claim/warranty-job-card-claim';
 
 
@@ -206,10 +208,12 @@ export const routes: Routes = [
       { path: 'designation-master', component: DesignationMasterList, data: [64] },
       { path: 'designation-master/add', component: DesignationMaster, data: [64] },
       { path: 'designation-master/edit/:id', component: DesignationMaster, data: [64] },
-
+      { path: 'role-master', component: RoleMasterList, data: [75] },
+      { path: 'role-master/add', component: RoleMaster, data: [75] },
+      { path: 'role-master/edit/:id', component: RoleMaster, data: [75] },
 
       { path: 'free-service-claim', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim-list/free-service-claim-list').then(m => m.FreeServiceClaimList) },
-      { path: 'free-service-claim:id', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim').then(m => m.FreeServiceClaim) },
+      { path: 'free-service-claim/:id', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim').then(m => m.FreeServiceClaim) },
 
       { path: 'free-service-rate', data: [67], loadComponent: () => import('./components/free-service-rate/free-service-rate-list/free-service-rate-list').then(m => m.FreeServiceRateList) },
       { path: 'free-service-rate/:id', data: [67], loadComponent: () => import('./components/free-service-rate/free-service-rate').then(m => m.FreeServiceRate) },
