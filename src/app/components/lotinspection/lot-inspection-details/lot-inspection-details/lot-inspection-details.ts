@@ -87,6 +87,7 @@ export class LotInspectionDetails implements OnInit {
 
   // ================= GET DATA =================
   getInvoiceData() {
+    debugger;
     this.loader.show();
     // current datetime 
     const today = new Date();
@@ -102,8 +103,10 @@ export class LotInspectionDetails implements OnInit {
       next: (res: any) => {
 
         if (res?.data?.length > 0) {
+          console.log(res)
 
-          this.isLotInspected = res?.data[0]?.isLotInspected;
+          this.isLotInspected = res?.data[0]?.islotinspected;
+          console.log("isLotInspected",this.isLotInspected);
 
           const first = res.data[0];
 
