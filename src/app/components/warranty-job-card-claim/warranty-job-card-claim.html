@@ -20,7 +20,7 @@
             <div class="col-md-2">
                 <label class="form-label">Claim Type</label>
                 <select class="form-select form-select-sm">
-                    <option>Warranty</option>
+                    <option value="Warranty">Warranty</option>
                 </select>
             </div>
 
@@ -47,12 +47,15 @@
 
             <div class="col-md-2">
                 <label class="form-label">Date</label>
-                <input type="date" class="form-control form-control-sm">
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="toDate">
             </div>
 
             <div class="col-md-1">
-                <label class="form-label">PrevYear</label>
-                <input type="text" class="form-control form-control-sm">
+                <label class="form-label d-block">PrevYear</label>
+
+                <div class="form-check form-switch form-switch-md">
+                    <input class="form-check-input" type="checkbox" role="switch" [(ngModel)]="isPrevYear">
+                </div>
             </div>
 
         </div>
@@ -60,34 +63,55 @@
         <!-- Row 2 -->
         <div class="row g-2 mt-1">
 
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">Supplier</label>
-                <select class="form-select form-select-sm">
-                    <option>--Select--</option>
-                    <option>Bgauss</option>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedSupplierId">
+
+                    <option [ngValue]="null">--Select--</option>
+
+                    <option *ngFor="let supplier of supplierList" [ngValue]="supplier.id">
+
+                        {{ supplier.ledgerName }}
+
+                    </option>
+
                 </select>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">Service Head</label>
-                <select class="form-select form-select-sm">
-                    <option>Select Service Head</option>
-                </select>
+                  <input type="text" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Service Type</label>
+                 <input type="text" class="form-control form-control-sm">
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">Job No</label>
 
                 <div class="input-group input-group-sm">
                     <input type="text" class="form-control">
 
-                    <button class="btn btn-primary"
-                    (click)="openJobSearch(jobSearchPopup)">
+                    <button class="btn btn-primary" (click)="openJobSearch(jobSearchPopup)">
                         <i class="ri-add-line"></i>
                     </button>
                 </div>
             </div>
+        </div>
 
+        <!-- Row 3 -->
+        <div class="row g-2 mt-1">
+            <div class="col-md-3">
+                <label class="form-label">Chassis No</label>
+                <input type="text" class="form-control form-control-sm">
+            </div>
+
+
+            <div class="col-md-3">
+                <label class="form-label">Motor No</label>
+                <input type="text" class="form-control form-control-sm">
+            </div>
             <div class="col-md-2">
                 <label class="form-label">Invoice No</label>
                 <input type="text" class="form-control form-control-sm">
@@ -97,28 +121,12 @@
                 <label class="form-label">Invoice Date</label>
                 <input type="date" class="form-control form-control-sm">
             </div>
-
-            <div class="col-md-2">
-                <label class="form-label">Chassis No</label>
-                <input type="text" class="form-control form-control-sm">
-            </div>
-
-        </div>
-
-        <!-- Row 3 -->
-        <div class="row g-2 mt-1">
-
-            <div class="col-md-2">
-                <label class="form-label">Motor No</label>
-                <input type="text" class="form-control form-control-sm">
-            </div>
-
             <div class="col-md-2">
                 <label class="form-label">KMs</label>
                 <input type="text" class="form-control form-control-sm">
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">Customer Name</label>
                 <input type="text" class="form-control form-control-sm">
             </div>
@@ -138,32 +146,10 @@
                 <input type="date" class="form-control form-control-sm">
             </div>
 
-        </div>
-
-        <!-- Row 4 -->
-        <div class="row g-2 mt-1">
-
-            <div class="col-md-2">
-                <label class="form-label">LR/GR No</label>
-                <input type="text" class="form-control form-control-sm">
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label">LR/GR Date</label>
-                <input type="date" class="form-control form-control-sm">
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label">Disp. Through</label>
-                <select class="form-select form-select-sm">
-                    <option>--Select--</option>
-                </select>
-            </div>
-
             <div class="col-md-3">
                 <label class="form-label">Claim Account</label>
                 <select class="form-select form-select-sm">
-                    <option>--Select--</option>
+                    <option value="Warranty Claim">Warranty Claim</option>
                 </select>
             </div>
 
@@ -201,10 +187,7 @@
     <div class="modal-header bg-primary">
         <h5 class="modal-title text-white">Job Search</h5>
 
-        <button
-            type="button"
-            class="btn-close text-white"
-            (click)="modal.dismiss()">
+        <button type="button" class="btn-close text-white" (click)="modal.dismiss()">
         </button>
     </div>
 
@@ -215,53 +198,39 @@
 
             <div class="col-md-2">
                 <label>Job No</label>
-                <input
-                    type="text"
-                    class="form-control form-control-sm"
-                    >
+                <input type="text" class="form-control form-control-sm">
             </div>
 
             <div class="col-md-2">
                 <label>RBill Date From</label>
-                <input
-                    type="date"
-                    class="form-control form-control-sm"
-                    [(ngModel)]="jobSearch.rBillfromDate"
-                    >
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="jobSearch.rBillfromDate">
             </div>
 
             <div class="col-md-2">
                 <label>RBill Date To</label>
-                <input
-                    type="date"
-                    class="form-control form-control-sm"
-                    [(ngModel)]="jobSearch.rBilltoDate"
-                    >
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="jobSearch.rBilltoDate">
             </div>
 
             <div class="col-md-2">
                 <label>Location</label>
-                <select
-                    class="form-select form-select-sm"
-                   >
+                <select class="form-select form-select-sm" [(ngModel)]="selectedLocationId">
 
-                    <option value="">Select</option>
+                    <option [ngValue]="null">--Select--</option>
 
-                    <!-- <option *ngFor="let loc of locationList"
-                            [value]="loc.id">
-                        {{loc.locationName}}
-                    </option> -->
+                    <option *ngFor="let location of locationList" [ngValue]="location.loccode">
+
+                        {{ location.locname }}
+
+                    </option>
 
                 </select>
             </div>
 
             <div class="col-md-2 d-flex align-items-end">
-                <button
-                    class="btn btn-primary btn-sm"
-                    >
+                <button class="btn btn-primary btn-sm">
 
                     <i class="ri-search-line me-1"></i>
-                    
+
                 </button>
             </div>
 
