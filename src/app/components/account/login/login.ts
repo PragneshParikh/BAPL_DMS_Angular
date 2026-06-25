@@ -78,7 +78,7 @@ export class Login {
         this.storageService.setRole(data.role);
         this.storageService.setSelectedModule('ShowRoom');
         if (data.userName) {
-          localStorage.setItem('dealerCode', data.dealrCode);
+          localStorage.setItem('dealerCode', data.dealerCode);
         }
         this.router.navigate(['/']);
       } else {
