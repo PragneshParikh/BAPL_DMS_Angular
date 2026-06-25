@@ -11,26 +11,31 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
+                            <div class="float-start col-sm-2">
+                                <label class="form-label">Select Location</label>
+                                <select class="form-select form-select-sm" name="location"
+                                    (change)="onChangeLocation($event)">
+                                    <option> -- Select -- </option>
+                                    <option *ngFor="let location of lstLocations" [value]="location.loccode"> {{
+                                        location.locname }}
+                                    </option>
+                                </select>
+                            </div>
 
                             <div class="d-flex align-items-center gap-2">
-
+                                <div class="search-box position-relative">
+                                    <input type="text" class="form-control form-control-sm" placeholder="Search..."
+                                        [(ngModel)]="searchTerm" (keyup)="onSearchChange()">
+                                    <i class="ri-search-line search-icon"></i>
+                                </div>
                                 <button class="btn btn-sm btn-primary" (click)="addMaterialTransfer()">
                                     Add
                                 </button>
-
                                 <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
                                     (click)="downloadExcel()">
                                     <i class="ri-file-excel-2-line"></i>
                                 </button>
-
-                                <div class="search-box position-relative">
-                                    <input type="text" class="form-control" placeholder="Search..."
-                                        [(ngModel)]="searchTerm" (keyup)="onSearchChange()">
-                                    <i class="ri-search-line search-icon"></i>
-                                </div>
-
                             </div>
-
                         </div>
                     </div>
                     <div class="card-body">

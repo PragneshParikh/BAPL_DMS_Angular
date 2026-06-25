@@ -19,13 +19,12 @@ import { JobCardService } from '../../core/services/job-card-service';
 export class WarrantyJobCardClaim implements OnInit {
   jobCardList: any[] = [];
   WjobClaimprefix: string = '';
-  isPrevYear: boolean = false;
   supplierList: any[] = [];
   selectedSupplierId: number | null = null;
-  selectedLocationId: number | null = null;
+  selectedLocationId: string | null = null;
 
   jobSearch: any = {
-    jobNo: '',
+    jobNo: 0,
     rBillfromDate: '',
     rBilltoDate: '',
     locationId: ''
@@ -68,7 +67,8 @@ export class WarrantyJobCardClaim implements OnInit {
     this.loadPrefix();
     this.loadSuplier();
     this.loadlocation();
-  
+    this.loadJobCarDetails();
+
 
   }
 
@@ -130,7 +130,27 @@ export class WarrantyJobCardClaim implements OnInit {
     })
   }
 
-  
+
+  loadJobCarDetails(): void {
+    this.loader.show();
+    const dealerCode = this.storageService.getDealerCode();
+    let jobNo = this.jobSearch.jobNo;
+    let fromDate=this.jobSearch.rBillfromDate;
+    let toDate = this.jobSearch.rBilltoDate;
+    let serviceloc = this.selectedLocationId;
+
+
+    this.jobcardService.getIssueTypebasedJobDetails(dealerCode,jobNo,serviceloc,fromDate,toDate).subscribe({
+      next:(res : any)=>{
+        this.loader.hide();
+        this.jobCardList = res;
+      },error:(err)=>{
+        this.loader.hide();
+        console.log(err)
+      }
+    })
+
+  }
 
   openJobSearch(content: any) {
     this.loadlocation();

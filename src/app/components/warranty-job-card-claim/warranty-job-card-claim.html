@@ -50,14 +50,6 @@
                 <input type="date" class="form-control form-control-sm" [(ngModel)]="toDate">
             </div>
 
-            <div class="col-md-1">
-                <label class="form-label d-block">PrevYear</label>
-
-                <div class="form-check form-switch form-switch-md">
-                    <input class="form-check-input" type="checkbox" role="switch" [(ngModel)]="isPrevYear">
-                </div>
-            </div>
-
         </div>
 
         <!-- Row 2 -->
@@ -227,7 +219,7 @@
             </div>
 
             <div class="col-md-2 d-flex align-items-end">
-                <button class="btn btn-primary btn-sm">
+                <button class="btn btn-primary btn-sm" (click)="loadJobCarDetails()">
 
                     <i class="ri-search-line me-1"></i>
 
