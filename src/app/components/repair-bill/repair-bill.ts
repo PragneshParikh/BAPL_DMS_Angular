@@ -199,7 +199,15 @@ export class RepairBill implements OnInit {
 
   }
 
+saveOrUpdateRepairBill() {
 
+  
+  this.saveRepairBill();
+ 
+  if (this.selectedJobCard?.jobCardHeader?.jobtype != 1) {
+    this.updateRepairBill();
+  }
+}
   loadPrefix(): void {
     this.loader.show();
     const dealerCode = this.storageService.getDealerCode();
