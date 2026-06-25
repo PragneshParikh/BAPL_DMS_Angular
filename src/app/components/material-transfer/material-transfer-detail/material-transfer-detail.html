@@ -14,19 +14,19 @@
                             <div class="row mb-2 g-1">
                                 <div class="col-md-2">
                                     <label class="form-label">Prefix No</label>
-                                    <input type="text" class="form-control form-control-sm" name="prefix"
-                                        #prefix="ngModel" [(ngModel)]="formData.prefix" required [disabled]="true">
+                                    <input type="text" class="form-control form-control-sm bg-light" name="prefix"
+                                        #prefix="ngModel" [(ngModel)]="formData.prefix" required readonly>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Issue Number</label>
-                                    <input type="text" class="form-control form-control-sm" name="issueNumber"
-                                        #issueNumber="ngModel" [(ngModel)]="formData.issueNumber" [disabled]="true">
+                                    <input type="text" class="form-control form-control-sm bg-light" name="issueNumber"
+                                        #issueNumber="ngModel" [(ngModel)]="formData.issueNumber" readonly>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Job No (ODO {{ formData.OdoMeter }}) </label>
                                     <div class="input-group input-group-sm">
-                                        <input type="text" class="form-control form-control-sm" name="jobNo"
-                                            #jobNo="ngModel" [(ngModel)]="formData.jobNo" required [disabled]="true">
+                                        <input type="text" class="form-control form-control-sm bg-light" name="jobNo"
+                                            #jobNo="ngModel" [(ngModel)]="formData.jobNo" required readonly>
                                         <button type="button" class="btn btn-outline-secondary bg-primary text-white"
                                             (click)="openJobSearch()">
                                             <i class="ri-file-line"></i>
@@ -35,15 +35,18 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Date</label>
-                                    <input type="date" class="form-control form-control-sm" name="date"
-                                        [(ngModel)]="formData.date" #date="ngModel" [disabled]="true" />
+                                    <input type="date" class="form-control form-control-sm bg-light" name="date"
+                                        [(ngModel)]="formData.date" #date="ngModel" readonly />
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Technician</label>
                                     <select class="form-select form-select-sm" name="technician"
                                         [(ngModel)]="formData.technician" [disabled]="true">
-                                        <option *ngFor="let tech of lstTechnician" [value]="tech.id"> {{ tech.name }}
-                                        </option>
+                                        <!-- <option *ngFor="let tech of lstTechnician" [value]="tech.id"> {{ tech.name }}
+                                        </option> -->
+                                        <option value="Manoj">Manoj</option>
+                                        <option value="Suraj">Suraj</option>
+                                        <option value="Vishal">Vishal</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
@@ -242,12 +245,12 @@
                         </table>
                     </div>
 
-                    <div>
+                    <!-- <div>
                         <div class="mt-2 col-md-12">
                             <label class="form-label">Remarks</label>
                             <textarea class="form-control form-control-sm" rows="3" name="remarks"></textarea>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Button -->
                     <div class=" row mt-3">
