@@ -38,6 +38,7 @@ export class MaterialTransfer implements OnInit {
 
   dealerCode: string = '';
   isSuperAdmin: boolean = false;
+  selectedLocation: string = '';
 
   lstLocations: any[] = [];
 
@@ -61,7 +62,8 @@ export class MaterialTransfer implements OnInit {
   }
 
   onSearchChange() {
-    this.getMaterialTransfer("");
+    const _dealerCode = this.lstLocations.filter(x => x.loccode === this.selectedLocation)[0].dealerCode;
+    this.getMaterialTransfer(_dealerCode);
   }
 
   addMaterialTransfer() {

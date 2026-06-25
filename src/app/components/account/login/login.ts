@@ -45,7 +45,7 @@ export class Login {
     // this.loginForm = this.formBuilder.group({
     //   username: ['CUS0435', [Validators.required]],
     //   password: ['Dealer@123', [Validators.required]],
-      
+
     // });
 
     this.loginForm = this.formBuilder.group({
@@ -74,15 +74,15 @@ export class Login {
 
     this.authenticationService.login(this.f['username'].value, this.f['password'].value).subscribe((data: any) => {
       if (data.status == 'success') {
-        this.toastService.show(data.message, { classname: 'bg-success text-white', delay: 5000 });
+        this.toastService.show(data.message, { classname: 'bg-success text-white', delay: 2000 });
         this.storageService.setRole(data.role);
         this.storageService.setSelectedModule('ShowRoom');
-         if (data.userName) {
-          localStorage.setItem('dealerCode', data.userName);
+        if (data.userName) {
+          localStorage.setItem('dealerCode', data.dealrCode);
         }
         this.router.navigate(['/']);
       } else {
-        this.toastService.show(data.message, { classname: 'bg-danger text-white', delay: 5000 });
+        this.toastService.show(data.message, { classname: 'bg-danger text-white', delay: 2000 });
       }
       this.isLoading = false;
     }, error => {
