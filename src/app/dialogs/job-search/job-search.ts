@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { LoaderService } from '../../core/services/loader';
@@ -14,6 +14,8 @@ import { SharedModule } from '../../shared/shared.module';
   styleUrl: './job-search.scss',
 })
 export class JobSearch {
+  @Input() sourceType: string;
+
   jobList: any[] = [];
 
   formData = {
@@ -40,7 +42,6 @@ export class JobSearch {
       dateFrom: new Date(new Date().setDate(new Date().getDate() - 15)).toISOString().split('T')[0],
       dateTo: new Date().toISOString().split('T')[0]
     };
-    console.log(this.formData);
   }
 
   onSubmit(form: any) {
@@ -69,18 +70,34 @@ export class JobSearch {
     const pageSize = this.pageSize;
 
     this.loader.show();
-    this.jobCardService.getFilterdDataByPaged(fromDate, toDate, jobNo, manualJobNo, pageIndex, pageSize).subscribe({
-      next: (res) => {
-        this.jobList = res.data;
-        this.collectionSize = res.totalRecords;
-        this.loader.hide();
-      },
-      error: (err) => {
-        this.loader.hide();
-        console.error(err);
-        this.toast.show('Something went wrong.', { classname: 'bg-danger text-white', delay: 5000 });
-      }
-    });
+
+    if (this.sourceType === 'material-transfer') {
+      this.jobCardService.getOpenJobCardDataByPaged(fromDate, toDate, jobNo, manualJobNo, pageIndex, pageSize, false).subscribe({
+        next: (res) => {
+          this.jobList = res.data;
+          this.collectionSize = res.totalRecords;
+          this.loader.hide();
+        },
+        error: (err) => {
+          this.loader.hide();
+          console.error(err);
+          this.toast.show('Something went wrong.', { classname: 'bg-danger text-white', delay: 5000 });
+        }
+      });
+    } else {
+      this.jobCardService.getFilterdDataByPaged(fromDate, toDate, jobNo, manualJobNo, pageIndex, pageSize).subscribe({
+        next: (res) => {
+          this.jobList = res.data;
+          this.collectionSize = res.totalRecords;
+          this.loader.hide();
+        },
+        error: (err) => {
+          this.loader.hide();
+          console.error(err);
+          this.toast.show('Something went wrong.', { classname: 'bg-danger text-white', delay: 5000 });
+        }
+      });
+    }
   }
 
   onSelectJobType(selectedRow: any) {

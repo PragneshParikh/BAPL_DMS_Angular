@@ -96,6 +96,7 @@ export class MaterialTransferDetail implements OnInit {
   lstLocation: any[] = [];
 
   dealerCode: string = '';
+  isEdit: boolean = false;
   private tempIdCounter = -1;
 
   constructor(
@@ -111,13 +112,33 @@ export class MaterialTransferDetail implements OnInit {
     private jobCardService: JobCardService,
     private taxService: TaxService
   ) {
+    // this.router.params.subscribe(params => {
+    //   this.jobId = Number(params['id']);
+    //   if (this.jobId > 0) {
+    //     this.getJobCardById(this.jobId);
+    //   }
+    // });
+
     this.router.params.subscribe(params => {
-      this.jobId = Number(params['id']);
-      if (this.jobId > 0) {
+
+      const encClaim = params['id'];
+      const decoded = atob(encClaim);
+
+      this.jobId = Number(decoded.split('|')[1]);
+
+      if (this.jobId && this.jobId !== 0) {
+        this.isEdit = true;
         this.getJobCardById(this.jobId);
       }
+      // else {
+      //   this.isEdit = false;
+      //   const to = new Date();
+      //   this.claimFormData.claimDate = to.toISOString().split('T')[0];
+      // }
+
     });
-    this.dealerCode = this.storageService.getDealerCode();
+
+    // this.dealerCode = this.storageService.getDealerCode();
   }
 
   ngOnInit() {
@@ -207,19 +228,13 @@ export class MaterialTransferDetail implements OnInit {
       this.materialTransferService.insert(lstAdded).subscribe({
         next: (result) => {
           this.loader.hide();
-          this.toast.show("Record inserted sucessfully.", {
-            classname: 'bg-success text-white',
-            delay: 5000
-          });
-          this.route.navigate['/material-transfer'];
+          this.toast.show("Record inserted sucessfully.", { classname: 'bg-success text-white', delay: 5000 });
+          this.route.navigate(['/material-transfer']);
         },
         error: (err) => {
           this.loader.hide();
           console.error(err);
-          this.toast.show('Failed to load items. Please try again later.', {
-            classname: 'bg-danger text-light',
-            delay: 5000
-          });
+          this.toast.show('Failed to load items. Please try again later.', { classname: 'bg-danger text-light', delay: 5000 });
         }
       })
     }
@@ -282,6 +297,16 @@ export class MaterialTransferDetail implements OnInit {
       return;
     }
 
+    if (this.newItem.technician === null || this.newItem.technician === '') {
+      this.toast.show('Please select the technician.', { classname: 'bg-warning text-white', delay: 5000 });
+      return;
+    }
+
+    if (this.newItem.issueType === null || this.newItem.issueType === '') {
+      this.toast.show('Please select the issuetype.', { classname: 'bg-warning text-white', delay: 5000 });
+      return;
+    }
+
 
     let index = this.items.findIndex(x => x.id === this.newItem.id);
 
@@ -316,6 +341,8 @@ export class MaterialTransferDetail implements OnInit {
       backdrop: 'static',
       keyboard: false
     });
+
+    modalRef.componentInstance.sourceType = 'material-transfer';
 
     modalRef.result.then(
       (result) => {
@@ -436,6 +463,8 @@ export class MaterialTransferDetail implements OnInit {
           this.newItem.itemname = selectedItem.itemname;
           this.newItem.itemId = selectedItem.id;
           this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
+          this.newItem.batchClosingQty = selectedItem.batchClosingQty;
+          this.newItem.quantity = 1;
         },
         error: (err) => {
           this.loader.hide();

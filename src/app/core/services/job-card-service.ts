@@ -92,6 +92,20 @@ export class JobCardService {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetFilteredJobCard`, { params });
   }
 
+  getOpenJobCardDataByPaged(fromDate: Date | null, toDate: Date | null, jobNo: number | null, manualJobNo: number | null, pageIndex: number, pageSize: number, status: boolean): Observable<any> {
+    const params = {
+      pageIndex: pageIndex.toString(),
+      pageSize: pageSize.toString(),
+      fromDate: fromDate ? new Date(fromDate).toISOString() : '',
+      toDate: toDate ? new Date(toDate).toISOString() : '',
+      jobNo: jobNo ? jobNo.toString() : '',
+      manualJobNo: manualJobNo ? manualJobNo.toString() : '',
+      isClosed: status.toString()
+    };
+
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardByStatus`, { params });
+  }
+
   getJobCardById(id: number): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/JobCard/${id}`);
   }
@@ -104,7 +118,7 @@ export class JobCardService {
     return this.httpClient.post<any[]>(`${this.baseUrl}/JobCard/SearchJobCard/`, payload)
   }
 
-  getJobCardServiceHistory(chassisNo: string,jobCardId:number) {
+  getJobCardServiceHistory(chassisNo: string, jobCardId: number) {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetServiceHistory/${chassisNo}/${jobCardId}`)
   }
 
