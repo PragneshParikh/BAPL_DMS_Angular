@@ -157,4 +157,8 @@ export class JobCardService {
       { params }
     );
   }
+
+  getIssueTypebasedJobDetails(dealerCode: string,jobNo:number,serviceloc:string,fromDate: Date,toDate :Date) {
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetIssueTypebasedJobDetails/${dealerCode}/${jobNo}/${serviceloc}/${fromDate}/${toDate}`)
+  }
 }
