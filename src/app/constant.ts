@@ -154,7 +154,8 @@ export const ModuleTypes = [
     { name: 'receipt_entry', moduleName: 'Receipt Entry' },
     { name: 'vehicle_transfer', moduleName: 'Vehicle Stock Transfer' },
     { name: 'job_card', moduleName: 'Job Card' },
-    { name: 'wclaim_prefix', moduleName:'Warranty Claim Prefix'}
+    { name: 'wclaim_prefix', moduleName: 'Warranty Claim Prefix' },
+    { name: 'material_transfer', moduleName: 'Material Transfer' }
 ]
 
 export const EmployeeDesignations = [
