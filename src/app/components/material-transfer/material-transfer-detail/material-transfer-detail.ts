@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { JobSearch } from '../../../dialogs/job-search/job-search';
 import { LoaderService } from '../../../core/services/loader';
 import { MaterialTransferService } from '../../../core/services/material-transfer';
@@ -26,9 +26,10 @@ import { PrefixService } from '../../../core/services/prefix';
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
-    GetTechnicianNamePipe,
+    // GetTechnicianNamePipe,
     GetIssueTypeNamePipe,
-    NgSelectModule
+    NgSelectModule,
+    NgbTooltip
   ],
   templateUrl: './material-transfer-detail.html',
   styleUrl: './material-transfer-detail.scss',
@@ -36,7 +37,7 @@ import { PrefixService } from '../../../core/services/prefix';
 export class MaterialTransferDetail implements OnInit {
 
   issueTypes = IssueTypes.filter(x => x.id === 1 || x.id === 2);
-  lstTechnician = TechnicianList;
+  // lstTechnician = TechnicianList;
 
   formData: any = {
     prefix: '',
@@ -44,7 +45,7 @@ export class MaterialTransferDetail implements OnInit {
     jobNo: 0,
     OdoMeter: 0,
     date: new Date(),
-    technician: '',
+    // technician: '',
     location: '',
   };
   newItem = {
@@ -61,7 +62,7 @@ export class MaterialTransferDetail implements OnInit {
     // issueSubType: '',
     inwardsrno: '',
     issuesrno: '',
-    technician: 0,
+    // technician: 0,
     cgst: '',
     sgst: '',
     igst: '',
@@ -302,10 +303,10 @@ export class MaterialTransferDetail implements OnInit {
       return;
     }
 
-    if (this.newItem.technician === null || this.newItem.technician === 0) {
-      this.toast.show('Please select the technician.', { classname: 'bg-warning text-white', delay: 5000 });
-      return;
-    }
+    // if (this.newItem.technician === null || this.newItem.technician === 0) {
+    //   this.toast.show('Please select the technician.', { classname: 'bg-warning text-white', delay: 5000 });
+    //   return;
+    // }
 
     if (this.newItem.issueType === null || this.newItem.issueType === '') {
       this.toast.show('Please select the issuetype.', { classname: 'bg-warning text-white', delay: 5000 });
@@ -405,7 +406,7 @@ export class MaterialTransferDetail implements OnInit {
       // issueSubType: '',
       inwardsrno: '',
       issuesrno: '',
-      technician: 0,
+      // technician: 0,
       cgst: '',
       sgst: '',
       igst: '',
@@ -514,10 +515,10 @@ export class MaterialTransferDetail implements OnInit {
       // issueSubType: '',
       inwardsrno: '',
       issuesrno: '',
-      technician: row.technician,
-      cgst: '',
-      sgst: '',
-      igst: '',
+      // technician: row.technician,
+      cgst: row.cgst,
+      sgst: row.sgst,
+      igst: row.igst,
       amount: row.amount,
       mrp: '',
       // wav: '',
@@ -628,12 +629,12 @@ export class MaterialTransferDetail implements OnInit {
 
 }
 
-export const TechnicianList = [
-  { id: 1, name: 'Technician Rajesh' },
-  { id: 2, name: 'Technician Amit' },
-  { id: 3, name: 'Technician Suresh' },
-  { id: 4, name: 'Technician Rakesh' },
-  { id: 5, name: 'Technician Manoj' },
-  { id: 6, name: 'Technician Mitesh' },
-  { id: 7, name: 'Technician Manish' }
-]
+// export const TechnicianList = [
+//   { id: 1, name: 'Technician Rajesh' },
+//   { id: 2, name: 'Technician Amit' },
+//   { id: 3, name: 'Technician Suresh' },
+//   { id: 4, name: 'Technician Rakesh' },
+//   { id: 5, name: 'Technician Manoj' },
+//   { id: 6, name: 'Technician Mitesh' },
+//   { id: 7, name: 'Technician Manish' }
+// ]
