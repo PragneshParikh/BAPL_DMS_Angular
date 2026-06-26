@@ -28,7 +28,7 @@
                                         <input type="text" class="form-control form-control-sm bg-light" name="jobNo"
                                             #jobNo="ngModel" [(ngModel)]="formData.jobNo" required readonly>
                                         <button type="button" class="btn btn-outline-secondary bg-primary text-white"
-                                            (click)="openJobSearch()">
+                                            [ngbTooltip]="'Job Search'" (click)="openJobSearch()">
                                             <i class="ri-file-line"></i>
                                         </button>
                                     </div>
@@ -126,18 +126,19 @@
                                     <input type="text" class="form-control form-control-sm" name="remarks"
                                         #remarks="ngModel" [(ngModel)]="newItem.remarks">
                                 </div>
-                                <div class="col-md-3">
+                                <!-- <div class="col-md-3">
                                     <label class="form-label">Technician</label>
                                     <select class="form-select form-select-sm" name="technician" #technician="ngModel"
                                         [(ngModel)]="newItem.technician">
                                         <option *ngFor="let tech of lstTechnician" [value]="tech.id">{{ tech.name }}
                                         </option>
                                     </select>
-                                </div>
-                                <div class="col-md-1">
+                                </div> -->
+                                <div class="col-md-2">
                                     <label class="form-label">Issue Type</label>
                                     <select class="form-select form-select-sm" name="issueType" #issueType="ngModel"
                                         [(ngModel)]="newItem.issueType">
+                                        <option value=""> -- Select -- </option>
                                         <option *ngFor="let issue of issueTypes" [value]="issue.id">
                                             {{ issue.name }}
                                         </option>
@@ -162,21 +163,21 @@
                                     <tr>
                                         <th>Action</th>
                                         <th>S. No.</th>
-                                        <th>Item</th>
-                                        <th>Description</th>
+                                        <th>Part Code</th>
+                                        <th>Part Description</th>
                                         <th>Qty</th>
                                         <th>Rate</th>
                                         <th>Stock</th>
                                         <th>Issue Type</th>
                                         <th>Inward Sr No.</th>
                                         <th>Issue Sr No.</th>
-                                        <th>Technician</th>
+                                        <!-- <th>Technician</th> -->
                                         <th>CGST(%)</th>
                                         <th>SGST(%)</th>
                                         <th>IGST(%)</th>
                                         <th>Amount</th>
                                         <th>MRP</th>
-                                        <th>Remarks</th>
+                                        <!-- <th>Remarks</th> -->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -201,18 +202,18 @@
                                         <td class="text-nowrap">{{ item.issueType | getIssueTypeName: issueTypes }}</td>
                                         <td class="text-nowrap">{{ item.inwardsrno }}</td>
                                         <td class="text-nowrap">{{ item.issuesrno }}</td>
-                                        <td class="text-nowrap">{{ item.technician | getTechnicianName: lstTechnician }}
-                                        </td>
+                                        <!-- <td class="text-nowrap">{{ item.technician | getTechnicianName: lstTechnician }}
+                                        </td> -->
                                         <td>{{ item.cgst }}</td>
                                         <td>{{ item.sgst }}</td>
                                         <td>{{ item.igst }}</td>
                                         <td class="text-nowrap">{{ item.amount }}</td>
                                         <td class="text-nowrap">{{ item.mrp | number:'1.2-2' }}</td>
-                                        <td class="text-nowrap" [title]="item.remarks">
+                                        <!-- <td class="text-nowrap" [title]="item.remarks">
                                             {{ item.remarks?.length > 30
                                             ? (item.remarks | slice:0:30) + '...'
                                             : item.remarks }}
-                                        </td>
+                                        </td> -->
                                     </tr>
 
                                 </tbody>
@@ -222,8 +223,8 @@
                                         <td>{{ getTotalQty() }}</td>
                                         <td colspan="9"></td>
                                         <td>{{ getTotalAmount() }}</td>
-                                        <td></td>
-                                        <td></td>
+                                        <!-- <td></td>
+                                        <td></td> -->
                                     </tr>
                                 </tfoot>
 

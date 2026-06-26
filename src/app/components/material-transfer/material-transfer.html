@@ -15,7 +15,7 @@
                                 <label class="form-label">Select Location</label>
                                 <select class="form-select form-select-sm" name="location"
                                     (change)="onChangeLocation($event)" [(ngModel)]="selectedLocation">
-                                    <option> -- Select -- </option>
+                                    <option value=""> -- Select -- </option>
                                     <option *ngFor="let location of lstLocations" [value]="location.loccode"> {{
                                         location.locname }}
                                     </option>
