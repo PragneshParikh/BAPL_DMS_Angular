@@ -22,16 +22,16 @@ export class RepairBillPerforma implements OnInit {
   issueTypes = IssueTypes;
   invoiceTotal: number
   taxSummary: any[] = [];
-  sgstRate:number
-  cgstRate:number
-  igstRate:number
+  sgstRate: number
+  cgstRate: number
+  igstRate: number
 
 
 
   constructor(private loader: LoaderService,
     private repairBillService: RepairBillService,
     private storageService: StorageService,
-    private convertToWord : CurrencyService,
+    private convertToWord: CurrencyService,
     private route: ActivatedRoute,
   ) {
 
@@ -67,10 +67,9 @@ export class RepairBillPerforma implements OnInit {
         this.invoiceTotal = (this.performaData.subTotal || 0) + (this.performaData.roundOff || 0)
         this.loadTaxSummary();
 
-        console.log(this.performaData);
       },
       error: (err) => {
-        console.log(err);
+        console.error(err);
         this.loader.hide();
 
       }
@@ -114,18 +113,18 @@ export class RepairBillPerforma implements OnInit {
 
   loadTaxSummary() {
 
-  this.taxSummary = [
-    {
-      sgstRate : this.performaData.hsncoDeTaxSummary[1].sgstRate,
-      cgstRate : this.performaData.hsncoDeTaxSummary[1].cgstRate,
-      igstRate : this.performaData.hsncoDeTaxSummary[1].igstRate,
-      taxableValue: this.totalTaxable,
-      sgstAmount: this.totalSGST,
-      cgstAmount: this.totalCGST,
-      igstAmount: this.totalIGST
-    }
-  ];
+    this.taxSummary = [
+      {
+        sgstRate: this.performaData.hsncoDeTaxSummary[1].sgstRate,
+        cgstRate: this.performaData.hsncoDeTaxSummary[1].cgstRate,
+        igstRate: this.performaData.hsncoDeTaxSummary[1].igstRate,
+        taxableValue: this.totalTaxable,
+        sgstAmount: this.totalSGST,
+        cgstAmount: this.totalCGST,
+        igstAmount: this.totalIGST
+      }
+    ];
 
-}
+  }
 
 }

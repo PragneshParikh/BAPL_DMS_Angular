@@ -79,7 +79,6 @@ export class KitCreationDetails implements OnInit {
     this.loader.show();
     this.itemMasterService.getItemsByItemType(2).subscribe({
       next: (res) => {
-        console.log(res);
         this.itemList = res;
         this.loader.hide();
       },

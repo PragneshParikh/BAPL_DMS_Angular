@@ -366,7 +366,6 @@ export class MaterialTransferDetail implements OnInit {
         }
       },
       (reason) => {
-        console.log('Modal dismissed:', reason);
       }
     );
   }

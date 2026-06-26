@@ -20,7 +20,6 @@ export class FFIRService {
   }
 
   getJobCardHistory(chassisNo: string): Observable<any> {
-    //debugger;
     return this.httpClient.get<any[]>(`${this.baseUrl}/FFIR/GetJobCardHistory/${chassisNo}`)
   }
 

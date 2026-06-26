@@ -102,7 +102,6 @@ export class LabourRateMaster implements OnInit {
       next: (res: any) => {
         this.loader.hide();
         this.partWiseLabourList = res.data || res;
-        console.log(this.partWiseLabourList);
         this.totalPages = Math.ceil(
           this.partWiseLabourList.length /
           this.pageSize
@@ -161,7 +160,6 @@ export class LabourRateMaster implements OnInit {
     this.selectedPartwiseLabour = {
       ...item
     };
-    console.log(this.selectedPartwiseLabour)
     if (this.selectedPartwiseLabour.jobType) {
       this.jobCardService.getServiceHead(
         this.selectedPartwiseLabour.jobType
@@ -198,12 +196,8 @@ export class LabourRateMaster implements OnInit {
   }
 
   onJobType(type: 'model' | 'part'): void {
-    debugger;
-    console.log(type);
 
     if (type === 'model') {
-
-      console.log(this.selectedLabour.jobType);
 
       if (!this.selectedLabour.jobType) {
         return;
@@ -224,9 +218,6 @@ export class LabourRateMaster implements OnInit {
     }
 
     else {
-      console.log(
-        this.selectedPartwiseLabour.jobType
-      );
 
       if (!this.selectedPartwiseLabour.jobType) {
         return;
@@ -254,7 +245,6 @@ export class LabourRateMaster implements OnInit {
   // =========================================
 
   onServiceHeadChange(type: 'model' | 'part'): void {
-    debugger;
     this.serviceTypeList = [];
 
     // MODELWISE
@@ -305,7 +295,6 @@ export class LabourRateMaster implements OnInit {
           next: (res: any) => {
 
             this.serviceTypeList = res;
-            console.log(this.serviceTypeList)
 
             // AUTO SELECT SINGLE
 
