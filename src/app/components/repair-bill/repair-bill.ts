@@ -79,7 +79,7 @@ export class RepairBill implements OnInit {
   isAccessorySelected = false;
   showValidation = false;
   repairBillStatus = '';
-  issuetypeId =0;
+  issuetypeId = 0;
   issuetypeName = '';
 
   repairBillId: number = 0;
@@ -139,6 +139,7 @@ export class RepairBill implements OnInit {
   showInsuranceDropdown = false;
   selectedInsuranceId: any;
   totalTax: any;
+  totalTaxPer: number = 0;
   remarks: string;
   labourId: any;
   partwiseLabourId: any;
@@ -444,6 +445,7 @@ export class RepairBill implements OnInit {
 
                 taxableAmount: this.totalTaxableAmount ?? 0,
                 taxAmount: this.totalTax ?? 0,
+                totalTaxPer: this.totalTaxPer ?? 0,
 
                 netAmount: labour.labourRate ?? 0,
 
@@ -570,19 +572,23 @@ export class RepairBill implements OnInit {
     let cgstAmount = 0;
     let sgstAmount = 0;
     let igstAmount = 0;
+
     if (isSameState) {
 
       // Intrastate
       cgstAmount = taxableAmount * (this.selectedLabour?.cgst || 0) / 100;
       sgstAmount = taxableAmount * (this.selectedLabour?.sgst || 0) / 100;
       igstAmount = 0;
+      this.totalTaxPer = this.selectedLabour?.cgst + this.selectedLabour?.sgst
+
 
     } else {
 
       // Interstate
       cgstAmount = 0;
       sgstAmount = 0;
-      taxableAmount * (this.selectedLabour?.igst || 0) / 100;
+      igstAmount = taxableAmount * (this.selectedLabour?.igst || 0) / 100;
+      this.totalTaxPer = this.selectedLabour?.igst
     }
 
     // const cgstAmount =
@@ -629,10 +635,11 @@ export class RepairBill implements OnInit {
       taxableAmount: taxableAmount,
 
       taxAmount: this.totalTax,
+      totalTaxPer: this.totalTaxPer,
 
-      cgstAmount : cgstAmount,
-      sgstAmount : sgstAmount,
-      igstAmount : igstAmount,
+      cgstAmount: cgstAmount,
+      sgstAmount: sgstAmount,
+      igstAmount: igstAmount,
 
 
       netAmount: netAmount,
@@ -728,7 +735,7 @@ export class RepairBill implements OnInit {
     this.discountType = item.discountType;
     this.issuetypeId = item.issuetypeId;
     this.issuetypeName = item.issuetypeName;
-   
+    this.selectedIssueType = item.issuetypeId;
 
 
   }
@@ -836,13 +843,17 @@ export class RepairBill implements OnInit {
       let cgstAmount = 0;
       let sgstAmount = 0;
       let igstAmount = 0;
+      
       if (isSameState) {
 
         // Intrastate
         cgstAmount = taxableAmount * (item.cgst || 0) / 100;
         sgstAmount = taxableAmount * (item.sgst || 0) / 100;
         igstAmount = 0;
-        
+        this.totalTaxPer = this.selectedLabour?.cgst + this.selectedLabour?.sgst
+
+
+
 
       } else {
 
@@ -850,7 +861,8 @@ export class RepairBill implements OnInit {
         cgstAmount = 0;
         sgstAmount = 0;
         igstAmount = taxableAmount * (item.igst || 0) / 100;
-        
+        this.totalTaxPer = this.selectedLabour?.igst
+
       }
 
       const totalTax =
@@ -863,7 +875,7 @@ export class RepairBill implements OnInit {
       item.discountType = this.labourDiscountType;
       item.taxableAmount =
         taxableAmount;
-     
+
 
       item.taxAmount =
         totalTax;
@@ -1244,6 +1256,7 @@ export class RepairBill implements OnInit {
                 (d.igstAmount || 0),
 
               netAmount: d.netAmount || 0,
+              totalTaxPer: this.totalTaxPer ?? 0,
 
               issuetypeId: Number(d.issueType) || 0,
 
