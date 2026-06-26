@@ -171,4 +171,8 @@ export class JobCardService {
       { params }
     );
   }
+
+  getJobCardStatusById(id: Number): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardStatusById/${id}`);
+  }
 }
