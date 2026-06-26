@@ -59,4 +59,21 @@ export class ItemMasterService {
     return this.http.put(`${this.baseUrl}/ItemMaster/${item.id}`, item);
   }
 
+  getItemsByLocation(dealerLocation:string,customerLocation:string): Observable<any> {
+
+    let params = new HttpParams()
+      .set('dealerLocation', dealerLocation)
+      .set('customerLocation', customerLocation);
+
+    if (dealerLocation && dealerLocation.trim() !== '') {
+      params = params.set('dealerLocation', dealerLocation.trim());
+    }
+
+    if (customerLocation && customerLocation.trim() !== '') {
+      params = params.set('customerLocation', customerLocation.trim());
+    }
+
+    return this.http.get<any>(`${this.baseUrl}/ItemMaster/GetItemsByLocation`, { params });
+  }
+
 }

@@ -18,6 +18,7 @@ import { TRANSACTION_TYPES } from '../../../constant';
 import { PrefixService } from '../../../core/services/prefix';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 import { LMSLeadService } from '../../../core/services/lmslead-service';
+import { LedgerMasterService } from '../../../core/services/ledger-master';
 
 @Component({
   selector: 'app-add-receipt-entry',
@@ -103,6 +104,7 @@ export class AddReceiptEntry implements OnInit {
     private loader: LoaderService,
     public toaster: ToastService,
     public prefixService: PrefixService,
+    public ledgerService:LedgerMasterService
   ) {
     this.router.paramMap.subscribe(params => {
       this.id = params.get('id');
@@ -220,7 +222,7 @@ export class AddReceiptEntry implements OnInit {
   }
   getFinanciers() {
 
-    this.receiptEntryService.getLedgerByType('Financier').subscribe({
+    this.ledgerService.getLedgerByType('Financier').subscribe({
       next: (res) => {
         this.financiers = res;
 
@@ -231,7 +233,7 @@ export class AddReceiptEntry implements OnInit {
 
   getParties(): Promise<any> {
     return new Promise((resolve) => {
-      this.receiptEntryService.getLedgerByType('Receipt').subscribe({
+      this.ledgerService.getLedgerByType('Receipt').subscribe({
         next: (res) => {
 
           this.parties = res;
@@ -604,7 +606,7 @@ export class AddReceiptEntry implements OnInit {
     modalRef.result.then((newId) => {
       if (newId) {
 
-        this.receiptEntryService.getLedgerByType(type).subscribe({
+        this.ledgerService.getLedgerByType(type).subscribe({
           next: (res) => {
 
             if (type === 'Financier') {
