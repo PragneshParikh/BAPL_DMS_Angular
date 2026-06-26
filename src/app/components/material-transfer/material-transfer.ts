@@ -137,11 +137,10 @@ export class MaterialTransfer implements OnInit {
       next: (res: any) => {
         this.lstLocations = res;
         this.loader.hide();
-        console.log(this.lstLocations);
       },
       error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
         this.toast.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
       }
     })

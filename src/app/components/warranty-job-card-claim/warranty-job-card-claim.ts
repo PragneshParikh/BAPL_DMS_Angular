@@ -23,8 +23,8 @@ export class WarrantyJobCardClaim implements OnInit {
   selectedSupplierId: number | null = null;
   selectedLocationId: string | null = null;
   selectedJob: any = {};
-  claimType:string='Warranty';
- 
+  claimType: string = 'Warranty';
+
 
   jobSearch: any = {
     jobNo: 0,
@@ -94,7 +94,7 @@ export class WarrantyJobCardClaim implements OnInit {
         this.claimNo = Number(res.split('/').pop());
       }, error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
 
       }
     })
@@ -109,14 +109,13 @@ export class WarrantyJobCardClaim implements OnInit {
         this.supplierList = res;
       }, error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
       }
     })
 
   }
 
   loadlocation(): void {
-    debugger;
     this.loader.show();
     const dealerCode = this.storageService.getDealerCode();
 
@@ -124,11 +123,10 @@ export class WarrantyJobCardClaim implements OnInit {
       next: (res: any) => {
         this.loader.hide();
         this.locationList = res;
-        console.log(this.locationList);
         this.locationList = res.filter((x: any) => x.locareaidno === 2);
       }, error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
       }
     })
   }
@@ -147,10 +145,9 @@ export class WarrantyJobCardClaim implements OnInit {
       next: (res: any) => {
         this.loader.hide();
         this.jobCardList = res;
-        console.log(this.jobCardList)
       }, error: (err) => {
         this.loader.hide();
-        console.log(err)
+        console.error(err)
       }
     })
 
@@ -170,19 +167,17 @@ export class WarrantyJobCardClaim implements OnInit {
 
   selectJob(item: any, modal: any) {
 
-  this.selectedJob = { ...item };
+    this.selectedJob = { ...item };
 
-  console.log('Selected Job:', this.selectedJob);
+    modal.close();
+  }
 
-  modal.close();
-}
+  get partDetails() {
+    return this.selectedJob?.repairBillDetails?.filter(x => x.itemType === 'Part') || [];
+  }
 
-get partDetails() {
-  return this.selectedJob?.repairBillDetails?.filter(x => x.itemType === 'Part') || [];
-}
-
-get labourDetails() {
-  return this.selectedJob?.repairBillDetails?.filter(x => x.itemType === 'Labour') || [];
-}
+  get labourDetails() {
+    return this.selectedJob?.repairBillDetails?.filter(x => x.itemType === 'Labour') || [];
+  }
 
 }

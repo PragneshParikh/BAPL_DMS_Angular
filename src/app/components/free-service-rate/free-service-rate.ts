@@ -100,7 +100,6 @@ export class FreeServiceRate implements OnInit {
 
         this.formData.effectiveDate = this.formatDate(response.effectiveDate);;
         this.formData.modelId = response.oemModelId;
-        console.log(response);
 
         this.dataSource = this.dataSource.map(item => {
           const service = response.services.find(

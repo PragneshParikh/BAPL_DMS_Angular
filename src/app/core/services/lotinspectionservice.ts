@@ -39,7 +39,6 @@ export class LotInspectionService {
   getLotinspectedExcel(invoiceNo?: string,
     fromDate?: string,
     toDate?: string): Observable<Blob> {
-    debugger
     let params = new HttpParams();
 
     if (invoiceNo) {

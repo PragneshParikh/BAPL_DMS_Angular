@@ -198,7 +198,6 @@ export class VehicleSaleBill {
     this.locationService.getLocationDropdownByDealerCode(dealerCode).subscribe({
       next: (res: any[]) => {
         this.locations = res;
-        console.log(this.locations);
       },
       error: (err) => {
         console.error('Error fetching locations', err);

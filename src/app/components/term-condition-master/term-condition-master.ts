@@ -71,8 +71,6 @@ export class TermConditionMaster implements OnInit {
               ?.ConditionName || ''
         }));
 
-        console.log(this.conditionList);
-
         this.refreshGrid();
       },
       error: (err) => {
@@ -98,7 +96,6 @@ export class TermConditionMaster implements OnInit {
   }
 
   openEditPopup(item: any): void {
-    console.log("item", item);
 
     this.selectedCondition = {
       ...item,
@@ -139,7 +136,6 @@ export class TermConditionMaster implements OnInit {
       conditionEffectiveDate: this.selectedCondition.conditionEffectiveDate
     };
 
-    console.log(payload);
 
     this.termConditionService
       .updateTermConditionMaster(payload)
@@ -154,44 +150,44 @@ export class TermConditionMaster implements OnInit {
       });
   }
 
- deleteCondition(conditionId: number, event: Event): void {
+  deleteCondition(conditionId: number, event: Event): void {
 
-  event.stopPropagation();
+    event.stopPropagation();
 
-  Swal.fire({
-    title: 'Delete Condition?',
-    text: 'Are you sure you want to delete this condition?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, Delete',
-    cancelButtonText: 'Cancel'
-  }).then((result) => {
+    Swal.fire({
+      title: 'Delete Condition?',
+      text: 'Are you sure you want to delete this condition?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Delete',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
 
-    if (!result.isConfirmed) {
-      return;
-    }
+      if (!result.isConfirmed) {
+        return;
+      }
 
-    this.termConditionService.deleteTermConditionMaster(conditionId)
-      .subscribe({
-        next: () => {
+      this.termConditionService.deleteTermConditionMaster(conditionId)
+        .subscribe({
+          next: () => {
 
-         this.toaster.show('TermCondition Deleted successfully!', {
-            classname: 'bg-success text-white',
-            delay: 5000
-          });
+            this.toaster.show('TermCondition Deleted successfully!', {
+              classname: 'bg-success text-white',
+              delay: 5000
+            });
 
-          this.getConditionList();
-        },
-        error: () => {
+            this.getConditionList();
+          },
+          error: () => {
 
-          this.toaster.show('Failed to Deleting', {
-            classname: 'bg-success text-white',
-            delay: 5000
-          });
-        }
-      });
-  });
-}
+            this.toaster.show('Failed to Deleting', {
+              classname: 'bg-success text-white',
+              delay: 5000
+            });
+          }
+        });
+    });
+  }
 
   refreshGrid(): void {
 

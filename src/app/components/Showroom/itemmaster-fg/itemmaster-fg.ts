@@ -154,7 +154,6 @@ export class ItemmasterFG implements OnInit {
     //     alert('Result ok');
     //   },
     //   (reason) => {
-    //     console.log('Modal dismissed:', reason);
     //   }
     // );
   }

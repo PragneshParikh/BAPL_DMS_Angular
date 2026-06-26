@@ -75,7 +75,6 @@ export class ExtendedBatteryWarranty implements OnInit {
       this.extendedBatteryWarrantyService.getById(this.schemeId).subscribe({
         next: (res) => {
           this.loader.hide();
-          console.log(res);
           this.formData = {
             id: res.id,
             schemeName: res.schemeName,
@@ -139,7 +138,6 @@ export class ExtendedBatteryWarranty implements OnInit {
     this.itemMasterService.getItemsByOEMModel(selectedModel).subscribe({
       next: (res) => {
         this.loader.hide();
-        console.log(res);
         this.items = res;
       },
       error: (err) => {

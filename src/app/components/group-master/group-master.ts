@@ -62,8 +62,7 @@ export class GroupMaster implements OnInit {
       next: (response: any) => {
 
         this.groupNameList = response || [];
-        console.log(this.groupNameList)
-          this.filteredList = [...this.groupNameList];
+        this.filteredList = [...this.groupNameList];
 
         this.refreshGrid();
       },
@@ -149,7 +148,6 @@ export class GroupMaster implements OnInit {
       groupName: this.groupForm.value.groupName
     };
 
-    console.log('Update Payload:', model);
 
     this.groupMasterService.updateGroupMaster(model)
       .subscribe({
@@ -248,21 +246,21 @@ export class GroupMaster implements OnInit {
 
   //#endregion
 
-   applySearch(): void {
+  applySearch(): void {
 
-  const search = this.searchText.toLowerCase().trim();
+    const search = this.searchText.toLowerCase().trim();
 
-  if (!search) {
-    this.filteredList = [...this.groupNameList];
-  } else {
-    this.filteredList = this.groupNameList.filter(x =>
-      x.groupName?.toLowerCase().includes(search)
-    );
+    if (!search) {
+      this.filteredList = [...this.groupNameList];
+    } else {
+      this.filteredList = this.groupNameList.filter(x =>
+        x.groupName?.toLowerCase().includes(search)
+      );
+    }
+
+    this.page = 1;
+    this.refreshGrid();
   }
-
-  this.page = 1;
-  this.refreshGrid();
-}
 
   //#region Pagination
 
@@ -272,15 +270,15 @@ export class GroupMaster implements OnInit {
 
     this.refreshGrid();
   }
- refreshGrid(): void {
+  refreshGrid(): void {
 
-  this.collectionSize = this.filteredList.length;
+    this.collectionSize = this.filteredList.length;
 
-  this.pagedData = this.filteredList.slice(
-    (this.page - 1) * this.pageSize,
-    (this.page - 1) * this.pageSize + this.pageSize
-  );
-}
+    this.pagedData = this.filteredList.slice(
+      (this.page - 1) * this.pageSize,
+      (this.page - 1) * this.pageSize + this.pageSize
+    );
+  }
 
   //#endregion
 

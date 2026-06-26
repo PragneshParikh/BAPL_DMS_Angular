@@ -118,7 +118,6 @@ export class Circular {
         }
       },
       (reason) => {
-        console.log('Modal dismissed:', reason);
       }
     );
   }
@@ -172,7 +171,6 @@ export class Circular {
         }
       },
       (reason) => {
-        console.log('Modal dismissed:', reason);
       }
     );
   }
@@ -227,7 +225,6 @@ export class Circular {
         }
       },
       (reason) => {
-        console.log('Modal dismissed:', reason);
       }
     );
   }

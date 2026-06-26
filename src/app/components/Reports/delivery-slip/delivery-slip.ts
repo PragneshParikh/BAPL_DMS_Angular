@@ -19,50 +19,46 @@ export class DeliverySlip implements OnInit {
   regNo!: string;
   dealerCode: any;
   saleBillId: any;
-  
+
   /**
    *
    */
   constructor(private storageService: StorageService,
     private dealerService: DealerService,
     private route: ActivatedRoute,
-    private router : Router
+    private router: Router
   ) {
 
   }
   ngOnInit(): void {
-   
+
     this.route.queryParams.subscribe(params => {
-      this.saleBillId=params['saleBillId'];
+      this.saleBillId = params['saleBillId'];
       this.partyName = params['partyName'];
       this.modelName = params['modelName'];
       this.chassisNo = params['chassisNo'];
       this.motorNo = params['motorNo'];
       this.regNo = params['regNo'];
-      this.dealerCode =params['dealerCode'];
+      this.dealerCode = params['dealerCode'];
     });
-    console.log(this.saleBillId);
-    
-     this.getDealerDetails(this.dealerCode);
+
+    this.getDealerDetails(this.dealerCode);
   }
 
-  getDealerDetails(dealerCode:string) {
+  getDealerDetails(dealerCode: string) {
 
     this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
-      this.dealer = res?.data|| null;
-      console.log(this.dealer);
-      
+      this.dealer = res?.data || null;
 
     });
   }
 
   goBack(): void {
-    console.log(this.saleBillId);
-    
-  this.router.navigate(['/vehicle-sale-bill/edit', this.saleBillId]);
-}
 
-printInvoice(): void {
-  window.print();
-}
+    this.router.navigate(['/vehicle-sale-bill/edit', this.saleBillId]);
+  }
+
+  printInvoice(): void {
+    window.print();
+  }
 }

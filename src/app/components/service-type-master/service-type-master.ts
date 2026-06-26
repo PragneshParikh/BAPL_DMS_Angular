@@ -9,20 +9,20 @@ import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-service-type-master',
-  imports: [CommonModule,FormsModule,ReactiveFormsModule,NgbPagination],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbPagination],
   templateUrl: './service-type-master.html',
   styleUrl: './service-type-master.scss',
 })
 export class ServiceTypeMaster implements OnInit {
 
-  
+
   @ViewChild('serviceTypeAdd') serviceTypeAdd!: TemplateRef<any>;
   @ViewChild('serviceTypeUpdate') serviceTypeUpdate!: TemplateRef<any>;
 
   serviceTypeForm!: FormGroup;
 
   serviceTypeList: any[] = [];
-selectedserviceHeadId: number = 0;
+  selectedserviceHeadId: number = 0;
 
   serviceHeadNameList: any[] = [];
   filteredList: any[] = [];
@@ -40,8 +40,8 @@ selectedserviceHeadId: number = 0;
     private fb: FormBuilder,
     private modalService: NgbModal,
     private toaster: ToastService,
-    private ServiceTypeMasterService : ServiceTypeService,
-    private ServiceHeadMasterService : ServiceHeadService,
+    private ServiceTypeMasterService: ServiceTypeService,
+    private ServiceHeadMasterService: ServiceHeadService,
   ) { }
 
   ngOnInit(): void {
@@ -56,15 +56,15 @@ selectedserviceHeadId: number = 0;
   }
 
   loadServiceHead(): void {
-  this.ServiceHeadMasterService.getServiceHeadMasterList().subscribe({
-    next: (res: any) => {
-      this.serviceHeadNameList = res || [];
-    },
-    error: (err) => {
-      console.error(err);
-    }
-  });
-}
+    this.ServiceHeadMasterService.getServiceHeadMasterList().subscribe({
+      next: (res: any) => {
+        this.serviceHeadNameList = res || [];
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
   //#region Get List
 
   getServiceTypeMasterList(): void {
@@ -74,7 +74,6 @@ selectedserviceHeadId: number = 0;
 
         this.serviceTypeList = response || [];
         this.filteredList = [...this.serviceTypeList];
-        console.log(this.serviceTypeList)
 
         this.refreshGrid();
       },
@@ -109,7 +108,7 @@ selectedserviceHeadId: number = 0;
     }
 
     const model = {
-      serviceHeadId : this.serviceTypeForm.value.serviceHeadId,
+      serviceHeadId: this.serviceTypeForm.value.serviceHeadId,
       ServiceTypeName: this.serviceTypeForm.value.ServiceTypeName
     };
 
@@ -137,7 +136,6 @@ selectedserviceHeadId: number = 0;
   //#region Edit
 
   openEditPopup(item: any): void {
-    console.log("edit item",item)
 
     this.serviceTypeForm.patchValue({
       serviceHeadId: item.serviceHeadId,
@@ -160,11 +158,10 @@ selectedserviceHeadId: number = 0;
 
     const model = {
       id: this.serviceTypeForm.value.serviceTypeId,
-      serviceHeadId : this.serviceTypeForm.value.serviceHeadId,
+      serviceHeadId: this.serviceTypeForm.value.serviceHeadId,
       ServiceTypeName: this.serviceTypeForm.value.ServiceTypeName
     };
 
-    console.log('Update Payload:', model);
 
     this.ServiceTypeMasterService.updateServiceTypeMaster(model)
       .subscribe({
@@ -275,30 +272,30 @@ selectedserviceHeadId: number = 0;
   //search method
   applySearch(): void {
 
-  const search = this.searchText.toLowerCase().trim();
+    const search = this.searchText.toLowerCase().trim();
 
-  if (!search) {
-    this.filteredList = [...this.serviceTypeList];
-  } else {
-    this.filteredList = this.serviceTypeList.filter(x =>
-      x.serviceTypeName?.toLowerCase().includes(search)
+    if (!search) {
+      this.filteredList = [...this.serviceTypeList];
+    } else {
+      this.filteredList = this.serviceTypeList.filter(x =>
+        x.serviceTypeName?.toLowerCase().includes(search)
+      );
+    }
+
+    this.page = 1;
+    this.refreshGrid();
+  }
+  //end
+
+  refreshGrid(): void {
+
+    this.collectionSize = this.filteredList.length;
+
+    this.pagedData = this.filteredList.slice(
+      (this.page - 1) * this.pageSize,
+      (this.page - 1) * this.pageSize + this.pageSize
     );
   }
-
-  this.page = 1;
-  this.refreshGrid();
-}
-//end
-
- refreshGrid(): void {
-
-  this.collectionSize = this.filteredList.length;
-
-  this.pagedData = this.filteredList.slice(
-    (this.page - 1) * this.pageSize,
-    (this.page - 1) * this.pageSize + this.pageSize
-  );
-}
 
 
   //#endregion

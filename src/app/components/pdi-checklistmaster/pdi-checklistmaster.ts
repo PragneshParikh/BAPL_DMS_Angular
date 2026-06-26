@@ -101,12 +101,10 @@ export class PdiChecklistmaster implements OnInit {
   }
 
   onSearch() {
-    //debugger;
     this.loadPdiChecklistList();
   }
 
   savePdiChecklistmaster(form: any) {
-    debugger
     if (form.invalid) return;
     const payload = {
       id: this.PdiChecklistmastermodel.id,
@@ -180,7 +178,6 @@ export class PdiChecklistmaster implements OnInit {
   }
   deletePdiCheclistMaster(pdicheckId: number, event: Event) {
     event.stopPropagation();
-    debugger;
     Swal.fire({
       title: 'Are you sure?',
       text: 'You want to delete this record?',

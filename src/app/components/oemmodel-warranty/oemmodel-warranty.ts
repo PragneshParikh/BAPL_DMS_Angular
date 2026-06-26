@@ -164,7 +164,6 @@ sort(field: keyof OemModelWarranty): void {
 }
 
 edit(item: OemModelWarranty) {
-  console.log("Editing item:", item);
   this.router.navigate(['/oemmodel-warranty/edit', item.id]);
 }
 

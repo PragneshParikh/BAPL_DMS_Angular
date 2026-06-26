@@ -110,11 +110,11 @@ export class LotInspectionDetails implements OnInit {
     this.headerObj.driverName = (this.headerObj.driverName || '')
       .replace(/[^a-zA-Z\s]/g, '');
   }
-  onTransporterNameInput(){
+  onTransporterNameInput() {
     this.headerObj.transporterName = (this.headerObj.transporterName || '')
       .replace(/[^a-zA-Z\s]/g, '');
   }
- 
+
   fetchLocations(): void {
     const dealerCode = this.storageService.getDealerCode();
     this.locationService.getLocationList(dealerCode).subscribe({
@@ -148,7 +148,6 @@ export class LotInspectionDetails implements OnInit {
 
   // ================= GET DATA =================
   getInvoiceData() {
-    debugger;
     this.loader.show();
     // current datetime 
     const today = new Date();
@@ -164,10 +163,8 @@ export class LotInspectionDetails implements OnInit {
       next: (res: any) => {
 
         if (res?.data?.length > 0) {
-          console.log(res)
 
           this.isLotInspected = res?.data[0]?.islotinspected;
-          console.log("isLotInspected", this.isLotInspected);
 
           const first = res.data[0];
 
@@ -237,7 +234,6 @@ export class LotInspectionDetails implements OnInit {
 
   // ================= SAVE DATA =================
   saveData() {
-    debugger;
     // VALIDATION FIRST
     const invalidRows = this.detailList.filter(x => !x.vehicleStatus || x.vehicleStatus === '');
 
