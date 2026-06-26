@@ -88,7 +88,6 @@ export class Hsnwisetaxcode implements OnInit {
   getATaxCodeList() {
     this.hsnwisetaxcodeservice.getAggregateTaxCodeList().subscribe({
       next: (res: any) => {
-        console.log("ATax List", res);
         this.ataxCodeList = res;
       },
       error: (err) => console.error(err)
@@ -147,7 +146,6 @@ export class Hsnwisetaxcode implements OnInit {
       createdBy: this.formData.createdBy
     };
 
-    console.log("Payload :", payload);
     this.loader.show();
     this.hsnwisetaxcodeservice.insertHsnwiseTaxcodedetails(payload)
       .subscribe({

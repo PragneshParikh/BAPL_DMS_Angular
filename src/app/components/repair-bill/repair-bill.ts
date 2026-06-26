@@ -199,7 +199,6 @@ export class RepairBill implements OnInit {
   }
 
   saveOrUpdateRepairBill() {
-    debugger
 
     this.saveRepairBill();
 
@@ -365,7 +364,6 @@ export class RepairBill implements OnInit {
 
     }
     this.selectedJobCard = item;
-    console.log(this.selectedJobCard);
     this.chassisNo = this.selectedJobCard.jobCardHeader.chassisno;
     this.insValidTill = this.selectedJobCard.jobCardCustomer.insuranceExpDate;
     this.vehicleSaleBillService.getPolicyNo(this.chassisNo).subscribe({
@@ -474,7 +472,7 @@ export class RepairBill implements OnInit {
     this.loader.show();
     this.oemmodelName = this.selectedJobCard?.jobCardCustomer?.modelName
     this.customerLedgerId = this.selectedJobCard?.jobCardCustomer?.customerLedgerId
-    this.labourMasterService.getLabourRateDropDown(this.oemmodelName,this.customerLedgerId).subscribe({
+    this.labourMasterService.getLabourRateDropDown(this.oemmodelName, this.customerLedgerId).subscribe({
       next: (res) => {
         this.loader.hide();
         this.labourCodeList = res;
@@ -893,7 +891,6 @@ export class RepairBill implements OnInit {
   }
 
   saveRepairBill(): void {
-    debugger
     const dealerCode = this.storageService.getDealerCode();
 
     const payload = {
@@ -1033,8 +1030,8 @@ export class RepairBill implements OnInit {
 
           this.toaster.show(
             this.selectedJobCard?.jobCardHeader?.jobtype == 1
-            ? 'Repair Bill Saved Successfully '
-            : 'Proforma Saved Successfully',
+              ? 'Repair Bill Saved Successfully '
+              : 'Proforma Saved Successfully',
             {
               classname: 'bg-success text-dark',
               delay: 3000

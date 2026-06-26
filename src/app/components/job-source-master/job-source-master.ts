@@ -8,8 +8,8 @@ import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-job-source-master',
-  standalone:true,
-  imports: [CommonModule,FormsModule,ReactiveFormsModule,NgbPagination],
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbPagination],
   templateUrl: './job-source-master.html',
   styleUrl: './job-source-master.scss',
 })
@@ -58,7 +58,6 @@ export class JobSourceMaster implements OnInit {
 
         this.JobSourceNameList = response || [];
         this.filteredList = [...this.JobSourceNameList];
-        console.log(this.JobSourceNameList)
 
         this.refreshGrid();
       },
@@ -120,7 +119,6 @@ export class JobSourceMaster implements OnInit {
   //#region Edit
 
   openEditPopup(item: any): void {
-debugger
     this.jobSourceForm.patchValue({
       jobSourceId: item.id,
       JobSourceName: item.jobSourceName
@@ -143,8 +141,6 @@ debugger
       id: this.jobSourceForm.value.jobTypeId,
       JobSourceName: this.jobSourceForm.value.JobSourceName
     };
-
-    console.log('Update Payload:', model);
 
     this.jobSourceMasterService.updateJobSourceMaster(model)
       .subscribe({
@@ -255,30 +251,30 @@ debugger
   //search method
   applySearch(): void {
 
-  const search = this.searchText.toLowerCase().trim();
+    const search = this.searchText.toLowerCase().trim();
 
-  if (!search) {
-    this.filteredList = [...this.JobSourceNameList];
-  } else {
-    this.filteredList = this.JobSourceNameList.filter(x =>
-      x.jobSourceName?.toLowerCase().includes(search)
+    if (!search) {
+      this.filteredList = [...this.JobSourceNameList];
+    } else {
+      this.filteredList = this.JobSourceNameList.filter(x =>
+        x.jobSourceName?.toLowerCase().includes(search)
+      );
+    }
+
+    this.page = 1;
+    this.refreshGrid();
+  }
+  //end
+
+  refreshGrid(): void {
+
+    this.collectionSize = this.filteredList.length;
+
+    this.pagedData = this.filteredList.slice(
+      (this.page - 1) * this.pageSize,
+      (this.page - 1) * this.pageSize + this.pageSize
     );
   }
-
-  this.page = 1;
-  this.refreshGrid();
-}
-//end
-
- refreshGrid(): void {
-
-  this.collectionSize = this.filteredList.length;
-
-  this.pagedData = this.filteredList.slice(
-    (this.page - 1) * this.pageSize,
-    (this.page - 1) * this.pageSize + this.pageSize
-  );
-}
 
 
   //#endregion

@@ -34,11 +34,9 @@ export class DealerMasterBulkDataDipatch implements OnInit {
   }
 
   uploadFile() {
-    console.log("Upload clicked");
   }
 
   onRowSelect(dealer: any) {
-    console.log("Selected Dealer:", dealer);
   }
 
   toggleSelectAll(event: any) {
@@ -54,8 +52,6 @@ export class DealerMasterBulkDataDipatch implements OnInit {
   printSelected() {
 
     const selectedDealers = this.paginatedDealerList.filter((d: any) => d.selected);
-
-    console.log("Selected Dealers:", selectedDealers);
 
   }
 

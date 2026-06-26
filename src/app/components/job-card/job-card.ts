@@ -107,7 +107,6 @@ export class JobCard {
     this.locationService.getLocationList(dealerCode).subscribe({
       next: (data: LocationName[]) => {
         this.locations = data;
-        // console.log("location data",data)
       },
       error: (err) => {
         console.error('Error fetching locations', err);
@@ -122,8 +121,6 @@ export class JobCard {
     this.jobTypeId = this.selectedJobtype;
     this.jobCardService.getInspectedChassisListDropDown(dealerCode).subscribe({
       next: (res: any) => {
-        console.log("list", res);
-
         // a duplicate chassis no remove (optional)
         this.chassisList = res.chassisNo || [];
       },
@@ -149,7 +146,6 @@ export class JobCard {
   }
 
   selectChassis(item: string) {
-    console.log('Selected:', item);
 
     this.searchModel.chassisNo = item;
     this.filteredChassisList = [];
@@ -157,14 +153,11 @@ export class JobCard {
   }
 
   loadJobCardList() {
-    // debugger;
-    //console.log("dealercode testing",this.searchModel.dealerCode);
     this.searchModel.dealerCode = this.storageService.getDealerCode();
     this.jobCardService.getJobCardList(this.searchModel)
       .subscribe({
         next: (res) => {
           this.jobCardList = res;
-          console.log("listing", this.jobCardList)
         },
         error: (err) => {
           console.error('Error fetching job cards', err);
@@ -246,37 +239,31 @@ export class JobCard {
     const target = event.target as HTMLSelectElement;
     this.selectedLocation = target.value;
 
-    console.log('Selected Location:', this.selectedLocation);
   }
   onJobType(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedJobtype = target.value;
 
-    console.log('Selected Location:', this.selectedJobtype);
   }
   onJobSource(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedJobSource = target.value;
 
-    console.log('Selected Location:', this.selectedJobSource);
   }
   onComplaints(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedComplaints = target.value;
 
-    console.log('Selected Location:', this.selectedComplaints);
   }
   onViewJobs(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedViewJobs = target.value;
 
-    console.log('Selected Location:', this.selectedViewJobs);
   }
   onChassisChange() {
     this.selectedChassis = '';
   }
   search() {
-    debugger
     const payload = {
       dealerCode: this.storageService.getDealerCode(),
       fromDate: this.searchModel.fromDate || null,
@@ -345,78 +332,78 @@ export class JobCard {
   //   XLSX.writeFile(wb, `JobCardList_${new Date().toISOString().slice(0, 10)}.xlsx`);
   // }
 
-printJobCard(item: any): void {
-  const html = this.buildInvoiceHtml(item);
-  const win = window.open('', '_blank', 'width=900,height=650');
-  if (!win) {
-    Swal.fire('Popup blocked', 'Please allow popups to print the invoice.', 'warning');
-    return;
+  printJobCard(item: any): void {
+    const html = this.buildInvoiceHtml(item);
+    const win = window.open('', '_blank', 'width=900,height=650');
+    if (!win) {
+      Swal.fire('Popup blocked', 'Please allow popups to print the invoice.', 'warning');
+      return;
+    }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    win.onload = () => {
+      win.print();
+      // win.close(); // uncomment to auto-close after printing
+    };
   }
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  win.onload = () => {
-    win.print();
-    // win.close(); // uncomment to auto-close after printing
-  };
-}
 
-private fmtDate(d: any): string {
-  if (!d) return '-';
-  const dt = new Date(d);
-  return isNaN(dt.getTime()) ? '-' : dt.toLocaleDateString('en-GB');
-}
+  private fmtDate(d: any): string {
+    if (!d) return '-';
+    const dt = new Date(d);
+    return isNaN(dt.getTime()) ? '-' : dt.toLocaleDateString('en-GB');
+  }
 
-private buildInvoiceHtml(item: any): string {
+  private buildInvoiceHtml(item: any): string {
 
-  /* ── DB source objects ─────────────────────────────────── */
-  const h  = item.jobCardHeader   ?? {};
-  const c  = item.jobCardCustomer ?? {};
-  const b  = item.jobCardBattery  ?? {};
-  const complaints: any[] = item.jobCardComplaint ?? [];
+    /* ── DB source objects ─────────────────────────────────── */
+    const h = item.jobCardHeader ?? {};
+    const c = item.jobCardCustomer ?? {};
+    const b = item.jobCardBattery ?? {};
+    const complaints: any[] = item.jobCardComplaint ?? [];
 
-  /* ── Customer (LedgerMaster party* → fallback jobCardCustomer) ── */
-  const customerName   = item.partyName     ?? c.customerName   ?? '-';
-  const customerMobile = item.partyMobileNo ?? c.customerMobile ?? '-';
-  const altMobile      = c.customerAltMobile ?? '-';
-  const address        = item.partyAddress  ?? '';
-  const city           = item.partyCity     ?? '-';
-  const pin            = item.partyPin      ?? '';
-  const state          = item.partyState    ?? '-';
-  const gstNo          = item.partyGstNo    ?? '-';
-  const cityPin        = pin ? `${city} - ${pin}` : city;
+    /* ── Customer (LedgerMaster party* → fallback jobCardCustomer) ── */
+    const customerName = item.partyName ?? c.customerName ?? '-';
+    const customerMobile = item.partyMobileNo ?? c.customerMobile ?? '-';
+    const altMobile = c.customerAltMobile ?? '-';
+    const address = item.partyAddress ?? '';
+    const city = item.partyCity ?? '-';
+    const pin = item.partyPin ?? '';
+    const state = item.partyState ?? '-';
+    const gstNo = item.partyGstNo ?? '-';
+    const cityPin = pin ? `${city} - ${pin}` : city;
 
-  /* ── Vehicle ──────────────────────────────────────────── */
-  const modelName    = c.modelName        ?? item.oemModelName ?? '-';
-  const colour       = item.colour        ?? c.colourName      ?? '-';
-  const oemModel     = item.oemModelName  ?? '-';
-  const modelDisplay = (colour && colour !== '-') ? `${modelName} (${colour})` : modelName;
-  const chassisNo    = c.chassisNo        ?? h.chassisno       ?? '-';
-  const batteryNo    = c.batteryNo        ?? b.batterySerialNo ?? '-';
-  const chargerNo    = b.chargerNo        ?? '-';
-  const controllerNo = b.controllerNo     ?? '-';
-  const registerNo   = c.registerNo       ?? '-';
+    /* ── Vehicle ──────────────────────────────────────────── */
+    const modelName = c.modelName ?? item.oemModelName ?? '-';
+    const colour = item.colour ?? c.colourName ?? '-';
+    const oemModel = item.oemModelName ?? '-';
+    const modelDisplay = (colour && colour !== '-') ? `${modelName} (${colour})` : modelName;
+    const chassisNo = c.chassisNo ?? h.chassisno ?? '-';
+    const batteryNo = c.batteryNo ?? b.batterySerialNo ?? '-';
+    const chargerNo = b.chargerNo ?? '-';
+    const controllerNo = b.controllerNo ?? '-';
+    const registerNo = c.registerNo ?? '-';
 
-  /* ── Helpers ──────────────────────────────────────────── */
-  const fd   = (d: any)  => this.fmtDate(d);
-  const dash = (v: any)  => (v !== null && v !== undefined && String(v).trim() !== '') ? String(v) : '-';
+    /* ── Helpers ──────────────────────────────────────────── */
+    const fd = (d: any) => this.fmtDate(d);
+    const dash = (v: any) => (v !== null && v !== undefined && String(v).trim() !== '') ? String(v) : '-';
 
-  /* ── Complaint rows (job card only) ──────────────────────────────────── */
-  const complaintRows = complaints.length
-    ? complaints.map((x: any, i: number) => `
+    /* ── Complaint rows (job card only) ──────────────────────────────────── */
+    const complaintRows = complaints.length
+      ? complaints.map((x: any, i: number) => `
         <tr>
           <td class="tc">${i + 1}</td>
           <td>${x.customerVoice ?? '-'}</td>
           <td>${x.complaintCode ?? '-'}</td>
-          <td>${x.complaint     ?? '-'}</td>
+          <td>${x.complaint ?? '-'}</td>
         </tr>`).join('')
-    : `<tr><td colspan="4" class="tc muted">No complaints recorded</td></tr>`;
+      : `<tr><td colspan="4" class="tc muted">No complaints recorded</td></tr>`;
 
-  /* ════════════════════════════════════════════════════════
-     HTML
-  ════════════════════════════════════════════════════════ */
-  return `<!DOCTYPE html>
+    /* ════════════════════════════════════════════════════════
+       HTML
+    ════════════════════════════════════════════════════════ */
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -759,7 +746,7 @@ body{
 
 </body>
 </html>`;
-}
+  }
   //Navigate Job Card Add form
   onNavigate() {
     this.router.navigate(['/job-card-addForm', 'test']);

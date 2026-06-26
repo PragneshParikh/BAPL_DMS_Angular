@@ -33,10 +33,10 @@ export class VehicleInfoUpdate implements OnInit {
   filteredInsurance: any[];
   insuranceNotFound: boolean;
   showInsuranceDropdown: boolean;
-  isSuperAdmin:boolean;
+  isSuperAdmin: boolean;
   constructor(private vehicleInfoService: VehicleInfoService, private chassisService: ChassisSearchService,
-    private ledgerService: LedgerMasterService,private storageService:StorageService,
-    private loader:LoaderService,private toaster:ToastService
+    private ledgerService: LedgerMasterService, private storageService: StorageService,
+    private loader: LoaderService, private toaster: ToastService
   ) { }
   updateData: any = {
     battery1: '',
@@ -62,14 +62,13 @@ export class VehicleInfoUpdate implements OnInit {
   };
 
   ngOnInit(): void {
-    this.isSuperAdmin =this.storageService.getRole().toLowerCase() === 'superadmin';
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     this.getChassisList();
     this.getInsuranceCompanies();
   }
   getChassisList() {
     this.chassisService.getAllSoldChassis().subscribe(
       (res) => {
-        console.log(res);
 
       }
     );
@@ -84,7 +83,6 @@ export class VehicleInfoUpdate implements OnInit {
       .getVehicleInfo(regNo ?? undefined, chassisNo ?? undefined)
       .subscribe({
         next: (response) => {
-          console.log(response);
 
           const batteries = response.vehicleDetails.batteries || [];
           const motors = response.vehicleDetails.motors || [];
@@ -228,14 +226,14 @@ export class VehicleInfoUpdate implements OnInit {
       .updateVehicleInfo(payload)
       .subscribe({
         next: () => {
-        this.loader.hide();
-        this.showVehicleDetails=false;
-        this.toaster.show('Succesfully updated Vehicle Information',
-          {
-            classname: 'bg-success text-white',
-            delay: 5000
-          }
-        );
+          this.loader.hide();
+          this.showVehicleDetails = false;
+          this.toaster.show('Succesfully updated Vehicle Information',
+            {
+              classname: 'bg-success text-white',
+              delay: 5000
+            }
+          );
         }
       });
   }
@@ -243,45 +241,41 @@ export class VehicleInfoUpdate implements OnInit {
   getInsuranceCompanies() {
     this.ledgerService.getLedgerByType('Insurance').subscribe({
       next: (res) => {
-        console.log(res);
-        
+
         this.insurance = res;
       }
     });
   }
- filterInsurance() {
-  debugger
-  const search = (this.editedVehicle.insuranceName || '')
-    .toLowerCase()
-    .trim();
+  filterInsurance() {
+    const search = (this.editedVehicle.insuranceName || '')
+      .toLowerCase()
+      .trim();
 
-  if (!search) {
-    this.filteredInsurance = [...this.insurance];
-    this.insuranceNotFound = false;
-    return;
+    if (!search) {
+      this.filteredInsurance = [...this.insurance];
+      this.insuranceNotFound = false;
+      return;
+    }
+
+    this.filteredInsurance = this.insurance.filter((x: any) =>
+      x.ledgerName?.toLowerCase().includes(search)
+    );
+
+    this.insuranceNotFound = this.filteredInsurance.length === 0;
   }
 
-  this.filteredInsurance = this.insurance.filter((x: any) =>
-    x.ledgerName?.toLowerCase().includes(search)
-  );
+  selectInsurance(party: LedgerMaster) {
+    this.editedVehicle.insuranceName = party.ledgerName;
+    this.editedVehicle.insuranceCompanyId = party.id;
+    this.filteredInsurance = [];
+    this.insuranceNotFound = false;
+    this.showInsuranceDropdown = false;
+  }
+  onInsuranceFocus() {
+    this.showInsuranceDropdown = true;
+    this.filteredInsurance = [...this.insurance];
 
-  this.insuranceNotFound = this.filteredInsurance.length === 0;
-}
-
- selectInsurance(party: LedgerMaster) {
-  this.editedVehicle.insuranceName = party.ledgerName;
-  this.editedVehicle.insuranceCompanyId = party.id;
-  this.filteredInsurance = [];
-  this.insuranceNotFound = false;
-  this.showInsuranceDropdown = false;
-}
-onInsuranceFocus() {
-  this.showInsuranceDropdown = true;
-  this.filteredInsurance = [...this.insurance];
-
-  console.log('showInsuranceDropdown', this.showInsuranceDropdown);
-  console.log('filteredInsurance', this.filteredInsurance);
-}
+  }
 
   onInsuranceBlur() {
     setTimeout(() => {
@@ -289,11 +283,11 @@ onInsuranceFocus() {
     }, 200);
   }
   sanitizeMobile(event: any) {
-  let value = event.target.value || '';
-  value = value.replace(/[^0-9]/g, '');
-  value = value.slice(0, 10);
-  event.target.value = value;
-  this.editedVehicle.partyAltMobile = value;
-}
+    let value = event.target.value || '';
+    value = value.replace(/[^0-9]/g, '');
+    value = value.slice(0, 10);
+    event.target.value = value;
+    this.editedVehicle.partyAltMobile = value;
+  }
 
 }

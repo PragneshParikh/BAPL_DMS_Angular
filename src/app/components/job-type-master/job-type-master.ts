@@ -8,14 +8,14 @@ import { JobTypeService } from '../../core/services/job-type-service';
 
 @Component({
   selector: 'app-job-type-master',
-  standalone:true,
-  imports: [CommonModule,FormsModule,ReactiveFormsModule,NgbPagination],
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbPagination],
   templateUrl: './job-type-master.html',
   styleUrl: './job-type-master.scss',
 })
 export class JobTypeMaster implements OnInit {
 
-  
+
   @ViewChild('jobTypeAdd') jobTypeAdd!: TemplateRef<any>;
   @ViewChild('jobTypeUpdate') jobtypeUpdate!: TemplateRef<any>;
 
@@ -59,7 +59,6 @@ export class JobTypeMaster implements OnInit {
 
         this.JobTypeNameList = response || [];
         this.filteredList = [...this.JobTypeNameList];
-        console.log(this.JobTypeNameList)
 
         this.refreshGrid();
       },
@@ -71,7 +70,7 @@ export class JobTypeMaster implements OnInit {
 
   //#endregion
 
-  
+
 
 
 
@@ -125,7 +124,6 @@ export class JobTypeMaster implements OnInit {
   //#region Edit
 
   openEditPopup(item: any): void {
-debugger
     this.jobTypeForm.patchValue({
       jobTypeId: item.id,
       JobTypeName: item.jobTypeName
@@ -148,8 +146,6 @@ debugger
       id: this.jobTypeForm.value.jobTypeId,
       JobTypeName: this.jobTypeForm.value.JobTypeName
     };
-
-    console.log('Update Payload:', model);
 
     this.jobTypeMasterService.updateJobTypeMaster(model)
       .subscribe({
@@ -260,30 +256,30 @@ debugger
   //search method
   applySearch(): void {
 
-  const search = this.searchText.toLowerCase().trim();
+    const search = this.searchText.toLowerCase().trim();
 
-  if (!search) {
-    this.filteredList = [...this.JobTypeNameList];
-  } else {
-    this.filteredList = this.JobTypeNameList.filter(x =>
-      x.jobTypeName?.toLowerCase().includes(search)
+    if (!search) {
+      this.filteredList = [...this.JobTypeNameList];
+    } else {
+      this.filteredList = this.JobTypeNameList.filter(x =>
+        x.jobTypeName?.toLowerCase().includes(search)
+      );
+    }
+
+    this.page = 1;
+    this.refreshGrid();
+  }
+  //end
+
+  refreshGrid(): void {
+
+    this.collectionSize = this.filteredList.length;
+
+    this.pagedData = this.filteredList.slice(
+      (this.page - 1) * this.pageSize,
+      (this.page - 1) * this.pageSize + this.pageSize
     );
   }
-
-  this.page = 1;
-  this.refreshGrid();
-}
-//end
-
- refreshGrid(): void {
-
-  this.collectionSize = this.filteredList.length;
-
-  this.pagedData = this.filteredList.slice(
-    (this.page - 1) * this.pageSize,
-    (this.page - 1) * this.pageSize + this.pageSize
-  );
-}
 
 
   //#endregion

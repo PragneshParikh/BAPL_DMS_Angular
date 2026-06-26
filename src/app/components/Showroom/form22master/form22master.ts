@@ -75,10 +75,9 @@ export class Form22master implements OnInit {
         this.loader.hide();
         this.refreshTable();
 
-        //console.log(this.griddata);
       },
       error: (err) => {
-        console.log(err);
+        console.error(err);
         this.loader.hide();
       }
     });
@@ -90,7 +89,6 @@ export class Form22master implements OnInit {
   loadOemModels() {
     this.form22service.getOemModelList().subscribe({
       next: (res: any) => {
-        console.log('OEM Models:', res);
 
         //  Direct assign (API already gives ID + Name)
         this.oemModelList = res;
@@ -207,7 +205,6 @@ export class Form22master implements OnInit {
         },
 
         complete: () => {
-          console.log('Update API completed');
         }
       });
   }

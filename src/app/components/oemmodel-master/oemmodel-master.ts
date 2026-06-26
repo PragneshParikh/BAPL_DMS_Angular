@@ -52,7 +52,6 @@ export class OemmodelMasterComponent implements OnInit {
 
       next: (res: any) => {
         this.loader.hide();
-        console.log("API DATA:", res);
 
         this.modelList = res;
         this.originalModelList = [...res];
@@ -181,7 +180,6 @@ export class OemmodelMasterComponent implements OnInit {
 
         next: (res: any) => {
           this.loader.hide();
-          console.log("Updated Successfully");
 
           // Show success toast
           this.toastr.show(res.message || "Model Changes successfully Added", {
@@ -240,7 +238,6 @@ export class OemmodelMasterComponent implements OnInit {
 
         next: (res: any) => {
           this.loader.hide();
-          console.log("Saved Successfully");
 
           // Show success toast
           this.toastr.show(res.message || "Model added successfully", {
@@ -262,7 +259,6 @@ export class OemmodelMasterComponent implements OnInit {
 
         error: (err: any) => {
           this.loader.hide();
-          console.log("Save Error:", err);
 
           // Show error toast
           this.toastr.show(err.error?.message || "Failed to add model", {

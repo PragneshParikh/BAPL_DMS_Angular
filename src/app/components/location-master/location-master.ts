@@ -72,7 +72,6 @@ export class LocationMasterComponent implements OnInit {
     this.locationService.getAllLocationMaster().subscribe({
       next: (res: any) => {
         this.loader.hide();
-        console.log(res);
         const data = res?.data || res;
         this.originalLocationList = data;
 
@@ -87,7 +86,7 @@ export class LocationMasterComponent implements OnInit {
       },
       error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
       }
     });
   }
@@ -264,7 +263,6 @@ export class LocationMasterComponent implements OnInit {
       next: (res: any) => {
         this.dealerList = res.data;
         this.loader.hide();
-        console.log(res);
       },
       error: (err) => {
         this.loader.hide();
@@ -294,7 +292,7 @@ export class LocationMasterComponent implements OnInit {
       },
       error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
         this.toastr.show('Excel download failed', { classname: 'bg-danger text-white', delay: 5000 });
       }
     });

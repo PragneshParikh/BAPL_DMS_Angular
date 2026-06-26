@@ -63,7 +63,6 @@ export class ForgotPassword {
           });
 
           this.passresetForm.reset();
-          console.log('Password reset email sent successfully:', response);
         } else {
           this.toastService.show(response.message, {
             classname: 'bg-warning text-white',

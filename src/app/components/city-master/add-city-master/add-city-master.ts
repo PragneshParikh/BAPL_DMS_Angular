@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CityService } from '../../../core/services/city';
 import { ActivatedRoute, LoadChildren, Router } from '@angular/router';
 import { StateService } from '../../../core/services/state';
-import { CityModel} from '../../../ViewModels/City';
+import { CityModel } from '../../../ViewModels/City';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 
@@ -12,7 +12,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
   selector: 'app-add-city-master',
   imports: [
     CommonModule,
-    FormsModule      
+    FormsModule
   ],
   templateUrl: './add-city-master.html',
   styleUrl: './add-city-master.scss',
@@ -22,16 +22,16 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 export class AddCityMaster {
   stateList: any;
   cityExists: boolean = false;
-  cityList:CityModel[]=[];
+  cityList: CityModel[] = [];
 
-constructor(
+  constructor(
     private cityService: CityService,
     private router: Router,
     private route: ActivatedRoute,
-    private stateService:StateService,
-    private loader:LoaderService,
-    private toaster:ToastService
-  ) {}
+    private stateService: StateService,
+    private loader: LoaderService,
+    private toaster: ToastService
+  ) { }
 
   //    Form Model (Matches Backend)
   formData: any = {
@@ -52,7 +52,7 @@ constructor(
   ngOnInit() {
     this.checkEditMode();
     this.loadStateList();
-      this.loadCityList(); 
+    this.loadCityList();
   }
 
   //    Check Edit Mode
@@ -64,20 +64,20 @@ constructor(
       this.loadCityById(+id);
     }
   }
-loadCityList() {
-  this.loader.show();
-  this.cityService.getAllWithState().subscribe({
-    next: (res: any) => {
-      this.cityList = res;
-      this.loader.hide();
-    },
-    error: (err) => {
-      this.loader.hide();
-      this.toaster.show('Error fetching cities',{classname:'bg-warn text-white',delay:5000});
-      console.error('Error loading cities:', err);
-    }
-  });
-}
+  loadCityList() {
+    this.loader.show();
+    this.cityService.getAllWithState().subscribe({
+      next: (res: any) => {
+        this.cityList = res;
+        this.loader.hide();
+      },
+      error: (err) => {
+        this.loader.hide();
+        this.toaster.show('Error fetching cities', { classname: 'bg-warn text-white', delay: 5000 });
+        console.error('Error loading cities:', err);
+      }
+    });
+  }
   //    Load City for Edit
   loadCityById(id: number) {
     this.cityService.getById(id).subscribe({
@@ -97,37 +97,36 @@ loadCityList() {
       }
     });
   }
-checkDuplicateCity() {
+  checkDuplicateCity() {
 
-  if (!this.formData.cityName || !this.formData.stateId) {
-    this.cityExists = false;
-    return;
+    if (!this.formData.cityName || !this.formData.stateId) {
+      this.cityExists = false;
+      return;
+    }
+
+    const cityName = this.formData.cityName.trim().toLowerCase();
+
+    this.cityExists = this.cityList.some(c =>
+      c.stateId == this.formData.stateId &&
+      c.cityName.trim().toLowerCase() === cityName
+    );
+
   }
-
-  const cityName = this.formData.cityName.trim().toLowerCase();
-
-  this.cityExists = this.cityList.some(c =>
-    c.stateId == this.formData.stateId &&  
-    c.cityName.trim().toLowerCase() === cityName
-  );
-
-  console.log("Exists:", this.cityExists);
-}
   //    Submit
   onSubmit(form: any) {
     if (!form.valid) return;
-this.loader.show();
+    this.loader.show();
     if (this.isEditMode) {
       this.cityService.update(this.formData.cityId, this.formData)
         .subscribe({
           next: () => {
-           this.loader.hide();
-           this.toaster.show('City updated succesgfully',{classname:'bg-success text-white',delay:5000});
+            this.loader.hide();
+            this.toaster.show('City updated succesgfully', { classname: 'bg-success text-white', delay: 5000 });
             this.router.navigate(['/city-master']);
           },
           error: (err) => {
             this.loader.hide();
-            this.toaster.show('Error updating city!',{classname:'bg-warning text-white',delay:5000});
+            this.toaster.show('Error updating city!', { classname: 'bg-warning text-white', delay: 5000 });
           }
         });
     } else {
@@ -135,12 +134,12 @@ this.loader.show();
         .subscribe({
           next: () => {
             this.loader.hide();
-            this.toaster.show('City created succesfully!',{className:'bg-success text-white',delay :5000});
+            this.toaster.show('City created succesfully!', { className: 'bg-success text-white', delay: 5000 });
             this.router.navigate(['/city-master']);
           },
           error: (err) => {
             this.loader.hide();
-           this.toaster.show('Error creating city!',{classname:'bg-warning text-white',delay:5000});
+            this.toaster.show('Error creating city!', { classname: 'bg-warning text-white', delay: 5000 });
           }
         });
     }
@@ -151,13 +150,13 @@ this.loader.show();
     this.router.navigate(['/city-master']);
   }
   loadStateList() {
-  this.stateService.get().subscribe({
-    next: (res: any) => {
-      this.stateList = res;
-    },
-    error: (err) => {
-     this.toaster.show('Error loading state list!',{classname:'bg-danger text-white',delay:5000});
-    }
-  });
-}
+    this.stateService.get().subscribe({
+      next: (res: any) => {
+        this.stateList = res;
+      },
+      error: (err) => {
+        this.toaster.show('Error loading state list!', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  }
 }
