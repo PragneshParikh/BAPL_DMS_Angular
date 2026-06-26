@@ -12,9 +12,9 @@ export class LedgerMasterService {
 
   constructor(private httpClient: HttpClient) { }
 
-  // getLedger(): Observable<any> {
-  //   return this.httpClient.get(`${this.baseUrl}/ledger-master`)
-  // }
+  getLedger(): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/ledger-master`)
+  }
 
   getCompanyLedgers(): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/ledger-master/companies`)

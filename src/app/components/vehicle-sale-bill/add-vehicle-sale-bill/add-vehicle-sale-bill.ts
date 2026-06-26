@@ -920,7 +920,7 @@ getInsuranceCompanies(){
 
     modalRef.result.then((resultId) => {
       if (resultId) {
-        this.receiptEntryService.getLedgerByType('Party').subscribe({
+        this.ledgerService.getLedgerByType('Party').subscribe({
           next: (res) => {
             this.parties = [...res];
 

@@ -1,0 +1,60 @@
+.a4-page {
+    width: 210mm;      /* A4 Width */
+    min-height: 297mm; /* A4 Height */
+    margin: 20px auto; /* Centers the page */
+    box-sizing: border-box;
+}
+
+@media print {
+
+    @page {
+        size: A4 portrait;
+        margin: 5mm;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        zoom: 0.85; /* shrink slightly */
+    }
+
+    .a4-page {
+        width: 100%;
+        min-height: auto !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .table {
+        margin-bottom: 2px !important;
+    }
+
+    td,
+    th {
+        padding: 2px 4px !important;
+        font-size: 11px !important;
+        line-height: 1.1 !important;
+    }
+
+    .invoice-table {
+        margin-bottom: 2px !important;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    /* Reduce signature area */
+    .invoice-table td[height="70"] {
+        height: 40px !important;
+    }
+}
+
+#reportContent{
+
+  .vehicleInfo{
+    display:inline-block;
+     width: 120px;
+  }
+}

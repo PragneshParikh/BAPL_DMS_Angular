@@ -1,10 +1,14 @@
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0"> Counter Bill </h4>
+    <button *ngIf="isEditMode" type="button" class="btn btn-primary btn-sm" (click)="printBill()" title="Print"> <i
+            class="ri-printer-line"></i>
+    </button>
 </div>
 
 <div class="card">
     <div class="card-body">
         <form>
+            <fieldset [disabled]="isEditMode && !editPermission">
             <!-- Header Section -->
             <div class="card card-body mb-2">
                 <div class="row g-1">
@@ -23,7 +27,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label mb-1">Location<span class="text-danger">*</span></label>
-                        <select class="form-select form-select-sm" [(ngModel)]="model.locationCode" name=locationCode>
+                        <select class="form-select form-select-sm" [(ngModel)]="model.locationCode" name="locationCode">
                             <option *ngFor="let location of locationList" [value]="location.locCode">
                                 {{ location.locname }} ({{ location.locCode }})
                             </option>
@@ -32,31 +36,45 @@
 
                     <div class="col-md-2">
                         <label class="form-label mb-1">Bill Type</label>
-                        <input type="text" class="form-control form-control-sm" [(ngModel)]="model.billType"
-                            name="billType" value="Cash" readonly>
+                        <select class="form-select form-select-sm" [(ngModel)]="model.billType" name="billType">
+                            <option value="Cash">Cash</option>
+                            <option value="Credit">Credit</option>
+                        </select>
                     </div>
 
                     <div class="col-md-2">
-                        <label class="form-label mb-1">Cash Acc.<span class="text-danger">*</span></label>
-                        <select class="form-select form-select-sm" [(ngModel)]="model.cashAccount" name="cashAccount">
-                            <option value="">Select Cash A/C</option>
-                            <option *ngFor="let option of CashTypeOptions" [value]="option.value">
-                                {{ option.name }}
-                            </option>
-                        </select>
+                        <label class="form-label mb-1">
+                            {{ model.billType === 'Credit' ? 'Credit Acc' : 'Cash Acc.' }}
+                            <span *ngIf="model.billType === 'Cash'" class="text-danger">*</span>
+                        </label>
+
+                        <ng-container *ngIf="model.billType === 'Cash'; else creditMode">
+                            <select class="form-select form-select-sm" [(ngModel)]="model.cashAccount"
+                                name="cashAccount">
+                                <option value="">Select Cash A/C</option>
+                                <option *ngFor="let option of CashTypeOptions" [value]="option.value">
+                                    {{ option.name }}
+                                </option>
+                            </select>
+                        </ng-container>
+
+                        <ng-template #creditMode>
+                            <input type="text" class="form-control form-control-sm" value="Credit" readonly>
+                        </ng-template>
                     </div>
                 </div>
                 <div class="row g-1 mt-1">
                     <div class="col-md-3">
                         <label class="form-label mb-1"> Party Name </label>
                         <div class="input-group input-group-sm">
-                            <input type="text" class="form-control" name="
-                            " [(ngModel)]="model.partyName" (input)="onPartySearch()" #partyName="ngModel">
+                            <input type="text" name="partyName" class="form-control" [(ngModel)]="model.partyName"
+                                (input)="onPartySearch()" (focus)="showPartyDropdown = filteredParties?.length > 0"
+                                (blur)="closePartyDropdown()" #partyName="ngModel" [readonly]="isExistingParty">
 
-                            <button type="button" class="btn btn-primary" (click)="openCustomerLedgerAdd()"
+                            <!-- <button type="button" class="btn btn-primary" (click)="openCustomerLedgerAdd()"
                                 [ngbTooltip]="'Add New Party'">
                                 <i class="ri-add-line"></i>
-                            </button>
+                            </button> -->
 
                         </div>
 
@@ -65,11 +83,10 @@
                             Customer Name is required.
                         </small>
 
-                        <div class="text-danger small" *ngIf="partyName.touched &&
-            model.partyName &&
-            !isCustomerValid()">
-                            Party not found. Please click + to add new party.
-                        </div>
+                        <!-- <div class="text-danger small" *ngIf="partyName.touched &&
+            model.partyName">
+                            Party Name is required
+                        </div> -->
 
                         <!-- Dropdown -->
                         <ul *ngIf="showPartyDropdown" class="list-group position-absolute w-100 small-dropdown mt-1"
@@ -86,20 +103,63 @@
 
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label mb-1">Party State</label>
+                        <label class="form-label mb-1">
+                            Party State
+                            <span *ngIf="!isExistingParty" class="text-danger">*</span>
+                        </label>
+
                         <input type="text" class="form-control form-control-sm" [(ngModel)]="model.partyState"
-                            name="partyState" value="model.partyState" #partyState="ngModel" readonly>
+                            name="partyState" [readonly]="isExistingParty" [required]="!isExistingParty"
+                            (input)="filterStates()" (change)="onStateChanged()" [readonly]="isExistingParty">
+
+                        <div class="text-danger small"
+                            *ngIf="model.partyState.invalid && model.partyState.touched && !isExistingParty">
+                            Party State is required.
+                        </div>
+
+                        <ul *ngIf="showStateDropdown && !isExistingParty"
+                            class="list-group position-absolute w-100 small-dropdown mt-1"
+                            style="z-index:1000; max-height:200px; overflow-y:auto;">
+
+                            <li class="list-group-item list-group-item-action" *ngFor="let state of filteredStates"
+                                (click)="selectState(state)">
+
+                                {{ state.stateName }}
+
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Mobile No</label>
+                        <div class="input-group input-group-sm">
+                            <input (input)="sanitizeMobile($event)" type="text" class="form-control"
+                                [(ngModel)]="model.mobileNo" name="mobileNo" (ngModelChange)="onMobileNoChange()"
+                                [readonly]="isExistingParty">
+                            <!-- <button type="button" class="btn btn-primary"> <i class="ri-add-line"></i> </button> -->
+                        </div>
                     </div>
 
 
                     <!-- Concept to be implemeted after global chassis seraach -->
-                    <!-- <div class="col-md-3">
-                        <label class="form-label mb-1">Chassis No</label>
-                        <div class="input-group input-group-sm">
-                            <input type="text" class="form-control">
-                            <button type="button" class="btn btn-primary"> <i class="ri-add-line"></i> </button>
-                        </div>
-                    </div> -->
+                    <div class="col-md-3 position-relative">
+                        <label class="form-label form-label-sm mb-1">Chassis No</label>
+
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="model.chassisNo"
+                            name="chassisNo" (input)="filterChassis()" (focus)="showChassisDropdown = true">
+
+                        <ul *ngIf="showChassisDropdown" class="list-group position-absolute w-100 mt-1"
+                            style="z-index:1000; max-height:200px; overflow-y:auto;">
+
+                            <li class="list-group-item list-group-item-action" *ngFor="let chassis of filteredChassis"
+                                (click)="selectChassis(chassis)">
+                                {{ chassis.chassisNo }}
+                            </li>
+
+                            <li *ngIf="filteredChassis.length === 0" class="list-group-item text-muted">
+                                No chassis found
+                            </li>
+                        </ul>
+                    </div>
 
                     <!-- <div class="col-md-2">
                         <label class="form-label mb-1">ODO Reading</label>
@@ -121,7 +181,7 @@
             <h3 class="fs-14 text-primary mb-0"> {{ isEditMode ? 'View Item Details' : 'Add Item Details'
                 }} </h3>
             <small class="text-danger d-block mb-1"
-                *ngIf="!model.locationCode || !model.cashAccount ||!model.partyName">
+                *ngIf="!model.locationCode || !model.cashAccount ||!model.partyName ||!model.partyState">
                 Please select all required fields (*) above before selecting Item
             </small>
             <fieldset class="border rounded p-2 mb-2">
@@ -133,7 +193,7 @@
                     <div class="col-md-4 position-relative">
 
                         <label class="form-label mb-1">
-                            Item Name
+                            Part Name
                             <span *ngIf="selectedItem">
                                 (Stock : {{ selectedItem.itemStock }})
                             </span>
@@ -147,16 +207,14 @@
                             style="max-height:250px;overflow-y:auto">
 
                             <button type="button" class="dropdown-item" *ngFor="let item of filteredItems"
-                                (click)="selectItem(item)">
+                                [disabled]="isItemAlreadyAdded(item.itemCode)" (click)="selectItem(item)">
 
                                 <div>
                                     <strong>{{ item.itemName }}</strong>
                                 </div>
 
                                 <small>
-                                    {{ item.itemCode }}
-                                    | Stock : {{ item.itemStock }}
-                                    | ₹{{ item.itemRate }}
+                                    {{ item.itemCode }} | Stock : {{ item.itemStock }}
                                 </small>
 
                             </button>
@@ -170,7 +228,11 @@
                     </div>
                     <div class="col-md-1">
                         <label class="form-label mb-1">Sale Type</label>
-                        <input type="text" class="form-control form-control-sm" [value]="model.saleType" disabled>
+                        <select class="form-select form-select-sm" [(ngModel)]="model.saleType" name="saleType">
+                            <option value="MRP">MRP</option>
+                            <option value="Taxable">Taxable</option>
+                            <option value="NDP">NDP</option>
+                        </select>
                     </div>
 
                     <!-- <div class="col-md-1">
@@ -185,26 +247,65 @@
 
                     <div class="col-md-1">
                         <label class="form-label mb-1">Qty</label>
-                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.qty" name="qty" #qty="ngModel">
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.qty" name="qty"
+                            (ngModelChange)="calculateAmounts()">
                     </div>
 
                     <div class="col-md-1">
-                        <label class="form-label mb-1">Rate</label>
-                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.rate" name="rate" #rate="ngModel">
+                        <label class="form-label mb-1">Item Rate</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.itemRate"
+                            name="itemRate" #itemRate="ngModel" readonly>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-1">MRP</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.itemMrp"
+                            name="itemMrp" #itemMrp="ngModel" readonly>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label mb-1 discount-type-select">Disc Type</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="model.discountType" name="discountType"
+                            (ngModelChange)="calculateAmounts()">
+                            <option value="Value">Value</option>
+                            <option value="%">%</option>
+                        </select>
                     </div>
 
                     <div class="col-md-1">
                         <label class="form-label mb-1">Discount</label>
-                        <input type="number" class="form-control form-control-sm">
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.itemDiscount"
+                            name="itemDiscount" (ngModelChange)="calculateAmounts()">
                     </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label mb-1">Disc Type</label>
-                        <select class="form-select form-select-sm">
-                            <option>Value</option>
-                        </select>
+                    <div class="col-md-1">
+                        <label class="form-label mb-1">Amount</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.itemTotalAmount"
+                            name="itemTotalAmount" (ngModelChange)="calculateAmounts()">
                     </div>
+                    <div class="row g-1 mt-2" *ngIf="selectedItem">
 
+                        <div class="col-md-2" *ngIf="model.igstPer > 0">
+                            <label class="form-label mb-1">
+                                IGST ({{ model.igstPer }}%)
+                            </label>
+                            <input type="text" class="form-control form-control-sm" [value]="model.igstAmount" readonly>
+                        </div>
+
+                        <div class="col-md-2" *ngIf="model.cgstPer > 0">
+                            <label class="form-label mb-1">
+                                CGST ({{ model.cgstPer }}%)
+                            </label>
+                            <input type="text" class="form-control form-control-sm" [value]="model.cgstAmount" readonly>
+                        </div>
+
+                        <div class="col-md-2" *ngIf="model.sgstPer > 0">
+                            <label class="form-label mb-1">
+                                SGST ({{ model.sgstPer }}%)
+                            </label>
+                            <input type="text" class="form-control form-control-sm" [value]="model.sgstAmount" readonly>
+                        </div>
+
+                    </div>
 
 
                 </div>
@@ -226,7 +327,7 @@
                         <input type="number" class="form-control form-control-sm">
                     </div> -->
                     <div class="col-md-auto ms-auto d-flex align-items-end">
-                        <button type="button" class="btn btn-primary btn-sm">
+                        <button type="button" class="btn btn-primary btn-sm" (click)="addItem()">
                             Add
                         </button>
                     </div>
@@ -236,22 +337,75 @@
 
             <!-- Grid -->
             <div *ngIf="showTable" class="table-responsive mb-2">
-                <table class="table table-bordered table-sm">
+                <table class="table table-bordered table-sm" style="font-size: 12px;">
                     <thead>
                         <tr>
                             <th width="60">Action</th>
-                            <th>Item Name</th>
+                            <th>Item Name /Item Code</th>
                             <th width="80">Qty</th>
-                            <th width="100">Rate</th>
+                            <th width="80">Sale Type</th>
+                            <th width="100">MRP</th>
+                            <th width="100">Item Rate</th>
+                            <th width="100">IGSTPer/IgstAmnt</th>
+                            <th width="100">Discount Type</th>
                             <th width="100">Discount</th>
                             <th width="120">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
 
-                        <tr>
-                            <td colspan="6" class="text-center"> Record(s) not found. </td>
+                        <tr *ngIf="counterBillItems.length === 0">
+                            <td colspan="6" class="text-center">
+                                Record(s) not found.
+                            </td>
                         </tr>
+
+                        <tr *ngFor="let item of counterBillItems; let i = index">
+
+                            <td>
+                                <button type="button" class="btn btn-sm btn-soft-info py-0 px-1 me-1"
+                                    (click)="editItem(i)"> <i class="ri-pencil-line"></i>
+                                </button>
+                                <button type="button" class="btn  btn-danger btn-sm py-0 px-1 me-1"
+                                    (click)="removeItem(i)">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </td>
+
+                            <td>{{ item.itemName }} <br>{{item.itemCode}}</td>
+                            <td>{{ item.qty }}</td>
+                            <td>{{ item.saleType}}</td>
+                            <td>{{ item.itemMrp | number:'1.2-2' }}</td>
+
+                            <td>{{ item.itemRate | number:'1.2-2' }}</td>
+
+                            <td>
+                                <div *ngIf="item.igstPer > 0">
+                                    IGST: {{ item.igstPer }}%
+                                    ({{ item.igstAmount | number:'1.2-2' }})
+                                </div>
+
+                                <div *ngIf="item.cgstPer > 0">
+                                    CGST: {{ item.cgstPer }}%
+                                    ({{ item.cgstAmount | number:'1.2-2' }})
+                                </div>
+
+                                <div *ngIf="item.sgstPer > 0">
+                                    SGST: {{ item.sgstPer }}%
+                                    ({{ item.sgstAmount | number:'1.2-2' }})
+                                </div>
+                            </td>
+
+                            <td>{{ item.discountType }}</td>
+
+                            <td>{{ item.discount | number:'1.2-2' }}</td>
+
+                            <td>
+                                <strong>{{ item.amount | number:'1.2-2' }}</strong>
+                            </td>
+
+                        </tr>
+
                     </tbody>
                 </table>
             </div>
@@ -259,36 +413,39 @@
             <!-- Amount Section -->
             <div class="card card-body mb-2">
                 <div class="row g-1">
-                    <div class="col-md-2">
+                    <!-- <div class="col-md-2">
                         <label class="form-label mb-1"> Disc Amount (-) </label>
-                        <input type="number" class="form-control form-control-sm" value="0.00">
-                    </div>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.discAmount"
+                            name="discAmount" (ngModelChange)="calculateSummary()">
+                    </div> -->
 
                     <div class="col-md-2">
                         <label class="form-label mb-1"> Rcpt Amt </label>
-                        <input type="number" class="form-control form-control-sm" value="0.00">
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label mb-1"> Receiving Mode </label>
-                        <select class="form-select form-select-sm">
-                            <option>--Select--</option>
-                        </select>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.receiptAmount"
+                            name="receiptAmount">
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label mb-1"> Parts Disc. </label>
-                        <input type="number" class="form-control form-control-sm" value="0">
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.partsDiscount"
+                            name="partsDiscount" (ngModelChange)="calculateSummary()">
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label mb-1"> Parts Amount </label>
-                        <input type="number" class="form-control form-control-sm" value="0.00">
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.partsAmount"
+                            name="partsAmount" readonly>
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label mb-1"> Net Amount </label>
-                        <input type="number" class="form-control form-control-sm" value="0.00">
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="model.netAmount"
+                            name="netAmount" readonly>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-primary btn-sm w-100" (click)="openDiscountPopup()">
+                            +Discount
+                        </button>
                     </div>
                 </div>
 
@@ -301,10 +458,96 @@
             </div>
 
             <!-- Footer Buttons -->
-            <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-primary btn-sm me-2"> Save </button>
+            <div class="d-flex justify-content-end gap-1">
+                <button class="btn btn-sm btn-primary" (click)="save()" gap-1>
+                    {{ isEditMode ? 'Update' : 'Save' }}
+                </button>
+                <button *ngIf="isEditMode && editPermission" type="button" class="btn btn-danger btn-sm"
+                    (click)="deleteCounterBill()">
+                    <i class="ri-delete-bin-line"></i>Delete
+                </button>
                 <button type="button" class="btn btn-light btn-sm" (click)="navigateToListPage()"> Close </button>
             </div>
+        </fieldset>
         </form>
+    </div>
+</div>
+
+<div *ngIf="showDiscountPopup" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.4);">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Discount</h5>
+
+                <button type="button" class="btn-close btn-close-white" (click)="closeDiscountPopup()">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row">
+
+                    <!-- Parts -->
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Parts Discount
+                        </label>
+
+                        <div class="input-group">
+
+                            <select class="form-select" [(ngModel)]="discountModel.partsDiscountType"
+                                name="partsDiscountType">
+
+                                <option value="Value">Value</option>
+                                <option value="%">%</option>
+
+                            </select>
+
+                            <input type="number" class="form-control" [(ngModel)]="discountModel.partsDiscount"
+                                name="partsDiscount">
+                        </div>
+                    </div>
+
+                    <!-- Accessories -->
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Accessories Discount
+                        </label>
+
+                        <div class="input-group">
+
+                            <select class="form-select" [(ngModel)]="discountModel.accessoriesDiscountType"
+                                name="accessoriesDiscountType">
+
+                                <option value="Value">Value</option>
+                                <option value="%">%</option>
+
+                            </select>
+
+                            <input type="number" class="form-control" [(ngModel)]="discountModel.accessoriesDiscount"
+                                name="accessoriesDiscount">
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-primary" (click)="submitDiscount()">
+                    Submit
+                </button>
+
+                <button type="button" class="btn btn-light" (click)="closeDiscountPopup()">
+                    Close
+                </button>
+
+
+            </div>
+
+        </div>
     </div>
 </div>

@@ -103,8 +103,8 @@ export class AddReceiptEntry implements OnInit {
     private navigation: Router,
     private loader: LoaderService,
     public toaster: ToastService,
-    public prefixService: PrefixService ,
-    private ledgerService:LedgerMasterService
+    public prefixService: PrefixService,
+    public ledgerService:LedgerMasterService
   ) {
     this.router.paramMap.subscribe(params => {
       this.id = params.get('id');
@@ -233,8 +233,7 @@ export class AddReceiptEntry implements OnInit {
 
   getParties(): Promise<any> {
     return new Promise((resolve) => {
-      this.ledgerService.getLedgerByType('Party').subscribe({
-      this.receiptEntryService.getLedgerByType('Receipt').subscribe({
+      this.ledgerService.getLedgerByType('Receipt').subscribe({
         next: (res) => {
 
           this.parties = res;
@@ -607,7 +606,7 @@ export class AddReceiptEntry implements OnInit {
     modalRef.result.then((newId) => {
       if (newId) {
 
-        this.receiptEntryService.getLedgerByType(type).subscribe({
+        this.ledgerService.getLedgerByType(type).subscribe({
           next: (res) => {
 
             if (type === 'Financier') {
