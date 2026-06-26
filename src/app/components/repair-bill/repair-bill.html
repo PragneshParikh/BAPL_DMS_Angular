@@ -412,9 +412,11 @@
                                     <th>Description</th>
                                     <th>Qty</th>
                                     <th>Rate</th>
-                                    <th>Discount</th>
+                                    <th>Discount Amt.</th>
                                     <th>Disc.Type</th>
-                                    <th>IGST Amt.</th>
+                                    <th>CGST(%)</th>
+                                    <th>SGST(%)</th>
+                                    <th>IGST(%)</th>
                                     <th>Net Amount</th>
                                     <th>Issue Type</th>
                                     <th>FOC Rate</th>
@@ -464,7 +466,8 @@
                                     </td>
 
                                     <td>{{item.discountType}}</td>
-
+                                    <td>{{item.cgst}}</td>
+                                    <td>{{item.sgst}}</td>
                                     <td class="text-end">
                                         {{item.igstAmount | number:'1.2-2'}}
                                     </td>
