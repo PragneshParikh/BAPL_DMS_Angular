@@ -49,7 +49,7 @@
 
                             <div class="col-md-3">
                                 <label>L.R. No</label>
-                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.lrNo">
+                                <input type="text" class="form-control form-control-sm" [(ngModel)]="headerObj.lrNo">
                             </div>
 
                             <div class="col-md-3">
@@ -64,17 +64,22 @@
 
                             <div class="col-md-3">
                                 <label>Transporter Name</label>
-                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.transporterName">
+                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.transporterName" (keypress)="allowCharactersOnly($event)"
+                                (input)="onTransporterNameInput()">>
                             </div>
 
                             <div class="col-md-3">
                                 <label>Driver Name</label>
-                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.driverName">
+                                <input type="text" class="form-control form-control-sm"
+                                    [(ngModel)]="headerObj.driverName" (keypress)="allowCharactersOnly($event)"
+                                    (input)="onDriverNameInput()">>
                             </div>
 
                             <div class="col-md-3">
                                 <label>Driver Contact</label>
-                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.driverContact">
+                                <input type="text" class="form-control form-control-sm"
+                                    [(ngModel)]="headerObj.driverContact" maxlength="10"
+                                    (input)="allowOnlyNumbers($event,'driverContact')">
                             </div>
 
                             <div class="col-md-3">
@@ -184,23 +189,32 @@
                                         <td>{{item.batteryNo}}</td>
                                         <td>{{item.chargerNo}}</td>
                                         <td><input [(ngModel)]="item.keyFobSetQty"
-                                                class="form-control form-control-sm qty-input"></td>
+                                                class="form-control form-control-sm qty-input" maxlength="2"
+                                                (input)="allowOnlyNumbers($event,'keyFobSetQty')"></td>
                                         <td><input [(ngModel)]="item.chargerQty"
-                                                class="form-control form-control-sm qty-input"></td>
+                                                class="form-control form-control-sm qty-input" maxlength="2"
+                                                (input)="allowOnlyNumbers($event,'chargerQty')"></td>
                                         <td><input [(ngModel)]="item.mirrorSetQty"
-                                                class="form-control form-control-sm qty-input"></td>
+                                                class="form-control form-control-sm qty-input" maxlength="2"
+                                                (input)="allowOnlyNumbers($event,'mirrorSetQty')"></td>
                                         <td><input [(ngModel)]="item.firstAidKitQty"
-                                                class="form-control form-control-sm qty-input"></td>
+                                                class="form-control form-control-sm qty-input" maxlength="2"
+                                                (input)="allowOnlyNumbers($event,'firstAidKitQty')"></td>
                                         <td><input [(ngModel)]="item.toolkitQty"
-                                                class="form-control form-control-sm qty-input"></td>
+                                                class="form-control form-control-sm qty-input" maxlength="2"
+                                                (input)="allowOnlyNumbers($event,'toolkitQty')"></td>
                                         <td><input [(ngModel)]="item.ownersManual"
-                                                class="form-control form-control-sm qty-input"></td>
+                                                class="form-control form-control-sm qty-input" maxlength="2"
+                                                (input)="allowOnlyNumbers($event,'ownersManual')"></td>
                                         <td><input [(ngModel)]="item.ignitionKeySet"
-                                                class="form-control form-control-sm qty-input"></td>
+                                                class="form-control form-control-sm qty-input" maxlength="2"
+                                                (input)="allowOnlyNumbers($event,'ignitionKeySet')"></td>
                                         <td><input [(ngModel)]="item.attributeCard"
-                                                class="form-control form-control-sm qty-input"></td>
+                                                class="form-control form-control-sm qty-input" maxlength="2"
+                                                (input)="allowOnlyNumbers($event,'attributeCard')"></td>
                                         <td><input [(ngModel)]="item.chargingKit"
-                                                class="form-control form-control-sm qty-input"></td>
+                                                class="form-control form-control-sm qty-input" maxlength="2"
+                                                (input)="allowOnlyNumbers($event,'chargingKit')"></td>
                                         <td><input type="date" [(ngModel)]="item.inspectionDate"
                                                 class="form-control form-control-sm"></td>
                                         <td>
@@ -247,8 +261,10 @@
 
         <!-- BUTTONS -->
         <div class="text-end mt-2">
-            <button class="btn btn-add btn-sm me-2" (click)="saveData()" [disabled]="!isLotInspected">Save</button>
-            <button class="btn btn-light btn-sm ">Close</button>
+            <button class="btn btn-add btn-sm me-2 text-white btn-primary" (click)="saveData()"
+                [disabled]="isLotInspected === true">
+                Save
+            </button><button class="btn btn-light btn-sm ">Close</button>
         </div>
     </div>
 </div>

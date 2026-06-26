@@ -174,5 +174,7 @@ export class JobCardService {
 
   getJobCardStatusById(id: Number): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardStatusById/${id}`);
+  getIssueTypebasedJobDetails(dealerCode: string,jobNo:number,serviceloc:string,fromDate: Date,toDate :Date) {
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetIssueTypebasedJobDetails/${dealerCode}/${jobNo}/${serviceloc}/${fromDate}/${toDate}`)
   }
 }

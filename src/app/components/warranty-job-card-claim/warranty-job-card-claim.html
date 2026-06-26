@@ -37,25 +37,18 @@
             </div>
             <div class="col-md-2">
                 <label class="form-label">Claim Prefix</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="WjobClaimprefix">
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="WjobClaimprefix" readonly>
             </div>
 
             <div class="col-md-1">
                 <label class="form-label">Claim No</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="claimNo">
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="claimNo" readonly>
             </div>
 
             <div class="col-md-2">
                 <label class="form-label">Date</label>
-                <input type="date" class="form-control form-control-sm" [(ngModel)]="toDate">
-            </div>
-
-            <div class="col-md-1">
-                <label class="form-label d-block">PrevYear</label>
-
-                <div class="form-check form-switch form-switch-md">
-                    <input class="form-check-input" type="checkbox" role="switch" [(ngModel)]="isPrevYear">
-                </div>
+                <input type="date" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="toDate"
+                    readonly>
             </div>
 
         </div>
@@ -80,18 +73,21 @@
 
             <div class="col-md-3">
                 <label class="form-label">Service Head</label>
-                  <input type="text" class="form-control form-control-sm">
+                <input type="text" class="form-control form-control-sm bg-light text-muted"
+                    [value]="selectedJob?.serviceHead || ''" readonly>
             </div>
             <div class="col-md-3">
                 <label class="form-label">Service Type</label>
-                 <input type="text" class="form-control form-control-sm">
+                <input type="text" class="form-control form-control-sm bg-light text-muted"
+                    [value]="selectedJob?.serviceType || ''" readonly>
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Job No</label>
 
                 <div class="input-group input-group-sm">
-                    <input type="text" class="form-control">
+                    <input type="text" class="form-control form-control-sm bg-light text-muted"
+                        [value]="selectedJob?.jobNo || ''" readonly>
 
                     <button class="btn btn-primary" (click)="openJobSearch(jobSearchPopup)">
                         <i class="ri-add-line"></i>
@@ -104,46 +100,55 @@
         <div class="row g-2 mt-1">
             <div class="col-md-3">
                 <label class="form-label">Chassis No</label>
-                <input type="text" class="form-control form-control-sm">
+                <input type="text" class="form-control form-control-sm bg-light text-muted"
+                    [value]="selectedJob?.chassisNo || ''" readonly>
             </div>
 
 
             <div class="col-md-3">
                 <label class="form-label">Motor No</label>
-                <input type="text" class="form-control form-control-sm">
+                <input type="text" class="form-control form-control-sm bg-light text-muted"
+                    [value]="selectedJob?.motorNo || ''" readonly>
             </div>
             <div class="col-md-2">
                 <label class="form-label">Invoice No</label>
-                <input type="text" class="form-control form-control-sm">
+                <input type="text" class="form-control form-control-sm bg-light text-muted"
+                    [value]="selectedJob?.repairBillNo || ''" readonly>
             </div>
 
             <div class="col-md-2">
                 <label class="form-label">Invoice Date</label>
-                <input type="date" class="form-control form-control-sm">
+                <input type="date" class="form-control form-control-sm bg-light text-muted"
+                    [value]="selectedJob?.repairBillDate | date:'yyyy-MM-dd'" readonly>
             </div>
             <div class="col-md-2">
                 <label class="form-label">KMs</label>
-                <input type="text" class="form-control form-control-sm">
+                <input type="text" class="form-control form-control-sm bg-light text-muted"
+                    [value]="selectedJob?.vehiclekms || '0'" readonly>
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Customer Name</label>
-                <input type="text" class="form-control form-control-sm">
+                <input type="text" class="form-control form-control-sm bg-light text-muted"
+                    [value]="selectedJob?.customerName || ''" readonly>
             </div>
 
             <div class="col-md-2">
                 <label class="form-label">Registration No.</label>
-                <input type="text" class="form-control form-control-sm">
+                <input type="text" class="form-control form-control-sm bg-light text-muted"
+                    [value]="selectedJob?.registrationNo || ''" readonly>
             </div>
 
             <div class="col-md-2">
                 <label class="form-label">Sale Date</label>
-                <input type="date" class="form-control form-control-sm">
+                <input type="date" class="form-control form-control-sm bg-light text-muted"
+                    [value]="selectedJob?.saleDate | date:'yyyy-MM-dd'" readonly>
             </div>
 
             <div class="col-md-2">
                 <label class="form-label">Failure Date</label>
-                <input type="date" class="form-control form-control-sm">
+                <input type="date" class="form-control form-control-sm"
+                    [value]="selectedJob?.failureDate | date:'yyyy-MM-dd'">
             </div>
 
             <div class="col-md-3">
@@ -156,6 +161,197 @@
         </div>
 
         <hr>
+        <div class="row g-3 mt-1">
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle warranty-table">
+                    <thead>
+                        <tr>
+                            <th>Part Item</th>
+                            <th>Description</th>
+                            <th>Inward Serial</th>
+                            <th>Outward Serial</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Rate</th>
+                            <th class="text-end">IGST Amnt</th>
+                            <th class="text-end">Amount</th>
+                            <th>Dealer Observation</th>
+                            <th>Root Cause Analysis(RCA)</th>
+                            <th>Claim Type</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let item of partDetails">
+                            <td>{{item.itemCode}}</td>
+
+                            <td>{{item.description}}</td>
+
+                            <td>
+                                <input type="text" class="form-control form-control-sm" [(ngModel)]="item.inwardSerial">
+                            </td>
+
+                            <td>
+                                <input type="text" class="form-control form-control-sm"
+                                    [(ngModel)]="item.outwardSerial">
+                            </td>
+
+                            <td class="text-center">
+                                {{item.qty}}
+                            </td>
+
+                            <td class="text-end">
+                                {{item.rate | number:'1.2-2'}}
+                            </td>
+
+                            <td class="text-end">
+                                {{item.igstAmount | number:'1.2-2'}}
+                            </td>
+
+                            <td class="text-end">
+                                {{item.amount | number:'1.2-2'}}
+                            </td>
+
+                            <td>
+                                <input type="text" class="form-control form-control-sm"
+                                    [(ngModel)]="item.dealerObservation">
+                            </td>
+
+                            <td>
+                                <input type="text" class="form-control form-control-sm"
+                                    [(ngModel)]="item.rootCauseAnalysis">
+                            </td>
+
+                            <td>
+                                <select class="form-select form-select-sm" [(ngModel)]="item.claimType">                           
+                                        <option value="Warranty Claim">Warranty Claim</option>                          
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                    <!-- <tfoot>
+                        <tr class="fw-bold">
+                            <td>Total</td>
+                            <td colspan="3"></td>
+
+                            <td class="text-center">
+                                {{ getTotalQty() }}
+                            </td>
+
+                            <td class="text-end">
+                                {{ getTotalRate() | number:'1.2-2' }}
+                            </td>
+
+                            <td></td>
+
+                            <td class="text-end">
+                                {{ getTotalAmount() | number:'1.2-2' }}
+                            </td>
+
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot> -->
+                </table>
+            </div>
+
+        </div>
+
+        <div class="row g-4 mt-1">
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle warranty-table">
+                    <thead>
+                        <tr>
+                            <th>Labour Item</th>
+                            <th>Description</th>
+                            <th>Inward Serial</th>
+                            <th>Outward Serial</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Rate</th>
+                            <th class="text-end">IGST Amnt</th>
+                            <th class="text-end">Amount</th>
+                            <th>Dealer Observation</th>
+                            <th>Root Cause Analysis(RCA)</th>
+                            <th>Claim Type</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let item of labourDetails">
+                            <td>{{item.itemCode}}</td>
+
+                            <td>{{item.description}}</td>
+
+                            <td>
+                                <input type="text" class="form-control form-control-sm" [(ngModel)]="item.inwardSerial">
+                            </td>
+
+                            <td>
+                                <input type="text" class="form-control form-control-sm"
+                                    [(ngModel)]="item.outwardSerial">
+                            </td>
+
+                            <td class="text-center">
+                                {{item.qty}}
+                            </td>
+
+                            <td class="text-end">
+                                {{item.rate | number:'1.2-2'}}
+                            </td>
+
+                            <td class="text-end">
+                                {{item.igstAmount | number:'1.2-2'}}
+                            </td>
+
+                            <td class="text-end">
+                                {{item.amount | number:'1.2-2'}}
+                            </td>
+
+                            <td>
+                                <input type="text" class="form-control form-control-sm"
+                                    [(ngModel)]="item.dealerObservation">
+                            </td>
+
+                            <td>
+                                <input type="text" class="form-control form-control-sm"
+                                    [(ngModel)]="item.rootCauseAnalysis">
+                            </td>
+
+                            <td>
+                                <select class="form-select form-select-sm" [(ngModel)]="item.claimType">
+                                    <option value="Warranty">Warranty</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                    <!-- <tfoot>
+                        <tr class="fw-bold">
+                            <td>Total</td>
+                            <td colspan="3"></td>
+
+                            <td class="text-center">
+                                {{ getTotalQty() }}
+                            </td>
+
+                            <td class="text-end">
+                                {{ getTotalRate() | number:'1.2-2' }}
+                            </td>
+
+                            <td></td>
+
+                            <td class="text-end">
+                                {{ getTotalAmount() | number:'1.2-2' }}
+                            </td>
+
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot> -->
+                </table>
+            </div>
+
+        </div>
 
         <!-- Footer Buttons -->
         <div class="d-flex justify-content-between align-items-center">
@@ -227,7 +423,7 @@
             </div>
 
             <div class="col-md-2 d-flex align-items-end">
-                <button class="btn btn-primary btn-sm">
+                <button class="btn btn-primary btn-sm" (click)="loadJobCarDetails()">
 
                     <i class="ri-search-line me-1"></i>
 
@@ -249,8 +445,8 @@
                         <th>Date</th>
                         <th>Location</th>
                         <th>Job No</th>
-                        <th>Service Name</th>
-                        <th>Party Name</th>
+                        <th>Service Head</th>
+                        <th>Service Type</th>
                         <th>Chassis No</th>
                         <th>Model Name</th>
                         <th width="80">Action</th>
@@ -260,30 +456,27 @@
 
                 <tbody>
 
-                    <!-- <tr *ngFor="let item of jobCardList; let i=index">
+                    <tr *ngFor="let item of jobCardList; let i=index">
 
                         <td>{{i+1}}</td>
                         <td>{{item.jobType}}</td>
-                        <td>{{item.jobDate | date:'dd-MM-yyyy'}}</td>
-                        <td>{{item.locationName}}</td>
+                        <td>{{item.jobInDate | date:'dd-MM-yyyy'}}</td>
+                        <td>{{item.jobLocation}}</td>
                         <td>{{item.jobNo}}</td>
-                        <td>{{item.serviceName}}</td>
-                        <td>{{item.partyName}}</td>
+                        <td>{{item.serviceHead}}</td>
+                        <td>{{item.serviceType}}</td>
                         <td>{{item.chassisNo}}</td>
                         <td>{{item.modelName}}</td>
-
                         <td class="text-center">
 
-                            <button
-                                class="btn btn-success btn-sm"
-                                (click)="selectJob(item,modal)">
+                            <button class="btn btn-success btn-sm" (click)="selectJob(item,modal)">
 
                                 <i class="ri-check-line"></i>
                             </button>
 
                         </td>
 
-                    </tr> -->
+                    </tr>
 
                     <tr *ngIf="jobCardList.length==0">
                         <td colspan="10" class="text-center">

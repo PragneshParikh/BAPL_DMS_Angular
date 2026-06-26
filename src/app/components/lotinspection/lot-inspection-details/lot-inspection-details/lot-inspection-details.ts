@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { LotInspectionUpdate, Header, Detail } from '../../../../ViewModels/LotInspectionViewModel';
 import { LotInspectionDetailsService } from '../../../../core/services/lot-inspection-details-service';
 import { StorageService } from '../../../../core/services/storage';
@@ -28,7 +29,7 @@ export class LotInspectionDetails implements OnInit {
   selectedvehiclefasteringcover: string = '';
   selectedPlastingcover: string = '';
   selectedSupervisor: string = '';
-  router: any;
+
   isLotInspected: any;
 
   constructor(
@@ -37,6 +38,7 @@ export class LotInspectionDetails implements OnInit {
     private locationService: LocationMasterService,
     public toaster: ToastService,
     private loader: LoaderService,
+    private router: Router,
     private storageService: StorageService
   ) { }
 
@@ -53,7 +55,66 @@ export class LotInspectionDetails implements OnInit {
       }
     });
   }
+  allowOnlyNumbers(event: any, field: 'driverContact' | 'keyFobSetQty' | 'chargerQty' | 'mirrorSetQty' | 'firstAidKitQty' | 'toolkitQty' | 'ownersManual' | 'ignitionKeySet' | 'attributeCard' | 'chargingKit') {
+    const value = event.target.value.replace(/\D/g, '');
+    event.target.value = value;
 
+    switch (field) {
+      case 'driverContact':
+        this.headerObj.driverContact = value;
+        break;
+      case 'keyFobSetQty':
+        this.detailList[0].keyFobSetQty = value;
+        break;
+      case 'chargerQty':
+        this.detailList[0].chargerQty = value;
+        break;
+      case 'mirrorSetQty':
+        this.detailList[0].mirrorSetQty = value;
+        break;
+      case 'firstAidKitQty':
+        this.detailList[0].firstAidKitQty = value;
+        break;
+
+      case 'toolkitQty':
+        this.detailList[0].toolkitQty = value;
+        break;
+      case 'ownersManual':
+        this.detailList[0].ownersManual = value;
+        break;
+      case 'ignitionKeySet':
+        this.detailList[0].ignitionKeySet = value;
+        break;
+      case 'attributeCard':
+        this.detailList[0].attributeCard = value;
+        break;
+      case 'chargingKit':
+        this.detailList[0].chargingKit = value;
+        break;
+
+    }
+  }
+
+  allowCharactersOnly(event: KeyboardEvent): boolean {
+    const char = event.key;
+
+    if (!/^[a-zA-Z\s]$/.test(char)) {
+      event.preventDefault();
+      return false;
+    }
+
+    return true;
+  }
+
+  onDriverNameInput() {
+    this.headerObj.driverName = (this.headerObj.driverName || '')
+      .replace(/[^a-zA-Z\s]/g, '');
+  }
+  onTransporterNameInput(){
+    this.headerObj.transporterName = (this.headerObj.transporterName || '')
+      .replace(/[^a-zA-Z\s]/g, '');
+  }
+ 
   fetchLocations(): void {
     const dealerCode = this.storageService.getDealerCode();
     this.locationService.getLocationList(dealerCode).subscribe({
@@ -87,6 +148,7 @@ export class LotInspectionDetails implements OnInit {
 
   // ================= GET DATA =================
   getInvoiceData() {
+    debugger;
     this.loader.show();
     // current datetime 
     const today = new Date();
@@ -102,8 +164,10 @@ export class LotInspectionDetails implements OnInit {
       next: (res: any) => {
 
         if (res?.data?.length > 0) {
+          console.log(res)
 
-          this.isLotInspected = res?.data[0]?.isLotInspected;
+          this.isLotInspected = res?.data[0]?.islotinspected;
+          console.log("isLotInspected", this.isLotInspected);
 
           const first = res.data[0];
 
@@ -173,7 +237,7 @@ export class LotInspectionDetails implements OnInit {
 
   // ================= SAVE DATA =================
   saveData() {
-
+    debugger;
     // VALIDATION FIRST
     const invalidRows = this.detailList.filter(x => !x.vehicleStatus || x.vehicleStatus === '');
 
