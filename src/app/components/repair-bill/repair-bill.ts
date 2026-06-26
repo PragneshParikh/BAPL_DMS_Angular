@@ -473,7 +473,8 @@ export class RepairBill implements OnInit {
   loadLabourCodelist(): void {
     this.loader.show();
     this.oemmodelName = this.selectedJobCard?.jobCardCustomer?.modelName
-    this.labourMasterService.getLabourRateDropDown(this.oemmodelName).subscribe({
+    this.customerLedgerId = this.selectedJobCard?.jobCardCustomer?.customerLedgerId
+    this.labourMasterService.getLabourRateDropDown(this.oemmodelName,this.customerLedgerId).subscribe({
       next: (res) => {
         this.loader.hide();
         this.labourCodeList = res;

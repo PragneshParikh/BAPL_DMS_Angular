@@ -22,6 +22,9 @@ export class WarrantyJobCardClaim implements OnInit {
   supplierList: any[] = [];
   selectedSupplierId: number | null = null;
   selectedLocationId: string | null = null;
+  selectedJob: any = {};
+  claimType:string='Warranty';
+ 
 
   jobSearch: any = {
     jobNo: 0,
@@ -67,7 +70,7 @@ export class WarrantyJobCardClaim implements OnInit {
     this.loadPrefix();
     this.loadSuplier();
     this.loadlocation();
-    this.loadJobCarDetails();
+    // this.loadJobCarDetails();
 
 
   }
@@ -135,16 +138,17 @@ export class WarrantyJobCardClaim implements OnInit {
     this.loader.show();
     const dealerCode = this.storageService.getDealerCode();
     let jobNo = this.jobSearch.jobNo;
-    let fromDate=this.jobSearch.rBillfromDate;
+    let fromDate = this.jobSearch.rBillfromDate;
     let toDate = this.jobSearch.rBilltoDate;
     let serviceloc = this.selectedLocationId;
 
 
-    this.jobcardService.getIssueTypebasedJobDetails(dealerCode,jobNo,serviceloc,fromDate,toDate).subscribe({
-      next:(res : any)=>{
+    this.jobcardService.getIssueTypebasedJobDetails(dealerCode, jobNo, serviceloc, fromDate, toDate).subscribe({
+      next: (res: any) => {
         this.loader.hide();
         this.jobCardList = res;
-      },error:(err)=>{
+        console.log(this.jobCardList)
+      }, error: (err) => {
         this.loader.hide();
         console.log(err)
       }
@@ -154,6 +158,7 @@ export class WarrantyJobCardClaim implements OnInit {
 
   openJobSearch(content: any) {
     this.loadlocation();
+    this.loadJobCarDetails();
     this.modalService.open(content, {
       size: 'xl',
       backdrop: 'static',
@@ -162,17 +167,22 @@ export class WarrantyJobCardClaim implements OnInit {
     });
 
   }
-  //  selectJob(item: any, modal: any) {
 
-  //   this.claimObj.jobNo = item.jobNo;
+  selectJob(item: any, modal: any) {
 
-  //   this.claimObj.customerName = item.partyName;
+  this.selectedJob = { ...item };
 
-  //   this.claimObj.chassisNo = item.chassisNo;
+  console.log('Selected Job:', this.selectedJob);
 
-  //   this.claimObj.modelName = item.modelName;
+  modal.close();
+}
 
-  //   modal.close();
-  // }
+get partDetails() {
+  return this.selectedJob?.repairBillDetails?.filter(x => x.itemType === 'Part') || [];
+}
+
+get labourDetails() {
+  return this.selectedJob?.repairBillDetails?.filter(x => x.itemType === 'Labour') || [];
+}
 
 }
