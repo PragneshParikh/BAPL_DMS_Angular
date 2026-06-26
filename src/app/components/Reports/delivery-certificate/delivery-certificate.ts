@@ -39,13 +39,12 @@ export class DeliveryCertificate {
     private vehicleSaleBillService: VehicleSaleBillService,
     private storageService: StorageService,
     private dealerService: DealerService,
-  private router:Router) { }
+    private router: Router) { }
 
 
   async ngOnInit() {
     this.saleBillId = this.route.snapshot.paramMap.get('id') || '';
-    console.log(this.saleBillId);
-    
+
     if (this.saleBillId) {
       await this.getDealerDetails();
       this.getBillById(parseInt(this.saleBillId));
@@ -56,7 +55,7 @@ export class DeliveryCertificate {
       const dealerCode = this.storageService.getDealerCode();
 
       this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
-        this.dealer = res?.data|| null;
+        this.dealer = res?.data || null;
         resolve(true);
       }, error => {
         reject(false);
@@ -121,11 +120,11 @@ export class DeliveryCertificate {
 
   }
 
-   goBack(): void {
-  this.router.navigate(['/vehicle-sale-bill/edit', this.saleBillId]);
-}
+  goBack(): void {
+    this.router.navigate(['/vehicle-sale-bill/edit', this.saleBillId]);
+  }
 
-printInvoice(): void {
-  window.print();
-}
+  printInvoice(): void {
+    window.print();
+  }
 }

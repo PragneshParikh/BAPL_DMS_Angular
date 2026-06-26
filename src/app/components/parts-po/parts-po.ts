@@ -163,7 +163,7 @@ export class PartsPo implements OnInit {
       },
       error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
         this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
       }
     })
@@ -879,7 +879,6 @@ export class PartsPo implements OnInit {
         }
       },
       (reason) => {
-        console.log('Modal dismissed:', reason);
       }
     );
   }

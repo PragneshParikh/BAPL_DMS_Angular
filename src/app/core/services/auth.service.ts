@@ -175,8 +175,6 @@ export class AuthenticationService {
                 return;
             }
 
-            console.log(`Token expires in ${Math.floor(timeout / 1000)} seconds`);
-
             // Clear existing timer
             if (this.timeoutId) {
                 clearTimeout(this.timeoutId);
@@ -184,7 +182,6 @@ export class AuthenticationService {
 
             // Start new timer
             this.timeoutId = setTimeout(() => {
-                console.log('Token expired → logging out');
                 this.logout();
             }, timeout);
 

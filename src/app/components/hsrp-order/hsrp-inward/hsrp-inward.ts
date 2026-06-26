@@ -79,7 +79,7 @@ export class HsrpInward implements OnInit {
           this.page = 1;
           this.updatePagination();
         },
-        error: (err) => console.log(err)
+        error: (err) => console.error(err)
       });
   }
 
@@ -119,11 +119,11 @@ export class HsrpInward implements OnInit {
   navigateToListingPage() {
     this.router.navigate(['/hsrp-order-list']);
   }
-get isSaveDisabled(): boolean {
-  return this.paginatedOrders.some(
-    item => item.selected && (!item.inwardStatus || item.inwardStatus === 'Pending' || item.inwardStatus === null)
-  );
-}
+  get isSaveDisabled(): boolean {
+    return this.paginatedOrders.some(
+      item => item.selected && (!item.inwardStatus || item.inwardStatus === 'Pending' || item.inwardStatus === null)
+    );
+  }
   onSearchChange(): void {
 
     const term = this.searchTerm.toLowerCase();

@@ -202,7 +202,6 @@ export class RepairBill implements OnInit {
   }
 
   saveOrUpdateRepairBill() {
-    debugger
 
     this.saveRepairBill();
 
@@ -368,7 +367,6 @@ export class RepairBill implements OnInit {
 
     }
     this.selectedJobCard = item;
-    console.log(this.selectedJobCard);
     this.chassisNo = this.selectedJobCard.jobCardHeader.chassisno;
     this.insValidTill = this.selectedJobCard.jobCardCustomer.insuranceExpDate;
     this.vehicleSaleBillService.getPolicyNo(this.chassisNo).subscribe({
@@ -949,7 +947,6 @@ export class RepairBill implements OnInit {
   }
 
   saveRepairBill(): void {
-    debugger
     const dealerCode = this.storageService.getDealerCode();
 
     const payload = {

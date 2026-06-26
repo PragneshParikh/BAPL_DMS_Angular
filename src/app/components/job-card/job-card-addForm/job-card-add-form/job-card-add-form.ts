@@ -146,7 +146,6 @@ export class JobCardAddForm {
     private toaster: ToastService) { }
 
   ngOnInit(): void {
-    console.log('Date :', new Date().toISOString().split('T')[0]);
     this.dealerCode = this.storageService.getDealerCode();
     this.loadPrefix();
     this.fetchLocations();
@@ -180,7 +179,7 @@ export class JobCardAddForm {
         this.jobNo = Number(res.split('/').pop());
       }, error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
 
       }
     })
@@ -234,7 +233,6 @@ export class JobCardAddForm {
   }
 
   selectChassis(item: any) {
-    console.log("selectedchassis", item);
     this.selectedChassis = item.chassisNumber;
     this.filteredChassisList = [];
 
@@ -297,7 +295,6 @@ export class JobCardAddForm {
 
 
   selectComplaint(item: any): void {
-    console.log("complaintmaster", item)
     this.complaintObj.complaintCode = item.complaintName;
     this.complaintObj.complaint = item.complaintName;
     this.complaintObj.complaintId = item.id;
@@ -325,7 +322,6 @@ export class JobCardAddForm {
     });
   }
   loadServiceHistory(chassisNo: string) {
-    debugger
     let jobCardId: number | null = 0;
 
     if (this.chassiseditData?.jobCardHeader?.id) {
@@ -342,7 +338,6 @@ export class JobCardAddForm {
           return;
         }
         this.serviceHistoryList = res;
-        console.log("service histoery", this.serviceHistoryList);
       },
       error: (err) => {
         this.toastr.show("Something went wrong");
@@ -367,13 +362,11 @@ export class JobCardAddForm {
   }
 
   loadChassisList() {
-    //debugger
     const dealerCode = this.storageService.getDealerCode();
     this.jobTypeId = this.selectedJobtype
 
     this.jobCardService.getAllInspectedChassis(dealerCode, this.jobTypeId).subscribe(res => {
       this.chassisList = res;
-      console.log("AddloadingChassisdetails", this.chassisList)
 
       if (this.isEditMode && this.chassiseditData) {
         this.customerObj.saleDate = this.chassisList[0].saleDate?.split('T')[0];
@@ -393,7 +386,6 @@ export class JobCardAddForm {
 
     this.jobCardService.getPdiChecklist(oemModelId).subscribe(res => {
       this.pdiCheckList = res
-      console.log("pdichecklist", this.pdiCheckList)
     });
   }
   toggle(section: string) {
@@ -544,7 +536,6 @@ export class JobCardAddForm {
   //   }
   // }
   onChassisChange() {
-    debugger;
     if (!this.selectedChassis) return;
     this.loadServiceHistory(this.selectedChassis);
 
@@ -569,7 +560,7 @@ export class JobCardAddForm {
       + (selected.colourName ? ' (' + selected.colourName + ')' : '');
 
     this.registerNo = selected.registerNo;
-   
+
     this.batteryCapacity = selected.batteryCapacity;
     this.batteryMake = selected.batteryMake;
     this.batteryChemestry = selected.batteryChemestry;
@@ -697,7 +688,6 @@ export class JobCardAddForm {
       remarks: x.remarks || ''
     }));
 
-    console.log("Save PDIChecklist", this.pdiCheckList)
     this.isPdiSaved = true;
 
     Swal.fire({
@@ -711,7 +701,6 @@ export class JobCardAddForm {
   }
   //insert jobcard
   saveJobCard() {
-    debugger
     //  VALIDATION (recommended)
     if (this.selectedJobtype == 1 && !this.isPdiSaved) {
       Swal.fire('Error', 'Please complete PDI first', 'error');

@@ -59,7 +59,7 @@ export class Ffirlisting {
 
   }
 
-   formatDate(date: Date): string {
+  formatDate(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -84,8 +84,6 @@ export class Ffirlisting {
           this.collectionSize = this.filteredData.length;
 
           this.refreshTable();
-
-          console.log("FFIRList :", res);
 
         },
 
@@ -218,14 +216,14 @@ export class Ffirlisting {
     this.pagedData = this.filteredData.slice(start, end);
 
   }
-  
+
   onFFIREdit(item: any) {
 
-  this.router.navigate(['/ffir'], {
-    queryParams: {
-      id: item.id
-    }
-  });
-}
+    this.router.navigate(['/ffir'], {
+      queryParams: {
+        id: item.id
+      }
+    });
+  }
 
 }
