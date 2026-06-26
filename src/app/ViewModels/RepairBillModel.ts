@@ -19,6 +19,7 @@ export interface LabourItem {
   taxableAmount: number;
   taxAmount: number;
   netAmount: number;
+  totalTaxPer:number;
 
   issuetypeName: string;
   issuetypeId?: number;

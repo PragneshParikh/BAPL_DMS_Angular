@@ -154,7 +154,7 @@
 
                 <div class="col-md-1">
                     <label class="form-label">Job Search</label>
-                    <button class="btn btn-light btn-sm w-100" (click)="openPopup()">
+                    <button class="btn btn-primary btn-sm w-100" (click)="openPopup()">
                         <i class="ri-car-line"></i>
                     </button>
                 </div>
@@ -320,19 +320,17 @@
                             [(ngModel)]="selectedPartRate" readonly>
 
                     </div> -->
-
-
                     <div class="col-md-1">
-                        <label class="form-label">Discount</label>
-                        <input type="number" class="form-control form-control-sm text-end" [(ngModel)]="discount">
-                    </div>
-
-                    <div class="col-md-2">
                         <label class="form-label">Disc. Type</label>
                         <select class="form-select form-select-sm" [(ngModel)]="discountType">
                             <option value="Value">Value</option>
                             <option value="%">%</option>
                         </select>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label">Discount</label>
+                        <input type="number" class="form-control form-control-sm text-end" [(ngModel)]="discount">
                     </div>
 
                     <div class="col-md-2">
@@ -356,8 +354,8 @@
                             <option value="Vishal">Vishal</option>
                         </select>
                     </div> -->
-                    <div class="col-md-2">
-                        <button class="btn btn-sm btn-soft-primary" (click)="addLabour()">
+                    <div class="col-md-1">
+                        <button class="btn btn-sm btn-primary" (click)="addLabour()">
                             + Add
                         </button>
                     </div>
@@ -414,9 +412,9 @@
                                     <th>Rate</th>
                                     <th>Discount Amt.</th>
                                     <th>Disc.Type</th>
-                                    <th>CGST(%)</th>
-                                    <th>SGST(%)</th>
-                                    <th>IGST(%)</th>
+                                    <th>CGST Amt.</th>
+                                    <th>SGST Amt.</th>
+                                    <th>IGST Amt.</th>
                                     <th>Net Amount</th>
                                     <th>Issue Type</th>
                                     <th>FOC Rate</th>
@@ -466,11 +464,12 @@
                                     </td>
 
                                     <td>{{item.discountType}}</td>
-                                    <td>{{item.cgst}}</td>
-                                    <td>{{item.sgst}}</td>
-                                    <td class="text-end">
+                                    <td>{{item.cgstAmount | number:'1.2-2'}}</td>
+                                    <td>{{item.sgstAmount | number:'1.2-2'}}</td>
+                                    <td>{{item.igstAmount | number:'1.2-2'}}</td>
+                                    <!-- <td class="text-end">
                                         {{item.igstAmount | number:'1.2-2'}}
-                                    </td>
+                                    </td> -->
 
                                     <td class="text-end">
                                         {{item.netAmount | number:'1.2-2'}}
@@ -485,7 +484,7 @@
                                     </td>
 
                                     <td class="text-end">
-                                        {{item.igst}}
+                                        {{item.totalTaxPer}}
                                     </td>
 
                                     <!-- <td>
