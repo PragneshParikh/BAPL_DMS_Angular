@@ -72,9 +72,10 @@
                                     </label>
 
                                     <ng-select class="ng-select-sm" [items]="itemList" bindValue="id"
-                                        [(ngModel)]="newItem.itemId" [searchFn]="customSearchFn" [clearable]="false"
-                                        (change)="onChangeItem($event)" placeholder="Search Part No or Description"
-                                        name="itemName_select" #itemName_select="ngModel" required>
+                                        [disabled]="formData.jobNo <= 0" [(ngModel)]="newItem.itemId"
+                                        [searchFn]="customSearchFn" [clearable]="false" (change)="onChangeItem($event)"
+                                        placeholder="Search Part No or Description" name="itemName_select"
+                                        #itemName_select="ngModel" required>
 
                                         <ng-template ng-label-tmp let-item="item">
                                             <span [title]="item.itemcode + ' - ' + item.itemdesc">

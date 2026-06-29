@@ -6,6 +6,7 @@ import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { JobCardService } from '../../core/services/job-card-service';
 import { SharedModule } from '../../shared/shared.module';
+import { StorageService } from '../../core/services/storage';
 
 @Component({
   selector: 'app-job-search',
@@ -23,24 +24,38 @@ export class JobSearch {
     manualJobNo: null,
     dateFrom: null,
     dateTo: null,
+    registerNo: '',
+    chassisNo: ''
   };
 
   page = 1;
   pageSize = 10;
   collectionSize = 0;
 
+  isSuperAdmin: boolean = false;
+  dealerCode: string = '';
+
   constructor(
     private activeModal: NgbActiveModal,
     private loader: LoaderService,
     private toast: ToastService,
-    private jobCardService: JobCardService
+    private jobCardService: JobCardService,
+    private storageService: StorageService
   ) {
+
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    }
 
     this.formData = {
       jobNo: null,
       manualJobNo: null,
       dateFrom: new Date(new Date().setDate(new Date().getDate() - 15)).toISOString().split('T')[0],
-      dateTo: new Date().toISOString().split('T')[0]
+      dateTo: new Date().toISOString().split('T')[0],
+      registerNo: '',
+      chassisNo: ''
     };
   }
 
@@ -72,7 +87,7 @@ export class JobSearch {
     this.loader.show();
 
     if (this.sourceType === 'material-transfer') {
-      this.jobCardService.getOpenJobCardDataByPaged(fromDate, toDate, jobNo, manualJobNo, pageIndex, pageSize, false).subscribe({
+      this.jobCardService.getOpenJobCardDataByPaged(fromDate, toDate, jobNo, manualJobNo, pageIndex, pageSize, false, this.dealerCode).subscribe({
         next: (res) => {
           this.jobList = res.data;
           this.collectionSize = res.totalRecords;
@@ -110,6 +125,8 @@ export class JobSearch {
       manualJobNo: null,
       dateFrom: null,
       dateTo: null,
+      registerNo: '',
+      chassisNo: ''
     };
   }
 

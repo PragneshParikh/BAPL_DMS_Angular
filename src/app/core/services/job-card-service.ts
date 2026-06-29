@@ -78,6 +78,9 @@ export class JobCardService {
     return this.httpClient.put(`${this.baseUrl}/JobCard/UpdateJobCardDetails`, data);
   }
 
+    getJobCardForPrint(jobId: number): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardForPrint/${jobId}`);
+  }
   getFilterdDataByPaged(fromDate: Date | null, toDate: Date | null, jobNo: number | null, manualJobNo: number | null, pageIndex: number, pageSize: number): Observable<any> {
 
     const params = {
@@ -92,7 +95,7 @@ export class JobCardService {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetFilteredJobCard`, { params });
   }
 
-  getOpenJobCardDataByPaged(fromDate: Date | null, toDate: Date | null, jobNo: number | null, manualJobNo: number | null, pageIndex: number, pageSize: number, status: boolean): Observable<any> {
+  getOpenJobCardDataByPaged(fromDate: Date | null, toDate: Date | null, jobNo: number | null, manualJobNo: number | null, pageIndex: number, pageSize: number, status: boolean, dealerCode: string | null): Observable<any> {
     const params = {
       pageIndex: pageIndex.toString(),
       pageSize: pageSize.toString(),
@@ -100,7 +103,8 @@ export class JobCardService {
       toDate: toDate ? new Date(toDate).toISOString() : '',
       jobNo: jobNo ? jobNo.toString() : '',
       manualJobNo: manualJobNo ? manualJobNo.toString() : '',
-      isClosed: status.toString()
+      isClosed: status.toString(),
+      dealerCode: dealerCode
     };
 
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardByStatus`, { params });
