@@ -1,4 +1,4 @@
-<div id="job-search">
+<!-- <div id="job-search">
     <div class="modal-header" style="background-color: #747CA0; padding: 5px;">
         <h5 class="modal-title" id="varyingcontentModalLabel" style="color: white;">Job Search
         </h5>
@@ -11,7 +11,7 @@
                 <div class="card-header">
                     <fieldset class="border p-2 mb-3">
                         <form #jobSearchForm="ngForm" (ngSubmit)="onSubmit(jobSearchForm)">
-                            <!-- Top Row -->
+                            <\!-- Top Row --\>
                             <div class="row mb-2 g-1">
                                 <div class="col-md-2">
                                     <label class="form-label">Date From</label>
@@ -47,7 +47,7 @@
                         </form>
                     </fieldset>
 
-                    <!-- Add Button -->
+                    <\!-- Add Button --\>
                     <div class=" row mt-3">
                         <div class="col-md-12">
                             <button type="button" class="btn btn-primary btn-sm float-end" (click)="reset()">
@@ -74,7 +74,7 @@
                                     <th> Job No </th>
                                     <th> Service Name </th>
                                     <th> Party Name </th>
-                                    <!-- <th> Reg No </th> -->
+                                    <\!-- <th> Reg No </th> --\>
                                     <th> Chassis No </th>
                                     <th> Item Model </th>
                                     <th> Post Invoice </th>
@@ -99,7 +99,7 @@
                                         </button>
                                     </td>
                                 </tr>
-                                <!-- No Data -->
+                                <\!-- No Data --\>
                                 <tr *ngIf="!jobList || jobList.length === 0">
                                     <td colspan="10" class="text-center text-muted py-3">
                                         No Data Available
@@ -109,7 +109,7 @@
                         </table>
 
                     </div>
-                    <!-- PAGINATION -->
+                    <\!-- PAGINATION --\>
                     <div class="col-sm-12 col-md-12 mt-2">
                         <div class="text-md-right float-md-end gridjs-pagination">
                             <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
@@ -117,9 +117,154 @@
                             </ngb-pagination>
                         </div>
                     </div>
-                    <!-- End Pagination -->
+                    <\!-- End Pagination --\>
 
                 </div>
-            </div><!-- end card -->
+            </div><\!-- end card --\>
+        </div>
+    </div> -->
+
+
+<div id="job-search">
+
+    <!-- <div class="custom-modal"> -->
+
+    <!-- Header -->
+    <!-- <div class="custom-modal-header bg-primary">
+        <h5 class="mb-0 text-white"> Job Search </h5>
+        <button class="btn-close-custom text-white" (click)="close(false)">
+            <i class="ri-close-line"></i>
+        </button>
+    </div> -->
+    <div class="modal-header" style="background-color: #747CA0; padding: 5px;">
+        <h5 class="modal-title" id="varyingcontentModalLabel" style="color: white;">Job Search
+        </h5>
+        <button type="button" class="btn-close" aria-hidden="true" style="color: white;" (click)="close(false)">
+        </button>
+    </div>
+
+    <!-- Body -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <fieldset class="p-2">
+                        <form #jobSearchForm="ngForm" (ngSubmit)="onSubmit(jobSearchForm)">
+                            <div class="custom-modal-body">
+                                <!-- SEARCH -->
+                                <div class="row mb-2 g-1">
+                                    <div class="col-md-2">
+                                        <label class="form-label">Date From</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="date" class="form-control form-control-sm" name="dateFrom"
+                                                #dateFrom="ngModel" [(ngModel)]="formData.dateFrom">
+                                            <div *ngIf="dateFrom.invalid && dateFrom.touched" class="text-danger">
+                                                Date From is required when Date To is selected
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label">Date To</label>
+                                        <input type="date" class="form-control form-control-sm" name="dateTo"
+                                            [(ngModel)]="formData.dateTo" #dateTo="ngModel"
+                                            [required]="formData.dateFrom" />
+
+                                        <div *ngIf="dateTo.invalid && dateTo.touched" class="text-danger">
+                                            Date To is required when Date From is selected
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label">Job No</label>
+                                        <input type="text" class="form-control form-control-sm" name="jobNo"
+                                            #jobNo="ngModel" [(ngModel)]="formData.jobNo">
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label>Registration No</label>
+                                        <input type="text" class="form-control form-control-sm" name="registrationNo"
+                                            #registrationNo="ngModel" [(ngModel)]="formData.registerNo">
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label>Chassis Number</label>
+                                        <input type="text" class="form-control form-control-sm" name="chassisNumber"
+                                            #chassisNumber="ngModel" [(ngModel)]="formData.chassisNo">
+                                    </div>
+
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <button type="submit" class="btn btn-primary btn-sm float-end me-1"
+                                            (click)="onSearchJob()">
+                                            Search
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- TABLE -->
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-sm">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Sr No.</th>
+                                                <th>Job No</th>
+                                                <th>Job Date</th>
+                                                <th>Location</th>
+                                                <th>Job Type/Service Name</th>
+                                                <th>Party Name</th>
+                                                <th>Regn./Chassis No.</th>
+                                                <th>Vehicle Type</th>
+                                                <th>Job Source</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let item of jobList; let i = index">
+                                                <td>{{ i + 1 }}</td>
+                                                <td> {{ item.jobNo }} </td>
+                                                <td> {{ item.jobDate | date:'dd-MM-yyyy' }} </td>
+                                                <td> {{ item.location }} </td>
+                                                <td>
+                                                    {{ item.jobType }}
+                                                    <br>
+                                                    {{ item.serviceType }}
+                                                </td>
+                                                <td> {{ item.customerName }} </td>
+                                                <td>
+                                                    <b>R:</b>
+                                                    {{ item.registerNo }}
+                                                    <br>
+                                                    <b>C:</b>
+                                                    {{ item.chasisNo }}
+                                                </td>
+                                                <td *ngIf="true"> External </td>
+                                                <td *ngIf="true"> {{ item.jobsource }} </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                                        (click)="onSelectJobType(item)">
+                                                        Select
+                                                    </button>
+                                                </td>
+                                            </tr>
+
+                                            <!-- No Data -->
+                                            <tr *ngIf="jobList.length === 0">
+                                                <td colspan="10" class="text-center text-muted py-3">
+                                                    No Data Available
+                                                </td>
+                                            </tr>
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                            </div>
+                        </form>
+                    </fieldset>
+                </div>
+            </div>
         </div>
     </div>
+</div>
+<!-- </div> -->

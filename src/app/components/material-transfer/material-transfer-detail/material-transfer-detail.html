@@ -72,9 +72,10 @@
                                     </label>
 
                                     <ng-select class="ng-select-sm" [items]="itemList" bindValue="id"
-                                        [(ngModel)]="newItem.itemId" [searchFn]="customSearchFn" [clearable]="false"
-                                        (change)="onChangeItem($event)" placeholder="Search Part No or Description"
-                                        name="itemName_select" #itemName_select="ngModel" required>
+                                        [disabled]="formData.jobNo <= 0" [(ngModel)]="newItem.itemId"
+                                        [searchFn]="customSearchFn" [clearable]="false" (change)="onChangeItem($event)"
+                                        placeholder="Search Part No or Description" name="itemName_select"
+                                        #itemName_select="ngModel" required>
 
                                         <ng-template ng-label-tmp let-item="item">
                                             <span [title]="item.itemcode + ' - ' + item.itemdesc">
@@ -172,9 +173,9 @@
                                         <th>Inward Sr No.</th>
                                         <th>Issue Sr No.</th>
                                         <!-- <th>Technician</th> -->
-                                        <th>CGST(%)</th>
-                                        <th>SGST(%)</th>
-                                        <th>IGST(%)</th>
+                                        <th>CGST ({{ cgstPercent }}%)</th>
+                                        <th>SGST ({{ sgstPercent }}%)</th>
+                                        <th>IGST ({{ igstPercent }}%)</th>
                                         <th>Amount</th>
                                         <th>MRP</th>
                                         <!-- <th>Remarks</th> -->
@@ -204,9 +205,9 @@
                                         <td class="text-nowrap">{{ item.issuesrno }}</td>
                                         <!-- <td class="text-nowrap">{{ item.technician | getTechnicianName: lstTechnician }}
                                         </td> -->
-                                        <td>{{ item.cgst }}</td>
-                                        <td>{{ item.sgst }}</td>
-                                        <td>{{ item.igst }}</td>
+                                        <td>{{ item.cgstAmount }}</td>
+                                        <td>{{ item.sgstAmount }}</td>
+                                        <td>{{ item.igstAmount }}</td>
                                         <td class="text-nowrap">{{ item.amount }}</td>
                                         <td class="text-nowrap">{{ item.mrp | number:'1.2-2' }}</td>
                                         <!-- <td class="text-nowrap" [title]="item.remarks">
@@ -221,10 +222,10 @@
                                     <tr>
                                         <td colspan="4" class="text-end"><strong>Total</strong></td>
                                         <td>{{ getTotalQty() }}</td>
-                                        <td colspan="9"></td>
+                                        <td colspan="8"></td>
                                         <td>{{ getTotalAmount() }}</td>
-                                        <!-- <td></td>
-                                        <td></td> -->
+                                        <td></td>
+                                        <!--<td></td> -->
                                     </tr>
                                 </tfoot>
 
