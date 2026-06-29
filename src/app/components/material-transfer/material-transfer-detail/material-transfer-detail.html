@@ -100,7 +100,7 @@
                                 <div class="col-md-1">
                                     <label class="form-label">Bin No.</label>
                                     <input type="text" class="form-control form-control-sm" name="binNo"
-                                        #binNo="ngModel" [(ngModel)]="newItem.binNo" required>
+                                        #binNo="ngModel" [(ngModel)]="newItem.binNo" [disabled]="true">
                                 </div>
                                 <div class="col-md-1">
                                     <label class="form-label">Quantity</label>
@@ -117,7 +117,7 @@
                                 <div class="col-md-2">
                                     <label class="form-label">Serial No</label>
                                     <input type="text" class="form-control form-control-sm" name="serialNo"
-                                        #serialNo="ngModel" [(ngModel)]="newItem.serialNo" readonly>
+                                        #serialNo="ngModel" [(ngModel)]="newItem.serialNo" [disabled]="true">
                                 </div>
                             </div>
 
@@ -145,11 +145,15 @@
                                         </option>
                                     </select>
                                 </div>
-                                <div class="col-md-1">
+                                <div class="col-md-2">
                                     <label class="form-label">&nbsp;</label><br>
-                                    <button type="submit" class="btn btn-primary btn-sm"
+                                    <button type="submit" class="btn btn-primary btn-sm me-2"
                                         [disabled]="this.formData.jobNo <= 0">
                                         Add
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-sm"
+                                        [disabled]="this.formData.jobNo <= 0" (click)="resetNewItem()">
+                                        Reset
                                     </button>
                                 </div>
 
@@ -225,10 +229,9 @@
                                     <tr>
                                         <td colspan="4" class="text-end"><strong>Total</strong></td>
                                         <td>{{ getTotalQty() }}</td>
-                                        <td colspan="8"></td>
+                                        <td colspan="7"></td>
                                         <td>{{ getTotalAmount() }}</td>
-                                        <!-- <td></td>
-                                        <td></td> -->
+                                        <td></td>
                                     </tr>
                                 </tfoot>
 
