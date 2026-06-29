@@ -67,8 +67,8 @@
                             <div class="row g-1">
                                 <div class="col-md-4">
                                     <label class="form-label">Part Name
-                                        <span class="fs-10">(Stock @ Location {{newItem.batchClosingQty}})(GST%
-                                            0.0)</span>
+                                        <span class="fs-10">(Stock @ Location {{newItem.batchClosingQty}})(GST
+                                            {{totalGST}}(%))</span>
                                     </label>
 
                                     <ng-select class="ng-select-sm" [items]="itemList" bindValue="id"
@@ -167,14 +167,17 @@
                                         <th>Part Description</th>
                                         <th>Qty</th>
                                         <th>Rate</th>
-                                        <th>Stock</th>
+                                        <!-- <th>Stock</th> -->
                                         <th>Issue Type</th>
                                         <th>Inward Sr No.</th>
                                         <th>Issue Sr No.</th>
                                         <!-- <th>Technician</th> -->
-                                        <th>CGST(%)</th>
-                                        <th>SGST(%)</th>
-                                        <th>IGST(%)</th>
+                                        <!-- <th>CGST({{cgstPercent}}%)</th> -->
+                                        <th>CGST</th>
+                                        <!-- <th>SGST({{sgstPercent}}%)</th> -->
+                                        <th>SGST</th>
+                                        <!-- <th>IGST({{igstPercent}}%)</th> -->
+                                        <th>IGST</th>
                                         <th>Amount</th>
                                         <th>MRP</th>
                                         <!-- <th>Remarks</th> -->
@@ -198,15 +201,15 @@
                                         <td class="text-nowrap">{{ item.itemdesc }}</td>
                                         <td class="text-nowrap">{{ item.quantity }}</td>
                                         <td class="text-nowrap">{{ item.itemRate }}</td>
-                                        <td class="text-nowrap">{{ item.stock }}</td>
+                                        <!-- <td class="text-nowrap">{{ item.stock }}</td> -->
                                         <td class="text-nowrap">{{ item.issueType | getIssueTypeName: issueTypes }}</td>
-                                        <td class="text-nowrap">{{ item.inwardsrno }}</td>
+                                        <td>{{ item.inwardsrno }}</td>
                                         <td class="text-nowrap">{{ item.issuesrno }}</td>
                                         <!-- <td class="text-nowrap">{{ item.technician | getTechnicianName: lstTechnician }}
                                         </td> -->
-                                        <td>{{ item.cgst }}</td>
-                                        <td>{{ item.sgst }}</td>
-                                        <td>{{ item.igst }}</td>
+                                        <td>{{ item.cgstAmount }}</td>
+                                        <td>{{ item.sgstAmount }}</td>
+                                        <td>{{ item.igstAmount }}</td>
                                         <td class="text-nowrap">{{ item.amount }}</td>
                                         <td class="text-nowrap">{{ item.mrp | number:'1.2-2' }}</td>
                                         <!-- <td class="text-nowrap" [title]="item.remarks">
@@ -221,7 +224,7 @@
                                     <tr>
                                         <td colspan="4" class="text-end"><strong>Total</strong></td>
                                         <td>{{ getTotalQty() }}</td>
-                                        <td colspan="9"></td>
+                                        <td colspan="8"></td>
                                         <td>{{ getTotalAmount() }}</td>
                                         <!-- <td></td>
                                         <td></td> -->
