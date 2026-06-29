@@ -17,7 +17,6 @@ export class TimeoutService {
     clearTimeout(this.timeout);
 
     this.timeout = setTimeout(() => {
-      console.log('Auto logout after 15 min inactivity');
       logoutCallback();
     }, this.idleTime);
   }

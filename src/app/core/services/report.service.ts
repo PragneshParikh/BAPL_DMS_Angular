@@ -60,8 +60,7 @@ import {
 })
 export class ReportService {
 
-  private apiUrl =
-    `${environment.apiUrl}/Report`;
+  private apiUrl = `${environment.apiUrl}/Report`;
 
   constructor(
     private http: HttpClient
@@ -487,4 +486,8 @@ export class ReportService {
   //     filter
   //   );
   // }
+  getCounterBillPrint(id: number) {
+    return this.http.get<any>(`${this.apiUrl}/print/${id}`);
+  }
+
 }

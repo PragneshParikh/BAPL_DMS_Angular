@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { JobSearch } from '../../../dialogs/job-search/job-search';
 import { LoaderService } from '../../../core/services/loader';
 import { MaterialTransferService } from '../../../core/services/material-transfer';
@@ -17,6 +17,7 @@ import { GetTechnicianNamePipe } from '../../../core/pipes/get-technician-name-p
 import { GetIssueTypeNamePipe } from '../../../core/pipes/get-issue-type-name-pipe';
 import { TaxService } from '../../../core/services/tax';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { PrefixService } from '../../../core/services/prefix';
 
 @Component({
   selector: 'app-material-transfer-detail',
@@ -25,9 +26,10 @@ import { NgSelectModule } from '@ng-select/ng-select';
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
-    GetTechnicianNamePipe,
+    // GetTechnicianNamePipe,
     GetIssueTypeNamePipe,
-    NgSelectModule
+    NgSelectModule,
+    NgbTooltip
   ],
   templateUrl: './material-transfer-detail.html',
   styleUrl: './material-transfer-detail.scss',
@@ -35,15 +37,15 @@ import { NgSelectModule } from '@ng-select/ng-select';
 export class MaterialTransferDetail implements OnInit {
 
   issueTypes = IssueTypes.filter(x => x.id === 1 || x.id === 2);
-  lstTechnician = TechnicianList;
+  // lstTechnician = TechnicianList;
 
-  formData = {
+  formData: any = {
     prefix: '',
-    issueNumber: 0,
+    issueNumber: '',
     jobNo: 0,
     OdoMeter: 0,
     date: new Date(),
-    technician: '',
+    // technician: '',
     location: '',
   };
   newItem = {
@@ -51,24 +53,32 @@ export class MaterialTransferDetail implements OnInit {
     id: 0,
     jobId: 0,
     itemId: null,
-    itemname: '',
+    itemcode: '',
     itemdesc: '',
     quantity: 0,
     itemRate: '',
     stock: 0,
+    batchClosingQty: 0,
     issueType: '',
-    issueSubType: '',
+    // issueSubType: '',
     inwardsrno: '',
     issuesrno: '',
-    technician: '',
+    // technician: 0,
+    cgstPercent: '',
+    sgstPercent: '',
+    igstPercent: '',
+
+    cgstAmount: '',
+    sgstAmount: '',
+    igstAmount: '',
     amount: '',
     mrp: '',
-    wav: '',
+    // wav: '',
     validdays: null,
     validkms: null,
     remarks: '',
-    firstfill: null,
-    firstfillstock: null,
+    // firstfill: null,
+    // firstfillstock: null,
     received: null,
     receivedrate: null,
     cir: null,
@@ -82,7 +92,6 @@ export class MaterialTransferDetail implements OnInit {
     returnQty: 0,
     serialNo: '',
     status: '',
-    batchClosingQty: 0,
     createdBy: '1',
     createdDate: new Date(),
     updatedBy: null,
@@ -98,6 +107,13 @@ export class MaterialTransferDetail implements OnInit {
   dealerCode: string = '';
   isEdit: boolean = false;
   private tempIdCounter = -1;
+  isSuperAdmin: boolean = false;
+
+  jobCardStatus: boolean = false;
+
+  cgstPercent: any;
+  sgstPercent: any;
+  igstPercent: any;
 
   constructor(
     private router: ActivatedRoute,
@@ -110,14 +126,15 @@ export class MaterialTransferDetail implements OnInit {
     private locationService: LocationMasterService,
     private storageService: StorageService,
     private jobCardService: JobCardService,
-    private taxService: TaxService
+    private taxService: TaxService,
+    private prefixMasterService: PrefixService
   ) {
-    // this.router.params.subscribe(params => {
-    //   this.jobId = Number(params['id']);
-    //   if (this.jobId > 0) {
-    //     this.getJobCardById(this.jobId);
-    //   }
-    // });
+
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    }
 
     this.router.params.subscribe(params => {
 
@@ -129,37 +146,31 @@ export class MaterialTransferDetail implements OnInit {
       if (this.jobId && this.jobId !== 0) {
         this.isEdit = true;
         this.getJobCardById(this.jobId);
+        this.getJobCardStatus(this.jobId);
       }
-      // else {
-      //   this.isEdit = false;
-      //   const to = new Date();
-      //   this.claimFormData.claimDate = to.toISOString().split('T')[0];
-      // }
-
     });
 
-    // this.dealerCode = this.storageService.getDealerCode();
   }
 
   ngOnInit() {
-    if (this.jobId === 0) {
-      this.getMaterialIssueId();
-    }
+    // if (this.jobId === 0) {
+    //   this.getMaterialIssueId();
+    // }
     this.getItemList();
     this.getLocationList(this.dealerCode, 2);
-    this.getMaterialTransferList(this.jobId);
+    this.getMaterialTransferList(this.jobId, null);
   }
 
-  getMaterialIssueId() {
-    this.materialTransferService.getMaterialIssueId().subscribe({
-      next: (res) => {
-        this.formData.issueNumber = res;
-      },
-      error: (err) => {
-        console.error(err);
-      }
-    });
-  }
+  // getMaterialIssueId() {
+  //   this.materialTransferService.getMaterialIssueId().subscribe({
+  //     next: (res) => {
+  //       this.formData.issueNumber = res;
+  //     },
+  //     error: (err) => {
+  //       console.error(err);
+  //     }
+  //   });
+  // }
 
   getItemList() {
     this.loader.show();
@@ -190,15 +201,30 @@ export class MaterialTransferDetail implements OnInit {
     })
   }
 
-  getMaterialTransferList(jobId: Number) {
+  getMaterialTransferList(jobId: Number, dealerCode: string | null) {
     this.loader.show();
     this.materialTransferService.getMaterialTransferByJobId(jobId).subscribe({
-      next: (res) => {
-        this.items = res.map((item: any) => {
-          item.mrp = (Number(item.custprice) * (item.quantity || 0)).toFixed(2);
+      next: (res: any) => {
+        this.items = [];
+        if (res && res.length > 0) {
+          this.formData.prefix = res[0].materialPrefix;
+          this.formData.issueNumber = res[0].materialIssueNumber;
 
-          return item;
-        });
+          this.items = res.map((item: any) => {
+            item.mrp = (Number(item.custprice) * (item.quantity || 0)).toFixed(2);
+            return item;
+          });
+
+          if (this.items.length > 0) {
+            this.cgstPercent = this.items[0].cgstPercent;
+            this.sgstPercent = this.items[0].sgstPercent;
+            this.igstPercent = this.items[0].igstPercent;
+          }
+        } else {
+          if (dealerCode && dealerCode != '') {
+            this.getMaterialPrefix(dealerCode);
+          }
+        }
 
         this.loader.hide();
       },
@@ -220,8 +246,8 @@ export class MaterialTransferDetail implements OnInit {
 
     const lstAdded: any[] = this.items.filter(x => x.status === "Added");
     const lstModified: any[] = this.items.filter(x => x.status === "Modified");
-    // const lstDeleted: any[] = this.items.filter(x => x.status === "Deleted");
-    const lstDeleted: number[] = this.items.filter(x => x.status === "Deleted").map(x => x.id);
+    // const lstDeleted: number[] = this.items.filter(x => x.status === "Deleted").map(x => x.id);
+    const lstDeleted: number[] = this.items.filter(x => x.status === "Deleted");
 
     if (lstAdded.length > 0) {
       this.loader.show();
@@ -265,18 +291,12 @@ export class MaterialTransferDetail implements OnInit {
       this.materialTransferService.delete(lstDeleted).subscribe({
         next: (result) => {
           this.loader.hide();
-          this.toast.show("Record inserted sucessfully.", {
-            classname: 'bg-success text-white',
-            delay: 5000
-          });
+          this.toast.show("Record updated sucessfully.", { classname: 'bg-success text-white', delay: 5000 });
         },
         error: (err) => {
           this.loader.hide();
           console.error(err);
-          this.toast.show('Failed to load items. Please try again later.', {
-            classname: 'bg-danger text-light',
-            delay: 5000
-          });
+          this.toast.show('Failed to load items. Please try again later.', { classname: 'bg-danger text-light', delay: 5000 });
         }
       })
     }
@@ -297,34 +317,59 @@ export class MaterialTransferDetail implements OnInit {
       return;
     }
 
-    if (this.newItem.technician === null || this.newItem.technician === '') {
-      this.toast.show('Please select the technician.', { classname: 'bg-warning text-white', delay: 5000 });
-      return;
-    }
+    // if (this.newItem.technician === null || this.newItem.technician === 0) {
+    //   this.toast.show('Please select the technician.', { classname: 'bg-warning text-white', delay: 5000 });
+    //   return;
+    // }
 
     if (this.newItem.issueType === null || this.newItem.issueType === '') {
       this.toast.show('Please select the issuetype.', { classname: 'bg-warning text-white', delay: 5000 });
       return;
     }
 
-
-    let index = this.items.findIndex(x => x.id === this.newItem.id);
+    let index = this.items.findIndex(x => x.itemcode === this.newItem.itemcode);
 
     const itemToSave = {
       ...this.newItem,
+      location: this.formData.location,
+      dealerCode: this.lstLocation.filter(x => x.loccode === this.formData.location)[0].dealerCode,
+      materialPrefix: this.formData.prefix,
+      materialissueNumber: this.formData.issueNumber,
       updatedBy: this.storageService.getUserId(),
       updatedDate: new Date()
     };
 
     if (index > -1) {
+      // itemToSave.status = 'Modified';
+      // this.items[index] = itemToSave;
+
+      // ← Increase quantity and recalculate tax
+      const updatedQuantity = Number(this.items[index].quantity) + Number(this.newItem.quantity);
+
+      const totalGST = Number(this.items[index].cgstPercent) + Number(this.items[index].sgstPercent) + Number(this.items[index].igstPercent);
+      const finalPrice = Number(this.items[index].itemRate) * updatedQuantity * (1 + totalGST / 100);
+      const taxDetails = this.calculateGST(finalPrice, totalGST);
+      const totalGSTAmount = Number(taxDetails.gstAmount);
+
+      itemToSave.quantity = updatedQuantity;
+      itemToSave.amount = taxDetails.finalPrice;
+      itemToSave.cgstAmount = totalGST > 0 ? ((Number(this.items[index].cgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      itemToSave.sgstAmount = totalGST > 0 ? ((Number(this.items[index].sgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      itemToSave.igstAmount = totalGST > 0 ? ((Number(this.items[index].igstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      itemToSave.batchClosingQty = this.items[index].batchClosingQty ?? this.newItem.batchClosingQty;
+      itemToSave.stock = itemToSave.batchClosingQty - updatedQuantity;
+
       itemToSave.status = 'Modified';
       this.items[index] = itemToSave;
+
     } else {
       itemToSave.status = 'Added';
 
       itemToSave.id = this.tempIdCounter--;
 
-      itemToSave.jobId = this.formData.issueNumber;
+      itemToSave.jobId = this.jobId;
+
+      itemToSave.batchClosingQty = this.newItem.batchClosingQty - this.newItem.quantity;
 
       itemToSave.createdBy = this.storageService.getUserId();
       itemToSave.createdDate = new Date();
@@ -348,13 +393,13 @@ export class MaterialTransferDetail implements OnInit {
       (result) => {
         if (result && result.isAccepted) {
           this.jobId = result.jobDetail.id;
-          this.getMaterialTransferList(result.jobDetail.id);
-          this.getJobCardById(result.jobDetail.id);
-          this.getLocationList(this.dealerCode, 2);
+          this.getMaterialTransferList(this.jobId, result.jobDetail.dealerCode);
+          this.getJobCardById(this.jobId);
+          this.getLocationList(result.jobDetail.dealerCode, 2);
+          this.getJobCardStatus(this.jobId);
         }
       },
       (reason) => {
-        console.log('Modal dismissed:', reason);
       }
     );
   }
@@ -363,8 +408,8 @@ export class MaterialTransferDetail implements OnInit {
     this.jobCardService.getJobCardById(id).subscribe({
       next: (res) => {
         this.formData = {
-          prefix: res.jobprefix,
-          issueNumber: res.id,
+          // prefix: res.materialPrefix,
+          // issueNumber: res.materialIssueNumber,
           jobNo: res.jobNo,
           OdoMeter: res.vehiclekms,
           date: res.jobinDate,
@@ -385,30 +430,38 @@ export class MaterialTransferDetail implements OnInit {
       id: 0,
       jobId: 0,
       itemId: 0,
-      itemname: '',
+      itemcode: '',
       itemdesc: '',
       quantity: 0,
       itemRate: '',
       stock: 0,
+      batchClosingQty: 0,
       issueType: '',
-      issueSubType: '',
+      // issueSubType: '',
       inwardsrno: '',
       issuesrno: '',
-      technician: '',
+      // technician: 0,
+      cgstPercent: '',
+      sgstPercent: '',
+      igstPercent: '',
+
+      cgstAmount: '',
+      sgstAmount: '',
+      igstAmount: '',
       amount: '',
       mrp: '',
-      wav: '',
+      // wav: '',
       validdays: null,
       validkms: null,
       remarks: '',
-      firstfill: null,
-      firstfillstock: null,
+      // firstfill: null,
+      // firstfillstock: null,
       received: null,
       receivedrate: null,
       cir: null,
       warrantyapproval: null,
       warrantyapprovalstatus: null,
-      batchClosingQty: 0,
+
       //#endregion
 
       //#region Item Detail Field
@@ -445,11 +498,12 @@ export class MaterialTransferDetail implements OnInit {
     if (!itemId) return;
 
     this.resetNewItem();
+    const dealerCode = this.lstLocation.filter(x => x.loccode === this.formData.location)[0].dealerCode;
 
     const selectedItem = this.itemList.find(item => item.id === Number(itemId.id));
     if (selectedItem) {
       this.loader.show();
-      this.taxService.getTaxList(selectedItem.itemcode.toString(), 'CUS0435S1', '').subscribe({
+      this.taxService.getTaxList(selectedItem.itemcode.toString(), dealerCode, '').subscribe({
         next: (res) => {
           this.loader.hide();
 
@@ -457,14 +511,25 @@ export class MaterialTransferDetail implements OnInit {
             (sum, tax) => sum + Number(tax.taxRate || 0), 0
           );
 
+          const cgstPercent = res.find((x: any) => x.taxCode.startsWith('CGST'))?.taxRate || 0;
+          const sgstPercent = res.find((x: any) => x.taxCode.startsWith('SGST'))?.taxRate || 0;
+          const igstPercent = res.find((x: any) => x.taxCode.startsWith('IGST'))?.taxRate || 0;
+
           const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
 
           this.newItem.itemdesc = selectedItem.itemdesc;
-          this.newItem.itemname = selectedItem.itemname;
+          this.newItem.itemcode = selectedItem.itemcode;
           this.newItem.itemId = selectedItem.id;
           this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
           this.newItem.batchClosingQty = selectedItem.batchClosingQty;
-          this.newItem.quantity = 1;
+
+          this.newItem.cgstPercent = cgstPercent;
+          this.newItem.sgstPercent = sgstPercent;
+          this.newItem.igstPercent = igstPercent;
+
+          if (this.newItem.batchClosingQty > 0) {
+            this.newItem.quantity = 1;
+          }
         },
         error: (err) => {
           this.loader.hide();
@@ -480,30 +545,38 @@ export class MaterialTransferDetail implements OnInit {
       id: row.id,
       jobId: row.jobId,
       itemId: row.itemId,
-      itemname: row.itemname,
+      itemcode: row.itemcode,
       itemdesc: row.itemdesc,
       quantity: row.quantity,
       itemRate: row.itemRate,
-      stock: 0,
+      stock: row.stock,
+      batchClosingQty: row.batchClosingQty,
       issueType: row.issueType,
-      issueSubType: '',
+      // issueSubType: '',
       inwardsrno: '',
       issuesrno: '',
-      technician: row.technician,
+      // technician: row.technician,
+      cgstPercent: row.cgstPercent,
+      sgstPercent: row.sgstPercent,
+      igstPercent: row.igstPercent,
+
+      cgstAmount: row.cgstAmount,
+      sgstAmount: row.sgstAmount,
+      igstAmount: row.igstAmount,
+
       amount: row.amount,
       mrp: '',
-      wav: '',
+      // wav: '',
       validdays: null,
       validkms: null,
       remarks: row.remarks,
-      firstfill: null,
-      firstfillstock: null,
+      // firstfill: null,
+      // firstfillstock: null,
       received: null,
       receivedrate: null,
       cir: null,
       warrantyapproval: null,
       warrantyapprovalstatus: null,
-      batchClosingQty: 0,
 
       rackNo: row.rackNo,
       binNo: row.bin,
@@ -567,14 +640,45 @@ export class MaterialTransferDetail implements OnInit {
     );
   }
 
+  getMaterialPrefix(dealerCode: string) {
+    this.loader.show();
+    this.prefixMasterService.getPrefixByDealerByModule(dealerCode, 'material_transfer').subscribe({
+      next: (res) => {
+        this.formData.prefix = res;
+        this.formData.issueNumber = res.split('/').pop();
+        this.loader.hide();
+      },
+      error: (err) => {
+        console.error(err);
+        this.loader.hide();
+        this.toast.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  }
+
+  getJobCardStatus(jobId: Number) {
+    this.loader.show();
+    this.jobCardService.getJobCardStatusById(jobId).subscribe({
+      next: (res: any) => {
+        this.jobCardStatus = res;
+        this.loader.hide();
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toast.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    })
+  }
+
 }
 
-export const TechnicianList = [
-  { id: 1, name: 'Technician Rajesh' },
-  { id: 2, name: 'Technician Amit' },
-  { id: 3, name: 'Technician Suresh' },
-  { id: 4, name: 'Technician Rakesh' },
-  { id: 5, name: 'Technician Manoj' },
-  { id: 6, name: 'Technician Mitesh' },
-  { id: 7, name: 'Technician Manish' }
-]
+// export const TechnicianList = [
+//   { id: 1, name: 'Technician Rajesh' },
+//   { id: 2, name: 'Technician Amit' },
+//   { id: 3, name: 'Technician Suresh' },
+//   { id: 4, name: 'Technician Rakesh' },
+//   { id: 5, name: 'Technician Manoj' },
+//   { id: 6, name: 'Technician Mitesh' },
+//   { id: 7, name: 'Technician Manish' }
+// ]

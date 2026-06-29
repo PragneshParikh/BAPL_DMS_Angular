@@ -114,7 +114,7 @@ export class FreeServiceClaimList implements OnInit {
       },
       error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
         this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
       }
     })

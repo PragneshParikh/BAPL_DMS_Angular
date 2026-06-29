@@ -107,7 +107,6 @@ export class JobCard {
     this.locationService.getLocationList(dealerCode).subscribe({
       next: (data: LocationName[]) => {
         this.locations = data;
-        // console.log("location data",data)
       },
       error: (err) => {
         console.error('Error fetching locations', err);
@@ -122,8 +121,6 @@ export class JobCard {
     this.jobTypeId = this.selectedJobtype;
     this.jobCardService.getInspectedChassisListDropDown(dealerCode).subscribe({
       next: (res: any) => {
-        console.log("list", res);
-
         // a duplicate chassis no remove (optional)
         this.chassisList = res.chassisNo || [];
       },
@@ -149,7 +146,6 @@ export class JobCard {
   }
 
   selectChassis(item: string) {
-    console.log('Selected:', item);
 
     this.searchModel.chassisNo = item;
     this.filteredChassisList = [];
@@ -157,14 +153,11 @@ export class JobCard {
   }
 
   loadJobCardList() {
-    // debugger;
-    //console.log("dealercode testing",this.searchModel.dealerCode);
     this.searchModel.dealerCode = this.storageService.getDealerCode();
     this.jobCardService.getJobCardList(this.searchModel)
       .subscribe({
         next: (res) => {
           this.jobCardList = res;
-          console.log("listing", this.jobCardList)
         },
         error: (err) => {
           console.error('Error fetching job cards', err);
@@ -246,37 +239,31 @@ export class JobCard {
     const target = event.target as HTMLSelectElement;
     this.selectedLocation = target.value;
 
-    console.log('Selected Location:', this.selectedLocation);
   }
   onJobType(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedJobtype = target.value;
 
-    console.log('Selected Location:', this.selectedJobtype);
   }
   onJobSource(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedJobSource = target.value;
 
-    console.log('Selected Location:', this.selectedJobSource);
   }
   onComplaints(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedComplaints = target.value;
 
-    console.log('Selected Location:', this.selectedComplaints);
   }
   onViewJobs(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedViewJobs = target.value;
 
-    console.log('Selected Location:', this.selectedViewJobs);
   }
   onChassisChange() {
     this.selectedChassis = '';
   }
   search() {
-    debugger
     const payload = {
       dealerCode: this.storageService.getDealerCode(),
       fromDate: this.searchModel.fromDate || null,
@@ -372,11 +359,11 @@ printJobCard(item: any): void {
   });
 }
 
-private fmtDate(d: any): string {
-  if (!d) return '-';
-  const dt = new Date(d);
-  return isNaN(dt.getTime()) ? '-' : dt.toLocaleDateString('en-GB');
-}
+  private fmtDate(d: any): string {
+    if (!d) return '-';
+    const dt = new Date(d);
+    return isNaN(dt.getTime()) ? '-' : dt.toLocaleDateString('en-GB');
+  }
 
 private buildInvoiceHtml(d: any): string {
 
@@ -422,12 +409,12 @@ private buildInvoiceHtml(d: any): string {
           <td>${x.complaintCode  ?? '-'}</td>
           <td>${x.complaint      ?? '-'}</td>
         </tr>`).join('')
-    : `<tr><td colspan="4" class="tc muted">No complaints recorded</td></tr>`;
+      : `<tr><td colspan="4" class="tc muted">No complaints recorded</td></tr>`;
 
-  /* ════════════════════════════════════════════════════════
-     HTML
-  ════════════════════════════════════════════════════════ */
-  return `<!DOCTYPE html>
+    /* ════════════════════════════════════════════════════════
+       HTML
+    ════════════════════════════════════════════════════════ */
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -1000,7 +987,7 @@ body{
 
 </body>
 </html>`;
-}
+  }
   //Navigate Job Card Add form
   onNavigate() {
     this.router.navigate(['/job-card-addForm', 'test']);

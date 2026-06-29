@@ -95,7 +95,7 @@ export class JobCardService {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetFilteredJobCard`, { params });
   }
 
-  getOpenJobCardDataByPaged(fromDate: Date | null, toDate: Date | null, jobNo: number | null, manualJobNo: number | null, pageIndex: number, pageSize: number, status: boolean): Observable<any> {
+  getOpenJobCardDataByPaged(fromDate: Date | null, toDate: Date | null, jobNo: number | null, manualJobNo: number | null, pageIndex: number, pageSize: number, status: boolean, dealerCode: string | null): Observable<any> {
     const params = {
       pageIndex: pageIndex.toString(),
       pageSize: pageSize.toString(),
@@ -103,7 +103,8 @@ export class JobCardService {
       toDate: toDate ? new Date(toDate).toISOString() : '',
       jobNo: jobNo ? jobNo.toString() : '',
       manualJobNo: manualJobNo ? manualJobNo.toString() : '',
-      isClosed: status.toString()
+      isClosed: status.toString(),
+      dealerCode: dealerCode
     };
 
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardByStatus`, { params });
@@ -175,7 +176,11 @@ export class JobCardService {
     );
   }
 
-  getIssueTypebasedJobDetails(dealerCode: string,jobNo:number,serviceloc:string,fromDate: Date,toDate :Date) {
+  getJobCardStatusById(id: Number): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardStatusById/${id}`);
+  }
+
+  getIssueTypebasedJobDetails(dealerCode: string, jobNo: number, serviceloc: string, fromDate: Date, toDate: Date) {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetIssueTypebasedJobDetails/${dealerCode}/${jobNo}/${serviceloc}/${fromDate}/${toDate}`)
   }
 }

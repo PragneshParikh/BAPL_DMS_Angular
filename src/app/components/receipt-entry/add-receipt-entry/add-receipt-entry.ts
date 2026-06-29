@@ -18,6 +18,7 @@ import { TRANSACTION_TYPES } from '../../../constant';
 import { PrefixService } from '../../../core/services/prefix';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 import { LMSLeadService } from '../../../core/services/lmslead-service';
+import { LedgerMasterService } from '../../../core/services/ledger-master';
 
 @Component({
   selector: 'app-add-receipt-entry',
@@ -103,6 +104,7 @@ export class AddReceiptEntry implements OnInit {
     private loader: LoaderService,
     public toaster: ToastService,
     public prefixService: PrefixService,
+    public ledgerService:LedgerMasterService
   ) {
     this.router.paramMap.subscribe(params => {
       this.id = params.get('id');
@@ -132,7 +134,6 @@ export class AddReceiptEntry implements OnInit {
     return new Promise((resolve) => {
       this.receiptEntryService.getReceiptById(id).subscribe({
         next: (res: ReceiptEntryEditModel) => {
-console.log(res);
 
           this.apiResponse = res;
           this.formData = {
@@ -152,7 +153,7 @@ console.log(res);
             customerType: res.businessType
           };
 
-          this.receiptDetails = res.receiptEntryDetail            ? [...res.receiptEntryDetail]            : [];
+          this.receiptDetails = res.receiptEntryDetail ? [...res.receiptEntryDetail] : [];
           this.mapEditDropdowns();
           this.onCustomerTypeChange();
 
@@ -221,7 +222,7 @@ console.log(res);
   }
   getFinanciers() {
 
-    this.receiptEntryService.getLedgerByType('Financier').subscribe({
+    this.ledgerService.getLedgerByType('Financier').subscribe({
       next: (res) => {
         this.financiers = res;
 
@@ -232,9 +233,8 @@ console.log(res);
 
   getParties(): Promise<any> {
     return new Promise((resolve) => {
-      this.receiptEntryService.getLedgerByType('Receipt').subscribe({
+      this.ledgerService.getLedgerByType('Receipt').subscribe({
         next: (res) => {
-          console.log(res);
 
           this.parties = res;
           this.onCustomerTypeChange();
@@ -268,7 +268,6 @@ console.log(res);
     this.locationService.getLocationList(dealerCode).subscribe({
       next: (data: any[]) => {
         this.locations = data.filter(p => p.locareadidNo == 1);
-        console.log(this.locations);
 
         if (!this.isEditMode && this.locations.length > 0) {
           this.formData.location = this.locations[0].locname;
@@ -357,15 +356,15 @@ console.log(res);
     }
 
     const bookingIdNumber = bookingId ? Number(bookingId) : null;
-const dealerCode = this.storageService.getDealerCode();
+    const dealerCode = this.storageService.getDealerCode();
     this.loader.show();
     // Check duplicate receipt
-    this.receiptEntryService.checkReceiptExist(mobileNo, bookingId,this.formData.saleType,dealerCode).subscribe({
+    this.receiptEntryService.checkReceiptExist(mobileNo, bookingId, this.formData.saleType, dealerCode).subscribe({
       next: (exists: boolean) => {
         if (exists) {
           this.loader.hide();
           this.leadResult = null;
-          this.disableSave =true;
+          this.disableSave = true;
           this.toaster.show('Receipt already exists for this Mobile No / Booking ID!', {
             classname: 'bg-danger text-white',
             delay: 5000
@@ -450,21 +449,21 @@ const dealerCode = this.storageService.getDealerCode();
     this.model = this.leadResult.model || '';
     modal.close();
 
-      // Open Customer Ledger
-  const modalRef = this.modalService.open(CustomerLedger, {
-    size: 'lg',
-    backdrop: 'static'
-  });
+    // Open Customer Ledger
+    const modalRef = this.modalService.open(CustomerLedger, {
+      size: 'lg',
+      backdrop: 'static'
+    });
 
-  modalRef.componentInstance.defaultLedgerType = 'Party';
-  modalRef.componentInstance.leadData = this.leadResult;
-  modalRef.componentInstance.fromReceiptEntry = true;
+    modalRef.componentInstance.defaultLedgerType = 'Party';
+    modalRef.componentInstance.leadData = this.leadResult;
+    modalRef.componentInstance.fromReceiptEntry = true;
 
-  modalRef.result.then((ledgerId) => {
-    if (ledgerId) {
-      this.getParties();
-    }
-  }).catch(() => {});
+    modalRef.result.then((ledgerId) => {
+      if (ledgerId) {
+        this.getParties();
+      }
+    }).catch(() => { });
 
   }
 
@@ -503,7 +502,7 @@ const dealerCode = this.storageService.getDealerCode();
 
 
   onSubmit(receiptForm: any) {
-    this.disableSave=true;
+    this.disableSave = true;
     this.loader.show();
     if (!receiptForm.valid) {
       Object.keys(receiptForm.controls).forEach(field => {
@@ -536,11 +535,11 @@ const dealerCode = this.storageService.getDealerCode();
         lineItemNo: index + 1,
         amount: Number(x.amount),
         receiptType: x.receiptType,
-        lineDate:x.instDate
+        lineDate: x.instDate
       }))
     };
     if (this.isEditMode && this.id) {
-      this.disableSave=false;
+      this.disableSave = false;
       this.loader.hide();
       this.receiptEntryService.updateReceipt(this.id, payload).subscribe({
         next: () => {
@@ -552,7 +551,7 @@ const dealerCode = this.storageService.getDealerCode();
         },
         error: (err) => {
           this.loader.hide();
-          this.disableSave=false;
+          this.disableSave = false;
           console.error(err);
           this.toaster.show('Failed to update the receipt!', {
             classname: 'bg-danger text-white',
@@ -581,7 +580,6 @@ const dealerCode = this.storageService.getDealerCode();
         }
       });
     }
-console.log(payload);
 
   }
 
@@ -608,7 +606,7 @@ console.log(payload);
     modalRef.result.then((newId) => {
       if (newId) {
 
-        this.receiptEntryService.getLedgerByType(type).subscribe({
+        this.ledgerService.getLedgerByType(type).subscribe({
           next: (res) => {
 
             if (type === 'Financier') {
@@ -675,7 +673,7 @@ console.log(payload);
     this.formData.partyCode = party.ledgerCode;
     this.formData.partyState = party.stateName;
     this.showPartyDropdown = false;
-    this .checkNo(this.formData.mobileNo);
+    this.checkNo(this.formData.mobileNo);
 
   }
 
@@ -742,37 +740,37 @@ console.log(payload);
       bankName: ''
     };
   }
-  checkNo(mobileNo: string ) {
-const dealerCode= this.storageService.getDealerCode();
-  this.receiptEntryService.checkReceiptExist(mobileNo, null,this.formData.saleType,dealerCode).subscribe({
-    next: (exists: boolean) => {
+  checkNo(mobileNo: string) {
+    const dealerCode = this.storageService.getDealerCode();
+    this.receiptEntryService.checkReceiptExist(mobileNo, null, this.formData.saleType, dealerCode).subscribe({
+      next: (exists: boolean) => {
 
-      if (exists) {
+        if (exists) {
+          this.loader.hide();
+          this.leadResult = null;
+
+          this.toaster.show(
+            'Receipt already exists for this Mobile No / Booking ID!',
+            {
+              classname: 'bg-danger text-white',
+              delay: 5000
+            }
+          );
+
+          return;
+        }
+
+      },
+      error: (err) => {
         this.loader.hide();
-        this.leadResult = null;
+        console.error(err);
 
-        this.toaster.show(
-          'Receipt already exists for this Mobile No / Booking ID!',
-          {
-            classname: 'bg-danger text-white',
-            delay: 5000
-          }
-        );
-
-        return;
+        this.toaster.show('Something went wrong', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
       }
+    });
+  }
 
-    },
-    error: (err) => {
-      this.loader.hide();
-      console.error(err);
-
-      this.toaster.show('Something went wrong', {
-        classname: 'bg-danger text-white',
-        delay: 5000
-      });
-    }
-  });
-}
-  
 }

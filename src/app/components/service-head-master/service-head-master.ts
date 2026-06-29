@@ -9,7 +9,7 @@ import { JobTypeService } from '../../core/services/job-type-service';
 
 @Component({
   selector: 'app-service-head-master',
-  imports: [CommonModule,FormsModule,ReactiveFormsModule,NgbPagination],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbPagination],
   templateUrl: './service-head-master.html',
   styleUrl: './service-head-master.scss',
 })
@@ -21,7 +21,7 @@ export class ServiceHeadMaster implements OnInit {
   serviceHeadForm!: FormGroup;
 
   jobTypeList: any[] = [];
-selectedJobTypeId: number = 0;
+  selectedJobTypeId: number = 0;
 
   serviceHeadNameList: any[] = [];
   filteredList: any[] = [];
@@ -39,8 +39,8 @@ selectedJobTypeId: number = 0;
     private fb: FormBuilder,
     private modalService: NgbModal,
     private toaster: ToastService,
-    private ServiceHeadMasterService : ServiceHeadService,
-    private jobTypeMasterService : JobTypeService
+    private ServiceHeadMasterService: ServiceHeadService,
+    private jobTypeMasterService: JobTypeService
   ) { }
 
   ngOnInit(): void {
@@ -55,15 +55,15 @@ selectedJobTypeId: number = 0;
   }
 
   loadJobTypes(): void {
-  this.jobTypeMasterService.getJobTypepMasterList().subscribe({
-    next: (res: any) => {
-      this.jobTypeList = res || [];
-    },
-    error: (err) => {
-      console.error(err);
-    }
-  });
-}
+    this.jobTypeMasterService.getJobTypepMasterList().subscribe({
+      next: (res: any) => {
+        this.jobTypeList = res || [];
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
   //#region Get List
 
   getServiceHeadMasterList(): void {
@@ -73,7 +73,6 @@ selectedJobTypeId: number = 0;
 
         this.serviceHeadNameList = response || [];
         this.filteredList = [...this.serviceHeadNameList];
-        console.log(this.serviceHeadNameList)
 
         this.refreshGrid();
       },
@@ -108,7 +107,7 @@ selectedJobTypeId: number = 0;
     }
 
     const model = {
-      jobtypeId : this.serviceHeadForm.value.jobtypeId,
+      jobtypeId: this.serviceHeadForm.value.jobtypeId,
       ServiceHeadName: this.serviceHeadForm.value.ServiceHeadName
     };
 
@@ -136,7 +135,6 @@ selectedJobTypeId: number = 0;
   //#region Edit
 
   openEditPopup(item: any): void {
-    console.log("edit item",item)
 
     this.serviceHeadForm.patchValue({
       jobtypeId: item.jobtypeId,
@@ -159,11 +157,10 @@ selectedJobTypeId: number = 0;
 
     const model = {
       id: this.serviceHeadForm.value.serviceHeadId,
-      jobtypeId : this.serviceHeadForm.value.jobtypeId,
+      jobtypeId: this.serviceHeadForm.value.jobtypeId,
       ServiceHeadName: this.serviceHeadForm.value.ServiceHeadName
     };
 
-    console.log('Update Payload:', model);
 
     this.ServiceHeadMasterService.updateServiceHeadMaster(model)
       .subscribe({
@@ -274,32 +271,32 @@ selectedJobTypeId: number = 0;
   //search method
   applySearch(): void {
 
-  const search = this.searchText.toLowerCase().trim();
+    const search = this.searchText.toLowerCase().trim();
 
-  if (!search) {
-    this.filteredList = [...this.serviceHeadNameList];
-   
-  } else {
-    this.filteredList = this.serviceHeadNameList.filter(x =>
-      x.serviceHeadName?.toLowerCase().includes(search)||
-      x.jobTypeName?.toLowerCase().includes(search)
+    if (!search) {
+      this.filteredList = [...this.serviceHeadNameList];
+
+    } else {
+      this.filteredList = this.serviceHeadNameList.filter(x =>
+        x.serviceHeadName?.toLowerCase().includes(search) ||
+        x.jobTypeName?.toLowerCase().includes(search)
+      );
+    }
+
+    this.page = 1;
+    this.refreshGrid();
+  }
+  //end
+
+  refreshGrid(): void {
+
+    this.collectionSize = this.filteredList.length;
+
+    this.pagedData = this.filteredList.slice(
+      (this.page - 1) * this.pageSize,
+      (this.page - 1) * this.pageSize + this.pageSize
     );
   }
-
-  this.page = 1;
-  this.refreshGrid();
-}
-//end
-
- refreshGrid(): void {
-
-  this.collectionSize = this.filteredList.length;
-
-  this.pagedData = this.filteredList.slice(
-    (this.page - 1) * this.pageSize,
-    (this.page - 1) * this.pageSize + this.pageSize
-  );
-}
 
 
   //#endregion

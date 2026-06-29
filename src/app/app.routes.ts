@@ -71,6 +71,9 @@ import { RoleMaster } from './components/role-master/role-master';
 import { BgemployeeMaster }     from './components/bgemployee-master/bgemployee-master';
 import { BgemployeeMasterList } from './components/bgemployee-master/bgemployee-master-list/bgemployee-master-list';
 import { WarrantyJobCardClaim } from './components/warranty-job-card-claim/warranty-job-card-claim';
+import { CounterBill } from './components/counter-bill/counter-bill';
+import { AddCounterBill } from './components/counter-bill/add-counter-bill/add-counter-bill';
+import { CounterBillPrint } from './components/Reports/counter-bill-print/counter-bill-print';
 
 
 export const routes: Routes = [
@@ -230,6 +233,11 @@ export const routes: Routes = [
       { path: 'job-source-master', component: JobSourceMaster, data: [71] },
       { path: 'warranty-job-card-claim', component: WarrantyJobCardClaim, data: [74] },
       { path: 'vehicle-info', component: VehicleInfoUpdate, data: [73] },
+
+      { path: 'counter-bill', component: CounterBill, data: [77] },
+      { path: 'counter-bill/edit/:id', component: AddCounterBill, data: [77] },
+      { path: 'add-counter-bill', component: AddCounterBill, data: [77] },
+      { path: 'print-counter-bill/:id', component: CounterBillPrint,data:[77] }
     ]
   },
   { path: '**', component: WorkInProgress }

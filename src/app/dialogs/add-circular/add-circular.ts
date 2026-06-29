@@ -236,10 +236,8 @@ export class AddCircular implements OnInit {
 
   uploadFile(file: File): Promise<string> {
     return new Promise(async (resolve, reject) => {
-      console.log('Uploading file:', file);
       this.blobUploadService.getUploadSasUrl(file.name).subscribe({
         next: async (res: any) => {
-          console.log('SAS URL:', res.sasUri);
           // const blobClient = new BlockBlobClient(res.sasUri);
 
           // await blobClient.uploadData(file, {
@@ -247,7 +245,6 @@ export class AddCircular implements OnInit {
           //   concurrency: 5,
           //   onProgress: (progress) => {
           //     const percent = Math.round((progress.loadedBytes / file.size) * 100);
-          //     console.log(`Upload Progress: ${percent}%`);
           //   }
           // });
           return res.blobUrl;

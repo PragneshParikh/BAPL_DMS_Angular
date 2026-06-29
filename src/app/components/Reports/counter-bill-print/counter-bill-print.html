@@ -1,0 +1,614 @@
+<div class="a4-page mx-auto bg-white p-2 shadow-sm" id="reportContent">
+
+    <!-- BUTTONS -->
+    <div class="d-flex justify-content-end gap-1 mb-2 no-print">
+        <button class="btn btn-sm btn-primary" (click)="goBack()">
+            Back
+        </button>
+
+        <button class="btn btn-sm btn-primary" (click)="printInvoice()">
+            Print
+        </button>
+    </div>
+
+    <!-- HEADER -->
+    <table class="table table-bordered table-sm invoice-table">
+        <tr>
+            <td width="50%" style="padding:4px 6px; line-height:1;">
+                <div class="fw-bold fs-6">
+                    {{ billData?.dealerName }}
+                </div>
+
+                <div>{{ billData?.dealerAddress1 }},{{ billData?.dealerAddress2 }}</div>
+                <div> PIN No : {{ billData?.pin }} </div>
+
+                <div>
+                    Phone No :
+                    {{ billData?.phoneNo1 }}
+                </div>
+
+                <div>
+                    GSTIN No :
+                    {{ billData?.gstNo }} PAN No :
+                    {{ billData?.panNo }}
+                </div>
+
+                <!-- <div>
+                    PAN No :
+                    {{ billData?.panNo }}
+                </div> -->
+            </td>
+
+            <td width="30%" class="text-center align-middle">
+                <img _ngcontent-ng-c3432604376="" src="assets/images/BGaussLightLogo.png" alt="" height="30">
+            </td>
+        </tr>
+    </table>
+
+    <!-- TITLE -->
+    <table class="table table-bordered invoice-table table-sm">
+        <tr>
+            <td class="text-center fw-bold">
+                Tax Invoice
+            </td>
+        </tr>
+    </table>
+
+    <!-- CUSTOMER DETAILS -->
+    <table class="table table-bordered invoice-table table-sm">
+        <tr>
+            <td width="50%" style="padding:4px 6px; line-height:1;">
+
+
+                <div>
+                    <strong>Invoice No</strong>
+                    :
+                    {{ billData?.invoiceNo }}
+                </div>
+
+                <div>
+                    <strong>Invoice Date</strong>
+                    :
+                    {{ billData?.invoiceDate | date:'dd-MM-yyyy' }}
+                </div>
+
+                <div>
+                    <strong>Bill Type</strong>
+                    :
+                    {{ billData?.billType }}
+                </div>
+
+                <div>
+                    <strong>City/State</strong>
+                    :
+                   {{ billData?.city}}/{{ billData?.state }}
+                </div>
+
+                <div>
+                    <strong>Address</strong>
+                    :
+                    {{ billData?.customerAddress }}
+                </div>
+
+            </td>
+
+            <td width="0%">
+
+                <div>
+                    <strong>Customer Name</strong>
+                    :
+                    {{ billData?.customerName }}
+                </div>
+
+                <div>
+                    <strong>Mobile</strong>
+                    :
+                    {{ billData?.customerMobile }}
+                </div>
+
+                <div>
+                    <strong>GST No</strong>
+                    :
+                    {{ billData?.customerGST }}
+                </div>
+
+                <div>
+                    <strong>Chassis No</strong>
+                    :
+                    <!-- {{ billData?.chassisNo }} -->
+                </div>
+
+            </td>
+        </tr>
+    </table>
+
+    <!-- ITEM TABLE -->
+    <table class="table table-bordered invoice-table" style="font-size: 10px;">
+
+        <thead>
+
+            <tr class="text-center">
+
+                <th>S.No</th>
+                <th>Item Description</th>
+                <th>HSN</th>
+                <th>Qty</th>
+                <th>Rate</th>
+                <th>Disc(₹/%) </th>
+                <th>Taxable Value</th>
+                <th>SGST %</th>
+                <th>SGST Amt</th>
+                <th>CGST %</th>
+                <th>CGST Amt</th>
+                <th>IGST %</th>
+                <th>IGST Amt</th>
+                <th>Net Amount</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr *ngFor="let item of billData?.details; let i=index">
+
+                <td>{{ i + 1 }}</td>
+
+                <td>
+                    {{ item.partName }}
+                    <br>
+                    <small>{{ item.partCode }}</small>
+                </td>
+
+                <td>
+                    {{ item.hsnCode }}
+                </td>
+
+                <td class="text-end">
+                    {{ item.qty }}
+                </td>
+
+                <td class="text-end">
+                    {{ item.rate | number:'1.2-2' }}
+                </td>
+
+                <td class="text-end">
+                    {{ item.discType === 'Value' ? '₹' : '' }}
+                    {{ item.discount | number:'1.2-2' }}
+                    {{ item.discType === '%' ? '%' : '' }}
+                </td>
+
+                <td class="text-end">
+                    {{ item.rate | number:'1.2-2' }}
+                </td>
+
+                <td class="text-end">
+                    {{ item.sgstper }}
+                </td>
+
+                <td class="text-end">
+                    {{ item.sgstamnt | number:'1.2-2' }}
+                </td>
+
+                <td class="text-end">
+                    {{ item.cgstper }}
+                </td>
+
+                <td class="text-end">
+                    {{ item.cgstamnt | number:'1.2-2' }}
+                </td>
+                <td class="text-end">
+                    {{ item.igstper }}
+                </td>
+
+                <td class="text-end">
+                    {{ item.igstamnt | number:'1.2-2' }}
+                </td>
+                <td class="text-end fw-bold">
+                    {{ getLineTotal(item) | number:'1.2-2' }}
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <!-- TOTALS -->
+    <table class="table table-bordered invoice-table">
+
+        <tr>
+
+            <td width="70%" rowspan="4">
+
+                <strong>Amount in Words</strong>
+
+                <div>
+                    {{ amountInWords }}
+                </div>
+
+            </td>
+
+            <td width="20%">
+                Sub Total
+            </td>
+
+            <td width="10%" class="text-end">
+                {{ getSubTotal() | number:'1.2-2' }}
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td>Round Off</td>
+
+            <td class="text-end">
+                0.00
+            </td>
+
+        </tr>
+
+        <tr class="fw-bold">
+
+            <td>Invoice Total</td>
+
+            <td class="text-end">
+                {{ getTotalAmount() | number:'1.2-2' }}
+            </td>
+
+        </tr>
+
+    </table>
+
+    <!-- TAX SUMMARY -->
+    <table class="table table-sm mb-0" style="width:100%; border-collapse:collapse; border:2px solid #000;">
+
+        <!-- Title -->
+        <tr>
+            <td colspan="9" style="border:1px solid #000; font-weight:bold; padding:3px;">
+                Tax Summary HSN Wise
+            </td>
+        </tr>
+
+        <!-- Header Row 1 -->
+        <tr class="text-center">
+
+            <th rowspan="2" style="border:1px solid #000;">
+                Sr. No.
+            </th>
+
+            <th rowspan="2" style="border:1px solid #000;">
+                HSN Code
+            </th>
+
+            <th rowspan="2" style="border:1px solid #000;">
+                Taxable Value
+            </th>
+
+            <th colspan="2" style="border:1px solid #000;">
+                SGST Tax
+            </th>
+
+            <th colspan="2" style="border:1px solid #000;">
+                CGST Tax
+            </th>
+
+            <th colspan="2" style="border:1px solid #000;">
+                IGST Tax
+            </th>
+
+        </tr>
+
+        <!-- Header Row 2 -->
+        <tr class="text-center">
+
+            <th style="border:1px solid #000;">Rate%</th>
+            <th style="border:1px solid #000;">Amount</th>
+
+            <th style="border:1px solid #000;">Rate%</th>
+            <th style="border:1px solid #000;">Amount</th>
+
+            <th style="border:1px solid #000;">Rate%</th>
+            <th style="border:1px solid #000;">Amount</th>
+
+        </tr>
+
+        <!-- Data -->
+        <tr *ngFor="let item of billData?.details; let i = index">
+
+            <td style="border:1px solid #000; text-align:center;">
+                {{ i + 1 }}
+            </td>
+
+            <td style="border:1px solid #000;">
+                <!-- {{ item.hsnCode }} -->
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTaxableAmount(item) | number:'1.2-2' }}
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ item.sgstper }}
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ item.sgstamnt | number:'1.2-2' }}
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ item.cgstper }}
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ item.cgstamnt | number:'1.2-2' }}
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ item.igstper }}
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ item.igstamnt | number:'1.2-2' }}
+            </td>
+
+        </tr>
+
+        <!-- Total -->
+        <tr style="font-weight:bold;">
+
+            <td colspan="2" style="border:1px solid #000; text-align:right;">
+                Total :
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getSubTotal() | number:'1.2-2' }}
+            </td>
+
+            <td style="border:1px solid #000;"></td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTotalSGST() | number:'1.2-2' }}
+            </td>
+
+            <td style="border:1px solid #000;"></td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTotalCGST() | number:'1.2-2' }}
+            </td>
+
+            <td style="border:1px solid #000;"></td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTotalIGST() | number:'1.2-2' }}
+            </td>
+
+        </tr>
+
+    </table>
+
+    <!-- TAX SUMMARY GST WISE -->
+    <table class="table table-sm mb-0"
+        style="width:100%; border-collapse:collapse; border:2px solid #000; margin-top:5px;">
+
+        <!-- Title -->
+        <tr>
+            <td colspan="8" style="border:1px solid #000; font-weight:bold; padding:2px;">
+                Tax Summary GST Wise
+            </td>
+        </tr>
+
+        <!-- Header -->
+        <tr style="text-align:center;">
+
+            <td style="border:1px solid #000;">Sr. No.</td>
+
+            <td style="border:1px solid #000;">Taxable Value</td>
+
+            <td colspan="2" style="border:1px solid #000;">
+                SGST Tax
+            </td>
+
+            <td colspan="2" style="border:1px solid #000;">
+                CGST Tax
+            </td>
+
+            <td colspan="2" style="border:1px solid #000;">
+                IGST Tax
+            </td>
+
+        </tr>
+
+        <!-- Sub Header -->
+        <tr style="text-align:center;">
+
+            <td style="border:1px solid #000;"></td>
+
+            <td style="border:1px solid #000;"></td>
+
+            <td style="border:1px solid #000;">Rate%</td>
+            <td style="border:1px solid #000;">Amount</td>
+
+            <td style="border:1px solid #000;">Rate%</td>
+            <td style="border:1px solid #000;">Amount</td>
+
+            <td style="border:1px solid #000;">Rate%</td>
+            <td style="border:1px solid #000;">Amount</td>
+
+        </tr>
+
+        <!-- Data Row -->
+        <tr>
+
+            <td style="border:1px solid #000; text-align:center;">
+                1
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getSubTotal() | number:'1.2-2' }}
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ billData?.details?.[0]?.sgstper }}
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTotalSGST() | number:'1.2-2' }}
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ billData?.details?.[0]?.cgstper }}
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTotalCGST() | number:'1.2-2' }}
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ billData?.details?.[0]?.igstper }}
+            </td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTotalIGST() | number:'1.2-2' }}
+            </td>
+
+        </tr>
+
+        <!-- Total Row -->
+        <tr style="font-weight:bold;">
+
+            <td style="border:1px solid #000;"></td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getSubTotal() | number:'1.2-2' }}
+            </td>
+
+            <td style="border:1px solid #000;"></td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTotalSGST() | number:'1.2-2' }}
+            </td>
+
+            <td style="border:1px solid #000;"></td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTotalCGST() | number:'1.2-2' }}
+            </td>
+
+            <td style="border:1px solid #000;"></td>
+
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTotalIGST() | number:'1.2-2' }}
+            </td>
+
+        </tr>
+
+    </table>
+
+    <!-- TERMS -->
+    <table class="table table-bordered invoice-table" *ngIf="billData?.termsAndConditions?.length">
+
+        <tr>
+            <td>
+                <strong>Terms & Conditions :</strong>
+
+                <div *ngFor="let term of billData?.termsAndConditions"
+                    [innerHTML]="formatTerms(term.conditionText || '')">
+                </div>
+
+            </td>
+        </tr>
+            <tr>
+        <td>
+            <strong>Remarks :</strong>
+            {{ billData?.remarks }}
+        </td>
+    </tr>
+
+
+    </table>
+
+    <!-- SIGNATURE -->
+   <table class="table table-bordered invoice-table">
+    <tr style="height: 120px;">
+        <td style="vertical-align: bottom;">
+            Customer Signature
+        </td>
+
+        <td style="padding: 0;">
+            <div
+                style="
+                    height: 120px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    padding: 8px;
+                "
+            >
+                <div class="text-end fw-bold">
+                    For : {{ billData?.dealerName }}
+                </div>
+
+                <div class="text-end">
+                    Authorized Signatory
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<table class="table table-bordered invoice-table table-sm">
+        <tr>
+            <td class="text-center fw-bold">
+                Gate Pass
+            </td>
+        </tr>
+    </table>
+<table class="table table-bordered invoice-table">
+    <tr style="height: 180px;">
+        <td width="50%" style="vertical-align: top; position: relative;">
+
+            <div>
+                Invoice No. &nbsp;&nbsp;: {{ billData?.invoiceNo }}
+            </div>
+
+            <div>
+                Sale Type &nbsp;&nbsp;&nbsp;&nbsp;: {{ billData?.billType }}
+            </div>
+
+            <div>
+                Invoice Date : {{ billData?.invoiceDate | date:'dd-MM-yyyy' }}
+            </div>
+
+            <div style="position: absolute; bottom: 10px;">
+                Customer Signature
+            </div>
+
+        </td>
+
+        <td width="50%" style="vertical-align: top; position: relative;">
+
+            <div>
+                <strong>Customer Name</strong>
+                &nbsp;&nbsp;:
+                {{ billData?.customerName }}
+            </div>
+
+            <div>
+                <strong>Customer Address</strong>
+                &nbsp;:
+                {{ billData?.customerAddress }}
+            </div>
+
+            <div
+                style="
+                    position: absolute;
+                    bottom: 10px;
+                    right: 10px;
+                ">
+                Authorized Signatory
+            </div>
+
+        </td>
+    </tr>
+</table>

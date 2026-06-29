@@ -68,7 +68,7 @@ export class PerformaInvoice implements OnInit {
 
   ngOnInit() {
     this.getFinanciers();
-//    this.getDealerDetails();
+    //    this.getDealerDetails();
 
     this.saleBillId = this.route.snapshot.paramMap.get('saleBillNo') || '';
 
@@ -82,7 +82,7 @@ export class PerformaInvoice implements OnInit {
 
   getFinanciers() {
 
-    this.receiptEntryService.getLedgerByType('Financier').subscribe({
+    this.ledgerService.getLedgerByType('Financier').subscribe({
       next: (res) => {
         this.financiers = res;
 
@@ -96,7 +96,7 @@ export class PerformaInvoice implements OnInit {
   getFinancierName(id: number): string {
     return this.financiers.find(x => x.id === id)?.ledgerName || '-';
   }
- 
+
   calculateAmounts() {
     const details = this.saleBill?.details || [];
 
@@ -204,20 +204,17 @@ export class PerformaInvoice implements OnInit {
   }
 
   getDealerDetails(dealerCode: string) {
-  this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
-    console.log(res);
+    this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
 
-    this.dealer = res?.data || null;
+      this.dealer = res?.data || null;
 
-    console.log(this.dealer);
-  });
-}
+    });
+  }
 
   getBillById(id: number) {
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
         this.saleBill = res;
-        console.log(this.saleBill);
         this.getDealerDetails(this.saleBill.dealerCode);
         if (this.saleBill.status == "Invoiced") {
           this.isInvoiced = true;
@@ -273,14 +270,14 @@ export class PerformaInvoice implements OnInit {
       this.currencyService.convertToWords(amount);
 
   }
-goBack(): void {
-  this.router.navigate(['/vehicle-sale-bill/edit', this.saleBillId]);
-}
+  goBack(): void {
+    this.router.navigate(['/vehicle-sale-bill/edit', this.saleBillId]);
+  }
 
-printInvoice(): void {
-  window.print();
-}
-formatTerms(text: string): string {
-  return text.replace(/(\d+\.)/g, '<br>$1');
-}
+  printInvoice(): void {
+    window.print();
+  }
+  formatTerms(text: string): string {
+    return text.replace(/(\d+\.)/g, '<br>$1');
+  }
 }

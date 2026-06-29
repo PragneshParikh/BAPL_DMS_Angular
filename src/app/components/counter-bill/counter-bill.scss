@@ -1,0 +1,16 @@
+.position-relative {
+  position: relative;
+}
+
+.dropdown-menu {
+  max-height: 250px;
+  overflow-y: auto;
+  display: block;
+  position: absolute;
+  width: 100%;
+  z-index: 1000;
+}
+
+.dropdown-item {
+  cursor: pointer;
+}

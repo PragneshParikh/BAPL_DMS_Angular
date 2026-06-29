@@ -78,7 +78,6 @@ export class ModelwiseServiceSchedule {
     this.form22service.getOemModelList().subscribe({
       next: (res: any) => {
         this.oemModelList = res;
-        //console.log("oemModelList:",this.oemModelList)
       },
       error: (err) => {
         console.error('Error fetching OEM Models', err);
@@ -91,7 +90,6 @@ export class ModelwiseServiceSchedule {
     this.modelwiseservicescheduleservice.getServiceHeadmodelwise().subscribe({
       next: (res: any) => {
         this.serviceheadlist = res;
-        //console.log("serviceheadlist:", this.serviceheadlist)
       },
       error: (err) => {
         console.error("error occured", err);
@@ -107,7 +105,6 @@ export class ModelwiseServiceSchedule {
       row.serviceTypeList = res;   //  row-wise data
       row.serviceTypeId = '';      // reset selection
 
-      //console.log("servicetype:", row.serviceTypeList);
     });
   }
 
@@ -115,9 +112,6 @@ export class ModelwiseServiceSchedule {
     this.loadservicetypemodel(row);
   }
   onSearchChange() {
-
-    console.log("Model:", this.searchModelId);
-    console.log("Date:", this.searchDate);
 
     //  both empty → full list
     if (!this.searchModelId && !this.searchDate) {
@@ -167,8 +161,6 @@ export class ModelwiseServiceSchedule {
 
   onModelChange() {
 
-    //console.log("Selected Model ID:", this.SelectedoemmodelId);
-
     if (!this.SelectedoemmodelId) {
       this.modelvarientList = [];
       return;
@@ -177,7 +169,6 @@ export class ModelwiseServiceSchedule {
     this.modelwiseservicescheduleservice.getBymodelwisemodelvarient(this.SelectedoemmodelId)
       .subscribe({
         next: (res: any) => {
-          // console.log("Variant API:", res);
 
           this.modelvarientList = res.map((x: any) => ({
             ...x,
@@ -203,7 +194,6 @@ export class ModelwiseServiceSchedule {
 
   // insert + update operation 
   save(form: any) {
-    debugger;
     if (form.invalid) {
       this.toaster.show('Please fill all required fields', {
         classname: 'bg-danger text-white',
@@ -275,7 +265,6 @@ export class ModelwiseServiceSchedule {
       effectiveDate: this.effectiveDate
     }));
 
-    console.log("SAVE:", payload);
 
     this.modelwiseservicescheduleservice.saveServiceSchedule(payload).subscribe({
       next: () => {

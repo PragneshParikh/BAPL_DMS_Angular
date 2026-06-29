@@ -358,7 +358,7 @@ export class TopbarComponent implements OnInit {
           classname: 'bg-danger text-white',
           delay: 5000
         });
-        console.log(err);
+        console.error(err);
       }
     });
   }
@@ -393,7 +393,6 @@ export class TopbarComponent implements OnInit {
         }
       },
       (reason) => {
-        console.log('Modal dismissed:', reason);
       }
     );
   }
@@ -414,7 +413,7 @@ export class TopbarComponent implements OnInit {
           classname: 'bg-warning text-white',
           delay: 5000
         });
-        console.log(err);
+        console.error(err);
       }
     })
   }
@@ -457,7 +456,6 @@ export class TopbarComponent implements OnInit {
         }
       },
       (reason) => {
-        console.log('Modal dismissed:', reason);
       }
     );
 

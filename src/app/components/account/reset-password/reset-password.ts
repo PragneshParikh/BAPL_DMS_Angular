@@ -121,7 +121,6 @@ export class ResetPassword {
 
     this.authservice.resetPassword(this.email, this.token, this.passresetForm.value.password, this.passresetForm.value.cpassword).subscribe(
       (response) => {
-        console.log('Password reset successfully:', response);
         this.authservice.logout();
         // You can show a success message to the user here
       },
