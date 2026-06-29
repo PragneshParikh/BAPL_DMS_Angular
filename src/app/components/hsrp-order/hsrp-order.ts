@@ -145,6 +145,8 @@ export class HSRPOrder implements OnInit {
 
     this.hsrpService.getPendingHSRPOrders(dealerCode, this.formatDate(this.filter.fromDate), this.formatDate(this.filter.toDate)).subscribe({
       next: (res: any) => {
+        console.log(res);
+        
         this.orders = (res || []).map(item => ({
           ...item,
           isFrontPlate: item.isFrontPlate ?? true,
@@ -295,6 +297,7 @@ export class HSRPOrder implements OnInit {
       id: item.id ?? null,
       dealerCode: dealerCode,
       chassisNo: item.chassisNo,
+      customerName:item.customerName,
       regNo: item.regNo,
       invoiceNo: item.invoiceNo,
       isFrontPlate: item.isFrontPlate,
