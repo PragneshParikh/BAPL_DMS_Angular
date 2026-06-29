@@ -1,0 +1,240 @@
+<div class="page-wrapper">
+
+  <!-- STAT CARDS -->
+  <div class="stat-row">
+
+    <div class="stat-card">
+      <div class="stat-label">Total Employees</div>
+      <div class="stat-value">{{ employeeList.length }}</div>
+    </div>
+
+    <div class="stat-card active">
+      <div class="stat-label">Active</div>
+      <div class="stat-value">{{ activeCount }}</div>
+    </div>
+
+    <div class="stat-card inactive">
+      <div class="stat-label">Inactive</div>
+      <div class="stat-value">{{ inactiveCount }}</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Departments</div>
+      <div class="stat-value">{{ departmentCount }}</div>
+    </div>
+
+  </div>
+
+  <!-- EMPLOYEE TABLE CARD -->
+  <div class="card">
+
+    <!-- CARD HEADER -->
+    <div class="card-header">
+
+      <h5 class="card-title">
+        <i class="ri-group-line"></i>
+        Employee List
+      </h5>
+
+      <button class="btn-primary" routerLink="/bgemployee-master/add">
+        <i class="ri-add-line"></i>
+        Add Employee
+      </button>
+
+    </div>
+
+    <!-- SEARCH & FILTER BAR -->
+    <div class="filter-bar">
+
+      <div class="search-wrap">
+        <i class="ri-search-line search-icon"></i>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search by name, code, email, mobile…"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="applyFilters()"
+        />
+      </div>
+
+      <select class="filter-select" [(ngModel)]="selectedDept" (ngModelChange)="applyFilters()">
+        <option value="">All Departments</option>
+        <option *ngFor="let dept of departmentList" [value]="dept.departmentId">
+          {{ dept.departmentName }}
+        </option>
+      </select>
+
+      <select class="filter-select" [(ngModel)]="selectedStatus" (ngModelChange)="applyFilters()">
+        <option value="">All Status</option>
+        <option value="true">Active</option>
+        <option value="false">Inactive</option>
+      </select>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+
+      <table class="emp-table">
+
+        <thead>
+          <tr>
+            <th class="col-sr">Sr</th>
+            <th class="col-profile">Profile</th>
+            <th class="col-code">Emp Code</th>
+            <th class="col-loc">Loc Code</th>
+            <th class="col-locname">Location</th>
+            <th class="col-name">Name</th>
+            <th class="col-gender">Gender</th>
+            <th class="col-mobile">Mobile</th>
+            <th class="col-email">Email</th>
+            <th class="col-dept">Department</th>
+            <th class="col-desig">Designation</th>
+            <th class="col-dealer">Dealer Code</th>
+            <th class="col-status">Status</th>
+            <th class="col-action">Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <!-- EMPTY STATE -->
+          <tr *ngIf="filteredList.length === 0">
+            <td colspan="14" class="empty-state">
+              <i class="ri-user-unfollow-line empty-icon"></i>
+              <span>No employees found</span>
+            </td>
+          </tr>
+
+          <!-- EMPLOYEE ROWS -->
+          <tr
+            *ngFor="let emp of filteredList; let i = index"
+            class="emp-row"
+            (click)="openEditPopup(emp)"
+          >
+
+            <!-- SR NO -->
+            <td>{{ i + 1 }}</td>
+
+            <!-- PROFILE AVATAR -->
+            <td class="td-center">
+              <img
+                *ngIf="emp.profileImage"
+                [src]="emp.profileImage"
+                class="avatar-img"
+                alt="Profile"
+              />
+              <div
+                *ngIf="!emp.profileImage"
+                class="avatar-initials"
+                [ngClass]="getAvatarColor(emp.firstName + emp.lastName)"
+              >
+                {{ getInitials(emp.firstName, emp.lastName) }}
+              </div>
+            </td>
+
+            <!-- EMPLOYEE CODE -->
+            <td class="mono">{{ emp.employeeCode }}</td>
+
+            <!-- LOCATION CODE -->
+            <td class="mono">{{ emp.locationCode }}</td>
+
+            <!-- LOCATION NAME -->
+            <td>{{ getLocationName(emp.locationCode) }}</td>
+
+            <!-- NAME -->
+            <td class="emp-name">{{ emp.firstName }} {{ emp.lastName }}</td>
+
+            <!-- GENDER -->
+            <td>{{ emp.gender }}</td>
+
+            <!-- MOBILE -->
+            <td class="mono">{{ emp.mobile }}</td>
+
+            <!-- EMAIL -->
+            <td class="text-muted">{{ emp.emailId }}</td>
+
+            <!-- DEPARTMENT -->
+            <td>{{ getDepartmentName(emp.department) }}</td>
+
+            <!-- DESIGNATION -->
+            <td>{{ getDesignationName(emp.designation) }}</td>
+
+            <!-- DEALER CODE -->
+            <td class="mono">{{ emp.dealerCode }}</td>
+
+            <!-- STATUS BADGE -->
+            <td class="td-center">
+              <span
+                class="status-badge"
+                [ngClass]="emp.isActive ? 'badge-active' : 'badge-inactive'"
+                title="Click to toggle status"
+                (click)="toggleStatus(emp, $event)"
+              >
+                {{ emp.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+
+            <!-- EDIT ACTION -->
+            <td class="td-center">
+              <button
+                class="btn-edit"
+                (click)="openEditPopup(emp); $event.stopPropagation()"
+              >
+                <i class="ri-pencil-fill"></i>
+                Edit
+              </button>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ===================================================== -->
+<!-- EDIT EMPLOYEE MODAL -->
+<!-- ===================================================== -->
+
+<div
+  *ngIf="showModal"
+  class="modal-backdrop"
+  (click)="closePopup()"
+>
+
+  <div
+    class="modal-dialog"
+    (click)="$event.stopPropagation()"
+  >
+
+    <div class="modal-content">
+
+      <!-- MODAL HEADER -->
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="ri-pencil-line"></i>
+          Edit Employee
+        </h5>
+        <button class="btn-close" (click)="closePopup()">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+
+      <!-- MODAL BODY -->
+      <div class="modal-body">
+        <app-bgemployee-master
+          *ngIf="selectedEmployee"
+          [popupData]="selectedEmployee"
+          [isPopupMode]="true"
+          (closed)="closePopup()"
+        ></app-bgemployee-master>
+      </div>
+    </div>
+  </div>
+</div>

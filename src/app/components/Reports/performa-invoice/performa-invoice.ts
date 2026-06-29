@@ -82,7 +82,7 @@ export class PerformaInvoice implements OnInit {
 
   getFinanciers() {
 
-    this.receiptEntryService.getLedgerByType('Financier').subscribe({
+    this.ledgerService.getLedgerByType('Financier').subscribe({
       next: (res) => {
         this.financiers = res;
 
