@@ -68,6 +68,8 @@ import { ServiceTypeMaster } from './components/service-type-master/service-type
 import { JobSourceMaster } from './components/job-source-master/job-source-master';
 import { RoleMasterList } from './components/role-master/role-list-master/role-list-master';
 import { RoleMaster } from './components/role-master/role-master';
+import { BgemployeeMaster }     from './components/bgemployee-master/bgemployee-master';
+import { BgemployeeMasterList } from './components/bgemployee-master/bgemployee-master-list/bgemployee-master-list';
 import { WarrantyJobCardClaim } from './components/warranty-job-card-claim/warranty-job-card-claim';
 import { CounterBill } from './components/counter-bill/counter-bill';
 import { AddCounterBill } from './components/counter-bill/add-counter-bill/add-counter-bill';
@@ -170,6 +172,10 @@ export const routes: Routes = [
       { path: 'employee', data: [49], component: EmployeeMasterList },
       { path: 'employee/add', component: EmployeeMasterComponent, data: [49] },
       { path: 'employee/edit/:id', component: EmployeeMasterComponent, data: [49] },
+
+      { path: 'bgemployee-master',          component: BgemployeeMasterList, data: [76] },
+      { path: 'bgemployee-master/add',      component: BgemployeeMaster,     data: [76] },
+      { path: 'bgemployee-master/edit/:id', component: BgemployeeMaster,     data: [76] },
 
       { path: 'hsrp-order', component: HSRPOrder, data: [48] },
       { path: 'hsrp-order/:id', component: HSRPOrder, data: [48] },
