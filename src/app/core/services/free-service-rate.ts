@@ -21,7 +21,7 @@ export class FreeServiceRateService {
     if (OEMModelId) {
       params = params.set("OEMModelId", OEMModelId.toString());
     }
-    return this.httpClient.get(`${this.baseUrl}/free-service-rate/GetByOEMMOdelId`);
+    return this.httpClient.get(`${this.baseUrl}/free-service-rate/GetByOEMMOdelId`, { params });
   }
 
   insert(data: any): Observable<any> {

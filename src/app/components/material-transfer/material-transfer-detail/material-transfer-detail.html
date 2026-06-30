@@ -127,14 +127,14 @@
                                     <input type="text" class="form-control form-control-sm" name="remarks"
                                         #remarks="ngModel" [(ngModel)]="newItem.remarks">
                                 </div>
-                                <!-- <div class="col-md-3">
+                                <div class="col-md-3">
                                     <label class="form-label">Technician</label>
                                     <select class="form-select form-select-sm" name="technician" #technician="ngModel"
                                         [(ngModel)]="newItem.technician">
                                         <option *ngFor="let tech of lstTechnician" [value]="tech.id">{{ tech.name }}
                                         </option>
                                     </select>
-                                </div> -->
+                                </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Issue Type</label>
                                     <select class="form-select form-select-sm" name="issueType" #issueType="ngModel"
@@ -176,7 +176,7 @@
                                         <th>Issue Type</th>
                                         <th>Inward Sr No.</th>
                                         <th>Issue Sr No.</th>
-                                        <!-- <th>Technician</th> -->
+                                        <th>Technician</th>
                                         <!-- <th>CGST({{cgstPercent}}%)</th> -->
                                         <th>CGST</th>
                                         <!-- <th>SGST({{sgstPercent}}%)</th> -->
@@ -210,8 +210,8 @@
                                         <td class="text-nowrap">{{ item.issueType | getIssueTypeName: issueTypes }}</td>
                                         <td>{{ item.inwardsrno }}</td>
                                         <td class="text-nowrap">{{ item.issuesrno }}</td>
-                                        <!-- <td class="text-nowrap">{{ item.technician | getTechnicianName: lstTechnician }}
-                                        </td> -->
+                                        <td class="text-nowrap">{{ item.technician | getTechnicianName: lstTechnician }}
+                                        </td>
                                         <td>{{ item.cgstAmount }}</td>
                                         <td>{{ item.sgstAmount }}</td>
                                         <td>{{ item.igstAmount }}</td>
@@ -229,8 +229,9 @@
                                     <tr>
                                         <td colspan="4" class="text-end"><strong>Total</strong></td>
                                         <td>{{ getTotalQty() }}</td>
-                                        <td colspan="7"></td>
+                                        <td colspan="8"></td>
                                         <td>{{ getTotalAmount() }}</td>
+                                        <td></td>
                                         <td></td>
                                     </tr>
                                 </tfoot>
