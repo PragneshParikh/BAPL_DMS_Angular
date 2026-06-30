@@ -26,7 +26,7 @@ import { PrefixService } from '../../../core/services/prefix';
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
-    // GetTechnicianNamePipe,
+    GetTechnicianNamePipe,
     GetIssueTypeNamePipe,
     NgSelectModule,
     NgbTooltip
@@ -37,7 +37,7 @@ import { PrefixService } from '../../../core/services/prefix';
 export class MaterialTransferDetail implements OnInit {
 
   issueTypes = IssueTypes.filter(x => x.id === 1 || x.id === 2);
-  // lstTechnician = TechnicianList;
+  lstTechnician = TechnicianList;
 
   formData: any = {
     prefix: '',
@@ -63,7 +63,7 @@ export class MaterialTransferDetail implements OnInit {
     // issueSubType: '',
     inwardsrno: '',
     issuesrno: '',
-    // technician: 0,
+    technician: 0,
     cgst: '',
     sgst: '',
     igst: '',
@@ -478,7 +478,7 @@ export class MaterialTransferDetail implements OnInit {
       // issueSubType: '',
       inwardsrno: '',
       issuesrno: '',
-      // technician: 0,
+      technician: 0,
       cgst: '',
       sgst: '',
       igst: '',
@@ -640,7 +640,7 @@ export class MaterialTransferDetail implements OnInit {
       // issueSubType: '',
       inwardsrno: '',
       issuesrno: '',
-      // technician: row.technician,
+      technician: row.technician,
       cgst: row.cgst,
       sgst: row.sgst,
       igst: row.igst,
@@ -760,12 +760,12 @@ export class MaterialTransferDetail implements OnInit {
 
 }
 
-// export const TechnicianList = [
-//   { id: 1, name: 'Technician Rajesh' },
-//   { id: 2, name: 'Technician Amit' },
-//   { id: 3, name: 'Technician Suresh' },
-//   { id: 4, name: 'Technician Rakesh' },
-//   { id: 5, name: 'Technician Manoj' },
-//   { id: 6, name: 'Technician Mitesh' },
-//   { id: 7, name: 'Technician Manish' }
-// ]
+export const TechnicianList = [
+  { id: 1, name: 'Technician Rajesh' },
+  { id: 2, name: 'Technician Amit' },
+  { id: 3, name: 'Technician Suresh' },
+  { id: 4, name: 'Technician Rakesh' },
+  { id: 5, name: 'Technician Manoj' },
+  { id: 6, name: 'Technician Mitesh' },
+  { id: 7, name: 'Technician Manish' }
+]
