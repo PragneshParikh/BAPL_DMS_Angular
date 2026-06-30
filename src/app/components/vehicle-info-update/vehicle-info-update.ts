@@ -78,9 +78,14 @@ export class VehicleInfoUpdate implements OnInit {
     this.loader.show();
     const regNo = this.searchCriteria === 'regNo' ? this.searchValue : null;
     const chassisNo = this.searchCriteria === 'chassis' ? this.searchValue : null;
+    let dealerCode ='';
+    if(!this.isSuperAdmin)
+    {
+      dealerCode = this.storageService.getDealerCode();
+    }
 
     this.vehicleInfoService
-      .getVehicleInfo(regNo ?? undefined, chassisNo ?? undefined)
+      .getVehicleInfo(regNo ?? undefined, chassisNo ?? undefined,dealerCode ?? undefined)
       .subscribe({
         next: (response) => {
 
@@ -91,6 +96,7 @@ export class VehicleInfoUpdate implements OnInit {
           const converters = response.vehicleDetails.converters || [];
 
           this.vehicle = {
+            ...response.dealerDetails,
             ...response.partyDetails,
             ...response.vehicleDetails,
 
@@ -120,6 +126,8 @@ export class VehicleInfoUpdate implements OnInit {
 
           this.showVehicleDetails = true;
           this.loader.hide();
+          console.log(this.vehicle);
+          
         },
         error: (error) => {
           this.loader.hide();
