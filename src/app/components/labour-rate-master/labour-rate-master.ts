@@ -77,6 +77,7 @@ export class LabourRateMaster implements OnInit {
       next: (res: any) => {
         this.loader.hide();
         this.modelWiseLabourList = res.data || res;
+        console.log(this.modelWiseLabourList);
         this.totalPages = Math.ceil(
           this.modelWiseLabourList.length /
           this.pageSize
