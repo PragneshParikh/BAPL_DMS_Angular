@@ -1074,4 +1074,8 @@ export class JobCardAddForm {
     });
   }
 
+  onCancelClick() {
+    this.router.navigate(['/job-card']);
+  }
+
 }
