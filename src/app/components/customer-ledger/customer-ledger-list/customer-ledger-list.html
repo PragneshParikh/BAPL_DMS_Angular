@@ -13,12 +13,13 @@
                         <div class="d-flex justify-content-between align-items-center">
 
 
-                            <div class="col-md-2 mb-0">
+                            <div *ngIf="isSuperAdmin" class="col-md-2 mb-0">
                                 <label class="form-label form-label-sm">Select Dealer Code</label>
 
-                                <ng-select class="ng-select-sm" style="width:180px;" [items]="dealers" 
+                                <ng-select class="ng-select-sm" style="width:180px;" [items]="dealers"
                                     bindLabel="dealerName" bindValue="dealerCode" [(ngModel)]="selectedDealerCode"
-                                    [searchable]="true" [clearable]="false" placeholder="Select Dealer Code" (change)="onDealerChange()">
+                                    [searchable]="true" [clearable]="false" placeholder="Select Dealer Code"
+                                    [searchFn]="customSearchFn" (change)="onDealerChange()">
 
                                     <ng-template ng-option-tmp let-item="item">
                                         {{ item.dealerCode }} - {{ item.dealerName }}
@@ -56,6 +57,7 @@
                             <table class="table table-hover  table-bordered mb-0 table-sm" style="font-size: 12px;">
                                 <thead class="table-light">
                                     <tr>
+                                        <th>Sl No.</th>
                                         <th class="sort" (click)="onSort('ledgerType')">
                                             Ledger Type</th>
                                         <th class="sort" (click)="onSort('ledgerName')">
@@ -76,13 +78,16 @@
                                         </th>
                                         <th class="sort" (click)="onSort('city')">City</th>
                                         <th class="sort" (click)="onSort('state')">State
+                                        <th class="sort" (click)="onSort('createdDate')">Created Date
+                                        <th class="sort" (click)="onSort('updatedDate')">Updated Date
                                         </th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
-                                    <tr *ngFor="let customer of dataSource; trackBy: trackByCustomer" class="table-row"
-                                        (dblclick)="onCustomerClick(customer)">
+                                    <tr *ngFor="let customer of dataSource; let i = index; trackBy: trackByCustomer"
+                                        class="table-row" (dblclick)="onCustomerClick(customer)">
+                                        <td>{{ (page - 1) * pageSize + i + 1 }}</td>
                                         <td>{{ customer?.ledgerType }}</td>
                                         <td>{{ customer?.ledgerName }}</td>
 
@@ -92,6 +97,8 @@
                                         <td>{{ customer?.eMail }}</td>
                                         <td>{{ customer?.cityName }}</td>
                                         <td>{{ customer?.stateName }}</td>
+                                        <td>{{ customer?.createdDate | date }}</td>
+                                        <td>{{ customer?.updatedDate | date }}</td>
                                     </tr>
 
                                     <!-- No Data -->
