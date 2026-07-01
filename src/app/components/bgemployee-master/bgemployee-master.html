@@ -20,7 +20,6 @@
 
         <!-- PROFILE IMAGE -------------------------------- -->
         <div class="col-md-2 text-center">
-
           <div class="border rounded overflow-hidden bg-white d-flex align-items-center justify-content-center"
             style="width:100px; height:120px; margin:auto;">
             <img *ngIf="imagePreview" [src]="imagePreview" class="w-100 h-100" style="object-fit:cover;" />
@@ -43,7 +42,6 @@
             3.5cm × 4.5cm, 100 dpi.<br>
             Max size: 50kb.
           </div>
-
         </div>
 
         <!-- FORM FIELDS ---------------------------------- -->
@@ -51,7 +49,6 @@
 
           <!-- ROW 1 : Code | First Name | Last Name | Gender -->
           <div class="row mb-2">
-
             <div class="col-md-3">
               <label class="form-label mb-1">Employee Code</label>
               <input type="text" class="form-control form-control-sm py-1 fw-semibold text-primary"
@@ -80,12 +77,10 @@
                 <option *ngFor="let g of genders" [value]="g.value">{{ g.title }}</option>
               </select>
             </div>
-
           </div>
 
           <!-- ROW 2 : Mobile | State | City | Pincode -->
           <div class="row mb-2">
-
             <div class="col-md-3">
               <label class="form-label mb-1">Mobile No. <span class="text-danger">*</span></label>
               <input type="text" class="form-control form-control-sm py-1"
@@ -123,12 +118,10 @@
                 (input)="onlyDigits($event, 'pincode', 6)" required>
               <small *ngIf="errors.pincode" class="text-danger">{{ errors.pincode }}</small>
             </div>
-
           </div>
 
           <!-- ROW 3 : DOJ | DOB | Effective Date | Reporting To -->
           <div class="row mb-2">
-
             <div class="col-md-3">
               <label class="form-label mb-1">Date of Joining <span class="text-danger">*</span></label>
               <input type="date" class="form-control form-control-sm py-1"
@@ -153,12 +146,10 @@
                 [(ngModel)]="employeeData.reportingTo" name="reportingTo"
                 placeholder="Supervisor name / code">
             </div>
-
           </div>
 
           <!-- ROW 4 : Status | Department -->
           <div class="row mb-2">
-
             <div class="col-md-3">
               <label class="form-label mb-1">Status</label>
               <select class="form-select form-select-sm py-1"
@@ -180,7 +171,97 @@
                 </option>
               </select>
             </div>
+          </div>
 
+          <!-- ============================================ -->
+          <!-- ZONE & DEALER MAPPING (checkbox selection)    -->
+          <!-- ============================================ -->
+          <div class="section-card mb-3">
+            <div class="section-header">
+              <i class="ri-map-pin-line"></i> Zone & Dealer Mapping
+            </div>
+
+            <div class="section-body">
+
+              <div class="row g-2 mb-2">
+                <div class="col-md-4">
+                  <label class="form-label mb-1" style="font-size:12px;">
+                    Zone <span class="text-danger">*</span>
+                  </label>
+                  <select class="form-select form-select-sm py-1"
+                    [(ngModel)]="selectedZone"
+                    (ngModelChange)="onZoneChange()"
+                    name="selectedZone">
+                    <option value="">— Select Zone —</option>
+                    <option *ngFor="let z of zones" [value]="z.zone">
+                      {{ z.zone }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="col-md-5" *ngIf="selectedZone && zoneDealers.length > 0">
+                  <label class="form-label mb-1" style="font-size:12px;">Search dealers</label>
+                  <input type="text" class="form-control form-control-sm py-1"
+                    [(ngModel)]="dealerSearchTerm"
+                    name="dealerSearchTerm"
+                    placeholder="Dealer name, code or city">
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end" *ngIf="selectedZone">
+                  <span class="badge bg-primary-subtle text-primary px-2 py-1" style="font-size:12px;">
+                    {{ selectedDealerIds.size }} dealer{{ selectedDealerIds.size === 1 ? '' : 's' }} selected
+                  </span>
+                </div>
+              </div>
+
+              <div *ngIf="loadingDealers" class="text-center py-3 text-muted" style="font-size:13px;">
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                Loading dealers…
+              </div>
+
+              <div *ngIf="selectedZone && !loadingDealers && zoneDealers.length === 0"
+                   class="alert alert-warning py-2 px-3 mb-0" style="font-size:13px;">
+                No dealers mapped to the {{ selectedZone }} zone yet.
+              </div>
+
+              <div *ngIf="selectedZone && !loadingDealers && zoneDealers.length > 0"
+                   class="border rounded" style="max-height:320px; overflow-y:auto;">
+
+                <div class="d-flex align-items-center px-3 py-2 border-bottom bg-light"
+                     style="position:sticky; top:0; z-index:1;">
+                  <input type="checkbox" class="form-check-input me-2"
+                    [checked]="allFilteredSelected"
+                    (change)="toggleSelectAll($event)"
+                    id="selectAllDealers">
+                  <label class="form-check-label fw-semibold mb-0" for="selectAllDealers" style="font-size:13px;">
+                    Select all ({{ filteredZoneDealers.length }})
+                  </label>
+                </div>
+
+                <div class="dealer-grid">
+                  <div *ngFor="let d of filteredZoneDealers; let i = index"
+                       class="dealer-grid-item"
+                       [class.border-end]="i % 2 === 0">
+                    <input type="checkbox" class="form-check-input me-2"
+                      [id]="'dealer-' + d.dealerId"
+                      [checked]="isDealerSelected(d.dealerId)"
+                      (change)="toggleDealer(d.dealerId)">
+                    <label class="form-check-label flex-grow-1 mb-0" [for]="'dealer-' + d.dealerId">
+                      <span class="fw-semibold">{{ d.dealerName }}</span>
+                      <br>
+                      <span class="text-muted">{{ d.dealerCode }}
+                        <ng-container *ngIf="d.cityName"> · {{ d.cityName }}</ng-container>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <div *ngIf="filteredZoneDealers.length === 0" class="text-center text-muted py-3" style="font-size:13px;">
+                  No dealers match "{{ dealerSearchTerm }}"
+                </div>
+              </div>
+
+            </div>
           </div>
 
           <!-- ============================================ -->
@@ -193,65 +274,105 @@
 
             <div class="section-body">
               <div class="col-md-4 px-0">
-                  <label class="form-label mb-1" style="font-size:12px;">
-                    Profile <span class="text-danger">*</span>
-                  </label>
-                  <select class="form-select form-select-sm py-1"
-                    [(ngModel)]="pendingProfileId"
-                    name="pendingProfileId">
-                    <!-- [ngValue]="0" keeps type as number — avoids string/number mismatch -->
-                    <option [ngValue]="0">— Select Profile —</option>
-                    <option *ngFor="let p of allProfiles" [ngValue]="p.id">
-                      {{ p.profileName }}
-                    </option>
-                  </select>
-                </div>
-            </div>
-          </div>
-
-          <!-- ============================================ -->
-          <!-- LOGIN CREDENTIALS                            -->
-          <!-- ============================================ -->
-          <div class="section-card mb-3">
-
-            <div class="section-header">
-              <i class="ri-lock-line"></i> Login Credentials
-            </div>
-
-            <div class="section-body">
-              <div class="row g-2">
-
-                <div class="col-md-4">
-                  <label class="form-label mb-1">Email ID <span class="text-danger">*</span></label>
-                  <input type="email" class="form-control form-control-sm py-1"
-                    [(ngModel)]="employeeData.emailId" name="emailId" required autocomplete="off">
-                </div>
-
-                <div class="col-md-4">
-                  <label class="form-label mb-1">
-                    Password
-                    <span class="text-danger" *ngIf="!isEditMode">*</span>
-                    <small class="text-muted ms-1" *ngIf="isEditMode">(leave blank to keep current)</small>
-                  </label>
-                  <div class="input-group input-group-sm">
-                    <input [type]="showPassword ? 'text' : 'password'"
-                      class="form-control form-control-sm py-1"
-                      [(ngModel)]="employeeData.password" name="password"
-                      autocomplete="new-password">
-                    <button type="button" class="btn btn-outline-secondary py-0 px-2"
-                      (click)="showPassword = !showPassword">
-                      <i [class]="showPassword ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
-                    </button>
-                  </div>
-                  <small *ngIf="errors.password" class="text-danger">{{ errors.password }}</small>
-                  <small class="text-muted d-block" style="font-size:10px;">
-                    Min 6 chars · uppercase · lowercase · digit · special char
-                  </small>
-                </div>
-
+                <label class="form-label mb-1" style="font-size:12px;">
+                  Profile <span class="text-danger">*</span>
+                </label>
+                <select class="form-select form-select-sm py-1"
+                  [(ngModel)]="pendingProfileId"
+                  name="pendingProfileId">
+                  <option [ngValue]="0">— Select Profile —</option>
+                  <option *ngFor="let p of allProfiles" [ngValue]="p.id">
+                    {{ p.profileName }}
+                  </option>
+                </select>
               </div>
             </div>
           </div>
+
+          <!-- ===================================================== -->
+          <!-- LOGIN ACCESS (toggle)                                  -->
+          <!-- ===================================================== -->
+          <div class="row mb-2 mt-1">
+            <div class="col-12">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="createLogin"
+                  [(ngModel)]="employeeData.createLogin" name="createLogin">
+                <label class="form-check-label fw-semibold" for="createLogin">
+                  Create Login Account
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Email / Password / Category + Roles — shown only when checkbox is checked -->
+          <div class="row mb-2 p-2 mx-0 bg-light rounded" *ngIf="employeeData.createLogin">
+
+            <div class="col-md-3">
+              <label class="form-label mb-1">Email ID</label>
+              <input type="email" class="form-control form-control-sm py-1"
+                [(ngModel)]="employeeData.emailId" name="emailId" autocomplete="off">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label mb-1">
+                Password
+                <small class="text-muted ms-1" *ngIf="isEditMode">(leave blank to keep current)</small>
+              </label>
+              <div class="input-group input-group-sm">
+                <input [type]="showPassword ? 'text' : 'password'"
+                  class="form-control form-control-sm py-1"
+                  [(ngModel)]="employeeData.password" name="password"
+                  autocomplete="new-password">
+                <button type="button" class="btn btn-outline-secondary py-0 px-2"
+                  (click)="showPassword = !showPassword">
+                  <i [class]="showPassword ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+                </button>
+              </div>
+              <small *ngIf="errors.password" class="text-danger">{{ errors.password }}</small>
+            </div>
+
+            <!-- CATEGORY CHECKBOXES (from DepartmentMaster) -->
+            <div class="col-md-6">
+              <label class="form-label mb-1 d-block">Category</label>
+              <div class="d-flex flex-wrap gap-3 pt-1">
+                <div class="form-check" *ngFor="let dept of departmentOptions">
+                  <input class="form-check-input" type="checkbox"
+                    [id]="'dept_' + dept.id"
+                    [checked]="isDepartmentSelected(dept.name)"
+                    (change)="onDepartmentToggle(dept.name, $event)">
+                  <label class="form-check-label" [for]="'dept_' + dept.id">
+                    {{ dept.name }}
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- ROLES revealed per checked category (from AspNetRoles via RoleCategoryMapping) -->
+            <div class="col-12 mt-2" *ngIf="selectedDepartments.length">
+              <div *ngFor="let dept of selectedDepartments" class="mb-2 ps-2 border-start">
+                <label class="form-label mb-1 d-block fw-semibold">{{ dept }} Roles</label>
+
+                <div class="d-flex flex-wrap gap-3"
+                  *ngIf="rolesByDepartment[dept]?.length; else noRoles">
+                  <div class="form-check" *ngFor="let role of rolesByDepartment[dept]">
+                    <input class="form-check-input" type="checkbox"
+                      [id]="'role_' + role.name"
+                      [checked]="isRoleSelected(role.name)"
+                      (change)="toggleRole(role.name, $event)">
+                    <label class="form-check-label" [for]="'role_' + role.name">
+                      {{ role.name }}
+                    </label>
+                  </div>
+                </div>
+
+                <ng-template #noRoles>
+                  <small class="text-muted">No roles found for {{ dept }}.</small>
+                </ng-template>
+              </div>
+            </div>
+
+          </div>
+          <!-- End login access -->
 
           <!-- ACTION BUTTONS ------------------------------ -->
           <div class="text-end mt-2">
