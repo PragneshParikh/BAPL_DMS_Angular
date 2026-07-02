@@ -15,12 +15,12 @@ import { PrefixService } from '../../core/services/prefix';
 
 @Component({
   selector: 'app-ffir',
-  standalone:true,
+  standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './ffir.html',
   styleUrl: './ffir.scss',
 })
-export class FFIR implements OnInit{
+export class FFIR implements OnInit {
 
   locations: LocationName[];
   ffirData: any = {};
@@ -52,7 +52,7 @@ export class FFIR implements OnInit{
 
     ffirPrefix: '',
     dealerCode: '',
-    cirNo : 0,
+    cirNo: 0,
     cirDate: '',
 
     jobCardCustomerId: 0,
@@ -103,15 +103,13 @@ export class FFIR implements OnInit{
 
   // fetch jobcard related data
   ngOnInit(): void {
-    //debugger;
     this.jobCardId = Number(this.route.snapshot.paramMap.get('id'));
     this.ffirObj.cirDate = new Date().toISOString().split('T')[0];
-    //console.log("Received JobCardId:", this.jobCardId);
     this.loadPrefix();
     this.fetchJobNoBasedData();
-    
+
     this.loadParts();
-   //this.loadFailureComplaints();
+    //this.loadFailureComplaints();
 
     this.route.queryParams.subscribe(params => {
       if (params['id']) {
@@ -135,7 +133,7 @@ export class FFIR implements OnInit{
         this.ffirObj.cirNo = Number(res.split('/').pop());
       }, error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
 
       }
     })
@@ -160,113 +158,109 @@ export class FFIR implements OnInit{
 
         this.selectedMainParts = res.mainParts || [];
         this.jobCardId = this.ffirObj.jobCardHeaderId
-        
+
         this.fetchJobNoBasedData();
         this.loadParts();
         //this.loadFailureComplaints();
       },
       error: (err) => {
-        console.log(err);
+        console.error(err);
       }
     });
   }
 
   fetchJobNoBasedData(): void {
-//debugger
-  if (!this.jobCardId) return;
+    if (!this.jobCardId) return;
 
-  this.loader.show();
+    this.loader.show();
 
-  this.jobCardService.getCIRJobCardDetails(this.jobCardId).subscribe({
-    next: (res: any) => {
+    this.jobCardService.getCIRJobCardDetails(this.jobCardId).subscribe({
+      next: (res: any) => {
 
-      this.loader.hide();
+        this.loader.hide();
 
-      this.ffirData = res;
-      console.log("ffirData",this.ffirData)
+        this.ffirData = res;
 
-      this.chassisNo = this.ffirData.chassisNo;
+        this.chassisNo = this.ffirData.chassisNo;
 
-      if (this.chassisNo) {
-        this.loadJobcardHistory(this.chassisNo);
-      }
-
-      this.complaintList = (this.ffirData.complaints || []).map((item: any) => ({
-        id: item.id,
-        customerVoice: item.customerVoice,
-        complaintCode: item.complaintCode,
-        complaint: item.complaint,
-        observation: this.ffirData.observation,
-        actionTaken: this.ffirData.actionTaken
-      }));
-
-      console.log('Complaint List', this.complaintList);
-    },
-
-    error: (err) => {
-      console.error("FFIR API Error", err);
-
-      this.loader.hide();
-
-      Swal.fire({
-        icon: 'error',
-        text: 'Failed to load FFIR data',
-        width: '300px'
-      });
-    }
-  });
-}
-
-
-  //Fetech Dealer Location
- fetchLocations(): void {
-
-  const dealerCode =
-    this.storageService.getDealerCode();
-
-  this.locationService
-    .getLocationList(dealerCode)
-    .subscribe({
-
-      next: (data: any[]) => {
-
-        // only Workshop
-        this.locations = data.filter(
-          x => x.locareadidNo === 2
-        );
-
-        // EDIT MODE
-        if (this.isEditMode && this.chassiseditData) {
-
-          const serviceLocCode =
-            this.chassiseditData
-              .jobCardHeader
-              .serviceloc;
-
-          // MATCH
-          const match = this.locations.find(
-            x => x.locCode === serviceLocCode
-          );
-          if (match) {
-            this.selectedLocation =
-              match.locname;
-              console.log("LocationName:",this.selectedLocation)
-          }
+        if (this.chassisNo) {
+          this.loadJobcardHistory(this.chassisNo);
         }
+
+        this.complaintList = (this.ffirData.complaints || []).map((item: any) => ({
+          id: item.id,
+          customerVoice: item.customerVoice,
+          complaintCode: item.complaintCode,
+          complaint: item.complaint,
+          observation: this.ffirData.observation,
+          actionTaken: this.ffirData.actionTaken
+        }));
+
       },
 
       error: (err) => {
+        console.error("FFIR API Error", err);
 
-        console.error(
-          'Error fetching locations',
-          err
-        );
+        this.loader.hide();
 
+        Swal.fire({
+          icon: 'error',
+          text: 'Failed to load FFIR data',
+          width: '300px'
+        });
       }
-
     });
+  }
 
-}
+
+  //Fetech Dealer Location
+  fetchLocations(): void {
+
+    const dealerCode =
+      this.storageService.getDealerCode();
+
+    this.locationService
+      .getLocationList(dealerCode)
+      .subscribe({
+
+        next: (data: any[]) => {
+
+          // only Workshop
+          this.locations = data.filter(
+            x => x.locareadidNo === 2
+          );
+
+          // EDIT MODE
+          if (this.isEditMode && this.chassiseditData) {
+
+            const serviceLocCode =
+              this.chassiseditData
+                .jobCardHeader
+                .serviceloc;
+
+            // MATCH
+            const match = this.locations.find(
+              x => x.locCode === serviceLocCode
+            );
+            if (match) {
+              this.selectedLocation =
+                match.locname;
+            }
+          }
+        },
+
+        error: (err) => {
+
+          console.error(
+            'Error fetching locations',
+            err
+          );
+
+        }
+
+      });
+
+  }
   onFileSelected(event: any, index: number) {
     const file = event.target.files[0];
     if (!file) return;
@@ -281,7 +275,6 @@ export class FFIR implements OnInit{
     const target = event.target as HTMLSelectElement;
     this.selectedLocation = target.value;
 
-    console.log('Selected Location:', this.selectedLocation);
   }
   loadParts() {
 
@@ -326,8 +319,6 @@ export class FFIR implements OnInit{
 
     });
 
-    console.log(this.selectedMainParts);
-
     this.searchpartText = '';
     this.showDropdown = false;
   }
@@ -343,10 +334,9 @@ export class FFIR implements OnInit{
     this.selectedMainParts.splice(index, 1);
   }
   loadFailureComplaints() {
-    
+
     this.ffirService.getComplaintCodeList().subscribe(res => {
       this.failurcomplaintList = res;
-      console.log("failurecomplaint",this.failurcomplaintList)
     });
   }
   filterComplaints() {
@@ -363,11 +353,9 @@ export class FFIR implements OnInit{
   }
 
   loadJobcardHistory(chassisNo: string) {
-   // debugger
     this.ffirService.getJobCardHistory(chassisNo).subscribe({
       next: (res: any) => {
         this.jobcardhistoryList = res;
-        console.log(this.jobcardhistoryList)
       },
       error: (err) => {
         console.error(err);
@@ -376,7 +364,6 @@ export class FFIR implements OnInit{
   }
 
   saveFFIR() {
-   // debugger;
     const dealerCode = this.storageService.getDealerCode();
     this.ffirObj.dealerCode = dealerCode;
     this.ffirObj.mainParts = this.selectedMainParts.map((item: any) => {
@@ -430,7 +417,7 @@ export class FFIR implements OnInit{
             });
           },
           error: (err) => {
-            console.log(err);
+            console.error(err);
           }
         });
     }

@@ -6,7 +6,7 @@ import { StorageService } from '../../../../core/services/storage';
 import { LocationName } from '../../../../ViewModels/ReceiptEntryModel';
 import { JobCardService } from '../../../../core/services/job-card-service';
 import { selectLeadData } from '../../../../store/CRM/crm_selector';
-import { NgbModal, NgbTimepickerModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbModal, NgbTimepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { icons } from '../../../../core/data';
 import { Console, error, info } from 'console';
@@ -23,7 +23,7 @@ import { PrefixService } from '../../../../core/services/prefix';
 @Component({
   selector: 'app-job-card-add-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NgbDropdownModule],
   templateUrl: './job-card-add-form.html',
   styleUrl: './job-card-add-form.scss',
 })
@@ -146,7 +146,6 @@ export class JobCardAddForm {
     private toaster: ToastService) { }
 
   ngOnInit(): void {
-    console.log('Date :', new Date().toISOString().split('T')[0]);
     this.dealerCode = this.storageService.getDealerCode();
     this.loadPrefix();
     this.fetchLocations();
@@ -180,7 +179,7 @@ export class JobCardAddForm {
         this.jobNo = Number(res.split('/').pop());
       }, error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
 
       }
     })
@@ -218,7 +217,7 @@ export class JobCardAddForm {
     this.complaintMasterService.getComplaintMasterList().subscribe({
       next: (res: any) => {
         this.complaintMasterList = res;
-        
+
       }
     });
   }
@@ -275,31 +274,30 @@ export class JobCardAddForm {
 
   onComplaintSearch(event: any): void {
 
-  const value = event.target.value?.trim().toLowerCase();
+    const value = event.target.value?.trim().toLowerCase();
 
-  // User ne typing start ki -> previous selection invalid
-  this.complaintObj.complaintId = 0;
+    // User ne typing start ki -> previous selection invalid
+    this.complaintObj.complaintId = 0;
 
-  if (!value) {
-    this.filteredComplaints = [];
-    this.showComplaintDropdown = false;
-    return;
+    if (!value) {
+      this.filteredComplaints = [];
+      this.showComplaintDropdown = false;
+      return;
+    }
+
+    this.filteredComplaints = this.complaintMasterList.filter(x =>
+      x.complaintName?.toLowerCase().includes(value)
+    );
+
+    this.showComplaintDropdown = this.filteredComplaints.length > 0;
   }
 
-  this.filteredComplaints = this.complaintMasterList.filter(x =>
-    x.complaintName?.toLowerCase().includes(value)
-  );
 
-  this.showComplaintDropdown = this.filteredComplaints.length > 0;
-}
-
- 
 
   selectComplaint(item: any): void {
-console.log("complaintmaster",item)
     this.complaintObj.complaintCode = item.complaintName;
     this.complaintObj.complaint = item.complaintName;
-     this.complaintObj.complaintId = item.id;
+    this.complaintObj.complaintId = item.id;
 
     this.filteredComplaints = [];
     this.showComplaintDropdown = false;
@@ -324,8 +322,12 @@ console.log("complaintmaster",item)
     });
   }
   loadServiceHistory(chassisNo: string) {
+    let jobCardId: number | null = 0;
 
-    this.jobCardService.getJobCardServiceHistory(chassisNo).subscribe({
+    if (this.chassiseditData?.jobCardHeader?.id) {
+      jobCardId = this.chassiseditData.jobCardHeader.id;
+    }
+    this.jobCardService.getJobCardServiceHistory(chassisNo, jobCardId).subscribe({
       next: (res: any) => {
         if (!res || res.length === 0) {
           // this.toastr.show('This chassis number is not sold History not available', {
@@ -360,14 +362,16 @@ console.log("complaintmaster",item)
   }
 
   loadChassisList() {
-    //debugger
     const dealerCode = this.storageService.getDealerCode();
     this.jobTypeId = this.selectedJobtype
 
     this.jobCardService.getAllInspectedChassis(dealerCode, this.jobTypeId).subscribe(res => {
       this.chassisList = res;
-      console.log("AddloadingChassisdetails", this.chassisList)
+
       if (this.isEditMode && this.chassiseditData) {
+        this.customerObj.saleDate = this.chassisList[0].saleDate?.split('T')[0];
+        this.customerObj.insuranceExpDate = this.chassisList[0].insuranceExpDate?.split('T')[0];
+        this.customerObj.nextServiceDueDate = this.chassisList[0].nextserviceDueDate?.split('T')[0];
         this.selectedChassis = this.chassiseditData.jobCardHeader.chassisno;
 
         setTimeout(() => {
@@ -382,7 +386,6 @@ console.log("complaintmaster",item)
 
     this.jobCardService.getPdiChecklist(oemModelId).subscribe(res => {
       this.pdiCheckList = res
-      console.log("pdichecklist", this.pdiCheckList)
     });
   }
   toggle(section: string) {
@@ -490,49 +493,92 @@ console.log("complaintmaster",item)
 
 
 
-  onChassisChange() {
+  // onChassisChange() {
 
+  //   if (!this.selectedChassis) return;
+  //   this.loadServiceHistory(this.selectedChassis);
+
+  //   const selected = this.chassisList.find(
+  //     x => x.chassisNumber == this.selectedChassis
+  //     //  use ==
+  //   );
+
+  //   if (!selected) return;
+
+  //   // ALWAYS FILL (EDIT + ADD)
+  //   this.invoiceNo = selected.invoiceNo;
+  //   this.couponNo = this.selectedChassis.slice(-13);
+  //   this.customerObj.customerLedgerId = selected.customerLedgerId;
+  //   this.customerObj.customerName = selected.customerName;
+  //   this.customerObj.customerMobile = selected.customerMobile;
+  //   this.customerObj.customerAltMobile = selected.customerAltMobile;
+
+  //   this.modelName = selected.modelName;
+  //   this.registerNo = selected.registerNo;
+
+  //   this.batteryCapacity = selected.batteryCapacity;
+  //   this.batteryMake = selected.batteryMake;
+  //   this.batteryChemestry = selected.batteryChemestry;
+  //   this.batteryNumber = selected.batteryNumber;
+
+  //   this.motorNo = selected.motorNo;
+  //   this.controllerNo = selected.controllerNo;
+  //   this.converterNo = selected.converterNo;
+  //   this.chargerNumber = selected.chargerNumber;
+
+  //   this.odoReading = selected.odoReading;
+  //   this.duration = selected.duration;
+  //   this.durationType = selected.durationType;
+  //   this.expireWarrentyDate = selected.expireWarrentyDate;
+  //   this.oemModelId = selected.oemModelId;
+  //   if (this.oemModelId) {
+  //     this.loadPdiData(this.oemModelId);
+  //   }
+  // }
+  onChassisChange() {
     if (!this.selectedChassis) return;
     this.loadServiceHistory(this.selectedChassis);
 
     const selected = this.chassisList.find(
       x => x.chassisNumber == this.selectedChassis
-      //  use ==
     );
 
     if (!selected) return;
 
-    // ALWAYS FILL (EDIT + ADD)
     this.invoiceNo = selected.invoiceNo;
     this.couponNo = this.selectedChassis.slice(-13);
     this.customerObj.customerLedgerId = selected.customerLedgerId;
     this.customerObj.customerName = selected.customerName;
     this.customerObj.customerMobile = selected.customerMobile;
     this.customerObj.customerAltMobile = selected.customerAltMobile;
+    this.customerObj.saleDate = selected.saleDate?.split('T')[0];
+    this.customerObj.nextServiceDueDate = selected.nextserviceDueDate?.split('T')[0];
+    this.customerObj.insuranceExpDate = selected.insuranceExpDate?.split('T')[0];
 
-    this.modelName = selected.modelName;
+    // Model + Colour combined
+    this.modelName = selected.modelName
+      + (selected.colourName ? ' (' + selected.colourName + ')' : '');
+
     this.registerNo = selected.registerNo;
 
     this.batteryCapacity = selected.batteryCapacity;
     this.batteryMake = selected.batteryMake;
     this.batteryChemestry = selected.batteryChemestry;
     this.batteryNumber = selected.batteryNumber;
-
     this.motorNo = selected.motorNo;
     this.controllerNo = selected.controllerNo;
     this.converterNo = selected.converterNo;
     this.chargerNumber = selected.chargerNumber;
-
     this.odoReading = selected.odoReading;
     this.duration = selected.duration;
     this.durationType = selected.durationType;
     this.expireWarrentyDate = selected.expireWarrentyDate;
     this.oemModelId = selected.oemModelId;
+
     if (this.oemModelId) {
       this.loadPdiData(this.oemModelId);
     }
   }
-
   // PDiChecklist popup
   openPdiModal(content: any) {
 
@@ -602,35 +648,35 @@ console.log("complaintmaster",item)
   // add complain section 
   addComplaint() {
 
-  if (!this.complaintObj.customerVoice || !this.complaintObj.complaint) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Validation',
-      text: 'Please fill required fields',
-      width: '300px'
-    });
-    return;
+    if (!this.complaintObj.customerVoice || !this.complaintObj.complaint) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation',
+        text: 'Please fill required fields',
+        width: '300px'
+      });
+      return;
+    }
+
+    // Complaint Code Validation
+    if (!this.complaintObj.complaintId) {
+      this.toastr.show('Please select a valid Complaint Code from dropdown', {
+        classname: 'bg-warning text-white',
+        delay: 2000
+      });
+      return;
+    }
+
+    this.complaintList.push({ ...this.complaintObj });
+
+    // Reset fields
+    this.complaintObj = {
+      customerVoice: '',
+      complaintCode: '',
+      complaintId: 0,
+      complaint: ''
+    };
   }
-
-  // Complaint Code Validation
-  if (!this.complaintObj.complaintId) {
-    this.toastr.show('Please select a valid Complaint Code from dropdown', {
-           classname: 'bg-warning text-white',
-            delay: 2000
-          });
-    return;
-  }
-
-  this.complaintList.push({ ...this.complaintObj });
-
-  // Reset fields
-  this.complaintObj = {
-    customerVoice: '',
-    complaintCode: '',
-    complaintId: 0,
-    complaint: ''
-  };
-}
   deleteComplaint(index: number) {
     this.complaintList.splice(index, 1);
   }
@@ -642,7 +688,6 @@ console.log("complaintmaster",item)
       remarks: x.remarks || ''
     }));
 
-    console.log("Save PDIChecklist", this.pdiCheckList)
     this.isPdiSaved = true;
 
     Swal.fire({
@@ -656,9 +701,8 @@ console.log("complaintmaster",item)
   }
   //insert jobcard
   saveJobCard() {
-    debugger
     //  VALIDATION (recommended)
-    if (!this.isPdiSaved) {
+    if (this.selectedJobtype == 1 && !this.isPdiSaved) {
       Swal.fire('Error', 'Please complete PDI first', 'error');
       return;
     }
@@ -1028,6 +1072,10 @@ console.log("complaintmaster",item)
         this.toaster.show("Something went wrong", { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
+  }
+
+  onCancelClick() {
+    this.router.navigate(['/job-card']);
   }
 
 }

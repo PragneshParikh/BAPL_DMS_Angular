@@ -9,41 +9,44 @@
                 <div class="card-body">
 
                     <fieldset class="border p-1 rounded mb-2">
-                        <form #customerLedgerForm="ngForm">
+                        <form #materialTransferForm="ngForm">
                             <!-- Top Row -->
                             <div class="row mb-2 g-1">
                                 <div class="col-md-2">
                                     <label class="form-label">Prefix No</label>
-                                    <input type="text" class="form-control form-control-sm" name="prefix"
-                                        #prefix="ngModel" [(ngModel)]="formData.prefix" required [disabled]="true">
+                                    <input type="text" class="form-control form-control-sm bg-light" name="prefix"
+                                        #prefix="ngModel" [(ngModel)]="formData.prefix" required readonly>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Issue Number</label>
-                                    <input type="text" class="form-control form-control-sm" name="issueNumber"
-                                        #issueNumber="ngModel" [(ngModel)]="formData.issueNumber" [disabled]="true">
+                                    <input type="text" class="form-control form-control-sm bg-light" name="issueNumber"
+                                        #issueNumber="ngModel" [(ngModel)]="formData.issueNumber" readonly>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Job No (ODO {{ formData.OdoMeter }}) </label>
                                     <div class="input-group input-group-sm">
-                                        <input type="text" class="form-control form-control-sm" name="jobNo"
-                                            #jobNo="ngModel" [(ngModel)]="formData.jobNo" required [disabled]="true">
+                                        <input type="text" class="form-control form-control-sm bg-light" name="jobNo"
+                                            #jobNo="ngModel" [(ngModel)]="formData.jobNo" required readonly>
                                         <button type="button" class="btn btn-outline-secondary bg-primary text-white"
-                                            (click)="openJobSearch()">
+                                            [ngbTooltip]="'Job Search'" (click)="openJobSearch()">
                                             <i class="ri-file-line"></i>
                                         </button>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Date</label>
-                                    <input type="date" class="form-control form-control-sm" name="date"
-                                        [(ngModel)]="formData.date" #date="ngModel" [disabled]="true" />
+                                    <input type="date" class="form-control form-control-sm bg-light" name="date"
+                                        [(ngModel)]="formData.date" #date="ngModel" readonly />
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Technician</label>
                                     <select class="form-select form-select-sm" name="technician"
                                         [(ngModel)]="formData.technician" [disabled]="true">
-                                        <option *ngFor="let tech of lstTechnician" [value]="tech.id"> {{ tech.name }}
-                                        </option>
+                                        <!-- <option *ngFor="let tech of lstTechnician" [value]="tech.id"> {{ tech.name }}
+                                        </option> -->
+                                        <option value="Manoj">Manoj</option>
+                                        <option value="Suraj">Suraj</option>
+                                        <option value="Vishal">Vishal</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
@@ -58,20 +61,21 @@
                         </form>
                     </fieldset>
 
-                    <fieldset class="border p-1 rounded">
+                    <fieldset class="border p-1 rounded" [disabled]="jobCardStatus">
                         <legend class="float-none w-auto px-2 fs-6">Material Details</legend>
                         <form #itemForm="ngForm" (ngSubmit)="onAddItem()">
                             <div class="row g-1">
                                 <div class="col-md-4">
-                                    <label class="form-label">Item Name
-                                        <span class="fs-10">(Stock @ Location {{newItem.batchClosingQty}})(GST%
-                                            0.0)</span>
+                                    <label class="form-label">Part Name
+                                        <span class="fs-10">(Stock @ Location {{newItem.batchClosingQty}})(GST
+                                            {{totalGST}}%)</span>
                                     </label>
 
                                     <ng-select class="ng-select-sm" [items]="itemList" bindValue="id"
-                                        [(ngModel)]="newItem.itemId" [searchFn]="customSearchFn" [clearable]="false"
-                                        (change)="onChangeItem($event)" placeholder="Search Part No or Description"
-                                        name="itemName_select" #itemName_select="ngModel" required>
+                                        [disabled]="formData.jobNo <= 0" [(ngModel)]="newItem.itemId"
+                                        [searchFn]="customSearchFn" [clearable]="false" (change)="onChangeItem($event)"
+                                        placeholder="Search Part No or Description" name="itemName_select"
+                                        #itemName_select="ngModel" required>
 
                                         <ng-template ng-label-tmp let-item="item">
                                             <span [title]="item.itemcode + ' - ' + item.itemdesc">
@@ -96,7 +100,7 @@
                                 <div class="col-md-1">
                                     <label class="form-label">Bin No.</label>
                                     <input type="text" class="form-control form-control-sm" name="binNo"
-                                        #binNo="ngModel" [(ngModel)]="newItem.binNo" required>
+                                        #binNo="ngModel" [(ngModel)]="newItem.binNo" [disabled]="true">
                                 </div>
                                 <div class="col-md-1">
                                     <label class="form-label">Quantity</label>
@@ -113,7 +117,7 @@
                                 <div class="col-md-2">
                                     <label class="form-label">Serial No</label>
                                     <input type="text" class="form-control form-control-sm" name="serialNo"
-                                        #serialNo="ngModel" [(ngModel)]="newItem.serialNo" readonly>
+                                        #serialNo="ngModel" [(ngModel)]="newItem.serialNo" [disabled]="true">
                                 </div>
                             </div>
 
@@ -131,20 +135,25 @@
                                         </option>
                                     </select>
                                 </div>
-                                <div class="col-md-1">
+                                <div class="col-md-2">
                                     <label class="form-label">Issue Type</label>
                                     <select class="form-select form-select-sm" name="issueType" #issueType="ngModel"
                                         [(ngModel)]="newItem.issueType">
+                                        <option value=""> -- Select -- </option>
                                         <option *ngFor="let issue of issueTypes" [value]="issue.id">
                                             {{ issue.name }}
                                         </option>
                                     </select>
                                 </div>
-                                <div class="col-md-1">
+                                <div class="col-md-3">
                                     <label class="form-label">&nbsp;</label><br>
-                                    <button type="submit" class="btn btn-primary btn-sm"
+                                    <button type="submit" class="btn btn-primary btn-sm me-2"
                                         [disabled]="this.formData.jobNo <= 0">
                                         Add
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-sm"
+                                        [disabled]="this.formData.jobNo <= 0" (click)="resetNewItem()">
+                                        Reset
                                     </button>
                                 </div>
 
@@ -152,102 +161,86 @@
                         </form>
                     </fieldset>
 
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm mt-3">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="text-nowrap">Action</th>
-                                    <th class="text-nowrap">S. No.</th>
-                                    <th class="text-nowrap">Item</th>
-                                    <th class="text-nowrap">Description</th>
-                                    <th class="text-nowrap">Qty</th>
-                                    <th class="text-nowrap">Rate</th>
-                                    <th class="text-nowrap">Stock</th>
-                                    <th class="text-nowrap">Issue Type</th>
-                                    <th class="text-nowrap">Issue Sub Type</th>
-                                    <th class="text-nowrap">Inward Sr No.</th>
-                                    <th class="text-nowrap">Issue Sr No.</th>
-                                    <th class="text-nowrap">Technician</th>
-                                    <th class="text-nowrap">Amount</th>
-                                    <th class="text-nowrap">MRP</th>
-                                    <th class="text-nowrap">WAV Rate</th>
-                                    <!-- <th class="text-nowrap">Valid Days</th> -->
-                                    <!-- <th class="text-nowrap">Valid Kms</th> -->
-                                    <th class="text-nowrap">Remarks</th>
-                                    <th class="text-nowrap">First Fill</th>
-                                    <th class="text-nowrap">First Fill Stock</th>
-                                    <!-- <th class="text-nowrap">Item Rec. Rate</th> -->
-                                    <!-- <th class="text-nowrap">CIR</th> -->
-                                    <!-- <th class="text-nowrap">Item Wrnt Approval</th> -->
-                                    <!-- <th class="text-nowrap">Item Wrnt Approval Status</th> -->
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Sample Data Row -->
-                                <tr *ngFor="let item of items; let i = index" [hidden]="item.status === 'Deleted'">
-                                    <td class="action-cell text-nowrap">
-                                        <button class="btn btn-sm btn-soft-info py-0 px-1 me-1"
-                                            (click)="editItem(item)">
-                                            <i class="ri-pencil-line"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-soft-danger py-0 px-1" (click)="deleteItem(item)">
-                                            <i class="ri-delete-bin-line"></i>
-                                        </button>
-                                    </td>
-                                    <td class="text-nowrap">{{ i + 1 }}</td>
-                                    <td class="text-nowrap">{{ item.itemname }}</td>
-                                    <td class="text-nowrap">{{ item.itemdesc }}</td>
-                                    <td class="text-nowrap">{{ item.quantity }}</td>
-                                    <td class="text-nowrap">{{ item.itemRate }}</td>
-                                    <td class="text-nowrap">{{ item.stock }}</td>
-                                    <td class="text-nowrap">{{ item.issueType | getIssueTypeName: issueTypes }}</td>
-                                    <td class="text-nowrap">{{ item.issueSubType }}</td>
-                                    <td class="text-nowrap">{{ item.inwardsrno }}</td>
-                                    <td class="text-nowrap">{{ item.issuesrno }}</td>
-                                    <td class="text-nowrap">{{ item.technician | getTechnicianName: lstTechnician }}
-                                    </td>
-                                    <td class="text-nowrap">{{ item.amount }}</td>
-                                    <td class="text-nowrap">{{ item.mrp | number:'1.2-2' }}</td>
-                                    <td class="text-nowrap">{{ item.wav }}</td>
-                                    <!-- <td>{{ item.validdays }}</td> -->
-                                    <!-- <td>{{ item.validkms }}</td> -->
-                                    <td class="text-nowrap" [title]="item.remarks">
-                                        {{ item.remarks?.length > 30
-                                        ? (item.remarks | slice:0:30) + '...'
-                                        : item.remarks }}
-                                    </td>
-                                    <td class="text-nowrap">{{ item.firstfill }}</td>
-                                    <td class="text-nowrap">{{ item.firstfillstock }}</td>
-                                    <!-- <td>{{ item.received }}</td> -->
-                                    <!-- <td>{{ item.receivedrate }}</td> -->
-                                    <!-- <td>{{ item.cir }}</td> -->
-                                    <!-- <td>{{ item.warrantyapproval }}</td> -->
-                                    <!-- <td>{{ item.warrantyapprovalstatus }}</td> -->
-                                </tr>
+                    <fieldset [disabled]="jobCardStatus">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm mt-3 text-nowrap">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>S. No.</th>
+                                        <th>Part Code</th>
+                                        <th>Part Description</th>
+                                        <th>Qty</th>
+                                        <th>Rate</th>
+                                        <th>HSN Code</th>
+                                        <!-- <th>Stock</th> -->
+                                        <th>Issue Type</th>
+                                        <th>Inward Sr No.</th>
+                                        <th>Issue Sr No.</th>
+                                        <th>Technician</th>
+                                        <!-- <th>CGST({{cgstPercent}}%)</th> -->
+                                        <th>CGST</th>
+                                        <!-- <th>SGST({{sgstPercent}}%)</th> -->
+                                        <th>SGST</th>
+                                        <!-- <th>IGST({{igstPercent}}%)</th> -->
+                                        <th>IGST</th>
+                                        <th>Amount</th>
+                                        <th>MRP</th>
+                                        <!-- <th>Remarks</th> -->
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Sample Data Row -->
+                                    <tr *ngFor="let item of items; let i = index" [hidden]="item.status === 'Deleted'">
+                                        <td class="action-cell text-nowrap">
+                                            <button class="btn btn-sm btn-soft-info py-0 px-1 me-1"
+                                                (click)="editItem(item)">
+                                                <i class="ri-pencil-line"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-soft-danger py-0 px-1"
+                                                (click)="deleteItem(item)">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                        </td>
+                                        <td class="text-nowrap">{{ i + 1 }}</td>
+                                        <td class="text-nowrap">{{ item.itemcode }}</td>
+                                        <td class="text-nowrap">{{ item.itemdesc }}</td>
+                                        <td class="text-nowrap">{{ item.quantity }}</td>
+                                        <td class="text-nowrap">{{ item.itemRate }}</td>
+                                        <td class="text-nowrap">{{ item.hsncode }}</td>
+                                        <!-- <td class="text-nowrap">{{ item.stock }}</td> -->
+                                        <td class="text-nowrap">{{ item.issueType | getIssueTypeName: issueTypes }}</td>
+                                        <td>{{ item.inwardsrno }}</td>
+                                        <td class="text-nowrap">{{ item.issuesrno }}</td>
+                                        <td class="text-nowrap">{{ item.technician | getTechnicianName: lstTechnician }}
+                                        </td>
+                                        <td>{{ item.cgstAmount }}</td>
+                                        <td>{{ item.sgstAmount }}</td>
+                                        <td>{{ item.igstAmount }}</td>
+                                        <td class="text-nowrap">{{ item.amount }}</td>
+                                        <td class="text-nowrap">{{ item.mrp | number:'1.2-2' }}</td>
+                                        <!-- <td class="text-nowrap" [title]="item.remarks">
+                                            {{ item.remarks?.length > 30
+                                            ? (item.remarks | slice:0:30) + '...'
+                                            : item.remarks }}
+                                        </td> -->
+                                    </tr>
 
-                            </tbody>
-                            <tfoot class="table-light">
-                                <tr>
-                                    <td colspan="4" class="text-end"><strong>Total</strong></td>
-                                    <td>{{ getTotalQty() }}</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td colspan="4"></td>
-                                    <td></td>
-                                    <td>{{ getTotalAmount() }}</td>
-                                    <td colspan="12"></td>
-                                </tr>
-                            </tfoot>
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <td colspan="4" class="text-end"><strong>Total</strong></td>
+                                        <td>{{ getTotalQty() }}</td>
+                                        <td colspan="8"></td>
+                                        <td>{{ getTotalAmount() }}</td>
+                                        <td></td>
+                                        <!--<td></td> -->
+                                    </tr>
+                                </tfoot>
 
-                        </table>
-                    </div>
-
-                    <div>
-                        <div class="mt-2 col-md-12">
-                            <label class="form-label">Remarks</label>
-                            <textarea class="form-control form-control-sm" rows="3" name="remarks"></textarea>
+                            </table>
                         </div>
-                    </div>
+                    </fieldset>
 
                     <!-- Button -->
                     <div class=" row mt-3">
@@ -256,8 +249,8 @@
                             <button type="button" class="btn btn-danger btn-sm float-end" (click)="backToList()">
                                 Cancel
                             </button>
-                            <button type="submit" [disabled]="customerLedgerForm.invalid"
-                                class="btn btn-primary btn-sm float-end me-1" (click)="onSubmit(customerLedgerForm)">
+                            <button type="submit" [disabled]="materialTransferForm.invalid" [disabled]="jobCardStatus"
+                                class="btn btn-primary btn-sm float-end me-1" (click)="onSubmit(materialTransferForm)">
                                 Save
                             </button>
 

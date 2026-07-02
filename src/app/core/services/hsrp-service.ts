@@ -75,7 +75,7 @@ export class HsrpService {
   }
 
   updateBulkHSRPInward(data: any[]): Observable<any> {
-    return this.http.put(`${this.baseUrl}/HSRP/updateInward`, data);
+    return this.http.post(`${this.baseUrl}/HSRP/inward`, data);
   }
 
   getHSRPById(id: number): Observable<any> {

@@ -192,9 +192,6 @@ export class AddVehicleSaleBill implements OnInit {
     }
   }
 
-
-
-
   ngOnInit(): void {
 
     this.model.customerType = 'B2C';
@@ -230,8 +227,8 @@ export class AddVehicleSaleBill implements OnInit {
     date.setFullYear(date.getFullYear() + 1);
     return date.toISOString().split('T')[0];
   }
-  getInsuranceCompanies() {
-    this.receiptEntryService.getLedgerByType('Insurance').subscribe({
+getInsuranceCompanies(){
+  this.ledgerService.getLedgerByType('Insurance').subscribe({
       next: (res) => {
         this.insurance = res;
       }
@@ -253,8 +250,6 @@ export class AddVehicleSaleBill implements OnInit {
     this.insuranceNotFound = this.filteredInsurance.length === 0;
   }
   onLocationChange() {
-    console.log("dsdaa");
-    debugger;
     this.filteredChassis = this.chassisList.filter(p => p.locationCode === this.model.location);
   }
   selectInsurance(party: LedgerMaster) {
@@ -275,7 +270,6 @@ export class AddVehicleSaleBill implements OnInit {
   }
 
   loadBillForEdit(bill: any) {
-    console.log(bill);
     if (bill.status === 'invoiced') {
 
       this.isInvoiced = true;
@@ -379,8 +373,6 @@ export class AddVehicleSaleBill implements OnInit {
 
     this.model.finalAmount = this.getGrandTotal();
     this.loader.hide();
-    console.log(this.model);
-
   }
 
 
@@ -392,7 +384,6 @@ export class AddVehicleSaleBill implements OnInit {
       .subscribe({
         next: (res) => {
           this.chassisList = res;;
-          console.log(this.chassisList);
 
           this.filteredChassis = res.filter(p => p.locationCode === this.model.location);
           if (callback) callback();
@@ -412,7 +403,6 @@ export class AddVehicleSaleBill implements OnInit {
     this.loader.show();
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
-        console.log(res);
 
         this.loader.hide();
         this.selectedCustomerId = res.ledgerId;
@@ -447,10 +437,8 @@ export class AddVehicleSaleBill implements OnInit {
   fetchLocations(): void {
     this.locationService.getLocationDropdownByDealerCode(this.dealerCode).subscribe({
       next: (data: any[]) => {
-        console.log(data);
 
         this.locations = data.filter(i => i.locareaidno === 1);
-console.log(this.locations);
 
         if (this.locations.length > 0 && !this.billId) {
           this.model.location = this.locations[0].locCode || this.locations[0].loccode;
@@ -463,7 +451,7 @@ console.log(this.locations);
   }
   getFinanciers() {
 
-    this.receiptEntryService.getLedgerByType('Financier').subscribe({
+    this.ledgerService.getLedgerByType('Financier').subscribe({
       next: (res) => {
         this.financiers = res;
 
@@ -917,7 +905,6 @@ console.log(this.locations);
   // }
 
   openCustomerLedgerAdd(ledgerId?: number) {
-    debugger
     const modalRef = this.modalService.open(CustomerLedger, {
       size: 'lg',
       backdrop: 'static'
@@ -933,7 +920,7 @@ console.log(this.locations);
 
     modalRef.result.then((resultId) => {
       if (resultId) {
-        this.receiptEntryService.getLedgerByType('Party').subscribe({
+        this.ledgerService.getLedgerByType('Party').subscribe({
           next: (res) => {
             this.parties = [...res];
 
@@ -952,10 +939,9 @@ console.log(this.locations);
   getParties() {
     const dealerCode = this.storageService.getDealerCode();
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-    this.ledgerService.getLedgerForSale(dealerCode, this.isSuperAdmin).subscribe({
+    this.ledgerService.getLedgerForSale(dealerCode, true).subscribe({
       next: (res) => {
         if (this.model.isD2D) {
-          console.log(res);
 
           this.parties = res.filter(p => p.ledgerType?.toLowerCase() === 'dealer' && p.dealerCode !== dealerCode);
         } else {
@@ -1352,7 +1338,6 @@ console.log(this.locations);
   }
 
   printDeliverySlip() {
-    debugger
     if (!this.vehicleList.length) return;
 
     const vehicle = this.vehicleList[0];
@@ -1422,7 +1407,6 @@ console.log(this.locations);
   // }
 
   filterChassis() {
-    debugger
     const search = (this.model.chassisNo || '').toLowerCase();
     const locationWiseChassis = this.chassisList.filter(
       p => p.locationCode === this.model.location

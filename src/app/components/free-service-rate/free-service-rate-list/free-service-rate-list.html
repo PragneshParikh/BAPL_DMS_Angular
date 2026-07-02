@@ -46,6 +46,8 @@
                                     <tr>
                                         <th> Sr. No. </th>
                                         <th> Model Name </th>
+                                        <th> Effective Date </th>
+                                        <th> Created Date </th>
                                     </tr>
                                 </thead>
 
@@ -54,11 +56,13 @@
                                         (dblclick)="openFreeServiceRateInfo(group)">
                                         <td>{{ group?.srNo }}</td>
                                         <td>{{ group?.oemModelName }}</td>
+                                        <td>{{ group?.effectiveDate | date : 'dd-MM-yyyy'}}</td>
+                                        <td>{{ group?.createdDate | date : 'dd-MM-yyyy'}}</td>
                                     </tr>
 
                                     <!-- No Data -->
                                     <tr *ngIf="!dataSource || dataSource.length === 0">
-                                        <td colspan="6" class="text-center text-muted py-3">
+                                        <td colspan="3" class="text-center text-muted py-3">
                                             No Data Available
                                         </td>
                                     </tr>

@@ -305,12 +305,10 @@
     </table>
 
     <!-- TERMS -->
-    <div class="small mt-2" *ngIf="saleBill?.termsAndConditions?.length">
-  <b>Terms & Conditions</b>
-
-  <div *ngFor="let term of saleBill.termsAndConditions"
-       [innerHTML]="formatTerms(term.conditionText)">
-  </div>
+    <div *ngFor="let term of saleBill.termsAndConditions">
+    <pre style="margin:0; white-space:pre-wrap; font-family:inherit;">
+{{ term.conditionText }}
+    </pre>
 </div>
 
     <!-- ACKNOWLEDGEMENT -->

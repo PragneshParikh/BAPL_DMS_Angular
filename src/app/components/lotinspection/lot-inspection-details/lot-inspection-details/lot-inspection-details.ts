@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { LotInspectionUpdate, Header, Detail } from '../../../../ViewModels/LotInspectionViewModel';
 import { LotInspectionDetailsService } from '../../../../core/services/lot-inspection-details-service';
 import { StorageService } from '../../../../core/services/storage';
@@ -28,7 +29,8 @@ export class LotInspectionDetails implements OnInit {
   selectedvehiclefasteringcover: string = '';
   selectedPlastingcover: string = '';
   selectedSupervisor: string = '';
-  router: any;
+
+  isLotInspected: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -36,6 +38,7 @@ export class LotInspectionDetails implements OnInit {
     private locationService: LocationMasterService,
     public toaster: ToastService,
     private loader: LoaderService,
+    private router: Router,
     private storageService: StorageService
   ) { }
 
@@ -48,10 +51,68 @@ export class LotInspectionDetails implements OnInit {
       if (this.invoiceNo) {
         this.getInvoiceData();
       } else {
-        console.log('error')
-        //this.loader.hide(); // important if no invoiceNo
+        console.error('error')
       }
     });
+  }
+  allowOnlyNumbers(event: any, field: 'driverContact' | 'keyFobSetQty' | 'chargerQty' | 'mirrorSetQty' | 'firstAidKitQty' | 'toolkitQty' | 'ownersManual' | 'ignitionKeySet' | 'attributeCard' | 'chargingKit') {
+    const value = event.target.value.replace(/\D/g, '');
+    event.target.value = value;
+
+    switch (field) {
+      case 'driverContact':
+        this.headerObj.driverContact = value;
+        break;
+      case 'keyFobSetQty':
+        this.detailList[0].keyFobSetQty = value;
+        break;
+      case 'chargerQty':
+        this.detailList[0].chargerQty = value;
+        break;
+      case 'mirrorSetQty':
+        this.detailList[0].mirrorSetQty = value;
+        break;
+      case 'firstAidKitQty':
+        this.detailList[0].firstAidKitQty = value;
+        break;
+
+      case 'toolkitQty':
+        this.detailList[0].toolkitQty = value;
+        break;
+      case 'ownersManual':
+        this.detailList[0].ownersManual = value;
+        break;
+      case 'ignitionKeySet':
+        this.detailList[0].ignitionKeySet = value;
+        break;
+      case 'attributeCard':
+        this.detailList[0].attributeCard = value;
+        break;
+      case 'chargingKit':
+        this.detailList[0].chargingKit = value;
+        break;
+
+    }
+  }
+
+  allowCharactersOnly(event: KeyboardEvent): boolean {
+    const char = event.key;
+
+    if (!/^[a-zA-Z\s]$/.test(char)) {
+      event.preventDefault();
+      return false;
+    }
+
+    return true;
+  }
+
+  onDriverNameInput() {
+    this.headerObj.driverName = (this.headerObj.driverName || '')
+      .replace(/[^a-zA-Z\s]/g, '');
+  }
+  onTransporterNameInput() {
+    this.headerObj.transporterName = (this.headerObj.transporterName || '')
+      .replace(/[^a-zA-Z\s]/g, '');
   }
 
   fetchLocations(): void {
@@ -60,7 +121,6 @@ export class LotInspectionDetails implements OnInit {
       next: (data: any[]) => {
         // only Workshop (id = 2)
         this.locations = data.filter(x => x.locareadidNo === 2);
-        //console.log("Workshop Locations", this.locations);
       },
       error: (err) => {
         console.error('Error fetching locations', err);
@@ -70,26 +130,20 @@ export class LotInspectionDetails implements OnInit {
   onLocationChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedLocation = target.value;
-
-    console.log('Selected Location:', this.selectedLocation);
   }
+
   onvehiclefasteringcoverChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedvehiclefasteringcover = target.value;
-
-    console.log('Selected vehcilefasteringcover:', this.selectedvehiclefasteringcover);
   }
   onPlastingCoverChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedPlastingcover = target.value;
-
-    console.log('Selected Plastingcover:', this.selectedPlastingcover);
   }
+
   onSupervicsorChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedSupervisor = target.value;
-
-    console.log('Selected Supervisor:', this.selectedSupervisor);
   }
 
   // ================= GET DATA =================
@@ -108,7 +162,9 @@ export class LotInspectionDetails implements OnInit {
     this.lotInspectionDetailservice.getAllDetailsByInvoice(this.invoiceNo).subscribe({
       next: (res: any) => {
 
-        if (res?.data?.length) {
+        if (res?.data?.length > 0) {
+
+          this.isLotInspected = res?.data[0]?.islotinspected;
 
           const first = res.data[0];
 
@@ -164,8 +220,6 @@ export class LotInspectionDetails implements OnInit {
             preview: null
           }));
           //this.loader.hide();
-          console.log("Header:", this.headerObj);
-          console.log("Details:", this.detailList);
         }
         setTimeout(() => {
           this.loader.hide();
@@ -180,7 +234,6 @@ export class LotInspectionDetails implements OnInit {
 
   // ================= SAVE DATA =================
   saveData() {
-
     // VALIDATION FIRST
     const invalidRows = this.detailList.filter(x => !x.vehicleStatus || x.vehicleStatus === '');
 
@@ -265,6 +318,7 @@ export class LotInspectionDetails implements OnInit {
           classname: 'bg-success text-white',
           delay: 3000
         });
+        this.router.navigate(['/lotinspection']);
       },
       error: (err) => {
         console.error(err);

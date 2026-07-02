@@ -153,7 +153,10 @@ export const ModuleTypes = [
     { name: 'sale_bill', moduleName: 'Vehicle Sale Bill' },
     { name: 'receipt_entry', moduleName: 'Receipt Entry' },
     { name: 'vehicle_transfer', moduleName: 'Vehicle Stock Transfer' },
-    { name: 'job_card', moduleName: 'Job Card' }
+    { name: 'job_card', moduleName: 'Job Card' },
+    { name: 'wclaim_prefix', moduleName: 'Warranty Claim Prefix' },
+    { name: 'material_transfer', moduleName: 'Material Transfer' },
+    {name:'counter-bill',moduleName:'Counter Bill'}
 ]
 
 export const EmployeeDesignations = [
@@ -234,6 +237,7 @@ export const conditionModule = [
     { Id: 5, ConditionName: 'Warranty Claim' },
     { Id: 6, ConditionName: 'Vehicle Sale Bill' },
     { Id: 7, ConditionName: 'Counter Bill' },
-    { Id: 8, ConditionName: 'EBW Invoice Creation' }
+    { Id: 8, ConditionName: 'EBW Invoice Creation' },
+    { Id: 9, ConditionName: 'Form 22' }       // <-- NEW
 ];
 

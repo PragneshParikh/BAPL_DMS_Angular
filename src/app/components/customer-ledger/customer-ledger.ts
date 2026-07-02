@@ -119,7 +119,6 @@ export class CustomerLedger {
       return;
     }
     if (this.leadData) {
-      console.log(this.leadData);
 
       this.populateLeadData();
     }
@@ -137,7 +136,6 @@ export class CustomerLedger {
     this.ledgerService.getLedgerMobileList(dealerCode).subscribe(
       (res) => {
         this.mobileList = res;
-        console.log(res);
 
       }
     );
@@ -146,7 +144,6 @@ export class CustomerLedger {
     const dealerCode = this.storageService.getDealerCode();
     this.ledgerService.getNextLedId(dealerCode).subscribe(
       (res) => {
-        console.log(res);
         if (!this.isModify) {
           this.formData.ledgerCode = res;
         }
@@ -167,12 +164,8 @@ export class CustomerLedger {
   }
   getOccupationList() {
     this.occupationService.getActiveOccupations().subscribe((res) => {
-      console.log(res);
 
       this.occupationList = res;
-      console.log(this.occupationList);
-
-
     });
   }
   populateLeadData() {
@@ -215,7 +208,6 @@ export class CustomerLedger {
     this.loader.show();
     this.ledgerService.getLedgerById(id).subscribe({
       next: (res) => {
-        console.log(res);
 
         this.formData = {
           id: res.id,

@@ -63,12 +63,6 @@ export class ReceiptEntryService {
     });
   }
 
-  getLedgerByType(type: string): Observable<LedgerMaster[]> {
-    return this.http.get<LedgerMaster[]>(
-      `${this.apiUrl}/ReceiptEntry/ledgerList?ledgerType=${type}`
-    );
-  }
-
   addReceiptEntry(data: ReceiptEntryAddViewModel) {
     return this.http.post(
       `${this.apiUrl}/ReceiptEntry/addReceiptEntry`,

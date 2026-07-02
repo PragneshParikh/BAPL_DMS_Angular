@@ -19,6 +19,7 @@ import { StorageService } from '../../core/services/storage';
 export class FreeServiceRate implements OnInit {
 
   oemModelList: any[] = [];
+  groupInfo: any;
 
   claimId: number = 0;
   dataSource: any[] = [
@@ -43,6 +44,7 @@ export class FreeServiceRate implements OnInit {
 
   ngOnInit(): void {
     this.oemModelList = history.state.oemModelList || [];
+    this.groupInfo = history.state.serviceInfo || [];
 
     this.route.params.subscribe(params => {
 
@@ -78,7 +80,8 @@ export class FreeServiceRate implements OnInit {
     this.freeServiceRateService.insert(this.dataSource).subscribe({
       next: (res) => {
         this.loader.hide();
-        this.toast.show("Record inserted sucessfully.", { classname: 'bg-success text-white', delay: 5000 })
+        this.toast.show("Record inserted sucessfully.", { classname: 'bg-success text-white', delay: 5000 });
+        this.backToList();
       },
       error: (err) => {
         console.error(err);
@@ -94,37 +97,39 @@ export class FreeServiceRate implements OnInit {
 
   getClaimDetailsById(OEMModelId) {
     this.loader.show();
-    this.freeServiceRateService.getByOEMModelId(null).subscribe({
-      next: (res) => {
-        const response = res[0];
+    // this.freeServiceRateService.getByOEMModelId(OEMModelId).subscribe({
+    // next: (res) => {
+    // const response = res[0];
 
-        this.formData.effectiveDate = this.formatDate(response.effectiveDate);;
-        this.formData.modelId = response.oemModelId;
-        console.log(response);
+    // this.formData.effectiveDate = this.formatDate(response.effectiveDate);;
+    // this.formData.modelId = response.oemModelId;
 
-        this.dataSource = this.dataSource.map(item => {
-          const service = response.services.find(
-            (s: any) => s.serviceId === item.serviceId
-          );
+    this.formData.effectiveDate = this.formatDate(this.groupInfo.effectiveDate);
+    this.formData.modelId = this.formatDate(this.groupInfo.oemModelId);
 
-          return service
-            ? {
-              ...item,
-              metroRate: service.metroRate,
-              metroGST: service.metroGst,
-              nonMetroRate: service.nonMetroRate,
-              nonMetroGST: service.nonMetroGst
-            }
-            : item;
-        });
-        this.loader.hide();
-      },
-      error: (err) => {
-        console.error(err);
-        this.loader.hide();
-        this.toast.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
-      }
+    this.dataSource = this.dataSource.map(item => {
+      const service = this.groupInfo.services.find(
+        (s: any) => s.serviceId === item.serviceId
+      );
+
+      return service
+        ? {
+          ...item,
+          metroRate: service.metroRate,
+          metroGST: service.metroGst,
+          nonMetroRate: service.nonMetroRate,
+          nonMetroGST: service.nonMetroGst
+        }
+        : item;
     });
+    this.loader.hide();
+    // },
+    // error: (err) => {
+    //   console.error(err);
+    //   this.loader.hide();
+    //   this.toast.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+    // }
+    // });
   }
 
   formatDate(date: string | Date): string {

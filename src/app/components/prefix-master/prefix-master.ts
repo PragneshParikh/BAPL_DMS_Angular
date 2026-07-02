@@ -51,6 +51,9 @@ export class PrefixMaster implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.lstModule = [...ModuleTypes].sort((a, b) =>
+      a.moduleName.localeCompare(b.moduleName)
+    );
     this.loadSequences();
   }
 

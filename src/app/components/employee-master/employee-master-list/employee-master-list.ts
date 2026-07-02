@@ -6,6 +6,7 @@ import { EmployeeMasterService } from '../../../core/services/employee-master';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 import { DepartmentService } from '../../../core/services/department';
 import { DesignationService } from '../../../core/services/designation';
+import { RoleService } from '../../../core/services/Deptrole';
 
 
 
@@ -37,6 +38,9 @@ export class EmployeeMasterList
   departmentMap: { [id: string]: string } = {};
   designationMap: { [id: string]: string } = {};
 
+  roles: { title: string; value: string }[] = [];
+  selectedRoles: string[] = ['Employee'];
+
   // =====================================
   // CONSTRUCTOR
   // =====================================
@@ -44,7 +48,8 @@ export class EmployeeMasterList
   constructor(private employeeService: EmployeeMasterService,
     private locationService: LocationMasterService,
     private departmentService: DepartmentService,
-    private designationService: DesignationService
+    private designationService: DesignationService,
+    private roleService: RoleService
   ) { }
 
   // =====================================
@@ -55,45 +60,57 @@ export class EmployeeMasterList
 
     this.getEmployees();
     this.loadLocations();
-    this.loadDepartments();      
-    this.loadDesignations();     
+    this.loadDepartments();
+    this.loadDesignations();
+    this.loadRoles();
   }
 
   loadDepartments(): void {
-  this.departmentService.get().subscribe({
-    next: (response: any[]) => {
-      this.departmentMap = {};
-      (response ?? []).forEach(d => {
-        if (d.departmentId != null) {
-          this.departmentMap[String(d.departmentId)] = d.departmentName;
-        }
-      });
-    },
-    error: (error) => console.error('Department load error', error)
-  });
-}
+    this.departmentService.get().subscribe({
+      next: (response: any[]) => {
+        this.departmentMap = {};
+        (response ?? []).forEach(d => {
+          if (d.departmentId != null) {
+            this.departmentMap[String(d.departmentId)] = d.departmentName;
+          }
+        });
+      },
+      error: (error) => console.error('Department load error', error)
+    });
+  }
 
-loadDesignations(): void {
-  this.designationService.get().subscribe({
-    next: (response: any[]) => {
-      this.designationMap = {};
-      (response ?? []).forEach(d => {
-        if (d.designationId != null) {
-          this.designationMap[String(d.designationId)] = d.designationName;
-        }
-      });
-    },
-    error: (error) => console.error('Designation load error', error)
-  });
-}
+  loadDesignations(): void {
+    this.designationService.get().subscribe({
+      next: (response: any[]) => {
+        this.designationMap = {};
+        (response ?? []).forEach(d => {
+          if (d.designationId != null) {
+            this.designationMap[String(d.designationId)] = d.designationName;
+          }
+        });
+      },
+      error: (error) => console.error('Designation load error', error)
+    });
+  }
 
-getDepartmentName(id: any): string {
-  return this.departmentMap[String(id)] ?? '';
-}
+  loadRoles(): void {
+    this.roleService.getRoles().subscribe({
+      next: (response: any[]) => {
+        this.roles = (response ?? []).map(r => ({
+          title: r.name ?? r.Name,
+          value: r.name ?? r.Name
+        }));
+      },
+      error: (error) => console.error('Role load error', error)
+    });
+  }
+  getDepartmentName(id: any): string {
+    return this.departmentMap[String(id)] ?? '';
+  }
 
-getDesignationName(id: any): string {
-  return this.designationMap[String(id)] ?? '';
-}
+  getDesignationName(id: any): string {
+    return this.designationMap[String(id)] ?? '';
+  }
   // =====================================
   // GET EMPLOYEES
   // =====================================
@@ -106,11 +123,6 @@ getDesignationName(id: any): string {
       .subscribe({
 
         next: (response) => {
-
-          console.log(
-            'Employee List',
-            response
-          );
 
           this.employeeList = response;
         },
@@ -126,54 +138,58 @@ getDesignationName(id: any): string {
   }
 
   loadLocations(): void {
-  const dealerCode = localStorage.getItem('dealerCode');
-  if (!dealerCode) return;
+    const dealerCode = localStorage.getItem('dealerCode');
+    if (!dealerCode) return;
 
-  this.locationService.getLocationByDealerCode(dealerCode).subscribe({
-    next: (response: any[]) => {
-      this.locationMap = {};
-      (response ?? []).forEach(l => {
-        const code = l.locCode ?? l.loccode ?? l.Loccode;
-        const name = l.locName ?? l.locname ?? l.Locname;
-        if (code != null) this.locationMap[code] = name;
-      });
-    },
-    error: (error) => console.error('Location load error', error)
-  });
-}
+    this.locationService.getLocationByDealerCode(dealerCode).subscribe({
+      next: (response: any[]) => {
+        this.locationMap = {};
+        (response ?? []).forEach(l => {
+          const code = l.locCode ?? l.loccode ?? l.Loccode;
+          const name = l.locName ?? l.locname ?? l.Locname;
+          if (code != null) this.locationMap[code] = name;
+        });
+      },
+      error: (error) => console.error('Location load error', error)
+    });
+  }
 
-getLocationName(code: string): string {
-  return this.locationMap[code] ?? '';
-}
+
+  getLocationName(code: string): string {
+    return this.locationMap[code] ?? '';
+  }
   // =====================================
   // OPEN EDIT POPUP
   // =====================================
-
   openEditPopup(employee: any): void {
 
-    this.selectedEmployee = {
-      ...employee
-    };
-
-    this.showModal = true;
+    // fetch the full record (includes selectedDepartments + roles from mappings)
+    this.employeeService.getEmployeeById(employee.id).subscribe({
+      next: (full: any) => {
+        this.selectedEmployee = { ...full };
+        this.showModal = true;
+      },
+      error: (err) => {
+        console.error('GetById error', err);
+        // fallback: open with the row data we already have
+        this.selectedEmployee = { ...employee };
+        this.showModal = true;
+      }
+    });
   }
 
   // =====================================
   // CLOSE POPUP
   // =====================================
-
   closePopup(): void {
-
     this.showModal = false;
-
     this.selectedEmployee = null;
-
     this.getEmployees();
   }
 
   // =====================================
-// TOGGLE ACTIVE / INACTIVE
-// =====================================
+  // TOGGLE ACTIVE / INACTIVE
+  // =====================================
 
   toggleStatus(emp: any, event: Event): void {
 
@@ -217,4 +233,6 @@ getLocationName(code: string): string {
       });
   }
 }
+
+
 

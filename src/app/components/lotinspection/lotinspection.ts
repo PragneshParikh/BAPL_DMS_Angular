@@ -39,6 +39,9 @@ export class Lotinspection implements OnInit {
   showAlert: boolean = false;
   alertMessage: string = '';
   isSuperAdmin: boolean;
+  fromDate: string = '';
+  toDate: string = '';
+  isLotInspected: any;
 
 
   constructor(private lotinspectionService: LotInspectionService,
@@ -51,6 +54,15 @@ export class Lotinspection implements OnInit {
 
   ngOnInit() {
 
+    const today = new Date();
+
+    // First day of current month
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    this.fromDate = firstDay.toISOString().split('T')[0];
+    this.toDate = today.toISOString().split('T')[0];
+
+    this.searchItems(this.fromDate, this.toDate, '');
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     // default search (today to today)
     //this.searchTerm = `${today} to ${today}`;
@@ -68,8 +80,6 @@ export class Lotinspection implements OnInit {
     this.lotinspectionService.getAllLotInspectionHeaderDetails(this.searchTerm || '', dealerCode)
       .subscribe({
         next: (res: any) => {
-          console.log("FULL RESPONSE:", res);
-
           // CORRECT FIX
           this.filteredData = Array.isArray(res.data) ? res.data : [];
           this.collectionSize = this.filteredData.length;
@@ -142,16 +152,17 @@ export class Lotinspection implements OnInit {
     event.stopPropagation();
     this.lotinspectionService.getAllLotInspectionHeaderDetails(invoiceNo).subscribe({
       next: (res: any) => {
-        if (res?.data?.length > 0 && res.data[0].isLotInspected === true) {
-          //console.log('BLOCKED');
-          Swal.fire({
-            icon: 'warning',
-            title: 'Already Inspected',
-            text: `Chassis No lot inspection already done`,
-            confirmButtonText: 'OK'
-          });
-          return;
-        }
+        // if (res?.data?.length > 0 && res.data[0].isLotInspected === true) {
+        //   Swal.fire({
+        //     icon: 'warning',
+        //     title: 'Already Inspected',
+        //     text: `Chassis No lot inspection already done`,
+        //     confirmButtonText: 'OK'
+        //   });
+        //   return;
+        // }
+        this.isLotInspected = res?.data[0].isLotInspected ?? false;
+
         this.router.navigate(['/lot-inspection-details', invoiceNo]);
       },
       error: (err) => {
@@ -164,6 +175,32 @@ export class Lotinspection implements OnInit {
         });
       }
     });
+  }
+
+  downloadLotinspectedExcel(invoiceNo?: string): void {
+
+    this.lotinspectionService.getLotinspectedExcel(invoiceNo)
+      .subscribe((response: Blob) => {
+
+        const blob = new Blob(
+          [response],
+          {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          });
+
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+
+        link.download = invoiceNo
+          ? `LotInspection_${invoiceNo}.xlsx`
+          : 'LotInspection_All.xlsx';
+
+        link.click();
+
+        window.URL.revokeObjectURL(url);
+      });
   }
 }
 

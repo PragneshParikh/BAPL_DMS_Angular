@@ -32,43 +32,43 @@ export class JobCardService {
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetJobSource`);
   }
 
-  getPdiChecklist(oemModelId:number): Observable<any> {
+  getPdiChecklist(oemModelId: number): Observable<any> {
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetPdiChecklist?oemModelId=${oemModelId}`)
   }
 
- getJobCardList(search: any): Observable<any> {
+  getJobCardList(search: any): Observable<any> {
 
-  let params = new HttpParams();
+    let params = new HttpParams();
 
-  if (search.dealerCode) {
-    params = params.set('dealerCode', search.dealerCode);
+    if (search.dealerCode) {
+      params = params.set('dealerCode', search.dealerCode);
+    }
+
+    if (search.fromDate) {
+      params = params.set('dateFrom', search.fromDate);
+    }
+
+    if (search.toDate) {
+      params = params.set('dateTo', search.toDate);
+    }
+
+    if (search.jobNo) {
+      params = params.set('jobNo', search.jobNo);
+    }
+
+    if (search.registerNo) {
+      params = params.set('registerNo', search.registerNo);
+    }
+
+    if (search.chassisNo) {
+      params = params.set('chassisNo', search.chassisNo);
+    }
+
+    return this.httpClient.get<any[]>(
+      `${this.baseUrl}/JobCard/GetJobCardList`,
+      { params }
+    );
   }
-
-  if (search.fromDate) {
-    params = params.set('dateFrom', search.fromDate);
-  }
-
-  if (search.toDate) {
-    params = params.set('dateTo', search.toDate);
-  }
-
-  if (search.jobNo) {
-    params = params.set('jobNo', search.jobNo);
-  }
-
-  if (search.registerNo) {
-    params = params.set('registerNo', search.registerNo);
-  }
-
-  if (search.chassisNo) {
-    params = params.set('chassisNo', search.chassisNo);
-  }
-
-  return this.httpClient.get<any[]>(
-    `${this.baseUrl}/JobCard/GetJobCardList`,
-    { params }
-  );
-}
 
   insertJobCard(data: any) {
     return this.httpClient.post(`${this.baseUrl}/JobCard/SaveJobCardDetails`, data);
@@ -78,6 +78,9 @@ export class JobCardService {
     return this.httpClient.put(`${this.baseUrl}/JobCard/UpdateJobCardDetails`, data);
   }
 
+    getJobCardForPrint(jobId: number): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardForPrint/${jobId}`);
+  }
   getFilterdDataByPaged(fromDate: Date | null, toDate: Date | null, jobNo: number | null, manualJobNo: number | null, pageIndex: number, pageSize: number): Observable<any> {
 
     const params = {
@@ -92,6 +95,21 @@ export class JobCardService {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetFilteredJobCard`, { params });
   }
 
+  getOpenJobCardDataByPaged(fromDate: Date | null, toDate: Date | null, jobNo: number | null, manualJobNo: number | null, pageIndex: number, pageSize: number, status: boolean, dealerCode: string | null): Observable<any> {
+    const params = {
+      pageIndex: pageIndex.toString(),
+      pageSize: pageSize.toString(),
+      fromDate: fromDate ? new Date(fromDate).toISOString() : '',
+      toDate: toDate ? new Date(toDate).toISOString() : '',
+      jobNo: jobNo ? jobNo.toString() : '',
+      manualJobNo: manualJobNo ? manualJobNo.toString() : '',
+      isClosed: status.toString(),
+      dealerCode: dealerCode
+    };
+
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardByStatus`, { params });
+  }
+
   getJobCardById(id: number): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/JobCard/${id}`);
   }
@@ -104,8 +122,8 @@ export class JobCardService {
     return this.httpClient.post<any[]>(`${this.baseUrl}/JobCard/SearchJobCard/`, payload)
   }
 
-  getJobCardServiceHistory(chassisNo: string) {
-    return this.httpClient.get(`${this.baseUrl}/JobCard/GetServiceHistory/${chassisNo}`)
+  getJobCardServiceHistory(chassisNo: string, jobCardId: number) {
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetServiceHistory/${chassisNo}/${jobCardId}`)
   }
 
   getCIRJobCardDetails(id: number) {
@@ -120,41 +138,49 @@ export class JobCardService {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetNextJobNo/${dealerCode}`);
   }
 
-  getInspectedChassisListDropDown(dealerCode: string):Observable<any>{
+  getInspectedChassisListDropDown(dealerCode: string): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetInspectedChassisListDropDown/${dealerCode}`)
   }
 
- getJobCardListRepairBill(search: any): Observable<any> {
+  getJobCardListRepairBill(search: any): Observable<any> {
 
-  let params = new HttpParams();
+    let params = new HttpParams();
 
-  if (search.dealerCode) {
-    params = params.set('dealerCode', search.dealerCode);
+    if (search.dealerCode) {
+      params = params.set('dealerCode', search.dealerCode);
+    }
+
+    if (search.fromDate) {
+      params = params.set('dateFrom', search.fromDate);
+    }
+
+    if (search.toDate) {
+      params = params.set('dateTo', search.toDate);
+    }
+
+    if (search.jobNo) {
+      params = params.set('jobNo', search.jobNo);
+    }
+
+    if (search.registerNo) {
+      params = params.set('registerNo', search.registerNo);
+    }
+
+    if (search.chassisNo) {
+      params = params.set('chassisNo', search.chassisNo);
+    }
+
+    return this.httpClient.get<any[]>(
+      `${this.baseUrl}/JobCard/GetJobCardListRepairBill`,
+      { params }
+    );
   }
 
-  if (search.fromDate) {
-    params = params.set('dateFrom', search.fromDate);
+  getJobCardStatusById(id: Number): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardStatusById/${id}`);
   }
 
-  if (search.toDate) {
-    params = params.set('dateTo', search.toDate);
+  getIssueTypebasedJobDetails(dealerCode: string, jobNo: number, serviceloc: string, fromDate: Date, toDate: Date) {
+    return this.httpClient.get(`${this.baseUrl}/JobCard/GetIssueTypebasedJobDetails/${dealerCode}/${jobNo}/${serviceloc}/${fromDate}/${toDate}`)
   }
-
-  if (search.jobNo) {
-    params = params.set('jobNo', search.jobNo);
-  }
-
-  if (search.registerNo) {
-    params = params.set('registerNo', search.registerNo);
-  }
-
-  if (search.chassisNo) {
-    params = params.set('chassisNo', search.chassisNo);
-  }
-
-  return this.httpClient.get<any[]>(
-    `${this.baseUrl}/JobCard/GetJobCardListRepairBill`,
-    { params }
-  );
-}
 }

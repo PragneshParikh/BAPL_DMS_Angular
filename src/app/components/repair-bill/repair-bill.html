@@ -5,22 +5,28 @@
         <div class="card-header">
             <h6 class="mb-0">Repair Bill [GST]</h6>
             <div class="text-white py-2 d-flex justify-content-end">
-                <div class="btn-group gap-2 me-3" ngbDropdown>
-                    <button class="btn btn-primary btn-sm gap-2 dropdown-toggle" type="button" ngbDropdownToggle>
+                <div ngbDropdown class="d-inline-block me-3">
+
+                    <button type="button" class="btn btn-primary btn-sm" ngbDropdownToggle>
                         <i class="ri-printer-line"></i>
                     </button>
 
-                    <div class="dropdown-menu" ngbDropdownMenu>
-                        <button class="dropdown-item" ngbDropdownItem (click)="printPerforma()">
+                    <div ngbDropdownMenu>
+
+                        <button ngbDropdownItem type="button" (click)="printPerforma()">
+
                             <i class="ri-file-text-line me-2"></i>
                             Performa Print
                         </button>
 
-                        <button class="dropdown-item" ngbDropdownItem (click)="printInvoice()">
+                        <button ngbDropdownItem type="button" (click)="printInvoice()">
+
                             <i class="ri-bill-line me-2"></i>
                             Invoice Print
                         </button>
+
                     </div>
+
                 </div>
 
                 <button class="btn btn-light btn-sm" (click)="onNavigate()">
@@ -148,7 +154,7 @@
 
                 <div class="col-md-1">
                     <label class="form-label">Job Search</label>
-                    <button class="btn btn-light btn-sm w-100" (click)="openPopup()">
+                    <button class="btn btn-primary btn-sm w-100" (click)="openPopup()">
                         <i class="ri-car-line"></i>
                     </button>
                 </div>
@@ -314,19 +320,17 @@
                             [(ngModel)]="selectedPartRate" readonly>
 
                     </div> -->
-
-
                     <div class="col-md-1">
-                        <label class="form-label">Discount</label>
-                        <input type="number" class="form-control form-control-sm text-end" [(ngModel)]="discount">
-                    </div>
-
-                    <div class="col-md-2">
                         <label class="form-label">Disc. Type</label>
                         <select class="form-select form-select-sm" [(ngModel)]="discountType">
                             <option value="Value">Value</option>
                             <option value="%">%</option>
                         </select>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label">Discount</label>
+                        <input type="number" class="form-control form-control-sm text-end" [(ngModel)]="discount">
                     </div>
 
                     <div class="col-md-2">
@@ -350,8 +354,8 @@
                             <option value="Vishal">Vishal</option>
                         </select>
                     </div> -->
-                    <div class="col-md-2">
-                        <button class="btn btn-sm btn-soft-primary" (click)="addLabour()">
+                    <div class="col-md-1">
+                        <button class="btn btn-sm btn-primary" (click)="addLabour()">
                             + Add
                         </button>
                     </div>
@@ -406,8 +410,10 @@
                                     <th>Description</th>
                                     <th>Qty</th>
                                     <th>Rate</th>
-                                    <th>Discount</th>
+                                    <th>Discount Amt.</th>
                                     <th>Disc.Type</th>
+                                    <th>CGST Amt.</th>
+                                    <th>SGST Amt.</th>
                                     <th>IGST Amt.</th>
                                     <th>Net Amount</th>
                                     <th>Issue Type</th>
@@ -458,10 +464,12 @@
                                     </td>
 
                                     <td>{{item.discountType}}</td>
-
-                                    <td class="text-end">
+                                    <td>{{item.cgstAmount | number:'1.2-2'}}</td>
+                                    <td>{{item.sgstAmount | number:'1.2-2'}}</td>
+                                    <td>{{item.igstAmount | number:'1.2-2'}}</td>
+                                    <!-- <td class="text-end">
                                         {{item.igstAmount | number:'1.2-2'}}
-                                    </td>
+                                    </td> -->
 
                                     <td class="text-end">
                                         {{item.netAmount | number:'1.2-2'}}
@@ -476,7 +484,7 @@
                                     </td>
 
                                     <td class="text-end">
-                                        {{item.igst}}
+                                        {{item.totalTaxPer}}
                                     </td>
 
                                     <!-- <td>
@@ -656,7 +664,7 @@
                     </button>
                     <button class="btn btn-primary btn-sm"
                         [disabled]="selectedJobCard?.jobCardHeader?.jobtype != 1 && (!isEditMode || repairBillStatus === 'Billed')"
-                        (click)="updateRepairBill()">
+                        (click)="saveOrUpdateRepairBill()">
 
                         <i class="ri-save-line"></i>
                         Save As Invoice

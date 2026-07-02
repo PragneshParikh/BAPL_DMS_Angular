@@ -8,11 +8,11 @@ import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-proforma-invoice',
-  imports: [CommonModule, FormsModule, NgbPaginationModule, 
-    NgbHighlight,FlatpickrModule,RouterOutlet],
+  imports: [CommonModule, FormsModule, NgbPaginationModule,
+    NgbHighlight, FlatpickrModule, RouterOutlet],
   templateUrl: './proforma-invoice.html',
   styleUrl: './proforma-invoice.scss',
-  providers:[FlatpickrDefaults]
+  providers: [FlatpickrDefaults]
 })
 export class ProformaInvoice implements OnInit {
 
@@ -32,7 +32,7 @@ export class ProformaInvoice implements OnInit {
     customerName: ''
   };
 
-  constructor(private invoiceService: ProformaInvoiceService) {}
+  constructor(private invoiceService: ProformaInvoiceService) { }
 
   ngOnInit() {
     this.loadInvoices();
@@ -47,9 +47,7 @@ export class ProformaInvoice implements OnInit {
         this.updatePagination();
       },
       error: (err) => {
- console.log(err);                 // full object
-    console.log(err.error);           // API response
-    console.log(err.error?.message);  
+        console.error(err);                 // full object
       }
     });
   }
@@ -102,19 +100,16 @@ export class ProformaInvoice implements OnInit {
 
   //    ROW CLICK
   editInvoice(item: any) {
-    console.log('Edit invoice', item);
     // TODO: navigate to edit page
   }
 
   //    ADD BUTTON
   navigateToAddInvoice() {
-    console.log('Navigate to add invoice');
     // TODO: router navigation
   }
 
   //    EXPORT
   exportExcel() {
-    console.log('Export to Excel');
     // TODO: implement export
   }
 }

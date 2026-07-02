@@ -14,11 +14,11 @@ import { Router } from '@angular/router';
   styleUrl: './hsrporder-list.scss',
   providers: [FlatpickrDefaults, FlatpickrModule],
 })
-export class HSRPOrderList implements OnInit { 
-filter:{
-  fromDate:Date,
-  toDate:Date
-};
+export class HSRPOrderList implements OnInit {
+  filter: {
+    fromDate: Date,
+    toDate: Date
+  };
   isSuperAdmin: boolean = false;
 
   orders: any[] = [];
@@ -37,18 +37,18 @@ filter:{
   constructor(
     private hsrpService: HsrpService,
     private storageService: StorageService,
-    private router:Router
-  ) {}
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     const today = new Date();
-  const last7Days = new Date();
-  last7Days.setDate(today.getDate() - 7);
+    const last7Days = new Date();
+    last7Days.setDate(today.getDate() - 7);
 
-  this.filter = {
-    fromDate: last7Days,
-    toDate: today
-  };
+    this.filter = {
+      fromDate: last7Days,
+      toDate: today
+    };
     this.getHSRPOrders();
   }
 
@@ -64,7 +64,7 @@ filter:{
       next: (res: any) => {
 
 
-        
+
 
         this.orders = (res || []).map((x: any) => ({
           ...x,
@@ -78,7 +78,7 @@ filter:{
         this.page = 1;
         this.updatePagination();
       },
-      error: (err) => console.log(err)
+      error: (err) => console.error(err)
     });
   }
 
@@ -103,15 +103,15 @@ filter:{
       x.chassisNo?.toLowerCase().includes(term) ||
       x.regNo?.toLowerCase().includes(term) ||
       x.invoiceNo?.toLowerCase().includes(term) ||
-      x.hsrpstatus?.toLowerCase().includes(term)||
-      x.customerName?.toLowerCase().includes(term)||
-      x.supplierName?.toLowerCase().includes(term)||
-      x.orderNo?.toLowerCase().includes(term)||
-      x.colour?.toLowerCase().includes(term)||
-      x.customerMobile?.toLowerCase().includes(term)||
-      x.hsrpResponse?.toLowerCase().includes(term)||
-      x.inwardStatus?.toLowerCase().includes(term)||
-      x.inwardResponse?.toLowerCase().includes(term)||
+      x.hsrpstatus?.toLowerCase().includes(term) ||
+      x.customerName?.toLowerCase().includes(term) ||
+      x.supplierName?.toLowerCase().includes(term) ||
+      x.orderNo?.toLowerCase().includes(term) ||
+      x.colour?.toLowerCase().includes(term) ||
+      x.customerMobile?.toLowerCase().includes(term) ||
+      x.hsrpResponse?.toLowerCase().includes(term) ||
+      x.inwardStatus?.toLowerCase().includes(term) ||
+      x.inwardResponse?.toLowerCase().includes(term) ||
       x.supplierName?.toLowerCase().includes(term)
     );
 
@@ -126,11 +126,11 @@ filter:{
   }
 
   formatDate(date: Date | null): string | undefined {
-  if (!date) return undefined;
+    if (!date) return undefined;
 
-  const d = new Date(date);
-  return d.toISOString().split('T')[0]; 
-}
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];
+  }
 
   // ROW SELECT
   onRowSelectionChange(): void {
@@ -145,37 +145,37 @@ filter:{
     return this.filteredOrders.some(x => x.selected);
   }
 
- goToDetails(item: any) {
-  
-  this.router.navigate(['/hsrp-order', item.id]);
-}
+  goToDetails(item: any) {
 
-navigateToAdd(){
-  this.router.navigate(['/hsrp-order']);
-}
-onFilterChange() {
-  this.getHSRPOrders();
-}
+    this.router.navigate(['/hsrp-order', item.id]);
+  }
 
-downloadHSRPExcel(){
-  this.isSuperAdmin = this.storageService.getRole() === 'SuperAdmin';
-  const dealerCode =  this.storageService.getDealerCode();
-  
-  this.hsrpService.downloadHSRPExcel(this.isSuperAdmin, dealerCode, this.filter.fromDate, this.filter.toDate)
-  .subscribe((response: Blob) => {
+  navigateToAdd() {
+    this.router.navigate(['/hsrp-order']);
+  }
+  onFilterChange() {
+    this.getHSRPOrders();
+  }
 
-  const blob = new Blob([response], {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  });
+  downloadHSRPExcel() {
+    this.isSuperAdmin = this.storageService.getRole() === 'SuperAdmin';
+    const dealerCode = this.storageService.getDealerCode();
 
-  const url = window.URL.createObjectURL(blob);
+    this.hsrpService.downloadHSRPExcel(this.isSuperAdmin, dealerCode, this.filter.fromDate, this.filter.toDate)
+      .subscribe((response: Blob) => {
 
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'HSRPList.xlsx';
-  a.click();
+        const blob = new Blob([response], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
 
-  window.URL.revokeObjectURL(url);
-});
-}
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'HSRPList.xlsx';
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+      });
+  }
 }

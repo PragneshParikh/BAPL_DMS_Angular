@@ -57,10 +57,23 @@ import { VehicleStockTransferList } from './components/vehicle-stock-transfer/ve
 import { GroupMaster } from './components/group-master/group-master';
 import { TermConditionMaster } from './components/term-condition-master/term-condition-master';
 import { OccupationMaster } from './components/occupation-master/occupation-master';
+import { VehicleInfoUpdate } from './components/vehicle-info-update/vehicle-info-update';
+import { DepartmentMasterList } from './components/department-master/department-master-list/department-master-list';
+import { DepartmentMaster } from './components/department-master/department-master';
+import { DesignationMasterList } from './components/designation-master/designation-master-list/designation-master-list';
+import { DesignationMaster } from './components/designation-master/designation-master';
 import { JobTypeMaster } from './components/job-type-master/job-type-master';
 import { ServiceHeadMaster } from './components/service-head-master/service-head-master';
 import { ServiceTypeMaster } from './components/service-type-master/service-type-master';
 import { JobSourceMaster } from './components/job-source-master/job-source-master';
+import { RoleMasterList } from './components/role-master/role-list-master/role-list-master';
+import { RoleMaster } from './components/role-master/role-master';
+import { BgemployeeMaster }     from './components/bgemployee-master/bgemployee-master';
+import { BgemployeeMasterList } from './components/bgemployee-master/bgemployee-master-list/bgemployee-master-list';
+import { WarrantyJobCardClaim } from './components/warranty-job-card-claim/warranty-job-card-claim';
+import { CounterBill } from './components/counter-bill/counter-bill';
+import { AddCounterBill } from './components/counter-bill/add-counter-bill/add-counter-bill';
+import { CounterBillPrint } from './components/Reports/counter-bill-print/counter-bill-print';
 
 
 export const routes: Routes = [
@@ -103,7 +116,7 @@ export const routes: Routes = [
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
       { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-search/chassis-search').then(m => m.ChassisSearch) },
       { path: 'proforma-invoice', component: ProformaInvoice, data: [22] },
-      {path: 'form22-certificate/:saleBillId/:chassisNo', component: Form22Certificate, data: [22] },
+      { path: 'form22-certificate/:saleBillId/:chassisNo', component: Form22Certificate, data: [22] },
       { path: 'delivery-checkList/:saleBillId', component: DeliveryChecklist, data: [22] },
       { path: 'delivery-slip', component: DeliverySlip, data: [22] },
       { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] },
@@ -160,6 +173,10 @@ export const routes: Routes = [
       { path: 'employee/add', component: EmployeeMasterComponent, data: [49] },
       { path: 'employee/edit/:id', component: EmployeeMasterComponent, data: [49] },
 
+      { path: 'bgemployee-master',          component: BgemployeeMasterList, data: [76] },
+      { path: 'bgemployee-master/add',      component: BgemployeeMaster,     data: [76] },
+      { path: 'bgemployee-master/edit/:id', component: BgemployeeMaster,     data: [76] },
+
       { path: 'hsrp-order', component: HSRPOrder, data: [48] },
       { path: 'hsrp-order/:id', component: HSRPOrder, data: [48] },
       { path: 'hsrp-order-list', component: HSRPOrderList, data: [48] },
@@ -181,6 +198,8 @@ export const routes: Routes = [
 
       { path: 'repair-bill-performa/:repairBillId', component: RepairBillPerforma, data: [51] },
 
+      { path: 'repair-bill-invoice/:id', loadComponent: () => import('./components/repair-bill-invoice/repair-bill-invoice').then(m => m.RepairBillInvoiceComponent), data: [51] },
+
       { path: 'complaint-master', component: ComplaintMaster, data: [56] },
 
       { path: 'add-vehicle-stock-transfer', component: AddVehicleStockTransfer, data: [57] },
@@ -191,6 +210,17 @@ export const routes: Routes = [
       { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
 
       { path: 'occupation-master', component: OccupationMaster, data: [62] },
+
+      { path: 'department-master', component: DepartmentMasterList, data: [63] },
+      { path: 'department-master/add', component: DepartmentMaster, data: [63] },
+      { path: 'department-master/edit/:id', component: DepartmentMaster, data: [63] },
+      { path: 'designation-master', component: DesignationMasterList, data: [64] },
+      { path: 'designation-master/add', component: DesignationMaster, data: [64] },
+      { path: 'designation-master/edit/:id', component: DesignationMaster, data: [64] },
+      { path: 'role-master', component: RoleMasterList, data: [75] },
+      { path: 'role-master/add', component: RoleMaster, data: [75] },
+      { path: 'role-master/edit/:id', component: RoleMaster, data: [75] },
+
       { path: 'free-service-claim', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim-list/free-service-claim-list').then(m => m.FreeServiceClaimList) },
       { path: 'free-service-claim/:id', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim').then(m => m.FreeServiceClaim) },
 
@@ -201,6 +231,13 @@ export const routes: Routes = [
       { path: 'service-head-master', component: ServiceHeadMaster, data: [69] },
       { path: 'service-type-master', component: ServiceTypeMaster, data: [70] },
       { path: 'job-source-master', component: JobSourceMaster, data: [71] },
+      { path: 'warranty-job-card-claim', component: WarrantyJobCardClaim, data: [74] },
+      { path: 'vehicle-info', component: VehicleInfoUpdate, data: [73] },
+
+      { path: 'counter-bill', component: CounterBill, data: [77] },
+      { path: 'counter-bill/edit/:id', component: AddCounterBill, data: [77] },
+      { path: 'add-counter-bill', component: AddCounterBill, data: [77] },
+      { path: 'print-counter-bill/:id', component: CounterBillPrint,data:[77] }
     ]
   },
   { path: '**', component: WorkInProgress }

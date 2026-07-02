@@ -1,20 +1,8 @@
-import {
-  Component,
-  Input,
-  OnInit
-} from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-
-import {
-  FormsModule,
-  ReactiveFormsModule
-} from '@angular/forms';
-
-import {
-  ActivatedRoute,
-  Router
-} from '@angular/router';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { Gender } from '../../constant';
 import { EmployeeMasterService } from '../../core/services/employee-master';
@@ -22,553 +10,603 @@ import { DealerService } from '../../core/services/dealer-service';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { DepartmentService } from '../../core/services/department';
 import { DesignationService } from '../../core/services/designation';
+import { RoleService } from '../../core/services/Deptrole';
 
 
 @Component({
   selector: 'app-employee-master',
-
   standalone: true,
-
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule
-  ],
-
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './employee-master.html',
-
   styleUrls: ['./employee-master.scss']
 })
-
-export class EmployeeMasterComponent
-  implements OnInit {
-
-  // =====================================
-  // INPUTS
-  // =====================================
-
-  @Input()
-  popupData: any;
-
-  @Input()
-  isPopupMode: boolean = false;
-
-  // =====================================
-  // VARIABLES
-  // =====================================
+export class EmployeeMasterComponent implements OnInit {
+  @Input() popupData: any;
+  @Input() isPopupMode: boolean = false;
+  @Output() closed = new EventEmitter<void>();
 
   genders = Gender;
-
   employeeData: any = {};
-
   states: any[] = [];
-
   cities: any[] = [];
-
   filteredCities: any[] = [];
-
   selectedFile: File | null = null;
-
   imagePreview: string | ArrayBuffer | null = null;
-
   isEditMode: boolean = false;
-
   departments: any[] = [];
-
   designations: any[] = [];
-
   dealerInfo: any = null;
-
   dealerLocations: any[] = [];
+  selectedLocations: string[] = []; 
+
+  // ============================
+  // DEPARTMENT -> ROLES (cascading)
+  // ============================
+  departmentOptions: { id: string; name: string }[] = [];   // top-level checkboxes (DepartmentMaster)
+  selectedDepartments: string[] = [];                        // checked department names
+  allRoles: { name: string }[] = [];                         // all AspNetRoles
+  rolesByDepartment: { [dept: string]: { name: string }[] } = {};  // roles revealed per dept
+  selectedRoles: string[] = [];   
+  
+  // validation error messages
+  errors: { mobile?: string; pincode?: string; password?: string } = {};// checked role names (sent on save)
 
   // =====================================
   // CONSTRUCTOR
   // =====================================
-constructor(
-  private employeeService: EmployeeMasterService,
-  private router: Router,
-  private route: ActivatedRoute,
-  private dealerMasterService: DealerService,
-  private locationService: LocationMasterService,
-  private departmentService: DepartmentService,      // add
-  private designationService: DesignationService     // add
-) { } 
+  constructor(
+    private employeeService: EmployeeMasterService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private dealerMasterService: DealerService,
+    private locationService: LocationMasterService,
+    private departmentService: DepartmentService,
+    private designationService: DesignationService,
+    private roleService: RoleService
+  ) { }
 
   ngOnInit(): void {
 
-  this.loadStates();
-  this.loadCities();
-  this.loadDepartments();
-  this.loadDesignations();
+    this.loadStates();
+    this.loadCities();
+    this.loadDepartments();
+    this.loadDesignations();
+    this.loadDepartmentOptions();   // department checkboxes
+    this.loadAllRoles();            // AspNet roles (filtered on department check)
 
-  // =====================================
-  // POPUP EDIT MODE
-  // =====================================
+    // =====================================
+    // POPUP EDIT MODE
+    // =====================================
+    if (this.popupData) {
 
-  if (this.popupData) {
+      this.employeeData = { ...this.popupData };
 
-    this.employeeData = {
-      ...this.popupData
-    };
+      // make dropdown values match the string option values so they preselect
+      this.employeeData.department =
+        this.popupData.department != null ? String(this.popupData.department) : '';
 
-    // make dropdown values match the string option values so they preselect
-    this.employeeData.department =
-      this.popupData.department != null ? String(this.popupData.department) : '';
-
-    this.employeeData.designation =
-      this.popupData.designation != null ? String(this.popupData.designation) : '';
+      this.employeeData.designation =
+        this.popupData.designation != null ? String(this.popupData.designation) : '';
 
       this.employeeData.location =
-        this.popupData.locationCode != null ? String(this.popupData.locationCode) : '';
+        this.popupData.locationCode != null ? String(this.popupData.locationCode).trim() : '';
+
+      this.employeeData.dateOfJoin = this.formatDate(this.popupData.dateOfJoin);
+      this.imagePreview = this.popupData.profileImage;
+     // show login fields if this employee already has a login email
+      this.employeeData.createLogin = !!this.popupData.emailId;
+      this.selectedRoles = this.popupData.roles?.length ? [...this.popupData.roles] : [];
+      this.selectedDepartments = this.popupData.selectedDepartments?.length
+    ? [...this.popupData.selectedDepartments] : [];
+      this.selectedRoles = this.popupData.roles?.length
+        ? [...this.popupData.roles] : [];
+
+      this.selectedDepartments.forEach(dept => {
+        this.roleService.getByCategory(dept).subscribe({
+          next: (res: any[]) => {
+            this.rolesByDepartment[dept] = (res ?? []).map(r => ({ name: r.name ?? r.Name }));
+          },
+          error: () => { this.rolesByDepartment[dept] = []; }
+        });
+      });
 
       if (this.popupData.dealerCode) {
         this.loadDealerInfo(this.popupData.dealerCode);
-        this.loadDealerLocations(this.popupData.dealerCode);   // load options with correct code
+        this.loadDealerLocations(this.popupData.dealerCode);
       }
+    const savedLoc = this.popupData.locationCode;
+    this.selectedLocations = savedLoc
+      ? String(savedLoc).split(',').map((c: string) => c.trim()).filter(Boolean)
+      : [];
+      this.isEditMode = true;
 
-    // format date for the <input type="date"> (needs yyyy-MM-dd)
-    this.employeeData.dateOfJoin =
-      this.formatDate(this.popupData.dateOfJoin);
-
-    this.imagePreview =
-      this.popupData.profileImage;
-
-    this.isEditMode = true;
-
-    // Fetch THIS employee's dealer status
-    if (this.popupData.dealerCode) {
-
-      this.loadDealerInfo(
-        this.popupData.dealerCode
-      );
+      setTimeout(() => {
+        this.onStateChange();
+        this.employeeData.city = this.popupData.city;
+      }, 300);
     }
 
-    setTimeout(() => {
-
-      this.onStateChange();
-
-      this.employeeData.city =
-        this.popupData.city;
-
-    }, 300);
+    // =====================================
+    // ADD MODE — LOGGED-IN DEALER
+    // =====================================
+    else {
+      this.employeeData.createLogin = false;
+      this.loadLoggedInDealer();
+    }
   }
 
   // =====================================
-  // ADD MODE — LOGGED-IN DEALER
+  // FORMAT DATE FOR <input type="date">
   // =====================================
-
-  else {
-
-    this.loadLoggedInDealer();
-  }
-}
-// =====================================
-// FORMAT DATE FOR <input type="date">
-// =====================================
-formatDate(value: any): string {
-
-  if (!value) {
-    return '';
+  formatDate(value: any): string {
+    if (!value) return '';
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return '';
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
   }
 
-  const d = new Date(value);
-
-  if (isNaN(d.getTime())) {
-    return '';
-  }
-
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-
-  return `${yyyy}-${mm}-${dd}`;
-}
   // =====================================
-  // LOAD DEALER INFO BY CODE
+  // LOAD DEALER INFO BY CODE (info only)
   // =====================================
-
   loadDealerInfo(dealerCode: string): void {
-
-    this.dealerMasterService
-      .getByDealerCode(dealerCode)
-
-      .subscribe({
-
-        next: (response) => {
-
-          this.dealerInfo = response;
-
-          this.loadDealerLocations(
-            response.dealerCode
-          );
-        },
-
-        error: () => {
-
-          this.dealerInfo = null;
-        }
-      });
+    this.dealerMasterService.getByDealerCode(dealerCode).subscribe({
+      next: (response) => { this.dealerInfo = response; },
+      error: () => { this.dealerInfo = null; }
+    });
   }
 
   // =====================================
-// LOAD LOGGED-IN DEALER
-// =====================================
+  // LOAD LOGGED-IN DEALER
+  // =====================================
+  loadLoggedInDealer(): void {
+    const dealerCode = localStorage.getItem('dealerCode');   // e.g. "CUS0435"
+    if (!dealerCode) return;
 
-loadLoggedInDealer(): void {
+    this.employeeData.dealerCode = dealerCode;
+    this.generateEmployeeCode(dealerCode);
 
-  const dealerCode = localStorage.getItem('dealerCode');   // e.g. "CUS0435"
-  if (!dealerCode) return;
-
-  this.employeeData.dealerCode = dealerCode;     // dealer code
-  this.generateEmployeeCode(dealerCode);         // employee code only
-
-  this.dealerMasterService.getByDealerCode(dealerCode).subscribe({
-    next: (response) => {
-      this.dealerInfo = response;
-      this.employeeData.dealerCode = response.dealerCode ?? dealerCode;  // still dealer code
-      this.loadDealerLocations(response.dealerCode ?? dealerCode);
-    },
-    error: () => this.loadDealerLocations(dealerCode)
-  });
-}
-
-// =====================================
-// LOAD DEALER LOCATIONS
-// =====================================
-
-  loadDealerLocations(dealerCode: string): void {
-
-    this.locationService
-      .getLocationByDealerCode(dealerCode)
-
-      .subscribe({
-
-        next: (response: any[]) => {
-
-          this.dealerLocations = (response ?? []).map(l => ({
-            locCode: String(l.locCode ?? l.loccode ?? l.Loccode ?? '').trim(),
-            locName: l.locName ?? l.locname ?? l.Locname ?? ''
-          }));
-
-          if (this.isEditMode && this.popupData?.locationCode != null) {
-
-            const saved = String(this.popupData.locationCode).trim();
-
-            // defer so the <option> elements are rendered first
-            setTimeout(() => {
-              const match = this.dealerLocations.find(l => l.locCode === saved);
-              if (match) {
-                this.employeeData.location = match.locCode;
-              }
-            });
-          }
-        },
-
-        error: (error) => console.error('Dealer location load error', error)
-      });
+    this.dealerMasterService.getByDealerCode(dealerCode).subscribe({
+      next: (response) => {
+        this.dealerInfo = response;
+        this.employeeData.dealerCode = response.dealerCode ?? dealerCode;
+        this.loadDealerLocations(response.dealerCode ?? dealerCode);
+      },
+      error: () => this.loadDealerLocations(dealerCode)
+    });
   }
+
+  // =====================================
+  // LOAD DEALER LOCATIONS
+  // =====================================
+  loadDealerLocations(dealerCode: string): void {
+    this.locationService.getAllLocationByDealerCode(dealerCode).subscribe({
+      next: (response: any[]) => {
+
+        this.dealerLocations = (response ?? []).map(l => ({
+          locCode: String(l.locCode ?? l.loccode ?? l.Loccode ?? '').trim(),
+          locName: l.locName ?? l.locname ?? l.Locname ?? ''
+        }));
+
+        const saved =
+          this.isEditMode && this.popupData?.locationCode != null
+            ? String(this.popupData.locationCode).trim()
+            : '';
+
+        if (saved) {
+          setTimeout(() => {
+            const match = this.dealerLocations.find(l => l.locCode === saved);
+            this.employeeData.location = match ? match.locCode : '';
+          });
+        }
+      },
+      error: (error) => console.error('Dealer location load error', error)
+    });
+  }
+
   // =====================================
   // LOAD STATES
   // =====================================
-
   loadStates(): void {
-
-    this.employeeService
-      .getStates()
-
-      .subscribe({
-
-        next: (response) => {
-
-          this.states = response;
-        }
-      });
+    this.employeeService.getStates().subscribe({
+      next: (response) => { this.states = response; }
+    });
   }
 
   // =====================================
   // LOAD CITIES
   // =====================================
-
   loadCities(): void {
-
-    this.employeeService
-      .getCities()
-
-      .subscribe({
-
-        next: (response) => {
-
-          this.cities = response;
-        }
-      });
+    this.employeeService.getCities().subscribe({
+      next: (response) => { this.cities = response; }
+    });
   }
 
   // =====================================
   // STATE CHANGE
   // =====================================
-
   onStateChange(): void {
-
-    const selectedStateId =
-      Number(this.employeeData.state);
-
-    this.filteredCities =
-      this.cities.filter(
-
-        (x: any) =>
-          x.stateId === selectedStateId
-      );
+    const selectedStateId = Number(this.employeeData.state);
+    this.filteredCities = this.cities.filter((x: any) => x.stateId === selectedStateId);
   }
 
+  // =====================================
+  // DEPARTMENT OPTIONS (top-level checkboxes)
+  // =====================================
+  loadDepartmentOptions(): void {
+    this.departmentService.get().subscribe({
+      next: (res: any[]) => {
+        this.departmentOptions = (res ?? [])
+          .filter(d => d.isActive)
+          .map(d => ({ id: String(d.departmentId), name: d.departmentName }));
+      },
+      error: (e) => console.error('Department options load error', e)
+    });
+  }
+
+  // =====================================
+  // ALL ROLES (from AspNetRoles)
+  // =====================================
+  loadAllRoles(): void {
+    this.roleService.getRoles().subscribe({
+      next: (res: any[]) => {
+        this.allRoles = (res ?? []).map(r => ({ name: r.name ?? r.Name }));
+      },
+      error: (e) => console.error('Role load error', e)
+    });
+  }
+
+  // =====================================
+  // DEPARTMENT CHECKBOX HELPERS
+  // =====================================
+  isDepartmentSelected(dept: string): boolean {
+    return this.selectedDepartments.includes(dept);
+  }
+
+  onDepartmentToggle(dept: string, event: any): void {
+  if (event.target.checked) {
+    if (!this.selectedDepartments.includes(dept)) this.selectedDepartments.push(dept);
+
+    // pull roles mapped to this category from RoleCategoryMapping
+    this.roleService.getByCategory(dept).subscribe({
+      next: (res: any[]) => {
+        this.rolesByDepartment[dept] = (res ?? []).map(r => ({ name: r.name ?? r.Name }));
+      },
+      error: () => { this.rolesByDepartment[dept] = []; }
+    });
+  } else {
+    this.selectedDepartments = this.selectedDepartments.filter(d => d !== dept);
+
+    const removed = (this.rolesByDepartment[dept] ?? []).map(r => r.name);
+    delete this.rolesByDepartment[dept];
+    this.selectedRoles = this.selectedRoles.filter(r => !removed.includes(r));
+  }
+}
+
+  // =====================================
+  // ROLE CHECKBOX HELPERS
+  // =====================================
+  isRoleSelected(role: string): boolean {
+    return this.selectedRoles.includes(role);
+  }
+
+  toggleRole(role: string, event: any): void {
+    if (event.target.checked) {
+      if (!this.selectedRoles.includes(role)) this.selectedRoles.push(role);
+    } else {
+      this.selectedRoles = this.selectedRoles.filter(r => r !== role);
+    }
+  }
+  onlyDigits(event: any, field: 'mobile' | 'pincode', maxLen: number): void {
+    let value = String(event.target.value || '').replace(/\D/g, '');  // remove non-digits
+    if (value.length > maxLen) {
+      value = value.slice(0, maxLen);
+    }
+    this.employeeData[field] = value;
+    event.target.value = value;   // keep the input box in sync
+  }
+  // =====================================
+  // VALIDATION
+  // =====================================
+  validateForm(): boolean {
+    this.errors = {};
+    let valid = true;
+
+    // Mobile: exactly 10 digits
+    const mobile = String(this.employeeData.mobile ?? '').trim();
+    if (!mobile) {
+      this.errors.mobile = 'Mobile number is required.';
+      valid = false;
+    } else if (!/^\d{10}$/.test(mobile)) {
+      this.errors.mobile = 'Mobile number must be exactly 10 digits.';
+      valid = false;
+    }
+
+    // Pincode: exactly 6 digits
+    const pincode = String(this.employeeData.pincode ?? '').trim();
+    if (!pincode) {
+      this.errors.pincode = 'Pincode is required.';
+      valid = false;
+    } else if (!/^\d{6}$/.test(pincode)) {
+      this.errors.pincode = 'Pincode must be exactly 6 digits.';
+      valid = false;
+    }
+
+    // Password: only when creating a login. Min 6, upper, lower, digit, special.
+    if (this.employeeData.createLogin) {
+      const pwd = String(this.employeeData.password ?? '');
+      const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/;
+      if (!strong.test(pwd)) {
+        this.errors.password =
+          'Password must be at least 6 characters and include uppercase, lowercase, a digit, and a special character.';
+        valid = false;
+      }
+    }
+
+    // If anything failed, show a single alert summarizing the issues
+    if (!valid) {
+      const messages = [
+        this.errors.mobile,
+        this.errors.pincode,
+        this.errors.password
+      ].filter(Boolean);
+
+      alert(messages.join('\n'));
+    }
+
+    return valid;
+  }
+
+  // true only when all required fields are filled and valid
+  get isFormValid(): boolean {
+    const d = this.employeeData;
+
+    // core required fields
+    const coreFilled =
+      !!d.firstName?.trim() &&
+      !!d.lastName?.trim() &&
+      !!d.gender &&
+      /^\d{10}$/.test(String(d.mobile ?? '')) &&
+      !!d.dateOfJoin &&
+      this.selectedLocations.length > 0 && 
+      !!d.department &&
+      !!d.designation &&
+      !!d.state &&
+      !!d.city &&
+      /^\d{6}$/.test(String(d.pincode ?? ''));
+
+    if (!coreFilled) return false;
+
+    // if creating a login: email, strong password, a category, and at least one role
+    if (d.createLogin) {
+      const strongPwd =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/.test(String(d.password ?? ''));
+
+      const emailOk = !!d.emailId?.trim();
+      const categoryOk = this.selectedDepartments.length > 0;   // at least one category checked
+      const roleOk = this.selectedRoles.length > 0;             // at least one role checked
+
+      if (!emailOk || !strongPwd || !categoryOk || !roleOk) return false;
+    }
+
+    return true;
+  }
   // =====================================
   // SAVE / UPDATE
   // =====================================
-
   onSubmit(form: any): void {
 
-    const employeeObj = {
-
-      id:
-        this.employeeData.id || 0,
-
-      employeeCode:
-        this.employeeData.employeeCode,
-
-      firstName:
-        this.employeeData.firstName,
-
-      lastName:
-        this.employeeData.lastName,
-
-      gender:
-        this.employeeData.gender,
-
-      mobile:
-        this.employeeData.mobile,
-
-      emailId:
-        this.employeeData.emailId,
-
-      password:
-        this.employeeData.password,
-
-      address:
-        this.employeeData.address,
-
-      state:
-        Number(this.employeeData.state),
-
-      city:
-        Number(this.employeeData.city),
-
-      pincode:
-        this.employeeData.pincode,
-
-      dateOfJoin:
-        this.employeeData.dateOfJoin,
-
-      designation:
-        this.employeeData.designation,
-
-      department:
-        this.employeeData.department,
-
-      dealerCode:
-        this.employeeData.dealerCode,
-
-      supervisor:
-        this.employeeData.supervisor,
-
-      isActive:
-        this.employeeData.isActive ?? true,
-
-      profileImage:
-        this.imagePreview as string,
-
-      notes:
-        this.employeeData.notes,
-
-      locationCode:
-        this.employeeData.location,
-
-      createdBy: 'admin',
-
-      createdDate: new Date(),
-
-      updatedBy: 'admin',
-
-      updatedDate: new Date()
-    };
-
-    // UPDATE
-
-    if (this.isEditMode) {
-
-      this.employeeService
-        .updateEmployee(employeeObj)
-
-        .subscribe({
-
-          next: () => {
-
-            alert(
-              'Employee Updated Successfully'
-            );
-
-          }
-        });
+    // validate before building the payload (shows alert + inline messages)
+    if (!this.validateForm()) {
+      return;
     }
 
-    // INSERT
+    // build category→role pairs from what's actually checked under each category
+    const roleMappings: { category: string; roleName: string }[] = [];
+    this.selectedDepartments.forEach(dept => {
+      (this.rolesByDepartment[dept] ?? []).forEach(r => {
+        if (this.selectedRoles.includes(r.name)) {
+          roleMappings.push({ category: dept, roleName: r.name });
+        }
+      });
+    });
 
-    else {
+    const employeeObj = {
+      id: this.employeeData.id || 0,
+      employeeCode: this.employeeData.employeeCode,
+      firstName: this.employeeData.firstName,
+      lastName: this.employeeData.lastName,
+      gender: this.employeeData.gender,
+      mobile: this.employeeData.mobile,
 
-      this.employeeService
-        .saveEmployee(employeeObj)
+      // only send login credentials when "Create Login Account" is checked
+      emailId: this.employeeData.createLogin ? this.employeeData.emailId : null,
+      password: this.employeeData.createLogin ? this.employeeData.password : null,
 
-        .subscribe({
+      address: this.employeeData.address,
+      state: Number(this.employeeData.state),
+      city: Number(this.employeeData.city),
+      pincode: this.employeeData.pincode,
+      dateOfJoin: this.employeeData.dateOfJoin,
+      designation: this.employeeData.designation,
+      department: this.employeeData.department,
+      dealerCode: this.employeeData.dealerCode,
+      supervisor: this.employeeData.supervisor,
+      isActive: this.employeeData.isActive ?? true,
+      profileImage: this.imagePreview as string,
+      notes: this.employeeData.notes,
+      locationCode: this.selectedLocations.join(','),              
 
-          next: () => {
+      createdBy: 'admin',
+      createdDate: new Date(),
+      updatedBy: 'admin',
+      updatedDate: new Date(),
 
-            alert(
-              'Employee Saved Successfully'
-            );
+      // login toggle
+      createLogin: this.employeeData.createLogin ?? false,
 
-          }
-        });
+      // flat lists (still used to drive checkbox ticking on edit)
+      selectedDepartments: this.employeeData.createLogin ? this.selectedDepartments : [],
+      roles: this.employeeData.createLogin ? this.selectedRoles : [],
+
+      // exact category→role pairs (only the checked combinations)
+      roleMappings: this.employeeData.createLogin ? roleMappings : []
+    };
+
+    if (this.isEditMode) {
+      this.employeeService.updateEmployee(employeeObj).subscribe({
+        next: () => {
+          alert('Employee Updated Successfully');
+          this.afterSave();
+        },
+        error: (err) => {
+          console.error('Update error', err);
+          alert('Failed to update employee');
+        }
+      });
+    } else {
+      this.employeeService.saveEmployee(employeeObj).subscribe({
+        next: () => {
+          alert('Employee Saved Successfully');
+          this.afterSave();
+        },
+        error: (err) => {
+          console.error('Save error', err);
+          alert('Failed to save employee');
+        }
+      });
     }
   }
 
+  // navigate to the list (or close the modal if used as a popup)
+  private afterSave(): void {
+    if (this.isPopupMode) {
+      this.closed.emit();
+    } else {
+      this.router.navigate(['/employee']);
+    }
+  }
   // =====================================
   // FILE SELECT
   // =====================================
-
   onFileSelect(event: any): void {
-
-    this.selectedFile =
-      event.target.files[0];
-
+    this.selectedFile = event.target.files[0];
     if (this.selectedFile) {
-
       const reader = new FileReader();
-
-      reader.onload = (e) => {
-
-        this.imagePreview =
-          e.target?.result!;
-      };
-
-      reader.readAsDataURL(
-        this.selectedFile
-      );
+      reader.onload = (e) => { this.imagePreview = e.target?.result!; };
+      reader.readAsDataURL(this.selectedFile);
     }
   }
 
   // =====================================
-// LOAD DEPARTMENTS
-// =====================================
-loadDepartments(): void {
-
-  this.departmentService.get().subscribe({
-
-    next: (response: any[]) => {
-
-      this.departments = response ?? [];
-
-      this.syncDepartmentSelection();
-    },
-
-    error: (error) => console.error('Department load error', error)
-  });
-}
-
-// Keep the saved department selected if it exists in the list,
-// otherwise reset to '' so the "Select Department" placeholder shows
-syncDepartmentSelection(): void {
-
-  const current = this.employeeData?.department;
-
-  if (current == null || current === '') {
-    return;
+  // LOAD DEPARTMENTS (for the Department dropdown)
+  // =====================================
+  loadDepartments(): void {
+    this.departmentService.get().subscribe({
+      next: (response: any[]) => {
+        this.departments = response ?? [];
+        this.syncDepartmentSelection();
+      },
+      error: (error) => console.error('Department load error', error)
+    });
   }
 
-  const val = String(current);
-
-  this.employeeData.department =
-    this.departments.some(d => String(d.departmentId) === val) ? val : '';
-}
-
-// =====================================
-// LOAD DESIGNATIONS
-// =====================================
-loadDesignations(): void {
-
-  this.designationService.get().subscribe({
-
-    next: (response: any[]) => {
-
-      this.designations = response ?? [];
-
-      this.syncDesignationSelection();
-    },
-
-    error: (error) => console.error('Designation load error', error)
-  });
-}
-
-// Keep the saved designation selected if it exists, otherwise reset to ''
-syncDesignationSelection(): void {
-
-  const current = this.employeeData?.designation;
-
-  if (current == null || current === '') {
-    return;
+  syncDepartmentSelection(): void {
+    const current = this.employeeData?.department;
+    if (current == null || current === '') return;
+    const val = String(current);
+    this.employeeData.department =
+      this.departments.some(d => String(d.departmentId) === val) ? val : '';
   }
 
-  const val = String(current);
+  // =====================================
+  // LOAD DESIGNATIONS
+  // =====================================
+  loadDesignations(): void {
+    this.designationService.get().subscribe({
+      next: (response: any[]) => {
+        this.designations = response ?? [];
+        this.syncDesignationSelection();
+      },
+      error: (error) => console.error('Designation load error', error)
+    });
+  }
 
-  this.employeeData.designation =
-    this.designations.some(d => String(d.designationId) === val) ? val : '';
-}
+  syncDesignationSelection(): void {
+    const current = this.employeeData?.designation;
+    if (current == null || current === '') return;
+    const val = String(current);
+    this.employeeData.designation =
+      this.designations.some(d => String(d.designationId) === val) ? val : '';
+  }
+
   // =====================================
   // BACK
   // =====================================
-
-  backToList(): void {
-
-    this.router.navigate([
-      '/employee'
-    ]);
+ backToList(): void {
+  if (this.isPopupMode) {
+    this.closed.emit();                  // edit modal: close it (list handles refresh)
+  } else {
+    this.router.navigate(['/employee']); // add page: navigate to list
   }
-    generateEmployeeCode(dealerCode: string): void {
-
-  const baseCode = dealerCode;   // the pure dealer code, e.g. "CUS0435"
-
-  this.employeeService.getEmployees().subscribe({
-
-    next: (employees: any[]) => {
-
-      let maxSeq = 0;
-
-      (employees ?? []).forEach(e => {
-        const code: string = e?.employeeCode ?? '';
-        if (code.startsWith(baseCode)) {
-          const suffix = code.substring(baseCode.length);
-          const num = parseInt(suffix, 10);
-          if (!isNaN(num) && num > maxSeq) {
-            maxSeq = num;
-          }
-        }
-      });
-
-      const nextSeq = maxSeq + 1;
-
-      // ONLY the employee code — do NOT touch dealerCode here
-      this.employeeData.employeeCode =
-        baseCode + nextSeq.toString().padStart(4, '0');
-    },
-
-    error: (error) => console.error('Employee code generation error', error)
-  });
 }
+
+  // =====================================
+  // AUTO EMPLOYEE CODE
+  // =====================================
+  generateEmployeeCode(dealerCode: string): void {
+    const baseCode = dealerCode;   // pure dealer code, e.g. "CUS0435"
+
+    this.employeeService.getEmployees().subscribe({
+      next: (employees: any[]) => {
+        let maxSeq = 0;
+        (employees ?? []).forEach(e => {
+          const code: string = e?.employeeCode ?? '';
+          if (code.startsWith(baseCode)) {
+            const suffix = code.substring(baseCode.length);
+            const num = parseInt(suffix, 10);
+            if (!isNaN(num) && num > maxSeq) maxSeq = num;
+          }
+        });
+        const nextSeq = maxSeq + 1;
+        this.employeeData.employeeCode = baseCode + nextSeq.toString().padStart(4, '0');
+      },
+      error: (error) => console.error('Employee code generation error', error)
+    });
+  }
+
+isLocationSelected(code: string): boolean {
+    return this.selectedLocations.includes(code);
+  }
+
+  onLocationToggle(code: string, event: any): void {
+    if (event.target.checked) {
+      if (!this.selectedLocations.includes(code)) this.selectedLocations.push(code);
+    } else {
+      this.selectedLocations = this.selectedLocations.filter(c => c !== code);
+    }
+  }
+
+  // SELECT ALL — true only when every location is checked
+  get allLocationsSelected(): boolean {
+    return this.dealerLocations.length > 0
+      && this.selectedLocations.length === this.dealerLocations.length;
+  }
+
+  // tri-state: some but not all checked (for the indeterminate dash)
+  get someLocationsSelected(): boolean {
+    return this.selectedLocations.length > 0 && !this.allLocationsSelected;
+  }
+
+  toggleAllLocations(event: any): void {
+    if (event.target.checked) {
+      // select every location
+      this.selectedLocations = this.dealerLocations.map(l => l.locCode);
+    } else {
+      // clear all
+      this.selectedLocations = [];
+    }
+  }
 }

@@ -100,7 +100,6 @@ export class ComplaintMaster implements OnInit {
   openEditPopup(item: any): void {
 
     this.selectedComplaint = { ...item };
-    console.log(this.selectedComplaint)
     this.modalService.open(this.complaintitemModal, {
       size: 'xl',
       backdrop: 'static'

@@ -49,7 +49,6 @@ export class CircularPermission implements OnInit {
   //     (dealers: any) => {
   //       this.loader.hide();
   //       this.dealerList = dealers.data;
-  //       console.log("Fetched Dealers: ", this.dealerList);
   //     },
   //     (error) => {
   //       this.loader.hide();

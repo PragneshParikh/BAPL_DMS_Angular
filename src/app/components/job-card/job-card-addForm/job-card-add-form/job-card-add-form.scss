@@ -72,3 +72,26 @@ color: white;
     font-weight: 600;
     color: #495057;
 }
+
+.service-history-table {
+    max-height: 350px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.dropdown-menu {
+    z-index: 1060 !important;
+}
+
+.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #fff;
+}
+
+.table th,
+.table td {
+    white-space: nowrap;
+    font-size: 12px;
+}
