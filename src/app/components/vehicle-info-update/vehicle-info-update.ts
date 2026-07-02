@@ -78,12 +78,21 @@ export class VehicleInfoUpdate implements OnInit {
     this.loader.show();
     const regNo = this.searchCriteria === 'regNo' ? this.searchValue : null;
     const chassisNo = this.searchCriteria === 'chassis' ? this.searchValue : null;
+    if (!regNo && !chassisNo) {
+      this.toaster.show('Please enter a valid chassis or registration number', {
+        classname: 'bg-danger text-white',
+        delay: 5000
+      });
+      this.loader.hide();
+      return;
+    }
     let dealerCode ='';
     if(!this.isSuperAdmin)
     {
       dealerCode = this.storageService.getDealerCode();
     }
 
+    debugger;
     this.vehicleInfoService
       .getVehicleInfo(regNo ?? undefined, chassisNo ?? undefined,dealerCode ?? undefined)
       .subscribe({
