@@ -554,10 +554,7 @@ export class MaterialTransferDetail implements OnInit {
       // const sgstPercent = res.find((x: any) => x.taxCode.startsWith('SGST'))?.taxRate || 0;
       // const igstPercent = res.find((x: any) => x.taxCode.startsWith('IGST'))?.taxRate || 0;
 
-      const totalGST = selectedItem.cgst + selectedItem.sgst;
 
-      const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
-      this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
 
       const totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage) //+ Number(this.newItem.igst);
       const taxDetails = this.calculateGST(selectedItem.custprice, totalGST);
@@ -565,7 +562,7 @@ export class MaterialTransferDetail implements OnInit {
       this.newItem.itemdesc = selectedItem.itemdesc;
       this.newItem.itemcode = selectedItem.itemcode;
       this.newItem.itemId = selectedItem.id;
-      this.newItem.itemRate = taxDetails.basePrice;
+      this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
       this.newItem.hsncode = selectedItem.hsncode;
       this.newItem.batchClosingQty = selectedItem.batchClosingQty;
 
