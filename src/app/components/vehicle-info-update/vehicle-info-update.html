@@ -15,17 +15,17 @@
                     <label class="form-label mb-0 small">Search Criteria</label>
                     <select class="form-select form-select-sm" [(ngModel)]="searchCriteria">
                         <option value="chassis">Chassis No</option>
-                        <option value="regno">Reg No</option>
+                        <option value="regNo">Reg No</option>
                     </select>
                 </div>
 
                 <!-- Search Value -->
                 <div class="col-md-3">
                     <label class="form-label mb-0 small">
-                        {{ searchCriteria === 'regno' ? 'Enter Reg No' : 'Enter Chassis No' }}
+                        {{ searchCriteria === 'regNo' ? 'Enter Reg No' : 'Enter Chassis No' }}
                     </label>
                     <input type="text" class="form-control form-control-sm" [(ngModel)]="searchValue"
-                        [placeholder]="searchCriteria === 'regno' ? 'Enter Reg No' : 'Enter Chassis No'">
+                        [placeholder]="searchCriteria === 'regNo' ? 'Enter Reg No' : 'Enter Chassis No'">
                 </div>
 
                 <div class="col-md-auto">
