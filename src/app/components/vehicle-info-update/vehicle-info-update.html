@@ -37,296 +37,349 @@
             </div>
         </div>
     </div>
-<div *ngIf="!showVehicleDetails" class="alert alert-warning mt-3">
-  No Record Found
-</div>
+    <div *ngIf="!showVehicleDetails" class="alert alert-warning mt-3">
+        No Record Found
+    </div>
     <!-- Vehicle Update Table -->
     <div class="card mt-3" *ngIf="showVehicleDetails">
         <div class="card-body p-0">
-         <fieldset [disabled]="!isSuperAdmin">
+            <fieldset [disabled]="!isSuperAdmin">
 
-            <div class="table-responsive table-scroll-container">
-                <table class="table table-bordered  table-sm mb-0" style="font-size: 12px;">
+                <div class="table-responsive table-scroll-container">
+                    <table class="table table-bordered  table-sm mb-0" style="font-size: 12px;">
 
-                    <thead class="table-light text-center sticky-header">
-                        <tr>
-                            <th>Item Name</th>
-                            <th>Current Value</th>
-                            <th>Update Value Here</th>
-                            <th>Item Name</th>
-                            <th>Current Value</th>
-                            <th>Update Value Here</th>
-                        </tr>
-                    </thead>
+                        <thead class="table-light text-center sticky-header">
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Current Value</th>
+                                <th>Update Value Here</th>
+                                <th>Item Name</th>
+                                <th>Current Value</th>
+                                <th>Update Value Here</th>
+                            </tr>
+                        </thead>
 
-                    <tbody>
+                        <tbody>
+                            <tr>
+                                <td>Dealer Code</td>
+                                <td>{{vehicle.dealerCode}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" [value]="vehicle.dealerCode"
+                                        disabled>
+                                </td>
+                                <td>Dealer Name</td>
+                                <td>{{vehicle.dealerName}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" [value]="vehicle.dealerName"
+                                        disabled>
+                                </td>
+                                
 
-                        <tr>
-                            <td>Party Name</td>
-                            <td>{{vehicle.partyName}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm" [value]="vehicle.partyName"
-                                    disabled>
-                            </td>
+                            </tr>
+                            <tr>
+                                <td>Dealer Mobile</td>
+                                <td>{{vehicle.mobileNo}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [value]="vehicle.mobileNo" disabled>
 
-                            <td>Party Mobile</td>
-                            <td>{{vehicle.partyMobile}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm" [value]="vehicle.partyMobile"
-                                    disabled>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Party Alternate Mobile</td>
-                            <td>{{vehicle.partyAltMobile}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.partyAltMobile" (input)="sanitizeMobile($event)"
-                                    maxlength="10">
+                                </td>
 
-                                <small class="text-danger"
-                                    *ngIf="editedVehicle.partyAltMobile && editedVehicle.partyAltMobile.length < 10">
-                                    Mobile number must be 10 digits.
-                                </small>
-                            </td>
+                                <td>Dealer Location</td>
+                                <td>{{vehicle.dealerLocation}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [value]="vehicle.dealerLocation" disabled>
+                                </td>
+                            </tr>
 
-                            <td>Party Email</td>
-                            <td>{{vehicle.email}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm" [value]="vehicle.email"
-                                    disabled>
-                            </td>
-                        </tr>
+                            <tr>
+                                <td>Dealer City</td>
+                                <td>{{vehicle.dealerCity}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [value]="vehicle.dealerCity" disabled>
 
-                        <tr>
-                            <td>Address</td>
-                            <td>{{vehicle.address1}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm" [value]="vehicle.address1"
-                                    disabled>
-                            </td>
+                                </td>
+                                <td>Dealer State</td>
+                                <td>{{vehicle.dealerState}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [value]="vehicle.dealerState" disabled>
+                                </td>
 
-                            <td>Pin</td>
-                            <td>{{vehicle.pin}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm" [value]="vehicle.pin" disabled>
-                            </td>
-                        </tr>
+                            </tr>
 
-                        <tr>
-                            <td>State</td>
-                            <td>{{vehicle.state}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm" [value]="vehicle.state"
-                                    disabled>
-                            </td>
+                            <tr>
+                                <td>Party Name</td>
+                                <td>{{vehicle.partyName}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" [value]="vehicle.partyName"
+                                        disabled>
+                                </td>
 
-                            <td>City</td>
-                            <td>{{vehicle.city}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm" [value]="vehicle.city" disabled>
-                            </td>
-                        </tr>
+                                <td>Party Mobile</td>
+                                <td>{{vehicle.partyMobile}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [value]="vehicle.partyMobile" disabled>
+                                </td>
+                            </tr>
 
-                        <tr>
-                            <td>Chassis Number</td>
-                            <td>{{vehicle.chassisNo}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm" [value]="vehicle.chassisNo"
-                                    disabled>
-                            </td>
+                            <tr>
+                                <td>Party Alternate Mobile</td>
+                                <td>{{vehicle.partyAltMobile}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.partyAltMobile" (input)="sanitizeMobile($event)"
+                                        maxlength="10">
 
-                            <td>Reg Number</td>
-                            <td>{{vehicle.regNo}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.regNo">
-                            </td>
-                        </tr>
+                                    <small class="text-danger"
+                                        *ngIf="editedVehicle.partyAltMobile && editedVehicle.partyAltMobile.length < 10">
+                                        Mobile number must be 10 digits.
+                                    </small>
+                                </td>
 
-                        <!-- Motor -->
-                        <tr>
-                            <td>Motor Number 1</td>
-                            <td>{{vehicle.motor1}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.motor1">
-                            </td>
+                                <td>Party Email</td>
+                                <td>{{vehicle.email}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" [value]="vehicle.email"
+                                        disabled>
+                                </td>
+                            </tr>
 
-                            <td>Motor Number 2</td>
-                            <td>{{vehicle.motor2}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.motor2">
-                            </td>
-                        </tr>
+                            <tr>
+                                <td>Address</td>
+                                <td>{{vehicle.address1}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" [value]="vehicle.address1"
+                                        disabled>
+                                </td>
 
-                        <!-- Battery 1 & 2 -->
-                        <tr>
-                            <td>Battery 1</td>
-                            <td>{{vehicle.battery1}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.battery1">
-                            </td>
+                                <td>Pin</td>
+                                <td>{{vehicle.pin}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" [value]="vehicle.pin"
+                                        disabled>
+                                </td>
+                            </tr>
 
-                            <td>Battery 2</td>
-                            <td>{{vehicle.battery2}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.battery2">
-                            </td>
-                        </tr>
+                            <tr>
+                                <td>State</td>
+                                <td>{{vehicle.state}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" [value]="vehicle.state"
+                                        disabled>
+                                </td>
 
-                        <!-- Battery 3 & 4 -->
-                        <tr>
-                            <td>Battery 3</td>
-                            <td>{{vehicle.battery3}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.battery3">
-                            </td>
+                                <td>City</td>
+                                <td>{{vehicle.city}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" [value]="vehicle.city"
+                                        disabled>
+                                </td>
+                            </tr>
 
-                            <td>Battery 4</td>
-                            <td>{{vehicle.battery4}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.battery4">
-                            </td>
-                        </tr>
+                            <tr>
+                                <td>Chassis Number</td>
+                                <td>{{vehicle.chassisNo}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" [value]="vehicle.chassisNo"
+                                        disabled>
+                                </td>
 
-                        <!-- Battery Details -->
-                        <tr>
-                            <td>Battery Capacity</td>
-                            <td>{{vehicle.batteryCapacity}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.batteryCapacity">
-                            </td>
+                                <td>Reg Number</td>
+                                <td>{{vehicle.regNo}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.regNo">
+                                </td>
+                            </tr>
 
-                            <td>Battery Chemical</td>
-                            <td>{{vehicle.batteryChemical}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.batteryChemical">
-                            </td>
-                        </tr>
+                            <!-- Motor -->
+                            <tr>
+                                <td>Motor Number 1</td>
+                                <td>{{vehicle.motor1}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.motor1">
+                                </td>
 
-                        <tr>
-                            <td>Battery Make</td>
-                            <td>{{vehicle.batteryMake}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.batteryMake">
-                            </td>
+                                <td>Motor Number 2</td>
+                                <td>{{vehicle.motor2}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.motor2">
+                                </td>
+                            </tr>
 
-                            <td>Sale Date</td>
-                            <td>{{vehicle.saleDate | date:'dd/MM/yyyy'}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm" [value]="vehicle.saleDate"
-                                    disabled>
-                            </td>
-                        </tr>
+                            <!-- Battery 1 & 2 -->
+                            <tr>
+                                <td>Battery 1</td>
+                                <td>{{vehicle.battery1}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.battery1">
+                                </td>
 
-                        <!-- Charger -->
-                        <tr>
-                            <td>Charger 1</td>
-                            <td>{{vehicle.charger1}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.charger1">
-                            </td>
+                                <td>Battery 2</td>
+                                <td>{{vehicle.battery2}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.battery2">
+                                </td>
+                            </tr>
 
-                            <td>Charger 2</td>
-                            <td>{{vehicle.charger2}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.charger2">
-                            </td>
-                        </tr>
+                            <!-- Battery 3 & 4 -->
+                            <tr>
+                                <td>Battery 3</td>
+                                <td>{{vehicle.battery3}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.battery3">
+                                </td>
 
-                        <!-- Converter -->
-                        <tr>
-                            <td>Converter 1</td>
-                            <td>{{vehicle.converter1}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.converter1">
-                            </td>
+                                <td>Battery 4</td>
+                                <td>{{vehicle.battery4}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.battery4">
+                                </td>
+                            </tr>
 
-                            <td>Converter 2</td>
-                            <td>{{vehicle.converter2}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.converter2">
-                            </td>
-                        </tr>
+                            <!-- Battery Details -->
+                            <tr>
+                                <td>Battery Capacity</td>
+                                <td>{{vehicle.batteryCapacity}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.batteryCapacity">
+                                </td>
 
-                        <!-- Controller -->
-                        <tr>
-                            <td>Controller 1</td>
-                            <td>{{vehicle.controller1}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.controller1">
-                            </td>
+                                <td>Battery Chemical</td>
+                                <td>{{vehicle.batteryChemical}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.batteryChemical">
+                                </td>
+                            </tr>
 
-                            <td>Controller 2</td>
-                            <td>{{vehicle.controller2}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.controller2">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Insurance policy No</td>
-                            <td>{{vehicle.policyNo}}</td>
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.policyNo">
-                            </td>
+                            <tr>
+                                <td>Battery Make</td>
+                                <td>{{vehicle.batteryMake}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.batteryMake">
+                                </td>
 
-                            <td>Insurance Start Date</td>
-                            <td>{{vehicle.insuranceDate}}</td>
-                            <td>
-                                <input type="date" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.insuranceDate">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Insurance Company</td>
-                            <td>{{vehicle.insuranceCompany}}</td>
-                            <td>
-                                <div class="insurance-dropdown-container">
+                                <td>Sale Date</td>
+                                <td>{{vehicle.saleDate | date:'dd/MM/yyyy'}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" [value]="vehicle.saleDate"
+                                        disabled>
+                                </td>
+                            </tr>
+
+                            <!-- Charger -->
+                            <tr>
+                                <td>Charger 1</td>
+                                <td>{{vehicle.charger1}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.charger1">
+                                </td>
+
+                                <td>Charger 2</td>
+                                <td>{{vehicle.charger2}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.charger2">
+                                </td>
+                            </tr>
+
+                            <!-- Converter -->
+                            <tr>
+                                <td>Converter 1</td>
+                                <td>{{vehicle.converter1}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.converter1">
+                                </td>
+
+                                <td>Converter 2</td>
+                                <td>{{vehicle.converter2}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.converter2">
+                                </td>
+                            </tr>
+
+                            <!-- Controller -->
+                            <tr>
+                                <td>Controller 1</td>
+                                <td>{{vehicle.controller1}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.controller1">
+                                </td>
+
+                                <td>Controller 2</td>
+                                <td>{{vehicle.controller2}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.controller2">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Insurance policy No</td>
+                                <td>{{vehicle.policyNo}}</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.policyNo">
+                                </td>
+
+                                <td>Insurance Start Date</td>
+                                <td>{{vehicle.insuranceDate}}</td>
+                                <td>
+                                    <input type="date" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.insuranceDate">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Insurance Company</td>
+                                <td>{{vehicle.insuranceCompany}}</td>
+                                <td>
+                                    <div class="insurance-dropdown-container">
 
 
-                                    <input type="text" class="form-control form-control-sm" name="insuranceName"
-                                        [(ngModel)]="editedVehicle.insuranceName" (input)="filterInsurance()"
-                                        (focus)="onInsuranceFocus()" (blur)="onInsuranceBlur()" autocomplete="off" />
+                                        <input type="text" class="form-control form-control-sm" name="insuranceName"
+                                            [(ngModel)]="editedVehicle.insuranceName" (input)="filterInsurance()"
+                                            (focus)="onInsuranceFocus()" (blur)="onInsuranceBlur()"
+                                            autocomplete="off" />
 
-                                    <div *ngIf="showInsuranceDropdown && filteredInsurance?.length"
-                                        class="position-absolute bg-white border shadow w-100"
-                                        style="top:100%; left:0; z-index:99999; max-height:200px; overflow-y:auto;">
+                                        <div *ngIf="showInsuranceDropdown && filteredInsurance?.length"
+                                            class="position-absolute bg-white border shadow w-100"
+                                            style="top:100%; left:0; z-index:99999; max-height:200px; overflow-y:auto;">
 
-                                        <div *ngFor="let party of filteredInsurance" class="p-2 border-bottom"
-                                            style="cursor:pointer" (mousedown)="selectInsurance(party)">
+                                            <div *ngFor="let party of filteredInsurance" class="p-2 border-bottom"
+                                                style="cursor:pointer" (mousedown)="selectInsurance(party)">
 
-                                            {{ party.ledgerName }}
+                                                {{ party.ledgerName }}
+
+                                            </div>
 
                                         </div>
-
                                     </div>
-                                </div>
-                            </td>
+                                </td>
 
-                            <td>Insurance Expiry Date</td>
-                            <td>{{vehicle.policyExpiryDate}}</td>
-                            <td>
-                                <input type="date" class="form-control form-control-sm"
-                                    [(ngModel)]="editedVehicle.policyExpiryDate">
-                            </td>
-                        </tr>
-                        <!-- <tr>
+                                <td>Insurance Expiry Date</td>
+                                <td>{{vehicle.policyExpiryDate}}</td>
+                                <td>
+                                    <input type="date" class="form-control form-control-sm"
+                                        [(ngModel)]="editedVehicle.policyExpiryDate">
+                                </td>
+                            </tr>
+                            <!-- <tr>
                             <td>Eng. Health Subsc. Date</td>
                             <td>{{vehicle.engHealthSubsDate}}</td>
                             <td>
@@ -348,22 +401,22 @@
                                 </select>
                             </td>
                         </tr> -->
-                    </tbody>
+                        </tbody>
 
-                </table>
-            </div>
+                    </table>
+                </div>
 
-            <div class="text-end p-3 border-top">
-                <!-- <button class="btn btn-success btn-sm me-2">
+                <div class="text-end p-3 border-top">
+                    <!-- <button class="btn btn-success btn-sm me-2">
                     Generate HSRP Order
                 </button> -->
 
-                <button *ngIf="isSuperAdmin" class="btn btn-primary btn-sm" (click)="updateAll()">
-                    Update All
-                </button>
-            </div>
+                    <button *ngIf="isSuperAdmin" class="btn btn-primary btn-sm" (click)="updateAll()">
+                        Update All
+                    </button>
+                </div>
 
-        </fieldset>
+            </fieldset>
         </div>
     </div>
 

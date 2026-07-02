@@ -367,6 +367,8 @@ export class MaterialTransferDetail implements OnInit {
       const taxDetails = this.calculateGST(finalPrice, totalGST);
       const totalGSTAmount = Number(taxDetails.gstAmount);
 
+      this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
+
       // itemToSave.quantity = this.newItem.quantity;
       itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
       itemToSave.mrp = this.items[index].mrp;
@@ -383,8 +385,12 @@ export class MaterialTransferDetail implements OnInit {
     } else {
 
       const totalGST = Number(this.newItem.cgst) + Number(this.newItem.sgst) //+ Number(this.newItem.igst);
-      const finalPrice = Number(this.newItem.itemRate) * this.newItem.quantity * (1 + totalGST / 100);
-      const taxDetails = this.calculateGST(finalPrice, totalGST);
+      // const finalPrice = Number(this.newItem.itemRate) * this.newItem.quantity * (1 + totalGST / 100);
+      // const taxDetails = this.calculateGST(finalPrice, totalGST);
+
+      const selectedItem = this.itemList.find(item => item.itemcode === this.newItem.itemcode);
+
+      const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
       const totalGSTAmount = Number(taxDetails.gstAmount);
 
       this.newItem.amount = Number(taxDetails.basePrice).toFixed(2);
@@ -548,7 +554,10 @@ export class MaterialTransferDetail implements OnInit {
       // const sgstPercent = res.find((x: any) => x.taxCode.startsWith('SGST'))?.taxRate || 0;
       // const igstPercent = res.find((x: any) => x.taxCode.startsWith('IGST'))?.taxRate || 0;
 
-      // const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
+      const totalGST = selectedItem.cgst + selectedItem.sgst;
+
+      const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
+      this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
 
       const totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage) //+ Number(this.newItem.igst);
       const taxDetails = this.calculateGST(selectedItem.custprice, totalGST);
@@ -567,6 +576,8 @@ export class MaterialTransferDetail implements OnInit {
       // this.newItem.cgstPercent = cgstPercent;
       // this.newItem.sgstPercent = sgstPercent;
       // this.newItem.igstPercent = igstPercent;
+
+      this.totalGST = selectedItem.cgst + selectedItem.sgst;
 
       if (this.newItem.batchClosingQty > 0) {
         this.newItem.quantity = 1;

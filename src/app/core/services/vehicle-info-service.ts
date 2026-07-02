@@ -10,13 +10,16 @@ export class VehicleInfoService {
   private apiUrl = environment.apiUrl;
   constructor(private http: HttpClient) { }
 
-  getVehicleInfo(regNo?: string, chassisNo?: string): Observable<any> {
+  getVehicleInfo(regNo?: string, chassisNo?: string, dealerCode?: string): Observable<any> {
     let params = new HttpParams();
     if (regNo) {
       params = params.set('regNo', regNo);
     }
     if (chassisNo) {
       params = params.set('chassisNo', chassisNo);
+    }
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
     }
     return this.http.get<any>(`${this.apiUrl}/VehicleInfo`, { params });
   }

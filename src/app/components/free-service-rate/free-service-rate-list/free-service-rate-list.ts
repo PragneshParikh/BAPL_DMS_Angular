@@ -102,7 +102,7 @@ export class FreeServiceRateList implements OnInit {
     const OEMModelId = group?.oemModelId || '0';
     const value = Date.now() + '|' + OEMModelId;
     const encPO = btoa(value);
-    this.router.navigate(['/free-service-rate', encPO], { state: { oemModelList: this.oemModelList } });
+    this.router.navigate(['/free-service-rate', encPO], { state: { oemModelList: this.oemModelList, serviceInfo: group } });
   }
 
   onChangeModel(event: any) {

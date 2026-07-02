@@ -39,7 +39,10 @@ export class RepairBill implements OnInit {
   partCodeList: any[] = [];
   materialedJobCarDList: any[] = [];
   insurancelist: any[] = [];
-  selectedJobCard: any = {};
+  selectedJobCard: any = {
+    jobCardHeader: {},
+    jobCardCustomer: {}
+  };
   itemdesc: any;
   showJobDetails = false;
   selectedLocationCode: any;
@@ -194,8 +197,9 @@ export class RepairBill implements OnInit {
       if (params['id']) {
         this.repairBillId = +params['id'];
         this.isEditMode = true;
-
+        this.showJobDetails = true;
         this.getRepairBillById(this.repairBillId);
+
       }
     });
 
@@ -203,10 +207,10 @@ export class RepairBill implements OnInit {
 
   saveOrUpdateRepairBill() {
 
-    this.saveRepairBill();
-
     if (this.selectedJobCard?.jobCardHeader?.jobtype != 1) {
       this.updateRepairBill();
+    } else {
+      this.saveRepairBill();
     }
   }
   loadPrefix(): void {
@@ -340,6 +344,7 @@ export class RepairBill implements OnInit {
       next: (res) => {
         this.loader.hide();
         this.jobCardList = res;
+
       },
       error: (err) => {
         this.loader.hide();
@@ -359,6 +364,7 @@ export class RepairBill implements OnInit {
   }
 
   onSelect(item: any) {
+    debugger;
     if (item.isMaterialTransfer === false || item.isMaterialTransfer === "null") {
       this.toaster.show('Material Transfer is not completed for this Job Card', {
         classname: 'bg-warning text-dark',
@@ -367,6 +373,7 @@ export class RepairBill implements OnInit {
 
     }
     this.selectedJobCard = item;
+    console.log("onselect", this.selectedJobCard);
     this.chassisNo = this.selectedJobCard.jobCardHeader.chassisno;
     this.insValidTill = this.selectedJobCard.jobCardCustomer.insuranceExpDate;
     this.vehicleSaleBillService.getPolicyNo(this.chassisNo).subscribe({
@@ -524,7 +531,7 @@ export class RepairBill implements OnInit {
   }
 
   selectLabour(item: any): void {
-
+    debugger
     this.selectedLabour = item;
     this.labourId = item.labourId;
     this.labourCode = item.labourCode;
@@ -547,6 +554,7 @@ export class RepairBill implements OnInit {
 
   addLabour(): void {
     debugger;
+
     const isSameState =
       (this.selectedLabour?.dealerState || '').trim().toUpperCase() ===
       (this.selectedLabour?.custState).trim().toUpperCase();
@@ -721,10 +729,16 @@ export class RepairBill implements OnInit {
     debugger
     const item = this.labourItems[index];
     console.log(this.labourItems[index])
-    this.editIndex = index;
 
+    this.editIndex = index;
     this.labourCode = item.labourCode;
     this.selectedDescription = item.description;
+    this.selectedLabour = this.labourCodeList.find(
+      x => x.labourCode === item.labourCode
+    );
+
+
+    //this.selectedCashAccount = 
 
     this.qty = item.qty;
     this.selectedRate = item.rate;
@@ -841,7 +855,7 @@ export class RepairBill implements OnInit {
       let cgstAmount = 0;
       let sgstAmount = 0;
       let igstAmount = 0;
-      
+
       if (isSameState) {
 
         // Intrastate
@@ -1127,12 +1141,16 @@ export class RepairBill implements OnInit {
   }
 
   getRepairBillById(id: number): void {
-
+    debugger;
     this.loader.show();
+
     this.repairBillService.getRepairBillById(id).subscribe({
 
       next: (res: any) => {
         const header = res.repairBillheader;
+        // console.log("header",header)
+
+
 
         // =====================
         // EDIT MODE
@@ -1146,11 +1164,18 @@ export class RepairBill implements OnInit {
         this.RepairBillprefix = header.prefix;
         this.billNo = header.billNo;
         this.billType = header.billType;
-        this.customerLedgerId = header.customerLedgerId;
+        this.selectedJobCard.jobCardCustomer.customerLedgerId = header.customerLedgerId;
         this.selectedCashAccount = header.cashAccount;
         this.selectedJobCard.partyName = header.partyName;
         this.selectedJobCard.partyMobileNo = header.mobileNumber;
         this.selectedJobCard.partyState = header.partyState;
+        this.selectedJobCard.jobCardHeader.jobinDate = header.jobInDate;
+        this.selectedJobCard.jobCardHeader.jobNo = header.jobNo;
+        this.selectedJobCard.jobCardCustomer.registerNo = header.registerNo;
+        this.selectedJobCard.jobCardCustomer.modelName = header.modelName;
+        this.selectedJobCard.jobCardHeader.vehiclekms = header.vehicleKms;
+        this.selectedJobCard.jobCardCustomer.chassisNo = header.chassisNo;
+        this.selectedJobCard.jobCardHeader.technician = header.technician;
         this.repairBillStatus = header.repairBillStatus;
         this.remarks = header.remarks;
 
@@ -1276,6 +1301,7 @@ export class RepairBill implements OnInit {
         this.isPartSelected = this.partItems.length > 0;
         this.isLabourSelected = this.labourItems.length > 0;
 
+        this.loadLabourCodelist();
         this.applyLabourDiscount();
         this.calculateTotals();
 
