@@ -44,47 +44,58 @@
 
                     <div class="table-responsive">
 
-                        <table class="table table-hover table-bordered mb-0 table-sm  table-sm mt-3 text-nowrap">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="sort " (click)="onSort('')">S.No</th>
-                                    <th class="sort text-nowrap" (click)="onSort('')">Issue No</th>
-                                    <th class="sort text-nowrap" (click)="onSort('')">Issue Date</th>
-                                    <th class="sort text-nowrap" (click)="onSort('')">Created Date</th>
-                                    <th class="sort text-nowrap" (click)="onSort('')">Job No</th>
-                                    <th class="sort text-nowrap" (click)="onSort('')">Party Name</th>
-                                    <th class="sort text-nowrap" (click)="onSort('')">Chasis No</th>
-                                    <th class="sort text-nowrap" (click)="onSort('')">Reg No</th>
-                                    <th class="sort text-nowrap" (click)="onSort('')">Location</th>
-                                    <th class="sort text-nowrap" (click)="onSort('')">Prepared By</th>
-                                    <th class="sort text-nowrap" (click)="onSort('')">Modified By</th>
-                                </tr>
-                            </thead>
+                            <table class="table table-bordered mb-0 table-sm text-nowrap" style="min-width: 1400px;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="sort" style="width: 80px" (click)="onSort('srNo')">S.No</th>
+                                        <th class="sort" style="width: 100px" (click)="onSort('id')">Issue No</th>
+                                        <th class="sort" style="width: 110px" (click)="onSort('jobinDate')">Issue Date
+                                        </th>
+                                        <th class="sort" style="width: 110px" (click)="onSort('createdDate')">Created
+                                            Date
+                                        </th>
+                                        <th class="sort" style="width: 80px" (click)="onSort('jobNo')">Job No</th>
+                                        <th class="sort" style="width: 100px" (click)="onSort('customerName')">Party
+                                            Name</th>
+                                        <th class="sort" style="width: 100px" (click)="onSort('chassisno')">Chasis No
+                                        </th>
+                                        <th class="sort" style="width: 100px" (click)="onSort('registerNo')">Reg No</th>
+                                        <th class="sort" style="width: 100px" (click)="onSort('serviceloc')">Location
+                                        </th>
+                                        <th class="sort" style="width: 110px" (click)="onSort('preparedBy')">Prepared By
+                                        </th>
+                                        <th class="sort" style="width: 110px" (click)="onSort('modifiedBy')">Modified By
+                                        </th>
+                                        <th class="sort" style="width: 100px" (click)="onSort('status')">JobCard Status
+                                        </th>
+                                    </tr>
+                                </thead>
 
-                            <tbody>
-                                <tr *ngFor="let material of dataSource; let index = index" class="table-row"
-                                    (dblclick)="onMaterialClick(material)">
-                                    <td>{{ material?.srNo }}</td>
-                                    <td>{{ material?.materialIssueNumber }}</td>
-                                    <td>{{ material?.jobinDate | date :'dd-MM-yyyy'}}</td>
-                                    <td>{{material?.createdDate | date: 'dd-MM-yyyy'}}</td>
-                                    <td>{{ material?.jobNo }}</td>
-                                    <td>{{ material?.customerName }}</td>
-                                    <td>{{ material?.chassisno }}</td>
-                                    <td>{{ material?.registerNo }}</td>
-                                    <td>{{ material?.serviceloc }}</td>
-                                    <td>{{ material?.preparedBy }}</td>
-                                    <td>{{ material?.modifiedBy }}</td>
-                                </tr>
+                                <tbody>
+                                    <tr *ngFor="let material of dataSource; let index = index" class="table-row"
+                                        (dblclick)="onMaterialClick(material)">
+                                        <td>{{ material?.srNo }}</td>
+                                        <td>{{ material?.materialIssueNumber }}</td>
+                                        <td>{{ material?.jobinDate | date : 'dd-MM-yyyy'}}</td>
+                                        <td>{{ material?.createdDate | date : 'dd-MM-yyyy'}}</td>
+                                        <td>{{ material?.jobNo }}</td>
+                                        <td>{{ material?.customerName }}</td>
+                                        <td>{{ material?.chassisno }}</td>
+                                        <td>{{ material?.registerNo }}</td>
+                                        <td>{{ material?.serviceloc }}</td>
+                                        <td>{{ material?.preparedBy }}</td>
+                                        <td>{{ material?.modifiedBy }}</td>
+                                        <td>{{ material?.jobCardStatus }} </td>
+                                    </tr>
 
-                                <!-- No Data -->
-                                <tr *ngIf="!dataSource || dataSource.length === 0">
-                                    <td colspan="11" class="text-center text-muted py-3">
-                                        No Data Available
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                    <!-- No Data -->
+                                    <tr *ngIf="!dataSource || dataSource.length === 0">
+                                        <td colspan="12" class="text-center text-muted py-3">
+                                            No Data Available
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
                     </div>
                     <!-- PAGINATION -->

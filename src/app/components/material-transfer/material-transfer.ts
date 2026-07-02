@@ -91,7 +91,15 @@ export class MaterialTransfer implements OnInit {
       this.sortColumn = column;
       this.sortDirection = 'asc';
     }
-    // Logic to sort data based on sortColumn and sortDirection
+
+    this.dataSource.sort((a, b) => {
+      let valueA = a[column] ?? '';
+      let valueB = b[column] ?? '';
+
+      const result = valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+      return this.sortDirection === 'asc' ? result : -result;
+    });
+
   }
 
   getMaterialTransfer(dealerCode: string) {
