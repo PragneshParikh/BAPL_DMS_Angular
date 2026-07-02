@@ -156,6 +156,7 @@ export class RepairBill implements OnInit {
     customerName: '',
     chassisNo: ''
   };
+  labourHsnCode: string;
 
 
 
@@ -199,7 +200,6 @@ export class RepairBill implements OnInit {
         this.isEditMode = true;
         this.showJobDetails = true;
         this.getRepairBillById(this.repairBillId);
-
       }
     });
 
@@ -410,9 +410,12 @@ export class RepairBill implements OnInit {
         this.loader.hide();
 
         this.materialedJobCarDList = res;
-
+        console.log("materialedJobCarDList", this.materialedJobCarDList)
         // Part Grid
         this.partItems = [...res];
+        console.log("loadematerialed parts",this.partItems)
+
+
 
         // Labour Grid
         this.labourItems = [];
@@ -435,6 +438,7 @@ export class RepairBill implements OnInit {
                 qty: 1,
                 rate: labour.labourRate ?? 0,
                 waveRate: this.waveRate ?? 0,
+                labourHsnCode: labour.labourHsnCode ?? '',
 
                 discount: 0,
                 discountType: this.discountType,
@@ -627,6 +631,7 @@ export class RepairBill implements OnInit {
 
       rate: this.selectedRate,
       waveRate: this.waveRate,
+      labourHsnCode: this.labourHsnCode,
 
       discount: discountAmount,
 
@@ -742,13 +747,20 @@ export class RepairBill implements OnInit {
 
     this.qty = item.qty;
     this.selectedRate = item.rate;
-
+    this.labourHsnCode = item.labourHsnCode;
     this.discount = item.discount;
     this.discountType = item.discountType;
     this.issuetypeId = item.issuetypeId;
     this.issuetypeName = item.issuetypeName;
     this.selectedIssueType = item.issuetypeId;
 
+
+  }
+  editPart(index:number){
+
+    const item = this.partItems[index];
+    console.log("edit index wise part",this.partItems[index]);
+    
 
   }
   deleteLabour(index: number): void {
@@ -925,7 +937,6 @@ export class RepairBill implements OnInit {
       const taxableAmount = grossAmount - discountAmount;
 
       const igstAmount = taxableAmount * item.igst / 100;
-
       item.discount = discountAmount;
       item.discountType = this.partDiscountType;
       item.taxableAmount = taxableAmount;
@@ -1024,6 +1035,7 @@ export class RepairBill implements OnInit {
 
           qty: 0,
           rate: 0,
+          partHsnCode: item.partHsnCode || '',
 
           discount: item.discount || 0,
           discountType: item.discountType || 'Value',
@@ -1062,6 +1074,7 @@ export class RepairBill implements OnInit {
 
           qty: item.qty || 0,
           rate: item.rate || 0,
+          labourHsnCode: item.labourHsnCode || '',
 
           discount: item.discount || 0,
           discountType: item.discountType || 'Value',
@@ -1169,6 +1182,7 @@ export class RepairBill implements OnInit {
         this.selectedJobCard.partyName = header.partyName;
         this.selectedJobCard.partyMobileNo = header.mobileNumber;
         this.selectedJobCard.partyState = header.partyState;
+        this.selectedJobCard.jobCardHeader.id = header.jobId;
         this.selectedJobCard.jobCardHeader.jobinDate = header.jobInDate;
         this.selectedJobCard.jobCardHeader.jobNo = header.jobNo;
         this.selectedJobCard.jobCardCustomer.registerNo = header.registerNo;
@@ -1218,6 +1232,7 @@ export class RepairBill implements OnInit {
 
               partQty: Number(d.partQty || 0),
               partRate: Number(d.partRate || 0),
+              partHsnCode:d.partHsnCode||'',
 
               discount: Number(d.partDiscount || 0),
               discountType: d.discountType || 'Value',
@@ -1239,7 +1254,9 @@ export class RepairBill implements OnInit {
             };
 
             this.partItems.push(partItem);
+            
             this.materialedJobCarDList = [...this.partItems];
+            console.log("edit materialedJobCarDList", this.materialedJobCarDList);
           });
 
         // =====================
@@ -1262,6 +1279,7 @@ export class RepairBill implements OnInit {
               rate: d.rate || 0,
 
               waveRate: d.fscRate || 0,
+              labourHsnCode: d.labourHsnCode || 0,
 
               discount: d.discount || 0,
               discountType: d.discountType || 'Value',
@@ -1301,7 +1319,9 @@ export class RepairBill implements OnInit {
         this.isPartSelected = this.partItems.length > 0;
         this.isLabourSelected = this.labourItems.length > 0;
 
+        this.loadMaterialedJobCardList();
         this.loadLabourCodelist();
+
         this.applyLabourDiscount();
         this.calculateTotals();
 
@@ -1395,7 +1415,7 @@ export class RepairBill implements OnInit {
 
           qty: 0,
           rate: 0,
-
+          partHsnCode: item.partHsnCode || '',
           discount: item.discount || 0,
           discountType: item.discountType || 'Value',
 
@@ -1433,6 +1453,7 @@ export class RepairBill implements OnInit {
 
           qty: item.qty || 0,
           rate: item.rate || 0,
+          labourHsnCode: item.labourHsnCode || '',
 
           discount: item.discount || 0,
           discountType: item.discountType || 'Value',

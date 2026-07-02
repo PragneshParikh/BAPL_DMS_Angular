@@ -107,6 +107,8 @@
                         <th>VehicleName</th>
                         <th>ServiceHead / Type</th>
                         <th>CustomerName / MobileNo</th>
+                        <th>Created Date</th>
+                        <th>Updated Date</th>
                     </tr>
                 </thead>
 
@@ -180,6 +182,8 @@
                             {{ item.jobCardCustomer?.customerName || '-' }} <br>
                             {{ item.jobCardCustomer?.customerMobile || '-' }}
                         </td>
+                        <td>{{item.jobCardHeader.createdDate | date:'dd-MM-yyyy hh:mm a'}}</td>
+                        <td>{{item.jobCardHeader.updatedDate | date:'dd-MM-yyyy hh:mm a'}}</td>
 
                     </tr>
 
