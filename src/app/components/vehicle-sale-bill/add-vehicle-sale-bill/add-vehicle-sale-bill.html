@@ -303,8 +303,8 @@
                                         (input)="filterParties()"
                                         [class.is-invalid]="customerName.invalid && (customerName.touched || vehicleSaleForm.submitted)" />
 
-                                    <button type="button" class="btn btn-sm btn-primary"
-                                        (click)="openCustomerLedgerAdd()" [ngbTooltip]="'Add New Party'">
+                                    <button *ngIf="billId" type="button" class="btn btn-sm btn-primary"
+                                        (click)="openCustomerLedgerAdd()" [ngbTooltip]="'Edit Party Details'">
                                         +
                                     </button>
 
@@ -315,7 +315,7 @@
 
                                         <li class="list-group-item list-group-item-action py-1 px-2 small text-dark"
                                             *ngFor="let party of filteredParties" (click)="selectParty(party)">
-                                            {{ party.ledgerName }}
+                                            <b>{{ party.ledgerName }}</b><br>({{party.ledgerCode}})
                                         </li>
 
                                     </ul>
