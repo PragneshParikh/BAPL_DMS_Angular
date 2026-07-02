@@ -10,8 +10,8 @@ import { LocationMasterService }         from '../../core/services/location-mast
 import { DepartmentService }             from '../../core/services/department';
 import { StateService }                  from '../../core/services/state';
 import { EmployeeProfileMasterService }  from '../../core/services/employee-profile-master-service';
-import { ZoneMasterService }              from '../../core/services/zone-master.service';
-import { RoleService }                    from '../../core/services/Deptrole';
+import { ZoneMasterService }             from '../../core/services/zone-master.service';
+import { RoleService }                   from '../../core/services/Deptrole';
 import { ZoneViewModel, ZoneDealerViewModel } from '../../ViewModels/models/ZoneViewModel';
 
 @Component({
@@ -43,8 +43,7 @@ export class BgemployeeMaster implements OnInit {
   states:         any[] = [];
   cities:         any[] = [];
   filteredCities: any[] = [];
-
-  departments: any[] = [];
+  departments:    any[] = [];
 
   dealerInfo:        any      = null;
   dealerLocations:   any[]    = [];
@@ -61,15 +60,28 @@ export class BgemployeeMaster implements OnInit {
   pendingProfileId: number = 0;
 
   // =====================================================
-  // ZONE → DEALER CHECKBOX MAPPING
+  // ZONE → DEALER — MULTI-ZONE STATE
   // =====================================================
 
-  zones:             ZoneViewModel[]       = [];
-  selectedZone:      string             = '';
-  zoneDealers:       ZoneDealerViewModel[] = [];
-  selectedDealerIds: Set<number>       = new Set<number>();
-  dealerSearchTerm:  string             = '';
-  loadingDealers:    boolean            = false;
+  zones:            ZoneViewModel[]       = [];
+  selectedZone:     string               = '';
+  zoneDealers:      ZoneDealerViewModel[] = [];
+  loadingDealers:   boolean              = false;
+  dealerSearchTerm: string               = '';
+
+  // Per-zone checkbox state — persists across zone switches
+  zoneSelectionMap: Map<string, Set<number>> = new Map();
+
+  // Confirmed rows in the summary table
+  addedDealers: any[] = [];
+
+  // =====================================================
+  // ASSIGNED-ELSEWHERE TRACKING (dealers mapped to OTHER BG employees)
+  // =====================================================
+
+  assignedDealersMap: Map<string, { employeeCode: string; employeeName: string }> = new Map();
+  private originalAssignedDealersMap: Map<string, { employeeCode: string; employeeName: string }> = new Map();
+  removedDueToReassignment: { dealerName: string; assignedTo: string }[] = [];
 
   // =====================================================
   // DEPARTMENT -> ROLES (cascading login access)
@@ -80,6 +92,7 @@ export class BgemployeeMaster implements OnInit {
   allRoles:            { name: string }[] = [];
   rolesByDepartment:   { [dept: string]: { name: string }[] } = {};
   selectedRoles:       string[] = [];
+  reportingToOptions: any[] = [];
 
   // =====================================================
   // VALIDATION
@@ -116,6 +129,7 @@ export class BgemployeeMaster implements OnInit {
     this.loadZones();
     this.loadDepartmentOptions();
     this.loadAllRoles();
+    this.loadReportingToOptions();
 
     // ── POPUP EDIT ────────────────────────────────────────
     if (this.popupData) {
@@ -141,12 +155,28 @@ export class BgemployeeMaster implements OnInit {
   }
 
   // =====================================================
+  // INIT — ADD
+  // =====================================================
+
+  private initAddMode(): void {
+    this.employeeData.isActive     = true;
+    this.employeeData.employeeCode = 'Generating…';
+    this.employeeData.createLogin  = false;
+    this.generateEmployeeCode('');
+    this.loadLoggedInDealer();
+    this.loadAssignedDealers();
+    this.loadReportingToOptions();
+
+  }
+
+  // =====================================================
   // INIT — EDIT
   // =====================================================
 
   private initEditMode(data: any): void {
     this.isEditMode   = true;
     this.employeeData = { ...data };
+    this.removedDueToReassignment = [];
 
     this.employeeData.state      = data.state      != null ? String(data.state)      : '';
     this.employeeData.city       = data.city        != null ? String(data.city)       : '';
@@ -158,7 +188,7 @@ export class BgemployeeMaster implements OnInit {
 
     this.imagePreview = data.profileImage ?? null;
 
-    const rawProfileId = data.profileId ?? data.ProfileId ?? data.profile_id ?? 0;
+    const rawProfileId   = data.profileId ?? data.ProfileId ?? data.profile_id ?? 0;
     const savedProfileId = rawProfileId ? Number(rawProfileId) : 0;
     this.pendingProfileId = savedProfileId;
     setTimeout(() => { this.pendingProfileId = savedProfileId; }, 500);
@@ -176,29 +206,15 @@ export class BgemployeeMaster implements OnInit {
       this.employeeData.city = data.city != null ? String(data.city) : '';
     }, 300);
 
-    // ── RESTORE ZONE + DEALER CHECKBOX SELECTION ──────────
-    this.selectedZone = data.mappedZones ?? '';
+    // ── RESTORE MULTI-ZONE + DEALER SELECTIONS ──────────────────────
+    this.addedDealers = [];
+    this.zoneSelectionMap.clear();
+    this.restoreZoneDealerSelections(data);
 
-    if (this.selectedZone) {
-      this.loadingDealers = true;
-      this.zoneMasterService.getDealersByZone(this.selectedZone).subscribe({
-        next: (res: ZoneDealerViewModel[]) => {
-          this.zoneDealers     = res ?? [];
-          this.loadingDealers = false;
+    // ── ASSIGNED-ELSEWHERE TRACKING — load after employeeData.id is set ──
+    this.loadAssignedDealers();
+    this.loadReportingToOptions();   // NEW
 
-          const savedIds = String(data.mappedZoneIds ?? '')
-            .split(',')
-            .map((id: string) => Number(id.trim()))
-            .filter((id: number) => !isNaN(id));
-
-          this.selectedDealerIds = new Set<number>(savedIds);
-        },
-        error: (err) => {
-          console.error('Zone dealers load error (edit mode)', err);
-          this.loadingDealers = false;
-        },
-      });
-    }
 
     // ── RESTORE LOGIN ACCESS + DEPARTMENT/ROLE SELECTION ──
     this.employeeData.createLogin = !!data.emailId;
@@ -216,19 +232,7 @@ export class BgemployeeMaster implements OnInit {
   }
 
   // =====================================================
-  // INIT — ADD
-  // =====================================================
-
-  private initAddMode(): void {
-    this.employeeData.isActive     = true;
-    this.employeeData.employeeCode = 'Generating…';
-    this.employeeData.createLogin  = false;
-    this.generateEmployeeCode('');
-    this.loadLoggedInDealer();
-  }
-
-  // =====================================================
-  // DEALER (legacy single-dealer support, kept intact)
+  // DEALER (legacy single-dealer support)
   // =====================================================
 
   loadLoggedInDealer(): void {
@@ -259,6 +263,20 @@ export class BgemployeeMaster implements OnInit {
     });
   }
 
+  loadReportingToOptions(): void {
+  this.bgEmployeeService.getEmployees().subscribe({
+    next: (res: any[]) => {
+      const currentId = this.employeeData?.id || 0;
+      this.reportingToOptions = (res ?? [])
+        .filter(e => e.id !== currentId && e.isActive)
+        .map(e => ({
+          id: e.id,
+          label: `${e.firstName} ${e.lastName} (${e.employeeCode})`,
+        }));
+    },
+    error: (err) => console.error('Reporting-to load error', err),
+  });
+}
   // =====================================================
   // STATES & CITIES
   // =====================================================
@@ -284,7 +302,7 @@ export class BgemployeeMaster implements OnInit {
   }
 
   // =====================================================
-  // DEPARTMENTS (employee's own department dropdown)
+  // DEPARTMENTS
   // =====================================================
 
   loadDepartments(): void {
@@ -332,7 +350,7 @@ export class BgemployeeMaster implements OnInit {
   }
 
   // =====================================================
-  // ZONE → DEALER CHECKBOX MAPPING
+  // ZONE → DEALER MULTI-ZONE SELECTION
   // =====================================================
 
   loadZones(): void {
@@ -344,12 +362,59 @@ export class BgemployeeMaster implements OnInit {
     });
   }
 
+  // ── helpers for the CURRENT zone's checkbox list ──────────────────
+
+  get currentZoneSelection(): Set<number> {
+    if (!this.selectedZone) return new Set();
+    if (!this.zoneSelectionMap.has(this.selectedZone)) {
+      this.zoneSelectionMap.set(this.selectedZone, new Set());
+    }
+    return this.zoneSelectionMap.get(this.selectedZone)!;
+  }
+
+  isDealerSelected(dealerId: number): boolean {
+    return this.currentZoneSelection.has(dealerId);
+  }
+
+  toggleDealer(dealerId: number): void {
+    const sel = this.currentZoneSelection;
+    sel.has(dealerId) ? sel.delete(dealerId) : sel.add(dealerId);
+  }
+
+  toggleSelectAll(event: any): void {
+    const sel = this.currentZoneSelection;
+    if (event.target.checked) {
+      this.filteredZoneDealers.forEach(d => sel.add(d.dealerId));
+    } else {
+      this.filteredZoneDealers.forEach(d => sel.delete(d.dealerId));
+    }
+  }
+
+  get allFilteredSelected(): boolean {
+    const sel = this.currentZoneSelection;
+    return this.filteredZoneDealers.length > 0
+        && this.filteredZoneDealers.every(d => sel.has(d.dealerId));
+  }
+
+  get filteredZoneDealers(): ZoneDealerViewModel[] {
+    const term = this.dealerSearchTerm.trim().toLowerCase();
+    if (!term) return this.zoneDealers;
+    return this.zoneDealers.filter(d =>
+      d.dealerName?.toLowerCase().includes(term) ||
+      d.dealerCode?.toLowerCase().includes(term) ||
+      d.cityName?.toLowerCase().includes(term)
+    );
+  }
+
+  get currentZoneCheckedCount(): number {
+    return this.currentZoneSelection.size;
+  }
+
+  // ── zone change: load dealers, KEEP existing selection ─────────────
+
   onZoneChange(): void {
-    this.zoneDealers       = [];
-    this.selectedDealerIds = new Set<number>();
-    this.dealerSearchTerm  = '';
-    this.employeeData.mappedZones   = this.selectedZone;
-    this.employeeData.mappedZoneIds = '';
+    this.zoneDealers      = [];
+    this.dealerSearchTerm = '';
 
     if (!this.selectedZone) return;
 
@@ -366,52 +431,160 @@ export class BgemployeeMaster implements OnInit {
     });
   }
 
-  get filteredZoneDealers(): ZoneDealerViewModel[] {
-    const term = this.dealerSearchTerm.trim().toLowerCase();
-    if (!term) return this.zoneDealers;
-    return this.zoneDealers.filter(d =>
-      d.dealerName?.toLowerCase().includes(term) ||
-      d.dealerCode?.toLowerCase().includes(term) ||
-      d.cityName?.toLowerCase().includes(term)
-    );
+  onAddZoneDealers(): void {
+    if (!this.selectedZone) return;
+
+    const sel = this.currentZoneSelection;
+    if (sel.size === 0) return;
+
+    const zone = this.selectedZone;
+
+    // replace old rows for this zone
+    this.addedDealers = this.addedDealers.filter(row => row.zone !== zone);
+
+    this.zoneDealers
+      .filter(d => sel.has(d.dealerId))
+      .forEach(d => {
+        this.addedDealers.push({
+          zone,
+          dealerId:   d.dealerId,
+          dealerName: d.dealerName,
+          dealerCode: d.dealerCode,
+          cityName:   d.cityName ?? d.city,
+        });
+
+        // dealer now belongs to this employee — clear the "assigned to other" flag
+        this.assignedDealersMap.delete((d.dealerCode || '').trim());
+      });
+
+    this.syncPayloadFromAddedDealers();
   }
 
-  isDealerSelected(dealerId: number): boolean {
-    return this.selectedDealerIds.has(dealerId);
-  }
+  // ── remove a single row from the summary table ─────────────────────
 
-  toggleDealer(dealerId: number): void {
-    if (this.selectedDealerIds.has(dealerId)) {
-      this.selectedDealerIds.delete(dealerId);
-    } else {
-      this.selectedDealerIds.add(dealerId);
+  removeAddedDealer(dealerId: number, zone: string): void {
+    const removedRow = this.addedDealers.find(r => r.dealerId === dealerId && r.zone === zone);
+
+    this.addedDealers = this.addedDealers
+      .filter(r => !(r.dealerId === dealerId && r.zone === zone));
+    this.zoneSelectionMap.get(zone)?.delete(dealerId);
+
+    // if this dealer originally belonged to another employee, restore the warning
+    if (removedRow) {
+      const code = (removedRow.dealerCode || '').trim();
+      const original = this.originalAssignedDealersMap.get(code);
+      if (original) {
+        this.assignedDealersMap.set(code, original);
+      }
     }
-    this.syncMappedFieldsFromSelection();
+
+    this.syncPayloadFromAddedDealers();
   }
 
-  toggleSelectAll(event: any): void {
-    const checked = event.target.checked;
-    if (checked) {
-      this.filteredZoneDealers.forEach(d => this.selectedDealerIds.add(d.dealerId));
-    } else {
-      this.filteredZoneDealers.forEach(d => this.selectedDealerIds.delete(d.dealerId));
+    private pruneStaleAssignments(): void {
+      if (!this.addedDealers.length || this.assignedDealersMap.size === 0) return;
+
+      const stillValid: any[] = [];
+
+      this.addedDealers.forEach(row => {
+        const code     = (row.dealerCode || '').trim();
+        const conflict = this.assignedDealersMap.get(code);
+
+        if (conflict) {
+          this.zoneSelectionMap.get(row.zone)?.delete(row.dealerId);
+          this.removedDueToReassignment.push({
+            dealerName: row.dealerName,
+            assignedTo: conflict.employeeName || conflict.employeeCode,
+          });
+        } else {
+          stillValid.push(row);
+        }
+      });
+
+      if (this.removedDueToReassignment.length) {
+        this.addedDealers = stillValid;
+        this.syncPayloadFromAddedDealers();
+      }
     }
-    this.syncMappedFieldsFromSelection();
+  // ── sync payload fields from addedDealers ──────────────────────────
+
+  private syncPayloadFromAddedDealers(): void {
+    const zones = [...new Set(this.addedDealers.map(r => r.zone))];
+    this.employeeData.mappedZones    = zones.join(',');
+    this.employeeData.mappedZoneIds  = this.addedDealers.map(r => r.dealerId).join(',');
+    this.employeeData.dealerCode     = this.addedDealers.map(r => r.dealerCode).join(',');
+    this.selectedLocations           = this.addedDealers.map(r => r.dealerCode);
   }
 
-  get allFilteredSelected(): boolean {
-    return this.filteredZoneDealers.length > 0 &&
-      this.filteredZoneDealers.every(d => this.selectedDealerIds.has(d.dealerId));
+  // ── restore selections in edit mode ───────────────────────────────
+
+  private restoreZoneDealerSelections(data: any): void {
+    if (!data.mappedZones || !data.mappedZoneIds) return;
+
+    const savedZones = String(data.mappedZones)
+      .split(',').map((z: string) => z.trim()).filter(Boolean);
+    const savedIds = String(data.mappedZoneIds)
+      .split(',').map((id: string) => Number(id.trim())).filter(Boolean);
+
+    savedZones.forEach(zone => {
+      this.zoneMasterService.getDealersByZone(zone).subscribe({
+        next: (res: ZoneDealerViewModel[]) => {
+          const matched = (res ?? []).filter(d => savedIds.includes(d.dealerId));
+
+          this.zoneSelectionMap.set(zone, new Set<number>(matched.map(d => d.dealerId)));
+
+          matched.forEach(d => {
+            if (!this.addedDealers.some(r => r.dealerId === d.dealerId && r.zone === zone)) {
+              this.addedDealers.push({
+                zone,
+                dealerId:   d.dealerId,
+                dealerName: d.dealerName,
+                dealerCode: d.dealerCode,
+                cityName:   d.cityName ?? d.city,
+              });
+            }
+          });
+
+          this.syncPayloadFromAddedDealers();
+          this.pruneStaleAssignments();   // NEW
+        },
+      });
+    });
   }
 
-  private syncMappedFieldsFromSelection(): void {
-    const selected = this.zoneDealers.filter(d => this.selectedDealerIds.has(d.dealerId));
+  // =====================================================
+  // ASSIGNED DEALERS (belonging to OTHER BG employees)
+  // =====================================================
 
-    this.employeeData.mappedZones    = this.selectedZone;
-    this.employeeData.mappedZoneIds = selected.map(d => d.dealerId).join(',');
-    this.employeeData.dealerCode    = selected.map(d => d.dealerCode).join(',');
+  loadAssignedDealers(): void {
+    const excludeId = this.employeeData?.id || 0;
 
-    this.selectedLocations = selected.map(d => d.dealerCode);
+    this.bgEmployeeService.getAssignedDealers(excludeId).subscribe({
+      next: (res: any[]) => {
+        this.assignedDealersMap.clear();
+        this.originalAssignedDealersMap.clear();
+
+        (res ?? []).forEach(a => {
+          const code = String(a.dealerCode ?? a.DealerCode ?? '').trim();
+          if (!code) return;
+
+          const info = {
+            employeeCode: a.employeeCode ?? a.EmployeeCode ?? '',
+            employeeName: a.employeeName ?? a.EmployeeName ?? '',
+          };
+
+          this.assignedDealersMap.set(code, info);
+          this.originalAssignedDealersMap.set(code, info);
+        });
+
+        this.pruneStaleAssignments();   // NEW
+      },
+      error: (err) => console.error('Assigned dealers load error', err),
+    });
+  }
+
+  getDealerAssignment(dealerCode: string): { employeeCode: string; employeeName: string } | null {
+    return this.assignedDealersMap.get((dealerCode || '').trim()) ?? null;
   }
 
   // =====================================================
@@ -454,7 +627,6 @@ export class BgemployeeMaster implements OnInit {
       });
     } else {
       this.selectedDepartments = this.selectedDepartments.filter(d => d !== dept);
-
       const removed = (this.rolesByDepartment[dept] ?? []).map(r => r.name);
       delete this.rolesByDepartment[dept];
       this.selectedRoles = this.selectedRoles.filter(r => !removed.includes(r));
@@ -529,56 +701,34 @@ export class BgemployeeMaster implements OnInit {
   }
 
   get isFormValid(): boolean {
-  const d = this.employeeData;
+    const d = this.employeeData;
 
-  const checks = {
-    firstName:     !!d.firstName?.trim(),
-    lastName:      !!d.lastName?.trim(),
-    gender:        !!d.gender,
-    mobile:        /^\d{10}$/.test(String(d.mobile ?? '')),
-    state:         !!d.state,
-    city:          !!d.city,
-    pincode:       /^\d{6}$/.test(String(d.pincode ?? '')),
-    dateOfJoin:    !!d.dateOfJoin,
-    dateOfBirth:   !!d.dateOfBirth,
-    effectiveDate: !!d.effectiveDate,
-    department:    !!d.department,
-    zone:          !!this.selectedZone,
-    dealers:       this.selectedDealerIds.size > 0,
-  };
+    const coreFilled =
+      !!d.firstName?.trim() &&
+      !!d.lastName?.trim() &&
+      !!d.gender &&
+      /^\d{10}$/.test(String(d.mobile ?? '')) &&
+      !!d.state && !!d.city &&
+      /^\d{6}$/.test(String(d.pincode ?? '')) &&
+      !!d.dateOfJoin && !!d.dateOfBirth && !!d.effectiveDate && !!d.department &&
+      this.addedDealers.length > 0;
 
-  console.log('[isFormValid] core checks:', checks);
+    if (!coreFilled) return false;
 
-  const coreFilled = Object.values(checks).every(v => v === true);
+    if (d.createLogin) {
+      const strongPwd = this.isEditMode
+        ? true
+        : /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/.test(String(d.password ?? ''));
 
-  if (!coreFilled) {
-    console.log('[isFormValid] FAILED on core checks above ☝️');
-    return false;
-  }
+      const emailOk    = !!d.emailId?.trim();
+      const categoryOk = this.selectedDepartments.length > 0;
+      const roleOk     = this.selectedRoles.length > 0;
 
-  if (d.createLogin) {
-    const strongPwd = this.isEditMode
-      ? true
-      : /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/.test(String(d.password ?? ''));
-
-    const loginChecks = {
-      emailOk:    !!d.emailId?.trim(),
-      strongPwd:  strongPwd,
-      categoryOk: this.selectedDepartments.length > 0,
-      roleOk:     this.selectedRoles.length > 0,
-    };
-
-    console.log('[isFormValid] login checks (createLogin=true):', loginChecks);
-
-    if (!loginChecks.emailOk || !loginChecks.strongPwd || !loginChecks.categoryOk || !loginChecks.roleOk) {
-      console.log('[isFormValid] FAILED on login checks above ☝️');
-      return false;
+      if (!emailOk || !strongPwd || !categoryOk || !roleOk) return false;
     }
-  }
 
-  console.log('[isFormValid] ALL PASSED — button should be enabled');
-  return true;
-}
+    return true;
+  }
 
   // =====================================================
   // SUBMIT
@@ -596,6 +746,10 @@ export class BgemployeeMaster implements OnInit {
       });
     });
 
+    const zones       = [...new Set(this.addedDealers.map(r => r.zone))];
+    const dealerIds   = this.addedDealers.map(r => r.dealerId);
+    const dealerCodes = this.addedDealers.map(r => r.dealerCode);
+
     const payload = {
       id:            this.employeeData.id || 0,
       employeeCode:  this.employeeData.employeeCode,
@@ -603,10 +757,8 @@ export class BgemployeeMaster implements OnInit {
       lastName:      this.employeeData.lastName,
       gender:        this.employeeData.gender,
       mobile:        this.employeeData.mobile,
-
       emailId:       this.employeeData.createLogin ? this.employeeData.emailId : null,
       password:      this.employeeData.createLogin ? (this.employeeData.password || null) : null,
-
       state:         Number(this.employeeData.state),
       city:          Number(this.employeeData.city),
       pincode:       this.employeeData.pincode,
@@ -617,25 +769,23 @@ export class BgemployeeMaster implements OnInit {
       isActive:      this.employeeData.isActive ?? true,
       department:    this.employeeData.department,
 
-      profileId:     this.pendingProfileId > 0 ? this.pendingProfileId : null,
-      profileImage:  this.imagePreview as string,
+      profileId:    this.pendingProfileId > 0 ? this.pendingProfileId : null,
+      profileImage: this.imagePreview as string,
 
-      mappedZones:   this.employeeData.mappedZones   || '',
-      mappedZoneIds: this.employeeData.mappedZoneIds || '',
+      mappedZones:   zones.join(','),
+      mappedZoneIds: dealerIds.join(','),
+      dealerCode:    dealerCodes.join(','),
+      locationCode:  dealerCodes.join(','),
 
-      locationCode:  this.selectedLocations.join(','),
-      dealerCode:    this.employeeData.dealerCode,
-
-      // login toggle + department/role cascade
       createLogin:         this.employeeData.createLogin ?? false,
       selectedDepartments: this.employeeData.createLogin ? this.selectedDepartments : [],
       roles:               this.employeeData.createLogin ? this.selectedRoles       : [],
       roleMappings:        this.employeeData.createLogin ? roleMappings              : [],
 
-      createdBy:     'admin',
-      createdDate:   new Date(),
-      updatedBy:     'admin',
-      updatedDate:   new Date(),
+      createdBy:   'admin',
+      createdDate: new Date(),
+      updatedBy:   'admin',
+      updatedDate: new Date(),
     };
 
     const save$ = this.isEditMode
