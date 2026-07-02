@@ -145,7 +145,7 @@
                                         </option>
                                     </select>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <label class="form-label">&nbsp;</label><br>
                                     <button type="submit" class="btn btn-primary btn-sm me-2"
                                         [disabled]="this.formData.jobNo <= 0">
@@ -172,6 +172,7 @@
                                         <th>Part Description</th>
                                         <th>Qty</th>
                                         <th>Rate</th>
+                                        <th>HSN Code</th>
                                         <!-- <th>Stock</th> -->
                                         <th>Issue Type</th>
                                         <th>Inward Sr No.</th>
@@ -206,6 +207,7 @@
                                         <td class="text-nowrap">{{ item.itemdesc }}</td>
                                         <td class="text-nowrap">{{ item.quantity }}</td>
                                         <td class="text-nowrap">{{ item.itemRate }}</td>
+                                        <td class="text-nowrap">{{ item.hsncode }}</td>
                                         <!-- <td class="text-nowrap">{{ item.stock }}</td> -->
                                         <td class="text-nowrap">{{ item.issueType | getIssueTypeName: issueTypes }}</td>
                                         <td>{{ item.inwardsrno }}</td>
@@ -232,7 +234,7 @@
                                         <td colspan="8"></td>
                                         <td>{{ getTotalAmount() }}</td>
                                         <td></td>
-                                        <td></td>
+                                        <!--<td></td> -->
                                     </tr>
                                 </tfoot>
 

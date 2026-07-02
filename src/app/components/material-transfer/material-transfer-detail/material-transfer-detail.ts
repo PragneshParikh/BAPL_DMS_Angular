@@ -68,6 +68,8 @@ export class MaterialTransferDetail implements OnInit {
     sgst: '',
     igst: '',
 
+    hsncode: '',
+
     cgstAmount: '',
     sgstAmount: '',
     igstAmount: '',
@@ -320,10 +322,10 @@ export class MaterialTransferDetail implements OnInit {
       return;
     }
 
-    // if (this.newItem.technician === null || this.newItem.technician === 0) {
-    //   this.toast.show('Please select the technician.', { classname: 'bg-warning text-white', delay: 5000 });
-    //   return;
-    // }
+    if (this.newItem.technician === null || this.newItem.technician === 0) {
+      this.toast.show('Please select the technician.', { classname: 'bg-warning text-white', delay: 5000 });
+      return;
+    }
 
     if (this.newItem.issueType === null || this.newItem.issueType === '') {
       this.toast.show('Please select the issuetype.', { classname: 'bg-warning text-white', delay: 5000 });
@@ -360,25 +362,24 @@ export class MaterialTransferDetail implements OnInit {
       // ← Increase quantity and recalculate tax
       // const updatedQuantity = Number(this.items[index].quantity) + Number(this.newItem.quantity);
 
-      const totalGST = Number(this.items[index].cgstPercent) + Number(this.items[index].sgstPercent) + Number(this.items[index].igstPercent);
-      // const finalPrice = Number(this.items[index].itemRate) * this.newItem.quantity * (1 + totalGST / 100);
-      // const taxDetails = this.calculateGST(finalPrice, totalGST);
-      const selectedItem = this.itemList.find(item => item.itemcode === selectedItem.itemcode);
-
-      const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
+      const totalGST = Number(this.items[index].cgst) + Number(this.items[index].sgst) + Number(this.items[index].igst);
+      const finalPrice = Number(this.items[index].itemRate) * this.newItem.quantity * (1 + totalGST / 100);
+      const taxDetails = this.calculateGST(finalPrice, totalGST);
       const totalGSTAmount = Number(taxDetails.gstAmount);
 
       this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
 
       // itemToSave.quantity = this.newItem.quantity;
-      itemToSave.amount = taxDetails.finalPrice;
-      itemToSave.cgstAmount = totalGST > 0 ? ((Number(this.items[index].cgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      itemToSave.sgstAmount = totalGST > 0 ? ((Number(this.items[index].sgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      itemToSave.igstAmount = totalGST > 0 ? ((Number(this.items[index].igstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
+      itemToSave.mrp = this.items[index].mrp;
+
+      itemToSave.cgstAmount = totalGST > 0 ? ((Number(this.items[index].cgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      itemToSave.sgstAmount = totalGST > 0 ? ((Number(this.items[index].sgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      itemToSave.igstAmount = totalGST > 0 ? ((Number(this.items[index].igst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
       itemToSave.batchClosingQty = this.items[index].batchClosingQty ?? this.newItem.batchClosingQty;
       itemToSave.stock = itemToSave.batchClosingQty - this.newItem.quantity;
 
-      itemToSave.status = 'Modified';
+      itemToSave.status = this.newItem.id > 0 ? 'Modified' : 'Added';
       this.items[index] = itemToSave;
 
     } else {
@@ -392,7 +393,11 @@ export class MaterialTransferDetail implements OnInit {
       const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
       const totalGSTAmount = Number(taxDetails.gstAmount);
 
-      itemToSave.itemRate = Number(taxDetails.basePrice).toFixed(2);
+      this.newItem.amount = Number(taxDetails.basePrice).toFixed(2);
+      this.newItem.mrp = taxDetails.finalPrice;
+
+      itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
+      itemToSave.mrp = taxDetails.finalPrice;
 
       itemToSave.cgstAmount = totalGST > 0 ? ((Number(this.newItem.cgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
       itemToSave.sgstAmount = totalGST > 0 ? ((Number(this.newItem.sgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
@@ -408,9 +413,6 @@ export class MaterialTransferDetail implements OnInit {
 
       itemToSave.createdBy = this.storageService.getUserId();
       itemToSave.createdDate = new Date();
-
-      itemToSave.mrp = Number((Number(this.newItem.itemRate) || 0) * (this.newItem.quantity || 0)).toFixed(2);
-      itemToSave.amount = (Number(this.newItem.itemRate) * (this.newItem.quantity || 0)).toFixed(2);
 
       this.items = [...this.items, itemToSave];
     }
@@ -463,6 +465,7 @@ export class MaterialTransferDetail implements OnInit {
   }
 
   resetNewItem() {
+    this.totalGST = 0;
     this.newItem = {
       //#region Item Table Field
       id: 0,
@@ -482,6 +485,8 @@ export class MaterialTransferDetail implements OnInit {
       cgst: '',
       sgst: '',
       igst: '',
+
+      hsncode: '',
 
       cgstAmount: '',
       sgstAmount: '',
@@ -543,9 +548,7 @@ export class MaterialTransferDetail implements OnInit {
     if (selectedItem) {
       this.loader.show();
 
-      // const totalGST = res.reduce(
-      //   (sum, tax) => sum + Number(tax.taxRate || 0), 0
-      // );
+      this.totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage);
 
       // const cgstPercent = res.find((x: any) => x.taxCode.startsWith('CGST'))?.taxRate || 0;
       // const sgstPercent = res.find((x: any) => x.taxCode.startsWith('SGST'))?.taxRate || 0;
@@ -556,15 +559,19 @@ export class MaterialTransferDetail implements OnInit {
       const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
       this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
 
+      const totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage) //+ Number(this.newItem.igst);
+      const taxDetails = this.calculateGST(selectedItem.custprice, totalGST);
+
       this.newItem.itemdesc = selectedItem.itemdesc;
       this.newItem.itemcode = selectedItem.itemcode;
       this.newItem.itemId = selectedItem.id;
-      this.newItem.itemRate = Number(selectedItem.custprice).toFixed(2);
+      this.newItem.itemRate = taxDetails.basePrice;
+      this.newItem.hsncode = selectedItem.hsncode;
       this.newItem.batchClosingQty = selectedItem.batchClosingQty;
 
-      this.newItem.cgst = selectedItem.cgst;
-      this.newItem.sgst = selectedItem.sgst;
-      // this.newItem.igst = selectedItem.igst;
+      this.newItem.cgst = selectedItem.cgstPercentage;
+      this.newItem.sgst = selectedItem.sgstPercentage;
+      this.newItem.igst = selectedItem.igstPercentage;
 
       // this.newItem.cgstPercent = cgstPercent;
       // this.newItem.sgstPercent = sgstPercent;
@@ -624,7 +631,7 @@ export class MaterialTransferDetail implements OnInit {
 
     const _item = this.itemList.filter(x => x.itemcode === row.itemcode);
 
-    this.totalGST = _item.reduce((sum, item) => sum + Number(item.cgst || 0) + Number(item.sgst || 0), 0);
+    this.totalGST = _item.reduce((sum, item) => sum + Number(item.cgstPercentage || 0) + Number(item.sgstPercentage || 0), 0);
 
     this.newItem = {
       id: row.id,
@@ -632,10 +639,11 @@ export class MaterialTransferDetail implements OnInit {
       itemId: row.itemId,
       itemcode: row.itemcode,
       itemdesc: row.itemdesc,
+      hsncode: row.hsncode,
       quantity: row.quantity,
       itemRate: row.itemRate,
       stock: row.stock,
-      batchClosingQty: row.batchClosingQty,
+      batchClosingQty: row.batchClosingQty ?? _item[0].batchClosingQty,
       issueType: row.issueType,
       // issueSubType: '',
       inwardsrno: '',
