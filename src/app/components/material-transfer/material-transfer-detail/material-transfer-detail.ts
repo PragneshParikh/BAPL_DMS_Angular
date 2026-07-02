@@ -332,12 +332,12 @@ export class MaterialTransferDetail implements OnInit {
       return;
     }
 
-    if (this.items.filter(x => x.itemcode === this.newItem.itemcode).length > 0 && this.newItem.isEdit === false) {
+    if (this.items.filter(x => x.itemcode === this.newItem.itemcode).length > 0 && this.newItem.isEdit === false && this.items.filter(x => x.status !== 'Deleted').length > 0) {
       this.toast.show('Part already exists.', { classname: 'bg-warning text-white', delay: 5000 });
       return;
     }
 
-    let index = this.items.findIndex(x => x.itemcode === this.newItem.itemcode);
+    let index = this.items.findIndex(x => x.itemcode === this.newItem.itemcode && x.status !== 'Deleted');
 
     const itemToSave = {
       ...this.newItem,
@@ -574,7 +574,7 @@ export class MaterialTransferDetail implements OnInit {
       // this.newItem.sgstPercent = sgstPercent;
       // this.newItem.igstPercent = igstPercent;
 
-      this.totalGST = selectedItem.cgst + selectedItem.sgst;
+      // this.totalGST = selectedItem.cgst + selectedItem.sgst;
 
       if (this.newItem.batchClosingQty > 0) {
         this.newItem.quantity = 1;
@@ -761,6 +761,12 @@ export class MaterialTransferDetail implements OnInit {
         this.toast.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
       }
     })
+  }
+
+  getRowNumber(index: number): number {
+    return this.items
+      .filter(item => item.status !== 'Deleted')
+      .findIndex(item => item === this.items[index]) + 1;
   }
 
 }

@@ -179,11 +179,11 @@
                                         <th>Issue Sr No.</th>
                                         <th>Technician</th>
                                         <!-- <th>CGST({{cgstPercent}}%)</th> -->
-                                        <th>CGST</th>
+                                        <th>CGST Amt.</th>
                                         <!-- <th>SGST({{sgstPercent}}%)</th> -->
-                                        <th>SGST</th>
+                                        <th>SGST Amt.</th>
                                         <!-- <th>IGST({{igstPercent}}%)</th> -->
-                                        <th>IGST</th>
+                                        <th>IGST Amt. </th>
                                         <th>Amount</th>
                                         <th>MRP</th>
                                         <!-- <th>Remarks</th> -->
@@ -202,7 +202,9 @@
                                                 <i class="ri-delete-bin-line"></i>
                                             </button>
                                         </td>
-                                        <td class="text-nowrap">{{ i + 1 }}</td>
+                                        <td class="text-nowrap">
+                                            {{ getRowNumber(i) }}
+                                        </td>
                                         <td class="text-nowrap">{{ item.itemcode }}</td>
                                         <td class="text-nowrap">{{ item.itemdesc }}</td>
                                         <td class="text-nowrap">{{ item.quantity }}</td>
@@ -231,10 +233,10 @@
                                     <tr>
                                         <td colspan="4" class="text-end"><strong>Total</strong></td>
                                         <td>{{ getTotalQty() }}</td>
-                                        <td colspan="8"></td>
+                                        <td colspan="9"></td>
                                         <td>{{ getTotalAmount() }}</td>
                                         <td></td>
-                                        <!--<td></td> -->
+                                        <!-- <td></td> -->
                                     </tr>
                                 </tfoot>
 
