@@ -94,7 +94,7 @@ export class VehicleSaleBill {
     const from = this.filter.fromDate ? new Date(this.filter.fromDate) : undefined;
 
     const to = this.filter.toDate ? new Date(this.filter.toDate) : undefined;
-    const Status = this.filter.Status ? this.filter.Status : undefined;
+    const Status = this.filter.status ? this.filter.status : undefined;
 
     this.service.getAllVehicleSaleBills(this.dealerCode, this.searchText, from, to, Status)
       .subscribe({
