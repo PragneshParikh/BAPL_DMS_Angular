@@ -251,7 +251,7 @@ export class HSRPOrder implements OnInit {
 
   // ---------------- SAVE ----------------
   submitHSRPOrder() {
-
+this.loaderService.show();
     let hasError = false;
 
     this.paginatedOrders.forEach(item => {
@@ -265,6 +265,7 @@ export class HSRPOrder implements OnInit {
     });
 
     if (hasError) {
+      this.loaderService.hide();
       this.toasterService.show('Please complete plate selection for highlighted rows.', {
         classname: 'bg-warning text-white',
         delay: 5000
@@ -277,6 +278,7 @@ export class HSRPOrder implements OnInit {
 
     const missingRegistration = selectedItems.filter(x => !x.regNo || x.regNo.trim() === '');
     if (missingRegistration.length > 0) {
+      this.loaderService.hide();
       const chassisList = selectedItems.filter(x => !x.regNo || x.regNo.trim() === '').map(x => x.chassisNo);
       this.toasterService.show(`Registration number is missing for chassis: ${chassisList.join(', ')}`, {
         classname: 'bg-warning text-white',
@@ -286,6 +288,7 @@ export class HSRPOrder implements OnInit {
     }
 
     if (selectedItems.length === 0) {
+      this.loaderService.hide();
       this.toasterService.show('Please select atleast one row', {
         classname: 'bg-warning text-white',
         delay: 5000
@@ -314,7 +317,7 @@ export class HSRPOrder implements OnInit {
       this.hsrpService.updateBulkHSRPOrder(payload).subscribe({
         next: (res) => {
 
-          console.log(res);
+          this.loaderService.hide();
 
           this.toasterService.show('HSRP Order Saved', {
             classname: 'bg-success text-white',
@@ -324,6 +327,7 @@ export class HSRPOrder implements OnInit {
           this.getPendingHSRPOrder();
         },
         error: () => {
+          this.loaderService.hide();
           this.toasterService.show('Error saving order', {
             classname: 'bg-danger text-white',
             delay: 5000
@@ -341,6 +345,7 @@ export class HSRPOrder implements OnInit {
             );
 
             if (failed) {
+              this.loaderService.hide();
               this.toasterService.show(
                 failed.hsrpresponse || 'HSRP order failed',
                 {
@@ -352,6 +357,7 @@ export class HSRPOrder implements OnInit {
             }
           }
 
+          this.loaderService.hide();
           this.toasterService.show('HSRP Order Saved', {
             classname: 'bg-success text-white',
             delay: 5000
