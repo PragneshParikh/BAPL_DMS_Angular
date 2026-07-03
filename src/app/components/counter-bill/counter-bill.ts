@@ -6,6 +6,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { CounterBillService } from '../../core/services/counter-bill-service';
 import { StorageService } from '../../core/services/storage';
 import { DealerService } from '../../core/services/dealer-service';
+import { LoaderService } from '../../core/services/loader';
 
 @Component({
   selector: 'app-counter-bill',
@@ -38,7 +39,7 @@ export class CounterBill implements OnInit {
   selectedDealer: string = '';
   showDropdown: boolean=false;
 
-  constructor(private router: Router, private counterBillService: CounterBillService,
+  constructor(private router: Router, private counterBillService: CounterBillService,private loader: LoaderService,
     private storageService: StorageService, private dealerService: DealerService,private eRef: ElementRef) { }
 @ViewChild('dealerContainer')
 dealerContainer!: ElementRef;
@@ -154,43 +155,29 @@ onDocumentClick(event: MouseEvent) {
       item.header.id
     ]);
   }
-  // loadData(): void {
-
-  //   this.counterBillService.getAllCounterBills(this.dealerCode,this.filter.fromDate,this.filter.toDate,this.searchTerm).subscribe({
-  //     next: (res) => {
-  //       console.log(res);
-
-  //       this.counterBills = res;
-  //       this.filteredCounterBills = [...res];
-
-  //       this.updatePagination();
-  //     },
-  //     error: (err) => {
-  //       console.error(err);
-  //     }
-  //   });
-  // }
-
+  
   loadData(): void {
-    debugger;
+    this.loader.show();
     const fromDate = this.filter.fromDate ? new Date(this.filter.fromDate) : undefined;
     const toDate = this.filter.toDate ? new Date(this.filter.toDate) : undefined;
 
     this.counterBillService.getAllCounterBills(this.dealerCode, fromDate, toDate, this.searchTerm,this.selectedDealer)
       .subscribe({
         next: (res) => {
-          console.log(res);
+          this.loader.hide();
 
           this.counterBills = res;
           this.filteredCounterBills = [...res];
           this.updatePagination();
         },
         error: (err) => {
+          this.loader.hide();
           console.error(err);
         }
       });
   }
   downloadExcel(): void {
+    this.loader.show();
     let dealerCode = '';
     const isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     if (!isSuperAdmin) {
@@ -200,7 +187,7 @@ onDocumentClick(event: MouseEvent) {
     )
       .subscribe({
         next: (response: Blob) => {
-
+this.loader.hide();
           const blob = new Blob(
             [response],
             {
@@ -221,6 +208,7 @@ onDocumentClick(event: MouseEvent) {
           window.URL.revokeObjectURL(url);
         },
         error: (err) => {
+          this.loader.hide();
           console.error(err);
         }
       });
