@@ -312,6 +312,8 @@ export class MaterialTransferDetail implements OnInit {
 
   onAddItem() {
 
+    const _existingItem = this.items.filter(x => x.itemcode === this.newItem.itemcode);
+
     if (this.newItem.itemId <= 0) {
       this.toast.show('Please select an item to add.', { classname: 'bg-warning text-white', delay: 5000 });
       return;
@@ -332,7 +334,7 @@ export class MaterialTransferDetail implements OnInit {
       return;
     }
 
-    if (this.items.filter(x => x.itemcode === this.newItem.itemcode).length > 0 && this.newItem.isEdit === false && this.items.filter(x => x.status !== 'Deleted').length > 0) {
+    if (_existingItem.length > 0 && _existingItem[0].status !== 'Deleted' && !this.newItem.isEdit) {
       this.toast.show('Part already exists.', { classname: 'bg-warning text-white', delay: 5000 });
       return;
     }

@@ -87,6 +87,10 @@
                                             <span [title]="item.itemcode + ' - ' + item.itemdesc">
                                                 {{ item.itemcode }} - {{ item.itemdesc }}
                                             </span>
+                                            <br>
+                                            <small>
+                                                {{ item.itemcode }} | Stock : {{ item.batchClosingQty }}
+                                            </small>
                                         </ng-template>
 
                                     </ng-select>
