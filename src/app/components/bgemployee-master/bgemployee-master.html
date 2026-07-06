@@ -18,7 +18,7 @@
     <form #bgEmployeeForm="ngForm" (ngSubmit)="onSubmit(bgEmployeeForm)" autocomplete="off">
       <div class="row">
 
-        <!-- PROFILE IMAGE -------------------------------- -->
+        <!-- PROFILE IMAGE -->
         <div class="col-md-2 text-center">
           <div class="border rounded overflow-hidden bg-white d-flex align-items-center justify-content-center"
             style="width:100px; height:120px; margin:auto;">
@@ -44,10 +44,10 @@
           </div>
         </div>
 
-        <!-- FORM FIELDS ---------------------------------- -->
+        <!-- FORM FIELDS -->
         <div class="col-md-10 ps-2">
 
-          <!-- ROW 1 : Code | First Name | Last Name | Gender -->
+          <!-- ROW 1: Code | First Name | Last Name | Gender -->
           <div class="row mb-2">
             <div class="col-md-3">
               <label class="form-label mb-1">Employee Code</label>
@@ -79,7 +79,7 @@
             </div>
           </div>
 
-          <!-- ROW 2 : Mobile | State | City | Pincode -->
+          <!-- ROW 2: Mobile | State | City | Pincode -->
           <div class="row mb-2">
             <div class="col-md-3">
               <label class="form-label mb-1">Mobile No. <span class="text-danger">*</span></label>
@@ -120,7 +120,7 @@
             </div>
           </div>
 
-          <!-- ROW 3 : DOJ | DOB | Effective Date | Reporting To -->
+          <!-- ROW 3: DOJ | DOB | Effective Date | Reporting To -->
           <div class="row mb-2">
             <div class="col-md-3">
               <label class="form-label mb-1">Date of Joining <span class="text-danger">*</span></label>
@@ -142,13 +142,19 @@
 
             <div class="col-md-3">
               <label class="form-label mb-1">Reporting To</label>
-              <input type="text" class="form-control form-control-sm py-1"
-                [(ngModel)]="employeeData.reportingTo" name="reportingTo"
-                placeholder="Supervisor name / code">
+              <select class="form-select form-select-sm py-1"
+                [ngModel]="employeeData.reportingTo ?? ''"
+                (ngModelChange)="employeeData.reportingTo = $event"
+                name="reportingTo">
+                <option value="">Select Supervisor</option>
+                <option *ngFor="let r of reportingToOptions" [value]="r.id">
+                  {{ r.label }}
+                </option>
+              </select>
             </div>
           </div>
 
-          <!-- ROW 4 : Status | Department -->
+          <!-- ROW 4: Status | Department -->
           <div class="row mb-2">
             <div class="col-md-3">
               <label class="form-label mb-1">Status</label>
@@ -171,10 +177,17 @@
                 </option>
               </select>
             </div>
-          </div>
+              <div class="col-md-3">
+                <label class="form-label mb-1">Email</label>
+                <input type="email" class="form-control form-control-sm py-1"
+                  [(ngModel)]="employeeData.email" name="email" autocomplete="off">
+              </div>
+            </div>
+          
+          
 
           <!-- ============================================ -->
-          <!-- ZONE & DEALER MAPPING (checkbox selection)    -->
+          <!-- ZONE & DEALER MAPPING — MULTI-ZONE          -->
           <!-- ============================================ -->
           <div class="section-card mb-3">
             <div class="section-header">
@@ -183,8 +196,9 @@
 
             <div class="section-body">
 
-              <div class="row g-2 mb-2">
-                <div class="col-md-4">
+              <!-- ZONE DROPDOWN + SEARCH + COUNT + ADD BUTTON -->
+              <div class="row g-2 mb-2 align-items-end">
+                <div class="col-md-3">
                   <label class="form-label mb-1" style="font-size:12px;">
                     Zone <span class="text-danger">*</span>
                   </label>
@@ -193,13 +207,11 @@
                     (ngModelChange)="onZoneChange()"
                     name="selectedZone">
                     <option value="">— Select Zone —</option>
-                    <option *ngFor="let z of zones" [value]="z.zone">
-                      {{ z.zone }}
-                    </option>
+                    <option *ngFor="let z of zones" [value]="z.zone">{{ z.zone }}</option>
                   </select>
                 </div>
 
-                <div class="col-md-5" *ngIf="selectedZone && zoneDealers.length > 0">
+                <div class="col-md-4" *ngIf="selectedZone && zoneDealers.length > 0">
                   <label class="form-label mb-1" style="font-size:12px;">Search dealers</label>
                   <input type="text" class="form-control form-control-sm py-1"
                     [(ngModel)]="dealerSearchTerm"
@@ -207,25 +219,33 @@
                     placeholder="Dealer name, code or city">
                 </div>
 
-                <div class="col-md-3 d-flex align-items-end" *ngIf="selectedZone">
+                <div class="col-md-3 d-flex align-items-center gap-2" *ngIf="selectedZone">
                   <span class="badge bg-primary-subtle text-primary px-2 py-1" style="font-size:12px;">
-                    {{ selectedDealerIds.size }} dealer{{ selectedDealerIds.size === 1 ? '' : 's' }} selected
+                    {{ currentZoneCheckedCount }} selected in {{ selectedZone }}
                   </span>
+                  <button type="button" class="btn btn-success btn-sm px-3"
+                    [disabled]="currentZoneCheckedCount === 0"
+                    (click)="onAddZoneDealers()">
+                    <i class="ri-add-line"></i> Add
+                  </button>
                 </div>
               </div>
 
+              <!-- LOADING -->
               <div *ngIf="loadingDealers" class="text-center py-3 text-muted" style="font-size:13px;">
                 <div class="spinner-border spinner-border-sm me-2" role="status"></div>
                 Loading dealers…
               </div>
 
+              <!-- NO DEALERS FOR THIS ZONE -->
               <div *ngIf="selectedZone && !loadingDealers && zoneDealers.length === 0"
-                   class="alert alert-warning py-2 px-3 mb-0" style="font-size:13px;">
-                No dealers mapped to the {{ selectedZone }} zone yet.
+                   class="alert alert-warning py-2 px-3 mb-2" style="font-size:13px;">
+                No dealers mapped to the {{ selectedZone }} zone.
               </div>
 
+              <!-- DEALER CHECKBOX GRID (2 columns) -->
               <div *ngIf="selectedZone && !loadingDealers && zoneDealers.length > 0"
-                   class="border rounded" style="max-height:320px; overflow-y:auto;">
+                   class="border rounded mb-3" style="max-height:280px; overflow-y:auto;">
 
                 <div class="d-flex align-items-center px-3 py-2 border-bottom bg-light"
                      style="position:sticky; top:0; z-index:1;">
@@ -233,7 +253,8 @@
                     [checked]="allFilteredSelected"
                     (change)="toggleSelectAll($event)"
                     id="selectAllDealers">
-                  <label class="form-check-label fw-semibold mb-0" for="selectAllDealers" style="font-size:13px;">
+                  <label class="form-check-label fw-semibold mb-0"
+                         for="selectAllDealers" style="font-size:13px;">
                     Select all ({{ filteredZoneDealers.length }})
                   </label>
                 </div>
@@ -246,26 +267,95 @@
                       [id]="'dealer-' + d.dealerId"
                       [checked]="isDealerSelected(d.dealerId)"
                       (change)="toggleDealer(d.dealerId)">
-                    <label class="form-check-label flex-grow-1 mb-0" [for]="'dealer-' + d.dealerId">
-                      <span class="fw-semibold">{{ d.dealerName }}</span>
-                      <br>
+                    
+                   <label class="form-check-label flex-grow-1 mb-0"
+                        [for]="'dealer-' + d.dealerId">
+                    <span class="fw-semibold">{{ d.dealerName }}</span>
+                      <span *ngIf="getDealerAssignment(d.dealerCode) as assignment"
+                            class="badge bg-warning-subtle text-warning ms-1"
+                            style="font-size:10px;"
+                            [title]="'Currently assigned to ' + (assignment.employeeName || assignment.employeeCode)">
+                        ⚠ {{ assignment.employeeName || assignment.employeeCode }}
+                      </span>
+                    <br>
                       <span class="text-muted">{{ d.dealerCode }}
                         <ng-container *ngIf="d.cityName"> · {{ d.cityName }}</ng-container>
                       </span>
-                    </label>
+                  </label>
                   </div>
                 </div>
 
-                <div *ngIf="filteredZoneDealers.length === 0" class="text-center text-muted py-3" style="font-size:13px;">
+                <div *ngIf="filteredZoneDealers.length === 0"
+                     class="text-center text-muted py-3" style="font-size:13px;">
                   No dealers match "{{ dealerSearchTerm }}"
                 </div>
               </div>
+
+              <!-- SUMMARY TABLE — added zone-dealer pairs -->
+               <div *ngIf="removedDueToReassignment.length"
+                  class="alert alert-info py-2 px-3 mb-2" style="font-size:12.5px;">
+                <i class="ri-information-line"></i>
+                The following dealer(s) were removed — they're now assigned to someone else:
+                  <ul class="mb-0 mt-1 ps-3">
+                    <li *ngFor="let r of removedDueToReassignment">
+                      <strong>{{ r.dealerName }}</strong> — now with {{ r.assignedTo }}
+                    </li>
+                  </ul>
+              </div>
+              <div *ngIf="addedDealers.length > 0">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="fw-semibold" style="font-size:13px;">
+                    Added Dealers
+                    <span class="badge bg-success ms-1">{{ addedDealers.length }}</span>
+                  </span>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="table table-sm table-bordered table-hover mb-0"
+                         style="font-size:12.5px;">
+                    <thead class="table-light">
+                      <tr>
+                        <th>#</th>
+                        <th>Zone</th>
+                        <th>Dealer Name</th>
+                        <th>Dealer Code</th>
+                        <th>City</th>
+                        <th>Remove</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let row of addedDealers; let i = index">
+                        <td>{{ i + 1 }}</td>
+                        <td>
+                          <span class="badge bg-primary-subtle text-primary">{{ row.zone }}</span>
+                        </td>
+                        <td class="fw-semibold">{{ row.dealerName }}</td>
+                        <td>{{ row.dealerCode }}</td>
+                        <td>{{ row.cityName }}</td>
+                        <td>
+                          <button type="button"
+                            class="btn btn-sm btn-outline-danger py-0 px-2"
+                            (click)="removeAddedDealer(row.dealerId, row.zone)"
+                            title="Remove">
+                            <i class="ri-delete-bin-line"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <small *ngIf="addedDealers.length === 0"
+                     class="text-danger d-block mt-1" style="font-size:12px;">
+                Select dealers from a zone and click Add to confirm.
+              </small>
 
             </div>
           </div>
 
           <!-- ============================================ -->
-          <!-- EMPLOYEE PROFILE MASTER MAPPING              -->
+          <!-- EMPLOYEE PROFILE MASTER MAPPING             -->
           <!-- ============================================ -->
           <div class="section-card mb-3">
             <div class="section-header">
@@ -304,7 +394,7 @@
             </div>
           </div>
 
-          <!-- Email / Password / Category + Roles — shown only when checkbox is checked -->
+          <!-- Email / Password / Category + Roles -->
           <div class="row mb-2 p-2 mx-0 bg-light rounded" *ngIf="employeeData.createLogin">
 
             <div class="col-md-3">
@@ -316,7 +406,7 @@
             <div class="col-md-3">
               <label class="form-label mb-1">
                 Password
-                <small class="text-muted ms-1" *ngIf="isEditMode">(leave blank to keep current)</small>
+                <small class="text-muted ms-1" *ngIf="isEditMode"></small>
               </label>
               <div class="input-group input-group-sm">
                 <input [type]="showPassword ? 'text' : 'password'"
@@ -331,7 +421,7 @@
               <small *ngIf="errors.password" class="text-danger">{{ errors.password }}</small>
             </div>
 
-            <!-- CATEGORY CHECKBOXES (from DepartmentMaster) -->
+            <!-- CATEGORY CHECKBOXES -->
             <div class="col-md-6">
               <label class="form-label mb-1 d-block">Category</label>
               <div class="d-flex flex-wrap gap-3 pt-1">
@@ -347,7 +437,7 @@
               </div>
             </div>
 
-            <!-- ROLES revealed per checked category (from AspNetRoles via RoleCategoryMapping) -->
+            <!-- ROLES revealed per checked category -->
             <div class="col-12 mt-2" *ngIf="selectedDepartments.length">
               <div *ngFor="let dept of selectedDepartments" class="mb-2 ps-2 border-start">
                 <label class="form-label mb-1 d-block fw-semibold">{{ dept }} Roles</label>
@@ -374,7 +464,7 @@
           </div>
           <!-- End login access -->
 
-          <!-- ACTION BUTTONS ------------------------------ -->
+          <!-- ACTION BUTTONS -->
           <div class="text-end mt-2">
             <button type="button" class="btn btn-secondary btn-sm px-3 py-1 me-2"
               (click)="backToList()">Cancel</button>

@@ -90,12 +90,12 @@ export class BgemployeeMasterList implements OnInit {
   // =====================================================
 
   loadEmployees(): void {
-    this.bgEmployeeService.getEmployees().subscribe({
+    this.bgEmployeeService.getEmployeeListView().subscribe({
       next: (response: any[]) => {
         this.employeeList = response ?? [];
         this.applyFilters();
       },
-      error: (err) => console.error('BG Employee load error', err),
+      error: (err) => console.error('BG Employee list-view load error', err),
     });
   }
 
@@ -177,17 +177,49 @@ export class BgemployeeMasterList implements OnInit {
   // AVATAR HELPERS
   // =====================================================
 
-  getInitials(firstName: string, lastName: string): string {
-    const f = firstName?.[0] ?? '';
-    const l = lastName?.[0]  ?? '';
+  getInitials(name: string): string {
+    if (!name) return '';
+    const parts = name.trim().split(' ').filter(Boolean);
+    const f = parts[0]?.[0] ?? '';
+    const l = parts.length > 1 ? parts[parts.length - 1][0] : '';
     return (f + l).toUpperCase();
   }
 
   getAvatarColor(name: string): string {
     const colors = ['avatar-blue', 'avatar-green', 'avatar-pink', 'avatar-amber', 'avatar-red'];
     let sum = 0;
-    for (const ch of name) sum += ch.charCodeAt(0);
+    for (const ch of (name || '')) sum += ch.charCodeAt(0);
     return colors[sum % colors.length];
+  }
+
+  // =====================================================
+  // ZONE HELPER
+  // =====================================================
+
+  getZones(emp: any): string[] {
+    return (emp.zone || '')
+      .split(',')
+      .map((z: string) => z.trim())
+      .filter((z: string) => z.length > 0);
+  }
+
+      getDealerNames(emp: any): string[] {
+    return (emp.dealerName || '')
+      .split(',')
+      .map((d: string) => d.trim())
+      .filter((d: string) => d.length > 0);
+  }
+
+
+  // =====================================================
+  // DATE FORMAT HELPER
+  // =====================================================
+
+  formatDate(value: any): string {
+    if (!value) return '—';
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   // =====================================================
@@ -200,11 +232,13 @@ export class BgemployeeMasterList implements OnInit {
     this.filteredList = this.employeeList.filter(emp => {
 
       const matchQuery = !q || [
-        emp.firstName,
-        emp.lastName,
+        emp.employeeName,
         emp.employeeCode,
-        emp.emailId,
-        emp.mobile,
+        emp.dealerCode,
+        emp.dealerName,
+        emp.zone,
+        emp.jobRoles,
+        emp.reportingTo,
       ].some(v => String(v ?? '').toLowerCase().includes(q));
 
       const matchDept   = !this.selectedDept   || String(emp.department) === this.selectedDept;
@@ -218,24 +252,18 @@ export class BgemployeeMasterList implements OnInit {
   // MODAL
   // =====================================================
 
-openEditPopup(employee: any): void {
-  this.bgEmployeeService.getEmployeeById(employee.id).subscribe({
-    next: (full: any) => {
-      // DEBUG: verify profileId is present in API response
-      console.log('[BgEmployeeList] full employee from API:', full);
-      console.log('[BgEmployeeList] profileId:', full.profileId ?? full.ProfileId ?? 'MISSING');
-
-      this.selectedEmployee = { ...full };
-      this.showModal = true;
-    },
-    error: () => {
-      // fallback — profileId may be missing from list row
-      console.warn('[BgEmployeeList] getById failed, using row data (profileId may be missing)');
-      this.selectedEmployee = { ...employee };
-      this.showModal = true;
-    },
-  });
-}
+  openEditPopup(employee: any): void {
+    this.bgEmployeeService.getEmployeeById(employee.id).subscribe({
+      next: (full: any) => {
+        this.selectedEmployee = { ...full };
+        this.showModal = true;
+      },
+      error: () => {
+        this.selectedEmployee = { ...employee };
+        this.showModal = true;
+      },
+    });
+  }
 
   closePopup(): void {
     this.showModal        = false;
@@ -257,7 +285,7 @@ openEditPopup(employee: any): void {
 
     if (!confirm(confirmMsg)) return;
 
-    this.bgEmployeeService.updateEmployee({ ...emp, isActive: newStatus }).subscribe({
+    this.bgEmployeeService.updateEmployee({ id: emp.id, isActive: newStatus }).subscribe({
       next: () => {
         emp.isActive = newStatus;
         this.applyFilters();
@@ -268,4 +296,6 @@ openEditPopup(employee: any): void {
       },
     });
   }
+
+
 }

@@ -48,4 +48,14 @@ export class BgemployeeMasterService {
   getCities(): Observable<any[]> {
     return this.employeeMasterService.getCities();
   }
+
+    getAssignedDealers(excludeId: number = 0): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.baseUrl}/AssignedDealers?excludeId=${excludeId}`
+    );
+  }
+
+    getEmployeeListView(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/ListView`);
+  }
 }

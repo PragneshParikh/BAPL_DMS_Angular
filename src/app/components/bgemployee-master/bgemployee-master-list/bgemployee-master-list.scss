@@ -108,6 +108,7 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.15s;
+  white-space: nowrap;
 
   &:hover { background: #cfe2ff; }
 
@@ -194,25 +195,29 @@
 
 .emp-table {
   width: 100%;
+  min-width: 1400px;         // forces horizontal scroll instead of crushing columns
   border-collapse: collapse;
   font-size: 13px;
-  table-layout: fixed;
+  border: 1px solid #dee2e6; // outer border
 
-  // column widths
-  .col-sr      { width: 44px; }
-  .col-profile { width: 54px; }
-  .col-code    { width: 90px; }
-  .col-loc     { width: 80px; }
-  .col-locname { width: 120px; }
-  .col-name    { width: 130px; }
-  .col-gender  { width: 65px; }
-  .col-mobile  { width: 110px; }
-  .col-email   { width: 160px; }
-  .col-dept    { width: 110px; }
-  .col-desig   { width: 120px; }
-  .col-dealer  { width: 90px; }
-  .col-status  { width: 80px; }
-  .col-action  { width: 78px; }
+  // column widths — matches actual template columns
+  .col-sr         { width: 44px; }
+  .col-profile    { width: 60px; }
+  .col-code       { width: 100px; }
+  .col-name       { width: 160px; }
+  .col-dealer     { width: 110px; }
+  .col-zone       { width: 90px; }
+  .col-roles      { width: 200px; }
+  .col-date       { width: 110px; }
+  .col-reporting  { width: 120px; }
+  .col-createdby  { width: 100px; }
+  .col-status     { width: 90px; }
+  .col-action     { width: 90px; }
+
+  th,
+  td {
+    border: 1px solid #dee2e6; // full grid border on every cell
+  }
 
   thead th {
     padding: 8px 10px;
@@ -220,35 +225,44 @@
     font-weight: 600;
     color: #495057;
     background: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
     white-space: nowrap;
     text-align: left;
   }
 
   tbody tr {
-    border-bottom: 1px solid #f1f3f5;
     transition: background 0.1s;
     cursor: pointer;
 
-    &:last-child { border-bottom: none; }
-    &:hover      { background: #f8f9fa; }
+    &:hover { background: #f8f9fa; }
   }
 
   td {
     padding: 8px 10px;
     color: #212529;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     vertical-align: middle;
+
+    // default: show full content, wrap rather than clip
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  // columns that should stay compact / single-line
+  .mono,
+  .col-date,
+  td[style*="white-space:nowrap"],
+  td[style*="white-space: nowrap"] {
+    white-space: nowrap;
   }
 }
 
 .td-center { text-align: center; }
 
-.emp-name  { font-weight: 500; }
-.text-muted{ color: #6c757d !important; }
-.mono      { font-family: monospace; font-size: 12px; }
+.emp-name    { font-weight: 500; }
+.dealer-name { }
+.job-roles   { }
+
+.text-muted { color: #6c757d !important; }
+.mono       { font-family: monospace; font-size: 12px; }
 
 // ---- Avatar ----
 
@@ -290,6 +304,7 @@
   cursor: pointer;
   user-select: none;
   transition: opacity 0.15s;
+  white-space: nowrap;
 
   &:hover { opacity: 0.8; }
 }
@@ -377,4 +392,17 @@
   .filter-bar { flex-direction: column; }
   .search-wrap { min-width: unset; }
   .filter-select { min-width: unset; width: 100%; }
+}
+
+.dealer-list {
+  margin: 0;
+  padding-left: 18px;
+
+  li {
+    line-height: 1.5;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  li + li { margin-top: 2px; }
 }

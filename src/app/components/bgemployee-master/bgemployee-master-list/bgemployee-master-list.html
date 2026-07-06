@@ -51,7 +51,7 @@
         <input
           type="text"
           class="search-input"
-          placeholder="Search by name, code, email, mobile…"
+          placeholder="Search by name, code, dealer, zone, role, reporting to…"
           [(ngModel)]="searchQuery"
           (ngModelChange)="applyFilters()"
         />
@@ -82,15 +82,15 @@
             <th class="col-sr">Sr</th>
             <th class="col-profile">Profile</th>
             <th class="col-code">Emp Code</th>
-            <th class="col-loc">Loc Code</th>
-            <th class="col-locname">Location</th>
-            <th class="col-name">Name</th>
-            <th class="col-gender">Gender</th>
-            <th class="col-mobile">Mobile</th>
-            <th class="col-email">Email</th>
-            <th class="col-dept">Department</th>
-            <th class="col-desig">Designation</th>
+            <th class="col-name">Employee Name</th>
             <th class="col-dealer">Dealer Code</th>
+            <th class="col-dealer">Dealer Name</th>
+            <th class="col-zone">Zone</th>
+            <th class="col-roles">Job Roles</th>
+            <th class="col-date">Created On</th>
+            <th class="col-date">Updated On</th>
+            <th class="col-reporting">Reporting To</th>
+            <th class="col-createdby">Created By</th>
             <th class="col-status">Status</th>
             <th class="col-action">Action</th>
           </tr>
@@ -127,41 +127,61 @@
               <div
                 *ngIf="!emp.profileImage"
                 class="avatar-initials"
-                [ngClass]="getAvatarColor(emp.firstName + emp.lastName)"
+                [ngClass]="getAvatarColor(emp.employeeName)"
               >
-                {{ getInitials(emp.firstName, emp.lastName) }}
+                {{ getInitials(emp.employeeName) }}
               </div>
             </td>
 
             <!-- EMPLOYEE CODE -->
-            <td class="mono">{{ emp.employeeCode }}</td>
+            <td class="mono">{{ emp.employeeCode || '—' }}</td>
 
-            <!-- LOCATION CODE -->
-            <td class="mono">{{ emp.locationCode }}</td>
-
-            <!-- LOCATION NAME -->
-            <td>{{ getLocationName(emp.locationCode) }}</td>
-
-            <!-- NAME -->
-            <td class="emp-name">{{ emp.firstName }} {{ emp.lastName }}</td>
-
-            <!-- GENDER -->
-            <td>{{ emp.gender }}</td>
-
-            <!-- MOBILE -->
-            <td class="mono">{{ emp.mobile }}</td>
-
-            <!-- EMAIL -->
-            <td class="text-muted">{{ emp.emailId }}</td>
-
-            <!-- DEPARTMENT -->
-            <td>{{ getDepartmentName(emp.department) }}</td>
-
-            <!-- DESIGNATION -->
-            <td>{{ getDesignationName(emp.designation) }}</td>
+            <!-- EMPLOYEE NAME -->
+            <td class="emp-name" [title]="emp.employeeName">{{ emp.employeeName || '—' }}</td>
 
             <!-- DEALER CODE -->
-            <td class="mono">{{ emp.dealerCode }}</td>
+            <td class="mono" [title]="emp.dealerCode">
+              {{ emp.dealerCode || '—' }}
+            </td>
+
+          <!-- DEALER NAME -->
+            <td class="dealer-name" [title]="emp.dealerName">
+              <ol class="dealer-list" *ngIf="getDealerNames(emp).length; else noDealer">
+                <li *ngFor="let d of getDealerNames(emp)">{{ d }}</li>
+              </ol>
+              <ng-template #noDealer>—</ng-template>
+            </td>
+
+            <!-- ZONE -->
+            <td>
+              <span *ngFor="let z of getZones(emp)"
+                    class="badge bg-primary-subtle text-primary me-1"
+                    style="font-size:11px;">
+                {{ z }}
+              </span>
+              <span *ngIf="!emp.zone">—</span>
+            </td>
+
+            <!-- JOB ROLES -->
+            <td class="job-roles" [title]="emp.jobRoles">
+              {{ emp.jobRoles || '—' }}
+            </td>
+
+            <!-- CREATED ON -->
+            <td class="text-muted" style="font-size:12.5px; white-space:nowrap;">
+              {{ formatDate(emp.createdDate) }}
+            </td>
+
+            <!-- UPDATED ON -->
+            <td class="text-muted" style="font-size:12.5px; white-space:nowrap;">
+              {{ formatDate(emp.updatedDate) }}
+            </td>
+
+            <!-- REPORTING TO -->
+            <td>{{ emp.reportingTo || '—' }}</td>
+
+            <!-- CREATED BY (ADMIN NAME) -->
+            <td>{{ emp.createdBy || '—' }}</td>
 
             <!-- STATUS BADGE -->
             <td class="td-center">
