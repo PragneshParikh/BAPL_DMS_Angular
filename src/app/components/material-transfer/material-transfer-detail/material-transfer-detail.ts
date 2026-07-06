@@ -250,8 +250,8 @@ export class MaterialTransferDetail implements OnInit {
 
     const lstAdded: any[] = this.items.filter(x => x.status === "Added");
     const lstModified: any[] = this.items.filter(x => x.status === "Modified");
-    // const lstDeleted: number[] = this.items.filter(x => x.status === "Deleted").map(x => x.id);
-    const lstDeleted: number[] = this.items.filter(x => x.status === "Deleted");
+    const lstDeleted: number[] = this.items.filter(x => x.status === "Deleted").map(x => x.id);
+    // const lstDeleted: number[] = this.items.filter(x => x.status === "Deleted");
 
     if (lstAdded.length > 0) {
       this.loader.show();
