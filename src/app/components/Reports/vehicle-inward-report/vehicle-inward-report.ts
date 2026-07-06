@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import * as XLSX from 'xlsx';
+// import * as XLSX from 'xlsx';
 
 import { VehicleInwardReportService, VehicleInwardReportFilter } from '../../../core/services/vehicle-inward-report.service';
 import { DealerService } from '../../../core/services/dealer-service';
@@ -72,7 +72,7 @@ export class VehicleInwardReport implements OnInit {
     private fb: FormBuilder,
     private inwardService: VehicleInwardReportService,
     private dealerService: DealerService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.filterForm = this.fb.group({
@@ -165,10 +165,10 @@ export class VehicleInwardReport implements OnInit {
     this.loadReport();
   }
 
-  firstPage(): void    { this.pageIndex = 1; this.loadReport(); }
+  firstPage(): void { this.pageIndex = 1; this.loadReport(); }
   previousPage(): void { if (this.pageIndex > 1) { this.pageIndex--; this.loadReport(); } }
-  nextPage(): void     { if (this.pageIndex * this.pageSize < this.totalRecords) { this.pageIndex++; this.loadReport(); } }
-  lastPage(): void     { this.pageIndex = Math.ceil(this.totalRecords / this.pageSize) || 1; this.loadReport(); }
+  nextPage(): void { if (this.pageIndex * this.pageSize < this.totalRecords) { this.pageIndex++; this.loadReport(); } }
+  lastPage(): void { this.pageIndex = Math.ceil(this.totalRecords / this.pageSize) || 1; this.loadReport(); }
 
   formatDate(value: any): string {
     if (!value) return '-';
@@ -223,10 +223,10 @@ export class VehicleInwardReport implements OnInit {
           'HST': r.hst,
         }));
 
-        const ws = XLSX.utils.json_to_sheet(rows);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Inwards Report');
-        XLSX.writeFile(wb, `vehicle-inward-report-${new Date().toISOString().slice(0, 10)}.xlsx`);
+        // const ws = XLSX.utils.json_to_sheet(rows);
+        // const wb = XLSX.utils.book_new();
+        // XLSX.utils.book_append_sheet(wb, ws, 'Inwards Report');
+        // XLSX.writeFile(wb, `vehicle-inward-report-${new Date().toISOString().slice(0, 10)}.xlsx`);
       },
       error: (err) => console.error('Export fetch error', err),
     });
