@@ -326,7 +326,7 @@ export class VehicleStockReportComponent
             this.formatDate(x.receiveDate),
             x.stockStatus,
             x.vehicleStatus,
-            x.location,
+            x.currentLocation,
             x.daysInStock
         ]);
 

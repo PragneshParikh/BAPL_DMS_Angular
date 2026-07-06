@@ -208,6 +208,7 @@ export const routes: Routes = [
       { path: 'group-master', component: GroupMaster, data: [59] },
       { path: 'term-condition-master', component: TermConditionMaster, data: [60] },
       { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
+      { path: 'vehicle-inward-report', data: [78], loadComponent: () => import('./components/Reports/vehicle-inward-report/vehicle-inward-report').then(m => m.VehicleInwardReport) },
 
       { path: 'occupation-master', component: OccupationMaster, data: [62] },
 
