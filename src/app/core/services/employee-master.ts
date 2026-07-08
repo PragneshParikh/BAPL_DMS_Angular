@@ -8,11 +8,6 @@ import { environment } from '../../../environments/environment';
 })
 export class EmployeeMasterService {
 
-  // private apiUrl = 'http://localhost:5215/api/Employee';
-
-  // private stateApi = 'http://localhost:5215/api/state';
-
-  // private cityApi = 'http://localhost:5215/api/city';  
   private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
@@ -22,15 +17,14 @@ export class EmployeeMasterService {
   // =========================================
 
   getEmployees(): Observable<any[]> {
-
     return this.http.get<any[]>(`${this.apiUrl}/Employee`);
   }
 
   // =========================================
   // GET EMPLOYEE BY ID
   // =========================================
-    getEmployeeById(id: number) {
-      return this.http.get<any>(`${environment.apiUrl}/Employee/GetById/${id}`);
+  getEmployeeById(id: number) {
+    return this.http.get<any>(`${environment.apiUrl}/Employee/GetById/${id}`);
   }
 
   // =========================================
@@ -52,7 +46,6 @@ export class EmployeeMasterService {
   // =========================================
 
   deleteEmployee(id: number): Observable<any> {
-
     return this.http.delete<any>(
       `${this.apiUrl}/${id}`
     );
@@ -63,7 +56,6 @@ export class EmployeeMasterService {
   // =========================================
 
   getStates(): Observable<any[]> {
-
     return this.http.get<any[]>(
       `${this.apiUrl}/state`
     );
@@ -74,7 +66,6 @@ export class EmployeeMasterService {
   // =========================================
 
   getCities(): Observable<any[]> {
-
     return this.http.get<any[]>(
       `${this.apiUrl}/city`
     );
@@ -98,5 +89,20 @@ export class EmployeeMasterService {
     return this.http.get<any[]>(
       `${environment.apiUrl}/LocationMaster/GetLocationByDealerCode/${dealerCode}`
     );
-  } 
+  }
+
+  // =========================================
+  // EXCEL EXPORT
+  // =========================================
+
+  downloadEmployeeExcel(dealerCode?: string | null): Observable<Blob> {
+    let params = new HttpParams();
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
+    }
+    return this.http.get(`${this.apiUrl}/Employee/download`, {
+      params,
+      responseType: 'blob'
+    });
+  }
 }

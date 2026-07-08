@@ -192,7 +192,7 @@ export const routes: Routes = [
 
       { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
 
-      { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
+      { path: 'vehicle-sale-d2d-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-d2d-report/vehicle-sale-d2d-report').then(m => m.VehicleSaleD2dReport) },
 
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
 
@@ -207,6 +207,7 @@ export const routes: Routes = [
       { path: 'vehicle-stock-transfer/edit/:id', component: AddVehicleStockTransfer, data: [57] },
       { path: 'group-master', component: GroupMaster, data: [59] },
       { path: 'term-condition-master', component: TermConditionMaster, data: [60] },
+      { path: 'vehicle-sale-d2d-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-d2d-report/vehicle-sale-d2d-report').then(m => m.VehicleSaleD2dReport) },
       { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
       { path: 'vehicle-inward-report', data: [78], loadComponent: () => import('./components/Reports/vehicle-inward-report/vehicle-inward-report').then(m => m.VehicleInwardReport) },
 
