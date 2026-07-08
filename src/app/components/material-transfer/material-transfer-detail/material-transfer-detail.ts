@@ -47,6 +47,7 @@ export class MaterialTransferDetail implements OnInit {
     date: new Date(),
     // technician: '',
     location: '',
+    isSameLocation: false
   };
   newItem = {
     //#region Item Table Field
@@ -130,7 +131,6 @@ export class MaterialTransferDetail implements OnInit {
     private locationService: LocationMasterService,
     private storageService: StorageService,
     private jobCardService: JobCardService,
-    private taxService: TaxService,
     private prefixMasterService: PrefixService
   ) {
 
@@ -363,8 +363,15 @@ export class MaterialTransferDetail implements OnInit {
 
       // ← Increase quantity and recalculate tax
       // const updatedQuantity = Number(this.items[index].quantity) + Number(this.newItem.quantity);
+      let totalGST = 0;
 
-      const totalGST = Number(this.items[index].cgst) + Number(this.items[index].sgst) + Number(this.items[index].igst);
+      if (this.formData.isSameLocation) {
+        totalGST = Number(this.items[index].cgst) + Number(this.items[index].sgst);
+      } else {
+        totalGST = Number(this.items[index].igst);
+      }
+
+      totalGST = Number(this.items[index].cgst) + Number(this.items[index].sgst) + Number(this.items[index].igst);
       const finalPrice = Number(this.items[index].itemRate) * this.newItem.quantity * (1 + totalGST / 100);
       const taxDetails = this.calculateGST(finalPrice, totalGST);
       const totalGSTAmount = Number(taxDetails.gstAmount);
@@ -375,9 +382,22 @@ export class MaterialTransferDetail implements OnInit {
       itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
       itemToSave.mrp = this.items[index].mrp;
 
-      itemToSave.cgstAmount = totalGST > 0 ? ((Number(this.items[index].cgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      itemToSave.sgstAmount = totalGST > 0 ? ((Number(this.items[index].sgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      itemToSave.igstAmount = totalGST > 0 ? ((Number(this.items[index].igst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      // itemToSave.cgstAmount = totalGST > 0 ? ((Number(this.items[index].cgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      // itemToSave.sgstAmount = totalGST > 0 ? ((Number(this.items[index].sgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      // itemToSave.igstAmount = totalGST > 0 ? ((Number(this.items[index].igst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+
+      itemToSave.cgstAmount = this.formData.isSameLocation && totalGST > 0
+        ? ((Number(this.items[index].cgst) / totalGST) * totalGSTAmount).toFixed(2)
+        : '0.00';
+
+      itemToSave.sgstAmount = this.formData.isSameLocation && totalGST > 0
+        ? ((Number(this.items[index].sgst) / totalGST) * totalGSTAmount).toFixed(2)
+        : '0.00';
+
+      itemToSave.igstAmount = !this.formData.isSameLocation && totalGST > 0
+        ? totalGSTAmount.toFixed(2)
+        : '0.00';
+
       itemToSave.batchClosingQty = this.items[index].batchClosingQty ?? this.newItem.batchClosingQty;
       itemToSave.stock = itemToSave.batchClosingQty - this.newItem.quantity;
 
@@ -386,9 +406,12 @@ export class MaterialTransferDetail implements OnInit {
 
     } else {
 
-      const totalGST = Number(this.newItem.cgst) + Number(this.newItem.sgst) //+ Number(this.newItem.igst);
+      // const totalGST = Number(this.newItem.cgst) + Number(this.newItem.sgst) //+ Number(this.newItem.igst);
       // const finalPrice = Number(this.newItem.itemRate) * this.newItem.quantity * (1 + totalGST / 100);
       // const taxDetails = this.calculateGST(finalPrice, totalGST);
+      const totalGST = this.formData.isSameLocation
+        ? Number(this.newItem.cgst) + Number(this.newItem.sgst)
+        : Number(this.newItem.igst);
 
       const selectedItem = this.itemList.find(item => item.itemcode === this.newItem.itemcode);
 
@@ -401,9 +424,21 @@ export class MaterialTransferDetail implements OnInit {
       itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
       itemToSave.mrp = taxDetails.finalPrice;
 
-      itemToSave.cgstAmount = totalGST > 0 ? ((Number(this.newItem.cgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      itemToSave.sgstAmount = totalGST > 0 ? ((Number(this.newItem.sgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      itemToSave.igstAmount = totalGST > 0 ? ((Number(this.newItem.igst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      // itemToSave.cgstAmount = totalGST > 0 ? ((Number(this.newItem.cgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      // itemToSave.sgstAmount = totalGST > 0 ? ((Number(this.newItem.sgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      // itemToSave.igstAmount = totalGST > 0 ? ((Number(this.newItem.igst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+
+      itemToSave.cgstAmount = this.formData.isSameLocation && totalGST > 0
+        ? ((Number(this.newItem.cgst) / totalGST) * totalGSTAmount).toFixed(2)
+        : '0.00';
+
+      itemToSave.sgstAmount = this.formData.isSameLocation && totalGST > 0
+        ? ((Number(this.newItem.sgst) / totalGST) * totalGSTAmount).toFixed(2)
+        : '0.00';
+
+      itemToSave.igstAmount = !this.formData.isSameLocation && totalGST > 0
+        ? totalGSTAmount.toFixed(2)
+        : '0.00';
 
       itemToSave.status = 'Added';
 
@@ -457,6 +492,7 @@ export class MaterialTransferDetail implements OnInit {
           date: res.jobinDate,
           technician: res.technician,
           location: res.serviceloc,
+          isSameLocation: res.isSameState
         }
       },
       error: (err) => {
@@ -556,8 +592,7 @@ export class MaterialTransferDetail implements OnInit {
       // const sgstPercent = res.find((x: any) => x.taxCode.startsWith('SGST'))?.taxRate || 0;
       // const igstPercent = res.find((x: any) => x.taxCode.startsWith('IGST'))?.taxRate || 0;
 
-
-
+      
       const totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage) //+ Number(this.newItem.igst);
       const taxDetails = this.calculateGST(selectedItem.custprice, totalGST);
 
