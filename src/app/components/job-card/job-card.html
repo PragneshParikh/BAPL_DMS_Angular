@@ -97,7 +97,7 @@
                         <th>SR.No.</th>
                         <th>Action</th>
                         <th>JobNo / JobDate</th>
-                        <th>JobStatus/InvoiceNo</th>
+                        <th>JobStatus</th>
                         <th>ManualJobNo.</th>
                         <th>LocationBooking</th>
                         <th>JobType / JobSource</th>
@@ -107,6 +107,8 @@
                         <th>VehicleName</th>
                         <th>ServiceHead / Type</th>
                         <th>CustomerName / MobileNo</th>
+                        <th>Created Date</th>
+                        <th>Updated Date</th>
                     </tr>
                 </thead>
 
@@ -139,7 +141,7 @@
 
                         <!-- Job Status -->
                         <td>{{ item.jobCardHeader.jobStatus }}<br>
-                            {{ item.jobCardHeader.invoiceNo }}
+                            <!-- {{ item.jobCardHeader.invoiceNo }} -->
                         </td>
 
                         <!-- Manual Job No -->
@@ -180,6 +182,8 @@
                             {{ item.jobCardCustomer?.customerName || '-' }} <br>
                             {{ item.jobCardCustomer?.customerMobile || '-' }}
                         </td>
+                        <td>{{item.jobCardHeader.createdDate | date:'dd-MM-yyyy hh:mm a'}}</td>
+                        <td>{{item.jobCardHeader.updatedDate | date:'dd-MM-yyyy hh:mm a'}}</td>
 
                     </tr>
 

@@ -60,9 +60,13 @@ export class VehicleSaleBill {
   selectAllInvoice = false;
   selectedForm22Bills: any[] = [];
   selectedInvoiceBills: any[] = [];
+  dealers: any;
+  filteredDealers: any[];
+  selectedDealer: string;
+  showDropdown: boolean;
 
   constructor(private service: VehicleSaleBillService,
-    private router: Router,
+    private router: Router, private dealerService: DealerService,
     private loader: LoaderService,
     private toaster: ToastService,
     private storageService: StorageService,
@@ -71,6 +75,9 @@ export class VehicleSaleBill {
 
   ngOnInit() {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    if (this.isSuperAdmin) {
+      this.getDealerList();
+    }
     this.fetchLocations();
     const today = new Date();
     const sevenDaysBefore = new Date(today);
@@ -84,6 +91,36 @@ export class VehicleSaleBill {
     this.loadData();
   }
 
+  getDealerList() {
+    this.dealerService.getDealerDropdown(null).subscribe((res) => {
+      this.dealers = res.data;
+      this.filteredDealers = [...this.dealers];
+    });
+  }
+
+  selectDealer(dealer: any) {
+
+    if (!dealer) {
+
+      this.dealerCode = '';
+    } else {
+      this.dealerCode = dealer.dealerCode;
+    }
+
+    this.showDropdown = false;
+    this.loadData();
+  }
+
+  filterDealers(event: any) {
+    const search = event.target.value.toLowerCase();
+    if (!search) {
+      this.selectedDealer = '';
+      this.loadData();
+    }
+    this.filteredDealers = this.dealers.filter(d => d.dealerCode.toLowerCase().includes(search) || d.dealerName.toLowerCase().includes(search));
+
+    this.showDropdown = true;
+  }
 
   loadData() {
     this.loader.show();
@@ -94,7 +131,7 @@ export class VehicleSaleBill {
     const from = this.filter.fromDate ? new Date(this.filter.fromDate) : undefined;
 
     const to = this.filter.toDate ? new Date(this.filter.toDate) : undefined;
-    const Status = this.filter.Status ? this.filter.Status : undefined;
+    const Status = this.filter.status ? this.filter.status : undefined;
 
     this.service.getAllVehicleSaleBills(this.dealerCode, this.searchText, from, to, Status)
       .subscribe({

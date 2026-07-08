@@ -109,6 +109,7 @@ export class RepairBillList implements OnInit {
       next: (res: any[]) => {
         this.repairBillList = res;
         this.filteredData   = [...res];
+        console.log("edit item",this.filteredData)
         this.collectionSize = this.filteredData.length;
         this.loader.hide();
         this.refreshTable();
@@ -147,6 +148,7 @@ export class RepairBillList implements OnInit {
   }
 
   editRepairBill(item: any): void {
+    
     this.router.navigate(['/repair-bill', item.id]);
   }
   printInvoice(item: any): void {

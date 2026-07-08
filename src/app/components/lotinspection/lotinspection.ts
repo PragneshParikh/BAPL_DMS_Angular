@@ -83,6 +83,7 @@ export class Lotinspection implements OnInit {
           // CORRECT FIX
           this.filteredData = Array.isArray(res.data) ? res.data : [];
           this.collectionSize = this.filteredData.length;
+          console.log(this.filteredData)
           this.page = 1; // RESET PAGE
 
           this.refreshTable();
@@ -128,7 +129,7 @@ export class Lotinspection implements OnInit {
 
   //  SORTING
   sort(column: string) {
-
+debugger;
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
@@ -162,6 +163,7 @@ export class Lotinspection implements OnInit {
         //   return;
         // }
         this.isLotInspected = res?.data[0].isLotInspected ?? false;
+      
 
         this.router.navigate(['/lot-inspection-details', invoiceNo]);
       },

@@ -61,6 +61,8 @@
                                 <th>Job Type</th>
                                 <th>Service Head</th>
                                 <th>Service Type</th>
+                                <th>Created Date</th>
+                                <th>Effective Date</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -80,6 +82,8 @@
                                 <td>{{item.jobTypeName}}</td>
                                 <td>{{item.serviceHeadName}}</td>
                                 <td>{{item.servicetypeName}}</td>
+                                <td>{{item.createdDate}}</td>
+                                <td>{{item.effectiveDate}}</td>
                                 <td>
                                     <span class="badge bg-success" *ngIf="item.isLabourRateActive">Active </span>
                                     <span class="badge bg-danger" *ngIf="!item.isLabourRateActive">Inactive </span>
@@ -134,6 +138,8 @@
                                 <th>Job Type</th>
                                 <th>Service Head</th>
                                 <th>Service Type</th>
+                                <th>Created Date</th>
+                                <th>Effective Date</th>
                                 <th>Dealer Code</th>
                                 <th>HSN Code</th>
                                 <th>Status</th>
@@ -157,6 +163,8 @@
                                 <td>{{item.jobTypeName}}</td>
                                 <td>{{item.serviceHeadName}}</td>
                                 <td>{{item.servicetypeName}}</td>
+                                 <td>{{item.createdDate}}</td>
+                                <td>{{item.effectiveDate}}</td>
                                 <td>{{item.dealerCode}}</td>
                                 <td>{{item.hsnCode}}</td>
                                 <td>

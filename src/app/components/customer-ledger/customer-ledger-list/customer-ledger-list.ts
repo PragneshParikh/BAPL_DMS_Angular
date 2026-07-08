@@ -53,7 +53,10 @@ export class CustomerLedgerList implements OnInit {
 
   ngOnInit(): void {
     this.filteredDealers = this.dealers;
-    // this.getCustomerLedgerDetails();
+    if(!this.isSuperAdmin){
+
+      this.getCustomerLedgerDetails();
+    }
     this.getDealerCodes();
   }
   getDealerCodes() {
@@ -68,7 +71,8 @@ export class CustomerLedgerList implements OnInit {
     this.loader.show();
     this.ledgerMasterService.getLedgerByPaged(this.searchTerm, this.page - 1, this.pageSize, this.dealerCode).subscribe({
       next: (res) => {
-
+          console.log(res);
+          
         this.collectionSize = 0;
         if (res) {
           this.dataSource = res.data;
@@ -170,6 +174,8 @@ export class CustomerLedgerList implements OnInit {
 
         this.collectionSize = 0;
         if (res) {
+          console.log(res);
+          
           this.dataSource = res.data;
           this.collectionSize = res.totalRecords;
         }
@@ -203,4 +209,13 @@ export class CustomerLedgerList implements OnInit {
 
     this.onDealerChange();
   }
+
+  customSearchFn(term: string, item: any): boolean {
+  term = term.toLowerCase();
+
+  return (
+    item.dealerCode?.toLowerCase().includes(term) ||
+    item.dealerName?.toLowerCase().includes(term)
+  );
+}
 }

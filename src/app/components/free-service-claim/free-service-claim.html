@@ -82,8 +82,8 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th> <input class="form-check-input" type="checkbox" value=""> </th>
-                                        <th>Action</th>
-                                        <th>Reject Reason</th>
+                                        <th *ngIf="this.isSuperAdmin"> Action </th>
+                                        <th *ngIf="this.isSuperAdmin"> Reject Reason </th>
                                         <th> Approval Status </th>
                                         <th> Job No/Job Date </th>
                                         <th> Rbill No/Rbill Date</th>
@@ -105,7 +105,7 @@
                                             <input class="form-check-input" type="checkbox"
                                                 (change)="onClaimCheckBoxChange($event, claim)">
                                         </td>
-                                        <td>
+                                        <td *ngIf="this.isSuperAdmin">
                                             <ng-container *ngIf="claim.isApproved == null; else statusTemplate">
                                                 <button class="btn btn-sm" [ngbTooltip]="'Approve'"
                                                     (click)="onApproveRejectClick(claim, true)">
@@ -128,7 +128,7 @@
                                                     [ngbTooltip]="'Rejected'"></i>
                                             </ng-template>
                                         </td>
-                                        <td>
+                                        <td *ngIf="this.isSuperAdmin">
                                             <input type="text" class="form-contorl form-control-sm"
                                                 [(ngModel)]="claim.rejectReason">
                                         </td>

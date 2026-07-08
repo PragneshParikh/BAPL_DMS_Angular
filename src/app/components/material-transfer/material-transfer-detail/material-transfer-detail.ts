@@ -26,7 +26,7 @@ import { PrefixService } from '../../../core/services/prefix';
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
-    // GetTechnicianNamePipe,
+    GetTechnicianNamePipe,
     GetIssueTypeNamePipe,
     NgSelectModule,
     NgbTooltip
@@ -37,7 +37,7 @@ import { PrefixService } from '../../../core/services/prefix';
 export class MaterialTransferDetail implements OnInit {
 
   issueTypes = IssueTypes.filter(x => x.id === 1 || x.id === 2);
-  // lstTechnician = TechnicianList;
+  lstTechnician = TechnicianList;
 
   formData: any = {
     prefix: '',
@@ -47,6 +47,7 @@ export class MaterialTransferDetail implements OnInit {
     date: new Date(),
     // technician: '',
     location: '',
+    isSameLocation: false
   };
   newItem = {
     //#region Item Table Field
@@ -63,10 +64,12 @@ export class MaterialTransferDetail implements OnInit {
     // issueSubType: '',
     inwardsrno: '',
     issuesrno: '',
-    // technician: 0,
-    cgstPercent: '',
-    sgstPercent: '',
-    igstPercent: '',
+    technician: 0,
+    cgst: '',
+    sgst: '',
+    igst: '',
+
+    hsncode: '',
 
     cgstAmount: '',
     sgstAmount: '',
@@ -95,7 +98,8 @@ export class MaterialTransferDetail implements OnInit {
     createdBy: '1',
     createdDate: new Date(),
     updatedBy: null,
-    updatedDate: null
+    updatedDate: null,
+    isEdit: false
     //#endregion
   }
 
@@ -111,9 +115,10 @@ export class MaterialTransferDetail implements OnInit {
 
   jobCardStatus: boolean = false;
 
-  cgstPercent: any;
-  sgstPercent: any;
-  igstPercent: any;
+  // cgstPercent: any;
+  // sgstPercent: any;
+  // igstPercent: any;
+  totalGST: any;
 
   constructor(
     private router: ActivatedRoute,
@@ -126,7 +131,6 @@ export class MaterialTransferDetail implements OnInit {
     private locationService: LocationMasterService,
     private storageService: StorageService,
     private jobCardService: JobCardService,
-    private taxService: TaxService,
     private prefixMasterService: PrefixService
   ) {
 
@@ -215,11 +219,11 @@ export class MaterialTransferDetail implements OnInit {
             return item;
           });
 
-          if (this.items.length > 0) {
-            this.cgstPercent = this.items[0].cgstPercent;
-            this.sgstPercent = this.items[0].sgstPercent;
-            this.igstPercent = this.items[0].igstPercent;
-          }
+          // if (this.items.length > 0) {
+          //   this.cgstPercent = this.items[0].cgstPercent;
+          //   this.sgstPercent = this.items[0].sgstPercent;
+          //   this.igstPercent = this.items[0].igstPercent;
+          // }
         } else {
           if (dealerCode && dealerCode != '') {
             this.getMaterialPrefix(dealerCode);
@@ -246,8 +250,8 @@ export class MaterialTransferDetail implements OnInit {
 
     const lstAdded: any[] = this.items.filter(x => x.status === "Added");
     const lstModified: any[] = this.items.filter(x => x.status === "Modified");
-    // const lstDeleted: number[] = this.items.filter(x => x.status === "Deleted").map(x => x.id);
-    const lstDeleted: number[] = this.items.filter(x => x.status === "Deleted");
+    const lstDeleted: number[] = this.items.filter(x => x.status === "Deleted").map(x => x.id);
+    // const lstDeleted: number[] = this.items.filter(x => x.status === "Deleted");
 
     if (lstAdded.length > 0) {
       this.loader.show();
@@ -307,6 +311,9 @@ export class MaterialTransferDetail implements OnInit {
   }
 
   onAddItem() {
+
+    const _existingItem = this.items.filter(x => x.itemcode === this.newItem.itemcode);
+
     if (this.newItem.itemId <= 0) {
       this.toast.show('Please select an item to add.', { classname: 'bg-warning text-white', delay: 5000 });
       return;
@@ -317,17 +324,22 @@ export class MaterialTransferDetail implements OnInit {
       return;
     }
 
-    // if (this.newItem.technician === null || this.newItem.technician === 0) {
-    //   this.toast.show('Please select the technician.', { classname: 'bg-warning text-white', delay: 5000 });
-    //   return;
-    // }
+    if (this.newItem.technician === null || this.newItem.technician === 0) {
+      this.toast.show('Please select the technician.', { classname: 'bg-warning text-white', delay: 5000 });
+      return;
+    }
 
     if (this.newItem.issueType === null || this.newItem.issueType === '') {
       this.toast.show('Please select the issuetype.', { classname: 'bg-warning text-white', delay: 5000 });
       return;
     }
 
-    let index = this.items.findIndex(x => x.itemcode === this.newItem.itemcode);
+    if (_existingItem.length > 0 && _existingItem[0].status !== 'Deleted' && !this.newItem.isEdit) {
+      this.toast.show('Part already exists.', { classname: 'bg-warning text-white', delay: 5000 });
+      return;
+    }
+
+    let index = this.items.findIndex(x => x.itemcode === this.newItem.itemcode && x.status !== 'Deleted');
 
     const itemToSave = {
       ...this.newItem,
@@ -339,30 +351,95 @@ export class MaterialTransferDetail implements OnInit {
       updatedDate: new Date()
     };
 
+
+    // this.newItem.cgstAmount = totalGST > 0 ? ((Number(this.items[index].cgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+    // this.newItem.sgstAmount = totalGST > 0 ? ((Number(this.items[index].sgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+    // this.newItem.igstAmount = totalGST > 0 ? ((Number(this.items[index].igstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+
+
     if (index > -1) {
       // itemToSave.status = 'Modified';
       // this.items[index] = itemToSave;
 
       // ← Increase quantity and recalculate tax
-      const updatedQuantity = Number(this.items[index].quantity) + Number(this.newItem.quantity);
+      // const updatedQuantity = Number(this.items[index].quantity) + Number(this.newItem.quantity);
+      let totalGST = 0;
 
-      const totalGST = Number(this.items[index].cgstPercent) + Number(this.items[index].sgstPercent) + Number(this.items[index].igstPercent);
-      const finalPrice = Number(this.items[index].itemRate) * updatedQuantity * (1 + totalGST / 100);
+      if (this.formData.isSameLocation) {
+        totalGST = Number(this.items[index].cgst) + Number(this.items[index].sgst);
+      } else {
+        totalGST = Number(this.items[index].igst);
+      }
+
+      totalGST = Number(this.items[index].cgst) + Number(this.items[index].sgst) + Number(this.items[index].igst);
+      const finalPrice = Number(this.items[index].itemRate) * this.newItem.quantity * (1 + totalGST / 100);
       const taxDetails = this.calculateGST(finalPrice, totalGST);
       const totalGSTAmount = Number(taxDetails.gstAmount);
 
-      itemToSave.quantity = updatedQuantity;
-      itemToSave.amount = taxDetails.finalPrice;
-      itemToSave.cgstAmount = totalGST > 0 ? ((Number(this.items[index].cgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      itemToSave.sgstAmount = totalGST > 0 ? ((Number(this.items[index].sgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      itemToSave.igstAmount = totalGST > 0 ? ((Number(this.items[index].igstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      itemToSave.batchClosingQty = this.items[index].batchClosingQty ?? this.newItem.batchClosingQty;
-      itemToSave.stock = itemToSave.batchClosingQty - updatedQuantity;
+      this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
 
-      itemToSave.status = 'Modified';
+      // itemToSave.quantity = this.newItem.quantity;
+      itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
+      itemToSave.mrp = this.items[index].mrp;
+
+      // itemToSave.cgstAmount = totalGST > 0 ? ((Number(this.items[index].cgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      // itemToSave.sgstAmount = totalGST > 0 ? ((Number(this.items[index].sgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      // itemToSave.igstAmount = totalGST > 0 ? ((Number(this.items[index].igst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+
+      itemToSave.cgstAmount = this.formData.isSameLocation && totalGST > 0
+        ? ((Number(this.items[index].cgst) / totalGST) * totalGSTAmount).toFixed(2)
+        : '0.00';
+
+      itemToSave.sgstAmount = this.formData.isSameLocation && totalGST > 0
+        ? ((Number(this.items[index].sgst) / totalGST) * totalGSTAmount).toFixed(2)
+        : '0.00';
+
+      itemToSave.igstAmount = !this.formData.isSameLocation && totalGST > 0
+        ? totalGSTAmount.toFixed(2)
+        : '0.00';
+
+      itemToSave.batchClosingQty = this.items[index].batchClosingQty ?? this.newItem.batchClosingQty;
+      itemToSave.stock = itemToSave.batchClosingQty - this.newItem.quantity;
+
+      itemToSave.status = this.newItem.id > 0 ? 'Modified' : 'Added';
       this.items[index] = itemToSave;
 
     } else {
+
+      // const totalGST = Number(this.newItem.cgst) + Number(this.newItem.sgst) //+ Number(this.newItem.igst);
+      // const finalPrice = Number(this.newItem.itemRate) * this.newItem.quantity * (1 + totalGST / 100);
+      // const taxDetails = this.calculateGST(finalPrice, totalGST);
+      const totalGST = this.formData.isSameLocation
+        ? Number(this.newItem.cgst) + Number(this.newItem.sgst)
+        : Number(this.newItem.igst);
+
+      const selectedItem = this.itemList.find(item => item.itemcode === this.newItem.itemcode);
+
+      const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
+      const totalGSTAmount = Number(taxDetails.gstAmount);
+
+      this.newItem.amount = Number(taxDetails.basePrice).toFixed(2);
+      this.newItem.mrp = taxDetails.finalPrice;
+
+      itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
+      itemToSave.mrp = taxDetails.finalPrice;
+
+      // itemToSave.cgstAmount = totalGST > 0 ? ((Number(this.newItem.cgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      // itemToSave.sgstAmount = totalGST > 0 ? ((Number(this.newItem.sgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      // itemToSave.igstAmount = totalGST > 0 ? ((Number(this.newItem.igst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+
+      itemToSave.cgstAmount = this.formData.isSameLocation && totalGST > 0
+        ? ((Number(this.newItem.cgst) / totalGST) * totalGSTAmount).toFixed(2)
+        : '0.00';
+
+      itemToSave.sgstAmount = this.formData.isSameLocation && totalGST > 0
+        ? ((Number(this.newItem.sgst) / totalGST) * totalGSTAmount).toFixed(2)
+        : '0.00';
+
+      itemToSave.igstAmount = !this.formData.isSameLocation && totalGST > 0
+        ? totalGSTAmount.toFixed(2)
+        : '0.00';
+
       itemToSave.status = 'Added';
 
       itemToSave.id = this.tempIdCounter--;
@@ -415,6 +492,7 @@ export class MaterialTransferDetail implements OnInit {
           date: res.jobinDate,
           technician: res.technician,
           location: res.serviceloc,
+          isSameLocation: res.isSameState
         }
       },
       error: (err) => {
@@ -425,6 +503,7 @@ export class MaterialTransferDetail implements OnInit {
   }
 
   resetNewItem() {
+    this.totalGST = 0;
     this.newItem = {
       //#region Item Table Field
       id: 0,
@@ -440,10 +519,12 @@ export class MaterialTransferDetail implements OnInit {
       // issueSubType: '',
       inwardsrno: '',
       issuesrno: '',
-      // technician: 0,
-      cgstPercent: '',
-      sgstPercent: '',
-      igstPercent: '',
+      technician: 0,
+      cgst: '',
+      sgst: '',
+      igst: '',
+
+      hsncode: '',
 
       cgstAmount: '',
       sgstAmount: '',
@@ -473,7 +554,8 @@ export class MaterialTransferDetail implements OnInit {
       createdBy: '1',
       createdDate: new Date(),
       updatedBy: null,
-      updatedDate: null
+      updatedDate: null,
+      isEdit: false
       //#endregion
     };
   }
@@ -503,62 +585,107 @@ export class MaterialTransferDetail implements OnInit {
     const selectedItem = this.itemList.find(item => item.id === Number(itemId.id));
     if (selectedItem) {
       this.loader.show();
-      this.taxService.getTaxList(selectedItem.itemcode.toString(), dealerCode, '').subscribe({
-        next: (res) => {
-          this.loader.hide();
 
-          const totalGST = res.reduce(
-            (sum, tax) => sum + Number(tax.taxRate || 0), 0
-          );
+      this.totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage);
 
-          const cgstPercent = res.find((x: any) => x.taxCode.startsWith('CGST'))?.taxRate || 0;
-          const sgstPercent = res.find((x: any) => x.taxCode.startsWith('SGST'))?.taxRate || 0;
-          const igstPercent = res.find((x: any) => x.taxCode.startsWith('IGST'))?.taxRate || 0;
+      // const cgstPercent = res.find((x: any) => x.taxCode.startsWith('CGST'))?.taxRate || 0;
+      // const sgstPercent = res.find((x: any) => x.taxCode.startsWith('SGST'))?.taxRate || 0;
+      // const igstPercent = res.find((x: any) => x.taxCode.startsWith('IGST'))?.taxRate || 0;
 
-          const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
+      
+      const totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage) //+ Number(this.newItem.igst);
+      const taxDetails = this.calculateGST(selectedItem.custprice, totalGST);
 
-          this.newItem.itemdesc = selectedItem.itemdesc;
-          this.newItem.itemcode = selectedItem.itemcode;
-          this.newItem.itemId = selectedItem.id;
-          this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
-          this.newItem.batchClosingQty = selectedItem.batchClosingQty;
+      this.newItem.itemdesc = selectedItem.itemdesc;
+      this.newItem.itemcode = selectedItem.itemcode;
+      this.newItem.itemId = selectedItem.id;
+      this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
+      this.newItem.hsncode = selectedItem.hsncode;
+      this.newItem.batchClosingQty = selectedItem.batchClosingQty;
 
-          this.newItem.cgstPercent = cgstPercent;
-          this.newItem.sgstPercent = sgstPercent;
-          this.newItem.igstPercent = igstPercent;
+      this.newItem.cgst = selectedItem.cgstPercentage;
+      this.newItem.sgst = selectedItem.sgstPercentage;
+      this.newItem.igst = selectedItem.igstPercentage;
 
-          if (this.newItem.batchClosingQty > 0) {
-            this.newItem.quantity = 1;
-          }
-        },
-        error: (err) => {
-          this.loader.hide();
-          console.error(err);
-          this.toast.show('Failed to fetch tax details. Please try again later.', { classname: 'bg-danger text-light' });
-        }
-      });
+      // this.newItem.cgstPercent = cgstPercent;
+      // this.newItem.sgstPercent = sgstPercent;
+      // this.newItem.igstPercent = igstPercent;
+
+      // this.totalGST = selectedItem.cgst + selectedItem.sgst;
+
+      if (this.newItem.batchClosingQty > 0) {
+        this.newItem.quantity = 1;
+      }
+      this.loader.hide();
+
+      // this.taxService.getTaxList(selectedItem.itemcode.toString(), dealerCode, '').subscribe({
+      //   next: (res) => {
+      //     this.loader.hide();
+
+      //     const totalGST = res.reduce(
+      //       (sum, tax) => sum + Number(tax.taxRate || 0), 0
+      //     );
+
+      //     this.totalGST = totalGST;
+
+      //     const cgstPercent = res.find((x: any) => x.taxCode.startsWith('CGST'))?.taxRate || 0;
+      //     const sgstPercent = res.find((x: any) => x.taxCode.startsWith('SGST'))?.taxRate || 0;
+      //     const igstPercent = res.find((x: any) => x.taxCode.startsWith('IGST'))?.taxRate || 0;
+
+      //     const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
+
+      //     this.newItem.itemdesc = selectedItem.itemdesc;
+      //     this.newItem.itemcode = selectedItem.itemcode;
+      //     this.newItem.itemId = selectedItem.id;
+      //     this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
+      //     this.newItem.batchClosingQty = selectedItem.batchClosingQty;
+
+      //     this.newItem.cgstPercent = cgstPercent;
+      //     this.newItem.sgstPercent = sgstPercent;
+      //     this.newItem.igstPercent = igstPercent;
+
+      //     // this.newItem.cgstAmount = totalGST > 0 ? ((Number(this.items[index].cgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      //     // this.newItem.sgstAmount = totalGST > 0 ? ((Number(this.items[index].sgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+      //     // this.newItem.igstAmount = totalGST > 0 ? ((Number(this.items[index].igstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
+
+      //     if (this.newItem.batchClosingQty > 0) {
+      //       this.newItem.quantity = 1;
+      //     }
+      //   },
+      //   error: (err) => {
+      //     this.loader.hide();
+      //     console.error(err);
+      //     this.toast.show('Failed to fetch tax details. Please try again later.', { classname: 'bg-danger text-light' });
+      //   }
+      // });
     }
   }
 
   editItem(row: any) {
+
+    const _item = this.itemList.filter(x => x.itemcode === row.itemcode);
+
+    this.totalGST = _item.reduce((sum, item) => sum + Number(item.cgstPercentage || 0) + Number(item.sgstPercentage || 0), 0);
+
     this.newItem = {
       id: row.id,
       jobId: row.jobId,
       itemId: row.itemId,
       itemcode: row.itemcode,
       itemdesc: row.itemdesc,
+      hsncode: row.hsncode,
       quantity: row.quantity,
       itemRate: row.itemRate,
       stock: row.stock,
-      batchClosingQty: row.batchClosingQty,
+      batchClosingQty: row.batchClosingQty ?? _item[0].batchClosingQty,
       issueType: row.issueType,
       // issueSubType: '',
       inwardsrno: '',
       issuesrno: '',
-      // technician: row.technician,
-      cgstPercent: row.cgstPercent,
-      sgstPercent: row.sgstPercent,
-      igstPercent: row.igstPercent,
+      technician: row.technician,
+      cgst: row.cgst,
+      sgst: row.sgst,
+      igst: row.igst,
 
       cgstAmount: row.cgstAmount,
       sgstAmount: row.sgstAmount,
@@ -586,7 +713,8 @@ export class MaterialTransferDetail implements OnInit {
       createdBy: row.createdBy,
       createdDate: row.createdDate,
       updatedBy: null,
-      updatedDate: null
+      updatedDate: null,
+      isEdit: true
     }
   }
 
@@ -656,6 +784,7 @@ export class MaterialTransferDetail implements OnInit {
     });
   }
 
+
   getJobCardStatus(jobId: Number) {
     this.loader.show();
     this.jobCardService.getJobCardStatusById(jobId).subscribe({
@@ -671,14 +800,20 @@ export class MaterialTransferDetail implements OnInit {
     })
   }
 
+  getRowNumber(index: number): number {
+    return this.items
+      .filter(item => item.status !== 'Deleted')
+      .findIndex(item => item === this.items[index]) + 1;
+  }
+
 }
 
-// export const TechnicianList = [
-//   { id: 1, name: 'Technician Rajesh' },
-//   { id: 2, name: 'Technician Amit' },
-//   { id: 3, name: 'Technician Suresh' },
-//   { id: 4, name: 'Technician Rakesh' },
-//   { id: 5, name: 'Technician Manoj' },
-//   { id: 6, name: 'Technician Mitesh' },
-//   { id: 7, name: 'Technician Manish' }
-// ]
+export const TechnicianList = [
+  { id: 1, name: 'Technician Rajesh' },
+  { id: 2, name: 'Technician Amit' },
+  { id: 3, name: 'Technician Suresh' },
+  { id: 4, name: 'Technician Rakesh' },
+  { id: 5, name: 'Technician Manoj' },
+  { id: 6, name: 'Technician Mitesh' },
+  { id: 7, name: 'Technician Manish' }
+]

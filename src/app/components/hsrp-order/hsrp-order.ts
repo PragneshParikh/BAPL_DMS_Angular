@@ -145,6 +145,8 @@ export class HSRPOrder implements OnInit {
 
     this.hsrpService.getPendingHSRPOrders(dealerCode, this.formatDate(this.filter.fromDate), this.formatDate(this.filter.toDate)).subscribe({
       next: (res: any) => {
+        console.log(res);
+        
         this.orders = (res || []).map(item => ({
           ...item,
           isFrontPlate: item.isFrontPlate ?? true,
@@ -171,7 +173,7 @@ export class HSRPOrder implements OnInit {
   loadOrderForEdit(id: any) {
     this.hsrpService.getHSRPById(id).subscribe({
       next: (res: any) => {
-
+console.log(res);
         this.orders = Array.isArray(res) ? res : [res];
         this.filteredOrders = [...this.orders];
 
@@ -249,7 +251,7 @@ export class HSRPOrder implements OnInit {
 
   // ---------------- SAVE ----------------
   submitHSRPOrder() {
-
+this.loaderService.show();
     let hasError = false;
 
     this.paginatedOrders.forEach(item => {
@@ -263,6 +265,7 @@ export class HSRPOrder implements OnInit {
     });
 
     if (hasError) {
+      this.loaderService.hide();
       this.toasterService.show('Please complete plate selection for highlighted rows.', {
         classname: 'bg-warning text-white',
         delay: 5000
@@ -275,6 +278,7 @@ export class HSRPOrder implements OnInit {
 
     const missingRegistration = selectedItems.filter(x => !x.regNo || x.regNo.trim() === '');
     if (missingRegistration.length > 0) {
+      this.loaderService.hide();
       const chassisList = selectedItems.filter(x => !x.regNo || x.regNo.trim() === '').map(x => x.chassisNo);
       this.toasterService.show(`Registration number is missing for chassis: ${chassisList.join(', ')}`, {
         classname: 'bg-warning text-white',
@@ -284,6 +288,7 @@ export class HSRPOrder implements OnInit {
     }
 
     if (selectedItems.length === 0) {
+      this.loaderService.hide();
       this.toasterService.show('Please select atleast one row', {
         classname: 'bg-warning text-white',
         delay: 5000
@@ -295,6 +300,7 @@ export class HSRPOrder implements OnInit {
       id: item.id ?? null,
       dealerCode: dealerCode,
       chassisNo: item.chassisNo,
+      customerName: item.customerName,
       regNo: item.regNo,
       invoiceNo: item.invoiceNo,
       isFrontPlate: item.isFrontPlate,
@@ -309,7 +315,10 @@ export class HSRPOrder implements OnInit {
     }));
     if (this.isEditMode) {
       this.hsrpService.updateBulkHSRPOrder(payload).subscribe({
-        next: () => {
+        next: (res) => {
+
+          this.loaderService.hide();
+
           this.toasterService.show('HSRP Order Saved', {
             classname: 'bg-success text-white',
             delay: 5000
@@ -318,6 +327,7 @@ export class HSRPOrder implements OnInit {
           this.getPendingHSRPOrder();
         },
         error: () => {
+          this.loaderService.hide();
           this.toasterService.show('Error saving order', {
             classname: 'bg-danger text-white',
             delay: 5000
@@ -328,7 +338,26 @@ export class HSRPOrder implements OnInit {
     else {
 
       this.hsrpService.createBulkHSRPOrder(payload).subscribe({
-        next: () => {
+        next: (res) => {
+          if (Array.isArray(res)) {
+            const failed = res.find(
+              x => x.hsrpstatus?.trim().toLowerCase() === 'failed'
+            );
+
+            if (failed) {
+              this.loaderService.hide();
+              this.toasterService.show(
+                failed.hsrpresponse || 'HSRP order failed',
+                {
+                  classname: 'bg-danger text-white',
+                  delay: 5000
+                }
+              );
+              return;
+            }
+          }
+
+          this.loaderService.hide();
           this.toasterService.show('HSRP Order Saved', {
             classname: 'bg-success text-white',
             delay: 5000

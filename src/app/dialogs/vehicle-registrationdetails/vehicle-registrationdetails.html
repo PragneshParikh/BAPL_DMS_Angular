@@ -78,8 +78,8 @@
 
           <label class="form-label">Insurance Amount <span class="text-danger">*</span></label>
 
-          <input type="number" class="form-control form-control-sm" [(ngModel)]="model.insAmount" name="insAmount"
-            #insAmount="ngModel" required>
+          <input type="number" class="form-control form-control-sm" [(ngModel)]="model.insuranceAmount" name="insuranceAmount"
+            #insuranceAmount="ngModel" required>
 
         </div>
 
@@ -143,9 +143,9 @@
 
         <td>{{ row.chassisNo }}</td>
         <td>{{ row.regNo }}</td>
-        <td>{{ row.regAmt }}</td>
+        <td>{{ row.regAmount }}</td>
         <td>{{ row.insNo }}</td>
-        <td>{{ row.insAmt }}</td>
+        <td>{{ row.insuranceAmount }}</td>
 
       </tr>
     </tbody>

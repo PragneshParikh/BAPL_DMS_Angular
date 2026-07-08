@@ -1,0 +1,123 @@
+// =====================================================
+// VEHICLE INWARD REPORT — STYLES
+// (Bootstrap-based layout — only report-specific overrides live here.
+//  Do NOT redefine .card / .btn-* / .table here — Bootstrap already
+//  styles those; component SCSS is scoped and will silently clobber them.)
+// =====================================================
+
+// ---- Sortable column headers ----
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  i {
+    font-size: 11px;
+    margin-left: 4px;
+    opacity: 0.6;
+  }
+
+  &:hover i { opacity: 1; }
+}
+
+// ---- Clickable dealer-wise summary header ----
+// Add class="dealer-toggle-header" alongside the existing card-header
+// classes on the clickable <div (click)="expandDealer(...)"> element
+// so this cursor rule only applies there, not to every card-header.
+
+.dealer-toggle-header {
+  cursor: pointer;
+}
+
+// =====================================================
+// MAIN REPORT TABLE — 25 COLUMNS
+// =====================================================
+
+.table-responsive {
+  overflow-x: auto;
+
+  table {
+    min-width: 3300px; // 27 columns now — was 3020px for 25
+  }
+}
+
+.table {
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    white-space: nowrap;
+  }
+
+  // 1. Sr No
+  th:nth-child(1), td:nth-child(1)   { width: 55px;  min-width: 55px; }
+  // 2. Receving Date
+  th:nth-child(2), td:nth-child(2)   { width: 110px; min-width: 110px; white-space: nowrap; }
+  // 3. Invoice Date
+  th:nth-child(3), td:nth-child(3)   { width: 110px; min-width: 110px; white-space: nowrap; }
+  // 4. Dealer Code
+  th:nth-child(4), td:nth-child(4)   { width: 110px; min-width: 110px; white-space: nowrap; }
+  // 5. Dealer Name
+  th:nth-child(5), td:nth-child(5)   { width: 160px; min-width: 160px; white-space: normal; word-break: break-word; }
+  // 6. BG Invoice No
+  th:nth-child(6), td:nth-child(6)   { width: 130px; min-width: 130px; }
+  // 7. Receving No
+  th:nth-child(7), td:nth-child(7)   { width: 120px; min-width: 120px; }
+  // 8. Party Name
+  th:nth-child(8), td:nth-child(8)   { width: 160px; min-width: 160px; white-space: normal; word-break: break-word; }
+  // 9. Purchase Receving Location
+  th:nth-child(9), td:nth-child(9)   { width: 170px; min-width: 170px; white-space: normal; word-break: break-word; }
+  // 10. Model Name (With Colour)
+  th:nth-child(10), td:nth-child(10) { width: 180px; min-width: 180px; white-space: normal; word-break: break-word; }
+  // 11. Quantity
+  th:nth-child(11), td:nth-child(11) { width: 90px;  min-width: 90px; }
+  // 12. Chassis No
+  th:nth-child(12), td:nth-child(12) { width: 150px; min-width: 150px; }
+  // 13. Motor No
+  th:nth-child(13), td:nth-child(13) { width: 140px; min-width: 140px; }
+  // 14. Colour
+  th:nth-child(14), td:nth-child(14) { width: 90px;  min-width: 90px; }
+  // 15. Mfg Year
+  th:nth-child(15), td:nth-child(15) { width: 90px;  min-width: 90px; }
+  // 16. Battery No
+  th:nth-child(16), td:nth-child(16) { width: 140px; min-width: 140px; }
+  // 17. Battery Make
+  th:nth-child(17), td:nth-child(17) { width: 120px; min-width: 120px; }
+  // 18. Battery Capacity
+  th:nth-child(18), td:nth-child(18) { width: 120px; min-width: 120px; }
+  // 19. Battery Chemical
+  th:nth-child(19), td:nth-child(19) { width: 130px; min-width: 130px; }
+  // 20. Charger No
+  th:nth-child(20), td:nth-child(20) { width: 120px; min-width: 120px; }
+  // 21. Controller No
+  th:nth-child(21), td:nth-child(21) { width: 130px; min-width: 130px; }
+  // 22. Rate
+  th:nth-child(22), td:nth-child(22) { width: 110px; min-width: 110px; white-space: nowrap; }
+  // 23. Subsidy Amount Fame 2
+  th:nth-child(23), td:nth-child(23) { width: 150px; min-width: 150px; white-space: nowrap; }
+  // 24. SGST
+  th:nth-child(24), td:nth-child(24) { width: 100px; min-width: 100px; white-space: nowrap; }
+  // 25. CGST
+  th:nth-child(25), td:nth-child(25) { width: 100px; min-width: 100px; white-space: nowrap; }
+  // 26. IGST
+  th:nth-child(26), td:nth-child(26) { width: 100px; min-width: 100px; white-space: nowrap; }
+  // 27. HST
+  th:nth-child(27), td:nth-child(27) { width: 90px;  min-width: 90px; white-space: nowrap; }
+}
+
+// ---- tfoot totals rows ----
+
+tfoot tr td {
+  white-space: nowrap;
+}
+
+// =====================================================
+// RESPONSIVE
+// =====================================================
+
+@media (max-width: 768px) {
+  .card-body form .row.g-2 > div {
+    margin-bottom: 0.5rem;
+  }
+}

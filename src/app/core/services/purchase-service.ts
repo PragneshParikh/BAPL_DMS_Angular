@@ -50,9 +50,10 @@ export class PurchaseService {
   }
 
   sendToERP(poModel: any): Observable<any> {
-    return this.httpClient.post<any>(`${this.erpBaseUrl}/BAPLSOHeader`, JSON.stringify(poModel), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    // return this.httpClient.post<any>(`${this.erpBaseUrl}/BAPLSOHeader`, JSON.stringify(poModel), {
+    //   headers: { 'Content-Type': 'application/json' },
+    // });
+    return this.httpClient.post(`${this.baseUrl}/PurchaseOrder/SendToERP`, poModel);
   }
 
   getPOByNumber(poNumber: string): Observable<any> {

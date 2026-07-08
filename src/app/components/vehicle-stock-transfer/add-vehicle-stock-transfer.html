@@ -40,7 +40,7 @@
                     <div class="col-md-2">
                         <label class="form-label mb-1">Issuing Staff<span class="text-danger">*</span></label>
                         <select class="form-select form-select-sm" [(ngModel)]="model.issuingStaff" name="issuingStaff"
-                            [disabled]="isEditMode" required>
+                            [disabled]="isEditMode || !model.issuingLocation" required>
                             <option [value]="null">Select Employee</option>
                             <option *ngFor="let employee of filteredIssueEmployeeList" [value]="employee.employeeCode">
                                 {{ employee.firstName }} {{ employee.lastName }}
@@ -53,9 +53,9 @@
                         <select class="form-select form-select-sm" [(ngModel)]="model.receivingLocation"
                             name="receivingLocation" [disabled]="isEditMode" (change)="onReceivingLocationChange()"
                             required>
-                            <option [value]="null">Select Location</option>
-                            <option *ngFor="let location of filteredReceivingLocationList" [value]="location.locCode">
-                                {{ location.locname }}
+                            <option [ngValue]="null">Select Location</option>
+                            <option *ngFor="let location of filteredReceivingLocationList" [ngValue]="location.locCode">
+                                {{ location.locname }}{{ location.locCode }}
                             </option>
                         </select>
                     </div>
@@ -63,7 +63,7 @@
                     <div class="col-md-2">
                         <label class="form-label mb-1">Receiving Staff<span class="text-danger">*</span></label>
                         <select class="form-select form-select-sm" [(ngModel)]="model.receivingStaff"
-                            name="receivingStaff" [disabled]="isEditMode" required>
+                            name="receivingStaff" [disabled]="isEditMode || !model.receivingLocation" required>
                             <option [value]="null">Select Employee</option>
                             <option *ngFor="let employee of filteredReceiveEmployeeList"
                                 [value]="employee.employeeCode">

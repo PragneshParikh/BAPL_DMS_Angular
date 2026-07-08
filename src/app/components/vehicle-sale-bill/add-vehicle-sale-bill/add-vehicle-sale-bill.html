@@ -1,5 +1,6 @@
 <!-- Page Title -->
 
+<!--NB: The commented parts were designed based on old DMS, but as per requiremnet they are commented and will take into consideration with requirement-->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-3">
     <h4 class="mb-0 text-primary">Vehicle Sale Bill</h4>
 </div>
@@ -78,19 +79,14 @@
 
             <!-- <button *ngIf="!isErpLocked && billId && !isInvoiced" class="btn btn-sm btn-primary" -->
             <button *ngIf="billId && isInvoiced" class="btn btn-sm btn-primary" (click)="openRegistrationModal()">
-               Open VDN Form
+                Open VDN Form
             </button>
 
-            <!-- <button *ngIf="!isErpLocked && billId && !isInvoiced && erpStatus !== 'Reserved'"
-                class="btn btn-sm btn-primary" (click)="navigateToPerformaInvoice()">
-                Genearate Proforma Invoice
-            </button> -->
+
             <button *ngIf="billId && !isInvoiced" class="btn btn-sm btn-primary" (click)="connfirmInvoiceGeneration()">
                 Genearate Invoice
             </button>
-            <!-- <button class="btn btn-sm btn-primary" (click)="onSubmitToERP()" *ngIf="isInvoiced && !isErpLocked">
-                Submit To ERP
-            </button> -->
+
             <button class="btn btn-light btn-sm" (click)="redirectToSaleList()">Close</button>
 
         </div>
@@ -162,7 +158,6 @@
                             </div>
 
                             <!-- D2D -->
-                            <!-- D2D -->
                             <div class="col-md-2">
                                 <label class="form-label d-block mb-1">D2D</label>
 
@@ -215,13 +210,11 @@
                                         [(ngModel)]="model.financier" name="financier" #financier="ngModel"
                                         [disabled]="model.saleType !== 'Credit'"
                                         [required]="model.saleType === 'Credit'">
-                                       <button
-    type="button"
-    class="btn btn-sm btn-warning"
-    (click)="openCustomerLedgerAdd(selectedCustomerId)"
-    [ngbTooltip]="'Edit Party'">
-    <i class="ri-edit-line"></i>
-</button>
+                                        <button type="button" class="btn btn-sm btn-warning"
+                                            (click)="openCustomerLedgerAdd(selectedCustomerId)"
+                                            [ngbTooltip]="'Edit Party'">
+                                            <i class="ri-edit-line"></i>
+                                        </button>
                                         <option class="dropdown-list" value="">Select Financier</option>
 
                                         <option *ngFor="let f of financiers" [value]="f.id" class="dropdown-list">
@@ -272,12 +265,10 @@
 
                                     <option value="">Select Billing Type</option>
 
-                                   <option
-  *ngFor="let option of billingTypeOptions"
-  [ngValue]="option.id"
-  [disabled]="model.customerType === 'B2B' && option.id !== 1">
-  {{ option.value }}
-</option>
+                                    <option *ngFor="let option of billingTypeOptions" [ngValue]="option.id"
+                                        [disabled]="model.customerType === 'B2B' && option.id !== 1">
+                                        {{ option.value }}
+                                    </option>
 
                                 </select>
                             </div>
@@ -303,8 +294,8 @@
                                         (input)="filterParties()"
                                         [class.is-invalid]="customerName.invalid && (customerName.touched || vehicleSaleForm.submitted)" />
 
-                                    <button type="button" class="btn btn-sm btn-primary"
-                                        (click)="openCustomerLedgerAdd()" [ngbTooltip]="'Add New Party'">
+                                    <button *ngIf="billId" type="button" class="btn btn-sm btn-primary"
+                                        (click)="openCustomerLedgerAdd()" [ngbTooltip]="'Edit Party Details'">
                                         +
                                     </button>
 
@@ -315,7 +306,7 @@
 
                                         <li class="list-group-item list-group-item-action py-1 px-2 small text-dark"
                                             *ngFor="let party of filteredParties" (click)="selectParty(party)">
-                                            {{ party.ledgerName }}
+                                            <b>{{ party.ledgerName }}</b><br>({{party.ledgerCode}})
                                         </li>
 
                                     </ul>
@@ -483,14 +474,14 @@
 
                             <!-- THESE FIELDS NEED TO BE SHOWN AFTER SALE -->
 
-                           
- <div class="col-md-1">
+
+                            <div class="col-md-1">
                                 <label class="form-label-sm mb-1">Reg Amt.</label>
                                 <input type="number" class="form-control form-control-sm" #regAmount="ngModel"
                                     [(ngModel)]="model.regAmount" name="regAmount">
 
                             </div>
-                             <div class="col-md-1">
+                            <div class="col-md-1">
                                 <label class="form-label-sm mb-1">Ins. Amt</label>
                                 <input type="number" class="form-control form-control-sm" #insAmount="ngModel"
                                     [(ngModel)]="model.insAmount" name="insAmount">
@@ -713,101 +704,105 @@
                     <!-- ROW 1 -->
                     <div class="row g-2">
 
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label-sm">Accessory Bill No</label>
-                            <input type="text" class="form-control form-control-sm">
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.accessoryBillNo" name="accessoryBillNo" #accessoryBillNo="ngModel">
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label-sm">Accessory Amount</label>
                             <input type="number" class="form-control form-control-sm"
-                                [(ngModel)]="model.accessoryAmount" name="accessoryAmount">
+                                [(ngModel)]="model.accessoryAmount" name="accessoryAmount" #accessoryAmount="ngModel" (input)="onExtraChargesChange()">
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-md-2">
+                            <label class="form-label-sm">Number Plate Amnt</label>
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.noPlateAmount" name="noPlateAmount" #noPlateAmount="ngModel" (input)="onExtraChargesChange()">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label-sm">Handling Charges</label>
+                            <input type="number" class="form-control form-control-sm"
+                                [(ngModel)]="model.handlingCharges" #handlingCharges="ngModel" name="handlingCharges" (input)="onExtraChargesChange()">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label-sm">HP Amount</label>
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.hpAmount"
+                                name="hpAmount" #hpAmount="ngModel" (input)="onExtraChargesChange()">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label-sm">State Subsidy Amnt</label>
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.stateSubsidyAmount" name="stateSubsidyAmount" #stateSubsidyAmount="ngModel" (input)="onExtraChargesChange()">
+                        </div>
+                        <!-- <div class="col-md-3">
                             <label class="form-label-sm">Discount Type</label>
                             <select class="form-select form-select-sm">
                                 <option>Select</option>
                                 <option>Percentage</option>
                                 <option>Amount</option>
                             </select>
-                        </div>
+                        </div> -->
 
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
                             <label class="form-label-sm">Post Gst Disc. Amt</label>
                             <input type="number" class="form-control form-control-sm">
-                        </div>
+                        </div> -->
 
                     </div>
 
                     <!-- ROW 2 -->
                     <div class="row g-2 mt-1">
 
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
                             <label class="form-label-sm">GoodLife Amnt.</label>
                             <input type="number" class="form-control form-control-sm">
-                        </div>
+                        </div> -->
 
-                        <div class="col-md-3">
-                            <label class="form-label-sm">Number Plate Amnt</label>
-                            <input type="number" class="form-control form-control-sm">
-                        </div>
 
-                        <div class="col-md-3">
-                            <label class="form-label-sm">Handling Charges</label>
-                            <input type="number" class="form-control form-control-sm"
-                                [(ngModel)]="model.handlingCharges" name="handlingCharges">
-                        </div>
 
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
                             <label class="form-label-sm">Smart Card Amnt</label>
                             <input type="number" class="form-control form-control-sm">
-                        </div>
+                        </div> -->
 
                     </div>
 
                     <!-- ROW 3 -->
                     <div class="row g-2 mt-1">
 
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
                             <label class="form-label-sm">Est.Kit Amnt</label>
                             <input type="number" class="form-control form-control-sm">
-                        </div>
+                        </div> -->
 
-                        <div class="col-md-3">
-                            <label class="form-label-sm">HP Amount</label>
-                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.hpAmount"
-                                name="hpAmount">
-                        </div>
+
 
                         <!-- SWITCH -->
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
                             <label class="form-label-sm d-block">Extended Warranty</label>
                             <div class="btn-group btn-group-sm">
                                 <button class="btn btn-outline-primary active px-2 py-0">Yes</button>
                                 <button class="btn btn-outline-primary px-2 py-0">No</button>
                             </div>
-                        </div>
+                        </div> -->
 
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
                             <label class="form-label-sm">Warranty Amount</label>
                             <input type="number" class="form-control form-control-sm" readonly>
-                        </div>
+                        </div> -->
 
                     </div>
 
                     <!-- ROW 4 -->
                     <div class="row g-2 mt-1">
 
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
                             <label class="form-label-sm">FameII Incentive Amnt</label>
                             <input type="number" class="form-control form-control-sm">
-                        </div>
+                        </div> -->
 
-                        <div class="col-md-3">
-                            <label class="form-label-sm">State Subsidy Amnt</label>
-                            <input type="number" class="form-control form-control-sm">
-                        </div>
+
 
                     </div>
 
@@ -816,7 +811,7 @@
 
                 <!-- ================= ACCESSORIES ================= -->
 
-                <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
+                <!-- <div class="d-flex justify-content-between align-items-center mt-3 mb-1 cursor-pointer"
                     data-bs-toggle="collapse" data-bs-target="#billDetails" aria-expanded="false"
                     style="cursor: pointer;">
 
@@ -829,10 +824,10 @@
 
                 </div>
 
-                <div id="billDetails" class="collapse">
+                <div id="billDetails" class="collapse"> -->
 
-                    <!-- ROW 1 (Readonly Info) -->
-                    <div class="row g-2">
+                <!-- ROW 1 (Readonly Info) -->
+                <!-- <div class="row g-2">
 
                         <div class="col-md-2">
                             <label class="form-label-sm">Bill No</label>
@@ -864,10 +859,10 @@
                             <input class="form-control form-control-sm" readonly>
                         </div>
 
-                    </div>
+                    </div> -->
 
-                    <!-- ROW 2 (Editable Inputs) -->
-                    <div class="row g-2 mt-1">
+                <!-- ROW 2 (Editable Inputs) -->
+                <!-- <div class="row g-2 mt-1">
 
                         <div class="col-md-2">
                             <label class="form-label-sm">Item Name</label>
@@ -908,10 +903,10 @@
                             <input class="form-control form-control-sm">
                         </div>
 
-                    </div>
+                    </div> -->
 
-                    <!-- ROW 3 -->
-                    <div class="row g-2 mt-1">
+                <!-- ROW 3 -->
+                <!-- <div class="row g-2 mt-1">
 
                         <div class="col-md-2">
                             <label class="form-label-sm">GST%</label>
@@ -925,7 +920,7 @@
 
                     </div>
 
-                </div>
+                </div> -->
 
                 <!-- ================= REFERRAL ================= -->
 
@@ -949,26 +944,26 @@
                         <div class="col-md-3">
                             <label class="form-label-sm">Referral Name</label>
                             <input class="form-control form-control-sm" [(ngModel)]="model.referralName"
-                                name="referralName">
+                                name="referralName" #referralName="ngModel">
                         </div>
 
                         <div class="col-md-3">
                             <label class="form-label-sm">Mobile</label>
                             <input class="form-control form-control-sm" [(ngModel)]="model.referralMobile"
-                                name="referralMobile">
+                                name="referralMobile" #referralMobile="ngModel">
                         </div>
 
                         <div class="col-md-3">
                             <label class="form-label-sm">Email</label>
                             <input type="email" class="form-control form-control-sm" [(ngModel)]="model.referralEmail"
-                                name="referralEmail">
+                                name="referralEmail" #referralEmail="ngModel">
                         </div>
 
                         <!-- NEW FIELD -->
                         <div class="col-md-3">
                             <label class="form-label-sm">Referral Point</label>
                             <input class="form-control form-control-sm" [(ngModel)]="model.referralPoint"
-                                name="referralPoint">
+                                name="referralPoint" #referralPoint="ngModel">
                         </div>
 
                     </div>
@@ -979,7 +974,7 @@
                         <div class="col-md-12">
                             <label class="form-label-sm">Referral Remarks</label>
                             <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="model.referralRemarks"
-                                name="referralRemarks"></textarea>
+                                name="referralRemarks" #referralRemarks="ngModel"></textarea>
                         </div>
 
                     </div>

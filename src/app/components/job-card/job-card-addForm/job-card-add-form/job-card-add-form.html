@@ -6,79 +6,73 @@
     <div class="d-flex align-items-center gap-2">
 
       <!-- Service History Dropdown -->
-    <div ngbDropdown class="d-inline-block">
+      <div ngbDropdown class="d-inline-block">
 
-  <button
-    class="btn btn-primary btn-sm"
-    ngbDropdownToggle>
-    Service History
-  </button>
+        <button class="btn btn-primary btn-sm" ngbDropdownToggle>
+          Service History
+        </button>
 
-  <div
-    ngbDropdownMenu
-    class="p-2 shadow-lg"
-    style="min-width: 900px;">
+        <div ngbDropdownMenu class="p-2 shadow-lg" style="min-width: 900px;">
 
-    <div class="table-responsive service-history-table">
+          <div class="table-responsive service-history-table">
 
-      <table class="table table-bordered table-sm mb-0">
+            <table class="table table-bordered table-sm mb-0">
 
-        <thead class="table-light sticky-top">
-          <tr>
-            <th>Sr.No</th>
-            <th>Service Head</th>
-            <th>Service Type</th>
-            <th>Service Seq</th>
-            <th>Service Date</th>
-            <th>Grace Date</th>
-            <th>Status</th>
-            <th>Dealer Name</th>
-            <th>Claim Date</th>
-          </tr>
-        </thead>
+              <thead class="table-light sticky-top">
+                <tr>
+                  <th>Sr.No</th>
+                  <th>Service Head</th>
+                  <th>Service Type</th>
+                  <th>Service Seq</th>
+                  <th>Service Date</th>
+                  <th>Grace Date</th>
+                  <th>Status</th>
+                  <th>Dealer Name</th>
+                  <th>Claim Date</th>
+                </tr>
+              </thead>
 
-        <tbody>
+              <tbody>
 
-          <tr *ngFor="let item of serviceHistoryList; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ item.serviceHead }}</td>
-            <td>{{ item.serviceType }}</td>
-            <td>{{ item.serviceseq }}</td>
+                <tr *ngFor="let item of serviceHistoryList; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ item.serviceHead }}</td>
+                  <td>{{ item.serviceType }}</td>
+                  <td>{{ item.serviceseq }}</td>
 
-            <td>{{ item.dueDate | date:'dd/MM/yyyy' }}</td>
-            <td>{{item.graceDate | date:'dd/MM/yyyy'}}</td>
-            <td>
-              <span class="badge"
-                [ngClass]="{
+                  <td>{{ item.dueDate | date:'dd/MM/yyyy' }}</td>
+                  <td>{{item.graceDate | date:'dd/MM/yyyy'}}</td>
+                  <td>
+                    <span class="badge" [ngClass]="{
                   'bg-primary': item.serviceStatus === 'Upcoming',
                   'bg-success': item.serviceStatus === 'Availed',
                   'bg-danger': item.serviceStatus === 'Lapsed'
                 }">
-                {{ item.serviceStatus }}
-              </span>
-            </td>
+                      {{ item.serviceStatus }}
+                    </span>
+                  </td>
 
-            <td>{{ item.dealerName }}</td>
-            <td>{{ item.claimDate | date:'dd/MM/yyyy' }}</td>
-          </tr>
+                  <td>{{ item.dealerName }}</td>
+                  <td>{{ item.claimDate | date:'dd/MM/yyyy' }}</td>
+                </tr>
 
-          <tr *ngIf="serviceHistoryList.length === 0">
-            <td colspan="8" class="text-center text-muted">
-              No service history available
-            </td>
-          </tr>
+                <tr *ngIf="serviceHistoryList.length === 0">
+                  <td colspan="8" class="text-center text-muted">
+                    No service history available
+                  </td>
+                </tr>
 
-        </tbody>
+              </tbody>
 
-      </table>
+            </table>
 
-    </div>
+          </div>
 
-  </div>
+        </div>
 
-</div>
+      </div>
 
-     
+
       <div>
         <button class="btn btn-primary btn-sm" type="button" [disabled]="!isEditMode" (click)="goToFFIR()">
           FFIR
@@ -226,7 +220,8 @@
               </div>
               <div class="col-md-3">
                 <label>Job In Time</label>
-                <input type="time" class="form-control form-control-sm" [(ngModel)]="jobInTime" [disabled]="true">
+                <input type="time" class="form-control form-control-sm" [(ngModel)]="jobInTime" [disabled]="true"
+                  (change)="calculateEstimatedDelivery()">
               </div>
               <div class="col-md-2">
                 <label>Job No.</label>
@@ -248,7 +243,8 @@
               </div>
               <div class="col-md-3">
                 <label class="form-lael">Job Source</label>
-                <select class="form-select form-select-sm" [(ngModel)]="selectedJobSources">
+                <select class="form-select form-select-sm" [(ngModel)]="selectedJobSources"
+                  [class.is-invalid]="isSubmitted && !selectedJobSources">
 
                   <option value="">Select Job Source</option>
 
@@ -256,24 +252,36 @@
                     {{ jobsource.jobSourceName }}
                   </option>
                 </select>
+                <div class="invalid-feedback">
+                  JobSources is required.
+                </div>
               </div>
               <div class="col-md-5">
                 <label>Supervisor/Advisor</label>
-                <select class="form-select form-select-sm" [(ngModel)]="supervisor">
+                <select class="form-select form-select-sm" [(ngModel)]="supervisor"
+                  [class.is-invalid]="isSubmitted && !supervisor">
                   <option value="">Select Supervisor</option>
                   <option value="Manoj">Manoj</option>
                   <option value="Suraj">Suraj</option>
                   <option value="Vishal">Vishal</option>
                 </select>
+
+                <div class="invalid-feedback">
+                  Supervisor is required.
+                </div>
               </div>
               <div class="col-md-4">
                 <label>Technician</label>
-                <select class="form-select form-select-sm" [(ngModel)]="technician">
+                <select class="form-select form-select-sm" [(ngModel)]="technician"
+                  [class.is-invalid]="isSubmitted && !technician">
                   <option value="">Select Technician</option>
                   <option value="Manoj">Manoj</option>
                   <option value="Suraj">Suraj</option>
                   <option value="Vishal">Vishal</option>
                 </select>
+                <div class="invalid-feedback">
+                  Technician is required.
+                </div>
               </div>
               <div class="col-md-3">
                 <label>Job Estimate</label>
@@ -496,7 +504,7 @@
           </div>
 
           <div class="col-md-3 position-relative">
-            <label>Complaint Code</label>
+            <label>Complaint Name</label>
             <input class="form-control form-control-sm" [(ngModel)]="complaintObj.complaintCode"
               (input)="onComplaintSearch($event)" autocomplete="off">
 
@@ -554,7 +562,9 @@
           <div class="text-center text-muted" *ngIf="complaintList.length === 0">
             Record(s) not found.
           </div>
-
+          <div class="text-danger mt-2" *ngIf="showComplaintValidation">
+            Please add at least one Customer Voice record before saving.
+          </div>
         </div>
       </div>
     </div>
@@ -567,17 +577,26 @@
       </div>
       <div class="section-body" *ngIf="isOpen.comments">
         <div class="row g-3">
-          <div class="col-md-3">
+          <div class="col-md-6">
             <label>Observation(s)<span class="text-danger">*</span></label>
-            <textarea class="form-control form-control-sm" [(ngModel)]="observation" placeholder="Enter observation"
+            <textarea class="form-control form-control-sm" rows="5" name="observation" [(ngModel)]="observation"
+              #observationCtrl="ngModel" placeholder="Enter observation" required>
+            </textarea>
+            <div class="text-danger mt-1"
+              *ngIf="observationCtrl.invalid && (observationCtrl.dirty || observationCtrl.touched)">
+              Observation is required.
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label>Supervisor Comment<span class="text-danger">*</span></label>
+            <textarea class="form-control form-control-sm" rows="5" name="supervisorComment"
+              [(ngModel)]="supervisorComment" #supervisorCommentCtrl="ngModel" placeholder="Enter supervisor comment"
               required>
             </textarea>
-          </div>
-          <div class="col-md-3">
-            <label>Supervisor Comment<span class="text-danger">*</span></label>
-            <textarea class="form-control form-control-sm" rows="3" [(ngModel)]="supervisorComment"
-              placeholder="Enter supervisor comment" required>
-            </textarea>
+            <div class="text-danger mt-1"
+              *ngIf="supervisorCommentCtrl.invalid && (supervisorCommentCtrl.dirty || supervisorCommentCtrl.touched)">
+              Supervisor Comment is required.
+            </div>
           </div>
         </div>
       </div>
@@ -712,7 +731,7 @@
     <!--<button type="button" class="btn btn-primary btn-sm" [disabled]="!isPdiSaved" (click)="saveJobCard()">Save</button>-->
     <button class="btn btn-primary btn-sm" [disabled]="selectedJobtype != 1"
       (click)="openPdiModal(PdiModelChecklist)">PDI Checklist</button>
-    <button class="btn btn-danger btn-sm">Cancel</button>
+    <button class="btn btn-danger btn-sm" (click)="onCancelClick()">Cancel</button>
   </div>
 </div>
 
@@ -756,6 +775,11 @@
             <td>
               <input type="text" class="form-control form-control-sm" [(ngModel)]="item.remarks"
                 placeholder="Enter remarks">
+            </td>
+          </tr>
+          <tr *ngIf="pdiCheckList.length === 0">
+            <td colspan="4" class="text-center text-muted">
+              No data found
             </td>
           </tr>
         </tbody>

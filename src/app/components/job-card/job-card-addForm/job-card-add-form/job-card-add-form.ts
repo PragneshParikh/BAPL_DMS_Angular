@@ -132,6 +132,8 @@ export class JobCardAddForm {
   filteredComplaints: any[] = [];
   showComplaintDropdown = false;
   oemModelId: any;
+  showComplaintValidation: boolean;
+  isSuperAdmin: boolean;
 
 
   constructor(private storageService: StorageService,
@@ -189,8 +191,14 @@ export class JobCardAddForm {
   }
   //Fetech Dealer Location
   fetchLocations(): void {
-    const dealerCode = this.storageService.getDealerCode();
-    this.locationService.getLocationList(dealerCode).subscribe({
+     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
+    this.locationService.getLocationList(this.dealerCode).subscribe({
       next: (data: any[]) => {
         // only Workshop (id = 2)
         this.locations = data.filter(x => x.locareadidNo === 2);
@@ -680,6 +688,24 @@ export class JobCardAddForm {
   deleteComplaint(index: number) {
     this.complaintList.splice(index, 1);
   }
+  calculateEstimatedDelivery() {
+
+    if (!this.jobInDate || !this.jobInTime) {
+      return;
+    }
+
+    const dateTime = new Date(`${this.jobInDate}T${this.jobInTime}`);
+
+    // Add 30 minutes
+    dateTime.setMinutes(dateTime.getMinutes() + 30);
+
+    // Date
+    this.estDelDate = dateTime.toISOString().split('T')[0];
+
+    // Time
+    this.estDelTime = dateTime.toTimeString().substring(0, 5);
+  }
+
   savePdi() {
 
     this.pdiCheckList = this.pdiCheckList.map(x => ({
@@ -700,7 +726,103 @@ export class JobCardAddForm {
     });
   }
   //insert jobcard
+  isSubmitted = false;
   saveJobCard() {
+
+    this.isSubmitted = true;
+    if (!this.supervisor) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please select Supervisor.',
+        width: '300px'
+      });
+      return;
+    }
+    if (!this.technician) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please select Technician.',
+        width: '300px'
+      });
+      return;
+    }
+    if (!this.selectedJobSources) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please select Job Source.',
+        width: '300px'
+      });
+      return;
+    }
+    const jobIn = new Date(`${this.jobInDate}T${this.jobInTime}`);
+    const estDel = new Date(`${this.estDelDate}T${this.estDelTime}`);
+
+    if (estDel <= jobIn) {
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Estimated Delivery Date & Time should be greater than Job In Date & Time.',
+        width: '350px'
+      });
+
+      return;
+    }
+    if (!this.observation) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Observation required.',
+        width: '350px'
+      });
+
+      return;
+    }
+    if (!this.supervisorComment) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Supervisor Comment required.',
+        width: '350px'
+      });
+
+      return;
+    }
+
+    this.showComplaintValidation = false;
+
+    // Pending entry exists but not added
+    if (
+      this.complaintObj.customerVoice?.trim() ||
+      this.complaintObj.complaint?.trim()
+    ) {
+
+      this.showComplaintValidation = true;
+      this.isOpen.voice = true;
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please click Add to save the Customer Voice details.',
+        width: '350px'
+      });
+      return;
+    }
+
+    // At least one record should exist
+    if (this.complaintList.length === 0) {
+      this.showComplaintValidation = true;
+      this.isOpen.voice = true;
+       Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please add at least one Customer Voice.',
+        width: '350px'
+      });
+      return;
+    }
     //  VALIDATION (recommended)
     if (this.selectedJobtype == 1 && !this.isPdiSaved) {
       Swal.fire('Error', 'Please complete PDI first', 'error');
@@ -1072,6 +1194,10 @@ export class JobCardAddForm {
         this.toaster.show("Something went wrong", { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
+  }
+
+  onCancelClick() {
+    this.router.navigate(['/job-card']);
   }
 
 }
