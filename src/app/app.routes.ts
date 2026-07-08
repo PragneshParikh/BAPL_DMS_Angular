@@ -68,7 +68,7 @@ import { ServiceTypeMaster } from './components/service-type-master/service-type
 import { JobSourceMaster } from './components/job-source-master/job-source-master';
 import { RoleMasterList } from './components/role-master/role-list-master/role-list-master';
 import { RoleMaster } from './components/role-master/role-master';
-import { BgemployeeMaster }     from './components/bgemployee-master/bgemployee-master';
+import { BgemployeeMaster } from './components/bgemployee-master/bgemployee-master';
 import { BgemployeeMasterList } from './components/bgemployee-master/bgemployee-master-list/bgemployee-master-list';
 import { WarrantyJobCardClaim } from './components/warranty-job-card-claim/warranty-job-card-claim';
 import { CounterBill } from './components/counter-bill/counter-bill';
@@ -173,9 +173,9 @@ export const routes: Routes = [
       { path: 'employee/add', component: EmployeeMasterComponent, data: [49] },
       { path: 'employee/edit/:id', component: EmployeeMasterComponent, data: [49] },
 
-      { path: 'bgemployee-master',          component: BgemployeeMasterList, data: [76] },
-      { path: 'bgemployee-master/add',      component: BgemployeeMaster,     data: [76] },
-      { path: 'bgemployee-master/edit/:id', component: BgemployeeMaster,     data: [76] },
+      { path: 'bgemployee-master', component: BgemployeeMasterList, data: [76] },
+      { path: 'bgemployee-master/add', component: BgemployeeMaster, data: [76] },
+      { path: 'bgemployee-master/edit/:id', component: BgemployeeMaster, data: [76] },
 
       { path: 'hsrp-order', component: HSRPOrder, data: [48] },
       { path: 'hsrp-order/:id', component: HSRPOrder, data: [48] },
@@ -208,7 +208,7 @@ export const routes: Routes = [
       { path: 'group-master', component: GroupMaster, data: [59] },
       { path: 'term-condition-master', component: TermConditionMaster, data: [60] },
       { path: 'vehicle-sale-d2d-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-d2d-report/vehicle-sale-d2d-report').then(m => m.VehicleSaleD2dReport) },
-      { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
+      // { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
       { path: 'vehicle-inward-report', data: [78], loadComponent: () => import('./components/Reports/vehicle-inward-report/vehicle-inward-report').then(m => m.VehicleInwardReport) },
 
       { path: 'occupation-master', component: OccupationMaster, data: [62] },
@@ -239,7 +239,7 @@ export const routes: Routes = [
       { path: 'counter-bill', component: CounterBill, data: [77] },
       { path: 'counter-bill/edit/:id', component: AddCounterBill, data: [77] },
       { path: 'add-counter-bill', component: AddCounterBill, data: [77] },
-      { path: 'print-counter-bill/:id', component: CounterBillPrint,data:[77] }
+      { path: 'print-counter-bill/:id', component: CounterBillPrint, data: [77] }
     ]
   },
   { path: '**', component: WorkInProgress }
