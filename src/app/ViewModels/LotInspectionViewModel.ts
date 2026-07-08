@@ -27,6 +27,8 @@ export interface Header {
     plasticCover?: string;
     nameSupervisor?: string;
     locationName?: string;
+    isD2D:boolean;
+    inwardType:string;
     UpdatedBy?: string;
     UpdatedDate?: string; // ISO string (yyyy-MM-dd)
     IsLotInspected?: boolean;

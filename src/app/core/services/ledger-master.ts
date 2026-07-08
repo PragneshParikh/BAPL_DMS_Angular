@@ -93,4 +93,20 @@ export class LedgerMasterService {
     return this.httpClient.get<LedgerMaster[]>(`${this.baseUrl}/ledger-master/getLedgerForSale`, { params });
   }
 
+
+  
+getLotRelatedLedgers(dealerCode: string | null, IsD2D: boolean | null): Observable<any> {
+
+  let params = new HttpParams()
+    .set('dealerCode', dealerCode ?? null)
+    .set('IsD2D', (IsD2D ?? false));
+
+  return this.httpClient.get<LedgerMaster[]>(
+    `${this.baseUrl}/ledger-master/GetLotRelatedLedgers`,
+    { params }
+  );
 }
+
+
+
+  }
