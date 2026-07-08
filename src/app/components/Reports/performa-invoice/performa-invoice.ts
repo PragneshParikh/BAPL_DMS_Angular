@@ -188,32 +188,24 @@ export class PerformaInvoice implements OnInit {
     });
 
     //      EX-SHOWROOM = NO FAME DEDUCTION HERE
-    this.amounts.exShowroom =
-      this.amounts.taxable +
-      this.amounts.cgst +
-      this.amounts.sgst +
-      this.amounts.igst;
-
+    this.amounts.exShowroom = this.amounts.taxable + this.amounts.cgst + this.amounts.sgst + this.amounts.igst;
     //      ON-ROAD TOTAL
-    this.onRoadTotal =
-      this.amounts.total +
-      this.registrationAmount +
-      this.insuranceAmount;
-
+    //this.onRoadTotal = this.amounts.total + this.registrationAmount + this.insuranceAmount;
+    debugger;
+    this.onRoadTotal = (this.amounts.total + this.registrationAmount + this.insuranceAmount + (this.saleBill.accessoryAmount || 0) + (this.saleBill.handlingCharges || 0) + (this.saleBill.noPlateAmount || 0) + (this.saleBill.hpamount || 0)) -(this.saleBill.stateSubsidyAmount ||0);
     this.convert();
   }
 
   getDealerDetails(dealerCode: string) {
     this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
-
       this.dealer = res?.data || null;
-
     });
   }
 
   getBillById(id: number) {
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
+        console.log('Sale Bill:', res);
         this.saleBill = res;
         this.getDealerDetails(this.saleBill.dealerCode);
         if (this.saleBill.status == "Invoiced") {
@@ -225,6 +217,8 @@ export class PerformaInvoice implements OnInit {
 
           this.ledgerService.getLedgerById(this.saleBill.ledgerId).subscribe({
             next: (ledgerRes) => {
+              console.log(ledgerRes);
+              
               this.CustomerLedger = ledgerRes;
             },
             error: (err) => console.error(err)
@@ -255,19 +249,11 @@ export class PerformaInvoice implements OnInit {
 
     return item.igstPer > 0 ? 'IGST' : 'GST';
   }
-  // convert() {
-  //     this.inWords = this.currencyService.convertToWords(this.amounts.total);
-  //   }
 
   convert() {
 
-    const amount =
-      this.invoiceType === 'onroad'
-        ? this.onRoadTotal
-        : this.amounts.total;
-
-    this.inWords =
-      this.currencyService.convertToWords(amount);
+    const amount = this.invoiceType === 'onroad' ? this.onRoadTotal : this.amounts.total;
+    this.inWords = this.currencyService.convertToWords(amount);
 
   }
   goBack(): void {

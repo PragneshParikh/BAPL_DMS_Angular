@@ -104,18 +104,18 @@
 
                         <div class="col-md-3">
                             <label class="form-label">Occupation</label>
-                            <select class="form-select form-select-sm" name="occupationId" [(ngModel)]="formData.occupationId"
-                                #occupationId="ngModel">
+                            <select class="form-select form-select-sm" name="occupationId"
+                                [(ngModel)]="formData.occupationId" #occupationId="ngModel">
                                 <option [ngValue]="null">Select Occupation</option>
                                 <option *ngFor="let o of occupationList" [ngValue]="o.id">
-                                    {{ o.occupationName  }}
+                                    {{ o.occupationName }}
                                 </option>
                             </select>
                         </div>
                     </div>
 
                     <!-- Third Row -->
-                    <div class="row mb-2">
+                    <!-- <div class="row mb-2">
                         <div class="col-md-3">
                             <label class="form-label">Mobile No <span class="text-danger">*</span></label>
                             <input type="text" class="form-control form-control-sm" name="mobile"
@@ -146,8 +146,64 @@
                             <input type="date" class="form-control form-control-sm" name="dob"
                                 [(ngModel)]="formData.dateOfBirth" #dob="ngModel" />
                         </div>
-                    </div>
+                    </div> -->
 
+
+                    <div class="row mb-2">
+                        <!-- Mobile No -->
+                        <div class="col-md-3">
+                            <label class="form-label">Mobile No <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" name="mobile"
+                                [(ngModel)]="formData.mobileNumber" maxlength="10" inputmode="numeric"
+                                (input)="sanitizeMobile($event)" #mobile="ngModel"
+                                (change)="checkPhoneNumberExist(formData.mobileNumber)" required>
+
+                            @if (mobile.invalid && mobile.touched) {
+                            <small class="text-danger">
+                                Enter valid 10-digit mobile number
+                            </small>
+                            }
+
+                            @if (mobileExist) {
+                            <small class="text-danger">Mobile number already exist</small>
+                            }
+                        </div>
+
+                        <!-- Alt Mobile No -->
+                        <div class="col-md-3">
+                            <label class="form-label">Alt Mobile No</label>
+                            <input type="text" class="form-control form-control-sm" name="altMobileNumber"
+                                [(ngModel)]="formData.altMobileNumber" maxlength="10" inputmode="numeric"
+                                pattern="^[0-9]{10}$" #altMobileNumber="ngModel" (input)="onAltMobileInput()">
+
+                            @if (altMobileNumber.invalid && altMobileNumber.touched && formData.altMobileNumber) {
+                            <small class="text-danger">
+                                Enter valid 10-digit alternate mobile number
+                            </small>
+                            }
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-3">
+                            <label class="form-label">Email</label>
+                            <input type="text" class="form-control form-control-sm" name="email"
+                                [(ngModel)]="formData.email" pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+                                #email="ngModel">
+
+                            @if (email.invalid && email.touched && formData.email) {
+                            <small class="text-danger">
+                                Enter a valid email address
+                            </small>
+                            }
+                        </div>
+
+                        <!-- DOB -->
+                        <div class="col-md-3">
+                            <label class="form-label">DOB</label>
+                            <input type="date" class="form-control form-control-sm" name="dob"
+                                [(ngModel)]="formData.dateOfBirth" #dob="ngModel" />
+                        </div>
+                    </div>
                     <!-- Fourth Row -->
                     <div class="row mb-2">
                         <div class="col-md-6">
@@ -219,7 +275,7 @@
                             </button>
                             <button type="submit" [disabled]="customerLedgerForm.invalid || mobileExist"
                                 class="btn btn-primary btn-sm float-end me-1">
-                                    {{ isModify ? 'Update' : 'Save' }}
+                                {{ isModify ? 'Update' : 'Save' }}
 
                             </button>
 
