@@ -153,6 +153,8 @@
                                         [term]="searchTerm"></ngb-highlight></td>
 
                                 <td><ngb-highlight [result]="item.customerName || '-'"
+                                        [term]="searchTerm"></ngb-highlight><br>
+                                    <ngb-highlight [result]="item.customerNumber || '-'"
                                         [term]="searchTerm"></ngb-highlight></td>
 
                                 <td><ngb-highlight [result]="item.chassisNo || '-'"

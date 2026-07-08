@@ -870,14 +870,14 @@ export class AddVehicleSaleBill implements OnInit {
   onChassisChange() {
     const selected = this.chassisList.find(c => c.chassisNo === this.model.chassisNo);
     if (!selected) return;
-    // if (!selected.pdiStatus || selected.pdiStatus === 'Not Done') {
-    //   this.toaster.show('Please complete PDI before proceeding', {
-    //     classname: 'bg-danger text-light',
-    //     delay: 3000
-    //   });
-    //   this.model.chassisNo = '';
-    //   return;
-    // }
+    if (!selected.pdiStatus || selected.pdiStatus === 'Not Done') {
+      this.toaster.show('Please complete PDI before proceeding', {
+        classname: 'bg-danger text-light',
+        delay: 3000
+      });
+      this.model.chassisNo = '';
+      return;
+    }
     if (selected.proformaCreated) {
       this.toaster.show(
         `Proforma already generated fOR(Bill No: ${selected.proformaCreated}). Please select another chassis.`,

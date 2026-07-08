@@ -44,6 +44,25 @@
                         </option>
                     </select>
                 </div>
+                <div *ngIf="isSuperAdmin" class="form-group col-md-2 position-relative" #dealerContainer>
+                        <label class="form-label mb-0 small">Dealer Code</label>
+
+                        <input type="text" class="form-control form-control-sm" placeholder="Search Dealer"
+                            [(ngModel)]="selectedDealer" (input)="filterDealers($event)"
+                            (focus)="showDropdown = true" />
+
+                        <div class="dropdown-menu w-100 show" *ngIf="showDropdown && filteredDealers.length > 0">
+                            <button type="button" class="dropdown-item" (click)="selectDealer(null)">
+                                Select All
+                            </button>
+
+                            <button type="button" class="dropdown-item" *ngFor="let dealer of filteredDealers"
+                                (click)="selectDealer(dealer)">
+
+                                {{ dealer.dealerCode }} - {{ dealer.dealerName }}
+                            </button>
+                        </div>
+                    </div>
 
                     <!-- SEARCH BUTTON -->
                     <div class="col-md-auto ms-auto d-flex align-items-end gap-1">
