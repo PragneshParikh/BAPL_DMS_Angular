@@ -4,11 +4,11 @@
         Parts Purchase Order
     </h4>
 
-    <div class="page-title-right">
+    <!-- <div class="page-title-right">
         <div class="d-flex gap-1">
             <button class="btn btn-sm btn-light"><i class="ri-printer-line"></i></button>
         </div>
-    </div>
+    </div> -->
 </div>
 
 <div #partsPO id="partsPO">
@@ -32,7 +32,8 @@
                                     <label class="form-label mb-0 small">Location</label>
                                     <select class="form-select form-select-sm border-start border-2" name="location"
                                         #location="ngModel" [class.is-invalid]="locationInvalid"
-                                        [(ngModel)]="partsPOData.selectedLocation" (change)="onLocationChange()">
+                                        (change)="onLocationChange($event)" [(ngModel)]=" partsPOData.selectedLocation">
+                                        <option value="">-- Select --</option>
                                         <option *ngFor="let loc of locationList" [value]="loc.loccode">{{loc.locname}}
                                         </option>
                                     </select>
@@ -119,15 +120,15 @@
                     <fieldset [disabled]="isSubmitted &&(this.isEdit && partsPOData.subPoType === 'VOR')">
                         <div class="row g-1 mb-2 align-items-end">
 
-                            <!-- Part No -->
+                            <!-- Part Name -->
                             <div class="col-md-3">
-                                <label class="form-label mb-0 small">Part No.</label>
+                                <label class="form-label mb-0 small">Part Name</label>
 
                                 <!-- Part -->
                                 <ng-select *ngIf="!partsPOData.isKit" class="ng-select-sm" [items]="itemList"
-                                    bindValue="itemcode" [(ngModel)]="currentItem.partNo" [searchFn]="customSearchFn"
-                                    [clearable]="false" (change)="onModelChange()"
-                                    placeholder="Search Part No or Description" name="itemName_select"
+                                    bindValue="itemcode" [(ngModel)]="currentItem.itemcode" [searchFn]="customSearchFn"
+                                    [clearable]="false" (change)="onPartChange($event)"
+                                    placeholder="Search Part Name or Description" name="itemName_select"
                                     #itemName_select="ngModel" required>
 
                                     <ng-template ng-label-tmp let-item="item">
@@ -146,8 +147,8 @@
 
                                 <!-- Kit -->
                                 <ng-select *ngIf="partsPOData.isKit" class="ng-select-sm" [items]="kitList"
-                                    bindValue="id" [(ngModel)]="currentItem.partNo" [clearable]="false"
-                                    (change)="onModelChange()" placeholder="Search Kit" name="kit_select" required>
+                                    bindValue="id" [(ngModel)]="currentItem.itemcode" [clearable]="false"
+                                    (change)="onPartChange($event)" placeholder="Search Kit" name="kit_select" required>
 
                                     <ng-template ng-label-tmp let-item="item">
                                         {{ item.kitName }}
@@ -197,11 +198,11 @@
                             </div>
 
                             <!-- Remarks -->
-                            <div class="col-md-4">
+                            <!-- <div class="col-md-4">
                                 <label class="form-label mb-0 small">Remarks</label>
                                 <textarea class="form-control form-control-sm" rows="1"
                                     [(ngModel)]="partsPOData.remarks" placeholder="Enter remarks..."></textarea>
-                            </div>
+                            </div> -->
 
                             <!-- Add button -->
                             <div class="col-md-1">
@@ -218,8 +219,8 @@
                                     <tr>
                                         <th>Sr.No</th>
                                         <th>Action</th>
-                                        <th>Part No.</th>
-                                        <th>Part Desc.</th>
+                                        <th>Part Code</th>
+                                        <th>Part Description</th>
                                         <th>Qty</th>
                                         <th>Rate</th>
                                         <th>(+) SGST Amt.</th>
@@ -227,7 +228,7 @@
                                         <th>(+) IGST Amt.</th>
                                         <th>Net Amount</th>
                                         <th>MRP</th>
-                                        <th>Stock</th>
+                                        <!-- <th>Stock</th> -->
                                     </tr>
                                 </thead>
                                 <tbody class="align-middle">
@@ -251,8 +252,8 @@
                                                 </span>
                                             </ng-template>
                                         </td>
-                                        <td>{{item.partNo}}</td>
-                                        <td>{{item.description}}</td>
+                                        <td>{{item.itemcode}}</td>
+                                        <td>{{item.itemdesc}}</td>
                                         <td class="text-center">{{item.quantity}}</td>
                                         <td class="text-end">{{item.itemRate | number:'1.2-2'}}</td>
                                         <td class="text-end">{{item.sgstAmt | number:'1.2-2'}}</td>
@@ -260,7 +261,7 @@
                                         <td class="text-end">{{item.igstAmt | number:'1.2-2'}}</td>
                                         <td class="text-end fw-semibold">{{item.amount | number:'1.2-2'}}</td>
                                         <td class="text-end">{{item.mrp | number:'1.2-2'}}</td>
-                                        <td class="text-center">0</td>
+                                        <!-- <td class="text-center">0</td> -->
                                     </tr>
                                     <!-- Total Row -->
                                     <tr class="fw-bold table-secondary">
