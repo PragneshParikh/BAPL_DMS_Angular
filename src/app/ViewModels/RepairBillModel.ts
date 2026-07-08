@@ -53,13 +53,15 @@ export interface PartItem {
   taxableAmount: number;
   netAmount: number;
   issuetypeName: string;
-  issueType: string;
+  //issueType: number;
   issuetypeId?: number;
 
   cgst: number;
   sgst: number;
   igst: number;
 
+  cgstAmount:number;
+  sgstAmount:number;
   igstAmount: number;
   dealerState?:string;
   custState?:string;

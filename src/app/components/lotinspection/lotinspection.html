@@ -56,14 +56,16 @@
             <table class="table table-hover table-bordered mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th (click)="sort('invoiceNo')">Invoice No</th>
-                        <th (click)="sort('invoiceDate')">Invoice Date</th>
-                        <th (click)="sort('lotno')">LOT No.</th>
-                        <th (click)="sort('arrivalDate')">Arrival Date</th>
-                        <th (click)="sort('truckNo')">Truck No.</th>
-                        <th (click)="sort('transporterName')">Transporter Name</th>
-                        <th (click)="sort('driverName')">Driver Name</th>
-                        <th (click)="sort('nameSupervisor')">Supervisor Name</th>
+                        <th class="sort" (click)="sort('invoiceNo')">Invoice No</th>
+                        <th class="sort" (click)="sort('invoiceDate')">Invoice Date</th>
+                        <th class="sort" (click)="sort('lotno')">LOT No.</th>
+                        <th class="sort" (click)="sort('arrivalDate')">Arrival Date</th>
+                        <th class="sort" (click)="sort('truckNo')">Truck No.</th>
+                        <th class="sort" (click)="sort('transporterName')">Transporter Name</th>
+                        <th class="sort" (click)="sort('driverName')">Driver Name</th>
+                        <th class="sort" (click)="sort('nameSupervisor')">Supervisor Name</th>
+                        <th class="sort" (click)="sort('createdDate')">Created Date</th>
+                        <th class="sort" (click)="sort('updatedDate')">Updated Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -83,6 +85,8 @@
                                 <td>{{ item.vehicleFasteningBracket }}</td>
                                 <td>{{ item.plasticCover }}</td> -->
                         <td>{{ data.nameSupervisor }}</td>
+                        <td>{{data.createdDate | date:'dd-MM-yyyy hh:mm a'}}</td>
+                        <td>{{data.updatedDate | date:'dd-MM-yyyy hh:mm a'}}</td>
                     </tr>
                     <!-- No Data -->
                     <tr *ngIf="collectionSize === 0">

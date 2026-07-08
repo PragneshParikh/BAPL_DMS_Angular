@@ -133,6 +133,7 @@ export class JobCardAddForm {
   showComplaintDropdown = false;
   oemModelId: any;
   showComplaintValidation: boolean;
+  isSuperAdmin: boolean;
 
 
   constructor(private storageService: StorageService,
@@ -190,8 +191,14 @@ export class JobCardAddForm {
   }
   //Fetech Dealer Location
   fetchLocations(): void {
-    const dealerCode = this.storageService.getDealerCode();
-    this.locationService.getLocationList(dealerCode).subscribe({
+     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
+    this.locationService.getLocationList(this.dealerCode).subscribe({
       next: (data: any[]) => {
         // only Workshop (id = 2)
         this.locations = data.filter(x => x.locareadidNo === 2);

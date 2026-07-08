@@ -21,7 +21,8 @@
 
                             <div class="col-md-3">
                                 <label>Invoice No</label>
-                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.invoiceNo" readonly>
+                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.invoiceNo" readonly
+                                    required>
                             </div>
 
                             <div class="col-md-3">
@@ -37,49 +38,80 @@
 
                             <div class="col-md-3">
                                 <label>Date of Arrival</label>
-                                <input type="date" class="form-control form-control-sm"
-                                    [(ngModel)]="headerObj.arrivalDate">
+                                <input type="date" class="form-control form-control-sm" #arrivalDate="ngModel"
+                                    name="arrivalDate" [(ngModel)]="headerObj.arrivalDate">
+
+                                <div class="text-danger" *ngIf="arrivalDate.invalid && arrivalDate.touched">
+                                    Arrival Date is required.
+                                </div>
+
                             </div>
 
                             <div class="col-md-3">
                                 <label>Time of Arrival</label>
                                 <input type="time" class="form-control form-control-sm"
-                                    [(ngModel)]="headerObj.arrivalTime">
+                                    [(ngModel)]="headerObj.arrivalTime" #arrivalTime="ngModel" name="arrivalTime">
+                                <div class="text-danger" *ngIf="arrivalTime.invalid && arrivalTime.touched">
+                                    Arrival Time is required.
+                                </div>
                             </div>
 
                             <div class="col-md-3">
                                 <label>L.R. No</label>
-                                <input type="text" class="form-control form-control-sm" [(ngModel)]="headerObj.lrNo">
+                                <input type="text" class="form-control form-control-sm" [(ngModel)]="headerObj.lrNo"
+                                    #lrNo="ngModel" name="lrNo">
+                                <div class="text-danger" *ngIf="lrNo.invalid && lrNo.touched">
+                                    L.R. No is required.
+                                </div>
                             </div>
 
                             <div class="col-md-3">
                                 <label>L.R. Date</label>
-                                <input type="date" class="form-control form-control-sm" [(ngModel)]="headerObj.lrDate">
+                                <input type="date" class="form-control form-control-sm" [(ngModel)]="headerObj.lrDate"
+                                    #lrDate="ngModel" name="lrDate">
+                                <div class="text-danger" *ngIf="lrDate.invalid && lrDate.touched">
+                                    L.R. Date is required.
+                                </div>
                             </div>
 
                             <div class="col-md-3">
                                 <label>Truck No</label>
-                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.truckNo">
+                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.truckNo"
+                                    #truckNo="ngModel" name="truckNo">
+                                <div class="text-danger" *ngIf="truckNo.invalid && truckNo.touched">
+                                    Truck No. is required.
+                                </div>
                             </div>
 
                             <div class="col-md-3">
                                 <label>Transporter Name</label>
-                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.transporterName" (keypress)="allowCharactersOnly($event)"
-                                (input)="onTransporterNameInput()">>
+                                <input class="form-control form-control-sm" [(ngModel)]="headerObj.transporterName"
+                                    (keypress)="allowCharactersOnly($event)" (input)="onTransporterNameInput()"
+                                    #transporterName="ngModel" name="transporterName">
+                                <div class="text-danger" *ngIf="transporterName.invalid && transporterName.touched">
+                                    Transporter Name is required.
+                                </div>
                             </div>
 
                             <div class="col-md-3">
                                 <label>Driver Name</label>
                                 <input type="text" class="form-control form-control-sm"
                                     [(ngModel)]="headerObj.driverName" (keypress)="allowCharactersOnly($event)"
-                                    (input)="onDriverNameInput()">>
+                                    (input)="onDriverNameInput()" #driverName="ngModel" name="driverName">
+                                <div class="text-danger" *ngIf="driverName.invalid && driverName.touched">
+                                    Driver Name is required.
+                                </div>
                             </div>
 
                             <div class="col-md-3">
                                 <label>Driver Contact</label>
                                 <input type="text" class="form-control form-control-sm"
                                     [(ngModel)]="headerObj.driverContact" maxlength="10"
-                                    (input)="allowOnlyNumbers($event,'driverContact')">
+                                    (input)="allowOnlyNumbers($event,'driverContact')" #driverContact="ngModel"
+                                    name="driverContact">
+                                <div class="text-danger" *ngIf="driverContact.invalid && driverContact.touched">
+                                    Driver Contact is required.
+                                </div>
                             </div>
 
                             <div class="col-md-3">
@@ -98,44 +130,87 @@
                                 <label>Vehicle Fastening Bracket</label>
                                 <select class="form-select form-select-sm"
                                     [(ngModel)]="headerObj.vehicleFasteningBracket"
-                                    (change)="onvehiclefasteringcoverChange($event)">
+                                    (change)="onvehiclefasteringcoverChange($event)" #vehicleFasteningBracket="ngModel"
+                                    name="vehicleFasteningBracket">
                                     <option value="">Select Value</option>
                                     <option value="OK">OK</option>
                                     <option value="Loose">Loose</option>
                                 </select>
+                                <div class="text-danger"
+                                    *ngIf="vehicleFasteningBracket.invalid && vehicleFasteningBracket.touched">
+                                    Please Select Vehicle Fastening Bracket
+                                </div>
                             </div>
 
                             <div class="col-md-3">
                                 <label>Plastic Cover</label>
                                 <select class="form-select form-select-sm" [(ngModel)]="headerObj.plasticCover"
-                                    (change)="onPlastingCoverChange($event)">
+                                    (change)="onPlastingCoverChange($event)" #plasticCover="ngModel"
+                                    name="plasticCover">
                                     <option value="">Select plasticCover</option>
                                     <option value="Available">Available</option>
                                     <option value="Not Available">Not Available</option>
                                     <option value="Damaged">Damaged</option>
                                 </select>
+                                <div class="text-danger" *ngIf="plasticCover.invalid && plasticCover.touched">
+                                    Please Select Plastic Cover
+                                </div>
                             </div>
 
                             <div class="col-md-3">
                                 <label>Name of Supervisor</label>
                                 <select class="form-select form-select-sm" [(ngModel)]="headerObj.nameSupervisor"
-                                    (change)="onSupervicsorChange($event)">
+                                    (change)="onSupervicsorChange($event)" #nameSupervisor="ngModel"
+                                    name="nameSupervisor">
                                     <option value="">Select Supervisor</option>
                                     <option value="Vishal">Vishal</option>
                                     <option value="Tushar">Tushar</option>
                                     <option value="Rakesh">Rakesh</option>
                                 </select>
+                                <div class="text-danger" *ngIf="nameSupervisor.invalid && nameSupervisor.touched">
+                                    Please Select Name of Supervisor
+                                </div>
                             </div>
                             <div class="col-md-3">
                                 <label>Location Name</label>
                                 <select class="form-select form-select-sm text-truncate"
-                                    [(ngModel)]="headerObj.locationName" (change)="onLocationChange($event)">
+                                    [(ngModel)]="headerObj.locationName" (change)="onLocationChange($event)"
+                                    #locationName="ngModel" name="locationName">
                                     <option value="">Select Location</option>
                                     <option *ngFor="let loc of locations" [value]="loc.locname">
                                         {{ loc.locname }}
                                     </option>
 
                                 </select>
+                                <div class="text-danger" *ngIf="locationName.invalid && locationName.touched">
+                                    Please Select Location Name
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Party Name</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="selectedlotPartyId">
+
+                                    <option [ngValue]="null">--Select--</option>
+
+                                    <option *ngFor="let lotParty of lotPartyList" [ngValue]="lotParty.id">
+
+                                        {{ lotParty.ledgerName }}
+
+                                    </option>
+
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label d-block mb-1 ">Inward Type</label>
+                                <div class="btn-group w-auto" role="group">
+                                    <input type="radio" class="btn-check"  id="b2c" checked
+                                        [(ngModel)]="headerObj.inwardType" value="B2C">
+                                    <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2c">B2C</label>
+
+                                    <input type="radio" class="btn-check"  id="b2b"
+                                        [(ngModel)]="headerObj.inwardType" value="B2B">
+                                    <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2b">B2B</label>
+                                </div>
                             </div>
                         </div>
                     </div>
