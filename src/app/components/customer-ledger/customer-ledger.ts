@@ -40,6 +40,7 @@ export class CustomerLedger {
     address: '',
     city: '',
     state: '',
+    altMobileNumber:'',
     pin: '',
     email: '',
     gender: '',
@@ -208,6 +209,7 @@ export class CustomerLedger {
     this.loader.show();
     this.ledgerService.getLedgerById(id).subscribe({
       next: (res) => {
+console.log(res);
 
         this.formData = {
           id: res.id,
@@ -219,6 +221,7 @@ export class CustomerLedger {
           pan: res.pan,
           aadharNumber: res.aadharNumber,
           mobileNumber: res.mobileNumber,
+          altMobileNumber: res.altMobileNumber,
           address: res.address,
           city: res.city,
           state: res.state,
@@ -348,6 +351,10 @@ export class CustomerLedger {
     event.target.value = value;
     this.formData.mobileNumber = value;
   }
+  onAltMobileInput(): void {
+  this.formData.altMobileNumber =
+    this.formData.altMobileNumber?.replace(/[^0-9]/g, '') || '';
+}
 
   onStateChange(event: any) {
     const selectedStateId = event.target.value;

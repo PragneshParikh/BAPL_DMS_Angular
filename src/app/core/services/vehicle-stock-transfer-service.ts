@@ -21,7 +21,8 @@ export class VehicleStockTransferService {
       .set('fromDate', filter.fromDate || '')
       .set('toDate', filter.toDate || '')
       .set('issuingLocation', filter.issuingLocation || '')
-      .set('receivingLocation', filter.receivingLocation || '');
+      .set('receivingLocation', filter.receivingLocation || '')
+      .set('dealerCode', filter.dealerCode || '');
 
     return this.http.get<any[]>(
       `${this.apiUrl}/VehicleStockTransfer/list`,

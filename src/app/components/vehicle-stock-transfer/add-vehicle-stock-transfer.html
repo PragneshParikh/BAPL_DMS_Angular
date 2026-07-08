@@ -53,9 +53,9 @@
                         <select class="form-select form-select-sm" [(ngModel)]="model.receivingLocation"
                             name="receivingLocation" [disabled]="isEditMode" (change)="onReceivingLocationChange()"
                             required>
-                            <option [value]="null">Select Location</option>
-                            <option *ngFor="let location of filteredReceivingLocationList" [value]="location.locCode">
-                                {{ location.locname }}
+                            <option [ngValue]="null">Select Location</option>
+                            <option *ngFor="let location of filteredReceivingLocationList" [ngValue]="location.locCode">
+                                {{ location.locname }}{{ location.locCode }}
                             </option>
                         </select>
                     </div>
