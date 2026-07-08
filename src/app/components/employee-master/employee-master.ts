@@ -46,10 +46,35 @@ export class EmployeeMasterComponent implements OnInit {
   selectedDepartments: string[] = [];                        // checked department names
   allRoles: { name: string }[] = [];                         // all AspNetRoles
   rolesByDepartment: { [dept: string]: { name: string }[] } = {};  // roles revealed per dept
-  selectedRoles: string[] = [];   
-  
-  // validation error messages
-  errors: { mobile?: string; pincode?: string; password?: string } = {};// checked role names (sent on save)
+  selectedRoles: string[] = [];
+
+  // ============================
+  // VALIDATION
+  // ============================
+  // FIX: previously only mobile/pincode/password had inline messages —
+  // every other required field silently disabled the Save button with no
+  // explanation. Extended to cover every field isFormValid() already
+  // enforces, so the user always sees *why* Save is blocked.
+  errors: {
+    firstName?: string;
+    lastName?: string;
+    gender?: string;
+    mobile?: string;
+    dateOfJoin?: string;
+    location?: string;
+    department?: string;
+    designation?: string;
+    state?: string;
+    city?: string;
+    pincode?: string;
+    emailId?: string;
+    password?: string;
+    category?: string;
+    role?: string;
+  } = {};
+
+  private readonly emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  private readonly strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/;
 
   // =====================================
   // CONSTRUCTOR
@@ -307,15 +332,34 @@ export class EmployeeMasterComponent implements OnInit {
     this.employeeData[field] = value;
     event.target.value = value;   // keep the input box in sync
   }
+
   // =====================================
   // VALIDATION
+  // FIX: extended to cover every field isFormValid() already requires,
+  // each with its own inline message instead of relying solely on a
+  // disabled Save button (which gives no explanation of what's missing).
   // =====================================
   validateForm(): boolean {
     this.errors = {};
     let valid = true;
+    const d = this.employeeData;
 
-    // Mobile: exactly 10 digits
-    const mobile = String(this.employeeData.mobile ?? '').trim();
+    if (!d.firstName?.trim()) {
+      this.errors.firstName = 'First name is required.';
+      valid = false;
+    }
+
+    if (!d.lastName?.trim()) {
+      this.errors.lastName = 'Last name is required.';
+      valid = false;
+    }
+
+    if (!d.gender) {
+      this.errors.gender = 'Gender is required.';
+      valid = false;
+    }
+
+    const mobile = String(d.mobile ?? '').trim();
     if (!mobile) {
       this.errors.mobile = 'Mobile number is required.';
       valid = false;
@@ -324,8 +368,37 @@ export class EmployeeMasterComponent implements OnInit {
       valid = false;
     }
 
-    // Pincode: exactly 6 digits
-    const pincode = String(this.employeeData.pincode ?? '').trim();
+    if (!d.dateOfJoin) {
+      this.errors.dateOfJoin = 'Date of joining is required.';
+      valid = false;
+    }
+
+    if (this.selectedLocations.length === 0) {
+      this.errors.location = 'Select at least one dealer location.';
+      valid = false;
+    }
+
+    if (!d.department) {
+      this.errors.department = 'Department is required.';
+      valid = false;
+    }
+
+    if (!d.designation) {
+      this.errors.designation = 'Designation is required.';
+      valid = false;
+    }
+
+    if (!d.state) {
+      this.errors.state = 'State is required.';
+      valid = false;
+    }
+
+    if (!d.city) {
+      this.errors.city = 'City is required.';
+      valid = false;
+    }
+
+    const pincode = String(d.pincode ?? '').trim();
     if (!pincode) {
       this.errors.pincode = 'Pincode is required.';
       valid = false;
@@ -334,26 +407,33 @@ export class EmployeeMasterComponent implements OnInit {
       valid = false;
     }
 
-    // Password: only when creating a login. Min 6, upper, lower, digit, special.
-    if (this.employeeData.createLogin) {
-      const pwd = String(this.employeeData.password ?? '');
-      const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/;
-      if (!strong.test(pwd)) {
+    // Login-only fields
+    if (d.createLogin) {
+      const email = String(d.emailId ?? '').trim();
+      if (!email) {
+        this.errors.emailId = 'Email is required to create a login.';
+        valid = false;
+      } else if (!this.emailPattern.test(email)) {
+        this.errors.emailId = 'Enter a valid email address.';
+        valid = false;
+      }
+
+      const pwd = String(d.password ?? '');
+      if (!this.strongPasswordPattern.test(pwd)) {
         this.errors.password =
           'Password must be at least 6 characters and include uppercase, lowercase, a digit, and a special character.';
         valid = false;
       }
-    }
 
-    // If anything failed, show a single alert summarizing the issues
-    if (!valid) {
-      const messages = [
-        this.errors.mobile,
-        this.errors.pincode,
-        this.errors.password
-      ].filter(Boolean);
+      if (this.selectedDepartments.length === 0) {
+        this.errors.category = 'Select at least one category.';
+        valid = false;
+      }
 
-      alert(messages.join('\n'));
+      if (this.selectedRoles.length === 0) {
+        this.errors.role = 'Select at least one role.';
+        valid = false;
+      }
     }
 
     return valid;
@@ -379,12 +459,10 @@ export class EmployeeMasterComponent implements OnInit {
 
     if (!coreFilled) return false;
 
-    // if creating a login: email, strong password, a category, and at least one role
+    // if creating a login: valid email, strong password, a category, and at least one role
     if (d.createLogin) {
-      const strongPwd =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/.test(String(d.password ?? ''));
-
-      const emailOk = !!d.emailId?.trim();
+      const emailOk = this.emailPattern.test(String(d.emailId ?? '').trim());
+      const strongPwd = this.strongPasswordPattern.test(String(d.password ?? ''));
       const categoryOk = this.selectedDepartments.length > 0;   // at least one category checked
       const roleOk = this.selectedRoles.length > 0;             // at least one role checked
 
@@ -393,12 +471,14 @@ export class EmployeeMasterComponent implements OnInit {
 
     return true;
   }
+
   // =====================================
   // SAVE / UPDATE
   // =====================================
   onSubmit(form: any): void {
 
-    // validate before building the payload (shows alert + inline messages)
+    // validate before building the payload — populates this.errors so the
+    // template can show which field(s) are the problem
     if (!this.validateForm()) {
       return;
     }
@@ -543,6 +623,27 @@ export class EmployeeMasterComponent implements OnInit {
   }
 
   // =====================================
+  // SALES/SERVICE → SUPERVISOR LOCK
+  // =====================================
+
+  get selectedDepartmentName(): string {
+    const dept = this.departments.find(
+      (d: any) => String(d.departmentId) === String(this.employeeData.department)
+    );
+    return (dept?.departmentName ?? '').trim().toLowerCase();
+  }
+
+  get isSupervisorDisabled(): boolean {
+    return this.selectedDepartmentName === 'sales';
+  }
+
+  onDepartmentFieldChange(): void {
+    if (this.isSupervisorDisabled) {
+      this.employeeData.supervisor = '';
+    }
+  }
+
+  // =====================================
   // BACK
   // =====================================
  backToList(): void {
@@ -576,6 +677,10 @@ export class EmployeeMasterComponent implements OnInit {
       error: (error) => console.error('Employee code generation error', error)
     });
   }
+
+  // =====================================
+  // DATE FORMATTER
+  // =====================================
 
 isLocationSelected(code: string): boolean {
     return this.selectedLocations.includes(code);

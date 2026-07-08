@@ -123,12 +123,12 @@ export class VehicleSaleReportComponent implements OnInit {
 
     const saleBill$ = (this.dataSource === 'both' || this.dataSource === 'saleBill')
       ? this.reportService.getVehicleSaleBillReport(this.buildSaleBillFilter())
-          .pipe(catchError(() => of(null)))
+          .pipe(catchError(err => { console.error('SaleBill API error:', err); return of(null); }))
       : of(null);
 
     const vehicleSale$ = (this.dataSource === 'both' || this.dataSource === 'vehicleSale')
       ? this.reportService.getVehicleSaleReport(dealerCode, fromDate, toDate)
-          .pipe(catchError(() => of(null)))
+          .pipe(catchError(err => { console.error('VehicleSale API error:', err); return of(null); }))
       : of(null);
 
     forkJoin({ saleBill: saleBill$, vehicleSale: vehicleSale$ }).subscribe({
@@ -217,12 +217,14 @@ export class VehicleSaleReportComponent implements OnInit {
       saleType:        r.saleType,
       billType:        r.billType,
       financier:       r.financier,
+      financeBy:       r.financier,   // ← NEW: mirror, so CSV/export never shows a blank pair
       salesExecutive:  r.salesExecutive,
       chassisNo:       r.chassisNo,
       motorNo:         r.motorNo,
       itemCode:        r.itemCode,
-      modelName:       r.modelName,
-      oemModelName:    r.oemModelName,
+      modelName:        r.modelName,
+      modelDescription: r.modelName,
+      oemModelName:     r.oemModelName,
       colour:          r.colour,
       hsn:             r.hsn,
       mfgYear:         r.mfgYear,
@@ -280,6 +282,8 @@ export class VehicleSaleReportComponent implements OnInit {
       bookingId:        r.bookingId,
       billType:         r.billType,
       financeBy:        r.financeBy,
+      financier:        r.financeBy,   
+      financierId:      r.financierId,
       financerCode:     r.financerCode,
       executiveName:    r.executiveName,
       prospectName:     r.prospectName,
@@ -288,6 +292,7 @@ export class VehicleSaleReportComponent implements OnInit {
       motorNumber:      r.motorNumber,
       motorNo:          r.motorNumber,
       modelCode:        r.modelCode,
+      modelName:        r.modelDescription,
       modelDescription: r.modelDescription,
       oemModelName:     r.oemModelName,
       colorCode:        r.colorCode,
@@ -301,6 +306,13 @@ export class VehicleSaleReportComponent implements OnInit {
       batteryNo5:       r.batteryNo5,
       batteryNo6:       r.batteryNo6,
       batteryCapacity:  r.batteryCapacity,
+      billingName:      r.billingName,
+      saleType:         r.saleType,
+      status:           r.status,
+      hsn:              r.hsn,
+      mfgYear:          r.mfgYear,
+      chargerNo:        r.chargerNo,
+      controllerNo:     r.controllerNo,
       subsidyAmount:    r.subsidyAmount ?? undefined,
       fameIIRequired:   r.fameIIRequired ?? undefined,
       totalAmount:      r.totalAmount ?? undefined,
@@ -308,9 +320,18 @@ export class VehicleSaleReportComponent implements OnInit {
   }
 
   onSearch(): void  { this.pageIndex = 1; this.loadReport(); }
+
   setSource(src: 'both' | 'saleBill' | 'vehicleSale'): void {
     this.dataSource = src;
-    this.pageIndex  = 1;
+
+    if (src === 'vehicleSale') {
+      this.filterForm.patchValue({
+        saleType: '', customerType: '', billType: '',
+        status: '', chassisNo: '', saleBillNo: ''
+      }, { emitEvent: false });
+    }
+
+    this.pageIndex = 1;
     this.loadReport();
   }
 

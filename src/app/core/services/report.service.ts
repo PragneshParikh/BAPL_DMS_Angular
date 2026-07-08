@@ -242,6 +242,14 @@ export class ReportService {
     );
   }
 
+      getVehicleSaleBillOnlyReport(
+    filter: VehicleSaleBillReportFilterModel
+  ): Observable<VehicleSaleBillReportResponse> {
+    return this.http.post<VehicleSaleBillReportResponse>(
+      `${this.apiUrl}/vehicle-sale-bill-only`,
+      filter
+    );
+  }
   // =====================================================
   // VEHICLE STOCK REPORT
   // =====================================================

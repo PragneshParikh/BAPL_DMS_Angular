@@ -7,14 +7,18 @@ import { LocationMasterService } from '../../../core/services/location-master-se
 import { DepartmentService } from '../../../core/services/department';
 import { DesignationService } from '../../../core/services/designation';
 import { RoleService } from '../../../core/services/Deptrole';
-
-
+import { DealerService } from '../../../core/services/dealer-service';
+import { ToastService } from '../../../shared/toaster/toast-service';
+import { LoaderService } from '../../../core/services/loader';
+import { StorageService } from '../../../core/services/storage';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-employee-master-list',
   imports: [
     CommonModule,
     RouterLink,
+    FormsModule,
     EmployeeMasterComponent
   ],
   templateUrl: './employee-master-list.html',
@@ -29,6 +33,7 @@ export class EmployeeMasterList
   // =====================================
 
   employeeList: any[] = [];
+  filteredEmployeeList: any[] = [];
 
   selectedEmployee: any = null;
 
@@ -41,6 +46,13 @@ export class EmployeeMasterList
   roles: { title: string; value: string }[] = [];
   selectedRoles: string[] = ['Employee'];
 
+  // ── DEALER FILTER — SuperAdmin only. Everyone else's list is already
+  // scoped server-side to their own DealerCode (EmployeeController.Get()),
+  // so the dropdown would be redundant/misleading for them. ──
+  dealerList: any[] = [];
+  selectedDealerCode: string = '';   // '' = All Dealers
+  isSuperAdmin: boolean = false;
+
   // =====================================
   // CONSTRUCTOR
   // =====================================
@@ -49,8 +61,14 @@ export class EmployeeMasterList
     private locationService: LocationMasterService,
     private departmentService: DepartmentService,
     private designationService: DesignationService,
-    private roleService: RoleService
-  ) { }
+    private roleService: RoleService,
+    private dealerService: DealerService,
+    private toaster: ToastService,
+    private loader: LoaderService,
+    private storageService: StorageService
+  ) {
+    this.isSuperAdmin = this.storageService.getRole()?.toLowerCase() === 'superadmin';
+  }
 
   // =====================================
   // INIT
@@ -63,6 +81,12 @@ export class EmployeeMasterList
     this.loadDepartments();
     this.loadDesignations();
     this.loadRoles();
+
+    // Non-SuperAdmins never see cross-dealer data (server enforces this
+    // regardless), so there's no reason to even load the dealer dropdown.
+    if (this.isSuperAdmin) {
+      this.loadDealers();
+    }
   }
 
   loadDepartments(): void {
@@ -111,6 +135,40 @@ export class EmployeeMasterList
   getDesignationName(id: any): string {
     return this.designationMap[String(id)] ?? '';
   }
+
+  // =====================================
+  // DEALER FILTER (SuperAdmin only)
+  // =====================================
+
+  loadDealers(): void {
+    this.dealerService.getDealerDropdown(null).subscribe({
+      next: (response: any) => {
+        this.dealerList = response?.data ?? response ?? [];
+      },
+      error: (error) => console.error('Dealer load error', error)
+    });
+  }
+
+  getDealerDisplayName(d: any): string {
+    const code = d.dealerCode ?? d.DealerCode ?? d.dealercode ?? '';
+    const name = d.compname ?? d.dealerName ?? d.DealerName ?? d.CompName ?? '';
+    return name ? `${code} - ${name}` : code;
+  }
+
+  onDealerFilterChange(): void {
+    this.applyDealerFilter();
+  }
+
+  applyDealerFilter(): void {
+    if (!this.selectedDealerCode) {
+      this.filteredEmployeeList = [...this.employeeList];
+    } else {
+      this.filteredEmployeeList = this.employeeList.filter(
+        e => (e.dealerCode ?? '').trim().toLowerCase() === this.selectedDealerCode.trim().toLowerCase()
+      );
+    }
+  }
+
   // =====================================
   // GET EMPLOYEES
   // =====================================
@@ -125,6 +183,7 @@ export class EmployeeMasterList
         next: (response) => {
 
           this.employeeList = response;
+          this.applyDealerFilter();
         },
 
         error: (error) => {
@@ -158,12 +217,45 @@ export class EmployeeMasterList
   getLocationName(code: string): string {
     return this.locationMap[code] ?? '';
   }
+
+  // =====================================
+  // EXCEL EXPORT
+  // =====================================
+
+  downloadExcel(): void {
+    this.loader.show();
+
+    this.employeeService.downloadEmployeeExcel(this.selectedDealerCode || null).subscribe({
+      next: (data: Blob) => {
+        const blob = new Blob([data], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = this.selectedDealerCode
+          ? `EmployeeList_${this.selectedDealerCode}.xlsx`
+          : 'EmployeeList_All.xlsx';
+        link.click();
+
+        window.URL.revokeObjectURL(url);
+        this.loader.hide();
+        this.toaster.show('Employee Excel downloaded successfully', { classname: 'bg-success text-light', delay: 3000 });
+      },
+      error: (err) => {
+        console.error('Excel download error', err);
+        this.loader.hide();
+        this.toaster.show('Failed to download Employee Excel', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  }
+
   // =====================================
   // OPEN EDIT POPUP
   // =====================================
   openEditPopup(employee: any): void {
 
-    // fetch the full record (includes selectedDepartments + roles from mappings)
     this.employeeService.getEmployeeById(employee.id).subscribe({
       next: (full: any) => {
         this.selectedEmployee = { ...full };
@@ -171,7 +263,6 @@ export class EmployeeMasterList
       },
       error: (err) => {
         console.error('GetById error', err);
-        // fallback: open with the row data we already have
         this.selectedEmployee = { ...employee };
         this.showModal = true;
       }
@@ -193,7 +284,6 @@ export class EmployeeMasterList
 
   toggleStatus(emp: any, event: Event): void {
 
-    // Prevent row click from opening edit popup
     event.stopPropagation();
 
     const newStatus = !emp.isActive;
@@ -233,6 +323,3 @@ export class EmployeeMasterList
       });
   }
 }
-
-
-
