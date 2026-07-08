@@ -55,8 +55,12 @@ export class VehicleStockTransferList implements OnInit {
   }
 
   getLocations() {
-
-    const dealerCode = this.storageService.getDealerCode();
+let dealerCode = '';
+    if (!this.isSuperAdmin) {
+      dealerCode = this.storageService.getDealerCode();
+    } else {
+      dealerCode = this.filter.dealerCode || '';
+    }
 
     this.locationMasterService.getLocationList(dealerCode)
       .subscribe({

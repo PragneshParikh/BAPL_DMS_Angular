@@ -26,12 +26,9 @@
                             (focus)="showDropdown = true" />
 
                         <div class="dropdown-menu w-100 show" *ngIf="showDropdown && filteredDealers.length > 0">
-    <button
-        type="button"
-        class="dropdown-item"
-        (click)="selectDealer(null)">
-        Select All
-    </button>
+                            <button type="button" class="dropdown-item" (click)="selectDealer(null)">
+                                Select All
+                            </button>
 
                             <button type="button" class="dropdown-item" *ngFor="let dealer of filteredDealers"
                                 (click)="selectDealer(dealer)">
