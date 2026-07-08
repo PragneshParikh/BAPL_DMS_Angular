@@ -6,7 +6,7 @@
 
     <!-- HEADER -->
 
-    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+    <div class="card-header py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
 
         <h5 class="mb-0 fw-bold">
 
@@ -14,15 +14,29 @@
 
         </h5>
 
-        <!-- ADD EMPLOYEE -->
+        <div class="d-flex align-items-center gap-2">
+            <!-- DEALER FILTER — SuperAdmin only -->
+            <select *ngIf="isSuperAdmin" class="form-select form-select-sm" style="width:220px;"
+                [(ngModel)]="selectedDealerCode"
+                (ngModelChange)="onDealerFilterChange()">
+                <option value="">All Dealers</option>
+                <option *ngFor="let d of dealerList" [value]="d.dealerCode ?? d.DealerCode ?? d.dealercode">
+                    {{ getDealerDisplayName(d) }}
+                </option>
+            </select>
 
-        <button class="btn btn-primary btn-sm" routerLink="/employee/add">
+            <!-- EXPORT EXCEL -->
+            <button class="btn btn-success btn-sm" title="Export to Excel" (click)="downloadExcel()">
+                <i class="ri-file-excel-2-line"></i>
+            </button>
 
-            <i class="ri-add-line"></i>
+            <!-- ADD EMPLOYEE -->
+            <button class="btn btn-primary btn-sm" routerLink="/employee/add">
+                <i class="ri-add-line"></i>
+                Add Employee
+            </button>
 
-            Add Employee
-
-        </button>
+        </div>
 
     </div>
 
@@ -72,9 +86,9 @@
 
                 <!-- NO DATA -->
 
-                <tr *ngIf="employeeList.length === 0">
+                <tr *ngIf="filteredEmployeeList.length === 0">
 
-                    <td colspan="11" class="text-center text-muted">
+                    <td colspan="14" class="text-center text-muted">
 
                         No Employee Data Found
 
@@ -85,7 +99,7 @@
                 <!-- EMPLOYEE DATA -->
 
                 <tr *ngFor="
-                      let emp of employeeList;
+                      let emp of filteredEmployeeList;
                       let i = index
                     " class="cursor-pointer" (click)="openEditPopup(emp)">
 
@@ -165,8 +179,6 @@
                         {{ emp.emailId }}
 
                     </td>
-
-                    <!-- DEPARTMENT -->
 
                     <!-- DEPARTMENT -->
                     <td>

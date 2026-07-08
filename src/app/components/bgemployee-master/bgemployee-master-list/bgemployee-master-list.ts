@@ -9,6 +9,8 @@ import { LocationMasterService } from '../../../core/services/location-master-se
 import { DepartmentService } from '../../../core/services/department';
 import { DesignationService } from '../../../core/services/designation';
 import { RoleService } from '../../../core/services/Deptrole';
+import { ToastService } from '../../../shared/toaster/toast-service';
+import { LoaderService } from '../../../core/services/loader';
 
 @Component({
   selector: 'app-bgemployee-master-list',
@@ -24,10 +26,6 @@ import { RoleService } from '../../../core/services/Deptrole';
 })
 export class BgemployeeMasterList implements OnInit {
 
-  // =====================================================
-  // DATA
-  // =====================================================
-
   employeeList:  any[] = [];
   filteredList:  any[] = [];
 
@@ -38,32 +36,16 @@ export class BgemployeeMasterList implements OnInit {
   departmentList: any[] = [];
   roles: { title: string; value: string }[]  = [];
 
-  // =====================================================
-  // FILTERS
-  // =====================================================
-
   searchQuery    = '';
   selectedDept   = '';
   selectedStatus = '';
 
-  // =====================================================
-  // MODAL
-  // =====================================================
-
   showModal        = false;
   selectedEmployee: any = null;
-
-  // =====================================================
-  // COMPUTED STATS
-  // =====================================================
 
   get activeCount():     number { return this.employeeList.filter(e =>  e.isActive).length; }
   get inactiveCount():   number { return this.employeeList.filter(e => !e.isActive).length; }
   get departmentCount(): number { return new Set(this.employeeList.map(e => e.department)).size; }
-
-  // =====================================================
-  // CONSTRUCTOR
-  // =====================================================
 
   constructor(
     private bgEmployeeService: BgemployeeMasterService,
@@ -71,11 +53,9 @@ export class BgemployeeMasterList implements OnInit {
     private departmentService: DepartmentService,
     private designationService:DesignationService,
     private roleService:       RoleService,
+    private toaster:           ToastService,
+    private loader:             LoaderService,
   ) {}
-
-  // =====================================================
-  // LIFECYCLE
-  // =====================================================
 
   ngOnInit(): void {
     this.loadEmployees();
@@ -84,10 +64,6 @@ export class BgemployeeMasterList implements OnInit {
     this.loadDesignations();
     this.loadRoles();
   }
-
-  // =====================================================
-  // LOAD DATA
-  // =====================================================
 
   loadEmployees(): void {
     this.bgEmployeeService.getEmployeeListView().subscribe({
@@ -157,10 +133,6 @@ export class BgemployeeMasterList implements OnInit {
     });
   }
 
-  // =====================================================
-  // LOOKUP HELPERS
-  // =====================================================
-
   getLocationName(code: string): string {
     return this.locationMap[code] ?? '';
   }
@@ -172,10 +144,6 @@ export class BgemployeeMasterList implements OnInit {
   getDesignationName(id: any): string {
     return this.designationMap[String(id)] ?? '';
   }
-
-  // =====================================================
-  // AVATAR HELPERS
-  // =====================================================
 
   getInitials(name: string): string {
     if (!name) return '';
@@ -192,10 +160,6 @@ export class BgemployeeMasterList implements OnInit {
     return colors[sum % colors.length];
   }
 
-  // =====================================================
-  // ZONE HELPER
-  // =====================================================
-
   getZones(emp: any): string[] {
     return (emp.zone || '')
       .split(',')
@@ -203,17 +167,12 @@ export class BgemployeeMasterList implements OnInit {
       .filter((z: string) => z.length > 0);
   }
 
-      getDealerNames(emp: any): string[] {
+  getDealerNames(emp: any): string[] {
     return (emp.dealerName || '')
       .split(',')
       .map((d: string) => d.trim())
       .filter((d: string) => d.length > 0);
   }
-
-
-  // =====================================================
-  // DATE FORMAT HELPER
-  // =====================================================
 
   formatDate(value: any): string {
     if (!value) return '—';
@@ -221,10 +180,6 @@ export class BgemployeeMasterList implements OnInit {
     if (isNaN(d.getTime())) return '—';
     return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   }
-
-  // =====================================================
-  // FILTER
-  // =====================================================
 
   applyFilters(): void {
     const q = this.searchQuery.toLowerCase().trim();
@@ -248,10 +203,6 @@ export class BgemployeeMasterList implements OnInit {
     });
   }
 
-  // =====================================================
-  // MODAL
-  // =====================================================
-
   openEditPopup(employee: any): void {
     this.bgEmployeeService.getEmployeeById(employee.id).subscribe({
       next: (full: any) => {
@@ -268,12 +219,8 @@ export class BgemployeeMasterList implements OnInit {
   closePopup(): void {
     this.showModal        = false;
     this.selectedEmployee = null;
-    this.loadEmployees();   // refresh list after edit
+    this.loadEmployees();
   }
-
-  // =====================================================
-  // TOGGLE STATUS
-  // =====================================================
 
   toggleStatus(emp: any, event: Event): void {
     event.stopPropagation();
@@ -285,7 +232,7 @@ export class BgemployeeMasterList implements OnInit {
 
     if (!confirm(confirmMsg)) return;
 
-    this.bgEmployeeService.updateEmployee({ id: emp.id, isActive: newStatus }).subscribe({
+    this.bgEmployeeService.updateStatus(emp.id, newStatus).subscribe({
       next: () => {
         emp.isActive = newStatus;
         this.applyFilters();
@@ -297,5 +244,39 @@ export class BgemployeeMasterList implements OnInit {
     });
   }
 
+  // =====================================================
+  // EXCEL EXPORT
+  // FIX: error handler now surfaces the real failure reason (via the
+  // blob-decoding added in BgemployeeMasterService) instead of a generic
+  // message with no detail — matches the fix just applied on the
+  // Employee list side.
+  // =====================================================
 
+  downloadExcel(): void {
+    this.loader.show();
+
+    this.bgEmployeeService.downloadBgEmployeeExcel().subscribe({
+      next: (data: Blob) => {
+        const blob = new Blob([data], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'BgEmployeeList.xlsx';
+        link.click();
+
+        window.URL.revokeObjectURL(url);
+        this.loader.hide();
+        this.toaster.show('BG Employee Excel downloaded successfully', { classname: 'bg-success text-light', delay: 3000 });
+      },
+      error: (err) => {
+        console.error('Excel download error', err);
+        this.loader.hide();
+        const detail = err?.message ? `: ${err.message}` : '';
+        this.toaster.show(`Failed to download BG Employee Excel${detail}`, { classname: 'bg-danger text-white', delay: 6000 });
+      }
+    });
+  }
 }

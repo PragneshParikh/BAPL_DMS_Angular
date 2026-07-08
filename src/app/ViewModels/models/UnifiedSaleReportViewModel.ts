@@ -1,4 +1,4 @@
-  // ── Unified model merging VehicleSaleReportViewModel + VehicleSaleBillReportViewModel ──
+// ── Unified model merging VehicleSaleReportViewModel + VehicleSaleBillReportViewModel ──
 
   export interface UnifiedSaleReportViewModel {
     // ── Identity ──────────────────────────────────────────────
@@ -36,6 +36,7 @@
     billType?:       number | string;
     financier?:      string;
     financeBy?:      string;
+    financierId?:    number;
     financerCode?:   string;
     salesExecutive?: string;
     executiveName?:  string;

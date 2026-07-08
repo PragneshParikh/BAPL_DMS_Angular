@@ -30,21 +30,21 @@
                                 [(ngModel)]="filter.toDate" (ngModelChange)="onFilterChange()" [altInput]="true"
                                 [altFormat]="'d-m-Y'" [dateFormat]="'Y-m-d'" placeholder="To Date">
                         </div>
-                         <div class="col-md-auto">
-                        <button class="btn btn-primary btn-sm">
-                            Search
-                        </button>
-                    </div>
+                        <div class="col-md-auto">
+                            <button class="btn btn-primary btn-sm">
+                                Search
+                            </button>
+                        </div>
 
                     </div>
 
                     <!-- RIGHT SIDE (Search) -->
                     <!-- RIGHT SIDE (Dropdown + Search) -->
- <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-3">
 
                         <!-- Buttons -->
                         <div class="d-flex gap-2">
-                          
+
                             <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
                                 (click)="downloadHSRPExcel()">
                                 <i class="ri-file-excel-2-line"></i>
@@ -82,7 +82,7 @@
                                 <th>Order No</th>
                                 <th>Order Date</th>
                                 <th>Supplier Name</th>
-                                <th>Chassis No</th>
+                                <th>Chassis No/Reg No</th>
                                 <th class="text-center">HSRP Order Status</th>
                                 <th class="text-center">HSRP Order Response</th>
                                 <th class="text-center">Inward Status</th>
@@ -113,17 +113,26 @@
 
 
                                 <td>
-                                    <ngb-highlight [result]="item.orderDate| date:'dd-MM-yyyy'" [term]="searchTerm"></ngb-highlight>
+                                    <ngb-highlight [result]="item.orderDate| date:'dd-MM-yyyy'"
+                                        [term]="searchTerm"></ngb-highlight>
                                 </td>
 
 
                                 <td>
-                                    <ngb-highlight [result]="item.supplierName || '-' " [term]="searchTerm"></ngb-highlight>
+                                    <ngb-highlight [result]="item.supplierName || '-' "
+                                        [term]="searchTerm"></ngb-highlight>
                                 </td>
 
 
                                 <td>
-                                    <ngb-highlight [result]="item.chassisNo" [term]="searchTerm"></ngb-highlight>
+                                    <div>
+                                        <strong>Chassis:</strong>
+                                        <ngb-highlight [result]="item.chassisNo" [term]="searchTerm"></ngb-highlight>
+                                    </div>
+                                    <div>
+                                        <strong>Reg No:</strong>
+                                        <ngb-highlight [result]="item.regNo" [term]="searchTerm"></ngb-highlight>
+                                    </div>
                                 </td>
 
 
@@ -135,13 +144,15 @@
                                 </td>
 
                                 <td>
-                                    <ngb-highlight [result]="item.inwardStatus || '-' " [term]="searchTerm"></ngb-highlight>
+                                    <ngb-highlight [result]="item.inwardStatus || '-' "
+                                        [term]="searchTerm"></ngb-highlight>
                                 </td>
 
 
                                 <!-- RESPONSE -->
                                 <td>
-                                    <ngb-highlight [result]="item.inwardResponse || '-' " [term]="searchTerm"></ngb-highlight>
+                                    <ngb-highlight [result]="item.inwardResponse || '-' "
+                                        [term]="searchTerm"></ngb-highlight>
                                 </td>
 
                             </tr>

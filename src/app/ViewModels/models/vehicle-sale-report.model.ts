@@ -14,6 +14,12 @@ export interface VehicleSaleReportViewModel {
 
   chasisNo: string;
 
+  billingName?: string;
+
+  hsn?: string;
+
+  mfgYear?: number;
+
   regNo: string;
 
   dealerCode: string;
@@ -56,9 +62,17 @@ export interface VehicleSaleReportViewModel {
 
   invoiceNo: string;
 
+  saleBillNo?: string;
+
   billType: string;
 
+  saleType?: string;
+
+  status: string;
+
   financeBy: string;
+
+  financierId?: number;
 
   financerCode: string;
 
@@ -85,6 +99,32 @@ export interface VehicleSaleReportViewModel {
   batteryNo6: string;
 
   batteryCapacity: string;
+
+  chargerNo?: string;
+
+  controllerNo?: string;
+
+  itemRate?: number;
+
+  preGstDiscount?: number;
+
+  taxableAmount?: number;
+
+  sgstPer?: number;
+
+  sgstAmount?: number;
+
+  cgstPer?: number;
+
+  cgstAmount?: number;
+
+  igstPer?: number;
+
+  igstAmount?: number;
+
+  totalGstAmount?: number;
+
+  finalAmount?: number;
 
   subsidyAmount: number;
 

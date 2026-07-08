@@ -173,7 +173,7 @@ export class HSRPOrder implements OnInit {
   loadOrderForEdit(id: any) {
     this.hsrpService.getHSRPById(id).subscribe({
       next: (res: any) => {
-
+console.log(res);
         this.orders = Array.isArray(res) ? res : [res];
         this.filteredOrders = [...this.orders];
 
