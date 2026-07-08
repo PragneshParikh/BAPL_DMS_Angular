@@ -11,6 +11,7 @@ import { ToastService } from '../../../../shared/toaster/toast-service';
 import { LocationName } from '../../../../ViewModels/ReceiptEntryModel';
 import Swal from 'sweetalert2';
 import { LocationMasterService } from '../../../../core/services/location-master-service';
+import { LedgerMasterService } from '../../../../core/services/ledger-master';
 
 @Component({
   selector: 'app-lot-inspection-details',
@@ -29,13 +30,20 @@ export class LotInspectionDetails implements OnInit {
   selectedvehiclefasteringcover: string = '';
   selectedPlastingcover: string = '';
   selectedSupervisor: string = '';
+  selectedlotPartyId: any;
 
   isLotInspected: any;
+  isSuperAdmin: boolean;
+  dealerCode: any;
+  IsD2d: boolean = false;
+  inwardType: string;
+  lotPartyList: any;
 
   constructor(
     private route: ActivatedRoute,
     private lotInspectionDetailservice: LotInspectionDetailsService,
     private locationService: LocationMasterService,
+    private ledgerService: LedgerMasterService,
     public toaster: ToastService,
     private loader: LoaderService,
     private router: Router,
@@ -55,6 +63,8 @@ export class LotInspectionDetails implements OnInit {
       }
     });
   }
+
+
   allowOnlyNumbers(event: any, field: 'driverContact' | 'keyFobSetQty' | 'chargerQty' | 'mirrorSetQty' | 'firstAidKitQty' | 'toolkitQty' | 'ownersManual' | 'ignitionKeySet' | 'attributeCard' | 'chargingKit') {
     const value = event.target.value.replace(/\D/g, '');
     event.target.value = value;
@@ -116,11 +126,20 @@ export class LotInspectionDetails implements OnInit {
   }
 
   fetchLocations(): void {
-    const dealerCode = this.storageService.getDealerCode();
-    this.locationService.getLocationList(dealerCode).subscribe({
+    debugger;
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
+
+
+    this.locationService.getLocationList(this.dealerCode).subscribe({
       next: (data: any[]) => {
-        // only Workshop (id = 2)
-        this.locations = data.filter(x => x.locareadidNo === 2);
+        // only showroom (id = 1)
+        this.locations = data.filter(x => x.locareadidNo === 1);
       },
       error: (err) => {
         console.error('Error fetching locations', err);
@@ -158,13 +177,18 @@ export class LotInspectionDetails implements OnInit {
     const formattedTime =
       String(now.getHours()).padStart(2, '0') + ':' +
       String(now.getMinutes()).padStart(2, '0');
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
     this.lotInspectionDetailservice.getAllDetailsByInvoice(this.invoiceNo).subscribe({
       next: (res: any) => {
 
         if (res?.data?.length > 0) {
-
+          console.log(res?.data[0]);
           this.isLotInspected = res?.data[0]?.islotinspected;
+          this.IsD2d = res?.data[0]?.isD2D;
+          this.inwardType = res?.data[0].inwardType;
+          this.getlotPartyName(this.IsD2d);
+
 
           const first = res.data[0];
 
@@ -186,6 +210,8 @@ export class LotInspectionDetails implements OnInit {
             plasticCover: first.plasticCover || this.selectedPlastingcover,
             nameSupervisor: first.nameSupervisor || this.selectedSupervisor,
             locationName: first.locationName || this.selectedLocation,
+            isD2D: first.IsD2D,
+            inwardType: first.inwardType || this.inwardType,
             dealerCode: this.storageService.getDealerCode()
           };
 
@@ -231,10 +257,125 @@ export class LotInspectionDetails implements OnInit {
       }
     });
   }
+  getlotPartyName(isD2D: boolean) {
+    debugger;
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
+    this.IsD2d = isD2D;
+    this.ledgerService.getLotRelatedLedgers(this.dealerCode, this.IsD2d).subscribe({
+      next: (res: any) => {
 
+        this.lotPartyList = res;
+        //console.log(this.lotPartyList)
+        if (this.lotPartyList.length === 1) {
+          this.selectedlotPartyId = this.lotPartyList[0].id;
+        }
+      }, error: (err) => {
+        this.loader.hide();
+        console.error(err);
+      }
+    })
+  }
   // ================= SAVE DATA =================
   saveData() {
     // VALIDATION FIRST
+
+    if (!this.headerObj.arrivalDate) {
+      this.toaster.show('Arrival Date is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.arrivalTime) {
+      this.toaster.show('Arrival Time is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.lrNo) {
+      this.toaster.show('L.R. No is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.lrDate) {
+      this.toaster.show('L.R. Date is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.truckNo) {
+      this.toaster.show('Truck No is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.transporterName) {
+      this.toaster.show('Transporter Name is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.driverName) {
+      this.toaster.show('Driver Name is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.driverContact) {
+      this.toaster.show('Driver Contact is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.locationName) {
+      this.toaster.show('Location Name is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.nameSupervisor) {
+      this.toaster.show('Name of Supervisor Name is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.plasticCover) {
+      this.toaster.show('Plastic Cover is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.vehicleFasteningBracket) {
+      this.toaster.show('Vvehicle Fastening Bracket is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+     if (!this.headerObj.inwardType) {
+      this.toaster.show('Inward Type is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+
+
     const invalidRows = this.detailList.filter(x => !x.vehicleStatus || x.vehicleStatus === '');
 
     if (invalidRows.length > 0) {
@@ -272,6 +413,8 @@ export class LotInspectionDetails implements OnInit {
       plasticCover: this.headerObj.plasticCover || '',
       nameSupervisor: this.headerObj.nameSupervisor || '',
       LocationName: this.headerObj.locationName || '',
+      IsD2D: this.headerObj.isD2D || false,
+      InwardType:this.headerObj.inwardType,
       updatedBy: 'Admin',
       updatedDate: new Date().toISOString(),
       IsLotInspected: true

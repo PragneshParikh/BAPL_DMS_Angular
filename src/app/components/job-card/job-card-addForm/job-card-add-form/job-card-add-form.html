@@ -220,7 +220,8 @@
               </div>
               <div class="col-md-3">
                 <label>Job In Time</label>
-                <input type="time" class="form-control form-control-sm" [(ngModel)]="jobInTime" [disabled]="true">
+                <input type="time" class="form-control form-control-sm" [(ngModel)]="jobInTime" [disabled]="true"
+                  (change)="calculateEstimatedDelivery()">
               </div>
               <div class="col-md-2">
                 <label>Job No.</label>
@@ -242,7 +243,8 @@
               </div>
               <div class="col-md-3">
                 <label class="form-lael">Job Source</label>
-                <select class="form-select form-select-sm" [(ngModel)]="selectedJobSources">
+                <select class="form-select form-select-sm" [(ngModel)]="selectedJobSources"
+                  [class.is-invalid]="isSubmitted && !selectedJobSources">
 
                   <option value="">Select Job Source</option>
 
@@ -250,24 +252,36 @@
                     {{ jobsource.jobSourceName }}
                   </option>
                 </select>
+                <div class="invalid-feedback">
+                  JobSources is required.
+                </div>
               </div>
               <div class="col-md-5">
                 <label>Supervisor/Advisor</label>
-                <select class="form-select form-select-sm" [(ngModel)]="supervisor">
+                <select class="form-select form-select-sm" [(ngModel)]="supervisor"
+                  [class.is-invalid]="isSubmitted && !supervisor">
                   <option value="">Select Supervisor</option>
                   <option value="Manoj">Manoj</option>
                   <option value="Suraj">Suraj</option>
                   <option value="Vishal">Vishal</option>
                 </select>
+
+                <div class="invalid-feedback">
+                  Supervisor is required.
+                </div>
               </div>
               <div class="col-md-4">
                 <label>Technician</label>
-                <select class="form-select form-select-sm" [(ngModel)]="technician">
+                <select class="form-select form-select-sm" [(ngModel)]="technician"
+                  [class.is-invalid]="isSubmitted && !technician">
                   <option value="">Select Technician</option>
                   <option value="Manoj">Manoj</option>
                   <option value="Suraj">Suraj</option>
                   <option value="Vishal">Vishal</option>
                 </select>
+                <div class="invalid-feedback">
+                  Technician is required.
+                </div>
               </div>
               <div class="col-md-3">
                 <label>Job Estimate</label>
@@ -490,7 +504,7 @@
           </div>
 
           <div class="col-md-3 position-relative">
-            <label>Complaint Code</label>
+            <label>Complaint Name</label>
             <input class="form-control form-control-sm" [(ngModel)]="complaintObj.complaintCode"
               (input)="onComplaintSearch($event)" autocomplete="off">
 
@@ -548,7 +562,9 @@
           <div class="text-center text-muted" *ngIf="complaintList.length === 0">
             Record(s) not found.
           </div>
-
+          <div class="text-danger mt-2" *ngIf="showComplaintValidation">
+            Please add at least one Customer Voice record before saving.
+          </div>
         </div>
       </div>
     </div>
@@ -561,17 +577,26 @@
       </div>
       <div class="section-body" *ngIf="isOpen.comments">
         <div class="row g-3">
-          <div class="col-md-3">
+          <div class="col-md-6">
             <label>Observation(s)<span class="text-danger">*</span></label>
-            <textarea class="form-control form-control-sm" [(ngModel)]="observation" placeholder="Enter observation"
+            <textarea class="form-control form-control-sm" rows="5" name="observation" [(ngModel)]="observation"
+              #observationCtrl="ngModel" placeholder="Enter observation" required>
+            </textarea>
+            <div class="text-danger mt-1"
+              *ngIf="observationCtrl.invalid && (observationCtrl.dirty || observationCtrl.touched)">
+              Observation is required.
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label>Supervisor Comment<span class="text-danger">*</span></label>
+            <textarea class="form-control form-control-sm" rows="5" name="supervisorComment"
+              [(ngModel)]="supervisorComment" #supervisorCommentCtrl="ngModel" placeholder="Enter supervisor comment"
               required>
             </textarea>
-          </div>
-          <div class="col-md-3">
-            <label>Supervisor Comment<span class="text-danger">*</span></label>
-            <textarea class="form-control form-control-sm" rows="3" [(ngModel)]="supervisorComment"
-              placeholder="Enter supervisor comment" required>
-            </textarea>
+            <div class="text-danger mt-1"
+              *ngIf="supervisorCommentCtrl.invalid && (supervisorCommentCtrl.dirty || supervisorCommentCtrl.touched)">
+              Supervisor Comment is required.
+            </div>
           </div>
         </div>
       </div>

@@ -8,6 +8,8 @@ export interface LabourItem {
   qty: number;
   rate: number;
   waveRate: number;
+  labourHsnCode:string;
+  
 
   discount: number;
   discountType: string;
@@ -46,17 +48,20 @@ export interface PartItem {
   partItemId?:number;
   partQty: number;
   partRate: number;
+  partHsnCode:string;
   discount: number;
   taxableAmount: number;
   netAmount: number;
   issuetypeName: string;
-  issueType: string;
+  //issueType: number;
   issuetypeId?: number;
 
   cgst: number;
   sgst: number;
   igst: number;
 
+  cgstAmount:number;
+  sgstAmount:number;
   igstAmount: number;
   dealerState?:string;
   custState?:string;
