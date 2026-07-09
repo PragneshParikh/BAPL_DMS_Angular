@@ -6,21 +6,14 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { ReportService } from '../../../core/services/report.service';
-
-import {
-  VehicleSaleBillReportFilterModel,
-  VehicleSaleBillReportViewModel,
-  VehicleSaleBillReportResponse
-} from '../../../ViewModels/models/vehicle-sale-bill-report.model';
+import { LedgerMasterService } from '../../../core/services/ledger-master';
+import { LedgerMaster } from '../../../ViewModels/LedgerMasterViewModel';
 
 import {
   DealerDropdownItem,
-  VehicleSaleReportViewModel
-} from '../../../ViewModels/models/vehicle-sale-report.model';
-
-import {
   UnifiedSaleReportViewModel,
-  UnifiedSaleReportTotals
+  UnifiedSaleReportTotals,
+  UnifiedSaleReportFilter
 } from '../../../ViewModels/models/UnifiedSaleReportViewModel';
 
 @Component({
@@ -32,11 +25,13 @@ import {
 })
 export class VehicleSaleReportComponent implements OnInit {
 
-  private reportService = inject(ReportService);
-  private fb            = inject(FormBuilder);
+  private reportService       = inject(ReportService);
+  private ledgerMasterService = inject(LedgerMasterService);
+  private fb                  = inject(FormBuilder);
 
   filterForm!: FormGroup;
   dealerList: DealerDropdownItem[] = [];
+  financierList: LedgerMaster[] = [];
 
   reportData: UnifiedSaleReportViewModel[] = [];
   totals:     UnifiedSaleReportTotals | null = null;
@@ -67,11 +62,13 @@ export class VehicleSaleReportComponent implements OnInit {
       status:       [''],
       chassisNo:    [''],
       saleBillNo:   [''],
+      financier:    [''],
       search:       ['']
     });
 
     this.initDates();
     this.loadDealers();
+    // this.loadFinanciers();
     this.loadReport();
   }
 
@@ -93,7 +90,15 @@ export class VehicleSaleReportComponent implements OnInit {
     });
   }
 
-  private buildSaleBillFilter(): VehicleSaleBillReportFilterModel {
+  // loadFinanciers(): void {
+  //   this.ledgerMasterService.getFinancierLedgers().subscribe({
+  //     next:  res => { this.financierList = res || []; },
+  //     error: err => console.error('Financier dropdown error', err)
+  //   });
+  // }
+
+  // ── One filter, shared by both report endpoints ──────────────
+  private buildFilter(): UnifiedSaleReportFilter {
     const f = this.filterForm.value;
     return {
       dealerCode:   f.dealerCode   || undefined,
@@ -105,6 +110,7 @@ export class VehicleSaleReportComponent implements OnInit {
       status:       f.status       || undefined,
       chassisNo:    f.chassisNo    || undefined,
       saleBillNo:   f.saleBillNo   || undefined,
+      financier:    f.financier    || undefined,
       search:       f.search       || undefined,
       pageIndex:    this.pageIndex,
       pageSize:     this.pageSize
@@ -116,18 +122,15 @@ export class VehicleSaleReportComponent implements OnInit {
     this.reportData = [];
     this.totals     = null;
 
-    const f          = this.filterForm.value;
-    const dealerCode = f.dealerCode || undefined;
-    const fromDate   = f.fromDate ? new Date(f.fromDate) : undefined;
-    const toDate     = f.toDate   ? new Date(f.toDate)   : undefined;
+    const filter = this.buildFilter();
 
     const saleBill$ = (this.dataSource === 'both' || this.dataSource === 'saleBill')
-      ? this.reportService.getVehicleSaleBillReport(this.buildSaleBillFilter())
+      ? this.reportService.getVehicleSaleBillReport(filter)
           .pipe(catchError(err => { console.error('SaleBill API error:', err); return of(null); }))
       : of(null);
 
     const vehicleSale$ = (this.dataSource === 'both' || this.dataSource === 'vehicleSale')
-      ? this.reportService.getVehicleSaleReport(dealerCode, fromDate, toDate)
+      ? this.reportService.getVehicleSaleReport(filter)
           .pipe(catchError(err => { console.error('VehicleSale API error:', err); return of(null); }))
       : of(null);
 
@@ -135,32 +138,56 @@ export class VehicleSaleReportComponent implements OnInit {
       next: ({ saleBill, vehicleSale }) => {
         const unified: UnifiedSaleReportViewModel[] = [];
 
-        // ── Map Sale Bill rows first ──────────────────────────
+        // ── Sale Bill rows first ───────────────────────────────
         if (saleBill?.data?.length) {
-          saleBill.data.forEach(r => unified.push(this.mapSaleBill(r)));
+          saleBill.data.forEach(r =>
+            unified.push(this.normalizeAliases({ ...r, source: 'SaleBill' }))
+          );
           this.totalRecords = saleBill.totalRecords || 0;
         }
 
-        // ── Map Vehicle Sale rows, skip duplicates by chassis ─
+        // ── Vehicle Sale rows, skip duplicates by chassis ──────
         if (vehicleSale?.length) {
           vehicleSale.forEach(r => {
-            const alreadyIn = unified.some(
-              u => !!u.chassisNo && u.chassisNo === r.chasisNo
-            );
-            if (!alreadyIn) unified.push(this.mapVehicleSale(r));
+            const row = this.normalizeAliases({ ...r, source: 'VehicleSale' });
+            const alreadyIn = unified.some(u => !!u.chassisNo && u.chassisNo === row.chassisNo);
+            if (!alreadyIn) unified.push(row);
           });
         }
 
-        // ── In-memory search across both sources ──────────────
-        const q = (f.search || '').trim().toLowerCase();
+        // ── saleType / customerType / billType / status apply to BOTH
+        // sources here, since the vehicle-sale API has no way to filter
+        // on them itself — only the sale-bill request body carries them.
+        const matches = (r: UnifiedSaleReportViewModel): boolean => {
+          if (filter.saleType && r.saleType?.trim().toLowerCase() !== filter.saleType.trim().toLowerCase()) {
+            return false;
+          }
+          if (filter.customerType && r.customerType?.trim().toLowerCase() !== filter.customerType.trim().toLowerCase()) {
+            return false;
+          }
+          if (filter.billType != null && Number(r.billType) !== filter.billType) {
+            return false;
+          }
+          if (filter.status && r.status?.trim().toLowerCase() !== filter.status.trim().toLowerCase()) {
+            return false;
+          }
+          if (filter.financier && r.financier?.trim().toLowerCase() !== filter.financier.trim().toLowerCase()) {
+            return false;
+          }
+          return true;
+        };
+        const bySource = unified.filter(matches);
+
+        // ── In-memory search across both sources ───────────────
+        const q = (filter.search || '').trim().toLowerCase();
         const filtered = q
-          ? unified.filter(r =>
+          ? bySource.filter(r =>
               [r.saleBillNo, r.invoiceNo, r.customerName, r.chassisNo,
                r.chasisNo, r.modelName, r.modelDescription, r.regNo,
                r.dealerName, r.dealerCode]
               .some(v => (v || '').toLowerCase().includes(q))
             )
-          : unified;
+          : bySource;
 
         filtered.forEach((r, i) => r.srNo = i + 1);
         this.reportData = filtered;
@@ -192,131 +219,18 @@ export class VehicleSaleReportComponent implements OnInit {
     return rows.reduce((s, r) => s + (Number(r[key]) || 0), 0);
   }
 
-  // ── VehicleSaleBillReportViewModel → UnifiedSaleReportViewModel
-  private mapSaleBill(r: VehicleSaleBillReportViewModel): UnifiedSaleReportViewModel {
-    return {
-      srNo:            0,
-      source:          'SaleBill',
-      saleBillId:      r.saleBillId,
-      saleBillNo:      r.saleBillNo,
-      invoiceNo:       r.invoiceNo,
-      saleDate:        r.saleDate,
-      status:          r.status,
-      dealerCode:      r.dealerCode,
-      dealerName:      r.dealerName,
-      dealerCity:      r.dealerCity,
-      dealerState:     r.dealerState,
-      location:        r.location,
-      customerName:    r.customerName,
-      billingName:     r.billingName,
-      customerType:    r.customerType,
-      customerMobile:  r.customerMobile,
-      customerCity:    r.customerCity,
-      customerState:   r.customerState,
-      address1:        r.address1,
-      saleType:        r.saleType,
-      billType:        r.billType,
-      financier:       r.financier,
-      financeBy:       r.financier,   // ← NEW: mirror, so CSV/export never shows a blank pair
-      salesExecutive:  r.salesExecutive,
-      chassisNo:       r.chassisNo,
-      motorNo:         r.motorNo,
-      itemCode:        r.itemCode,
-      modelName:        r.modelName,
-      modelDescription: r.modelName,
-      oemModelName:     r.oemModelName,
-      colour:          r.colour,
-      hsn:             r.hsn,
-      mfgYear:         r.mfgYear,
-      regNo:           r.regNo,
-      insNo:           r.insNo,
-      batteryNo:       r.batteryNo,
-      batteryNo2:      r.batteryNo2,
-      batteryNo3:      r.batteryNo3,
-      batteryCapacity: r.batteryCapacity,
-      battery:         r.battery,
-      chargerNo:       r.chargerNo,
-      controllerNo:    r.controllerNo,
-      vcu:             r.vcu,
-      itemRate:        r.itemRate,
-      preGstDiscount:  r.preGstDiscount,
-      taxableAmount:   r.taxableAmount,
-      sgstPer:         r.sgstPer,
-      sgstAmount:      r.sgstAmount,
-      cgstPer:         r.cgstPer,
-      cgstAmount:      r.cgstAmount,
-      igstPer:         r.igstPer,
-      igstAmount:      r.igstAmount,
-      fameIIDiscount:  r.fameIIDiscount,
-      regAmount:       r.regAmount,
-      insuranceAmount: r.insuranceAmount,
-      postGstDiscount: r.postGstDiscount,
-      finalAmount:     r.finalAmount,
-      subsidyAmount:   r.subsidyAmount,
-      fameIIRequired:  r.fameIIRequired,
-    };
-  }
-
-  // ── VehicleSaleReportViewModel → UnifiedSaleReportViewModel
-  private mapVehicleSale(r: VehicleSaleReportViewModel): UnifiedSaleReportViewModel {
-    return {
-      srNo:             0,
-      source:           'VehicleSale',
-      invoiceNo:        r.invoiceNo,
-      saleDate:         r.saleDate?.toString(),
-      billDate:         r.billDate?.toString(),
-      dealerCode:       r.dealerCode,
-      dealerName:       r.dealerName,
-      dealerCity:       r.dealerCity,
-      dealerState:      r.dealerState,
-      location:         r.location,
-      locCode:          r.locCode,
-      customerName:     r.name,
-      customerType:     r.type,
-      customerMobile:   r.mobileNo,
-      customerCity:     r.customerCity,
-      customerState:    r.customerState,
-      address1:         r.address1,
-      email:            r.email,
-      pin:              r.pin,
-      bookingId:        r.bookingId,
-      billType:         r.billType,
-      financeBy:        r.financeBy,
-      financier:        r.financeBy,   
-      financierId:      r.financierId,
-      financerCode:     r.financerCode,
-      executiveName:    r.executiveName,
-      prospectName:     r.prospectName,
-      chasisNo:         r.chasisNo,
-      chassisNo:        r.chasisNo,
-      motorNumber:      r.motorNumber,
-      motorNo:          r.motorNumber,
-      modelCode:        r.modelCode,
-      modelName:        r.modelDescription,
-      modelDescription: r.modelDescription,
-      oemModelName:     r.oemModelName,
-      colorCode:        r.colorCode,
-      vehicleGroup:     r.vehicleGroup,
-      regNo:            r.regNo,
-      dispatchDate:     r.dispatchDate?.toString(),
-      batteryNo:        r.batteryNo,
-      batteryNo2:       r.batteryNo2,
-      batteryNo3:       r.batteryNo3,
-      batteryNo4:       r.batteryNo4,
-      batteryNo5:       r.batteryNo5,
-      batteryNo6:       r.batteryNo6,
-      batteryCapacity:  r.batteryCapacity,
-      billingName:      r.billingName,
-      saleType:         r.saleType,
-      status:           r.status,
-      hsn:              r.hsn,
-      mfgYear:          r.mfgYear,
-      chargerNo:        r.chargerNo,
-      controllerNo:     r.controllerNo,
-      subsidyAmount:    r.subsidyAmount ?? undefined,
-      fameIIRequired:   r.fameIIRequired ?? undefined,
-      totalAmount:      r.totalAmount ?? undefined,
-    };
+  // Fills known alias pairs both ways so the template/CSV export never see a
+  // blank field just because one API used a different name for the same value.
+  private normalizeAliases(r: UnifiedSaleReportViewModel): UnifiedSaleReportViewModel {
+    r.chassisNo        = r.chassisNo        ?? r.chasisNo;
+    r.chasisNo         = r.chasisNo         ?? r.chassisNo;
+    r.motorNo          = r.motorNo          ?? r.motorNumber;
+    r.motorNumber      = r.motorNumber      ?? r.motorNo;
+    r.financier        = r.financier        ?? r.financeBy;
+    r.financeBy        = r.financeBy        ?? r.financier;
+    r.modelDescription = r.modelDescription ?? r.modelName;
+    r.modelName        = r.modelName        ?? r.modelDescription;
+    return r;
   }
 
   onSearch(): void  { this.pageIndex = 1; this.loadReport(); }
@@ -339,7 +253,7 @@ export class VehicleSaleReportComponent implements OnInit {
     this.filterForm.reset({
       dealerCode: '', fromDate: '', toDate: '', saleType: '',
       customerType: '', billType: '', status: '',
-      chassisNo: '', saleBillNo: '', search: ''
+      chassisNo: '', saleBillNo: '', financier: '', search: ''
     });
     this.initDates();
     this.dataSource  = 'both';
