@@ -304,7 +304,7 @@
 
                     </div> -->
                     <div class="col-md-1">
-                        <label class="form-label">Qty/Hrs.</label>
+                        <label class="form-label">Qty</label>
                         <input type="number" class="form-control form-control-sm text-end bg-light text-muted"
                             [value]="1" readonly>
                     </div>
@@ -397,22 +397,76 @@
 
                 </div> -->
 
-                <input type="text" class="form-control" [(ngModel)]="itemcode" [readonly]="isPartEditMode">
+                <div class="border rounded p-2 mb-2 bg-light-subtle">
 
-                <input type="text" class="form-control" [(ngModel)]="selectedPartDescription" readonly>
+                    <div class="row g-2 align-items-end">
 
-                <select class="form-select" [(ngModel)]="selectedIssueType" [disabled]="isPartEditMode">
+                        <!-- Part & Description -->
+                        <div class="col-md-2">
 
-                    <option *ngFor="let item of IssueType" [ngValue]="item.id">
-                        {{item.name}}
-                    </option>
+                            <label class="form-label">Part</label>
+                            <input type="text" class="form-control form-control-sm bg-light text-muted"
+                                [(ngModel)]="itemcode" [readonly]="isPartEditMode">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-control form-control-sm bg-light text-muted"
+                                [(ngModel)]="selectedPartDescription" readonly>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">Qty</label>
+                            <input type="number" class="form-control form-control-sm text-end bg-light text-muted"
+                                [(ngModel)]="selectedPartQty" readonly>
+                        </div>
+                        <div class="col-md-1">
 
-                </select>
-                <button class="btn btn-primary" (click)="isPartEditMode ? updatePart() : ''">
+                            <label class="form-label">Rate</label>
 
-                    {{ isPartEditMode ? 'Update' : 'Add' }}
+                            <input type="number" class="form-control form-control-sm text-end bg-light text-muted"
+                                [(ngModel)]="selectedPartRate" readonly>
 
-                </button>
+                        </div>
+
+                        <div class="col-md-1">
+                            <label class="form-label">Disc. Type</label>
+                            <select class="form-select form-select-sm" [(ngModel)]="discountPartType">
+                                <option value="Value">Value</option>
+                                <option value="%">%</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">Discount</label>
+                            <input type="number" class="form-control form-control-sm text-end" [(ngModel)]="partdiscount">
+                        </div>
+
+
+                        <!-- Issue Type -->
+                        <!-- <div class="col-md-2">
+                            <label class="form-label">Issue Type</label>
+                            <select class="form-select form-select-sm" [(ngModel)]="selectedIssueType"
+                                [disabled]="isPartEditMode">
+
+                                <option [ngValue]=null>--Select Cash--</option>
+
+                                <option *ngFor="let item of IssueType" [ngValue]="item.id">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                        </div> -->
+                        <!-- Button -->
+                        <div class="col-md-1 d-grid">
+                            <button class="btn btn-sm btn-primary" (click)="isPartEditMode ? updatePart() : ''">
+                                + Add
+                            </button>
+                        </div>
+                        <!-- <div class="col-md-1 d-grid mb-2">
+                            <button class="btn btn-primary btn-sm" (click)="isPartEditMode ? updatePart() : ''">+Add
+                            </button>
+                        </div> -->
+
+                    </div>
+
+                </div>
                 <!-- Labour Grid -->
                 <div *ngIf="selectedItemType === 'Labour'">
 
@@ -539,7 +593,7 @@
 
                         <thead class="table-secondary">
                             <tr>
-
+                               
                                 <th>Action</th>
                                 <th>Sr.No</th>
                                 <th>Part No.</th>
@@ -563,7 +617,7 @@
                         <tbody>
 
                             <tr *ngFor="let item of materialedJobCarDList; let i=index">
-
+                                
                                 <td><button class="btn btn-sm btn-primary me-1" (click)="editPart(i)"
                                         [disabled]="item.isAutoGenerated">
                                         <i class="ri-edit-line"></i>
@@ -584,7 +638,16 @@
                                 <td>{{item.igstAmount | number:'1.2-2'}}</td>
                                 <td>{{item.netAmount | number:'1.2-2'}}</td>
                                 <td>{{item.issuetypeName}}</td>
-                                <td>{{item.fscRate | number:'1.2-2'}}</td>
+                                <td>
+                                    {{
+                                    item.issuetypeName === 'U/W'
+                                    ? item.partRate
+                                    : item.issuetypeName === 'FSC'
+                                    ? item.fscRate
+                                    : 0
+                                    | number:'1.2-2'
+                                    }}
+                                </td>
                                 <td>{{item.igst | number:'1.2-2'}}</td>
 
                             </tr>
