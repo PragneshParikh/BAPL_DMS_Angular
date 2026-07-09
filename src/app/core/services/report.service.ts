@@ -13,8 +13,10 @@ import {
 } from '../../ViewModels/models/job-report.model';
 
 import {
-  VehicleSaleReportViewModel
-} from '../../ViewModels/models/vehicle-sale-report.model';
+  UnifiedSaleReportViewModel,
+  UnifiedSaleReportFilter,
+  UnifiedSaleReportResponse
+} from '../../ViewModels/models/UnifiedSaleReportViewModel';
 
 import {
   VehicleStockFilterModel,
@@ -51,10 +53,6 @@ import {
   VehicleSaleBillReportFilterModel,
   VehicleSaleBillReportPagedResponse
 } from '../../ViewModels/models/sale-bill-report.model';
-
-import {
-  VehicleSaleBillReportResponse
-} from '../../ViewModels/models/vehicle-sale-bill-report.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -83,6 +81,7 @@ export class ReportService {
         map(response => response.data)
       );
   }
+
 
   // =====================================================
   // STOCK REPORT
@@ -210,42 +209,48 @@ export class ReportService {
   // =====================================================
 
   getVehicleSaleReport(
-    dealerCode?: string,
-    fromDate?: Date,
-    toDate?: Date
-  ): Observable<VehicleSaleReportViewModel[]> {
+    filter: UnifiedSaleReportFilter
+  ): Observable<UnifiedSaleReportViewModel[]> {
     let params = new HttpParams();
 
-    if (dealerCode)
+    if (filter.dealerCode)
       params = params.set(
         'dealerCode',
-        dealerCode
+        filter.dealerCode
       );
 
-    if (fromDate)
+    if (filter.fromDate)
       params = params.set(
         'fromDate',
-        fromDate.toISOString()
+        filter.fromDate
       );
 
-    if (toDate)
+    if (filter.toDate)
       params = params.set(
         'toDate',
-        toDate.toISOString()
+        filter.toDate
       );
 
-    return this.http.get<
-      VehicleSaleReportViewModel[]
-    >(
+    // The vehicle-sale API returns customer fields under different keys
+    // (name / type / mobileNo) than the unified model uses, so they're
+    // renamed here before the data ever reaches the component.
+    return this.http.get<any[]>(
       `${this.apiUrl}/vehicle-sale`,
       { params }
+    ).pipe(
+      map(rows => (rows || []).map(r => ({
+        ...r,
+        customerName:   r.customerName   ?? r.name,
+        customerType:   r.customerType   ?? r.type,
+        customerMobile: r.customerMobile ?? r.mobileNo,
+      } as UnifiedSaleReportViewModel)))
     );
   }
 
       getVehicleSaleBillOnlyReport(
     filter: VehicleSaleBillReportFilterModel
-  ): Observable<VehicleSaleBillReportResponse> {
-    return this.http.post<VehicleSaleBillReportResponse>(
+  ): Observable<UnifiedSaleReportResponse> {
+    return this.http.post<UnifiedSaleReportResponse>(
       `${this.apiUrl}/vehicle-sale-bill-only`,
       filter
     );
@@ -441,9 +446,9 @@ export class ReportService {
   // =====================================================
 
   getVehicleSaleBillReport(
-    filter: VehicleSaleBillReportFilterModel
-  ): Observable<VehicleSaleBillReportResponse> {
-    return this.http.post<VehicleSaleBillReportResponse>(
+    filter: UnifiedSaleReportFilter
+  ): Observable<UnifiedSaleReportResponse> {
+    return this.http.post<UnifiedSaleReportResponse>(
       `${this.apiUrl}/vehicle-sale-bill`,
       filter
     );

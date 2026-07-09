@@ -130,8 +130,8 @@ export class JobCardService {
 
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetCIRJobCardDetails/${id}`)
   }
-  getMaterialedJobCardList(jobId: number) {
-    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetMaterialedJobCardList/${jobId}`)
+  getMaterialedJobCardList(jobId: number,dealerCode:string) {
+    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetMaterialedJobCardList/${jobId}/${dealerCode}`)
   }
 
   getJobNo(dealerCode: string): Observable<any> {

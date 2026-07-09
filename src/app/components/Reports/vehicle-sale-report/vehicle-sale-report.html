@@ -6,22 +6,6 @@
   <div class="col-lg-12">
 
     <!-- FILTERS -->
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="card-title mb-0">Filters</h5>
-        <!-- Source toggle -->
-        <div class="btn-group btn-group-sm" role="group">
-          <button type="button"
-            [class]="'btn ' + (dataSource === 'both' ? 'btn-primary' : 'btn-outline-primary')"
-            (click)="setSource('both')">Both</button>
-          <button type="button"
-            [class]="'btn ' + (dataSource === 'saleBill' ? 'btn-primary' : 'btn-outline-primary')"
-            (click)="setSource('saleBill')">Sale Bill Only</button>
-          <button type="button"
-            [class]="'btn ' + (dataSource === 'vehicleSale' ? 'btn-primary' : 'btn-outline-primary')"
-            (click)="setSource('vehicleSale')">Vehicle Sale Only</button>
-        </div>
-      </div>
       <div class="card-body">
         <form [formGroup]="filterForm">
           <div class="row g-2 align-items-end">
@@ -349,4 +333,3 @@
     </div>
 
   </div>
-</div>
