@@ -187,8 +187,8 @@ export class JobCardAddForm {
     })
   }
   get isBatteryReadOnly(): boolean {
-    return this.selectedJobtype == 1;
-  }
+  return !!this.selectedJobtype;
+}
   //Fetech Dealer Location
   fetchLocations(): void {
      this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
@@ -708,6 +708,15 @@ export class JobCardAddForm {
 
   savePdi() {
 
+      if(this.pdiCheckList.length == 0){
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please Add atleast one checklist for this model.',
+        width: '300px'
+      });
+      return;
+    }
     this.pdiCheckList = this.pdiCheckList.map(x => ({
       ...x,
       isStatus: x.isStatus === true,
@@ -730,6 +739,16 @@ export class JobCardAddForm {
   saveJobCard() {
 
     this.isSubmitted = true;
+      if(this.selectedJobtype == 1 && this.pdiCheckList.length == 0){
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please Add atleast one checklist for this model.',
+        width: '300px'
+      });
+      return;
+    }
+  
     if (!this.supervisor) {
       Swal.fire({
         icon: 'warning',
