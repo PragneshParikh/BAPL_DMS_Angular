@@ -187,8 +187,8 @@ export class JobCardAddForm {
     })
   }
   get isBatteryReadOnly(): boolean {
-    return this.selectedJobtype == 1;
-  }
+  return !!this.selectedJobtype;
+}
   //Fetech Dealer Location
   fetchLocations(): void {
      this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
@@ -739,7 +739,7 @@ export class JobCardAddForm {
   saveJobCard() {
 
     this.isSubmitted = true;
-      if(this.pdiCheckList.length == 0){
+      if(this.selectedJobtype == 1 && this.pdiCheckList.length == 0){
       Swal.fire({
         icon: 'warning',
         title: 'Validation',
