@@ -129,7 +129,7 @@
                                     bindValue="itemcode" [(ngModel)]="currentItem.itemcode" [searchFn]="customSearchFn"
                                     [clearable]="false" (change)="onPartChange($event)"
                                     placeholder="Search Part Name or Description" name="itemName_select"
-                                    #itemName_select="ngModel" required>
+                                    #itemName_select="ngModel" [clearable]="true" required>
 
                                     <ng-template ng-label-tmp let-item="item">
                                         <span [title]="item.itemcode + ' - ' + item.itemdesc">
