@@ -94,7 +94,8 @@ export class PartsPo implements OnInit {
     transactionType: 'B2C',
     isKit: false,
     partyName: '',
-    poType: 'Spares'
+    poType: 'Spares',
+    id: 0
   }
 
   dealerCode: string = '';
@@ -438,11 +439,198 @@ export class PartsPo implements OnInit {
     if (this.partsPOData.transactionType) this.transactionTypeInvalid = false;
   }
 
+  // addPurchaseItem() {
+  //   this.locationInvalid = !this.partsPOData.selectedLocation;
+  //   this.transactionTypeInvalid = !this.partsPOData.transactionType;
+  //   this.orderTypeInvalid = !this.partsPOData.subPoType;
+
+  //   this.partNoInvalid = !this.currentItem.itemcode;
+  //   this.qtyInvalid = !this.currentItem.quantity || this.currentItem.quantity <= 0;
+
+  //   if (this.locationInvalid || this.transactionTypeInvalid || this.orderTypeInvalid || this.partNoInvalid || this.qtyInvalid) {
+  //     return;
+  //   }
+
+  //   if (this.partsPOData.isKit) {
+  //     if (this.currentItem.quantity > 1) {
+  //       this.toaster.show('Only 1 kit can be purchased at a time.', { classname: 'bg-danger text-white', delay: 3000 });
+  //       return;
+  //     }
+
+  //     // Fetch kit details and expand them
+  //     this.loader.show();
+  //     this.kitDetailService.getKitDetailsWithItemsByHeaderAndLocation(this.currentItem.itemcode, this.partsPOData.selectedLocation, this.partsPOData.partyName).subscribe({
+  //       next: (res: any) => {
+  //         this.loader.hide();
+  //         const details = Array.isArray(res) ? res : (res?.data || []);
+
+  //         if (details.length === 0) {
+  //           this.toaster.show('No parts found in this kit.', { classname: 'bg-warning text-dark', delay: 3000 });
+  //           return;
+  //         }
+
+  //         const kitItems: any[] = [];
+  //         const zeroParts: string[] = [];
+
+  //         details.forEach((det: any) => {
+
+  //           const totalGST = det.taxDetails.reduce(
+  //             (sum, tax) => sum + Number(tax.taxRate || 0), 0
+  //           );
+
+  //           const gstPrice = this.calculateGST(det.itemPrice, totalGST);
+  //           const gstData = this.calculateGSTAmount(det.itemPrice, det.taxDetails);
+
+  //           const sgstAmt = gstData.sgst * det.quantity;
+  //           const cgstAmt = gstData.cgst * det.quantity;
+  //           const igstAmt = gstData.igst * det.quantity;
+
+  //           let amount = Number(gstPrice.basePrice) * Number(det.quantity);
+
+  //           kitItems.push({
+  //             partNo: det.itemCode,
+  //             description: det.itemDescription,
+  //             quantity: det.quantity,
+  //             itemRate: gstPrice.basePrice,
+  //             mrp: det.itemPrice * det.quantity,
+  //             sgstAmt: sgstAmt,
+  //             cgstAmt: cgstAmt,
+  //             igstAmt: igstAmt,
+  //             amount: amount,
+  //             itemType: det.item?.itemtype || 1,
+  //             fromKit: true
+  //           });
+  //         });
+
+  //         // Block if any kit item has zero rate
+  //         if (zeroParts.length > 0) {
+  //           this.toaster.show(`Rate is 0 for: ${zeroParts.join(', ')}. Kit not added.`, { classname: 'bg-danger text-white', delay: 6000 });
+  //           return;
+  //         }
+
+  //         kitItems.forEach(k => this.purchaseDetails.push(k));
+
+  //         this.resetCurrentItem();
+  //         this.loadPage();
+  //       },
+  //       error: (err) => {
+  //         this.loader.hide();
+  //         console.error('Error expanding kit:', err);
+  //         this.toaster.show('Error loading kit details.', { classname: 'bg-danger text-white', delay: 3000 });
+  //       }
+  //     });
+
+  //   } else {
+
+  //     const _existingItem = this.pagedPurchaseDetails.filter(x => x.itemcode === this.currentItem.itemcode);
+
+  //     if (this.currentItem.itemId <= 0) {
+  //       this.toaster.show('Please select an item to add.', { classname: 'bg-warning text-white', delay: 5000 });
+  //       return;
+  //     }
+
+  //     if (this.currentItem.quantity <= 0) {
+  //       this.toaster.show('Please enter a valid quantity.', { classname: 'bg-warning text-white', delay: 5000 });
+  //       return;
+  //     }
+
+  //     if (_existingItem.length > 0 && _existingItem[0].status !== 'Deleted' && !this.currentItem.isEdit) {
+  //       this.toaster.show('Part already exists.', { classname: 'bg-warning text-white', delay: 5000 });
+  //       return;
+  //     }
+
+  //     // Attempt to set a fallback description if still empty
+  //     // if (!this.currentItem.itemdesc) {
+  //     //   const fallbackModel = this.itemList.find(m => m.itemcode === this.currentItem.partNo);
+  //     //   if (fallbackModel) {
+  //     //     this.currentItem.itemdesc = fallbackModel.itemdesc || fallbackModel.itemname || fallbackModel.Itemname || fallbackModel.itemdesc || '';
+  //     //   }
+  //     // }
+
+  //     // this.calculateRowTotals();
+
+  //     // const newItem = { ...this.currentItem };
+
+  //     let index = this.pagedPurchaseDetails.findIndex(x => x.itemcode === this.currentItem.itemcode && x.status !== 'Deleted');
+
+  //     const totalGST = Number(this.currentItem.cgst) + Number(this.currentItem.sgst) //+ Number(this.currentItem.igst);
+
+  //     const selectedItem = this.itemList.find(item => item.itemcode === this.currentItem.itemcode);
+
+  //     const taxDetails = this.calculateGST(Number(selectedItem.dlrprice), totalGST);
+  //     const totalGSTAmount = Number(taxDetails.gstAmount);
+
+  //     const qty = Number(this.currentItem.quantity || 0);
+
+  //     let sellerParty = this.ledgerList.find(l => l.ledgerCode === this.partsPOData.partyName);
+  //     let buyerParty = this.locationList.find(l => l.locationCode === this.partsPOData.selectedLocation);
+
+  //     if (sellerParty.stateName === buyerParty.stateName) {
+  //       this.currentItem.cgstAmt = totalGST > 0
+  //         ? (((Number(this.currentItem.cgst) / totalGST) * totalGSTAmount) * qty).toFixed(2)
+  //         : '0.00';
+
+  //       this.currentItem.sgstAmt = totalGST > 0
+  //         ? (((Number(this.currentItem.sgst) / totalGST) * totalGSTAmount) * qty).toFixed(2)
+  //         : '0.00';
+  //     } else {
+  //       this.currentItem.igstAmt = totalGST > 0
+  //         ? (((Number(this.currentItem.igst) / totalGST) * totalGSTAmount) * qty).toFixed(2)
+  //         : '0.00';
+  //     }
+
+  //     this.currentItem.amount = Number(Number(taxDetails.basePrice) * this.currentItem.quantity).toFixed(2);
+  //     this.currentItem.mrp = Number(Number(taxDetails.finalPrice) * this.currentItem.quantity).toFixed(2);
+
+  //     // const gstData = this.calculateGSTAmount(this.currentItem.itemRate, this.taxDetails);
+
+  //     // const qty = Number(this.currentItem.quantity || 0);
+  //     // const rate = Number(this.currentItem.itemRate || 0);      
+
+  //     // this.currentItem.mrp = qty * rate + gstData.totalGST;
+  //     // this.currentItem.amount = (Number(this.currentItem.itemRate) * (this.currentItem.quantity || 0)).toFixed(2);
+
+  //     const itemToSave = {
+  //       ...this.currentItem,
+
+  //       // sgstAmt: gstData.sgst * this.currentItem.quantity,
+  //       // cgstAmt: gstData.cgst * this.currentItem.quantity,
+  //       // igstAmt: gstData.igst * this.currentItem.quantity,
+
+  //       updatedBy: this.storageService.getUserId(),
+  //       updatedDate: new Date()
+  //     };
+
+  //     if (index > -1) {
+  //       itemToSave.status = 'Modified';
+  //       this.pagedPurchaseDetails[index] = itemToSave;
+  //     } else {
+  //       itemToSave.status = 'Added';
+
+  //       itemToSave.id = this.tempIdCounter--;
+
+  //       itemToSave.createdBy = this.storageService.getUserId();
+  //       itemToSave.createdDate = new Date();
+
+  //       this.pagedPurchaseDetails = [...this.pagedPurchaseDetails, itemToSave];
+  //     }
+
+  //     // if (this.editingIndex !== null) {
+  //     //   this.pagedPurchaseDetails[this.editingIndex] = newItem;
+  //     //   this.editingIndex = null;
+  //     // } else {
+  //     //   this.pagedPurchaseDetails.push(newItem);
+  //     // }
+
+  //     this.resetCurrentItem();
+  //     // this.loadPage();
+  //   }
+  // }
+
   addPurchaseItem() {
     this.locationInvalid = !this.partsPOData.selectedLocation;
     this.transactionTypeInvalid = !this.partsPOData.transactionType;
     this.orderTypeInvalid = !this.partsPOData.subPoType;
-
     this.partNoInvalid = !this.currentItem.itemcode;
     this.qtyInvalid = !this.currentItem.quantity || this.currentItem.quantity <= 0;
 
@@ -456,9 +644,12 @@ export class PartsPo implements OnInit {
         return;
       }
 
-      // Fetch kit details and expand them
       this.loader.show();
-      this.kitDetailService.getKitDetailsWithItemsByHeaderAndLocation(this.currentItem.itemcode, this.partsPOData.selectedLocation, this.partsPOData.partyName).subscribe({
+      this.kitDetailService.getKitDetailsWithItemsByHeaderAndLocation(
+        this.currentItem.itemcode,
+        this.partsPOData.selectedLocation,
+        this.partsPOData.partyName
+      ).subscribe({
         next: (res: any) => {
           this.loader.hide();
           const details = Array.isArray(res) ? res : (res?.data || []);
@@ -472,19 +663,18 @@ export class PartsPo implements OnInit {
           const zeroParts: string[] = [];
 
           details.forEach((det: any) => {
+            if (!det.itemPrice || det.itemPrice <= 0) {
+              zeroParts.push(det.itemCode || 'Unknown Part');
+            }
 
-            const totalGST = det.taxDetails.reduce(
-              (sum, tax) => sum + Number(tax.taxRate || 0), 0
-            );
-
+            const totalGST = det.taxDetails?.reduce((sum: number, tax: any) => sum + Number(tax.taxRate || 0), 0) || 0;
             const gstPrice = this.calculateGST(det.itemPrice, totalGST);
             const gstData = this.calculateGSTAmount(det.itemPrice, det.taxDetails);
 
             const sgstAmt = gstData.sgst * det.quantity;
             const cgstAmt = gstData.cgst * det.quantity;
             const igstAmt = gstData.igst * det.quantity;
-
-            let amount = Number(gstPrice.basePrice) * Number(det.quantity);
+            const amount = Number(gstPrice.basePrice) * Number(det.quantity);
 
             kitItems.push({
               partNo: det.itemCode,
@@ -501,7 +691,6 @@ export class PartsPo implements OnInit {
             });
           });
 
-          // Block if any kit item has zero rate
           if (zeroParts.length > 0) {
             this.toaster.show(`Rate is 0 for: ${zeroParts.join(', ')}. Kit not added.`, { classname: 'bg-danger text-white', delay: 6000 });
             return;
@@ -518,105 +707,68 @@ export class PartsPo implements OnInit {
           this.toaster.show('Error loading kit details.', { classname: 'bg-danger text-white', delay: 3000 });
         }
       });
+    }
 
-    } else {
-
-      const _existingItem = this.pagedPurchaseDetails.filter(x => x.itemcode === this.currentItem.itemcode);
-
+    else {
       if (this.currentItem.itemId <= 0) {
         this.toaster.show('Please select an item to add.', { classname: 'bg-warning text-white', delay: 5000 });
         return;
       }
 
-      if (this.currentItem.quantity <= 0) {
-        this.toaster.show('Please enter a valid quantity.', { classname: 'bg-warning text-white', delay: 5000 });
+      const selectedItem = this.itemList.find(item => item.itemcode === this.currentItem.itemcode);
+      if (!selectedItem) {
+        this.toaster.show('Selected item details not found in inventory.', { classname: 'bg-danger text-white', delay: 5000 });
         return;
       }
 
-      if (_existingItem.length > 0 && _existingItem[0].status !== 'Deleted' && !this.currentItem.isEdit) {
+      const existingIndex = this.purchaseDetails.findIndex(x => x.itemcode === this.currentItem.itemcode && x.status !== 'Deleted');
+      if (existingIndex > -1 && !this.currentItem.isEdit) {
         this.toaster.show('Part already exists.', { classname: 'bg-warning text-white', delay: 5000 });
         return;
       }
 
-      // Attempt to set a fallback description if still empty
-      // if (!this.currentItem.itemdesc) {
-      //   const fallbackModel = this.itemList.find(m => m.itemcode === this.currentItem.partNo);
-      //   if (fallbackModel) {
-      //     this.currentItem.itemdesc = fallbackModel.itemdesc || fallbackModel.itemname || fallbackModel.Itemname || fallbackModel.itemdesc || '';
-      //   }
-      // }
-
-      // this.calculateRowTotals();
-
-      // const newItem = { ...this.currentItem };
-
-      let index = this.pagedPurchaseDetails.findIndex(x => x.itemcode === this.currentItem.itemcode && x.status !== 'Deleted');
-
-      const totalGST = Number(this.currentItem.cgst) + Number(this.currentItem.sgst) //+ Number(this.currentItem.igst);
-
-      const selectedItem = this.itemList.find(item => item.itemcode === this.currentItem.itemcode);
-
-      const taxDetails = this.calculateGST(Number(selectedItem.dlrprice), totalGST);
-      const totalGSTAmount = Number(taxDetails.gstAmount);
-
+      const totalGST = Number(this.currentItem.cgst || 0) + Number(this.currentItem.sgst || 0);
+      const taxDetails = this.calculateGST(Number(selectedItem.dlrprice || 0), totalGST);
+      const totalGSTAmount = Number(taxDetails.gstAmount || 0);
       const qty = Number(this.currentItem.quantity || 0);
 
-      this.currentItem.cgstAmt = totalGST > 0
-        ? (((Number(this.currentItem.cgst) / totalGST) * totalGSTAmount) * qty).toFixed(2)
-        : '0.00';
+      const sellerParty = this.ledgerList.find(l => l.ledgerCode === this.partsPOData.partyName);
+      const buyerParty = this.locationList.find(l => l.loccode === this.partsPOData.selectedLocation);
 
-      this.currentItem.sgstAmt = totalGST > 0
-        ? (((Number(this.currentItem.sgst) / totalGST) * totalGSTAmount) * qty).toFixed(2)
-        : '0.00';
+      this.currentItem.cgstAmt = '0.00';
+      this.currentItem.sgstAmt = '0.00';
+      this.currentItem.igstAmt = '0.00';
 
-      this.currentItem.igstAmt = totalGST > 0
-        ? (((Number(this.currentItem.igst) / totalGST) * totalGSTAmount) * qty).toFixed(2)
-        : '0.00';
-      this.currentItem.amount = Number(Number(taxDetails.basePrice) * this.currentItem.quantity).toFixed(2);
-      this.currentItem.mrp = Number(Number(taxDetails.finalPrice) * this.currentItem.quantity).toFixed(2);
+      if (sellerParty?.stateName && buyerParty?.state && sellerParty.stateName.trim().toLowerCase() === buyerParty.state.trim().toLowerCase()) {
+        this.currentItem.cgstAmt = totalGST > 0 ? (((Number(this.currentItem.cgst) / totalGST) * totalGSTAmount) * qty).toFixed(2) : '0.00';
+        this.currentItem.sgstAmt = totalGST > 0 ? (((Number(this.currentItem.sgst) / totalGST) * totalGSTAmount) * qty).toFixed(2) : '0.00';
+      } else {
+        const igstRate = Number(this.currentItem.igst || totalGST);
+        this.currentItem.igstAmt = igstRate > 0 ? (((igstRate / (igstRate || 1)) * totalGSTAmount) * qty).toFixed(2) : '0.00';
+      }
 
-      // const gstData = this.calculateGSTAmount(this.currentItem.itemRate, this.taxDetails);
-
-      // const qty = Number(this.currentItem.quantity || 0);
-      // const rate = Number(this.currentItem.itemRate || 0);      
-
-      // this.currentItem.mrp = qty * rate + gstData.totalGST;
-      // this.currentItem.amount = (Number(this.currentItem.itemRate) * (this.currentItem.quantity || 0)).toFixed(2);
+      this.currentItem.amount = (Number(taxDetails.basePrice || 0) * qty).toFixed(2);
+      this.currentItem.mrp = (Number(taxDetails.finalPrice || 0) * qty).toFixed(2);
 
       const itemToSave = {
         ...this.currentItem,
-
-        // sgstAmt: gstData.sgst * this.currentItem.quantity,
-        // cgstAmt: gstData.cgst * this.currentItem.quantity,
-        // igstAmt: gstData.igst * this.currentItem.quantity,
-
         updatedBy: this.storageService.getUserId(),
         updatedDate: new Date()
       };
 
-      if (index > -1) {
+      if (existingIndex > -1) {
         itemToSave.status = 'Modified';
-        this.pagedPurchaseDetails[index] = itemToSave;
+        this.purchaseDetails[existingIndex] = itemToSave;
       } else {
         itemToSave.status = 'Added';
-
         itemToSave.id = this.tempIdCounter--;
-
         itemToSave.createdBy = this.storageService.getUserId();
         itemToSave.createdDate = new Date();
-
-        this.pagedPurchaseDetails = [...this.pagedPurchaseDetails, itemToSave];
+        this.purchaseDetails.push(itemToSave);
       }
 
-      // if (this.editingIndex !== null) {
-      //   this.pagedPurchaseDetails[this.editingIndex] = newItem;
-      //   this.editingIndex = null;
-      // } else {
-      //   this.pagedPurchaseDetails.push(newItem);
-      // }
-
       this.resetCurrentItem();
-      // this.loadPage();
+      this.loadPage();
     }
   }
 
@@ -719,6 +871,13 @@ export class PartsPo implements OnInit {
     this.isSaving = true;
     this.loader.show();
 
+    let dealerCode = "";
+    const matchedLocation = this.locationList.find(x => x.loccode === this.partsPOData.selectedLocation);
+
+    if (!this.dealerCode) {
+      dealerCode = matchedLocation?.dealercode;
+    }
+
     const userId = this.storageService.getUserId();
     // PONumber is Prefix + OrderNo logic can be added later if needed. For now using orderNo.
     const poModel = {
@@ -726,7 +885,7 @@ export class PartsPo implements OnInit {
       PODate: this.partsPOData.poDate,
       POType: this.partsPOData.poType,
       subOrderType: this.partsPOData.subPoType,
-      CustomerCode: this.dealerCode,
+      CustomerCode: dealerCode,
       TransactionType: this.partsPOData.transactionType,
       LocCode: this.partsPOData.selectedLocation,
       LedgerCode: this.partsPOData.partyName,
@@ -736,12 +895,12 @@ export class PartsPo implements OnInit {
       createdDate: new Date(),
       Items: this.partsPOData.isKit
         ? this.purchaseDetails.map((item: any) => ({
-          ItemCode: item.partNo,
-          Qty: item.quantity
+          ItemCode: item.itemCode,
+          Qty: item.qty
         }))
         : this.pagedPurchaseDetails.map((item: any) => ({
-          ItemCode: item.partNo,
-          Qty: item.quantity
+          ItemCode: item.itemCode,
+          Qty: item.qty
         }))
     };
 
@@ -786,12 +945,9 @@ export class PartsPo implements OnInit {
 
   onSubmitToERP() {
     this.loader.show();
-
-    const dealerCode = this.storageService.getDealerCode();
-
     const soHeader = {
       soHeader: {
-        CustomerCode: dealerCode || '',
+        CustomerCode: this.partsPOData.customerCode || '',
         ConsigneeCode: this.partsPOData.selectedLocation,
         TestCertificate: '',
         RefNo: this.partsPOData.prefixNo,
@@ -820,14 +976,18 @@ export class PartsPo implements OnInit {
     this.purchaseService.sendToERP(soHeader).subscribe({
       next: (res: any) => {
         this.loader.hide();
-        this.toaster.show('Submit to ERP successful!', { classname: 'bg-success text-white', delay: 5000 });
+
         this.isSubmitted = res.Succeed; // Disable button after success
 
         // const match = res?.ConfirmMessage?.match(/SO No\.\s*([A-Za-z0-9/-]+)/);
         // const salesOrderNo = match ? match[1] : '';
-        const salesOrderNo = res.ReturnValue.SOId;
-
-        this.updatePOStatus(this.partsPOData.prefixNo, res.Succeed, salesOrderNo, this.partsPOData.selectedLocation);
+        if (res.Succeed) {
+          const salesOrderNo = res.ReturnValue.SOId;
+          this.updatePOStatus(this.partsPOData.prefixNo, res.Succeed, salesOrderNo, this.partsPOData.selectedLocation);
+          this.toaster.show('Submit to ERP successful!', { classname: 'bg-success text-white', delay: 5000 });
+        } else {
+          this.toaster.show('Submit to ERP failed!', { classname: 'bg-warning text-white', delay: 5000 });
+        }
       },
       error: (err) => {
         this.loader.hide();
@@ -892,6 +1052,7 @@ export class PartsPo implements OnInit {
       next: (res) => {
         this.loader.hide();
         this.partsPOData = {
+          id: res.id,
           poDate: res.poDate,
           selectedLocation: res.locCode,
           prefixNo: res.poNumber,
@@ -916,10 +1077,10 @@ export class PartsPo implements OnInit {
 
           return {
             id: item.lineNumber,
-            partNo: item.itemCode,
-            description: item.itemDescription,
-            quantity: item.qty,
-            itemRate: gstPrice.basePrice,
+            itemCode: item.itemCode,
+            itemDescription: item.itemDescription,
+            qty: item.qty,
+            rate: gstPrice.basePrice,
             mrp: item.rate,
             amount: Number(gstPrice.basePrice) * Number(item.qty),
             sgstAmt: gstData.sgst * item.qty,

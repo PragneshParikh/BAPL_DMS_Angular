@@ -123,7 +123,6 @@
                             <!-- Part Name -->
                             <div class="col-md-3">
                                 <label class="form-label mb-0 small">Part Name</label>
-
                                 <!-- Part -->
                                 <ng-select *ngIf="!partsPOData.isKit" class="ng-select-sm" [items]="itemList"
                                     bindValue="itemcode" [(ngModel)]="currentItem.itemcode" [searchFn]="customSearchFn"
@@ -252,10 +251,10 @@
                                                 </span>
                                             </ng-template>
                                         </td>
-                                        <td>{{item.itemcode}}</td>
-                                        <td>{{item.itemdesc}}</td>
-                                        <td class="text-center">{{item.quantity}}</td>
-                                        <td class="text-end">{{item.itemRate | number:'1.2-2'}}</td>
+                                        <td>{{item.itemCode}}</td>
+                                        <td>{{item.itemDescription}}</td>
+                                        <td class="text-center">{{item.qty}}</td>
+                                        <td class="text-end">{{item.rate | number:'1.2-2'}}</td>
                                         <td class="text-end">{{item.sgstAmt | number:'1.2-2'}}</td>
                                         <td class="text-end">{{item.cgstAmt | number:'1.2-2'}}</td>
                                         <td class="text-end">{{item.igstAmt | number:'1.2-2'}}</td>
@@ -298,7 +297,8 @@
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button class="btn btn-primary btn-sm" (click)="onSubmitToERP()" [disabled]="isSubmitted">
+                            <button class="btn btn-primary btn-sm" (click)="onSubmitToERP()"
+                                [disabled]="isSubmitted || !partsPOData?.id || partsPOData.id <= 0">
                                 Submit To ERP
                             </button>
                             <button class="btn btn-primary btn-sm" (click)="onSave()" [disabled]="isSubmitted">
