@@ -412,11 +412,12 @@ export class RepairBill implements OnInit {
     this.loader.show();
 
     const jobId = this.selectedJobCard?.jobCardHeader?.id;
+    const dealerCode = this.storageService.getDealerCode();
 
     this.isPartSelected = true;
     this.isLabourSelected = true;
 
-    this.jobCardService.getMaterialedJobCardList(jobId).subscribe({
+    this.jobCardService.getMaterialedJobCardList(jobId,dealerCode).subscribe({
 
       next: (res) => {
 
