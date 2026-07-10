@@ -19,17 +19,19 @@ import { PurchaseService } from '../../core/services/purchase-service';
 export class PartsPoList implements OnInit {
   poStatuses = PO_STATUSES;
 
-  purchaseNo: string = '';
-  dateFrom: string = '';
-  dateTo: string = '';
-  partyName: string = '';
-  transactionType: string = '';
-  isSubmitted: string = '';
+  poFilterData: any = {
+    purchaseNo: '',
+    dateTo: '',
+    dateFrom: '',
+    isSubmitted: false,
+  }
 
-  transactionTypeList = TRANSACTION_TYPES;
+  // partyName: string = '';
+  // transactionType: string = '';
+  // transactionTypeList = TRANSACTION_TYPES;
 
-  purchaseOrders: any[] = [];
-  originalPurchaseOrders: any[] = [];
+  // purchaseOrders: any[] = [];
+  // originalPurchaseOrders: any[] = [];
   pagedPurchaseOrders: any[] = [];
 
   isSuperAdmin: boolean;
@@ -45,11 +47,12 @@ export class PartsPoList implements OnInit {
     private toastr: ToastService,
     private purchaseService: PurchaseService,
     private storageService: StorageService
-  ) { }
-
-  ngOnInit() {
+  ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     this.initDefaultDates();
+  }
+
+  ngOnInit() {
     this.loadPOList();
   }
 
@@ -57,8 +60,8 @@ export class PartsPoList implements OnInit {
     const to = new Date();
     const from = new Date();
     from.setDate(to.getDate() - 7);
-    this.dateTo = to.toISOString().split('T')[0];
-    this.dateFrom = from.toISOString().split('T')[0];
+    this.poFilterData.dateTo = to.toISOString().split('T')[0];
+    this.poFilterData.dateFrom = from.toISOString().split('T')[0];
   }
 
   loadPOList() {
@@ -66,19 +69,20 @@ export class PartsPoList implements OnInit {
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
     }
-    this.purchaseService.getPOList('Spares', this.dealerCode).subscribe({
-      next: (res: any[]) => {
+    this.purchaseService.getPOList('Spares', this.dealerCode, this.page, this.pageSize, this.poFilterData).subscribe({
+      next: (res: any) => {
         this.loader.hide();
         // const flattened = this.flattenPOList(res);
         // this.originalPurchaseOrders = flattened;
         // this.originalPurchaseOrders = res;
         // this.onSearch();
-        this.pagedPurchaseOrders = res;
-        this.totalRecords = this.purchaseOrders.length;
+        this.pagedPurchaseOrders = res.data;
+        this.totalRecords = res.totalRecords;
       },
       error: (err) => {
         this.loader.hide();
         console.error('Error fetching Parts PO list:', err);
+        this.toastr.show('Failed to load Parts PO list', { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
   }
@@ -124,32 +128,33 @@ export class PartsPoList implements OnInit {
     this.router.navigate(['/parts-po', encPO]);
   }
 
-  onSearch() {
-    let filtered = this.originalPurchaseOrders;
-    if (this.purchaseNo) filtered = filtered.filter(x => x.purchaseNo?.toLowerCase().includes(this.purchaseNo.toLowerCase()));
-    if (this.partyName) filtered = filtered.filter(x => x.partyName?.toLowerCase().includes(this.partyName.toLowerCase()));
-    if (this.transactionType) filtered = filtered.filter(x => x.transactionType === this.transactionType);
-    if (this.isSubmitted) filtered = filtered.filter(x => x.isSubmitted === this.isSubmitted);
-    if (this.dateFrom && this.dateTo) {
-      const from = new Date(this.dateFrom);
-      from.setHours(0, 0, 0, 0);
-      const to = new Date(this.dateTo);
-      to.setHours(23, 59, 59, 999);
-      filtered = filtered.filter(x => x.rawDate >= from && x.rawDate <= to);
-    }
-    this.purchaseOrders = filtered;
-    this.totalRecords = this.purchaseOrders.length;
-    this.loadPage();
-  }
+  // onSearch() {
+  //   let filtered = this.originalPurchaseOrders;
+  //   if (this.purchaseNo) filtered = filtered.filter(x => x.purchaseNo?.toLowerCase().includes(this.purchaseNo.toLowerCase()));
+  //   if (this.partyName) filtered = filtered.filter(x => x.partyName?.toLowerCase().includes(this.partyName.toLowerCase()));
+  //   if (this.transactionType) filtered = filtered.filter(x => x.transactionType === this.transactionType);
+  //   if (this.isSubmitted) filtered = filtered.filter(x => x.isSubmitted === this.isSubmitted);
+  //   if (this.dateFrom && this.dateTo) {
+  //     const from = new Date(this.dateFrom);
+  //     from.setHours(0, 0, 0, 0);
+  //     const to = new Date(this.dateTo);
+  //     to.setHours(23, 59, 59, 999);
+  //     filtered = filtered.filter(x => x.rawDate >= from && x.rawDate <= to);
+  //   }
+  //   // this.purchaseOrders = filtered;
+  //   this.totalRecords = this.purchaseOrders.length;
+  //   // this.loadPage();
+  // }
 
-  loadPage() {
-    const start = (this.page - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    this.pagedPurchaseOrders = this.purchaseOrders.slice(start, end);
-  }
+  // loadPage() {
+  //   const start = (this.page - 1) * this.pageSize;
+  //   const end = start + this.pageSize;
+  //   this.pagedPurchaseOrders = this.pagedPurchaseOrders.slice(start, end);
+  // }
 
-  refreshPage() {
-    this.loadPage();
+  pageChange(page: number) {
+    this.page = page;
+    this.loadPOList();
   }
 
   sortColumn = 'rawDate';
@@ -163,17 +168,17 @@ export class PartsPoList implements OnInit {
       this.sortDirection = 'asc';
     }
 
-    this.onSearch();
+    // this.onSearch();
   }
 
   downloadPurchaseOrderExcel() {
     this.loader.show();
     const filters = {
-      purchaseNo: this.purchaseNo,
-      dateFrom: this.dateFrom,
-      dateTo: this.dateTo,
-      transactionType: this.transactionType,
-      isSubmitted: this.isSubmitted
+      purchaseNo: this.poFilterData.purchaseNo,
+      dateFrom: this.poFilterData.dateFrom,
+      dateTo: this.poFilterData.dateTo,
+      // transactionType: this.transactionType,
+      isSubmitted: this.poFilterData.isSubmitted
     };
 
     this.purchaseService.downloadPurchaseOrderExcel(filters).subscribe({
@@ -200,11 +205,18 @@ export class PartsPoList implements OnInit {
   }
 
   resetFilters() {
-    this.purchaseNo = '';
-    this.partyName = '';
-    this.transactionType = '';
-    this.isSubmitted = '';
+    // this.purchaseNo = '';
+    // this.partyName = '';
+    // this.transactionType = '';
+    // this.isSubmitted = '';
+
+    this.poFilterData = {
+      purchaseNo: '',
+      dateTo: '',
+      dateFrom: '',
+      isSubmitted: false
+    }
     this.initDefaultDates();
-    this.onSearch();
+    // this.onSearch();
   }
 }
