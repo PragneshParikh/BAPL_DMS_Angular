@@ -56,11 +56,11 @@ export class PartsPo implements OnInit {
   currentItem = {
     id: 0,
     itemId: null,
-    itemcode: null,
-    itemdesc: '',
+    itemCode: null,
+    itemDescription: '',
 
-    quantity: 0,
-    itemRate: '',
+    qty: 0,
+    rate: '',
 
     mrp: '',
     amount: '',
@@ -334,20 +334,20 @@ export class PartsPo implements OnInit {
 
   onPartChange(itemId: any) {
     this.partNoInvalid = false;
-    if (!this.currentItem.itemcode) {
+    if (!this.currentItem.itemCode) {
       this.resetCurrentItem();
       return;
     }
 
     //#region IsKIT
     if (this.partsPOData.isKit) {
-      const selectedKit = this.kitList.find(k => k.id === Number(this.currentItem.itemcode) || k.kitName === this.currentItem.itemcode);
+      const selectedKit = this.kitList.find(k => k.id === Number(this.currentItem.itemCode) || k.kitName === this.currentItem.itemCode);
       if (selectedKit) {
-        this.currentItem.itemdesc = selectedKit.kitName || '';
-        this.currentItem.quantity = 1; // Default kit qty to 1
+        this.currentItem.itemDescription = selectedKit.kitName || '';
+        this.currentItem.qty = 1; // Default kit qty to 1
 
         this.loader.show();
-        this.kitDetailService.getKitDetailsWithItemsByHeaderAndLocation(this.currentItem.itemcode, this.partsPOData.selectedLocation, this.partsPOData.partyName).subscribe({
+        this.kitDetailService.getKitDetailsWithItemsByHeaderAndLocation(this.currentItem.itemCode, this.partsPOData.selectedLocation, this.partsPOData.partyName).subscribe({
           next: (res: any) => {
             this.loader.hide();
             const details = Array.isArray(res) ? res : (res?.data || []);
@@ -372,7 +372,7 @@ export class PartsPo implements OnInit {
               totalRate += (qty * rate);
             });
 
-            this.currentItem.itemRate = totalRate.toFixed(2);
+            this.currentItem.rate = totalRate.toFixed(2);
             this.calculateRowTotals();
           },
           error: (err) => {
@@ -385,7 +385,7 @@ export class PartsPo implements OnInit {
     }
     //#endregion
 
-    const selectedItem = this.itemList.find(item => item.itemcode === this.currentItem.itemcode);
+    const selectedItem = this.itemList.find(item => item.itemcode === this.currentItem.itemCode);
     if (selectedItem) {
       // this.loader.show();
       // this.taxService.getTaxList(selectedItem.itemcode.toString(), this.partsPOData.selectedLocation, '').subscribe({
@@ -413,10 +413,10 @@ export class PartsPo implements OnInit {
       const totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage) //+ Number(this.newItem.igst);
       const taxDetails = this.calculateGST(selectedItem.dlrprice, totalGST);
 
-      this.currentItem.itemdesc = selectedItem.itemdesc;
-      this.currentItem.itemcode = selectedItem.itemcode;
+      this.currentItem.itemDescription = selectedItem.itemdesc;
+      this.currentItem.itemCode = selectedItem.itemcode;
       this.currentItem.itemId = selectedItem.id;
-      this.currentItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
+      this.currentItem.rate = Number(taxDetails.basePrice).toFixed(2);
 
       this.currentItem.cgst = selectedItem.cgstPercentage;
       this.currentItem.sgst = selectedItem.sgstPercentage;
@@ -426,8 +426,8 @@ export class PartsPo implements OnInit {
   }
 
   calculateRowTotals() {
-    let qty = Number(this.currentItem.quantity) || 0;
-    let rate = Number(this.currentItem.itemRate) || 0;
+    let qty = Number(this.currentItem.qty) || 0;
+    let rate = Number(this.currentItem.rate) || 0;
 
     let taxableAmount = (qty * rate);
     this.currentItem.taxableAmount = taxableAmount > 0 ? taxableAmount : 0;
@@ -435,7 +435,7 @@ export class PartsPo implements OnInit {
     this.currentItem.amount = this.currentItem.taxableAmount + this.currentItem.sgstAmt + this.currentItem.cgstAmt + this.currentItem.igstAmt;
 
     // Reset validation flags
-    if (this.currentItem.quantity > 0) this.qtyInvalid = false;
+    if (this.currentItem.qty > 0) this.qtyInvalid = false;
     if (this.partsPOData.transactionType) this.transactionTypeInvalid = false;
   }
 
@@ -444,22 +444,22 @@ export class PartsPo implements OnInit {
   //   this.transactionTypeInvalid = !this.partsPOData.transactionType;
   //   this.orderTypeInvalid = !this.partsPOData.subPoType;
 
-  //   this.partNoInvalid = !this.currentItem.itemcode;
-  //   this.qtyInvalid = !this.currentItem.quantity || this.currentItem.quantity <= 0;
+  //   this.partNoInvalid = !this.currentItem.itemCode;
+  //   this.qtyInvalid = !this.currentItem.qty || this.currentItem.qty <= 0;
 
   //   if (this.locationInvalid || this.transactionTypeInvalid || this.orderTypeInvalid || this.partNoInvalid || this.qtyInvalid) {
   //     return;
   //   }
 
   //   if (this.partsPOData.isKit) {
-  //     if (this.currentItem.quantity > 1) {
+  //     if (this.currentItem.qty > 1) {
   //       this.toaster.show('Only 1 kit can be purchased at a time.', { classname: 'bg-danger text-white', delay: 3000 });
   //       return;
   //     }
 
   //     // Fetch kit details and expand them
   //     this.loader.show();
-  //     this.kitDetailService.getKitDetailsWithItemsByHeaderAndLocation(this.currentItem.itemcode, this.partsPOData.selectedLocation, this.partsPOData.partyName).subscribe({
+  //     this.kitDetailService.getKitDetailsWithItemsByHeaderAndLocation(this.currentItem.itemCode, this.partsPOData.selectedLocation, this.partsPOData.partyName).subscribe({
   //       next: (res: any) => {
   //         this.loader.hide();
   //         const details = Array.isArray(res) ? res : (res?.data || []);
@@ -631,22 +631,22 @@ export class PartsPo implements OnInit {
     this.locationInvalid = !this.partsPOData.selectedLocation;
     this.transactionTypeInvalid = !this.partsPOData.transactionType;
     this.orderTypeInvalid = !this.partsPOData.subPoType;
-    this.partNoInvalid = !this.currentItem.itemcode;
-    this.qtyInvalid = !this.currentItem.quantity || this.currentItem.quantity <= 0;
+    this.partNoInvalid = !this.currentItem.itemCode;
+    this.qtyInvalid = !this.currentItem.qty || this.currentItem.qty <= 0;
 
     if (this.locationInvalid || this.transactionTypeInvalid || this.orderTypeInvalid || this.partNoInvalid || this.qtyInvalid) {
       return;
     }
 
     if (this.partsPOData.isKit) {
-      if (this.currentItem.quantity > 1) {
+      if (this.currentItem.qty > 1) {
         this.toaster.show('Only 1 kit can be purchased at a time.', { classname: 'bg-danger text-white', delay: 3000 });
         return;
       }
 
       this.loader.show();
       this.kitDetailService.getKitDetailsWithItemsByHeaderAndLocation(
-        this.currentItem.itemcode,
+        this.currentItem.itemCode,
         this.partsPOData.selectedLocation,
         this.partsPOData.partyName
       ).subscribe({
@@ -677,10 +677,10 @@ export class PartsPo implements OnInit {
             const amount = Number(gstPrice.basePrice) * Number(det.quantity);
 
             kitItems.push({
-              partNo: det.itemCode,
-              description: det.itemDescription,
-              quantity: det.quantity,
-              itemRate: gstPrice.basePrice,
+              itemCode: det.itemCode,
+              itemDescription: det.itemDescription,
+              qty: det.quantity,
+              rate: gstPrice.basePrice,
               mrp: det.itemPrice * det.quantity,
               sgstAmt: sgstAmt,
               cgstAmt: cgstAmt,
@@ -715,13 +715,13 @@ export class PartsPo implements OnInit {
         return;
       }
 
-      const selectedItem = this.itemList.find(item => item.itemcode === this.currentItem.itemcode);
+      const selectedItem = this.itemList.find(item => item.itemcode === this.currentItem.itemCode);
       if (!selectedItem) {
         this.toaster.show('Selected item details not found in inventory.', { classname: 'bg-danger text-white', delay: 5000 });
         return;
       }
 
-      const existingIndex = this.purchaseDetails.findIndex(x => x.itemcode === this.currentItem.itemcode && x.status !== 'Deleted');
+      const existingIndex = this.purchaseDetails.findIndex(x => x.itemCode === this.currentItem.itemCode && x.status !== 'Deleted');
       if (existingIndex > -1 && !this.currentItem.isEdit) {
         this.toaster.show('Part already exists.', { classname: 'bg-warning text-white', delay: 5000 });
         return;
@@ -730,7 +730,7 @@ export class PartsPo implements OnInit {
       const totalGST = Number(this.currentItem.cgst || 0) + Number(this.currentItem.sgst || 0);
       const taxDetails = this.calculateGST(Number(selectedItem.dlrprice || 0), totalGST);
       const totalGSTAmount = Number(taxDetails.gstAmount || 0);
-      const qty = Number(this.currentItem.quantity || 0);
+      const qty = Number(this.currentItem.qty || 0);
 
       const sellerParty = this.ledgerList.find(l => l.ledgerCode === this.partsPOData.partyName);
       const buyerParty = this.locationList.find(l => l.loccode === this.partsPOData.selectedLocation);
@@ -776,10 +776,10 @@ export class PartsPo implements OnInit {
     this.currentItem = {
       id: 0,
       itemId: null,
-      itemcode: null,
-      itemdesc: '',
-      quantity: 0,
-      itemRate: '',
+      itemCode: null,
+      itemDescription: '',
+      qty: 0,
+      rate: '',
 
       mrp: '',
       amount: '',
@@ -945,7 +945,7 @@ export class PartsPo implements OnInit {
 
   onSubmitToERP() {
     this.loader.show();
-    const soHeader = {
+    const _erpObject = {
       soHeader: {
         CustomerCode: this.partsPOData.customerCode || '',
         ConsigneeCode: this.partsPOData.selectedLocation,
@@ -960,12 +960,12 @@ export class PartsPo implements OnInit {
         FameIIFlag: '',
       },
       soLine: this.pagedPurchaseDetails.map((item) => ({
-        ItemName: item.partNo,
-        modlname: item.partNo,
-        descriptions: item.description,
+        ItemName: item.itemCode,
+        modlname: item.itemCode,
+        descriptions: item.itemDescription,
         Unit: 'NOS',
-        Qty: item.quantity,
-        itemmodelname: item.modelNo,
+        Qty: item.qty,
+        itemmodelname: item.itemCode,
         colridno: 0,
         colrcode: '',
         dmspordridno: '1111',
@@ -973,7 +973,7 @@ export class PartsPo implements OnInit {
       }))
     };
 
-    this.purchaseService.sendToERP(soHeader).subscribe({
+    this.purchaseService.sendToERP(_erpObject).subscribe({
       next: (res: any) => {
         this.loader.hide();
 
@@ -1061,7 +1061,8 @@ export class PartsPo implements OnInit {
           transactionType: res.transactionType,
           isKit: res.isAgainstKit,
           partyName: res.ledgerCode,
-          poType: 'Spares'
+          poType: 'Spares',
+          customerCode: res.customerCode
         }
 
         this.isSubmitted = res.isSubmitted;
