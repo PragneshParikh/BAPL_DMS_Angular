@@ -74,11 +74,12 @@ export class VehiclePoList implements OnInit {
       this.dealerCode = this.storageService.getDealerCode();
     }
     this.purchaseService.getPOList('Vehicle', this.dealerCode, this.page, this.pageSize, this.poFilterField).subscribe({
-      next: (res: any[]) => {
+      next: (res: any) => {
         this.loader.hide();
-        const flattened = this.flattenPOList(res);
+        const flattened = this.flattenPOList(res.data);
         // this.originalPurchaseOrders = flattened;
         this.pagedPurchaseOrders = flattened;
+        this.totalRecords = res.totalRecords;
         // this.onSearch(); // Apply the default 7-day filter and sorting
       },
       error: (err) => {
