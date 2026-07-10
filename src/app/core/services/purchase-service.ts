@@ -81,7 +81,7 @@ export class PurchaseService {
   //   return this.httpClient.post<any>(`${this.baseUrl}/PurchaseOrder/parts/create`, poModel);
   // }
 
-  getPartsPOList(): Observable<any> {
-    return this.httpClient.get<any>(`${this.baseUrl}/PurchaseOrder/parts/Polist`);
-  }
+  // getPartsPOList(): Observable<any> {
+  //   return this.httpClient.get<any>(`${this.baseUrl}/PurchaseOrder/parts/Polist`);
+  // }
 }
