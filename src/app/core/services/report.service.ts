@@ -53,6 +53,21 @@ import {
   VehicleSaleBillReportFilterModel,
   VehicleSaleBillReportPagedResponse
 } from '../../ViewModels/models/sale-bill-report.model';
+
+import {
+  ModelWiseSaleCountFilter,
+  ModelWiseSalePivotResponse
+} from '../../ViewModels/models/model-wise-sale-countModel';
+
+import {
+  ModelWiseStockPivotResponse,
+  ModelWiseStockCountFilter
+} from '../../ViewModels/models/Model wise stock count.model';
+
+import {
+  TotalSaleReportDealerWiseFilter,
+  TotalSaleReportDealerWiseResponse
+} from '../../ViewModels/models/total-sale-reportModel';
 @Injectable({
   providedIn: 'root'
 })
@@ -82,6 +97,11 @@ export class ReportService {
       );
   }
 
+  // Financier dropdown moved to LedgerMasterService.getFinancierLedgers() —
+  // that service already owns every other ledger-master/* call
+  // (getCompanyLedgers, getInsuranceLedgers, etc.); duplicating one call here
+  // was how the wrong URL crept in. See vehicle-sale-report.ts for the
+  // updated call site.
 
   // =====================================================
   // STOCK REPORT
@@ -244,6 +264,29 @@ export class ReportService {
         customerType:   r.customerType   ?? r.type,
         customerMobile: r.customerMobile ?? r.mobileNo,
       } as UnifiedSaleReportViewModel)))
+    );
+  }
+
+  // =====================================================
+  // TOTAL SALE REPORT (DEALER-WISE MAPPING)
+  // =====================================================
+  getTotalSaleReportDealerWise(
+    filter: TotalSaleReportDealerWiseFilter
+  ): Observable<TotalSaleReportDealerWiseResponse> {
+    let params = new HttpParams();
+
+    if (filter.dealerCode)
+      params = params.set('dealerCode', filter.dealerCode);
+
+    if (filter.fromDate)
+      params = params.set('fromDate', filter.fromDate);
+
+    if (filter.toDate)
+      params = params.set('toDate', filter.toDate);
+
+    return this.http.get<TotalSaleReportDealerWiseResponse>(
+      `${this.apiUrl}/total-sale-dealer-wise`,
+      { params }
     );
   }
 
@@ -501,6 +544,52 @@ export class ReportService {
   // }
   getCounterBillPrint(id: number) {
     return this.http.get<any>(`${this.apiUrl}/print/${id}`);
+  }
+
+  // =====================================================
+  // MODEL WISE SALE REPORT (COUNT-WISE)
+  // =====================================================
+  getModelWiseSaleCountReport(
+    filter: ModelWiseSaleCountFilter
+  ): Observable<ModelWiseSalePivotResponse> {
+    let params = new HttpParams();
+
+    if (filter.dealerCode)
+      params = params.set('dealerCode', filter.dealerCode);
+
+    if (filter.fromDate)
+      params = params.set('fromDate', filter.fromDate);
+
+    if (filter.toDate)
+      params = params.set('toDate', filter.toDate);
+
+    return this.http.get<ModelWiseSalePivotResponse>(
+      `${this.apiUrl}/model-wise-sale-count`,
+      { params }
+    );
+  }
+
+  // =====================================================
+  // MODEL-WISE CURRENT STOCK (COUNT-WISE)
+  // =====================================================
+  getModelWiseStockCountReport(
+    filter: ModelWiseStockCountFilter
+  ): Observable<ModelWiseStockPivotResponse> {
+    let params = new HttpParams();
+
+    if (filter.dealerCode)
+      params = params.set('dealerCode', filter.dealerCode);
+
+    if (filter.fromDate)
+      params = params.set('fromDate', filter.fromDate);
+
+    if (filter.toDate)
+      params = params.set('toDate', filter.toDate);
+
+    return this.http.get<ModelWiseStockPivotResponse>(
+      `${this.apiUrl}/model-wise-stock-count`,
+      { params }
+    );
   }
 
 }
