@@ -21,7 +21,7 @@
           <div class="row g-3 align-items-end">
 
             <!-- Dealer -->
-            <div class="col-xl-2 col-lg-2 col-md-6">
+            <div class="col-xl-2 col-lg-2 col-md-6" *ngIf="!isDealerUser">
               <label class="form-label">Dealer</label>
               <select
                 formControlName="dealerCode"

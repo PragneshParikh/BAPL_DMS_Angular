@@ -36,6 +36,13 @@ export interface UnifiedSaleReportViewModel {
   email?:          string;
   pin?:            string;
 
+  // ── NEW: previously missing from both sources ────────────
+  gender?:         string;
+  dob?:            string | Date;
+  accountType?:    string;
+  partyEmail?:     string;
+  occupation?:     string;
+
   // ── Sale info ─────────────────────────────────────────────
   saleType?:       string;
   billType?:       number | string;
@@ -77,6 +84,8 @@ export interface UnifiedSaleReportViewModel {
   batteryNo6?:     string;
   batteryCapacity?: string;
   battery?:        string;
+  batteryMake?:    string;
+  batteryType?:    string;
   chargerNo?:      string;
   controllerNo?:   string;
   vcu?:            string;

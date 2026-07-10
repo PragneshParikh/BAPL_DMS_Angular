@@ -6,6 +6,22 @@
   <div class="col-lg-12">
 
     <!-- FILTERS -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">Filters</h5>
+        <!-- Source toggle -->
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button"
+            [class]="'btn ' + (dataSource === 'both' ? 'btn-primary' : 'btn-outline-primary')"
+            (click)="setSource('both')">Both</button>
+          <button type="button"
+            [class]="'btn ' + (dataSource === 'saleBill' ? 'btn-primary' : 'btn-outline-primary')"
+            (click)="setSource('saleBill')">Sale Bill Only</button>
+          <button type="button"
+            [class]="'btn ' + (dataSource === 'vehicleSale' ? 'btn-primary' : 'btn-outline-primary')"
+            (click)="setSource('vehicleSale')">Vehicle Sale Only</button>
+        </div>
+      </div>
       <div class="card-body">
         <form [formGroup]="filterForm">
           <div class="row g-2 align-items-end">
@@ -26,6 +42,14 @@
             <div class="col-xl-2 col-md-4">
               <label class="form-label">To Date</label>
               <input type="date" formControlName="toDate" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Financier</label>
+              <select formControlName="financier" class="form-select form-select-sm">
+                <option value="">-- All Financiers --</option>
+                <option *ngFor="let f of financierList" [value]="f.ledgerName">{{ f.ledgerName }}</option>
+              </select>
             </div>
 
             <!-- Sale Bill filters only shown when source includes sale bill -->
@@ -161,6 +185,7 @@
                 <th>Dealer City</th>
                 <th>Dealer State</th>
                 <th>Location</th>
+                <th>Location City</th>
 
                 <!-- Customer -->
                 <th>Customer Name</th>
@@ -170,6 +195,11 @@
                 <th>City</th>
                 <th>State</th>
                 <th>Address</th>
+                <th>Gender</th>
+                <th>DOB</th>
+                <th>Account Type</th>
+                <th>Party Email</th>
+                <th>Occupation</th>
 
                 <!-- Sale info -->
                 <th>Sale Type</th>
@@ -225,7 +255,7 @@
             </thead>
             <tbody>
               <tr *ngIf="reportData.length === 0">
-                <td colspan="60" class="text-center text-muted py-4">
+                <td colspan="66" class="text-center text-muted py-4">
                   No records found. Adjust filters and search again.
                 </td>
               </tr>
@@ -258,6 +288,7 @@
                 <td>{{ item.dealerCity }}</td>
                 <td>{{ item.dealerState }}</td>
                 <td>{{ item.location }}</td>
+                <td>{{ item.locCity }}</td>
 
                 <!-- Customer -->
                 <td>{{ item.customerName }}</td>
@@ -267,6 +298,11 @@
                 <td>{{ item.customerCity }}</td>
                 <td>{{ item.customerState }}</td>
                 <td>{{ item.address1 }}</td>
+                <td>{{ item.gender }}</td>
+                <td>{{ formatDate(item.dob) }}</td>
+                <td>{{ item.accountType }}</td>
+                <td>{{ item.partyEmail }}</td>
+                <td>{{ item.occupation }}</td>
 
                 <!-- Sale info -->
                 <td>{{ item.saleType }}</td>
@@ -333,3 +369,4 @@
     </div>
 
   </div>
+</div>

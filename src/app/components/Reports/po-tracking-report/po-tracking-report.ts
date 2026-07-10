@@ -45,6 +45,11 @@ export class POTrackingReportComponent implements OnInit {
   // ✅ Fixed — always exactly Active / Inactive (bool field)
   poStatusList: string[] = ['Active', 'Inactive'];
 
+  // The backend already forces dealerCode for a dealer login regardless of
+  // what this filter sends — hiding it is purely cosmetic, since a dealer
+  // user's own dropdown selection would never actually change their results.
+  isDealerUser = false;
+
   constructor(
     private fb           : FormBuilder,
     private reportService: ReportService
@@ -59,6 +64,8 @@ export class POTrackingReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.isDealerUser = this.checkIsDealerUser();
+
     this.initializeDates();
     this.loadAllDropdowns();
     this.loadReport();
@@ -71,6 +78,27 @@ export class POTrackingReportComponent implements OnInit {
         this.pageIndex = 1;
         this.loadReport();
       });
+  }
+
+  // NOTE: assumes the JWT is stored in localStorage under the key 'token' —
+  // adjust that key if this project's auth service uses a different one.
+  // Fails safe: if anything here doesn't match, the filter just stays
+  // visible rather than being hidden incorrectly.
+  private checkIsDealerUser(): boolean {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return false;
+
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const role =
+        payload.role ??
+        payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ??
+        payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role'];
+
+      return typeof role === 'string' && role.toLowerCase() === 'dealer';
+    } catch {
+      return false;
+    }
   }
 
   // ── Fetch dealer + poType from API in parallel ──────────

@@ -183,17 +183,13 @@ export const routes: Routes = [
       { path: 'hsrp-inward', component: HsrpInward, data: [48] },
 
       { path: 'vehicle-sale-report', data: [43], loadComponent: () => import('./components/Reports/vehicle-sale-report/vehicle-sale-report').then(m => m.VehicleSaleReportComponent) },
-
       { path: 'vehicle-stocks-report', data: [46], loadComponent: () => import('./components/Reports/vehicle-stock-report/vehicle-stock-report').then(m => m.VehicleStockReportComponent) },
-
       { path: 'po-tracking-report', data: [47], loadComponent: () => import('./components/Reports/po-tracking-report/po-tracking-report').then(m => m.POTrackingReportComponent) },
-
       { path: 'parts-dispatch-report', data: [50], loadComponent: () => import('./components/Reports/parts-dispatch-report/parts-dispatch-report').then(m => m.PartsDispatchReport) },
-
       { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
-
       { path: 'vehicle-sale-d2d-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-d2d-report/vehicle-sale-d2d-report').then(m => m.VehicleSaleD2dReport) },
-
+      { path: 'total-sale-dealer-wise', data: [81], loadComponent: () => import('./components/Reports/total-sale-report/total-sale-report').then(m => m.TotalSaleDealerWiseComponent) },
+      
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
 
       { path: 'repair-bill-performa/:repairBillId', component: RepairBillPerforma, data: [51] },
@@ -210,9 +206,9 @@ export const routes: Routes = [
       { path: 'vehicle-sale-d2d-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-d2d-report/vehicle-sale-d2d-report').then(m => m.VehicleSaleD2dReport) },
       // { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
       { path: 'vehicle-inward-report', data: [78], loadComponent: () => import('./components/Reports/vehicle-inward-report/vehicle-inward-report').then(m => m.VehicleInwardReport) },
-
+      { path: 'model-wise-sale-report', data: [79], loadComponent: () => import('./components/Reports/model-wise-sale-report/model-wise-sale-report').then(m => m.ModelWiseSaleReportComponent) },
+      { path: 'model-wise-current-stock', data: [80], loadComponent: () => import('./components/Reports/model-wise-current-stock/model-wise-current-stock').then(m => m.ModelWiseCurrentStockComponent) },
       { path: 'occupation-master', component: OccupationMaster, data: [62] },
-
       { path: 'department-master', component: DepartmentMasterList, data: [63] },
       { path: 'department-master/add', component: DepartmentMaster, data: [63] },
       { path: 'department-master/edit/:id', component: DepartmentMaster, data: [63] },
