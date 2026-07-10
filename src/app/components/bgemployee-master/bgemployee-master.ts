@@ -2,7 +2,9 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
+import { environment } from '../../../environments/environment';
 import { Gender } from '../../constant';
 import { BgemployeeMasterService }       from '../../core/services/bgemployee-master.service';
 import { DealerService }                 from '../../core/services/dealer-service';
@@ -51,6 +53,14 @@ export class BgemployeeMaster implements OnInit {
 
   selectedFile:  File | null                 = null;
   imagePreview:  string | ArrayBuffer | null = null;
+
+  // =====================================================
+  // TSM ERP LOOKUP — NEW
+  // =====================================================
+
+  tsmCode:         string = '';
+  tsmFetchLoading: boolean = false;
+  tsmFetchError:   string  = '';
 
   // =====================================================
   // EMPLOYEE PROFILE MAPPING
@@ -115,6 +125,7 @@ export class BgemployeeMaster implements OnInit {
     private employeeProfileMasterService: EmployeeProfileMasterService,
     private zoneMasterService:            ZoneMasterService,
     private roleService:                  RoleService,
+    private http:                         HttpClient,
   ) {}
 
   // =====================================================
@@ -152,6 +163,122 @@ export class BgemployeeMaster implements OnInit {
 
     // ── ROUTE ADD  /bgemployee-master/add ─────────────────
     this.initAddMode();
+  }
+
+  // =====================================================
+  // TSM ERP LOOKUP — NEW
+  // =====================================================
+
+  fetchTsmDetails(): void {
+    const code = (this.tsmCode || '').trim();
+    if (!code) {
+      this.tsmFetchError = 'Enter a TSM Code first.';
+      return;
+    }
+
+    this.tsmFetchLoading = true;
+    this.tsmFetchError   = '';
+
+    // Proxied through our own backend now — GET api/BgEmployee/TsmLookup/{code}
+    // — rather than calling the external ERP domain directly from the browser.
+    this.http.get<any>(`${environment.apiUrl}/BgEmployee/TsmLookup/${encodeURIComponent(code)}`).subscribe({
+      next: (data) => {
+        this.applyTsmData(data);
+        this.tsmFetchLoading = false;
+      },
+      error: (err) => {
+        console.error('TSM fetch error', err);
+        this.tsmFetchError   = 'TSM Code not found or the lookup service is unavailable.';
+        this.tsmFetchLoading = false;
+      },
+    });
+  }
+
+  private applyTsmData(data: any): void {
+    if (!data) return;
+
+    // ── Name: API returns one combined "tsmname" field; the form wants
+    // firstName/lastName separately. First word -> firstName, remainder
+    // -> lastName. Adjust if TSM names don't reliably split this way.
+    const fullName = String(data.tsmname ?? '').trim();
+    if (fullName) {
+      const spaceIdx = fullName.indexOf(' ');
+      if (spaceIdx > -1) {
+        this.employeeData.firstName = fullName.slice(0, spaceIdx);
+        this.employeeData.lastName  = fullName.slice(spaceIdx + 1);
+      } else {
+        this.employeeData.firstName = fullName;
+        this.employeeData.lastName  = '';
+      }
+    }
+
+    if (data.mobileno) this.employeeData.mobile = String(data.mobileno);
+    if (data.email)    this.employeeData.email  = data.email;
+
+    // ── Gender: API sends 'M'/'F'. Assumes the Gender constant's option
+    // values are also 'M'/'F' — if genders are stored as full words
+    // ('Male'/'Female') in that constant, this direct assignment won't
+    // match any <option> and the dropdown will show blank.
+    if (data.gender) this.employeeData.gender = data.gender;
+
+    // ── Dates: API sends DD/MM/YYYY strings; form fields are bound as
+    // YYYY-MM-DD (matching formatDate() elsewhere in this component).
+    // doa (date of appointment) -> dateOfJoin
+    // doe -> effectiveDate (could instead mean "date of exit" — unconfirmed)
+    if (data.doa) this.employeeData.dateOfJoin    = this.parseDDMMYYYY(data.doa);
+    if (data.dob) this.employeeData.dateOfBirth   = this.parseDDMMYYYY(data.dob);
+    if (data.doe) this.employeeData.effectiveDate = this.parseDDMMYYYY(data.doe);
+
+    // ── State / City: API returns NAMES ("MAHARASHTRA"/"PUNE"), but the
+    // form stores IDs. Matched by name against the already-loaded lists.
+    if (data.state) {
+      const matchedState = this.states.find(s =>
+        String(s.stateName ?? '').trim().toUpperCase() === String(data.state).trim().toUpperCase()
+      );
+      if (matchedState) {
+        this.employeeData.state = String(matchedState.stateId);
+        this.onStateChange();
+
+        if (data.city) {
+          setTimeout(() => {
+            const matchedCity = this.filteredCities.find(c =>
+              String(c.cityName ?? '').trim().toUpperCase() === String(data.city).trim().toUpperCase()
+            );
+            if (matchedCity) this.employeeData.city = String(matchedCity.cityId);
+          }, 0);
+        }
+      }
+    }
+
+    // ── TSM Head Code -> Reporting To: reportingToOptions labels look
+    // like "First Last (EMP0361)" — match on the code inside parentheses.
+    if (data.tsmheadcode) {
+      const match = this.reportingToOptions.find(opt =>
+        String(opt.label ?? '').includes(`(${data.tsmheadcode})`)
+      );
+      if (match) this.employeeData.reportingTo = match.id;
+    }
+
+    // ── Status: assumed 'N' = inactive, anything else = active. Unconfirmed.
+    if (data.estatus) this.employeeData.isActive = data.estatus !== 'N';
+
+    // ── Photo: only assigned if it looks like a usable value (URL or
+    // base64) — the sample payload shows this as an empty string.
+    if (data.Photo) this.imagePreview = data.Photo;
+
+    // ── Area Office ID: no corresponding field exists anywhere in this
+    // form or in BgEmployeeViewModel today. Stored on employeeData so it's
+    // visible in the object, but it will NOT be persisted on Save unless a
+    // matching field is added to the payload/backend model.
+    if (data.areaoffidno) this.employeeData.areaOfficeId = data.areaoffidno;
+  }
+
+  private parseDDMMYYYY(value: string): string {
+    const parts = String(value ?? '').split('/');
+    if (parts.length !== 3) return '';
+    const [dd, mm, yyyy] = parts;
+    if (!dd || !mm || !yyyy) return '';
+    return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
   }
 
   // =====================================================
