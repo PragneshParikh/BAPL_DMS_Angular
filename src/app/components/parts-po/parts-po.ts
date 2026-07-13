@@ -871,12 +871,8 @@ export class PartsPo implements OnInit {
     this.isSaving = true;
     this.loader.show();
 
-    let dealerCode = "";
     const matchedLocation = this.locationList.find(x => x.loccode === this.partsPOData.selectedLocation);
-
-    if (!this.dealerCode) {
-      dealerCode = matchedLocation?.dealercode;
-    }
+    let dealerCode = matchedLocation?.dealercode;
 
     const userId = this.storageService.getUserId();
     // PONumber is Prefix + OrderNo logic can be added later if needed. For now using orderNo.
