@@ -189,7 +189,7 @@ export const routes: Routes = [
       { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
       { path: 'vehicle-sale-d2d-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-d2d-report/vehicle-sale-d2d-report').then(m => m.VehicleSaleD2dReport) },
       { path: 'total-sale-dealer-wise', data: [81], loadComponent: () => import('./components/Reports/total-sale-report/total-sale-report').then(m => m.TotalSaleDealerWiseComponent) },
-      
+      { path: 'model-wise-variant-stock', data: [66], loadComponent: () => import('./components/Reports/model-wise-variant-report/model-wise-variant-report').then(m => m.ModelWiseVariantStockComponent) },
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
 
       { path: 'repair-bill-performa/:repairBillId', component: RepairBillPerforma, data: [51] },

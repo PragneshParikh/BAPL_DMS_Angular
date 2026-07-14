@@ -55,12 +55,13 @@ export class BgemployeeMaster implements OnInit {
   imagePreview:  string | ArrayBuffer | null = null;
 
   // =====================================================
-  // TSM ERP LOOKUP — NEW
+  // TSM ERP LOOKUP
   // =====================================================
 
-  tsmCode:         string = '';
+  tsmCode:         string  = '';
   tsmFetchLoading: boolean = false;
   tsmFetchError:   string  = '';
+  tsmFetchSuccess: boolean = false;
 
   // =====================================================
   // EMPLOYEE PROFILE MAPPING
@@ -79,14 +80,11 @@ export class BgemployeeMaster implements OnInit {
   loadingDealers:   boolean              = false;
   dealerSearchTerm: string               = '';
 
-  // Per-zone checkbox state — persists across zone switches
   zoneSelectionMap: Map<string, Set<number>> = new Map();
-
-  // Confirmed rows in the summary table
   addedDealers: any[] = [];
 
   // =====================================================
-  // ASSIGNED-ELSEWHERE TRACKING (dealers mapped to OTHER BG employees)
+  // ASSIGNED-ELSEWHERE TRACKING
   // =====================================================
 
   assignedDealersMap: Map<string, { employeeCode: string; employeeName: string }> = new Map();
@@ -94,7 +92,7 @@ export class BgemployeeMaster implements OnInit {
   removedDueToReassignment: { dealerName: string; assignedTo: string }[] = [];
 
   // =====================================================
-  // DEPARTMENT -> ROLES (cascading login access)
+  // DEPARTMENT -> ROLES
   // =====================================================
 
   departmentOptions:   { id: string; name: string }[] = [];
@@ -142,13 +140,11 @@ export class BgemployeeMaster implements OnInit {
     this.loadAllRoles();
     this.loadReportingToOptions();
 
-    // ── POPUP EDIT ────────────────────────────────────────
     if (this.popupData) {
       this.initEditMode(this.popupData);
       return;
     }
 
-    // ── ROUTE EDIT  /bgemployee-master/edit/:id ───────────
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId) {
       this.bgEmployeeService.getEmployeeById(+routeId).subscribe({
@@ -161,12 +157,11 @@ export class BgemployeeMaster implements OnInit {
       return;
     }
 
-    // ── ROUTE ADD  /bgemployee-master/add ─────────────────
     this.initAddMode();
   }
 
   // =====================================================
-  // TSM ERP LOOKUP — NEW
+  // TSM ERP LOOKUP
   // =====================================================
 
   fetchTsmDetails(): void {
@@ -178,13 +173,13 @@ export class BgemployeeMaster implements OnInit {
 
     this.tsmFetchLoading = true;
     this.tsmFetchError   = '';
+    this.tsmFetchSuccess = false;
 
-    // Proxied through our own backend now — GET api/BgEmployee/TsmLookup/{code}
-    // — rather than calling the external ERP domain directly from the browser.
     this.http.get<any>(`${environment.apiUrl}/BgEmployee/TsmLookup/${encodeURIComponent(code)}`).subscribe({
       next: (data) => {
         this.applyTsmData(data);
         this.tsmFetchLoading = false;
+        this.tsmFetchSuccess = true;
       },
       error: (err) => {
         console.error('TSM fetch error', err);
@@ -197,9 +192,6 @@ export class BgemployeeMaster implements OnInit {
   private applyTsmData(data: any): void {
     if (!data) return;
 
-    // ── Name: API returns one combined "tsmname" field; the form wants
-    // firstName/lastName separately. First word -> firstName, remainder
-    // -> lastName. Adjust if TSM names don't reliably split this way.
     const fullName = String(data.tsmname ?? '').trim();
     if (fullName) {
       const spaceIdx = fullName.indexOf(' ');
@@ -215,22 +207,23 @@ export class BgemployeeMaster implements OnInit {
     if (data.mobileno) this.employeeData.mobile = String(data.mobileno);
     if (data.email)    this.employeeData.email  = data.email;
 
-    // ── Gender: API sends 'M'/'F'. Assumes the Gender constant's option
-    // values are also 'M'/'F' — if genders are stored as full words
-    // ('Male'/'Female') in that constant, this direct assignment won't
-    // match any <option> and the dropdown will show blank.
-    if (data.gender) this.employeeData.gender = data.gender;
+    // Gender: try direct match against genders list ('M'/'F' options),
+    // fall back to mapped full word ('Male'/'Female' options)
+    if (data.gender) {
+      const code = String(data.gender).trim().toUpperCase();
+      const genderMap: { [key: string]: string } = { M: 'Male', F: 'Female' };
+      const directMatch = this.genders.find((g: any) =>
+        String(g.value ?? g).toUpperCase() === code
+      );
+      this.employeeData.gender = directMatch
+        ? (directMatch.value ?? directMatch)
+        : (genderMap[code] ?? data.gender);
+    }
 
-    // ── Dates: API sends DD/MM/YYYY strings; form fields are bound as
-    // YYYY-MM-DD (matching formatDate() elsewhere in this component).
-    // doa (date of appointment) -> dateOfJoin
-    // doe -> effectiveDate (could instead mean "date of exit" — unconfirmed)
     if (data.doa) this.employeeData.dateOfJoin    = this.parseDDMMYYYY(data.doa);
     if (data.dob) this.employeeData.dateOfBirth   = this.parseDDMMYYYY(data.dob);
     if (data.doe) this.employeeData.effectiveDate = this.parseDDMMYYYY(data.doe);
 
-    // ── State / City: API returns NAMES ("MAHARASHTRA"/"PUNE"), but the
-    // form stores IDs. Matched by name against the already-loaded lists.
     if (data.state) {
       const matchedState = this.states.find(s =>
         String(s.stateName ?? '').trim().toUpperCase() === String(data.state).trim().toUpperCase()
@@ -250,8 +243,6 @@ export class BgemployeeMaster implements OnInit {
       }
     }
 
-    // ── TSM Head Code -> Reporting To: reportingToOptions labels look
-    // like "First Last (EMP0361)" — match on the code inside parentheses.
     if (data.tsmheadcode) {
       const match = this.reportingToOptions.find(opt =>
         String(opt.label ?? '').includes(`(${data.tsmheadcode})`)
@@ -259,17 +250,11 @@ export class BgemployeeMaster implements OnInit {
       if (match) this.employeeData.reportingTo = match.id;
     }
 
-    // ── Status: assumed 'N' = inactive, anything else = active. Unconfirmed.
     if (data.estatus) this.employeeData.isActive = data.estatus !== 'N';
 
-    // ── Photo: only assigned if it looks like a usable value (URL or
-    // base64) — the sample payload shows this as an empty string.
     if (data.Photo) this.imagePreview = data.Photo;
 
-    // ── Area Office ID: no corresponding field exists anywhere in this
-    // form or in BgEmployeeViewModel today. Stored on employeeData so it's
-    // visible in the object, but it will NOT be persisted on Save unless a
-    // matching field is added to the payload/backend model.
+    // Stored for save payload — persisted via BgEmployeeViewModel.AreaOfficeId
     if (data.areaoffidno) this.employeeData.areaOfficeId = data.areaoffidno;
   }
 
@@ -293,7 +278,6 @@ export class BgemployeeMaster implements OnInit {
     this.loadLoggedInDealer();
     this.loadAssignedDealers();
     this.loadReportingToOptions();
-
   }
 
   // =====================================================
@@ -333,17 +317,13 @@ export class BgemployeeMaster implements OnInit {
       this.employeeData.city = data.city != null ? String(data.city) : '';
     }, 300);
 
-    // ── RESTORE MULTI-ZONE + DEALER SELECTIONS ──────────────────────
     this.addedDealers = [];
     this.zoneSelectionMap.clear();
     this.restoreZoneDealerSelections(data);
 
-    // ── ASSIGNED-ELSEWHERE TRACKING — load after employeeData.id is set ──
     this.loadAssignedDealers();
-    this.loadReportingToOptions();   // NEW
+    this.loadReportingToOptions();
 
-
-    // ── RESTORE LOGIN ACCESS + DEPARTMENT/ROLE SELECTION ──
     this.employeeData.createLogin = !!data.emailId;
     this.selectedDepartments = data.selectedDepartments?.length ? [...data.selectedDepartments] : [];
     this.selectedRoles       = data.roles?.length             ? [...data.roles]             : [];
@@ -391,19 +371,20 @@ export class BgemployeeMaster implements OnInit {
   }
 
   loadReportingToOptions(): void {
-  this.bgEmployeeService.getEmployees().subscribe({
-    next: (res: any[]) => {
-      const currentId = this.employeeData?.id || 0;
-      this.reportingToOptions = (res ?? [])
-        .filter(e => e.id !== currentId && e.isActive)
-        .map(e => ({
-          id: e.id,
-          label: `${e.firstName} ${e.lastName} (${e.employeeCode})`,
-        }));
-    },
-    error: (err) => console.error('Reporting-to load error', err),
-  });
-}
+    this.bgEmployeeService.getEmployees().subscribe({
+      next: (res: any[]) => {
+        const currentId = this.employeeData?.id || 0;
+        this.reportingToOptions = (res ?? [])
+          .filter(e => e.id !== currentId && e.isActive)
+          .map(e => ({
+            id: e.id,
+            label: `${e.firstName} ${e.lastName} (${e.employeeCode})`,
+          }));
+      },
+      error: (err) => console.error('Reporting-to load error', err),
+    });
+  }
+
   // =====================================================
   // STATES & CITIES
   // =====================================================
@@ -440,7 +421,7 @@ export class BgemployeeMaster implements OnInit {
   }
 
   // =====================================================
-  // EMPLOYEE PROFILE MASTER — dropdown
+  // EMPLOYEE PROFILE MASTER
   // =====================================================
 
   private readonly defaultProfiles = [
@@ -489,8 +470,6 @@ export class BgemployeeMaster implements OnInit {
     });
   }
 
-  // ── helpers for the CURRENT zone's checkbox list ──────────────────
-
   get currentZoneSelection(): Set<number> {
     if (!this.selectedZone) return new Set();
     if (!this.zoneSelectionMap.has(this.selectedZone)) {
@@ -537,8 +516,6 @@ export class BgemployeeMaster implements OnInit {
     return this.currentZoneSelection.size;
   }
 
-  // ── zone change: load dealers, KEEP existing selection ─────────────
-
   onZoneChange(): void {
     this.zoneDealers      = [];
     this.dealerSearchTerm = '';
@@ -566,7 +543,6 @@ export class BgemployeeMaster implements OnInit {
 
     const zone = this.selectedZone;
 
-    // replace old rows for this zone
     this.addedDealers = this.addedDealers.filter(row => row.zone !== zone);
 
     this.zoneDealers
@@ -580,14 +556,11 @@ export class BgemployeeMaster implements OnInit {
           cityName:   d.cityName ?? d.city,
         });
 
-        // dealer now belongs to this employee — clear the "assigned to other" flag
         this.assignedDealersMap.delete((d.dealerCode || '').trim());
       });
 
     this.syncPayloadFromAddedDealers();
   }
-
-  // ── remove a single row from the summary table ─────────────────────
 
   removeAddedDealer(dealerId: number, zone: string): void {
     const removedRow = this.addedDealers.find(r => r.dealerId === dealerId && r.zone === zone);
@@ -596,7 +569,6 @@ export class BgemployeeMaster implements OnInit {
       .filter(r => !(r.dealerId === dealerId && r.zone === zone));
     this.zoneSelectionMap.get(zone)?.delete(dealerId);
 
-    // if this dealer originally belonged to another employee, restore the warning
     if (removedRow) {
       const code = (removedRow.dealerCode || '').trim();
       const original = this.originalAssignedDealersMap.get(code);
@@ -608,32 +580,31 @@ export class BgemployeeMaster implements OnInit {
     this.syncPayloadFromAddedDealers();
   }
 
-    private pruneStaleAssignments(): void {
-      if (!this.addedDealers.length || this.assignedDealersMap.size === 0) return;
+  private pruneStaleAssignments(): void {
+    if (!this.addedDealers.length || this.assignedDealersMap.size === 0) return;
 
-      const stillValid: any[] = [];
+    const stillValid: any[] = [];
 
-      this.addedDealers.forEach(row => {
-        const code     = (row.dealerCode || '').trim();
-        const conflict = this.assignedDealersMap.get(code);
+    this.addedDealers.forEach(row => {
+      const code     = (row.dealerCode || '').trim();
+      const conflict = this.assignedDealersMap.get(code);
 
-        if (conflict) {
-          this.zoneSelectionMap.get(row.zone)?.delete(row.dealerId);
-          this.removedDueToReassignment.push({
-            dealerName: row.dealerName,
-            assignedTo: conflict.employeeName || conflict.employeeCode,
-          });
-        } else {
-          stillValid.push(row);
-        }
-      });
-
-      if (this.removedDueToReassignment.length) {
-        this.addedDealers = stillValid;
-        this.syncPayloadFromAddedDealers();
+      if (conflict) {
+        this.zoneSelectionMap.get(row.zone)?.delete(row.dealerId);
+        this.removedDueToReassignment.push({
+          dealerName: row.dealerName,
+          assignedTo: conflict.employeeName || conflict.employeeCode,
+        });
+      } else {
+        stillValid.push(row);
       }
+    });
+
+    if (this.removedDueToReassignment.length) {
+      this.addedDealers = stillValid;
+      this.syncPayloadFromAddedDealers();
     }
-  // ── sync payload fields from addedDealers ──────────────────────────
+  }
 
   private syncPayloadFromAddedDealers(): void {
     const zones = [...new Set(this.addedDealers.map(r => r.zone))];
@@ -642,8 +613,6 @@ export class BgemployeeMaster implements OnInit {
     this.employeeData.dealerCode     = this.addedDealers.map(r => r.dealerCode).join(',');
     this.selectedLocations           = this.addedDealers.map(r => r.dealerCode);
   }
-
-  // ── restore selections in edit mode ───────────────────────────────
 
   private restoreZoneDealerSelections(data: any): void {
     if (!data.mappedZones || !data.mappedZoneIds) return;
@@ -673,14 +642,14 @@ export class BgemployeeMaster implements OnInit {
           });
 
           this.syncPayloadFromAddedDealers();
-          this.pruneStaleAssignments();   // NEW
+          this.pruneStaleAssignments();
         },
       });
     });
   }
 
   // =====================================================
-  // ASSIGNED DEALERS (belonging to OTHER BG employees)
+  // ASSIGNED DEALERS
   // =====================================================
 
   loadAssignedDealers(): void {
@@ -704,7 +673,7 @@ export class BgemployeeMaster implements OnInit {
           this.originalAssignedDealersMap.set(code, info);
         });
 
-        this.pruneStaleAssignments();   // NEW
+        this.pruneStaleAssignments();
       },
       error: (err) => console.error('Assigned dealers load error', err),
     });
@@ -715,7 +684,7 @@ export class BgemployeeMaster implements OnInit {
   }
 
   // =====================================================
-  // DEPARTMENT -> ROLES (cascading)
+  // DEPARTMENT -> ROLES
   // =====================================================
 
   loadDepartmentOptions(): void {
@@ -908,6 +877,10 @@ export class BgemployeeMaster implements OnInit {
       selectedDepartments: this.employeeData.createLogin ? this.selectedDepartments : [],
       roles:               this.employeeData.createLogin ? this.selectedRoles       : [],
       roleMappings:        this.employeeData.createLogin ? roleMappings              : [],
+
+      // NEW — TSM traceability fields
+      tsmCode:      this.tsmCode || null,
+      areaOfficeId: this.employeeData.areaOfficeId || null,
 
       createdBy:   'admin',
       createdDate: new Date(),
