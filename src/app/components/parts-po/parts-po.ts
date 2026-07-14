@@ -82,7 +82,8 @@ export class PartsPo implements OnInit {
     createdDate: new Date(),
     updatedBy: null,
     updatedDate: null,
-    isEdit: false
+    isEdit: false,
+    minOrdQty: 0,
   };
 
   partsPOData: any = {
@@ -413,6 +414,8 @@ export class PartsPo implements OnInit {
       const totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage) //+ Number(this.newItem.igst);
       const taxDetails = this.calculateGST(selectedItem.dlrprice, totalGST);
 
+      this.currentItem.qty = selectedItem.minOrderQty || 1;
+      this.currentItem.minOrdQty = selectedItem.minOrderQty || 1;
       this.currentItem.itemDescription = selectedItem.itemdesc;
       this.currentItem.itemCode = selectedItem.itemcode;
       this.currentItem.itemId = selectedItem.id;
@@ -638,6 +641,25 @@ export class PartsPo implements OnInit {
       return;
     }
 
+    if (this.currentItem.qty <= 0 || this.currentItem.qty === null || this.currentItem.qty === undefined) {
+      this.toaster.show('Quantity must be greater than zero.', { classname: 'bg-warning text-white', delay: 5000 });
+      return;
+    }
+
+    if (this.currentItem.minOrdQty && this.currentItem.minOrdQty > 0) {
+
+      if (this.currentItem.qty < this.currentItem.minOrdQty) {
+        this.toaster.show(`Quantity must be at least ${this.currentItem.minOrdQty}.`, { classname: 'bg-warning text-white', delay: 5000 }
+        );
+        return;
+      }
+
+      if (this.currentItem.qty % this.currentItem.minOrdQty !== 0) {
+        this.toaster.show(`Quantity must be a multiple of ${this.currentItem.minOrdQty} (e.g., ${this.currentItem.minOrdQty}, ${this.currentItem.minOrdQty * 2}, ${this.currentItem.minOrdQty * 3}).`, { classname: 'bg-warning text-white', delay: 5000 });
+        return;
+      }
+    }
+
     if (this.partsPOData.isKit) {
       if (this.currentItem.qty > 1) {
         this.toaster.show('Only 1 kit can be purchased at a time.', { classname: 'bg-danger text-white', delay: 3000 });
@@ -801,7 +823,8 @@ export class PartsPo implements OnInit {
       createdDate: new Date(),
       updatedBy: null,
       updatedDate: null,
-      isEdit: false
+      isEdit: false,
+      minOrdQty: 0,
     };
     // this.editingIndex = null;
   }

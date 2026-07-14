@@ -162,9 +162,49 @@
 
                             <!-- Last Price -->
                             <div class="col-md-1">
-                                <label class="form-label mb-0 small text-success">Last Price: 0.00</label>
-                                <input type="number" class="form-control form-control-sm text-end bg-light" readonly
-                                    placeholder="0.00">
+                                <label class="form-label mb-0 small text-success">Previous Ord.</label>
+                                <!-- Vertical Variation -->
+                                <div class="btn-group" role="group"
+                                    aria-label="Button group with nested table dropdown">
+                                    <div class="btn-group" role="group">
+                                        <!-- Main Dropdown Trigger Button -->
+                                        <button id="btnGroupDrop1" type="button"
+                                            class="btn btn-primary dropdown-toggle material-shadow-none"
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                            View Table Data
+                                        </button>
+
+                                        <!-- Dropdown Menu with custom widths to fit a table nicely -->
+                                        <div class="dropdown-menu p-3" aria-labelledby="btnGroupDrop1"
+                                            style="min-width: 300px;">
+
+                                            <!-- The Data Table -->
+                                            <table class="table table-sm table-striped table-hover m-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">Item</th>
+                                                        <th scope="col" class="text-end">Min. Qty</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Product A</td>
+                                                        <td class="text-end">5</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Product B</td>
+                                                        <td class="text-end">10</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Product C</td>
+                                                        <td class="text-end">15</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Part Description -->
