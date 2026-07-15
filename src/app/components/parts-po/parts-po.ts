@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit } from '@angular/core';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -6,7 +6,7 @@ import { StorageService } from '../../core/services/storage';
 import { ItemMasterService } from '../../core/services/item-master-service';
 import { KitCreationService } from '../../core/services/kit-creation.service';
 import { KitDetailService } from '../../core/services/kit-detail-service';
-import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
@@ -14,7 +14,6 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { JobCardService } from '../../core/services/job-card-service';
 import Swal from 'sweetalert2';
 import { PrefixService } from '../../core/services/prefix';
-import { TaxService } from '../../core/services/tax';
 import { PurchaseService } from '../../core/services/purchase-service';
 import { LedgerMasterService } from '../../core/services/ledger-master';
 import _ from 'lodash';
@@ -24,7 +23,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 @Component({
   selector: 'app-parts-po',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbPaginationModule, NgSelectModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbPaginationModule, NgSelectModule, NgbDropdownModule],
   templateUrl: './parts-po.html',
   styleUrl: './parts-po.scss',
 })
@@ -106,6 +105,7 @@ export class PartsPo implements OnInit {
   taxDetails: any[] = [];
   isEdit: boolean = false;
   ledgerList: any[] = [];
+  previousPurchaseDetails: any[] = [];
 
   constructor(
     private locationService: LocationMasterService,
@@ -120,10 +120,9 @@ export class PartsPo implements OnInit {
     private kitDetailService: KitDetailService,
     private jobCardService: JobCardService,
     private prefixService: PrefixService,
-    private taxService: TaxService,
     private ledgerService: LedgerMasterService,
-    private modalService: NgbModal
-  ) {
+    private modalService: NgbModal,
+    private eRef: ElementRef) {
 
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
@@ -1182,6 +1181,20 @@ export class PartsPo implements OnInit {
     // if (this.currentItem.modelNo) {
     //   this.calculateRowTotals();
     // }
+  }
+
+  getPreviousPurchaseDetails(event: any) {
+    const dealerCode = this.locationList.filter(x => x.loccode === this.partsPOData.selectedLocation)[0].dealercode;
+    this.purchaseService.getItemDetailsByItemCode(this.currentItem.itemCode, dealerCode).subscribe({
+      next: (res) => {
+        if (res) {
+          this.previousPurchaseDetails = res;
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching previous part:', err);
+      }
+    });
   }
 
 }
