@@ -202,7 +202,7 @@ export class LabourRateMaster implements OnInit {
     debugger;
 
     if (type === 'model') {
-
+debugger
       if (!this.selectedLabour.jobType) {
         return;
       }
