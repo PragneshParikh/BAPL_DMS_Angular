@@ -135,9 +135,11 @@ export class LabourRateMaster implements OnInit {
   }
 
   openEditPopup(item: any): void {
+    debugger;
     this.selectedLabour = {
       ...item
     };
+    console.log( this.selectedLabour)
     if (this.selectedLabour.jobType) {
       this.jobCardService.getServiceHead(
         this.selectedLabour.jobType
@@ -197,6 +199,7 @@ export class LabourRateMaster implements OnInit {
   }
 
   onJobType(type: 'model' | 'part'): void {
+    debugger;
 
     if (type === 'model') {
 
@@ -230,9 +233,7 @@ export class LabourRateMaster implements OnInit {
         )
         .subscribe({
           next: (res: any) => {
-
             this.serviceHeadList = res;
-
           }
         });
 
