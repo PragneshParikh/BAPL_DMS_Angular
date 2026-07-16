@@ -74,6 +74,9 @@ import { WarrantyJobCardClaim } from './components/warranty-job-card-claim/warra
 import { CounterBill } from './components/counter-bill/counter-bill';
 import { AddCounterBill } from './components/counter-bill/add-counter-bill/add-counter-bill';
 import { CounterBillPrint } from './components/Reports/counter-bill-print/counter-bill-print';
+import { VehicleQuotation } from './components/vehicle-quotation/vehicle-quotation';
+import { VehicleQuotationListComponent } from './components/vehicle-quotation/vehicle-quotation-list/vehicle-quotation-list';
+
 
 
 export const routes: Routes = [
@@ -182,6 +185,8 @@ export const routes: Routes = [
       { path: 'hsrp-order-list', component: HSRPOrderList, data: [48] },
       { path: 'hsrp-inward', component: HsrpInward, data: [48] },
 
+      
+
       { path: 'vehicle-sale-report', data: [43], loadComponent: () => import('./components/Reports/vehicle-sale-report/vehicle-sale-report').then(m => m.VehicleSaleReportComponent) },
       { path: 'vehicle-stocks-report', data: [46], loadComponent: () => import('./components/Reports/vehicle-stock-report/vehicle-stock-report').then(m => m.VehicleStockReportComponent) },
       { path: 'po-tracking-report', data: [47], loadComponent: () => import('./components/Reports/po-tracking-report/po-tracking-report').then(m => m.POTrackingReportComponent) },
@@ -235,7 +240,10 @@ export const routes: Routes = [
       { path: 'counter-bill', component: CounterBill, data: [77] },
       { path: 'counter-bill/edit/:id', component: AddCounterBill, data: [77] },
       { path: 'add-counter-bill', component: AddCounterBill, data: [77] },
-      { path: 'print-counter-bill/:id', component: CounterBillPrint, data: [77] }
+      { path: 'print-counter-bill/:id', component: CounterBillPrint, data: [77] },
+      { path: 'vehicle-quotation', component: VehicleQuotationListComponent, data: [87] },
+      { path: 'vehicle-quotation/add', component: VehicleQuotation, data: [87] },
+      { path: 'vehicle-quotation/edit/:id', component: VehicleQuotation, data: [87] },
     ]
   },
   { path: '**', component: WorkInProgress }
