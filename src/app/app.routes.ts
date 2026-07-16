@@ -74,6 +74,7 @@ import { WarrantyJobCardClaim } from './components/warranty-job-card-claim/warra
 import { CounterBill } from './components/counter-bill/counter-bill';
 import { AddCounterBill } from './components/counter-bill/add-counter-bill/add-counter-bill';
 import { CounterBillPrint } from './components/Reports/counter-bill-print/counter-bill-print';
+import { RepoBilling } from './components/repo-billing/repo-billing';
 
 
 export const routes: Routes = [
@@ -189,7 +190,7 @@ export const routes: Routes = [
       { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
       { path: 'vehicle-sale-d2d-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-d2d-report/vehicle-sale-d2d-report').then(m => m.VehicleSaleD2dReport) },
       { path: 'total-sale-dealer-wise', data: [81], loadComponent: () => import('./components/Reports/total-sale-report/total-sale-report').then(m => m.TotalSaleDealerWiseComponent) },
-      
+
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
 
       { path: 'repair-bill-performa/:repairBillId', component: RepairBillPerforma, data: [51] },
@@ -235,7 +236,8 @@ export const routes: Routes = [
       { path: 'counter-bill', component: CounterBill, data: [77] },
       { path: 'counter-bill/edit/:id', component: AddCounterBill, data: [77] },
       { path: 'add-counter-bill', component: AddCounterBill, data: [77] },
-      { path: 'print-counter-bill/:id', component: CounterBillPrint, data: [77] }
+      { path: 'print-counter-bill/:id', component: CounterBillPrint, data: [77] },
+      { path: 'repo-billing', component: RepoBilling, data: [88] }
     ]
   },
   { path: '**', component: WorkInProgress }
