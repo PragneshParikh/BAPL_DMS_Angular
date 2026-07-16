@@ -120,6 +120,7 @@ export class TopbarComponent implements OnInit {
 
     this.getVehicleDispatchNotification();
     this.getPartsInwardNotification();
+    this.getD2DVehicleNotification();
 
     // Fetch Data
     this.saleInvoice = saleInvoice;
@@ -300,10 +301,12 @@ export class TopbarComponent implements OnInit {
     this.loader.show();
     this.vehicleInwardService.getByVehicleStatus(false, this.dealerCode).subscribe({
       next: (result) => {
+        console.log(result);
+        
         this.vehicleInward = result;
 
         // Group by invoice number
-        const groupedInvoices = this.vehicleInward.reduce((acc: any, item: any) => {
+        const groupedInvoices = this.vehicleInward.filter((p:any)=>!p.isD2d).reduce((acc: any, item: any) => {
           const invoiceNo = item.invoiceNo;
           if (!acc[invoiceNo]) {
             acc[invoiceNo] = {
@@ -329,9 +332,48 @@ export class TopbarComponent implements OnInit {
     });
   }
 
+   getD2DVehicleNotification() {
+    this.loader.show();
+    this.vehicleInwardService.getByVehicleStatus(false, this.dealerCode).subscribe({
+      next: (result) => {
+        console.log(result);
+        
+        this.vehicleInward = result;
+
+        // Group by invoice number
+        const groupedInvoices = this.vehicleInward.filter((p:any)=>p.isD2d).reduce((acc: any, item: any) => {
+          const invoiceNo = item.invoiceNo;
+          if (!acc[invoiceNo]) {
+            acc[invoiceNo] = {
+              invoiceNumber: invoiceNo,
+              invoiceDate: item.invoiceDate,
+              numberOfItems: 0,
+              issuedFrom:item.issuedDealerName,
+              issuedDealerCode:item.issuedDealerCode,
+              status: 'Received' // You can adjust this based on your logic
+            };
+          }
+          acc[invoiceNo].numberOfItems += 1;
+          return acc;
+        }, {});
+
+        // Convert grouped object to array
+        this.d2dNotificationList = Object.values(groupedInvoices);
+        console.log('D2D Notifications:', this.d2dNotificationList);
+
+        this.loader.hide();
+      },
+      error: (err) => {
+        console.error(err);
+        this.loader.hide();
+      }
+    });
+  }
   getPartsInwardNotification() {
     this.partInwardService.getPendingNotificationByDealer(this.dealerCode).subscribe({
       next: (res: any) => {
+        console.log(res);
+        
         this.partsInward = res;
 
         // Group by invoice number

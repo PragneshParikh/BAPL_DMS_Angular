@@ -25,7 +25,9 @@
                         <div class="col-md-3">
                             <label class="form-label">Ledger Type</label>
                             <select class="form-select form-select-sm" name="ledgerType"
-                                [(ngModel)]="formData.ledgerType" [disabled]="isExternalCall" required>
+                                [(ngModel)]="formData.ledgerType"
+                                [disabled]="isExternalCall || (isModify && formData.ledgerType == 'Dealer' && role !== 'SuperAdmin')"
+                                required>
                                 <option *ngFor="let lt of ledgerTypes" [value]="lt.value">
                                     {{ lt.name }}
                                 </option>
@@ -237,6 +239,14 @@
                             </small>
                             }
                         </div>
+                        <div *ngIf="showD2DProvision && formData.ledgerType === 'Dealer'" class="col-md-3">
+                            <label class="form-label form-label-sm" for="d2dProvision">D2D Provision</label>
+                            <select class="form-select form-select-sm" name="d2dProvision"
+                                [(ngModel)]="formData.d2dProvision">
+                                <option [ngValue]="false">NO</option>
+                                <option [ngValue]="true">Yes</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Fifth Row -->
@@ -273,10 +283,10 @@
                             <button type="button" class="btn btn-primary btn-sm float-end" (click)="backToList()">
                                 Cancel
                             </button>
-                            <button type="submit" [disabled]="customerLedgerForm.invalid || mobileExist"
-                                class="btn btn-primary btn-sm float-end me-1">
+                            <button type="submit" class="btn btn-primary btn-sm float-end me-1" [disabled]="customerLedgerForm.invalid 
+                || mobileExist 
+                || (formData.ledgerType === 'Dealer' && role !== 'SuperAdmin')">
                                 {{ isModify ? 'Update' : 'Save' }}
-
                             </button>
 
                         </div>

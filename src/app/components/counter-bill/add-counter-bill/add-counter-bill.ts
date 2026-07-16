@@ -204,16 +204,22 @@ export class AddCounterBill implements OnInit {
       });
   }
   getLocations() {
-    const dealerCode = this.storageService.getDealerCode();
-    this.locationMasterService.getLocationList(dealerCode).subscribe({
-      next: (data) => {
-        this.locationList = data.filter(p => p.locareadidNo == 2);
+    let dealerCode = '';
+    const isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    if (!isSuperAdmin) {
+       dealerCode = this.storageService.getDealerCode();
+    }
+    this.locationMasterService.getLocationDropdownByDealerCode(dealerCode).subscribe({
+      next: (data) => {      
+        this.locationList = data.filter(p => p.locareaidno == 2);
         if (!this.isEditMode) {
-          this.model.locationCode = this.locationList[0].locCode;
+         this.model.locationCode = this.locationList?.[0]?.loccode ?? null;
         }
       }
     });
   }
+
+  
   openCustomerLedgerAdd() {
     const modalRef = this.modalService.open(CustomerLedger, {
       size: 'lg',
@@ -883,7 +889,7 @@ export class AddCounterBill implements OnInit {
         this.navigateToListPage();
       },
       error: (err) => {
-this.loader.hide();
+        this.loader.hide();
         console.error(err);
 
         Swal.fire({

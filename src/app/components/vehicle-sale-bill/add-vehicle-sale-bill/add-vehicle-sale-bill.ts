@@ -161,6 +161,7 @@ export class AddVehicleSaleBill implements OnInit {
   };
   private modalRef!: NgbModalRef;
   dealerCode: string = '';
+  showD2D: boolean;
   constructor(private storageService: StorageService, private locationService: LocationMasterService,
     private receiptEntryService: ReceiptEntryService, private vehicleSaleBillService: VehicleSaleBillService,
     private modalService: NgbModal, private loader: LoaderService, private toaster: ToastService,
@@ -173,6 +174,7 @@ export class AddVehicleSaleBill implements OnInit {
   }
 
   ngOnInit(): void {
+    this.getD2dProvision();
     this.model.customerType = 'B2C';
     this.onCustomerTypeChange();
     this.getInsuranceCompanies();
@@ -210,6 +212,19 @@ export class AddVehicleSaleBill implements OnInit {
         this.insurance = res;
       }
     });
+  }
+
+  getD2dProvision() {
+    if(!this.isSuperAdmin){
+      this.ledgerService.getD2DProvision(this.dealerCode).subscribe({
+        next: (res) => {
+          console.log(res);
+          
+          this.showD2D = res;
+        }
+      });
+    }
+    
   }
   filterInsurance() {
     const search = (this.model.insuranceName || '').trim().toLowerCase();
@@ -332,10 +347,12 @@ export class AddVehicleSaleBill implements OnInit {
 
   loadChassisList(callback?: () => void) {
     const dealerCode = this.storageService.getDealerCode();
+    const isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     this.vehicleSaleBillService.getAllChassisWithPDIStatus(dealerCode, this.selectedCustomerId)
       .subscribe({
         next: (res) => {
-          this.chassisList = res;;
+          console.log('Chassis list',res);
+          this.chassisList = res;
           this.filteredChassis = res.filter(p => p.locationCode === this.model.location);
           if (callback) callback();
         },
@@ -352,8 +369,6 @@ export class AddVehicleSaleBill implements OnInit {
     this.loader.show();
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
-        console.log(res);
-        
         this.loader.hide();
         this.selectedCustomerId = res.ledgerId;
         this.Status = res.status || '';
@@ -869,8 +884,9 @@ export class AddVehicleSaleBill implements OnInit {
 
   onChassisChange() {
     const selected = this.chassisList.find(c => c.chassisNo === this.model.chassisNo);
+    console.log('Selected chassis:', selected);
     if (!selected) return;
-    if (!selected.pdiStatus || selected.pdiStatus === 'Not Done') {
+    if ((!selected.pdiStatus || selected.pdiStatus === 'Not Done') && !this.model.isD2D) {
       this.toaster.show('Please complete PDI before proceeding', {
         classname: 'bg-danger text-light',
         delay: 3000
@@ -878,7 +894,7 @@ export class AddVehicleSaleBill implements OnInit {
       this.model.chassisNo = '';
       return;
     }
-    if (selected.proformaCreated) {
+    if (selected.proformaCreated && !selected.isD2D) {
       this.toaster.show(
         `Proforma already generated fOR(Bill No: ${selected.proformaCreated}). Please select another chassis.`,
         {
