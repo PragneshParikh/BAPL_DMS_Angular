@@ -8,9 +8,17 @@ import { Observable } from 'rxjs';
 })
 export class ItemMasterService {
 
+
   private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
+
+  insertItem(itemObj: any) {
+    return this.http.post<any>(
+      `${this.baseUrl}/ItemMaster`,
+      itemObj
+    );
+  }
 
   getItems(grpidno: number, search: string = '', itemtype?: number): Observable<any> {
 
@@ -59,7 +67,7 @@ export class ItemMasterService {
     return this.http.put(`${this.baseUrl}/ItemMaster/${item.id}`, item);
   }
 
-  getItemsByLocation(dealerLocation:string,customerLocation:string): Observable<any> {
+  getItemsByLocation(dealerLocation: string, customerLocation: string): Observable<any> {
 
     let params = new HttpParams()
       .set('dealerLocation', dealerLocation)

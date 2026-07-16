@@ -249,7 +249,7 @@
                                 Select Job Type
                             </option>
 
-                            <option *ngFor="let job of jobTypeList" [ngValue]="job.id">
+                            <option *ngFor="let job of jobTypeList" [ngValue]="job.jobTypeId">
 
                                 {{ job.jobtypeName }}
 
@@ -270,7 +270,7 @@
                                     Select Service Head
                                 </option>
 
-                                <option *ngFor="let sh of serviceHeadList" [ngValue]="sh.id">
+                                <option *ngFor="let sh of serviceHeadList" [ngValue]="sh.serviceHeadId">
 
                                     {{ sh.serviceHeadName }}
 
@@ -294,7 +294,7 @@
                                     Select Service Type
                                 </option>
 
-                                <option *ngFor="let st of serviceTypeList" [ngValue]="st.id">
+                                <option *ngFor="let st of serviceTypeList" [ngValue]="st.serviceTypeId">
 
                                     {{ st.serviceTypeName }}
 
