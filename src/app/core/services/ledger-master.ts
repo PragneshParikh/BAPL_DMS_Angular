@@ -107,6 +107,15 @@ getLotRelatedLedgers(dealerCode: string | null, IsD2D: boolean | null): Observab
   );
 }
 
+getSupplierLedgers(dealerCode: string | null):Observable<any>{
+  let params = new HttpParams()
+    .set('dealerCode', dealerCode ?? null)
+  return this.httpClient.get<LedgerMaster[]>(
+    `${this.baseUrl}/ledger-master/GetSupplierLedgers`,
+    { params }
+  );
+}
+
 
 
   }

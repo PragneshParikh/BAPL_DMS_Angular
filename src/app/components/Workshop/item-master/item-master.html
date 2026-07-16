@@ -187,6 +187,20 @@
         <input class="form-control form-control-sm" [value]="" readonly>
       </div>
       <div class="col-md-2">
+         <label class="form-label">
+          Supplier
+        </label>
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.supplierId" name="supplierId">
+
+          <option [ngValue]="null">-- Select Supplier --</option>
+
+          <option *ngFor="let supplier of supplierlist" [ngValue]="supplier.id">
+            {{ supplier.ledgerName }}
+          </option>
+
+        </select>
+      </div>
+      <div class="col-md-2">
         <label class="form-label">UOM</label>
         <input class="form-control form-control-sm" [value]="'PCS'" readonly>
       </div>
@@ -510,7 +524,20 @@
         <input class="form-control form-control-sm" [(ngModel)]="itemObj.oemPartDescription" name="oemPartDescription">
 
       </div>
+      <div class="col-md-2">
+         <label class="form-label">
+          Supplier
+        </label>
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.supplierId" name="supplierId">
 
+          <option [ngValue]="null">-- Select Supplier --</option>
+
+          <option *ngFor="let supplier of supplierlist" [ngValue]="supplier.id">
+            {{ supplier.ledgerName }}
+          </option>
+
+        </select>
+      </div>
       <!-- UOM -->
       <div class="col-md-2">
 
