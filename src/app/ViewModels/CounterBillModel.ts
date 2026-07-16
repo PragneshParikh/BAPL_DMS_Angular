@@ -17,6 +17,7 @@ export interface CounterBillPrintDetail {
 }
 
 export interface CounterBillPrintModel {
+  chassisNo:string;
   dealerCode: string;
   dealerName: string;
   dealerAddress1: string;

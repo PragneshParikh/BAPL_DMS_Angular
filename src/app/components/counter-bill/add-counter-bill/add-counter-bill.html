@@ -29,9 +29,9 @@
                             <label class="form-label mb-1">Location<span class="text-danger">*</span></label>
                             <select class="form-select form-select-sm" [(ngModel)]="model.locationCode"
                                 name="locationCode">
-                                <option *ngFor="let location of locationList" [value]="location.locCode">
-                                    {{ location.locname }} ({{ location.locCode }})
-                                </option>
+                                <<option *ngFor="let loc of locationList" [value]="loc.loccode">
+                                        {{ loc.locname}} 
+                                    </option>
                             </select>
                         </div>
 
@@ -96,7 +96,7 @@
                                 <li class="list-group-item list-group-item-action" *ngFor="let party of filteredParties"
                                     (click)="selectParty(party)">
 
-                                    {{ party.ledgerName }}
+                                     <b>{{ party.ledgerName }}</b><br>({{party.ledgerCode}})
 
                                 </li>
 
