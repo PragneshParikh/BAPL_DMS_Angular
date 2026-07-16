@@ -8,6 +8,7 @@ import { DurationTypes } from '../../../constant';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { StorageService } from '../../../core/services/storage';
 import { subscribe } from 'diagnostics_channel';
+import { LedgerMasterService } from '../../../core/services/ledger-master';
 
 @Component({
   selector: 'app-item-master',
@@ -36,17 +37,20 @@ export class ItemMaster implements OnInit {
   sortDirection: 'asc' | 'desc' = 'asc';
 
   groupId = 1; // static group id
+  supplierlist: any[]=[];
 
   constructor(
     private itemService: ItemMasterService,
     private loader: LoaderService,
     private modalService: NgbModal,
     private toaster: ToastService,
+    private ledgerservice : LedgerMasterService,
     private storageService: StorageService
   ) { }
 
   ngOnInit() {
     this.loadItems();
+    this.loadsuplier();
   }
 
   //  API CALL
@@ -68,6 +72,24 @@ export class ItemMaster implements OnInit {
       }
 
     });
+
+  }
+
+  loadsuplier(){
+
+    const dealerCode = this.storageService.getDealerCode();
+
+    this.ledgerservice.getSupplierLedgers(dealerCode).subscribe({
+      next:(res:any)=>{
+
+        this.supplierlist = res;
+        console.log(this.supplierlist)
+
+      },
+      error:(err)=>{
+        console.error(err);
+      }
+    })
 
   }
 
@@ -286,7 +308,8 @@ getEmptyItem() {
     isInventory: false,
     isInEligibleInput: false,
     dealerCode:'',
-    status:true
+    status:true,
+    supplierId:0
 
   };
 
@@ -362,6 +385,7 @@ saveItem() {
     return;
   const dealerCode = this.storageService.getDealerCode();
   this.itemObj.dealerCode = dealerCode;
+
   this.itemService.insertItem(this.itemObj).subscribe({
 
     next: (res: any) => {
