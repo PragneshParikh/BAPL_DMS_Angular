@@ -44,6 +44,7 @@ export class CustomerLedger {
     pin: '',
     email: '',
     gender: '',
+    d2dProvision: false,
     dateOfBirth: '',
     createdBy: '1',
     createdDate: new Date(),
@@ -62,6 +63,7 @@ export class CustomerLedger {
   mobileList: string[];
   mobileExist: boolean;
   role: string;
+  showD2DProvision: boolean;
 
   constructor(
     private ledgerService: LedgerMasterService,
@@ -92,6 +94,7 @@ export class CustomerLedger {
 
   async ngOnInit() {
     this.role = this.storageService.getRole();
+    this.showD2DProvision = this.role?.toLowerCase() === 'superadmin';
     this.ledgerTypes = this.role?.toLowerCase() === 'superadmin' ? LedgerTypes : LedgerTypes.filter(x => !x.isAdmin);
     await this.getMobileList();
     await this.getNextLedCode();
@@ -234,8 +237,23 @@ console.log(res);
           createdDate: res.createdDate,
           updatedBy: res.updatedBy,
           updatedDate: res.updatedDate,
+          d2dProvision: res.d2DProvision === true || res.d2DProvision === 1,
           ledgerVisibility: res.ledgerVisibility
         }
+
+         if (
+        this.formData.ledgerType &&
+        !this.ledgerTypes.some(x => x.value === this.formData.ledgerType)
+      ) {
+        const currentType = LedgerTypes.find(
+          x => x.value === this.formData.ledgerType
+        );
+
+        if (currentType) {
+          this.ledgerTypes = [currentType, ...this.ledgerTypes];
+        }
+      }
+
         this.loader.hide();
         this.changeCityOptions(this.formData.state);
       }, error: (err) => {
@@ -262,8 +280,14 @@ console.log(res);
 
   onSubmit(form: any) {
     const dealerCode = this.storageService.getDealerCode();
-    this.formData.dealerCode = dealerCode;
+    if(!this.isModify){
+      this.formData.dealerCode = dealerCode;
+    }
+    else{
+      this.formData.dealerCode = this.formData.dealerCode;
+    }
     const isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+console.log("Call",this.formData);
 
     this.formData.ledgerVisibility = (isSuperAdmin && !this.isExternalCall) ? 'All' : dealerCode;
     if (!form.valid) return;
