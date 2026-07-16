@@ -432,7 +432,7 @@ export class RepairBill implements OnInit {
         this.materialedJobCarDList = res.map((x: any) => ({
           ...x,
           issuetypeName: this.IssueType.find(i => i.id === Number(x.issueType))?.name || '',
-          issuetypeId: this.IssueType.find(i=>i.id == Number(x.issueType))?.id||0
+          issuetypeId: this.IssueType.find(i => i.id == Number(x.issueType))?.id || 0
         }));
 
         this.materialedJobCarDList.forEach(item => {
@@ -441,7 +441,8 @@ export class RepairBill implements OnInit {
 
           // Taxable Amount
           item.taxableAmount =
-            (Number(item.partQty) * Number(item.partRate)) - item.discount;
+            (item.issuetypeName === 'U/W' || item.issuetypeName === 'FSC') ? 0 :
+              (Number(item.partQty) * Number(item.partRate)) - item.discount;
 
           // Net Amount
           item.netAmount =
@@ -460,7 +461,7 @@ export class RepairBill implements OnInit {
         });
 
         this.partItems = [...this.materialedJobCarDList];
-        console.log("bind in grid part details",this.partItems);
+        console.log("bind in grid part details", this.partItems);
 
         this.calculateTotals();
 
@@ -621,7 +622,7 @@ export class RepairBill implements OnInit {
       x => x.id == this.selectedIssueType
     );
 
-    this.discountValue = this.discount||0;
+    this.discountValue = this.discount || 0;
     let discountAmount = this.discount || 0;
 
     if (this.discountType === '%') {
@@ -759,7 +760,7 @@ export class RepairBill implements OnInit {
   }
 
   calculateTotals(): void {
-
+    debugger;
 
     //debugger
     const labourDiscount =
@@ -805,9 +806,9 @@ export class RepairBill implements OnInit {
 
     this.totalNetAmount =
       labourNet + partNet;
-   // this.discountValue = partDiscount + labourDiscount;
+    // this.discountValue = partDiscount + labourDiscount;
     this.amountReceived =
-      this.totalTaxableAmount;
+      this.totalNetAmount;
   }
   editLabour(index: number): void {
     debugger
@@ -856,7 +857,7 @@ export class RepairBill implements OnInit {
     this.editPartIndex = index;
 
     // Only editable fields
-    
+
     this.partdiscount = item.discount;
     this.discountPartType = item.discountType;
     this.discountValue = this.partDiscount;
