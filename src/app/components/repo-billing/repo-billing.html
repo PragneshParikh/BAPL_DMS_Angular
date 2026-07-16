@@ -77,154 +77,284 @@
             <!-- Vehicle Update Table -->
             <div class="card mt-3 card-body" *ngIf="showVehicleDetails">
                 <div class="card-body p-0">
-                    <fieldset>
 
-                        <div class="table-responsive table-scroll-container">
-                            <table class="table table-bordered  table-sm mb-0" style="font-size: 12px;">
+                    <fieldset class="border p-1 rounded mb-2" [disabled]="true">
+                        <legend class="float-none w-auto px-2 fs-6">Vehicle Information</legend>
+                        <div>
+                            <form>
+                                <div class="row mb-2 g-1">
+                                    <!-- Chassis No -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Chassis Number</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.chassisNo">
+                                    </div>
 
-                                <thead class="table-light text-center sticky-header">
-                                    <tr>
-                                        <th>Item Name</th>
-                                        <th>Current Value</th>
-                                        <th>Item Name</th>
-                                        <th>Current Value</th>
-                                    </tr>
-                                </thead>
+                                    <!-- Registration Number -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Reg Number</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.regNo">
+                                    </div>
 
-                                <tbody>
-                                    <tr>
-                                        <td>Dealer Code</td>
-                                        <td>{{dealerDetails.dealerCode}}</td>
-                                        <td>Dealer Name</td>
-                                        <td>{{dealerDetails.dealerName}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Dealer Mobile</td>
-                                        <td>{{dealerDetails.mobileNo}}</td>
-                                        <td>Dealer Location</td>
-                                        <td>{{dealerDetails.dealerLocation}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Dealer City</td>
-                                        <td>{{dealerDetails.dealerCity}}</td>
-                                        <td>Dealer State</td>
-                                        <td>{{dealerDetails.dealerState}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Party Name</td>
-                                        <td>{{partyDetails.partyName}}</td>
-                                        <td>Party Mobile</td>
-                                        <td>{{partyDetails.partyMobile}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Party Alternate Mobile</td>
-                                        <td>{{partyDetails.partyAltMobile}}</td>
-                                        <td>Party Email</td>
-                                        <td>{{partyDetails.email}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Address</td>
-                                        <td>{{partyDetails.address1}}</td>
-                                        <td>Pin</td>
-                                        <td>{{partyDetails.pin}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>State</td>
-                                        <td>{{partyDetails.state}}</td>
-                                        <td>City</td>
-                                        <td>{{partyDetails.city}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Chassis Number</td>
-                                        <td>{{vehicleDetails.chassisNo}}</td>
-                                        <td>Reg Number</td>
-                                        <td>{{vehicleDetails.regNo}}</td>
-                                    </tr>
+                                    <!-- Motor Number 1 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Motor Number 1</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.motor1">
+                                    </div>
 
-                                    <!-- Motor -->
-                                    <tr>
-                                        <td>Motor Number 1</td>
-                                        <td>{{vehicleDetails.motor1}}</td>
-                                        <td>Motor Number 2</td>
-                                        <td>{{vehicleDetails.motor2}}</td>
-                                    </tr>
+                                    <!-- Motor Number 2 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Motor Number 2</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.motor2">
+                                    </div>
 
-                                    <!-- Battery 1 & 2 -->
-                                    <tr>
-                                        <td>Battery 1</td>
-                                        <td>{{vehicleDetails.battery1}}</td>
-                                        <td>Battery 2</td>
-                                        <td>{{vehicleDetails.battery2}}</td>
-                                    </tr>
+                                    <!-- Battery 1 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery 1</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.battery1">
+                                    </div>
 
-                                    <!-- Battery 3 & 4 -->
-                                    <tr>
-                                        <td>Battery 3</td>
-                                        <td>{{vehicleDetails.battery3}}</td>
-                                        <td>Battery 4</td>
-                                        <td>{{vehicleDetails.battery4}}</td>
-                                    </tr>
+                                    <!-- Battery 2 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery 2</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.battery2">
+                                    </div>
 
-                                    <!-- Battery Details -->
-                                    <tr>
-                                        <td>Battery Capacity</td>
-                                        <td>{{vehicleDetails.batteryCapacity}}</td>
-                                        <td>Battery Chemical</td>
-                                        <td>{{vehicleDetails.batteryChemical}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Battery Make</td>
-                                        <td>{{vehicleDetails.batteryMake}}</td>
-                                        <td>Sale Date</td>
-                                        <td>{{vehicleDetails.saleDate | date:'dd/MM/yyyy'}}</td>
-                                    </tr>
+                                    <!-- Battery 3 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery 3</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.battery3">
+                                    </div>
 
-                                    <!-- Charger -->
-                                    <tr>
-                                        <td>Charger 1</td>
-                                        <td>{{vehicleDetails.charger1}}</td>
-                                        <td>Charger 2</td>
-                                        <td>{{vehicleDetails.charger2}}</td>
-                                    </tr>
+                                    <!-- Battery 4 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery 4</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.battery4">
+                                    </div>
 
-                                    <!-- Converter -->
-                                    <tr>
-                                        <td>Converter 1</td>
-                                        <td>{{vehicleDetails.converter1}}</td>
-                                        <td>Converter 2</td>
-                                        <td>{{vehicleDetails.converter2}}</td>
-                                    </tr>
+                                    <!-- Battery Capacity -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery Capacity</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.batteryCapacity">
+                                    </div>
 
-                                    <!-- Controller -->
-                                    <tr>
-                                        <td>Controller 1</td>
-                                        <td>{{vehicleDetails.controller1}}</td>
-                                        <td>Controller 2</td>
-                                        <td>{{vehicleDetails.controller2}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Insurance policy No</td>
-                                        <td>{{vehicleDetails.policyNo}}</td>
-                                        <td>Insurance Start Date</td>
-                                        <td>{{vehicleDetails.insuranceDate | date:'dd-MM-yyyy'}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Insurance Company</td>
-                                        <td>{{vehicleDetails.insuranceCompany}}</td>
-                                        <td>Insurance Expiry Date</td>
-                                        <td>{{vehicleDetails.policyExpiryDate | date :'dd-MM-yyyy'}}</td>
-                                    </tr>
-                                </tbody>
+                                    <!-- Battery Chemical -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery Chemical</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.batteryChemical">
+                                    </div>
 
-                            </table>
+                                    <!-- Battery Make -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery Make</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.batteryMake">
+                                    </div>
+
+                                    <!-- Sale Date -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Sale Date</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.saleDate | date:'dd/MM/yyyy'">
+                                    </div>
+
+                                    <!-- Charger 1 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Charger 1</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.charger1">
+                                    </div>
+
+                                    <!-- Charger 2 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Charger 2</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.charger2">
+                                    </div>
+
+                                    <!-- Converter 1 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Converter 1</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.converter1">
+                                    </div>
+
+                                    <!-- Converter 2 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Converter 2</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.converter2">
+                                    </div>
+
+                                    <!-- Controller 1 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Controller 1</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.controller1">
+                                    </div>
+
+                                    <!-- Controller 2 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Controller 2</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.controller2">
+                                    </div>
+
+                                    <!-- Insurance Policy No -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Insurance Policy No</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.policyNo">
+                                    </div>
+
+                                    <!-- Insurance Start Date -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Insurance Start Date</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.insuranceDate | date:'dd-MM-yyyy'">
+                                    </div>
+
+                                    <!-- Insurance Company -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Insurance Company</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.insuranceCompany">
+                                    </div>
+
+                                    <!-- Insurance Expiry Date -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Insurance Expiry Date</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.policyExpiryDate | date :'dd-MM-yyyy'">
+                                    </div>
+
+                                </div>
+                            </form>
                         </div>
+                    </fieldset>
 
-                        <div class="text-end p-3 border-top">
-                            <button class="btn btn-primary btn-sm" (click)="updateAll()">
-                                Update All
-                            </button>
+                    <fieldset class="border p-1 rounded mb-2" [disabled]="true">
+                        <legend class="float-none w-auto px-2 fs-6">Dealer Information</legend>
+                        <div>
+                            <form>
+                                <div class="row mb-2 g-1">
+                                    <!-- Dealer Code -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Dealer Code</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="dealerDetails.dealerCode">
+                                    </div>
+
+                                    <!-- Dealer Name -->
+                                    <div class="col-md-3">
+                                        <label class="form-label mb-0">Dealer Name</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="dealerDetails.dealerName">
+                                    </div>
+
+                                    <!-- Dealer Mobile -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Dealer Mobile</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="dealerDetails.mobileNo">
+                                    </div>
+
+                                    <!-- Dealer Location -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Dealer Location</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="dealerDetails.dealerLocation">
+                                    </div>
+
+                                    <!-- Dealer State -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Dealer State</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="dealerDetails.dealerState">
+                                    </div>
+
+                                    <!-- Dealer City -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Dealer City</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="dealerDetails.dealerCity">
+                                    </div>
+                                </div>
+                            </form>
                         </div>
+                    </fieldset>
 
+                    <fieldset class="border p-1 rounded mb-2" [disabled]="true">
+                        <legend class="float-none w-auto px-2 fs-6">Party Information</legend>
+                        <div>
+                            <form>
+                                <div class="row mb-2 g-1">
+                                    <!-- Party Name -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Party Name</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.partyName">
+                                    </div>
+
+                                    <!-- Party Mobile -->
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Party Mobile</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.partyMobile">
+                                    </div>
+
+                                    <!-- Party Alternate Mobile -->
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Party Alternate Mobile</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.partyAltMobile">
+                                    </div>
+
+                                    <!-- Dealer Location -->
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Party Email</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.email">
+                                    </div>
+
+                                    <!-- Dealer City -->
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Address</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.address1">
+                                    </div>
+
+                                    <!-- Dealer State -->
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Pin</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.pin">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">State</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.state">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">City</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.city">
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
                     </fieldset>
                 </div>
             </div>
