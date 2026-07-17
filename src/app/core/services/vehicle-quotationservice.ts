@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -12,8 +12,17 @@ export class VehicleQuotationService {
 
   constructor(private http: HttpClient) { }
 
-  getQuotations(): Observable<any[]> {
-    return this.http.get<any[]>(this.baseUrl);
+  // FIX: was getQuotations() with no params — this is what threw
+  // "Expected 0 arguments, but got 1" once vehicle-quotation-list.ts started
+  // calling getQuotations(dealerCode). Sent as a query param; the backend
+  // service layer (VehicleQuotationService.GetAllAsync) only actually uses
+  // it for a SuperAdmin caller and overrides it server-side from the JWT
+  // otherwise, so it's safe to always send this regardless of role.
+  getQuotations(dealerCode?: string): Observable<any[]> {
+    let params = new HttpParams();
+    if (dealerCode) params = params.set('dealerCode', dealerCode);
+
+    return this.http.get<any[]>(this.baseUrl, { params });
   }
 
   getQuotationById(id: number): Observable<any> {

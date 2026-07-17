@@ -70,27 +70,79 @@
         </select>
     </div>
 
-      <div class="col-md-2">
+      <div class="col-md-2 position-relative">
           <label class="form-label mb-1">
               Chassis No
           </label>
 
-          <select
+          <!--
+            FIX: swapped the native <datalist> for a custom dropdown rendered
+            directly below the input. The native datalist popup (unstyled,
+            browser-rendered, overlapping page content) is replaced here with
+            a Bootstrap list-group anchored to this field via
+            position-relative/position-absolute. Capped at 20 matches (see
+            MAX_CHASSIS_SUGGESTIONS in the component) so it stays fast even
+            with a large chassisList.
+          -->
+          <input
+              type="text"
               formControlName="chassisNo"
-              class="form-select form-select-sm">
+              class="form-control form-control-sm"
+              placeholder="Search chassis no..."
+              autocomplete="off"
+              (input)="onChassisInput()"
+              (focus)="onChassisFocus()"
+              (blur)="onChassisBlur()" />
 
-              <option value="">
-                  All
-              </option>
+          <div
+              class="list-group position-absolute w-100 shadow-sm"
+              style="z-index: 1000; max-height: 220px; overflow-y: auto;"
+              *ngIf="showChassisDropdown">
 
-              <option
-                  *ngFor="let chassis of chassisList"
-                  [value]="chassis">
+              <button
+                  type="button"
+                  class="list-group-item list-group-item-action py-1 px-2"
+                  style="font-size: 12px;"
+                  *ngFor="let chassis of filteredChassisList"
+                  (mousedown)="selectChassis(chassis)">
 
                   {{ chassis }}
-              </option>
+              </button>
 
-          </select>
+              <span
+                  *ngIf="filteredChassisList.length === 0"
+                  class="list-group-item text-muted py-1 px-2"
+                  style="font-size: 12px;">
+                  No matching chassis found
+              </span>
+
+          </div>
+      </div>
+
+      <!-- From Date -->
+
+      <div class="col-md-2">
+          <label class="form-label mb-1">
+              From Date
+          </label>
+
+          <input
+              type="date"
+              formControlName="fromDate"
+              class="form-control form-control-sm" />
+      </div>
+
+      <!-- To Date -->
+
+      <div class="col-md-2">
+          <label class="form-label mb-1">
+              To Date
+          </label>
+
+          <input
+              type="date"
+              formControlName="toDate"
+              class="form-control form-control-sm" />
       </div>
 
       <!-- Vehicle Status -->
