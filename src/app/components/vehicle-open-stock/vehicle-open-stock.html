@@ -65,12 +65,12 @@
 
                 <div class="col-md-3">
                     <label>Chassis No</label>
-                    <input class="form-control form-control-sm">
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.chassisNo">
                 </div>
 
                 <div class="col-md-3">
                     <label>Motor No</label>
-                    <input class="form-control form-control-sm">
+                    <input class="form-control form-control-sm"  [(ngModel)]="vehicleObj.motorNo">
                 </div>
                 <div class="col-md-2">
                     <label>Fame2 Amount</label>
@@ -78,94 +78,98 @@
                 </div>
                 <div class="col-md-2">
                     <label>Colour</label>
-                    <select class="form-select form-select-sm">
-                        <option>--Select Colour--</option>
-                    </select>
+                    <input class="form-control form-control-sm" [(ngModel)]="itemObj.colorName" name="colorName">
                 </div>
 
                 <div class="col-md-2">
                     <label>Location</label>
-                    <select class="form-select form-select-sm">
-                        <option>--Select Location--</option>
+                    <select class="form-select form-select-sm text-truncate" [(ngModel)]="itemObj.locationName"
+                        (change)="onLocationChange($event)" #locationName="ngModel" name="locationName">
+                        <option value="">Select Location</option>
+                        <option *ngFor="let loc of locations" [value]="loc.locname">
+                            {{ loc.locname }}
+                        </option>
+
                     </select>
+                    <div class="text-danger" *ngIf="locationName.invalid && locationName.touched">
+                        Please Select Location Name
+                    </div>
                 </div>
 
                 <div class="col-md-2">
                     <label>Year</label>
-                    <input class="form-control form-control-sm">
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.mfgYear">
                 </div>
 
                 <div class="col-md-2">
                     <label>Rate</label>
-                    <input class="form-control form-control-sm text-end" value="0">
+                    <input class="form-control form-control-sm text-end" [(ngModel)]="vehicleObj.rate" (input)="calculateTotalStock()">
                 </div>
                 <div class="col-md-2">
                     <label>Serv.Book No</label>
-                    <input class="form-control form-control-sm">
+                    <input class="form-control form-control-sm"  [(ngModel)]="vehicleObj.serviceBookNo">
                 </div>
 
 
 
                 <div class="col-md-2">
                     <label>Battery Make</label>
-                    <select class="form-select form-select-sm">
+                    <select class="form-select form-select-sm"  [(ngModel)]="vehicleObj.batteryMake">
                         <option>--Select Make--</option>
                     </select>
                 </div>
 
                 <div class="col-md-2">
                     <label>Battery</label>
-                    <input class="form-control form-control-sm">
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.batteryNo">
                 </div>
 
                 <div class="col-md-2">
                     <label>Converter No.</label>
-                    <input class="form-control form-control-sm">
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.converterNo">
                 </div>
 
                 <div class="col-md-2">
                     <label>Charger No.</label>
-                    <input class="form-control form-control-sm">
-                </div>
-
-                <div class="col-md-2">
-                    <label>Charger No.2</label>
-                    <input class="form-control form-control-sm">
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.chargerNo">
                 </div>
 
                 <div class="col-md-2">
                     <label>Controller No.</label>
-                    <input class="form-control form-control-sm">
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.controllerNo">
                 </div>
 
                 <div class="col-md-2">
                     <label>Battery Chemical</label>
-                    <input class="form-control form-control-sm">
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.batteryChemical">
                 </div>
 
                 <div class="col-md-2">
                     <label>Battery Capacity</label>
-                    <input class="form-control form-control-sm">
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.batteryCapacity">
                 </div>
 
                 <div class="col-md-1">
                     <label>SGST%</label>
-                    <input class="form-control form-control-sm text-end" value="0">
+                    <input class="form-control form-control-sm text-end bg-light text-muted" [(ngModel)]="itemObj.sgst"
+                        readonly>
                 </div>
 
                 <div class="col-md-1">
                     <label>CGST%</label>
-                    <input class="form-control form-control-sm text-end" value="0">
+                    <input class="form-control form-control-sm text-end bg-light text-muted" [(ngModel)]="itemObj.cgst"
+                        readonly>
                 </div>
 
                 <div class="col-md-1">
                     <label>IGST%</label>
-                    <input class="form-control form-control-sm text-end" value="0">
+                    <input class="form-control form-control-sm text-end bg-light text-muted" [(ngModel)]="itemObj.igst"
+                        readonly>
                 </div>
 
                 <div class="col-md-2">
                     <label>Total Op. Stock</label>
-                    <input class="form-control form-control-sm text-end" value="0">
+                    <input class="form-control form-control-sm text-end" [(ngModel)]="vehicleObj.totalOpStock">
                 </div>
 
             </div>
@@ -178,8 +182,10 @@
 
                 <div class="col text-end">
 
-                    <button class="btn btn-primary btn-sm me-2">
-                        <i class="bi bi-plus"></i> Add
+                    <button type="button" class="btn btn-primary btn-sm me-2" (click)="addVehicle()">
+
+                        <i class="bi" [ngClass]="isEditMode ? 'bi-check-lg' : 'bi-plus'"></i>
+                        {{ isEditMode ? 'Update' : 'Add' }}
                     </button>
 
                     <button class="btn btn-outline-primary btn-sm">
@@ -235,8 +241,7 @@
 
                         <td class="text-center">
 
-                            <button class="btn btn-warning btn-sm me-1">
-                                <!-- (click)="editVehicle(i)" -->
+                            <button class="btn btn-warning btn-sm me-1" (click)="editVehicle(i)">
                                 <i class="ri-edit-line"></i>
                             </button>
 
@@ -249,9 +254,9 @@
 
                         <td>{{item.chassisNo}}</td>
                         <td>{{item.motorNo}}</td>
-                        <td>{{item.colourName}}</td>
+                        <td>{{item.colorName}}</td>
                         <td>{{item.locationName}}</td>
-                        <td>{{item.year}}</td>
+                        <td>{{item.mfgYear}}</td>
                         <td class="text-end">{{item.rate | number:'1.2-2'}}</td>
                         <td>{{item.serviceBookNo}}</td>
                         <td>{{item.batteryMake}}</td>
