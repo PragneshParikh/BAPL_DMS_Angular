@@ -74,6 +74,7 @@ import { WarrantyJobCardClaim } from './components/warranty-job-card-claim/warra
 import { CounterBill } from './components/counter-bill/counter-bill';
 import { AddCounterBill } from './components/counter-bill/add-counter-bill/add-counter-bill';
 import { CounterBillPrint } from './components/Reports/counter-bill-print/counter-bill-print';
+import { RepoBilling } from './components/repo-billing/repo-billing';
 import { VehicleOpenStock } from './components/vehicle-open-stock/vehicle-open-stock';
 import { VehicleQuotation } from './components/vehicle-quotation/vehicle-quotation';
 import { VehicleQuotationListComponent } from './components/vehicle-quotation/vehicle-quotation-list/vehicle-quotation-list';
@@ -195,6 +196,7 @@ export const routes: Routes = [
       { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
       { path: 'vehicle-sale-d2d-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-d2d-report/vehicle-sale-d2d-report').then(m => m.VehicleSaleD2dReport) },
       { path: 'total-sale-dealer-wise', data: [81], loadComponent: () => import('./components/Reports/total-sale-report/total-sale-report').then(m => m.TotalSaleDealerWiseComponent) },
+
       { path: 'model-wise-variant-stock', data: [66], loadComponent: () => import('./components/Reports/model-wise-variant-report/model-wise-variant-report').then(m => m.ModelWiseVariantStockComponent) },
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
 
@@ -242,6 +244,7 @@ export const routes: Routes = [
       { path: 'counter-bill/edit/:id', component: AddCounterBill, data: [77] },
       { path: 'add-counter-bill', component: AddCounterBill, data: [77] },
       { path: 'print-counter-bill/:id', component: CounterBillPrint, data: [77] },
+      { path: 'repo-billing', component: RepoBilling, data: [88] }
       { path: 'vehicle-open-stock', component:VehicleOpenStock, data: [89] }
       { path: 'vehicle-quotation', component: VehicleQuotationListComponent, data: [87] },
       { path: 'vehicle-quotation/add', component: VehicleQuotation, data: [87] },

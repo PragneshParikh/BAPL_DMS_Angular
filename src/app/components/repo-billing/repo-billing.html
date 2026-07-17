@@ -1,0 +1,458 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">
+        Repo Billing
+    </h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <form #chassisSearchForm="ngForm" (ngSubmit)="onSubmit(chassisSearchForm)">
+                    <div class="row mb-2">
+
+                        <div class="col-md-2">
+                            <label class="form-label mb-0 small">Search Criteria</label>
+                            <select class="form-select form-select-sm" [(ngModel)]="formData.searchCriteria"
+                                name="searchCriteria" #searchCriteria="ngModel" required>
+                                <!-- <option value="">-- Select --</option> -->
+                                <option value="chassis">Chassis No</option>
+                                <option value="regNo">Reg No</option>
+                            </select>
+                            @if (searchCriteria.invalid && searchCriteria.touched) {
+                            <small class="text-danger">
+                                Search Criteria is required.
+                            </small>
+                            }
+                        </div>
+
+                        <div class="col-md-3" *ngIf="formData.searchCriteria === 'chassis'">
+                            <label class="form-label mb-0 small"> Chassis Number </label>
+                            <input type="text" class="form-control form-control-sm" name="chassisNumber"
+                                #chassisNumber="ngModel" maxlength="17" minlength="17"
+                                [(ngModel)]="formData.chassisNumber" style="text-transform: uppercase;" required>
+
+                            @if (chassisNumber.invalid && chassisNumber.touched )
+                            {
+                            <small class="text-danger">
+                                Chassis Number is required.
+                            </small>
+                            }
+
+                            @if (chassisNumber.errors?.['minlength']
+                            || chassisNumber.errors?.['maxlength']) {
+
+                            <small class="text-danger">
+                                Chassis Number must be exactly
+                                17 characters long.
+                            </small>
+                            }
+
+                        </div>
+
+                        <div class="col-md-3" *ngIf="formData.searchCriteria === 'regNo'">
+                            <label class="form-label mb-0 small"> Registration No </label>
+                            <input type="text" class="form-control form-control-sm" name="regNo" #regNo="ngModel"
+                                [(ngModel)]="formData.chassisNumber" style="text-transform: uppercase;" required>
+
+                            @if (regNo.invalid && regNo.touched )
+                            {
+                            <small class="text-danger">
+                                Registration Number is required.
+                            </small>
+                            }
+
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label mb-0 small"> &nbsp; </label>
+
+                            <br>
+
+                            <button type="submit" [disabled]="chassisSearchForm.invalid"
+                                class="btn btn-primary btn-sm me-1">
+                                Search
+                            </button>
+
+                            <button type="button" (click)="resetForms()" class="btn btn-primary btn-sm me-1">
+                                Reset
+                            </button>
+
+                            <button type="button" (click)="addNewLedger()" class="btn btn-primary btn-sm">
+                                Modify Customer
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Vehicle Update Table -->
+            <div class="card card-body" *ngIf="showVehicleDetails">
+                <div class="card-body p-0">
+
+                    <!-- Vehicle Information -->
+                    <fieldset class="border p-1 rounded mb-2" [disabled]="true">
+                        <legend class="float-none w-auto px-2 fs-6">Vehicle Information</legend>
+                        <div>
+                            <form>
+                                <div class="row mb-2 g-1">
+                                    <!-- Chassis No -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Chassis Number</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.chassisNo">
+                                    </div>
+
+                                    <!-- Registration Number -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Reg Number</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.regNo">
+                                    </div>
+
+                                    <!-- Motor Number 1 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Motor Number 1</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.motor1">
+                                    </div>
+
+                                    <!-- Motor Number 2 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Motor Number 2</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.motor2">
+                                    </div>
+
+                                    <!-- Battery 1 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery 1</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.battery1">
+                                    </div>
+
+                                    <!-- Battery 2 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery 2</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.battery2">
+                                    </div>
+
+                                    <!-- Battery 3 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery 3</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.battery3">
+                                    </div>
+
+                                    <!-- Battery 4 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery 4</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.battery4">
+                                    </div>
+
+                                    <!-- Battery Capacity -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery Capacity</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.batteryCapacity">
+                                    </div>
+
+                                    <!-- Battery Chemical -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery Chemical</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.batteryChemical">
+                                    </div>
+
+                                    <!-- Battery Make -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Battery Make</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.batteryMake">
+                                    </div>
+
+                                    <!-- Sale Date -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Sale Date</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.saleDate | date:'dd/MM/yyyy'">
+                                    </div>
+
+                                    <!-- Charger 1 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Charger 1</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.charger1">
+                                    </div>
+
+                                    <!-- Charger 2 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Charger 2</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.charger2">
+                                    </div>
+
+                                    <!-- Converter 1 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Converter 1</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.converter1">
+                                    </div>
+
+                                    <!-- Converter 2 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Converter 2</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.converter2">
+                                    </div>
+
+                                    <!-- Controller 1 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Controller 1</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.controller1">
+                                    </div>
+
+                                    <!-- Controller 2 -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Controller 2</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.controller2">
+                                    </div>
+
+                                    <!-- Insurance Policy No -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Insurance Policy No</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.policyNo">
+                                    </div>
+
+                                    <!-- Insurance Start Date -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Insurance Start Date</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.insuranceDate | date:'dd-MM-yyyy'">
+                                    </div>
+
+                                    <!-- Insurance Company -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Insurance Company</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.insuranceCompany">
+                                    </div>
+
+                                    <!-- Insurance Expiry Date -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Insurance Expiry Date</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="vehicleDetails.policyExpiryDate | date :'dd-MM-yyyy'">
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
+                    </fieldset>
+
+                    <!-- Dealer Information -->
+                    @for (dealer of dealerDetailsList; track $index) {
+                    <fieldset class="border p-1 rounded mb-2" [disabled]="true">
+                        <legend class="float-none w-auto px-2 fs-6">Dealer Information</legend>
+                        <div>
+                            <form>
+                                <div class="row mb-2 g-1">
+                                    <!-- Dealer Code -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Dealer Code</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="dealer.dealerCode">
+                                    </div>
+
+                                    <!-- Dealer Name -->
+                                    <div class="col-md-3">
+                                        <label class="form-label mb-0">Dealer Name</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="dealer.dealerName">
+                                    </div>
+
+                                    <!-- Dealer Mobile -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Dealer Mobile</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="dealer.mobileNo">
+                                    </div>
+
+                                    <!-- Dealer Location -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Dealer Location</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="dealer.dealerLocation">
+                                    </div>
+
+                                    <!-- Dealer State -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Dealer State</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="dealer.dealerState">
+                                    </div>
+
+                                    <!-- Dealer City -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Dealer City</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="dealer.dealerCity">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </fieldset>
+                    }
+
+                    <!-- First Party Information -->
+                    @for (party of partyDetailsList; track $index) {
+                    <fieldset class="border p-1 rounded mb-2" [disabled]="true">
+                        <legend class="float-none w-auto px-2 fs-6">Party Information</legend>
+                        <div>
+                            <form>
+                                <div class="row mb-2 g-1">
+                                    <!-- Party Name -->
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Party Name</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="party.partyName">
+                                    </div>
+
+                                    <!-- Party Mobile -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Party Mobile</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="party.partyMobile">
+                                    </div>
+
+                                    <!-- Party Alternate Mobile -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Party Alternate Mobile</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="party.partyAltMobile">
+                                    </div>
+
+                                    <!-- Party Email -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Party Email</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="party.email">
+                                    </div>
+
+                                    <!-- Address -->
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Address</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="party.address1">
+                                    </div>
+
+                                    <!-- Pin -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Pin</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="party.pin">
+                                    </div>
+
+                                    <!-- State -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">State</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="party.state">
+                                    </div>
+
+                                    <!-- City -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">City</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="party.city">
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
+                    </fieldset>
+                    }
+
+                    <!-- Second Party Information -->
+                    <!-- <fieldset class="border p-1 rounded mb-2" [disabled]="true">
+                        <legend class="float-none w-auto px-2 fs-6">Second Party Information</legend>
+                        <div>
+                            <form>
+                                <div class="row mb-2 g-1">
+                                    <\!-- Party Name --\>
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Party Name</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.partyName">
+                                    </div>
+
+                                    <\!-- Party Mobile --\>
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Party Mobile</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.partyMobile">
+                                    </div>
+
+                                    <\!-- Party Alternate Mobile --\>
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Party Alternate Mobile</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.partyAltMobile">
+                                    </div>
+
+                                    <\!-- Party Email --\>
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Party Email</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.email">
+                                    </div>
+
+                                    <\!-- Address --\>
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Address</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.address1">
+                                    </div>
+
+                                    <\!-- Pin --\>
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Pin</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.pin">
+                                    </div>
+
+                                    <\!-- State --\>
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">State</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.state">
+                                    </div>
+
+                                    <\!-- City --\>
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">City</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.city">
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
+                    </fieldset> -->
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
