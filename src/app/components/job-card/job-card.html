@@ -123,9 +123,10 @@
                             <button class="btn btn-sm btn-soft-primary" (click)="onEdit(item)">
                                 <i class="ri-pencil-fill fs-12"></i>
                             </button>
-                            <button class="btn btn-sm btn-soft-danger" [disabled]="currentUserRole !== 'SuperAdmin'"
-                                title="Only SuperAdmin can delete" (click)="deleteJobCard(item.id)">
+                            <button class="btn btn-sm btn-soft-danger" 
+                                title="Only SuperAdmin can delete" (click)="deleteJobCard(item.id)" [disabled]="!this.isSuperAdmin">
                                 <i class="ri-delete-bin-fill fs-12"></i>
+                                <!-- [disabled]="currentUserRole !== 'SuperAdmin'" -->
                             </button>
                             <button class="btn btn-sm btn-soft-success" title="Print Invoice"
                                 (click)="printJobCard(item)">

@@ -187,11 +187,11 @@ export class JobCardAddForm {
     })
   }
   get isBatteryReadOnly(): boolean {
-  return !!this.selectedJobtype;
-}
+    return !!this.selectedJobtype;
+  }
   //Fetech Dealer Location
   fetchLocations(): void {
-     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
@@ -200,7 +200,15 @@ export class JobCardAddForm {
     }
     this.locationService.getLocationList(this.dealerCode).subscribe({
       next: (data: any[]) => {
+       
         // only Workshop (id = 2)
+        this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+        if (!this.isSuperAdmin) {
+          this.dealerCode = this.storageService.getDealerCode();
+        } else {
+          this.dealerCode = null;
+        }
         this.locations = data.filter(x => x.locareadidNo === 2);
         // EDIT MODE FIX
         if (this.isEditMode && this.chassiseditData) {
@@ -708,7 +716,7 @@ export class JobCardAddForm {
 
   savePdi() {
 
-      if(this.pdiCheckList.length == 0){
+    if (this.pdiCheckList.length == 0) {
       Swal.fire({
         icon: 'warning',
         title: 'Validation',
@@ -739,7 +747,7 @@ export class JobCardAddForm {
   saveJobCard() {
 
     this.isSubmitted = true;
-      if(this.selectedJobtype == 1 && this.pdiCheckList.length == 0){
+    if (this.selectedJobtype == 1 && this.pdiCheckList.length == 0) {
       Swal.fire({
         icon: 'warning',
         title: 'Validation',
@@ -748,7 +756,7 @@ export class JobCardAddForm {
       });
       return;
     }
-  
+
     if (!this.supervisor) {
       Swal.fire({
         icon: 'warning',
@@ -834,7 +842,7 @@ export class JobCardAddForm {
     if (this.complaintList.length === 0) {
       this.showComplaintValidation = true;
       this.isOpen.voice = true;
-       Swal.fire({
+      Swal.fire({
         icon: 'warning',
         title: 'Validation',
         text: 'Please add at least one Customer Voice.',
