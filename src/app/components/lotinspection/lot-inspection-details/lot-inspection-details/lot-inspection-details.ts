@@ -367,7 +367,7 @@ export class LotInspectionDetails implements OnInit {
       });
       return;
     }
-     if (!this.headerObj.inwardType) {
+    if (!this.headerObj.inwardType) {
       this.toaster.show('Inward Type is required', {
         classname: 'bg-warning text-white',
         delay: 3000
@@ -414,7 +414,7 @@ export class LotInspectionDetails implements OnInit {
       nameSupervisor: this.headerObj.nameSupervisor || '',
       LocationName: this.headerObj.locationName || '',
       IsD2D: this.headerObj.isD2D || false,
-      InwardType:this.headerObj.inwardType,
+      InwardType: this.headerObj.inwardType,
       updatedBy: 'Admin',
       updatedDate: new Date().toISOString(),
       IsLotInspected: true

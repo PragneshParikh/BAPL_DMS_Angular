@@ -84,4 +84,8 @@ export class ItemMasterService {
     return this.http.get<any>(`${this.baseUrl}/ItemMaster/GetItemsByLocation`, { params });
   }
 
+  getItemModelist(){
+    return this.http.get<any>(`${this.baseUrl}/ItemMaster/GetItemModelist`);
+  }
+
 }

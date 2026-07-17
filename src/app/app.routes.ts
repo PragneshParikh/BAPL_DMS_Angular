@@ -74,6 +74,7 @@ import { WarrantyJobCardClaim } from './components/warranty-job-card-claim/warra
 import { CounterBill } from './components/counter-bill/counter-bill';
 import { AddCounterBill } from './components/counter-bill/add-counter-bill/add-counter-bill';
 import { CounterBillPrint } from './components/Reports/counter-bill-print/counter-bill-print';
+import { VehicleOpenStock } from './components/vehicle-open-stock/vehicle-open-stock';
 
 
 export const routes: Routes = [
@@ -235,7 +236,8 @@ export const routes: Routes = [
       { path: 'counter-bill', component: CounterBill, data: [77] },
       { path: 'counter-bill/edit/:id', component: AddCounterBill, data: [77] },
       { path: 'add-counter-bill', component: AddCounterBill, data: [77] },
-      { path: 'print-counter-bill/:id', component: CounterBillPrint, data: [77] }
+      { path: 'print-counter-bill/:id', component: CounterBillPrint, data: [77] },
+      { path: 'vehicle-open-stock', component:VehicleOpenStock, data: [89] }
     ]
   },
   { path: '**', component: WorkInProgress }
