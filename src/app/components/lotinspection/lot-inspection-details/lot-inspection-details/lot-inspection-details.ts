@@ -187,7 +187,8 @@ export class LotInspectionDetails implements OnInit {
           this.isLotInspected = res?.data[0]?.islotinspected;
           this.IsD2d = res?.data[0]?.isD2D;
           this.inwardType = res?.data[0].inwardType;
-          this.getlotPartyName(this.IsD2d);
+          this.invoiceNo = res?.data[0].invoiceNo;
+          this.getlotPartyName(this.IsD2d, this.invoiceNo);
 
 
           const first = res.data[0];
@@ -257,19 +258,20 @@ export class LotInspectionDetails implements OnInit {
       }
     });
   }
-  getlotPartyName(isD2D: boolean) {
+  getlotPartyName(isD2D: boolean, invoiceNo: string) {
     debugger;
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
     } else {
       this.dealerCode = null;
     }
     this.IsD2d = isD2D;
-    this.ledgerService.getLotRelatedLedgers(this.dealerCode, this.IsD2d).subscribe({
+    this.ledgerService.getLotRelatedLedgers(invoiceNo, this.IsD2d).subscribe({
       next: (res: any) => {
 
         this.lotPartyList = res;
-        //console.log(this.lotPartyList)
+        console.log("**",this.lotPartyList)
         if (this.lotPartyList.length === 1) {
           this.selectedlotPartyId = this.lotPartyList[0].id;
         }
