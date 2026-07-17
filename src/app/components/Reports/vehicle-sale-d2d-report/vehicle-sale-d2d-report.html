@@ -1,1 +1,209 @@
-<p>vehicle-sale-d2d-report works!</p>
+<div class="d2d-report-container p-3">
+  <h4 class="mb-3">D2D Report</h4>
+
+  <!-- Filters -->
+  <div class="card p-3 mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-2">
+        <label class="form-label">Dealer</label>
+        <select class="form-select" [(ngModel)]="filter.dealerCode">
+          <option [ngValue]="null">All Dealers</option>
+          <option *ngFor="let d of dealers" [value]="d.dealerCode">
+            {{ d.dealerName }}
+          </option>
+        </select>
+      </div>
+
+      <div class="col-md-2 position-relative">
+        <label class="form-label">Chassis No</label>
+        <input
+          type="text"
+          class="form-control"
+          autocomplete="off"
+          [(ngModel)]="filter.chassisNo"
+          (focus)="onChassisFocus()"
+          (input)="onChassisInput()"
+          (blur)="onChassisBlur()"
+          placeholder="Type or select chassis"
+        />
+        <div
+          class="list-group position-absolute w-100 shadow-sm"
+          style="top: 100%; left: 0; z-index: 1050; max-height: 220px; overflow-y: auto;"
+          *ngIf="showChassisDropdown && filteredChassisList.length > 0"
+        >
+          <button
+            type="button"
+            class="list-group-item list-group-item-action py-1 px-2 small"
+            *ngFor="let c of filteredChassisList"
+            (mousedown)="selectChassis(c)"
+          >
+            {{ c }}
+          </button>
+        </div>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Motor No</label>
+        <input type="text" class="form-control" [(ngModel)]="filter.motorNo" />
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Battery No</label>
+        <input type="text" class="form-control" [(ngModel)]="filter.batteryNo" />
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Charger No</label>
+        <input type="text" class="form-control" [(ngModel)]="filter.chargerNo" />
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Controller No</label>
+        <input type="text" class="form-control" [(ngModel)]="filter.controllerNo" />
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Stock Status</label>
+        <select class="form-select" [(ngModel)]="filter.stockStatus">
+          <option [ngValue]="null">All</option>
+          <option value="In Stock">In Stock</option>
+          <option value="Allocated">Allocated</option>
+          <option value="Sold">Sold</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">From Date</label>
+        <input type="date" class="form-control" [(ngModel)]="filter.fromDate" />
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">To Date</label>
+        <input type="date" class="form-control" [(ngModel)]="filter.toDate" />
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Search</label>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Chassis / Motor / Dealer / Model / Invoice No"
+          [(ngModel)]="filter.search"
+        />
+      </div>
+
+      <div class="col-md-auto d-flex gap-2">
+        <button class="btn btn-primary" (click)="applyFilters()">
+          Apply
+        </button>
+        <button class="btn btn-outline-secondary" (click)="resetFilters()">
+          Reset
+        </button>
+        <button
+          class="btn btn-success"
+          (click)="exportToExcel()"
+          [disabled]="exporting || loading"
+        >
+          <span *ngIf="exporting" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          {{ exporting ? 'Exporting...' : 'Export to Excel' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+  <!-- Table -->
+  <div class="table-responsive card p-2">
+    <table class="table table-sm table-bordered table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Sr No</th>
+          <th>Invoice Date</th>
+          <th>BG Invoice No</th>
+          <th>From Dealer Code</th>
+          <th>From Dealer Name</th>
+          <th>From Dealer City</th>
+          <th>From Dealer State</th>
+          <th>To Dealer Code</th>
+          <th>To Dealer Name</th>
+          <th>To Dealer City</th>
+          <th>To Dealer State</th>
+          <th>Location</th>
+          <th>Location Code</th>
+          <th>Location City</th>
+          <th>Model Code</th>
+          <th>Model</th>
+          <th>OEM Model</th>
+          <th>Chassis No</th>
+          <th>Motor No</th>
+          <th>Colour</th>
+          <th>Mfg Year</th>
+          <th>Battery No</th>
+          <th>Battery Make</th>
+          <th>Charger No</th>
+          <th>Controller No</th>
+          <th>Stock Status</th>
+          <th>D2D</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="loading">
+          <td colspan="27" class="text-center py-4">Loading...</td>
+        </tr>
+        <tr *ngIf="!loading && rows.length === 0">
+          <td colspan="27" class="text-center py-4">No D2D records found.</td>
+        </tr>
+        <tr *ngFor="let row of rows">
+          <td>{{ row.srNo }}</td>
+          <td>{{ row.invoiceDate | date: 'dd-MM-yyyy' }}</td>
+          <td>{{ row.bgInvoiceNo }}</td>
+          <td>{{ row.fromDealerCode }}</td>
+          <td>{{ row.fromDealerName }}</td>
+          <td>{{ row.fromDealerCity }}</td>
+          <td>{{ row.fromDealerState }}</td>
+          <td>{{ row.dealerCode }}</td>
+          <td>{{ row.dealerName }}</td>
+          <td>{{ row.dealerCity }}</td>
+          <td>{{ row.dealerState }}</td>
+          <td>{{ row.purchaseReceivingLocation }}</td>
+          <td>{{ row.locationCode }}</td>
+          <td>{{ row.locationCity }}</td>
+          <td>{{ row.modelCode }}</td>
+          <td>{{ row.modelName }}</td>
+          <td>{{ row.oemModelName }}</td>
+          <td>{{ row.chassisNo }}</td>
+          <td>{{ row.motorNo }}</td>
+          <td>{{ row.colour }}</td>
+          <td>{{ row.mfgYear }}</td>
+          <td>{{ row.batteryNo }}</td>
+          <td>{{ row.batteryMake }}</td>
+          <td>{{ row.chargerNo }}</td>
+          <td>{{ row.controllerNo }}</td>
+          <td>{{ row.stockStatus }}</td>
+          <td>
+            <span class="badge bg-success" *ngIf="row.isD2D">Yes</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="d-flex justify-content-between align-items-center mt-2" *ngIf="totalRecords > 0">
+    <div>Total Records: {{ totalRecords }}</div>
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-sm btn-outline-secondary" [disabled]="filter.pageIndex <= 1" (click)="prevPage()">
+        Prev
+      </button>
+      <span>Page {{ filter.pageIndex }} of {{ totalPages }}</span>
+      <button
+        class="btn btn-sm btn-outline-secondary"
+        [disabled]="filter.pageIndex >= totalPages"
+        (click)="nextPage()"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+</div>
