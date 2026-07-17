@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import * as XLSX from 'xlsx';
+// import * as XLSX from 'xlsx';
 import { ReportService } from '../../../core/services/report.service';
 import { D2DReportFilter, D2DReportRow } from '../../../ViewModels/models/d2d-reportModel';
 
@@ -39,7 +39,7 @@ export class VehicleSaleD2dReport implements OnInit {
   exporting = false;
   errorMessage = '';
 
-  constructor(private reportService: ReportService) {}
+  constructor(private reportService: ReportService) { }
 
   ngOnInit(): void {
     this.loadDealers();
@@ -171,12 +171,12 @@ export class VehicleSaleD2dReport implements OnInit {
           'D2D': row.isD2D ? 'Yes' : 'No'
         }));
 
-        const worksheet = XLSX.utils.json_to_sheet(exportRows);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'D2D Report');
+        // const worksheet = XLSX.utils.json_to_sheet(exportRows);
+        // const workbook = XLSX.utils.book_new();
+        // XLSX.utils.book_append_sheet(workbook, worksheet, 'D2D Report');
 
-        const fileName = `D2D_Report_${new Date().toISOString().slice(0, 10)}.xlsx`;
-        XLSX.writeFile(workbook, fileName);
+        // const fileName = `D2D_Report_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        // XLSX.writeFile(workbook, fileName);
       },
       error: (err: any) => {
         this.exporting = false;
