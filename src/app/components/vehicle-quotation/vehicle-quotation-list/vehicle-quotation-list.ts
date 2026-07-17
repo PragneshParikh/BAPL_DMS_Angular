@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { VehicleQuotationService } from '../../../core/services/vehicle-quotationservice';
+import { AuthenticationService } from '../../../core/services/auth.service';
 import { VehicleQuotation } from '../../vehicle-quotation/vehicle-quotation';
 
 @Component({
@@ -25,19 +26,37 @@ export class VehicleQuotationListComponent implements OnInit {
 
   printingId?: number; // shows a spinner/disabled state on the row being printed
 
+  // Access control — SuperAdmin sees every dealer's quotations; any other
+  // role only ever sees their own dealer's, same pattern already used by
+  // StockReportComponent. NOTE: this only controls what this screen *asks
+  // for* — the real boundary has to be enforced server-side too, otherwise
+  // a dealer user could still request another dealer's data by calling the
+  // API directly with a different dealerCode. See chat for what's needed
+  // on the service/backend side to close that gap.
+  isSuperAdmin = false;
+
   constructor(
     private quotationService: VehicleQuotationService,
+    private authService: AuthenticationService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
+    const currentUser = this.authService.currentUserValue;
+    this.isSuperAdmin = currentUser?.role === 'SuperAdmin';
+
     this.loadData();
   }
 
   loadData(): void {
     this.loading = true;
 
-    this.quotationService.getQuotations().subscribe({
+    const currentUser = this.authService.currentUserValue;
+    const dealerCode = this.isSuperAdmin
+      ? undefined
+      : (currentUser?.dealerCode ?? undefined);
+
+    this.quotationService.getQuotations(dealerCode).subscribe({
       next: (res: any) => {
         this.quotations = Array.isArray(res) ? res : (res.data || []);
         this.filteredData = [...this.quotations];
