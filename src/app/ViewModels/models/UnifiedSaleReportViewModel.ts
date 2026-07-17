@@ -6,7 +6,6 @@ export interface DealerDropdownItem {
 export interface UnifiedSaleReportViewModel {
   // ── Identity ──────────────────────────────────────────────
   srNo:            number;
-  source:          'SaleBill' | 'VehicleSale';   // which API the row came from
   saleBillId?:     number;
   saleBillNo?:     string;
   invoiceNo?:      string;
@@ -35,8 +34,6 @@ export interface UnifiedSaleReportViewModel {
   address2?:       string;
   email?:          string;
   pin?:            string;
-
-  // ── NEW: previously missing from both sources ────────────
   gender?:         string;
   dob?:            string | Date;
   accountType?:    string;
@@ -124,10 +121,9 @@ export interface UnifiedSaleReportTotals {
   totalRegistration: number;
   totalInsurance:    number;
   grandTotal:        number;
-  totalAmount:       number;   // from VehicleSale rows
+  totalAmount:       number;
 }
 
-// ── One filter, used by BOTH report endpoints ────────────────
 export interface UnifiedSaleReportFilter {
   dealerCode?:   string;
   fromDate?:     string;
@@ -138,17 +134,28 @@ export interface UnifiedSaleReportFilter {
   status?:       string;
   chassisNo?:    string;
   saleBillNo?:   string;
-  financier?:    string;   // matched client-side against the resolved financier name (neither API filters on it server-side)
+  financier?:    string;
   search?:       string;
   pageIndex:     number;
   pageSize:      number;
 }
 
-// ── One response shape, used by the paginated (Sale Bill) endpoint ──
+// ── Matches VehicleSaleBillReportResponse from the API 1:1 — totals are
+// returned at the top level alongside `data`, not nested under a `totals`
+// key. Now that the Sale Bill endpoint is the only source, this is the
+// only response shape the component needs to handle.
 export interface UnifiedSaleReportResponse {
-  data:         UnifiedSaleReportViewModel[];
-  totalRecords: number;
-  pageIndex:    number;
-  pageSize:     number;
-  totals?:      UnifiedSaleReportTotals;  // optional server totals; client currently recomputes from `data`
+  data:               UnifiedSaleReportViewModel[];
+  totalRecords:       number;
+  pageIndex:          number;
+  pageSize:           number;
+  totalItemRate:      number;
+  totalTaxable:       number;
+  totalSgst:          number;
+  totalCgst:          number;
+  totalIgst:          number;
+  totalFameII:        number;
+  totalRegistration:  number;
+  totalInsurance:     number;
+  grandTotal:         number;
 }
