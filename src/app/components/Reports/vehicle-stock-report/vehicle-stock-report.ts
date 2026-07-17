@@ -50,6 +50,18 @@ export class VehicleStockReportComponent
 
     chassisList: string[] = [];
 
+    // =====================================================
+    // CHASSIS SEARCH SUGGESTIONS
+    // Replaces the native <datalist> popup (unstyled, browser-rendered,
+    // overlaps page content) with a custom app-styled dropdown rendered
+    // directly below the search box. filteredChassisList is capped at 20
+    // matches so it stays fast/readable even with a large chassisList.
+    // =====================================================
+    filteredChassisList: string[] = [];
+    showChassisDropdown = false;
+
+    private static readonly MAX_CHASSIS_SUGGESTIONS = 20;
+
     isLoading: boolean = false;
 
     totalRecords: number = 0;
@@ -175,6 +187,54 @@ export class VehicleStockReportComponent
 }
 
     // =====================================================
+    // CHASSIS SEARCH — custom dropdown handlers
+    // =====================================================
+
+    onChassisInput(): void {
+        this.updateChassisSuggestions();
+    }
+
+    onChassisFocus(): void {
+        // Show suggestions immediately on focus too — an empty box shows
+        // the first 20 chassis numbers rather than nothing, so the dropdown
+        // isn't blank until the user starts typing.
+        this.updateChassisSuggestions();
+    }
+
+    onChassisBlur(): void {
+        // Delayed hide: a suggestion button's (mousedown) fires before this
+        // blur completes, but not before a plain click would — the timeout
+        // gives that handler a chance to run first instead of the dropdown
+        // disappearing out from under the click.
+        setTimeout(() => {
+            this.showChassisDropdown = false;
+        }, 150);
+    }
+
+    selectChassis(chassis: string): void {
+        this.filterForm.patchValue({ chassisNo: chassis });
+        this.showChassisDropdown = false;
+    }
+
+    private updateChassisSuggestions(): void {
+        const text = (this.filterForm.get('chassisNo')?.value ?? '')
+            .toString()
+            .trim()
+            .toUpperCase();
+
+        const source = text
+            ? this.chassisList.filter(c => c.toUpperCase().includes(text))
+            : this.chassisList;
+
+        this.filteredChassisList = source.slice(
+            0,
+            VehicleStockReportComponent.MAX_CHASSIS_SUGGESTIONS
+        );
+
+        this.showChassisDropdown = true;
+    }
+
+    // =====================================================
     // LOAD REPORT
     // =====================================================
 
@@ -263,6 +323,9 @@ export class VehicleStockReportComponent
         });
 
         this.modelList = [];
+
+        this.filteredChassisList = [];
+        this.showChassisDropdown = false;
 
         this.pageIndex = 1;
 

@@ -12,11 +12,18 @@
             (click)="downloadItemMasterExcel()">
             <i class="ri-file-excel-2-line"></i>
           </button>
+          <button class="btn btn-primary btn-sm me-3" (click)="openAddItem(addItemModal)">
+            +
+          </button>
           <!-- Search Box -->
 
           <div class="search-box">
             <input type="text" class="form-control search" placeholder="Search..." (input)="searchItems($event)" />
             <i class="ri-search-line search-icon"></i>
+          </div>
+
+          <div>
+
           </div>
         </div>
 
@@ -178,6 +185,20 @@
       <div class="col-md-2">
         <label class="form-label">OEM Part Description</label>
         <input class="form-control form-control-sm" [value]="" readonly>
+      </div>
+      <div class="col-md-2">
+         <label class="form-label">
+          Supplier
+        </label>
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.supplierId" name="supplierId">
+
+          <option [ngValue]="null">-- Select Supplier --</option>
+
+          <option *ngFor="let supplier of supplierlist" [ngValue]="supplier.id">
+            {{ supplier.ledgerName }}
+          </option>
+
+        </select>
       </div>
       <div class="col-md-2">
         <label class="form-label">UOM</label>
@@ -346,6 +367,522 @@
     <button class="btn btn-danger btn-sm" (click)="modal.close()">Close</button>
   </div>
 </ng-template>
-
-
 <!-- end item popup -->
+
+<!-- Add item popup-->
+<ng-template #addItemModal let-modal>
+
+  <div class="modal-header item-modal-header">
+    <h5 class="modal-title">
+      <i class="ri-add-circle-line me-2"></i>
+      Add Parts Item Master
+    </h5>
+
+    <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()">
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="row">
+      <!-- Item Type -->
+      <div class="col-md-2">
+        <label class="form-label">
+          Item Type <span class="text-danger">*</span>
+        </label>
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.itemtype" name="itemtype">
+          <option [ngValue]="1">Vehicle</option>
+          <option [ngValue]="2">Parts</option>
+          <option [ngValue]="3">Labour</option>
+          <option [ngValue]="4">Accessory</option>
+          <option [ngValue]="6">Outside Work</option>
+          <option [ngValue]="7">Complain</option>
+          <option [ngValue]="8">Tyre</option>
+          <option [ngValue]="9">Oil</option>
+          <option [ngValue]="10">Gift</option>
+          <option [ngValue]="12">Battery/E-Device</option>
+        </select>
+      </div>
+      <!-- Part No -->
+      <div class="col-md-2">
+        <label class="form-label">
+          Part No <span class="text-danger">*</span>
+        </label>
+        <input type="text" class="form-control form-control-sm" [(ngModel)]="itemObj.itemname" name="itemname"
+          placeholder="Enter Part No">
+      </div>
+      <!-- Description -->
+      <div class="col-md-2">
+        <label class="form-label">
+          Description <span class="text-danger">*</span>
+        </label>
+        <input type="text" class="form-control form-control-sm" [(ngModel)]="itemObj.itemdesc" name="itemdesc"
+          placeholder="Enter Description">
+      </div>
+      <!-- Part Code -->
+      <div class="col-md-2">
+        <label class="form-label">
+          Part Code
+        </label>
+        <input type="text" class="form-control form-control-sm" [(ngModel)]="itemObj.itemcode" name="itemcode">
+      </div>
+
+      <!-- OEM Part -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          Is OEM Part
+        </label>
+
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.iselectric" name="iselectric">
+
+          <option [ngValue]="true">Yes</option>
+          <option [ngValue]="false">No</option>
+
+        </select>
+
+      </div>
+
+      <!-- OEM Part No -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          OEM Part No.
+        </label>
+
+        <input class="form-control form-control-sm" [(ngModel)]="itemObj.oemPartNo" name="oemPartNo">
+
+      </div>
+
+      <!-- Group -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          Select Group
+        </label>
+
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.grpidno" name="grpidno">
+
+          <option selected="selected" [ngValue]="1">Spares</option>
+          <option [ngValue]="2">Tools</option>
+          <option [ngValue]="3">Accessories</option>
+          <option [ngValue]="6">FG</option>
+          <option [ngValue]="16">FGWG</option>
+          <option [ngValue]="80">Electric 2 Wheeler</option>
+          <option [ngValue]="81">Spares</option>
+          <option [ngValue]="82">Consumable</option>
+          <option [ngValue]="83">Packing</option>
+          <option [ngValue]="98">BGAUSS B8</option>
+          <option [ngValue]="99">BGAUSS A2</option>
+          <option [ngValue]="100">Parts</option>
+          <option [ngValue]="101">BGAUSS B8.</option>
+          <option [ngValue]="102">BGAUSS A2.</option>
+          <option [ngValue]="198">A2</option>
+          <option [ngValue]="199">B8</option>
+          <option [ngValue]="205">A2/B8</option>
+          <option [ngValue]="259">Other</option>
+          <option [ngValue]="11448">C12</option>
+          <option [ngValue]="11449">D15</option>
+          <option [ngValue]="11450">Generic</option>
+          <option [ngValue]="11493">Extended Warranty</option>
+          <option [ngValue]="11536">Initial Kit</option>
+          <option [ngValue]="12039">FGWB</option>
+
+        </select>
+
+      </div>
+
+      <!-- Vehicle Model -->
+      <!-- <div class="col-md-2">
+
+        <label class="form-label">
+          Vehicle Model Name
+        </label>
+
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.oemModelId" name="oemModelId">
+
+          <option [ngValue]="null">
+            Select Model
+          </option>
+
+          <option *ngFor="let model of modelList" [ngValue]="model.id">
+
+            {{model.modelName}}
+
+          </option>
+
+        </select>
+
+      </div> -->
+
+      <!-- OEM Description -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          OEM Part Description
+        </label>
+
+        <input class="form-control form-control-sm" [(ngModel)]="itemObj.oemPartDescription" name="oemPartDescription">
+
+      </div>
+      <div class="col-md-2">
+         <label class="form-label">
+          Supplier
+        </label>
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.supplierId" name="supplierId">
+
+          <option [ngValue]="null">-- Select Supplier --</option>
+
+          <option *ngFor="let supplier of supplierlist" [ngValue]="supplier.id">
+            {{ supplier.ledgerName }}
+          </option>
+
+        </select>
+      </div>
+      <!-- UOM -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          UOM
+        </label>
+
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.uom" name="uom">
+
+          <option value="39">Kit</option>
+          <option value="40">Make</option>
+          <option value="42">PCS</option>
+          <option value="56">Unit</option>
+
+        </select>
+
+      </div>
+
+      <!-- HSN -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          HSN Code
+        </label>
+
+        <input class="form-control form-control-sm" [(ngModel)]="itemObj.hsncode" name="hsncode">
+
+      </div>
+
+      <!-- GST -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          TAX %
+        </label>
+
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.taxPercent" name="taxPercent">
+
+      </div>
+
+      <!-- SGST -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          SGST
+        </label>
+
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.sgst" name="sgst">
+
+      </div>
+
+      <!-- CGST -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          CGST
+        </label>
+
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.cgst" name="cgst">
+
+      </div>
+
+      <!-- IGST -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          IGST
+        </label>
+
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.igst" name="igst">
+
+      </div>
+
+      <!-- UGST -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          UGST
+        </label>
+
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.ugst" name="ugst">
+
+      </div>
+
+      <!-- GST Cess -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          GST Cess
+        </label>
+
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.gstCess" name="gstCess">
+
+      </div>
+
+      <!-- TCS -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          TCS
+        </label>
+
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.tcs" name="tcs">
+
+      </div>
+
+      <!-- Item Category -->
+      <div class="col-md-2">
+
+        <label class="form-label">
+          Item Category
+        </label>
+
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.itemCategory" name="itemCategory">
+
+          <option value="Parts">Parts</option>
+          <option value="Vehicle">Vehicle</option>
+
+        </select>
+
+      </div>
+
+      <!-- HR/TAT -->
+      <div class="col-md-2">
+        <label class="form-label">
+          HRs / TAT
+        </label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.hrsTat" name="hrsTat">
+      </div>
+
+      <!-- List Price -->
+      <div class="col-md-2">
+        <label class="form-label">List Price</label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.dlrprice" name="dlrprice">
+      </div>
+
+      <!-- Item MRP -->
+      <div class="col-md-2">
+        <label class="form-label">Item MRP</label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.itemMrp" name="itemMrp">
+      </div>
+
+      <!-- OEM MRP -->
+      <div class="col-md-2">
+        <label class="form-label">OEM MRP</label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.oemMrp" name="oemMrp">
+      </div>
+
+      <!-- Purchase Rate -->
+      <div class="col-md-2">
+        <label class="form-label">Purchase Rate</label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.ipurrate" name="ipurrate">
+      </div>
+
+      <!-- Sale Rate -->
+      <div class="col-md-2">
+        <label class="form-label">Sale Rate</label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.custprice" name="custprice">
+      </div>
+
+      <!-- Margin -->
+      <div class="col-md-2">
+        <label class="form-label">Margin %</label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.margin" name="margin">
+      </div>
+
+      <!-- Part Labour -->
+      <div class="col-md-2">
+        <label class="form-label">Part Labour</label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.partLabour" name="partLabour">
+      </div>
+
+      <!-- Re Order -->
+      <div class="col-md-2">
+        <label class="form-label">Re-Order Qty</label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.reOrderQty" name="reOrderQty">
+      </div>
+
+      <!-- Minimum Bill Qty -->
+      <div class="col-md-2">
+        <label class="form-label">Min Bill Qty</label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.minBillQty" name="minBillQty">
+      </div>
+
+      <!-- Minimum Order Qty -->
+      <div class="col-md-2">
+        <label class="form-label">Min Order Qty</label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.minOrderQty" name="minOrderQty">
+      </div>
+
+      <!-- Warranty Period -->
+      <div class="col-md-2">
+        <label class="form-label">Warranty Period</label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.warrantyPeriod"
+          name="warrantyPeriod">
+      </div>
+
+      <!-- Warranty Type -->
+      <div class="col-md-2">
+        <label class="form-label">Month / Year</label>
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.warrantyDurationType"
+          name="warrantyDurationType">
+
+          <option *ngFor="let type of durationTypes" [ngValue]="type.id">
+            {{type.title}}
+          </option>
+
+        </select>
+      </div>
+
+      <!-- Warranty Kms -->
+      <div class="col-md-2">
+        <label class="form-label">Warranty Kms.</label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.warrantyKms" name="warrantyKms">
+      </div>
+
+      <!-- Warranty Approval -->
+      <div class="col-md-2">
+        <label class="form-label d-block">Warranty Approval</label>
+
+        <div class="form-check form-switch mt-2">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="itemObj.isWarrantyApproval"
+            name="isWarrantyApproval">
+
+          <label class="form-check-label">
+            {{itemObj.isWarrantyApproval ? 'Yes' : 'No'}}
+          </label>
+        </div>
+      </div>
+
+      <!-- VOR Rate -->
+      <div class="col-md-2">
+        <label class="form-label">VOR Rate</label>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.vorRate" name="vorRate">
+      </div>
+
+      <!-- VOR -->
+      <div class="col-md-2">
+        <label class="form-label d-block">VOR Specific</label>
+
+        <div class="form-check form-switch mt-2">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="itemObj.isVOR" name="isVOR">
+
+          <label class="form-check-label">
+            {{itemObj.isVOR ? 'Yes' : 'No'}}
+          </label>
+        </div>
+      </div>
+
+      <!-- Remarks -->
+      <div class="col-md-12">
+        <label class="form-label">Remarks</label>
+
+        <textarea rows="1" class="form-control form-control-sm" [(ngModel)]="itemObj.remarks" name="remarks">
+        </textarea>
+      </div>
+    </div>
+  </div>
+  <hr>
+
+
+  <!-- Checkbox Section -->
+
+  <div class="row">
+
+    <div class="col-sm-2">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" [(ngModel)]="itemObj.isExempted" name="isExempted">
+
+        <label class="form-check-label">
+          GST Exempted
+        </label>
+      </div>
+    </div>
+
+    <div class="col-sm-2">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" [(ngModel)]="itemObj.isToolkitFirstAid"
+          name="isToolkitFirstAid">
+
+        <label class="form-check-label">
+          Tool Kit / First Aid
+        </label>
+      </div>
+    </div>
+
+    <div class="col-sm-2">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" [(ngModel)]="itemObj.isStockRequired" name="isStockRequired">
+
+        <label class="form-check-label">
+          Must Stock
+        </label>
+      </div>
+    </div>
+
+    <div class="col-sm-2">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" [(ngModel)]="itemObj.isHelmet" name="isHelmet">
+
+        <label class="form-check-label">
+          Save As Helmet
+        </label>
+      </div>
+    </div>
+
+    <div class="col-sm-2">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" [(ngModel)]="itemObj.isInventory" name="isInventory">
+
+        <label class="form-check-label">
+          Non Inventory
+        </label>
+      </div>
+    </div>
+
+    <div class="col-sm-2">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" [(ngModel)]="itemObj.isInEligibleInput"
+          name="isInEligibleInput">
+
+        <label class="form-check-label">
+          In Eligible Input
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+
+    <button type="button" class="btn btn-primary btn-sm" (click)="saveItem()">
+      <i class="ri-save-line me-1"></i>
+      Save
+    </button>
+
+    <button type="button" class="btn btn-warning btn-sm" (click)="resetForm()">
+      <i class="ri-refresh-line me-1"></i>
+      Reset
+    </button>
+
+    <button type="button" class="btn btn-light btn-sm" (click)="modal.dismiss()">
+      <i class="ri-close-line me-1"></i>
+      Cancel
+    </button>
+
+  </div>
+
+</ng-template>
+<!-- end item popup-->

@@ -23,6 +23,8 @@ export class ModelWiseCurrentStockComponent implements OnInit {
   dealerList: DealerDropdownItem[] = [];
 
   // Pivoted report state: dealers as rows, one column per model.
+  // Backend already excludes unmapped models and zero-total rows/columns
+  // entirely — this component just renders what it gets.
   modelNames: string[] = [];
   rows: ModelWiseStockPivotRow[] = [];
   columnTotals: { [modelName: string]: number } = {};
@@ -30,9 +32,6 @@ export class ModelWiseCurrentStockComponent implements OnInit {
 
   isLoading = false;
 
-  // The backend already forces dealerCode for a dealer login regardless of
-  // what this filter sends — hiding it is purely cosmetic, since a dealer
-  // user's own dropdown selection would never actually change their results.
   isDealerUser = false;
 
   ngOnInit(): void {
@@ -67,10 +66,6 @@ export class ModelWiseCurrentStockComponent implements OnInit {
     });
   }
 
-  // NOTE: assumes the JWT is stored in localStorage under the key 'token' —
-  // adjust that key if this project's auth service uses a different one.
-  // Fails safe: if anything here doesn't match, the filter just stays
-  // visible rather than being hidden incorrectly.
   private checkIsDealerUser(): boolean {
     try {
       const token = localStorage.getItem('token');
@@ -132,8 +127,11 @@ export class ModelWiseCurrentStockComponent implements OnInit {
     this.loadReport();
   }
 
-  cell(row: ModelWiseStockPivotRow, model: string): number {
-    return row.modelCounts?.[model] || 0;
+  // Returns null for zero/missing values so the template can render a
+  // blank/dash instead of a visually noisy "0" in the pivot cell.
+  cell(row: ModelWiseStockPivotRow, model: string): number | null {
+    const val = row.modelCounts?.[model] || 0;
+    return val > 0 ? val : null;
   }
 
   columnTotal(model: string): number {
@@ -145,10 +143,12 @@ export class ModelWiseCurrentStockComponent implements OnInit {
 
     const headers = ['Dealer Code', 'Dealer Name', ...this.modelNames, 'Total'];
 
+    // CSV export intentionally uses raw counts (including 0), not the
+    // blanked-out display value from cell().
     const rows = this.rows.map(r => [
       r.dealerCode,
       r.dealerName,
-      ...this.modelNames.map(m => this.cell(r, m)),
+      ...this.modelNames.map(m => r.modelCounts?.[m] || 0),
       r.total
     ]);
 

@@ -70,7 +70,7 @@
         <div class="d-flex justify-content-end gap-1 me-3">
             <button *ngIf="!billId" class="btn btn-sm btn-primary" [disabled]="!canSave() || isErpLocked"
                 (click)="billId ? updateVehicleSaleBill() : saveVehicleDetailsOnly()">
-                Save As Proforma
+                Save As{{!this.model.isD2D ? ' Proforma' :' Invoice'}}
             </button>
             <button *ngIf="billId && !isErpLocked && !isInvoiced" class="btn btn-sm btn-primary"
                 [disabled]="!canSave() || isErpLocked" (click)=" updateVehicleSaleBill()">
@@ -134,7 +134,7 @@
                                     #location="ngModel" (change)="onLocationChange()" required>
                                     <option value="">Select Location</option>
                                     <option *ngFor="let loc of locations" [value]="loc.loccode">
-                                        {{ loc.locname }}
+                                        {{ loc.locname }} 
                                     </option>
                                 </select>
                                 <small *ngIf="location.invalid && (location.touched || vehicleSaleForm.submitted)"
@@ -165,7 +165,8 @@
 
                                     <!-- Disable -->
                                     <input type="radio" class="btn-check" name="d2dSwitch" id="d2dOff" [value]="false"
-                                        [(ngModel)]="model.isD2D" (change)="onD2DChange()">
+                                        [(ngModel)]="model.isD2D" (change)="onD2DChange()"
+                                        [disabled]="!showD2D && !isSuperAdmin    ">
 
                                     <label class="btn btn-outline-primary btn-sm px-2 py-1" for="d2dOff">
                                         No
@@ -706,24 +707,28 @@
 
                         <div class="col-md-2">
                             <label class="form-label-sm">Accessory Bill No</label>
-                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.accessoryBillNo" name="accessoryBillNo" #accessoryBillNo="ngModel">
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="model.accessoryBillNo"
+                                name="accessoryBillNo" #accessoryBillNo="ngModel">
                         </div>
 
                         <div class="col-md-2">
                             <label class="form-label-sm">Accessory Amount</label>
                             <input type="number" class="form-control form-control-sm"
-                                [(ngModel)]="model.accessoryAmount" name="accessoryAmount" #accessoryAmount="ngModel" (input)="onExtraChargesChange()">
+                                [(ngModel)]="model.accessoryAmount" name="accessoryAmount" #accessoryAmount="ngModel"
+                                (input)="onExtraChargesChange()">
                         </div>
 
                         <div class="col-md-2">
                             <label class="form-label-sm">Number Plate Amnt</label>
-                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.noPlateAmount" name="noPlateAmount" #noPlateAmount="ngModel" (input)="onExtraChargesChange()">
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.noPlateAmount"
+                                name="noPlateAmount" #noPlateAmount="ngModel" (input)="onExtraChargesChange()">
                         </div>
 
                         <div class="col-md-2">
                             <label class="form-label-sm">Handling Charges</label>
                             <input type="number" class="form-control form-control-sm"
-                                [(ngModel)]="model.handlingCharges" #handlingCharges="ngModel" name="handlingCharges" (input)="onExtraChargesChange()">
+                                [(ngModel)]="model.handlingCharges" #handlingCharges="ngModel" name="handlingCharges"
+                                (input)="onExtraChargesChange()">
                         </div>
 
                         <div class="col-md-2">
@@ -733,7 +738,9 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label-sm">State Subsidy Amnt</label>
-                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.stateSubsidyAmount" name="stateSubsidyAmount" #stateSubsidyAmount="ngModel" (input)="onExtraChargesChange()">
+                            <input type="number" class="form-control form-control-sm"
+                                [(ngModel)]="model.stateSubsidyAmount" name="stateSubsidyAmount"
+                                #stateSubsidyAmount="ngModel" (input)="onExtraChargesChange()">
                         </div>
                         <!-- <div class="col-md-3">
                             <label class="form-label-sm">Discount Type</label>

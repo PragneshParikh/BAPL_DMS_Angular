@@ -13,6 +13,9 @@
     vertical-align: middle;
     text-align: center !important;
   }
+  .pivot-table tbody td.empty-cell {
+    color: #c0c0c0;
+  }
 </style>
 
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
@@ -119,7 +122,11 @@
               <tr *ngFor="let row of rows">
                 <td>{{ row.dealerCode }}</td>
                 <td>{{ row.dealerName }}</td>
-                <td *ngFor="let model of modelNames" class="text-end">{{ cell(row, model) }}</td>
+                <td *ngFor="let model of modelNames"
+                    class="text-end"
+                    [class.empty-cell]="cell(row, model) === null">
+                  {{ cell(row, model) ?? '—' }}
+                </td>
                 <td class="text-end fw-semibold">{{ row.total }}</td>
               </tr>
             </tbody>
@@ -132,9 +139,7 @@
             </tfoot>
           </table>
         </div>
-
       </div>
     </div>
-
   </div>
 </div>

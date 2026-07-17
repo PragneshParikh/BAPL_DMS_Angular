@@ -7,6 +7,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DurationTypes } from '../../../constant';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { StorageService } from '../../../core/services/storage';
+import { subscribe } from 'diagnostics_channel';
+import { LedgerMasterService } from '../../../core/services/ledger-master';
 
 @Component({
   selector: 'app-item-master',
@@ -35,17 +37,20 @@ export class ItemMaster implements OnInit {
   sortDirection: 'asc' | 'desc' = 'asc';
 
   groupId = 1; // static group id
+  supplierlist: any[]=[];
 
   constructor(
     private itemService: ItemMasterService,
     private loader: LoaderService,
     private modalService: NgbModal,
     private toaster: ToastService,
+    private ledgerservice : LedgerMasterService,
     private storageService: StorageService
   ) { }
 
   ngOnInit() {
     this.loadItems();
+    this.loadsuplier();
   }
 
   //  API CALL
@@ -67,6 +72,24 @@ export class ItemMaster implements OnInit {
       }
 
     });
+
+  }
+
+  loadsuplier(){
+
+    const dealerCode = this.storageService.getDealerCode();
+
+    this.ledgerservice.getSupplierLedgers(dealerCode).subscribe({
+      next:(res:any)=>{
+
+        this.supplierlist = res;
+        console.log(this.supplierlist)
+
+      },
+      error:(err)=>{
+        console.error(err);
+      }
+    })
 
   }
 
@@ -153,6 +176,9 @@ export class ItemMaster implements OnInit {
 
   updateItem() {
     this.loader.show();
+    this.selectedItem.dealerCode = this.storageService.getDealerCode();
+    this.selectedItem.uom = this.itemObj.uom;
+    this.selectedItem.status = true;
     this.selectedItem.updatedBy = this.storageService.getUserId();
     this.selectedItem.updatedDate = new Date();
     this.itemService.updateItem(this.selectedItem).subscribe({
@@ -170,4 +196,218 @@ export class ItemMaster implements OnInit {
     });
   }
 
+  // ===============================
+// Item Object
+// ===============================
+
+itemObj: any = this.getEmptyItem();
+
+
+// ===============================
+// Dropdown Lists
+// ===============================
+
+modelList: any[] = [];
+// durationTypes: any[] = [
+//   { id: 1, title: 'Month' },
+//   { id: 2, title: 'Year' }
+// ];
+
+groupList = [
+  { id: 1, title: 'Spares' },
+  { id: 2, title: 'FG' }
+];
+
+itemTypeList = [
+  { id: 1, title: 'Vehicle' },
+  { id: 2, title: 'Parts' }
+];
+
+uomList = [
+  'PCS',
+  'NOS',
+  'SET',
+  'BOX'
+];
+
+
+
+
+// ===============================
+// Empty Object
+// ===============================
+
+getEmptyItem() {
+
+  return {
+
+    id: 0,
+
+    itemtype: 0,
+
+    itemname: '',
+    itemdesc: '',
+    itemcode: '',
+
+    iselectric: false,
+
+    oemPartNo: '',
+    oemPartDescription: '',
+
+    grpidno: 1,
+    oemModelId: null,
+
+    uom: 'PCS',
+
+    hsncode: '',
+
+    taxPercent: 0,
+
+    cgst: 0,
+    sgst: 0,
+    igst: 0,
+    ugst: 0,
+
+    gstCess: 0,
+    tcs: 0,
+
+    itemCategory: 'Parts',
+
+    hrsTat: 0,
+
+    dlrprice: 0,
+    itemMrp: 0,
+    oemMrp: 0,
+
+    ipurrate: 0,
+    custprice: 0,
+
+    margin: 0,
+    partLabour: 0,
+
+    reOrderQty: 0,
+
+    minBillQty: 0,
+    minOrderQty: 0,
+
+    warrantyPeriod: 0,
+    warrantyDurationType: 1,
+    warrantyKms: 0,
+
+    isWarrantyApproval: false,
+
+    vorRate: 0,
+    isVOR: false,
+
+    remarks: '',
+
+    isExempted: false,
+    isToolkitFirstAid: false,
+    isStockRequired: false,
+    isHelmet: false,
+    isInventory: false,
+    isInEligibleInput: false,
+    dealerCode:'',
+    status:true,
+    supplierId:0
+
+  };
+
+}
+
+// ===============================
+// Reset Form
+// ===============================
+resetForm() {
+  this.itemObj = this.getEmptyItem();
+}
+
+// ===============================
+// Open Add Popup
+// ===============================
+
+openAddItem(content: any) {
+
+  this.resetForm();
+
+  this.modalService.open(content, {
+
+    size: 'xl',
+    backdrop: 'static',
+    keyboard: false
+
+  });
+
+}
+
+// ===============================
+// Validation
+// ===============================
+
+validateItem(): boolean {
+
+  if (!this.itemObj.itemname?.trim()) {
+     this.toaster.show('Enter Part NO.', { classname: 'bg-warning text-light', delay: 5000 });
+    return false;
+  }
+
+  if (!this.itemObj.itemdesc?.trim()) {
+     this.toaster.show('Enter Item Description', { classname: 'bg-warning text-light', delay: 5000 });
+    return false;
+  }
+
+  if (!this.itemObj.hsncode?.trim()) {
+     this.toaster.show('Enter HSNCode', { classname: 'bg-warning text-light', delay: 5000 });
+    return false;
+  }
+
+  if (this.itemObj.custprice <= 0) {
+     this.toaster.show('Enter Sale Rate', { classname: 'bg-warning text-light', delay: 5000 });
+    return false;
+  }
+
+  if (this.itemObj.ipurrate <= 0) { 
+     this.toaster.show('Enter Purchase Rate', { classname: 'bg-warning text-light', delay: 5000 });
+    return false;
+  }
+  return true;
+}
+
+
+
+// ===============================
+// Save Item
+// ===============================
+
+saveItem() {
+
+  if (!this.validateItem())
+    return;
+  const dealerCode = this.storageService.getDealerCode();
+  this.itemObj.dealerCode = dealerCode;
+
+  this.itemService.insertItem(this.itemObj).subscribe({
+
+    next: (res: any) => {
+
+      this.toaster.show('Item Saved Successfully.', { classname: 'bg-success text-light', delay: 5000 });
+      
+
+      this.modalService.dismissAll();
+
+      this.loadItems();
+
+    },
+
+    error: (err) => {
+
+      console.log(err);
+
+      this.toaster.show('something went wrong', { classname: 'bg-danger text-light', delay: 5000 });
+
+    }
+
+  });
+
+}
 }

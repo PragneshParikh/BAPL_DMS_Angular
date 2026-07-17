@@ -72,7 +72,7 @@ export class HsrpInward implements OnInit {
     this.hsrpService.getHSRPInward(dealerCode, fromDate, toDate)
       .subscribe({
         next: (res: any) => {
-
+console.log('HSRP Inward List:', res);
           this.orders = (res || []).map((x: any) => ({
             ...x
           }));
@@ -121,11 +121,14 @@ export class HsrpInward implements OnInit {
   navigateToListingPage() {
     this.router.navigate(['/hsrp-order-list']);
   }
-  get isSaveDisabled(): boolean {
-    return this.paginatedOrders.some(
-      item => item.selected && (!item.inwardStatus || item.inwardStatus === 'Pending' || item.inwardStatus === null)
-    );
-  }
+ get isSaveDisabled(): boolean {
+  const selectedItems = this.paginatedOrders.filter(x => x.selected);
+
+  return (
+    selectedItems.length === 0 ||
+    selectedItems.some(x => x.inwardStatus !== 'Received')
+  );
+}
   onSearchChange(): void {
 
     const term = this.searchTerm.toLowerCase();
