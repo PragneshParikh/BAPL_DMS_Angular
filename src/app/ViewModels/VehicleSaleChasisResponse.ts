@@ -5,7 +5,7 @@ export interface VehicleSaleListChasisResponse {
   itemCode: string;
   itemName: string;
   itemColor: string;
-
+  isD2D?: boolean;
   mfgYear?: number;
 
   //  Battery & Components

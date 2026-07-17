@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { forkJoin, of } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { ReportService } from '../../../core/services/report.service';
@@ -37,8 +37,11 @@ export class VehicleSaleReportComponent implements OnInit {
   totals:     UnifiedSaleReportTotals | null = null;
   isLoading = false;
 
+  // Vehicle Sale Bill is now the single source of truth — it already
+  // returns every field the table/CSV need, so we just pull everything
+  // that matches the filter in one shot (no UI pagination controls exist).
   pageIndex    = 1;
-  pageSize     = 50;
+  pageSize     = 100000;
   totalRecords = 0;
 
   saleTypeList     = ['Cash', 'Credit'];
@@ -48,8 +51,6 @@ export class VehicleSaleReportComponent implements OnInit {
     { id: 2, name: 'Counter Sale' }
   ];
   statusList = ['PerformaCreated', 'Invoiced', 'Pending', 'Invalid'];
-
-  dataSource: 'both' | 'saleBill' | 'vehicleSale' = 'both';
 
   ngOnInit(): void {
     this.filterForm = this.fb.group({
@@ -68,7 +69,6 @@ export class VehicleSaleReportComponent implements OnInit {
 
     this.initDates();
     this.loadDealers();
-    // this.loadFinanciers();
     this.loadReport();
   }
 
@@ -90,14 +90,6 @@ export class VehicleSaleReportComponent implements OnInit {
     });
   }
 
-  // loadFinanciers(): void {
-  //   this.ledgerMasterService.getFinancierLedgers().subscribe({
-  //     next:  res => { this.financierList = res || []; },
-  //     error: err => console.error('Financier dropdown error', err)
-  //   });
-  // }
-
-  // ── One filter, shared by both report endpoints ──────────────
   private buildFilter(): UnifiedSaleReportFilter {
     const f = this.filterForm.value;
     return {
@@ -117,6 +109,8 @@ export class VehicleSaleReportComponent implements OnInit {
     };
   }
 
+  // ── Single API call. The backend query already joins in dealer, location,
+  // customer, and vehicle data, so there's nothing left to merge here.
   loadReport(): void {
     this.isLoading  = true;
     this.reportData = [];
@@ -124,103 +118,48 @@ export class VehicleSaleReportComponent implements OnInit {
 
     const filter = this.buildFilter();
 
-    const saleBill$ = (this.dataSource === 'both' || this.dataSource === 'saleBill')
-      ? this.reportService.getVehicleSaleBillReport(filter)
-          .pipe(catchError(err => { console.error('SaleBill API error:', err); return of(null); }))
-      : of(null);
+    this.reportService.getVehicleSaleBillReport(filter)
+      .pipe(catchError(err => {
+        console.error('Vehicle Sale Bill API error:', err);
+        return of(null);
+      }))
+      .subscribe({
+        next: (res) => {
+          const rows = (res?.data || []).map(r => this.normalizeAliases({ ...r }));
+          rows.forEach((r, i) => r.srNo = i + 1);
 
-    const vehicleSale$ = (this.dataSource === 'both' || this.dataSource === 'vehicleSale')
-      ? this.reportService.getVehicleSaleReport(filter)
-          .pipe(catchError(err => { console.error('VehicleSale API error:', err); return of(null); }))
-      : of(null);
+          this.reportData   = rows;
+          this.totalRecords = res?.totalRecords ?? rows.length;
 
-    forkJoin({ saleBill: saleBill$, vehicleSale: vehicleSale$ }).subscribe({
-      next: ({ saleBill, vehicleSale }) => {
-        const unified: UnifiedSaleReportViewModel[] = [];
+          this.totals = {
+            totalRecords:      res?.totalRecords ?? rows.length,
+            totalItemRate:     res?.totalItemRate ?? this.sum(rows, 'itemRate'),
+            totalTaxable:      res?.totalTaxable ?? this.sum(rows, 'taxableAmount'),
+            totalSgst:         res?.totalSgst ?? this.sum(rows, 'sgstAmount'),
+            totalCgst:         res?.totalCgst ?? this.sum(rows, 'cgstAmount'),
+            totalIgst:         res?.totalIgst ?? this.sum(rows, 'igstAmount'),
+            totalFameII:       res?.totalFameII ?? this.sum(rows, 'fameIIDiscount'),
+            totalRegistration: res?.totalRegistration ?? this.sum(rows, 'regAmount'),
+            totalInsurance:    res?.totalInsurance ?? this.sum(rows, 'insuranceAmount'),
+            grandTotal:        res?.grandTotal ?? this.sum(rows, 'finalAmount'),
+            totalAmount:       this.sum(rows, 'totalAmount'),
+          };
 
-        // ── Sale Bill rows first ───────────────────────────────
-        if (saleBill?.data?.length) {
-          saleBill.data.forEach(r =>
-            unified.push(this.normalizeAliases({ ...r, source: 'SaleBill' }))
-          );
-          this.totalRecords = saleBill.totalRecords || 0;
+          this.isLoading = false;
+        },
+        error: err => {
+          console.error('Report load error', err);
+          this.isLoading = false;
         }
-
-        // ── Vehicle Sale rows, skip duplicates by chassis ──────
-        if (vehicleSale?.length) {
-          vehicleSale.forEach(r => {
-            const row = this.normalizeAliases({ ...r, source: 'VehicleSale' });
-            const alreadyIn = unified.some(u => !!u.chassisNo && u.chassisNo === row.chassisNo);
-            if (!alreadyIn) unified.push(row);
-          });
-        }
-
-        // ── saleType / customerType / billType / status apply to BOTH
-        // sources here, since the vehicle-sale API has no way to filter
-        // on them itself — only the sale-bill request body carries them.
-        const matches = (r: UnifiedSaleReportViewModel): boolean => {
-          if (filter.saleType && r.saleType?.trim().toLowerCase() !== filter.saleType.trim().toLowerCase()) {
-            return false;
-          }
-          if (filter.customerType && r.customerType?.trim().toLowerCase() !== filter.customerType.trim().toLowerCase()) {
-            return false;
-          }
-          if (filter.billType != null && Number(r.billType) !== filter.billType) {
-            return false;
-          }
-          if (filter.status && r.status?.trim().toLowerCase() !== filter.status.trim().toLowerCase()) {
-            return false;
-          }
-          if (filter.financier && r.financier?.trim().toLowerCase() !== filter.financier.trim().toLowerCase()) {
-            return false;
-          }
-          return true;
-        };
-        const bySource = unified.filter(matches);
-
-        // ── In-memory search across both sources ───────────────
-        const q = (filter.search || '').trim().toLowerCase();
-        const filtered = q
-          ? bySource.filter(r =>
-              [r.saleBillNo, r.invoiceNo, r.customerName, r.chassisNo,
-               r.chasisNo, r.modelName, r.modelDescription, r.regNo,
-               r.dealerName, r.dealerCode]
-              .some(v => (v || '').toLowerCase().includes(q))
-            )
-          : bySource;
-
-        filtered.forEach((r, i) => r.srNo = i + 1);
-        this.reportData = filtered;
-
-        this.totals = {
-          totalRecords:      filtered.length,
-          totalItemRate:     this.sum(filtered, 'itemRate'),
-          totalTaxable:      this.sum(filtered, 'taxableAmount'),
-          totalSgst:         this.sum(filtered, 'sgstAmount'),
-          totalCgst:         this.sum(filtered, 'cgstAmount'),
-          totalIgst:         this.sum(filtered, 'igstAmount'),
-          totalFameII:       this.sum(filtered, 'fameIIDiscount'),
-          totalRegistration: this.sum(filtered, 'regAmount'),
-          totalInsurance:    this.sum(filtered, 'insuranceAmount'),
-          grandTotal:        this.sum(filtered, 'finalAmount'),
-          totalAmount:       this.sum(filtered, 'totalAmount'),
-        };
-
-        this.isLoading = false;
-      },
-      error: err => {
-        console.error('Report load error', err);
-        this.isLoading = false;
-      }
-    });
+      });
   }
 
   private sum(rows: UnifiedSaleReportViewModel[], key: keyof UnifiedSaleReportViewModel): number {
     return rows.reduce((s, r) => s + (Number(r[key]) || 0), 0);
   }
 
-  // Fills known alias pairs both ways so the template/CSV export never see a
-  // blank field just because one API used a different name for the same value.
+  // Fills known alias pairs so the template/CSV never see a blank field
+  // just because the API used a different name for the same value.
   private normalizeAliases(r: UnifiedSaleReportViewModel): UnifiedSaleReportViewModel {
     r.chassisNo        = r.chassisNo        ?? r.chasisNo;
     r.chasisNo         = r.chasisNo         ?? r.chassisNo;
@@ -230,24 +169,15 @@ export class VehicleSaleReportComponent implements OnInit {
     r.financeBy        = r.financeBy        ?? r.financier;
     r.modelDescription = r.modelDescription ?? r.modelName;
     r.modelName        = r.modelName        ?? r.modelDescription;
+    r.executiveName    = r.executiveName    ?? r.salesExecutive;
+    r.salesExecutive   = r.salesExecutive   ?? r.executiveName;
+    r.address1         = r.address1         ?? (r as any).partyAddress;
+    r.email            = r.email            ?? r.partyEmail;
+    r.subsidyAmount    = r.subsidyAmount     ?? (r as any).subsidyAmnt;
     return r;
   }
 
-  onSearch(): void  { this.pageIndex = 1; this.loadReport(); }
-
-  setSource(src: 'both' | 'saleBill' | 'vehicleSale'): void {
-    this.dataSource = src;
-
-    if (src === 'vehicleSale') {
-      this.filterForm.patchValue({
-        saleType: '', customerType: '', billType: '',
-        status: '', chassisNo: '', saleBillNo: ''
-      }, { emitEvent: false });
-    }
-
-    this.pageIndex = 1;
-    this.loadReport();
-  }
+  onSearch(): void { this.pageIndex = 1; this.loadReport(); }
 
   onReset(): void {
     this.filterForm.reset({
@@ -256,8 +186,7 @@ export class VehicleSaleReportComponent implements OnInit {
       chassisNo: '', saleBillNo: '', financier: '', search: ''
     });
     this.initDates();
-    this.dataSource  = 'both';
-    this.pageIndex   = 1;
+    this.pageIndex = 1;
     this.loadReport();
   }
 
@@ -277,7 +206,7 @@ export class VehicleSaleReportComponent implements OnInit {
     if (!this.reportData.length) return;
 
     const headers = [
-      'Sr No','Source','Sale Bill No','Invoice No','Sale Date','Status','Booking ID',
+      'Sr No','Sale Bill No','Invoice No','Sale Date','Status','Booking ID',
       'Dealer Code','Dealer Name','Dealer City','Dealer State','Location','Loc Code','Location City',
       'Customer Name','Billing Name','Customer Type','Mobile','Customer City','Customer State',
       'Address','Email','PIN','Gender','DOB','Account Type','Party Email','Occupation',
@@ -294,7 +223,7 @@ export class VehicleSaleReportComponent implements OnInit {
     ];
 
     const rows = this.reportData.map(x => [
-      x.srNo, x.source, x.saleBillNo, x.invoiceNo,
+      x.srNo, x.saleBillNo, x.invoiceNo,
       this.formatDate(x.saleDate), x.status, x.bookingId,
       x.dealerCode, x.dealerName, x.dealerCity, x.dealerState, x.location, x.locCode, x.locCity,
       x.customerName, x.billingName, x.customerType, x.customerMobile,

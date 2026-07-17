@@ -151,7 +151,7 @@
                                                         <li class="list-group-item list-group-item-action"
                                                             *ngFor="let party of filteredParties"
                                                             (click)="selectParty(party)">
-                                                            {{ party.ledgerName }}
+                                                             <b>{{ party.ledgerName }}</b><br>({{party.ledgerCode}})
                                                         </li>
 
                                                     </ul>

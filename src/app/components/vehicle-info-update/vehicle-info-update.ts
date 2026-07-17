@@ -86,15 +86,14 @@ export class VehicleInfoUpdate implements OnInit {
       this.loader.hide();
       return;
     }
-    let dealerCode ='';
-    if(!this.isSuperAdmin)
-    {
+    let dealerCode = '';
+    if (!this.isSuperAdmin) {
       dealerCode = this.storageService.getDealerCode();
     }
 
     debugger;
     this.vehicleInfoService
-      .getVehicleInfo(regNo ?? undefined, chassisNo ?? undefined,dealerCode ?? undefined)
+      .getVehicleInfo(regNo ?? undefined, chassisNo ?? undefined, dealerCode ?? undefined)
       .subscribe({
         next: (response) => {
 
@@ -136,7 +135,7 @@ export class VehicleInfoUpdate implements OnInit {
           this.showVehicleDetails = true;
           this.loader.hide();
           console.log(this.vehicle);
-          
+
         },
         error: (error) => {
           this.loader.hide();
@@ -239,20 +238,18 @@ export class VehicleInfoUpdate implements OnInit {
       ].filter(x => x.componentNo)
     };
 
-    this.vehicleInfoService
-      .updateVehicleInfo(payload)
-      .subscribe({
-        next: () => {
-          this.loader.hide();
-          this.showVehicleDetails = false;
-          this.toaster.show('Succesfully updated Vehicle Information',
-            {
-              classname: 'bg-success text-white',
-              delay: 5000
-            }
-          );
-        }
-      });
+    this.vehicleInfoService.updateVehicleInfo(payload).subscribe({
+      next: () => {
+        this.loader.hide();
+        this.showVehicleDetails = false;
+        this.toaster.show('Succesfully updated Vehicle Information',
+          {
+            classname: 'bg-success text-white',
+            delay: 5000
+          }
+        );
+      }
+    });
   }
 
   getInsuranceCompanies() {

@@ -68,6 +68,11 @@ import {
   TotalSaleReportDealerWiseFilter,
   TotalSaleReportDealerWiseResponse
 } from '../../ViewModels/models/total-sale-reportModel';
+
+import {
+  ModelWiseVariantStockPivotResponse,
+  ModelWiseVariantStockCountFilter
+} from '../../ViewModels/models/Model wise variant stock count.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -588,6 +593,29 @@ export class ReportService {
 
     return this.http.get<ModelWiseStockPivotResponse>(
       `${this.apiUrl}/model-wise-stock-count`,
+      { params }
+    );
+  }
+
+  // =====================================================
+  // MODEL-WISE VARIANT STOCK (COUNT-WISE)
+  // =====================================================
+  getModelWiseVariantStockCountReport(
+    filter: ModelWiseVariantStockCountFilter
+  ): Observable<ModelWiseVariantStockPivotResponse> {
+    let params = new HttpParams();
+
+    if (filter.dealerCode)
+      params = params.set('dealerCode', filter.dealerCode);
+
+    if (filter.fromDate)
+      params = params.set('fromDate', filter.fromDate);
+
+    if (filter.toDate)
+      params = params.set('toDate', filter.toDate);
+
+    return this.http.get<ModelWiseVariantStockPivotResponse>(
+      `${this.apiUrl}/model-wise-variant-stock-count`,
       { params }
     );
   }

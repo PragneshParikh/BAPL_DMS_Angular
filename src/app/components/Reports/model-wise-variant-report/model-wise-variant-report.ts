@@ -5,16 +5,19 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { ReportService } from '../../../core/services/report.service';
 import { DealerDropdownItem } from '../../../ViewModels/models/UnifiedSaleReportViewModel';
-import { ModelWiseStockPivotRow, ModelWiseStockCountFilter } from '../../../ViewModels/models/Model wise stock count.model';
+import {
+  ModelWiseVariantStockPivotRow,
+  ModelWiseVariantStockCountFilter
+} from '../../../ViewModels/models/Model wise variant stock count.model';
 
 @Component({
-  selector: 'app-model-wise-current-stock',
+  selector: 'app-model-wise-variant-stock',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbTooltipModule],
-  templateUrl: './model-wise-current-stock.html',
+  templateUrl: './model-wise-variant-report.html',
   providers: [ReportService]
 })
-export class ModelWiseCurrentStockComponent implements OnInit {
+export class ModelWiseVariantStockComponent implements OnInit {
 
   private reportService = inject(ReportService);
   private fb            = inject(FormBuilder);
@@ -22,12 +25,12 @@ export class ModelWiseCurrentStockComponent implements OnInit {
   filterForm!: FormGroup;
   dealerList: DealerDropdownItem[] = [];
 
-  // Pivoted report state: dealers as rows, one column per model.
-  // Backend already excludes unmapped models and zero-total rows/columns
-  // entirely — this component just renders what it gets.
-  modelNames: string[] = [];
-  rows: ModelWiseStockPivotRow[] = [];
-  columnTotals: { [modelName: string]: number } = {};
+  // Pivoted report state: models as rows, one column per colour variant.
+  // Backend already excludes unmapped models/colours and zero-total
+  // rows/columns entirely — this component just renders what it gets.
+  variantNames: string[] = [];
+  rows: ModelWiseVariantStockPivotRow[] = [];
+  columnTotals: { [variantName: string]: number } = {};
   grandTotal = 0;
 
   isLoading = false;
@@ -83,7 +86,7 @@ export class ModelWiseCurrentStockComponent implements OnInit {
     }
   }
 
-  private buildFilter(): ModelWiseStockCountFilter {
+  private buildFilter(): ModelWiseVariantStockCountFilter {
     const f = this.filterForm.value;
     return {
       dealerCode: f.dealerCode || undefined,
@@ -96,16 +99,16 @@ export class ModelWiseCurrentStockComponent implements OnInit {
     this.isLoading = true;
     this.resetData();
 
-    this.reportService.getModelWiseStockCountReport(this.buildFilter()).subscribe({
+    this.reportService.getModelWiseVariantStockCountReport(this.buildFilter()).subscribe({
       next: res => {
-        this.modelNames   = res?.modelNames   || [];
+        this.variantNames = res?.variantNames || [];
         this.rows         = res?.rows         || [];
         this.columnTotals = res?.columnTotals || {};
         this.grandTotal   = res?.grandTotal   || 0;
         this.isLoading    = false;
       },
       error: err => {
-        console.error('Model-wise Current Stock error', err);
+        console.error('Model-wise Variant Stock error', err);
         this.resetData();
         this.isLoading = false;
       }
@@ -113,7 +116,7 @@ export class ModelWiseCurrentStockComponent implements OnInit {
   }
 
   private resetData(): void {
-    this.modelNames   = [];
+    this.variantNames = [];
     this.rows         = [];
     this.columnTotals = {};
     this.grandTotal   = 0;
@@ -127,34 +130,29 @@ export class ModelWiseCurrentStockComponent implements OnInit {
     this.loadReport();
   }
 
-  // Returns null for zero/missing values so the template can render a
-  // blank/dash instead of a visually noisy "0" in the pivot cell.
-  cell(row: ModelWiseStockPivotRow, model: string): number | null {
-    const val = row.modelCounts?.[model] || 0;
+
+  cell(row: ModelWiseVariantStockPivotRow, variant: string): number | null {
+    const val = row.variantCounts?.[variant] || 0;
     return val > 0 ? val : null;
   }
 
-  columnTotal(model: string): number {
-    return this.columnTotals?.[model] || 0;
+  columnTotal(variant: string): number {
+    return this.columnTotals?.[variant] || 0;
   }
 
   exportToCSV(): void {
     if (!this.rows.length) return;
 
-    const headers = ['Dealer Code', 'Dealer Name', ...this.modelNames, 'Total'];
-
-    // CSV export intentionally uses raw counts (including 0), not the
-    // blanked-out display value from cell().
+    const headers = ['Model', ...this.variantNames, 'Total'];
     const rows = this.rows.map(r => [
-      r.dealerCode,
-      r.dealerName,
-      ...this.modelNames.map(m => r.modelCounts?.[m] || 0),
+      r.modelName,
+      ...this.variantNames.map(v => r.variantCounts?.[v] || 0),
       r.total
     ]);
 
     const totalsRow = [
-      '', 'Grand Total',
-      ...this.modelNames.map(m => this.columnTotal(m)),
+      'Grand Total',
+      ...this.variantNames.map(v => this.columnTotal(v)),
       this.grandTotal
     ];
 
@@ -164,7 +162,7 @@ export class ModelWiseCurrentStockComponent implements OnInit {
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     a.href     = url;
-    a.download = `ModelWiseCurrentStock_${new Date().toISOString().slice(0,10)}.csv`;
+    a.download = `ModelWiseVariantStock_${new Date().toISOString().slice(0,10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
