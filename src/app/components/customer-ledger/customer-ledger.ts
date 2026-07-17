@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Optional } from '@angular/core';
+import { Component, input, Input, OnInit, Optional } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LedgerMasterService } from '../../core/services/ledger-master';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,6 +14,7 @@ import { StorageService } from '../../core/services/storage';
 import { AuthenticationService } from '../../core/services/auth.service';
 import { GetUserNameByIdPipe } from '../../core/pipe/get-user-name-by-id-pipe';
 import { OccupationService } from '../../core/services/occupation-service';
+import { ChassisDetailService } from '../../core/services/chassis-detail';
 
 @Component({
   selector: 'app-customer-ledger',
@@ -40,7 +41,7 @@ export class CustomerLedger {
     address: '',
     city: '',
     state: '',
-    altMobileNumber:'',
+    altMobileNumber: '',
     pin: '',
     email: '',
     gender: '',
@@ -74,6 +75,7 @@ export class CustomerLedger {
     private storageService: StorageService,
     private occupationService: OccupationService,
     private authService: AuthenticationService,
+    private chassisDetailService: ChassisDetailService,
     @Optional() public activeModal: NgbActiveModal
   ) {
     this.activatedRoute.paramMap.subscribe(params => {
@@ -89,6 +91,7 @@ export class CustomerLedger {
   @Input() fromReceiptEntry: boolean = false;
   @Input() defaultLedgerType: string = '';
   @Input() leadData: any;
+  @Input() fromRepoBill = false;
 
   async ngOnInit() {
     this.role = this.storageService.getRole();
@@ -209,7 +212,7 @@ export class CustomerLedger {
     this.loader.show();
     this.ledgerService.getLedgerById(id).subscribe({
       next: (res) => {
-console.log(res);
+        console.log(res);
 
         this.formData = {
           id: res.id,
@@ -286,6 +289,11 @@ console.log(res);
           if (this.activeModal) {
             this.activeModal.close(newId);
           }
+
+          if (this.fromRepoBill) {
+            this.updateCustomerDetailsForChassis();
+          }
+
           this.backToList();
         },
         error: (err) => {
@@ -352,9 +360,9 @@ console.log(res);
     this.formData.mobileNumber = value;
   }
   onAltMobileInput(): void {
-  this.formData.altMobileNumber =
-    this.formData.altMobileNumber?.replace(/[^0-9]/g, '') || '';
-}
+    this.formData.altMobileNumber =
+      this.formData.altMobileNumber?.replace(/[^0-9]/g, '') || '';
+  }
 
   onStateChange(event: any) {
     const selectedStateId = event.target.value;
@@ -363,6 +371,15 @@ console.log(res);
   changeCityOptions(selectedStateId: any) {
     this.cities = this._cities.filter(x => x.stateId === Number(selectedStateId));
   }
+  updateCustomerDetailsForChassis() {
+    this.chassisDetailService.updateChassisNewLedger("", "").subscribe({
+      next: (res) => {
 
+      },
+      error: (err) => {
+
+      }
+    })
+  }
 
 }

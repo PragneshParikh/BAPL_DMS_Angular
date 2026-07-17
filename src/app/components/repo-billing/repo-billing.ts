@@ -4,6 +4,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RepoBillingService } from '../../core/services/repo-billing';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { CustomerLedger } from '../customer-ledger/customer-ledger';
 
 @Component({
   selector: 'app-repo-billing',
@@ -82,7 +84,8 @@ export class RepoBilling {
   constructor(
     private repoBillingService: RepoBillingService,
     private toast: ToastService,
-    private loader: LoaderService
+    private loader: LoaderService,
+    private modalService: NgbModal
   ) { }
 
   onSubmit(form: any) {
@@ -187,5 +190,27 @@ export class RepoBilling {
 
   resetForms() {
     this.formData = { chassisNumber: '', searchCriteria: '' };
+  }
+
+  addNewLedger() {
+    const modalRef = this.modalService.open(CustomerLedger, {
+      size: 'xl',
+      backdrop: 'static',
+      keyboard: false
+    });
+
+    modalRef.componentInstance.defaultLedgerType = 'Party';
+    modalRef.componentInstance.fromReceiptEntry = true;
+    modalRef.componentInstance.fromRepoBill = true;
+
+    modalRef.result.then(
+      (result) => {
+        if (result.isAccepted) {
+          alert("Customer added sucessfully.");
+        }
+      },
+      (reason) => {
+      }
+    );
   }
 }

@@ -59,8 +59,12 @@
                                 Search
                             </button>
 
-                            <button type="button" (click)="resetForms()" class="btn btn-primary btn-sm">
+                            <button type="button" (click)="resetForms()" class="btn btn-primary btn-sm me-1">
                                 Reset
+                            </button>
+
+                            <button type="button" (click)="addNewLedger()" class="btn btn-primary btn-sm">
+                                Modify Customer
                             </button>
 
                         </div>
@@ -70,14 +74,11 @@
                 </form>
             </div>
 
-
-            <div *ngIf="!showVehicleDetails" class="alert alert-warning mt-3 card-body">
-                No Record Found
-            </div>
             <!-- Vehicle Update Table -->
-            <div class="card mt-3 card-body" *ngIf="showVehicleDetails">
+            <div class="card card-body" *ngIf="showVehicleDetails">
                 <div class="card-body p-0">
 
+                    <!-- Vehicle Information -->
                     <fieldset class="border p-1 rounded mb-2" [disabled]="true">
                         <legend class="float-none w-auto px-2 fs-6">Vehicle Information</legend>
                         <div>
@@ -242,6 +243,7 @@
                         </div>
                     </fieldset>
 
+                    <!-- Dealer Information -->
                     <fieldset class="border p-1 rounded mb-2" [disabled]="true">
                         <legend class="float-none w-auto px-2 fs-6">Dealer Information</legend>
                         <div>
@@ -293,60 +295,63 @@
                         </div>
                     </fieldset>
 
+                    <!-- First Party Information -->
                     <fieldset class="border p-1 rounded mb-2" [disabled]="true">
-                        <legend class="float-none w-auto px-2 fs-6">Party Information</legend>
+                        <legend class="float-none w-auto px-2 fs-6">First Party Information</legend>
                         <div>
                             <form>
                                 <div class="row mb-2 g-1">
                                     <!-- Party Name -->
-                                    <div class="col-md-2">
+                                    <div class="col-md-4">
                                         <label class="form-label mb-0">Party Name</label>
                                         <input type="text" class="form-control form-control-sm bg-light"
                                             [value]="partyDetails.partyName">
                                     </div>
 
                                     <!-- Party Mobile -->
-                                    <div class="col-md-4">
+                                    <div class="col-md-2">
                                         <label class="form-label mb-0">Party Mobile</label>
                                         <input type="text" class="form-control form-control-sm bg-light"
                                             [value]="partyDetails.partyMobile">
                                     </div>
 
                                     <!-- Party Alternate Mobile -->
-                                    <div class="col-md-4">
+                                    <div class="col-md-2">
                                         <label class="form-label mb-0">Party Alternate Mobile</label>
                                         <input type="text" class="form-control form-control-sm bg-light"
                                             [value]="partyDetails.partyAltMobile">
                                     </div>
 
-                                    <!-- Dealer Location -->
-                                    <div class="col-md-4">
+                                    <!-- Party Email -->
+                                    <div class="col-md-2">
                                         <label class="form-label mb-0">Party Email</label>
                                         <input type="text" class="form-control form-control-sm bg-light"
                                             [value]="partyDetails.email">
                                     </div>
 
-                                    <!-- Dealer City -->
+                                    <!-- Address -->
                                     <div class="col-md-4">
                                         <label class="form-label mb-0">Address</label>
                                         <input type="text" class="form-control form-control-sm bg-light"
                                             [value]="partyDetails.address1">
                                     </div>
 
-                                    <!-- Dealer State -->
-                                    <div class="col-md-4">
+                                    <!-- Pin -->
+                                    <div class="col-md-2">
                                         <label class="form-label mb-0">Pin</label>
                                         <input type="text" class="form-control form-control-sm bg-light"
                                             [value]="partyDetails.pin">
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <!-- State -->
+                                    <div class="col-md-2">
                                         <label class="form-label mb-0">State</label>
                                         <input type="text" class="form-control form-control-sm bg-light"
                                             [value]="partyDetails.state">
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <!-- City -->
+                                    <div class="col-md-2">
                                         <label class="form-label mb-0">City</label>
                                         <input type="text" class="form-control form-control-sm bg-light"
                                             [value]="partyDetails.city">
@@ -356,6 +361,74 @@
                             </form>
                         </div>
                     </fieldset>
+
+                    <!-- Second Party Information -->
+                    <fieldset class="border p-1 rounded mb-2" [disabled]="true">
+                        <legend class="float-none w-auto px-2 fs-6">Second Party Information</legend>
+                        <div>
+                            <form>
+                                <div class="row mb-2 g-1">
+                                    <!-- Party Name -->
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Party Name</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.partyName">
+                                    </div>
+
+                                    <!-- Party Mobile -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Party Mobile</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.partyMobile">
+                                    </div>
+
+                                    <!-- Party Alternate Mobile -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Party Alternate Mobile</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.partyAltMobile">
+                                    </div>
+
+                                    <!-- Party Email -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Party Email</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.email">
+                                    </div>
+
+                                    <!-- Address -->
+                                    <div class="col-md-4">
+                                        <label class="form-label mb-0">Address</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.address1">
+                                    </div>
+
+                                    <!-- Pin -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">Pin</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.pin">
+                                    </div>
+
+                                    <!-- State -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">State</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.state">
+                                    </div>
+
+                                    <!-- City -->
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-0">City</label>
+                                        <input type="text" class="form-control form-control-sm bg-light"
+                                            [value]="partyDetails.city">
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
+                    </fieldset>
+
                 </div>
             </div>
 
