@@ -6,6 +6,8 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CustomerLedger } from '../customer-ledger/customer-ledger';
+import { ChassisDetailService } from '../../core/services/chassis-detail';
+import { StorageService } from '../../core/services/storage';
 
 @Component({
   selector: 'app-repo-billing',
@@ -15,7 +17,7 @@ import { CustomerLedger } from '../customer-ledger/customer-ledger';
 })
 export class RepoBilling {
 
-  formData: any = { chassisNumber: '', searchCriteria: '' };
+  formData: any = { chassisNumber: '', searchCriteria: 'chassis' };
   showVehicleDetails = true;
 
   vehicleDetails: any = {
@@ -58,34 +60,39 @@ export class RepoBilling {
     converter1: '',
     converter2: ''
   }
-  dealerDetails: any = {
-    address: '',
-    dealerCity: '',
-    dealerCode: "",
-    dealerEmail: '',
-    dealerLocation: '',
-    dealerName: '',
-    dealerState: '',
-    email: '',
-    mobileNo: ''
-  }
-  partyDetails: any = {
-    partyName: '',
-    partyMobile: '',
-    partyAltMobile: '',
-    address1: '',
-    address2: '',
-    state: '',
-    city: '',
-    email: '',
-    pin: ''
-  }
+  // dealerDetails: any = {
+  //   address: '',
+  //   dealerCity: '',
+  //   dealerCode: "",
+  //   dealerEmail: '',
+  //   dealerLocation: '',
+  //   dealerName: '',
+  //   dealerState: '',
+  //   email: '',
+  //   mobileNo: ''
+  // }
+  // partyDetails: any = {
+  //   partyName: '',
+  //   partyMobile: '',
+  //   partyAltMobile: '',
+  //   address1: '',
+  //   address2: '',
+  //   state: '',
+  //   city: '',
+  //   email: '',
+  //   pin: ''
+  // }
+
+  dealerDetailsList: any[] = [];
+  partyDetailsList: any[] = [];
 
   constructor(
     private repoBillingService: RepoBillingService,
     private toast: ToastService,
     private loader: LoaderService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private chassisDetailService: ChassisDetailService,
+    private storageService: StorageService
   ) { }
 
   onSubmit(form: any) {
@@ -100,9 +107,12 @@ export class RepoBilling {
       next: (res: any) => {
         console.log(res);
         this.loader.hide();
-        const dealer = res.dealerDetails;
-        const party = res.partyDetails;
+        // const dealer = res.dealerDetails;
+        // const party = res.partyDetails;
         const vehicle = res.vehicleDetails;
+
+        this.dealerDetailsList = res.dealerDetails;
+        this.partyDetailsList = res.partyDetails;
 
         const batteries = res.vehicleDetails.batteries || [];
         const motors = res.vehicleDetails.motors || [];
@@ -110,29 +120,29 @@ export class RepoBilling {
         const controllers = res.vehicleDetails.controllers || [];
         const converters = res.vehicleDetails.converters || [];
 
-        this.dealerDetails = {
-          address: dealer.address,
-          dealerCity: dealer.dealerCity,
-          dealerCode: dealer.dealerCode,
-          dealerEmail: dealer.dealerEmail,
-          dealerLocation: dealer.dealerLocation,
-          dealerName: dealer.dealerName,
-          dealerState: dealer.dealerState,
-          email: dealer.email,
-          mobileNo: dealer.mobileNo
-        };
+        // this.dealerDetails = {
+        //   address: dealer.address,
+        //   dealerCity: dealer.dealerCity,
+        //   dealerCode: dealer.dealerCode,
+        //   dealerEmail: dealer.dealerEmail,
+        //   dealerLocation: dealer.dealerLocation,
+        //   dealerName: dealer.dealerName,
+        //   dealerState: dealer.dealerState,
+        //   email: dealer.email,
+        //   mobileNo: dealer.mobileNo
+        // };
 
-        this.partyDetails = {
-          partyName: party.partyName || '',
-          partyMobile: party.partyMobile || '',
-          partyAltMobile: party.partyAltMobile || '',
-          address1: party.address1 || '',
-          address2: party.address2 || '',
-          state: party.state || '',
-          city: party.city || '',
-          email: party.email || '',
-          pin: party.pin || ''
-        };
+        // this.partyDetails = {
+        //   partyName: party.partyName || '',
+        //   partyMobile: party.partyMobile || '',
+        //   partyAltMobile: party.partyAltMobile || '',
+        //   address1: party.address1 || '',
+        //   address2: party.address2 || '',
+        //   state: party.state || '',
+        //   city: party.city || '',
+        //   email: party.email || '',
+        //   pin: party.pin || ''
+        // };
 
         this.vehicleDetails = {
           chassisNo: vehicle.chassisNo || '',
@@ -184,15 +194,58 @@ export class RepoBilling {
     });
   }
 
-  updateAll() {
-
-  }
-
   resetForms() {
-    this.formData = { chassisNumber: '', searchCriteria: '' };
+    this.formData = { chassisNumber: '', searchCriteria: 'chassis' };
+    this.vehicleDetails = {
+      chassisNo: '',
+      regNo: '',
+      engineNo: null,
+      saleDate: '',
+      itemCode: '',
+      modelName: '',
+      colorName: '',
+      insuranceDate: '',
+      pollutionDate: null,
+      policyNo: '',
+      policyExpiryDate: '',
+      insuranceCompany: '',
+      insuranceCompanyId: '',
+      fuelType: null,
+      engineHealthSubscriptionDate: null,
+      monthlySubsidyDate: null,
+      ownershipType: null,
+
+      battery1: '',
+      battery2: '',
+      battery3: '',
+      battery4: '',
+
+      batteryCapacity: '',
+      batteryChemical: '',
+      batteryMake: '',
+
+      motor1: '',
+      motor2: '',
+
+      charger1: '',
+      charger2: '',
+
+      controller1: '',
+      controller2: '',
+
+      converter1: '',
+      converter2: ''
+    }
+    this.dealerDetailsList = [];
+    this.partyDetailsList = [];
   }
 
   addNewLedger() {
+    if (!this.vehicleDetails.chassisNo || this.vehicleDetails.chassisNo === '') {
+      this.toast.show("Please select any chassis", { classname: 'bg-warning text-white', delay: 5000 });
+      return
+    }
+
     const modalRef = this.modalService.open(CustomerLedger, {
       size: 'xl',
       backdrop: 'static',
@@ -205,12 +258,25 @@ export class RepoBilling {
 
     modalRef.result.then(
       (result) => {
-        if (result.isAccepted) {
-          alert("Customer added sucessfully.");
+        if (result) {
+          this.updateCustomerDetailsForChassis(result);
         }
       },
       (reason) => {
       }
     );
   }
+
+  updateCustomerDetailsForChassis(ledgerId: Number) {
+    const dealerCode = this.storageService.getDealerCode();
+    this.chassisDetailService.updateChassisNewLedger(ledgerId, dealerCode, this.vehicleDetails.chassisNo).subscribe({
+      next: (res) => {
+
+      },
+      error: (err) => {
+
+      }
+    })
+  }
+
 }

@@ -11,11 +11,12 @@ export class ChassisDetailService {
 
   constructor(private httpClient: HttpClient) { }
 
-  updateChassisNewLedger(ledgerId: string, dealerCode: string): Observable<any> {
+  updateChassisNewLedger(ledgerId: Number, dealerCode: string, chassisNo: string): Observable<any> {
     const params = new HttpParams()
-      .set('ledgerId', ledgerId)
-      .set('dealerCode', dealerCode);
+      .set('ledgerId', ledgerId.toString())
+      .set('dealerCode', dealerCode)
+      .set('chassisNo', chassisNo);
 
-    return this.httpClient.put(`${this.baseUrl}/chassis-details/UpdateNewLedgerForChassis`, null, { params });
+    return this.httpClient.put(`${this.baseUrl}/chassis-details/UpdateNewLedgerForChassis`, {}, { params });
   }
 }

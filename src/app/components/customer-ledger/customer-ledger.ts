@@ -75,7 +75,6 @@ export class CustomerLedger {
     private storageService: StorageService,
     private occupationService: OccupationService,
     private authService: AuthenticationService,
-    private chassisDetailService: ChassisDetailService,
     @Optional() public activeModal: NgbActiveModal
   ) {
     this.activatedRoute.paramMap.subscribe(params => {
@@ -290,10 +289,6 @@ export class CustomerLedger {
             this.activeModal.close(newId);
           }
 
-          if (this.fromRepoBill) {
-            this.updateCustomerDetailsForChassis();
-          }
-
           this.backToList();
         },
         error: (err) => {
@@ -370,16 +365,6 @@ export class CustomerLedger {
   }
   changeCityOptions(selectedStateId: any) {
     this.cities = this._cities.filter(x => x.stateId === Number(selectedStateId));
-  }
-  updateCustomerDetailsForChassis() {
-    this.chassisDetailService.updateChassisNewLedger("", "").subscribe({
-      next: (res) => {
-
-      },
-      error: (err) => {
-
-      }
-    })
   }
 
 }
