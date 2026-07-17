@@ -7,20 +7,8 @@
 
     <!-- FILTERS -->
     <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
+      <div class="card-header">
         <h5 class="card-title mb-0">Filters</h5>
-        <!-- Source toggle -->
-        <div class="btn-group btn-group-sm" role="group">
-          <button type="button"
-            [class]="'btn ' + (dataSource === 'both' ? 'btn-primary' : 'btn-outline-primary')"
-            (click)="setSource('both')">Both</button>
-          <button type="button"
-            [class]="'btn ' + (dataSource === 'saleBill' ? 'btn-primary' : 'btn-outline-primary')"
-            (click)="setSource('saleBill')">Sale Bill Only</button>
-          <button type="button"
-            [class]="'btn ' + (dataSource === 'vehicleSale' ? 'btn-primary' : 'btn-outline-primary')"
-            (click)="setSource('vehicleSale')">Vehicle Sale Only</button>
-        </div>
       </div>
       <div class="card-body">
         <form [formGroup]="filterForm">
@@ -52,47 +40,43 @@
               </select>
             </div>
 
-            <!-- Sale Bill filters only shown when source includes sale bill -->
-            <ng-container *ngIf="dataSource !== 'vehicleSale'">
-              <div class="col-xl-2 col-md-4">
-                <label class="form-label">Sale Type</label>
-                <select formControlName="saleType" class="form-select form-select-sm">
-                  <option value="">-- All --</option>
-                  <option *ngFor="let s of saleTypeList" [value]="s">{{ s }}</option>
-                </select>
-              </div>
-              <div class="col-xl-2 col-md-4">
-                <label class="form-label">Customer Type</label>
-                <select formControlName="customerType" class="form-select form-select-sm">
-                  <option value="">-- All --</option>
-                  <option *ngFor="let c of customerTypeList" [value]="c">{{ c }}</option>
-                </select>
-              </div>
-              <div class="col-xl-2 col-md-4">
-                <label class="form-label">Bill Type</label>
-                <select formControlName="billType" class="form-select form-select-sm">
-                  <option value="">-- All --</option>
-                  <option *ngFor="let b of billTypeList" [value]="b.id">{{ b.name }}</option>
-                </select>
-              </div>
-              <div class="col-xl-2 col-md-4">
-                <label class="form-label">Status</label>
-                <select formControlName="status" class="form-select form-select-sm">
-                  <option value="">-- All --</option>
-                  <option *ngFor="let s of statusList" [value]="s">{{ s }}</option>
-                </select>
-              </div>
-              <div class="col-xl-2 col-md-4">
-                <label class="form-label">Sale Bill No</label>
-                <input type="text" formControlName="saleBillNo"
-                  class="form-control form-control-sm" placeholder="Bill No">
-              </div>
-              <div class="col-xl-2 col-md-4">
-                <label class="form-label">Chassis No</label>
-                <input type="text" formControlName="chassisNo"
-                  class="form-control form-control-sm" placeholder="Chassis No">
-              </div>
-            </ng-container>
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Sale Type</label>
+              <select formControlName="saleType" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option *ngFor="let s of saleTypeList" [value]="s">{{ s }}</option>
+              </select>
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Customer Type</label>
+              <select formControlName="customerType" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option *ngFor="let c of customerTypeList" [value]="c">{{ c }}</option>
+              </select>
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Bill Type</label>
+              <select formControlName="billType" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option *ngFor="let b of billTypeList" [value]="b.id">{{ b.name }}</option>
+              </select>
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Status</label>
+              <select formControlName="status" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option *ngFor="let s of statusList" [value]="s">{{ s }}</option>
+              </select>
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Sale Bill No</label>
+              <input type="text" formControlName="saleBillNo"
+                class="form-control form-control-sm" placeholder="Bill No">
+            </div>
 
             <div class="col-xl-2 col-md-4">
               <label class="form-label">Search</label>
@@ -164,7 +148,7 @@
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
-          <p class="text-muted mt-2">Loading report data from both sources...</p>
+          <p class="text-muted mt-2">Loading report data...</p>
         </div>
 
         <div class="table-responsive" *ngIf="!isLoading">
@@ -173,13 +157,11 @@
             <thead class="table-dark">
               <tr>
                 <th>Sr</th>
-                <th>Source</th>
                 <th>Sale Bill No</th>
                 <th>Invoice No</th>
                 <th>Sale Date</th>
                 <th>Status</th>
 
-                <!-- Dealer -->
                 <th>Dealer Code</th>
                 <th>Dealer Name</th>
                 <th>Dealer City</th>
@@ -187,7 +169,6 @@
                 <th>Location</th>
                 <th>Location City</th>
 
-                <!-- Customer -->
                 <th>Customer Name</th>
                 <th>Billing Name</th>
                 <th>Cust. Type</th>
@@ -201,14 +182,12 @@
                 <th>Party Email</th>
                 <th>Occupation</th>
 
-                <!-- Sale info -->
                 <th>Sale Type</th>
                 <th>Bill Type</th>
                 <th>Financier</th>
                 <th>Executive</th>
                 <th>Booking ID</th>
 
-                <!-- Vehicle -->
                 <th>Chassis No</th>
                 <th>Motor No</th>
                 <th>Item Code</th>
@@ -222,7 +201,6 @@
                 <th>Ins No</th>
                 <th>Dispatch Date</th>
 
-                <!-- Battery -->
                 <th>Battery No</th>
                 <th>Battery No 2</th>
                 <th>Battery No 3</th>
@@ -233,7 +211,6 @@
                 <th>Controller No</th>
                 <th>VCU</th>
 
-                <!-- Financials (SaleBill rows only) -->
                 <th class="text-end">Item Rate</th>
                 <th class="text-end">Pre-GST</th>
                 <th class="text-end">Taxable</th>
@@ -255,19 +232,13 @@
             </thead>
             <tbody>
               <tr *ngIf="reportData.length === 0">
-                <td colspan="66" class="text-center text-muted py-4">
+                <td colspan="65" class="text-center text-muted py-4">
                   No records found. Adjust filters and search again.
                 </td>
               </tr>
 
               <tr *ngFor="let item of reportData">
                 <td>{{ item.srNo }}</td>
-                <td>
-                  <span class="badge"
-                    [ngClass]="item.source === 'SaleBill' ? 'bg-primary' : 'bg-info text-dark'">
-                    {{ item.source === 'SaleBill' ? 'Sale Bill' : 'Vehicle Sale' }}
-                  </span>
-                </td>
                 <td>{{ item.saleBillNo || '-' }}</td>
                 <td>{{ item.invoiceNo || '-' }}</td>
                 <td>{{ formatDate(item.saleDate) }}</td>
@@ -282,7 +253,6 @@
                   <ng-template #dash>-</ng-template>
                 </td>
 
-                <!-- Dealer -->
                 <td>{{ item.dealerCode }}</td>
                 <td>{{ item.dealerName }}</td>
                 <td>{{ item.dealerCity }}</td>
@@ -290,7 +260,6 @@
                 <td>{{ item.location }}</td>
                 <td>{{ item.locCity }}</td>
 
-                <!-- Customer -->
                 <td>{{ item.customerName }}</td>
                 <td>{{ item.billingName }}</td>
                 <td>{{ item.customerType }}</td>
@@ -304,14 +273,12 @@
                 <td>{{ item.partyEmail }}</td>
                 <td>{{ item.occupation }}</td>
 
-                <!-- Sale info -->
                 <td>{{ item.saleType }}</td>
                 <td>{{ getBillTypeName(item.billType) }}</td>
                 <td>{{ item.financier || item.financeBy }}</td>
                 <td>{{ item.salesExecutive || item.executiveName }}</td>
                 <td>{{ item.bookingId }}</td>
 
-                <!-- Vehicle -->
                 <td>{{ item.chassisNo || item.chasisNo }}</td>
                 <td>{{ item.motorNo || item.motorNumber }}</td>
                 <td>{{ item.itemCode || item.modelCode }}</td>
@@ -325,7 +292,6 @@
                 <td>{{ item.insNo }}</td>
                 <td>{{ formatDate(item.dispatchDate) }}</td>
 
-                <!-- Battery -->
                 <td>{{ item.batteryNo }}</td>
                 <td>{{ item.batteryNo2 }}</td>
                 <td>{{ item.batteryNo3 }}</td>
@@ -336,7 +302,6 @@
                 <td>{{ item.controllerNo }}</td>
                 <td>{{ item.vcu }}</td>
 
-                <!-- Financials -->
                 <td class="text-end">{{ (item.itemRate || 0) | number:'1.2-2' }}</td>
                 <td class="text-end">{{ (item.preGstDiscount || 0) | number:'1.2-2' }}</td>
                 <td class="text-end">{{ (item.taxableAmount || 0) | number:'1.2-2' }}</td>

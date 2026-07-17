@@ -19,7 +19,7 @@
 </style>
 
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-  <h4 class="mb-sm-0">Model Wise Sale Report (Count-wise)</h4>
+  <h4 class="mb-sm-0">Model Wise Variant Stock Report</h4>
 </div>
 
 <div class="row">
@@ -72,25 +72,25 @@
     <div *ngIf="!isLoading && rows.length > 0" class="row g-2 mb-2">
       <div class="col-6 col-md-3">
         <div class="card card-body py-2 px-3">
-          <p class="text-muted mb-1" style="font-size:11px">Dealers</p>
+          <p class="text-muted mb-1" style="font-size:11px">Models</p>
           <h6 class="mb-0 fw-semibold">{{ rows.length }}</h6>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="card card-body py-2 px-3">
-          <p class="text-muted mb-1" style="font-size:11px">Models</p>
-          <h6 class="mb-0">{{ modelNames.length }}</h6>
+          <p class="text-muted mb-1" style="font-size:11px">Variants</p>
+          <h6 class="mb-0">{{ variantNames.length }}</h6>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="card card-body py-2 px-3">
-          <p class="text-muted mb-1" style="font-size:11px">Total Units</p>
+          <p class="text-muted mb-1" style="font-size:11px">Total Stock</p>
           <h6 class="mb-0 text-primary">{{ grandTotal }}</h6>
         </div>
       </div>
     </div>
 
-    <!-- PIVOT TABLE: Dealer rows x Model columns -->
+    <!-- PIVOT TABLE: Model rows x Variant columns -->
     <div class="card">
       <div class="card-body p-0">
 
@@ -98,7 +98,7 @@
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
-          <p class="text-muted mt-2">Loading model wise sale counts...</p>
+          <p class="text-muted mt-2">Loading model-wise variant stock counts...</p>
         </div>
 
         <div class="table-responsive" *ngIf="!isLoading">
@@ -106,34 +106,32 @@
             style="font-size:12px">
             <thead class="table-dark">
               <tr>
-                <th>Dealer Code</th>
-                <th>Dealer Name</th>
-                <th *ngFor="let model of modelNames" class="text-end">{{ model }}</th>
+                <th>Model</th>
+                <th *ngFor="let variant of variantNames" class="text-end">{{ variant }}</th>
                 <th class="text-end">Total</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngIf="rows.length === 0">
-                <td [attr.colspan]="modelNames.length + 3" class="text-center text-muted py-4">
+                <td [attr.colspan]="variantNames.length + 2" class="text-center text-muted py-4">
                   No records found. Adjust filters and search again.
                 </td>
               </tr>
 
               <tr *ngFor="let row of rows">
-                <td>{{ row.dealerCode }}</td>
-                <td>{{ row.dealerName }}</td>
-                <td *ngFor="let model of modelNames"
+                <td>{{ row.modelName }}</td>
+                <td *ngFor="let variant of variantNames"
                     class="text-end"
-                    [class.empty-cell]="cell(row, model) === null">
-                  {{ cell(row, model) ?? '—' }}
+                    [class.empty-cell]="cell(row, variant) === null">
+                  {{ cell(row, variant) ?? '—' }}
                 </td>
                 <td class="text-end fw-semibold">{{ row.total }}</td>
               </tr>
             </tbody>
             <tfoot *ngIf="rows.length > 0">
               <tr class="fw-semibold">
-                <td colspan="2" class="text-end">Grand Total</td>
-                <td *ngFor="let model of modelNames" class="text-end">{{ columnTotal(model) }}</td>
+                <td class="text-end">Grand Total</td>
+                <td *ngFor="let variant of variantNames" class="text-end">{{ columnTotal(variant) }}</td>
                 <td class="text-end">{{ grandTotal }}</td>
               </tr>
             </tfoot>
