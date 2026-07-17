@@ -50,7 +50,7 @@ export class JobCard {
 
   // userRole: string = ''; when userrole api done then this var use
 
-  currentUserRole = userRole[0].value;
+  //currentUserRole = userRole[0].value;
 
 
   constructor(private locationService: LocationMasterService,
@@ -74,6 +74,8 @@ export class JobCard {
     let dealerCode = '';
     if (!this.isSuperAdmin) {
       dealerCode = this.storageService.getDealerCode();
+    } else {
+      dealerCode = null;
     }
     const today = new Date();
 
@@ -87,7 +89,7 @@ export class JobCard {
     this.searchModel.fromDate = this.formatDate(firstDayOfMonth);
     this.searchModel.toDate = this.formatDate(today);
     this.loadJobCardList();
-    this.setUserRole();
+   // this.setUserRole();
     this.fetchLocations();
     this.loadChassisList();
 
@@ -222,18 +224,18 @@ export class JobCard {
       this.search();
     }, 500); // 500ms delay
   }
-  setUserRole() {
-    const dealerCode = this.storageService.getDealerCode();
+  // setUserRole() {
+  //   const dealerCode = this.storageService.getDealerCode();
 
-    const superAdminCodes = ['ADMIN001']; // 👈 multiple bhi rakh sakte ho
+  //   const superAdminCodes = ['ADMIN001']; 
 
-    const role = superAdminCodes.includes(dealerCode)
-      ? 'SuperAdmin'
-      : 'Dealer';
+  //   const role = superAdminCodes.includes(dealerCode)
+  //     ? 'SuperAdmin'
+  //     : 'Dealer';
 
-    this.storageService.setRole(role);
-    this.currentUserRole = role;
-  }
+  //   this.storageService.setRole(role);
+  //   this.currentUserRole = role;
+  // }
 
   onLocationChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
@@ -332,32 +334,32 @@ export class JobCard {
   //   XLSX.writeFile(wb, `JobCardList_${new Date().toISOString().slice(0, 10)}.xlsx`);
   // }
 
-printJobCard(item: any): void {
-  const jobId = item?.jobCardHeader?.id;
-  if (!jobId) {
-    Swal.fire('Error', 'Job card id not found for printing.', 'error');
-    return;
-  }
-  this.jobCardService.getJobCardForPrint(jobId).subscribe({
-    next: (data: any) => {
-      const html = this.buildInvoiceHtml(data);
-      const win = window.open('', '_blank', 'width=900,height=650');
-      if (!win) {
-        Swal.fire('Popup blocked', 'Please allow popups to print the invoice.', 'warning');
-        return;
-      }
-      win.document.open();
-      win.document.write(html);
-      win.document.close();
-      win.focus();
-      win.onload = () => win.print();
-    },
-    error: (err) => {
-      console.error(err);
-      Swal.fire('Error', 'Failed to load job card for printing.', 'error');
+  printJobCard(item: any): void {
+    const jobId = item?.jobCardHeader?.id;
+    if (!jobId) {
+      Swal.fire('Error', 'Job card id not found for printing.', 'error');
+      return;
     }
-  });
-}
+    this.jobCardService.getJobCardForPrint(jobId).subscribe({
+      next: (data: any) => {
+        const html = this.buildInvoiceHtml(data);
+        const win = window.open('', '_blank', 'width=900,height=650');
+        if (!win) {
+          Swal.fire('Popup blocked', 'Please allow popups to print the invoice.', 'warning');
+          return;
+        }
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+        win.focus();
+        win.onload = () => win.print();
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire('Error', 'Failed to load job card for printing.', 'error');
+      }
+    });
+  }
 
   private fmtDate(d: any): string {
     if (!d) return '-';
@@ -365,49 +367,49 @@ printJobCard(item: any): void {
     return isNaN(dt.getTime()) ? '-' : dt.toLocaleDateString('en-GB');
   }
 
-private buildInvoiceHtml(d: any): string {
+  private buildInvoiceHtml(d: any): string {
 
-  /* ── source objects ───────────────────────────────────── */
-  const b = d.battery ?? {};
-  const complaints: any[] = d.complaints ?? [];
+    /* ── source objects ───────────────────────────────────── */
+    const b = d.battery ?? {};
+    const complaints: any[] = d.complaints ?? [];
 
-  /* ── helpers ──────────────────────────────────────────── */
-  const fd   = (x: any) => this.fmtDate(x);
-  const dash = (v: any) =>
-    (v !== null && v !== undefined && String(v).trim() !== '') ? String(v) : '-';
+    /* ── helpers ──────────────────────────────────────────── */
+    const fd = (x: any) => this.fmtDate(x);
+    const dash = (v: any) =>
+      (v !== null && v !== undefined && String(v).trim() !== '') ? String(v) : '-';
 
-  /* ── customer ─────────────────────────────────────────── */
-  const customerName   = dash(d.customerName);
-  const customerMobile = dash(d.customerMobile);
-  const altMobile      = dash(d.customerAltMobile);
-  const address        = d.address ?? '';
-  const city           = d.city ?? '';
-  const pin            = d.pincode ?? '';
-  const state          = dash(d.state);
-  const gstNo          = dash(d.gstNo);
-  const cityPin        = pin ? `${city || '-'} - ${pin}` : (city || '-');
+    /* ── customer ─────────────────────────────────────────── */
+    const customerName = dash(d.customerName);
+    const customerMobile = dash(d.customerMobile);
+    const altMobile = dash(d.customerAltMobile);
+    const address = d.address ?? '';
+    const city = d.city ?? '';
+    const pin = d.pincode ?? '';
+    const state = dash(d.state);
+    const gstNo = dash(d.gstNo);
+    const cityPin = pin ? `${city || '-'} - ${pin}` : (city || '-');
 
-  /* ── vehicle ──────────────────────────────────────────── */
-  const modelName    = d.modelName    ?? '-';
-  const colour       = dash(d.colour);
-  const oemModel     = dash(d.oemModelName);
-  const modelDisplay = (colour && colour !== '-')
-    ? `${modelName} (${colour})` : modelName;
-  const chassisNo    = dash(d.chassisNo);
-  const batteryNo    = dash(b.batterySerialNo);
-  const chargerNo    = dash(b.chargerNo);
-  const controllerNo = dash(b.controllerNo);
-  const registerNo   = dash(d.registerNo);
-  const remarks      = dash(d.remarks);
+    /* ── vehicle ──────────────────────────────────────────── */
+    const modelName = d.modelName ?? '-';
+    const colour = dash(d.colour);
+    const oemModel = dash(d.oemModelName);
+    const modelDisplay = (colour && colour !== '-')
+      ? `${modelName} (${colour})` : modelName;
+    const chassisNo = dash(d.chassisNo);
+    const batteryNo = dash(b.batterySerialNo);
+    const chargerNo = dash(b.chargerNo);
+    const controllerNo = dash(b.controllerNo);
+    const registerNo = dash(d.registerNo);
+    const remarks = dash(d.remarks);
 
-  /* ── complaint rows ───────────────────────────────────── */
-  const complaintRows = complaints.length
-    ? complaints.map((x: any, i: number) => `
+    /* ── complaint rows ───────────────────────────────────── */
+    const complaintRows = complaints.length
+      ? complaints.map((x: any, i: number) => `
         <tr>
           <td class="tc">${i + 1}</td>
-          <td>${x.customerVoice  ?? '-'}</td>
-          <td>${x.complaintCode  ?? '-'}</td>
-          <td>${x.complaint      ?? '-'}</td>
+          <td>${x.customerVoice ?? '-'}</td>
+          <td>${x.complaintCode ?? '-'}</td>
+          <td>${x.complaint ?? '-'}</td>
         </tr>`).join('')
       : `<tr><td colspan="4" class="tc muted">No complaints recorded</td></tr>`;
 

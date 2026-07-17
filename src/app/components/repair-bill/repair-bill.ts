@@ -324,7 +324,7 @@ export class RepairBill implements OnInit {
     this.locationService.getLocationList(this.dealerCode).subscribe({
       next: (data: any[]) => {
         // only Workshop
-        this.loader.hide();
+      this.loader.hide();
         this.locations = data.filter(x => x.locareadidNo === 2);
         // auto select first workshop location
         if (this.locations.length > 0) {
