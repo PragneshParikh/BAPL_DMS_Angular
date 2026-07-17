@@ -169,7 +169,7 @@
                             <th class="sort" (click)="onSort('billingName')" style="cursor:pointer">Billing Name</th>
                             <th class="sort" (click)="onSort('customerType')" style="cursor:pointer">Customer Type</th>
                             <th class="sort" (click)="onSort('totalAmount')" style="cursor:pointer">Total Amount</th>
-                            <th class="sort" (click)="onSort('totalItems')" style="cursor:pointer">Total Items</th>
+                            <th class="sort" (click)="onSort('d2d')" style="cursor:pointer">D2D</th>
                         </tr>
                     </thead>
 
@@ -212,7 +212,7 @@
                                 <td>{{ item.billingName }}</td>
                                 <td>{{ getCustomerTypeName(item.customerType) }}</td>
                                 <td>₹ {{ item.totalAmount }}</td>
-                                <td>{{ item.details?.length || 0 }}</td>
+                                <td>{{ item.isD2d ? 'Yes' : 'No' }}</td>
                             </tr>
                             }
 

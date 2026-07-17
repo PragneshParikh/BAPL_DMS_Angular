@@ -52,7 +52,10 @@ export class LedgerMasterService {
   getLedgerByType(ledgerType: string): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/ledger-master/ledgerByType?ledgerType=${ledgerType}`);
   }
-
+ getD2DProvision(dealerCode: string): Observable<boolean> {
+    return this.httpClient.get<boolean>(`${this.baseUrl}/ledger-master/getD2DProvision`,{params: { dealerCode }});
+  }
+  
   getNextLedId(dealerCode: string): Observable<string> {
     return this.httpClient.get<string>(
       `${this.baseUrl}/ledger-master/getNextLed`,

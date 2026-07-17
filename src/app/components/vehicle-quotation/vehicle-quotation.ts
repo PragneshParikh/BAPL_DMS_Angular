@@ -1,0 +1,922 @@
+import { Component, OnInit, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
+
+import { VehicleQuotationService } from '../../core/services/vehicle-quotationservice';
+import { DealerService } from '../../core/services/dealer-service';
+import { ColorMasterService } from '../../core/services/color-master.service';
+import { StateService } from '../../core/services/state';
+import { CityService } from '../../core/services/city';
+import { ItemMasterService } from '../../core/services/item-master-service';
+import { OemmodelMasterService } from '../../core/services/oemmodel-master-service';
+import { LedgerMasterService } from '../../core/services/ledger-master';
+
+
+@Component({
+  selector: 'app-vehicle-quotation',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  templateUrl: './vehicle-quotation.html',
+  styleUrls: ['./vehicle-quotation.scss']
+})
+export class VehicleQuotation implements OnInit, OnChanges {
+
+  // =====================================
+  // MODAL SUPPORT
+  // When used inside vehicle-quotation-list.html as <app-vehicle-quotation>,
+  // isModal=true and quotationId (if editing) are passed in as @Input.
+  // closed/saved are emitted instead of using the router.
+  // When used as a routed page (/vehicle-quotation/add or /edit/:id),
+  // isModal stays false and the original route-based behavior applies.
+  // =====================================
+  @Input() quotationId?: number;
+  @Input() isModal: boolean = false;
+  @Output() closed = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<void>();
+
+  quotationData: any = {};
+  isEditMode: boolean = false;
+
+  dealers: any[] = [];
+  models: any[] = [];
+  filteredVariants: any[] = [];
+  colors: any[] = [];
+
+  states: any[] = [];
+  cities: any[] = [];
+  filteredCities: any[] = [];
+  financeCompanies: any[] = [];
+
+  statusOptions: string[] = ['Draft', 'Sent', 'Approved', 'Rejected', 'Converted'];
+
+  // =====================================
+  // COLOR AUTO-SELECT / LOCK STATE
+  // colorLocked becomes true ONLY after the item detail fetch
+  // (getPurchaseDetailsWithHsnTaxByModelNo) resolves with a colorId.
+  // lastFetchedItem is cached so dealer/state changes can recompute
+  // tax split (SGST/CGST vs IGST) without re-hitting the API.
+  // =====================================
+  colorLocked: boolean = false;
+  private lastFetchedItem: any = null;
+
+  // Tracks whether master dropdown data (dealers, colors, models, states,
+  // cities, finance companies) has finished loading. Used to guard
+  // ngOnChanges so it never tries to load/prep a record before the
+  // dropdown data it depends on (for filtering cities/variants/etc.) is ready.
+  private masterDataLoaded = false;
+
+  errors: {
+    quotationDate?: string;
+    validTillDate?: string;
+    dealerId?: string;
+    status?: string;
+    customerName?: string;
+    mobileNo?: string;
+    emailId?: string;
+    stateId?: string;
+    cityId?: string;
+    modelId?: string;
+    variantId?: string;
+    exShowroomPrice?: string;
+    exchangeAmount?: string;
+    financeCompanyId?: string;
+    loanAmount?: string;
+    downPayment?: string;
+  } = {};
+
+  private readonly emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  constructor(
+    private quotationService: VehicleQuotationService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private dealerService: DealerService,
+    private colorService: ColorMasterService,
+    private itemService: ItemMasterService,
+    private stateService: StateService,
+    private cityService: CityService,
+    private oemModelService: OemmodelMasterService,
+    private LedgerService: LedgerMasterService
+  ) { }
+
+  // =====================================
+  // ngOnInit — loads ALL master dropdown data (dealers, colors, models,
+  // states, cities, finance companies) together via forkJoin BEFORE
+  // attempting to load an existing quotation or set defaults for a new one.
+  //
+  // Why: previously each loadX() ran independently, and loadQuotationForEdit()
+  // could run before states/cities/models finished fetching, causing
+  // onStateChange()/onModelChange() to filter against empty arrays —
+  // resulting in State/City (and potentially Model/Variant/Color) dropdowns
+  // appearing blank in edit mode even though the underlying data was correct.
+  // =====================================
+  ngOnInit(): void {
+    forkJoin({
+      dealers: this.dealerService.getDealerDropdown(null),
+      colors: this.colorService.getColor(),
+      models: this.oemModelService.getAllOEMModels(),
+      states: this.stateService.get(),
+      cities: this.cityService.getAllWithState(),
+      financeCompanies: this.LedgerService.getLedgerByType('Financier')
+    }).subscribe({
+      next: (result) => {
+        this.dealers = this.toArray(result.dealers);
+        this.colors = this.toArray(result.colors);
+        this.models = this.toArray(result.models);
+        this.states = this.toArray(result.states);
+        this.cities = this.toArray(result.cities);
+        
+        this.financeCompanies = this.toArray(result.financeCompanies);
+
+        this.masterDataLoaded = true;
+
+        // Routed mode resolves its id from the URL right here.
+        // Modal mode's id comes via @Input; this also covers the very
+        // first modal open, since ngOnChanges may fire before
+        // masterDataLoaded is true and will be skipped in that case.
+        if (!this.isModal) {
+          const id = Number(this.route.snapshot.paramMap.get('id'));
+          this.loadRecordOrDefaults(id);
+        } else {
+          this.loadRecordOrDefaults(Number(this.quotationId));
+        }
+      },
+      error: (err) => {
+        console.error('Master data load error', err);
+        this.dealers = [];
+        this.colors = [];
+        this.models = [];
+        this.states = [];
+        this.cities = [];
+        this.financeCompanies = [];
+      }
+    });
+  }
+
+  // =====================================
+  // ngOnChanges — fires when the modal is reopened with a different
+  // quotationId (component instance reused rather than destroyed/recreated).
+  // Guarded on masterDataLoaded so it never runs ahead of ngOnInit's
+  // forkJoin — if master data isn't ready yet, ngOnInit's own callback
+  // above will pick up the current @Input value once it resolves.
+  // =====================================
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!this.isModal) return;
+    if (!this.masterDataLoaded) return; // ngOnInit will handle the first load
+    if (!changes['quotationId']) return;
+
+    this.loadRecordOrDefaults(Number(this.quotationId));
+  }
+
+  private loadRecordOrDefaults(id: number): void {
+    if (id) {
+      this.isEditMode = true;
+      this.loadQuotationForEdit(id);
+    } else {
+      this.isEditMode = false;
+      this.setDefaultsForNewQuotation();
+    }
+  }
+
+  private setDefaultsForNewQuotation(): void {
+    this.quotationData = {};
+    this.quotationData.quotationDate = this.formatDate(new Date());
+    this.quotationData.status = 'Draft';
+    this.quotationData.dealerId = '';
+    this.quotationData.hypothecationAmount = 0;
+    this.quotationData.plateAmount = 0;
+    this.quotationData.handlingCharges = 0;
+    this.quotationData.validTillDate = '';
+    this.quotationData.totalAmount = 0;
+    this.quotationData.stateId = '';
+    this.quotationData.cityId = '';
+    this.quotationData.modelId = '';
+    this.quotationData.variantId = '';
+    this.quotationData.colorId = '';
+    this.quotationData.financeCompanyId = '';
+    this.colorLocked = false;
+    this.lastFetchedItem = null;
+    this.generateQuotationNo();
+  }
+
+  private toArray(response: any): any[] {
+    if (Array.isArray(response)) {
+      return response;
+    }
+    if (response && Array.isArray(response.data)) {
+      return response.data;
+    }
+    if (response && Array.isArray(response.Data)) {
+      return response.Data;
+    }
+    if (response && Array.isArray(response.items)) {
+      return response.items;
+    }
+    return [];
+  }
+
+  // =====================================
+  // LOAD EXISTING QUOTATION (edit mode)
+  // By the time this runs, dealers/colors/models/states/cities/finance
+  // companies are guaranteed loaded (see ngOnInit's forkJoin), so
+  // onStateChange()/onModelChange() below filter against fully-populated
+  // arrays instead of racing against in-flight HTTP calls.
+  // =====================================
+ loadQuotationForEdit(id: number): void {
+
+  this.quotationService.getQuotationById(id).subscribe({
+    next: (response: any) => {
+
+      console.log('Quotation Response', response);
+
+      this.quotationData = { ...response };
+
+      this.isEditMode = true;
+
+      this.quotationData.id = response.vehicleQuotationId;
+      this.quotationData.vehicleQuotationId = response.vehicleQuotationId;
+
+      this.quotationData.dealerId =
+        response.dealerId != null ? String(response.dealerId) : '';
+
+      this.quotationData.modelId =
+        response.modelId != null ? String(response.modelId) : '';
+
+      this.quotationData.variantId =
+        response.variantId != null ? String(response.variantId) : '';
+
+      this.quotationData.colorId =
+        response.colorId != null ? String(response.colorId) : '';
+
+      this.quotationData.financeCompanyId =
+        response.financeCompanyId != null ? String(response.financeCompanyId) : '';
+
+      this.quotationData.stateId =
+        response.stateId != null ? String(response.stateId) : '';
+
+      this.quotationData.cityId =
+        response.cityId != null ? String(response.cityId) : '';
+
+      this.quotationData.quotationDate =
+        this.formatDate(response.quotationDate);
+
+      this.quotationData.validTillDate =
+        this.formatDate(response.validTillDate ?? response.validTill);
+
+      // Populate city list for selected state
+      this.onStateChange(true);
+
+      // Restore selected city after filtering
+      setTimeout(() => {
+
+        this.quotationData.cityId =
+          response.cityId != null
+            ? String(response.cityId)
+            : '';
+
+      });
+
+      if (this.quotationData.modelId) {
+        this.onModelChange(true);
+      }
+
+      this.calculateTotal();
+    },
+    error: err => console.error(err)
+  });
+
+}
+
+  formatDate(value: any): string {
+    if (!value) return '';
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return '';
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  onDealerChange(): void {
+    // Dealer's state determines inter-state vs intra-state GST split
+    this.recalculateTax();
+  }
+
+  trackById(index: number, item: any): any {
+    return item.id ?? item.modelId ?? item.itemId ?? item.colorId ?? item.financeCompanyId;
+  }
+
+  // =====================================
+  // MODEL -> VARIANT CASCADE
+  // =====================================
+  onModelChange(preserveVariant: boolean = false): void {
+    const selectedModelId = this.quotationData.modelId;
+
+    if (!selectedModelId) {
+      this.filteredVariants = [];
+      if (!preserveVariant) {
+        this.quotationData.variantId = '';
+        this.resetColor();
+      }
+      return;
+    }
+
+    this.itemService.getItemsByOEMModel(Number(selectedModelId)).subscribe({
+      next: (response: any) => {
+        this.filteredVariants = this.toArray(response);
+
+        if (!preserveVariant) {
+          this.quotationData.variantId = '';
+          this.resetColor();
+        } else if (this.quotationData.variantId) {
+          // Edit mode: variants just loaded — re-resolve color lock + pricing for the saved variant
+          const selectedVariant = this.filteredVariants.find(
+            v => String(v.id ?? v.itemId) === String(this.quotationData.variantId)
+          );
+          this.applyVariantColor(selectedVariant);
+          this.applyBasePricing(selectedVariant);
+          this.fetchGstRates(selectedVariant);
+        }
+      },
+      error: (error) => {
+        console.error('Variant load error', error);
+        this.filteredVariants = [];
+      }
+    });
+  }
+
+  // =====================================
+  // VARIANT SELECTED -> resolve color, base price, and FAME2 INSTANTLY
+  // (no API wait). GetItemsByOEMModel returns the full raw ItemMaster
+  // entity per variant (not a trimmed DTO), so Colorcode, Custprice, and
+  // Fame2amount are all already sitting on `selectedVariant` the moment
+  // it's picked. Only the GST *rate* genuinely needs a fetch (HSN-code
+  // lookup via GetPurchaseDetailsWithHsnTaxByModelNo), so that's kicked
+  // off separately and refines the price once it resolves.
+  // =====================================
+  onVariantChange(variantId: any): void {
+    this.quotationData.variantId = variantId;
+    this.resetColor();
+
+    if (!variantId) return;
+
+    const selectedVariant = this.filteredVariants.find(
+      v => String(v.id ?? v.itemId) === String(variantId)
+    );
+
+    this.applyVariantColor(selectedVariant);
+    this.applyBasePricing(selectedVariant);
+    this.fetchGstRates(selectedVariant);
+  }
+
+  private resetColor(): void {
+    this.quotationData.colorId = '';
+    this.colorLocked = false;
+    this.lastFetchedItem = null;
+    this.quotationData.exShowroomPrice = 0;
+    this.quotationData.taxAmount = 0;
+    this.quotationData.sgstAmount = 0;
+    this.quotationData.cgstAmount = 0;
+    this.quotationData.igstAmount = 0;
+    this.quotationData.fame2Amount = 0;
+    this.quotationData.custPrice = 0;
+    this.calculateTotal();
+  }
+
+  // =====================================
+  // Match the variant's Colorcode (ItemMaster.Colorcode) against the
+  // loaded ColorMaster list (ColorMasterService.getColor(), matched on
+  // Colorcode) to find the corresponding color record's id, then lock
+  // the dropdown. If the variant has no Colorcode, or no match is found
+  // in the master list, the dropdown is left open for manual selection.
+  // =====================================
+  private applyVariantColor(selectedVariant: any): void {
+    const colorCode =
+      selectedVariant?.colorcode ?? selectedVariant?.colorCode ?? selectedVariant?.Colorcode;
+
+    if (!colorCode) {
+      this.quotationData.colorId = '';
+      this.colorLocked = false;
+      return;
+    }
+
+    const matchedColor = this.colors.find(c =>
+      String(c.colorcode ?? c.colorCode ?? c.Colorcode ?? '').toUpperCase()
+      === String(colorCode).toUpperCase()
+    );
+
+    if (matchedColor) {
+      this.quotationData.colorId = String(matchedColor.id ?? matchedColor.colorId ?? matchedColor.rrgcoloridno);
+      this.colorLocked = true;
+    } else {
+      // Variant has a Colorcode but it isn't in the loaded ColorMaster
+      // list (e.g. inactive color, or colors hadn't finished loading yet).
+      console.warn('No ColorMaster match for Colorcode:', colorCode);
+      this.quotationData.colorId = '';
+      this.colorLocked = false;
+    }
+  }
+
+  // =====================================
+  // BASE PRICE — resolved synchronously from the variant row itself.
+  //
+  // NOTE: We deliberately do NOT source Custprice from
+  // GetPurchaseDetailsWithHsnTaxByModelNo — that endpoint's
+  // ItemMasterViewModel construction (ItemMasterRepo.
+  // GetPurchaseDetailsWithHsnTaxByModelNo) never assigns Custprice, so
+  // it always comes back as 0 from there. GetItemsByOEMModel returns
+  // the full ItemMaster entity though, so custprice/fame2amount are
+  // already on `selectedVariant` — no fetch needed for these two.
+  //
+  // Shows a preliminary Ex-Showroom Price (CustPrice − FAME2) right
+  // away; fetchGstRates() below then adds the GST portion once the HSN
+  // lookup resolves.
+  // =====================================
+  private applyBasePricing(selectedVariant: any): void {
+    const d = this.quotationData;
+
+    const custPrice = Number(selectedVariant?.custprice ?? selectedVariant?.Custprice) || 0;
+    const fame2Amount = Number(selectedVariant?.fame2amount ?? selectedVariant?.Fame2amount) || 0;
+
+    d.custPrice = custPrice;
+    d.fame2Amount = fame2Amount;
+    d.taxAmount = 0; // refined once fetchGstRates() resolves
+    d.sgstAmount = 0;
+    d.cgstAmount = 0;
+    d.igstAmount = 0;
+
+    d.exShowroomPrice = Math.round((custPrice - fame2Amount) * 100) / 100;
+    this.calculateTotal();
+  }
+
+  // =====================================
+  // FETCH GST RATE FOR SELECTED VARIANT (HSN-code lookup)
+  // Uses ItemMasterService.getPurchaseDetailsWithHsnTaxByModelNo via
+  // itemcode of the selected variant — this is the one part of the
+  // formula that genuinely needs a server round trip, since the rate
+  // depends on HSN-code matching (ItemMasterRepo joins HsnwiseTaxCodes
+  // + AggregateTaxCodes), not just a static column.
+  // =====================================
+  private fetchGstRates(selectedVariant: any): void {
+    const itemCode = selectedVariant?.itemcode ?? selectedVariant?.itemCode;
+    if (!itemCode) return;
+
+    this.itemService.getPurchaseDetailsWithHsnTaxByModelNo(itemCode).subscribe({
+      next: (item: any) => {
+        if (!item) return;
+        this.lastFetchedItem = item;
+        this.applyGstToPrice(item);
+      },
+      error: (err) => {
+        console.error('GST rate fetch error', err);
+      }
+    });
+  }
+
+  // =====================================
+  // APPLY GST RATE TO THE ALREADY-RESOLVED BASE PRICE
+  //
+  // Ex-Showroom Price = Customer Price + GST (5%) − FAME2 Subsidy
+  // CustPrice and FAME2 were already set by applyBasePricing(); this
+  // only adds the GST portion once the HSN-tax lookup resolves.
+  // GST is computed as SGST+CGST (same-state) or IGST (inter-state) —
+  // the two splits should sum to the same ~5% total either way; only
+  // the ledger classification differs. Reusable by dealer/state changes
+  // via recalculateTax(), using the cached lastFetchedItem.
+  //
+  // NOTE: taxAmount is kept on quotationData purely for the on-screen
+  // breakdown — it is NOT added again in calculateTotal(), since it's
+  // already folded into exShowroomPrice right here.
+  // =====================================
+  private applyGstToPrice(item: any): void {
+
+    const d = this.quotationData;
+
+    const custPrice = Number(d.custPrice) || 0;
+    const fame2Amount = Number(d.fame2Amount) || 0;
+
+    const dealer = this.dealers.find(
+      x => String(x.id) === String(d.dealerId)
+    );
+
+    const dealerStateId = dealer?.stateId;
+    const customerStateId = d.stateId;
+
+    const interState =
+      dealerStateId &&
+      customerStateId &&
+      String(dealerStateId) !== String(customerStateId);
+
+    const sgstRate = Number(item.sgst ?? 0);
+    const cgstRate = Number(item.cgst ?? 0);
+
+    // If backend doesn't return IGST, derive it as SGST + CGST
+    let igstRate = Number(item.igst ?? 0);
+
+    if (interState && igstRate === 0) {
+      igstRate = sgstRate + cgstRate;
+    }
+
+    const round2 = (v: number) => Math.round(v * 100) / 100;
+
+    if (interState) {
+      d.sgstAmount = 0;
+      d.cgstAmount = 0;
+      d.igstAmount = round2(custPrice * igstRate / 100);
+    } else {
+      d.sgstAmount = round2(custPrice * sgstRate / 100);
+      d.cgstAmount = round2(custPrice * cgstRate / 100);
+      d.igstAmount = 0;
+    }
+
+    d.taxAmount = round2(
+      d.sgstAmount +
+      d.cgstAmount +
+      d.igstAmount
+    );
+
+    d.exShowroomPrice = round2(
+      custPrice + d.taxAmount - fame2Amount
+    );
+
+    this.calculateTotal();
+  }
+
+  // =====================================
+  // State changes affect the interState tax split only —
+  // recompute from the cached item instead of refetching from the API.
+  // =====================================
+  recalculateTax(): void {
+    if (this.lastFetchedItem) {
+      this.applyGstToPrice(this.lastFetchedItem);
+    }
+  }
+
+  onStateChange(isEdit: boolean = false): void {
+
+    console.log('Selected StateId:', this.quotationData.stateId);
+    console.log('All Cities:', this.cities);
+
+    this.filteredCities = this.cities.filter(x =>
+      Number(x.stateId) === Number(this.quotationData.stateId)
+    );
+
+    console.log('Filtered Cities:', this.filteredCities);
+
+    if (!isEdit) {
+      this.quotationData.cityId = '';
+    }
+
+    this.recalculateTax();
+  }
+
+  onlyDigits(event: any, field: 'mobileNo', maxLen: number): void {
+    let value = String(event.target.value || '').replace(/\D/g, '');
+    if (value.length > maxLen) {
+      value = value.slice(0, maxLen);
+    }
+    this.quotationData[field] = value;
+    event.target.value = value;
+  }
+
+  // =====================================
+  // TOTAL AMOUNT CALCULATION
+  // No checkboxes — Exchange/Finance amounts are additive only if
+  // the user actually filled them in (defaults to 0 via num()).
+  //
+  // taxAmount is intentionally NOT summed here — Ex-Showroom Price
+  // already includes GST (see applyGstToPrice). taxAmount
+  // is kept on quotationData only as a display breakdown; adding it
+  // again here would double-count it.
+  // =====================================
+  calculateTotal(): void {
+    const d = this.quotationData;
+    const num = (v: any) => Number(v) || 0;
+
+    const total =
+      num(d.exShowroomPrice) +
+      num(d.rtoCharges) +
+      num(d.insuranceAmount) +
+      num(d.accessoriesAmount) +
+      num(d.extendedWarrantyAmount) +
+      num(d.amcAmount) +
+      num(d.otherCharges) +
+      num(d.hypothecationAmount) +
+      num(d.plateAmount) +
+      num(d.handlingCharges) -
+      num(d.discountAmount) -
+      num(d.exchangeAmount);
+
+    this.quotationData.totalAmount = total < 0 ? 0 : total;
+  }
+
+  // =====================================
+  // VALIDATION
+  // Exchange/Finance are validated only "if started" (any field filled)
+  // since the checkboxes are gone.
+  // Email, Address, and Remarks are intentionally optional — Address and
+  // Remarks have no checks at all; Email is only format-checked if the
+  // user actually typed something in.
+  // =====================================
+  validateForm(): boolean {
+    this.errors = {};
+    let valid = true;
+    const d = this.quotationData;
+
+    if (!d.quotationDate) {
+      this.errors.quotationDate = 'Quotation date is required.';
+      valid = false;
+    }
+
+    if (!d.validTillDate) {
+      this.errors.validTillDate = 'Valid Till Date is required.';
+      valid = false;
+    }
+
+    if (!d.dealerId) {
+      this.errors.dealerId = 'Dealer is required.';
+      valid = false;
+    }
+
+    if (!d.status) {
+      this.errors.status = 'Status is required.';
+      valid = false;
+    }
+
+    if (!d.customerName?.trim()) {
+      this.errors.customerName = 'Customer name is required.';
+      valid = false;
+    }
+
+    if (!d.stateId) {
+      this.errors.stateId = 'State is required.';
+      valid = false;
+    }
+
+    if (!d.cityId) {
+      this.errors.cityId = 'City is required.';
+      valid = false;
+    }
+
+    const mobile = String(d.mobileNo ?? '').trim();
+    if (!mobile) {
+      this.errors.mobileNo = 'Mobile number is required.';
+      valid = false;
+    } else if (!/^\d{10}$/.test(mobile)) {
+      this.errors.mobileNo = 'Mobile number must be exactly 10 digits.';
+      valid = false;
+    }
+
+    const email = String(d.emailId ?? '').trim();
+    if (email && !this.emailPattern.test(email)) {
+      this.errors.emailId = 'Enter a valid email address.';
+      valid = false;
+    }
+
+    if (!d.modelId) {
+      this.errors.modelId = 'Model is required.';
+      valid = false;
+    }
+
+    if (!d.variantId) {
+      this.errors.variantId = 'Variant is required.';
+      valid = false;
+    }
+
+    const price = String(d.exShowroomPrice ?? '').trim();
+    if (!price || Number(price) <= 0) {
+      this.errors.exShowroomPrice = 'Ex-showroom price is required.';
+      valid = false;
+    }
+
+    // Exchange: only enforced if the user entered something
+    if (d.exchangeAmount !== undefined && d.exchangeAmount !== null && d.exchangeAmount !== '') {
+      if (Number(d.exchangeAmount) <= 0) {
+        this.errors.exchangeAmount = 'Exchange amount must be greater than 0.';
+        valid = false;
+      }
+    }
+
+    // Finance: only enforced if any finance field was started
+    const financeStarted = !!(d.financeCompanyId || d.loanAmount || d.downPayment);
+    if (financeStarted) {
+      if (!d.financeCompanyId) {
+        this.errors.financeCompanyId = 'Finance company is required.';
+        valid = false;
+      }
+      if (!d.loanAmount || Number(d.loanAmount) <= 0) {
+        this.errors.loanAmount = 'Loan amount is required.';
+        valid = false;
+      }
+      if (d.downPayment == null || d.downPayment === '' || Number(d.downPayment) < 0) {
+        this.errors.downPayment = 'Down payment is required.';
+        valid = false;
+      }
+    }
+
+    return valid;
+  }
+
+  // =====================================
+  // SAVE / UPDATE
+  // =====================================
+onSubmit(form: any): void {
+
+  console.log('isEditMode:', this.isEditMode);
+  console.log('quotationId:', this.quotationId);
+  console.log('quotationData:', this.quotationData);
+
+  if (!this.validateForm()) {
+    console.warn('Validation failed:', this.errors);
+    alert('Please fix the highlighted fields before saving.');
+    return;
+  }
+
+  this.calculateTotal();
+
+  const quotationId =
+    this.quotationData.vehicleQuotationId ||
+    this.quotationData.id ||
+    this.quotationId ||
+    0;
+
+  const quotationObj = {
+
+    id: quotationId,
+
+    quotationNo: this.quotationData.quotationNo,
+    quotationDate: this.quotationData.quotationDate,
+
+    dealerId: this.quotationData.dealerId
+      ? Number(this.quotationData.dealerId)
+      : null,
+
+    customerId: this.quotationData.customerId
+      ? Number(this.quotationData.customerId)
+      : null,
+
+    customerName: this.quotationData.customerName,
+    mobileNo: this.quotationData.mobileNo,
+    emailId: this.quotationData.emailId,
+    address: this.quotationData.address,
+
+    stateId: this.quotationData.stateId
+      ? Number(this.quotationData.stateId)
+      : null,
+
+    cityId: this.quotationData.cityId
+      ? Number(this.quotationData.cityId)
+      : null,
+
+    modelId: this.quotationData.modelId
+      ? Number(this.quotationData.modelId)
+      : null,
+
+    variantId: this.quotationData.variantId
+      ? Number(this.quotationData.variantId)
+      : null,
+
+    colorId: this.quotationData.colorId
+      ? Number(this.quotationData.colorId)
+      : null,
+
+    custPrice: Number(this.quotationData.custPrice) || 0,
+    fame2Amount: Number(this.quotationData.fame2Amount) || 0,
+    sgstAmount: Number(this.quotationData.sgstAmount) || 0,
+    cgstAmount: Number(this.quotationData.cgstAmount) || 0,
+    igstAmount: Number(this.quotationData.igstAmount) || 0,
+
+    exShowroomPrice: Number(this.quotationData.exShowroomPrice) || 0,
+    rtoCharges: Number(this.quotationData.rtoCharges) || 0,
+    insuranceAmount: Number(this.quotationData.insuranceAmount) || 0,
+    accessoriesAmount: Number(this.quotationData.accessoriesAmount) || 0,
+    extendedWarrantyAmount: Number(this.quotationData.extendedWarrantyAmount) || 0,
+    amcAmount: Number(this.quotationData.amcAmount) || 0,
+    otherCharges: Number(this.quotationData.otherCharges) || 0,
+    discountAmount: Number(this.quotationData.discountAmount) || 0,
+    taxAmount: Number(this.quotationData.taxAmount) || 0,
+    totalAmount: Number(this.quotationData.totalAmount) || 0,
+
+    isExchange: Number(this.quotationData.exchangeAmount) > 0,
+    exchangeAmount: Number(this.quotationData.exchangeAmount) || 0,
+
+    isFinance: !!(
+      this.quotationData.financeCompanyId ||
+      this.quotationData.loanAmount ||
+      this.quotationData.downPayment
+    ),
+
+    financeCompanyId: this.quotationData.financeCompanyId
+      ? Number(this.quotationData.financeCompanyId)
+      : null,
+
+    loanAmount: Number(this.quotationData.loanAmount) || 0,
+    downPayment: Number(this.quotationData.downPayment) || 0,
+
+    status: this.quotationData.status,
+    remarks: this.quotationData.remarks,
+
+    hypothecationAmount: Number(this.quotationData.hypothecationAmount) || 0,
+    plateAmount: Number(this.quotationData.plateAmount) || 0,
+    handlingCharges: Number(this.quotationData.handlingCharges) || 0,
+
+    validTillDate: this.quotationData.validTillDate
+  };
+
+  console.log('Quotation Id:', quotationId);
+  console.log('Payload:', quotationObj);
+
+  if (quotationId > 0) {
+
+    console.log('******** UPDATE API ********');
+
+    this.quotationService.updateQuotation(quotationId, quotationObj).subscribe({
+
+      next: (res) => {
+
+        console.log('Update Success', res);
+
+        alert('Quotation Updated Successfully');
+
+        if (this.isModal) {
+          this.saved.emit();
+        } else {
+          this.backToList();
+        }
+
+      },
+
+      error: (err) => {
+
+        console.error('Update Error', err);
+        console.error(err.error);
+
+        alert(
+          'Update Failed : ' +
+          (err.error?.message || err.message)
+        );
+
+      }
+
+    });
+
+  } else {
+
+    console.log('******** SAVE API ********');
+
+    this.quotationService.saveQuotation(quotationObj).subscribe({
+
+      next: (res) => {
+
+        console.log('Save Success', res);
+
+        alert('Quotation Saved Successfully');
+
+        if (this.isModal) {
+          this.saved.emit();
+        } else {
+          this.backToList();
+        }
+
+      },
+
+      error: (err) => {
+
+        console.error('Save Error', err);
+        console.error(err.error);
+
+        alert(
+          'Save Failed : ' +
+          (err.error?.message || err.message)
+        );
+
+      }
+
+    });
+
+  }
+
+}
+
+  backToList(): void {
+    if (this.isModal) {
+      this.closed.emit();
+    } else {
+      this.router.navigate(['/vehicle-quotation']);
+    }
+  }
+
+  generateQuotationNo(): void {
+    this.quotationService.generateQuotationNo().subscribe({
+      next: (quotationNo: string) => {
+        this.quotationData.quotationNo = quotationNo;
+      },
+      error: (error) => {
+        console.error('Quotation number generation error', error);
+        this.quotationData.quotationNo = '';
+      }
+    });
+  }
+}
