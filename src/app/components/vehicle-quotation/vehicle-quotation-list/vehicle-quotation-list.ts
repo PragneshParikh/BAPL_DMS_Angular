@@ -6,6 +6,175 @@ import { VehicleQuotationService } from '../../../core/services/vehicle-quotatio
 import { AuthenticationService } from '../../../core/services/auth.service';
 import { VehicleQuotation } from '../../vehicle-quotation/vehicle-quotation';
 
+// =====================================
+// PRINT STYLES
+// Kept as a plain string constant (not a separate .scss file) so the print
+// window — a fully separate document opened via window.open() +
+// document.write() — can use it directly in a <style> tag. Angular's
+// component style encapsulation can't reach into that document anyway,
+// and a real .scss import here would need the esbuild-based builder plus
+// a '*.scss?raw' typings declaration, which added unnecessary setup for
+// something this self-contained.
+// =====================================
+const PRINT_STYLES = `
+* { box-sizing: border-box; }
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  color: #222;
+  margin: 0;
+  padding: 28px;
+}
+
+.letterhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 3px solid #333;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+
+.letterhead-dealer {
+  max-width: 62%;
+}
+
+.letterhead-dealer h1 {
+  font-size: 20px;
+  margin: 0 0 6px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.letterhead-dealer .dealer-line {
+  font-size: 12px;
+  color: #444;
+  margin-bottom: 3px;
+  line-height: 1.5;
+}
+
+.letterhead-meta {
+  text-align: right;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.letterhead-meta .doc-title {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: #555;
+  letter-spacing: 0.5px;
+}
+
+.letterhead-meta div { margin-bottom: 3px; }
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
+  background: #fff3cd;
+  color: #7a5b00;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.section-title {
+  background: #f0f0f0;
+  font-weight: bold;
+  padding: 6px 10px;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  border-left: 4px solid #333;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+table.info {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 4px;
+}
+
+table.info td {
+  padding: 5px 8px;
+  vertical-align: top;
+  width: 25%;
+  font-size: 12.5px;
+}
+
+table.info td.label {
+  color: #666;
+  width: 15%;
+}
+
+table.pricing {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4px;
+}
+
+table.pricing td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+table.pricing td.amt {
+  text-align: right;
+  width: 160px;
+  font-variant-numeric: tabular-nums;
+}
+
+table.pricing tr.subtotal td {
+  border-top: 1px solid #999;
+  font-weight: 600;
+  background: #fafafa;
+}
+
+table.pricing tr.total td {
+  border-top: 2px solid #333;
+  border-bottom: none;
+  font-weight: bold;
+  font-size: 15px;
+  padding-top: 10px;
+}
+
+.calc-note {
+  font-size: 11px;
+  color: #666;
+  padding: 4px 10px 0 10px;
+  font-style: italic;
+}
+
+.terms {
+  margin-top: 22px;
+  font-size: 11px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.signature-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 60px;
+}
+
+.signature-box {
+  text-align: center;
+  width: 220px;
+  border-top: 1px solid #333;
+  padding-top: 6px;
+  font-size: 12px;
+}
+
+@media print {
+  body { padding: 0 20px; }
+  .no-print { display: none; }
+}
+`;
+
 @Component({
   selector: 'app-vehicle-quotation-list',
   standalone: true,
@@ -129,11 +298,13 @@ export class VehicleQuotationListComponent implements OnInit {
 
   // =====================================
   // PRINT / PDF
-  // Fetches the full record (list grid only has summary fields), builds a
-  // formatted A4 print layout in a new window, and triggers the browser's
-  // print dialog. The user can "Save as PDF" from there — no extra PDF
-  // library dependency needed since this uses the browser's native
-  // print-to-PDF renderer.
+  // Fetches the FULL print record via GetPrintQuotationAsync (dealer
+  // address/mobile/email/GST, real GST split, finance details — none of
+  // which exist on the plain GetById DTO), builds a formatted A4 print
+  // layout in a new window, and triggers the browser's print dialog.
+  // The user can "Save as PDF" from there — no extra PDF library
+  // dependency needed since this uses the browser's native print-to-PDF
+  // renderer.
   // =====================================
   printQuotation(id: number): void {
     if (!id) {
@@ -143,7 +314,7 @@ export class VehicleQuotationListComponent implements OnInit {
 
     this.printingId = id;
 
-    this.quotationService.getQuotationById(id).subscribe({
+    this.quotationService.getPrintQuotation(id).subscribe({
       next: (data: any) => {
         this.openPrintWindow(data);
         this.printingId = undefined;
@@ -197,143 +368,33 @@ export class VehicleQuotationListComponent implements OnInit {
     const gstTotal = num(d.taxAmount) || (sgst + cgst + igst);
     const exShowroom = num(d.exShowroomPrice);
 
+    // Build the dealer contact line for the letterhead — only include the
+    // parts that actually exist, joined with a separator, so a dealer
+    // missing (say) an email doesn't leave a stray "| |" in the output.
+    const dealerContactParts: string[] = [];
+    if (d.dealerMobile) dealerContactParts.push(`Mobile: ${d.dealerMobile}`);
+    if (d.dealerEmail) dealerContactParts.push(`Email: ${d.dealerEmail}`);
+    if (d.dealerGSTNo) dealerContactParts.push(`GSTIN: ${d.dealerGSTNo}`);
+    const dealerContactLine = dealerContactParts.join(' &nbsp;|&nbsp; ');
+
     const html = `
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Quotation ${d.quotationNo ?? ''}</title>
-<style>
-  * { box-sizing: border-box; }
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 13px;
-    color: #222;
-    margin: 0;
-    padding: 28px;
-  }
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 3px solid #333;
-    padding-bottom: 14px;
-    margin-bottom: 18px;
-  }
-  .header h1 {
-    font-size: 21px;
-    margin: 0 0 4px 0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .header .sub {
-    font-size: 13px;
-    color: #555;
-    font-weight: bold;
-  }
-  .quote-meta {
-    text-align: right;
-    font-size: 12.5px;
-  }
-  .quote-meta div { margin-bottom: 3px; }
-  .status-badge {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 10px;
-    background: #fff3cd;
-    color: #7a5b00;
-    font-weight: bold;
-    font-size: 11px;
-  }
-  .section-title {
-    background: #f0f0f0;
-    font-weight: bold;
-    padding: 6px 10px;
-    margin-top: 18px;
-    margin-bottom: 8px;
-    border-left: 4px solid #333;
-    text-transform: uppercase;
-    font-size: 12px;
-  }
-  table.info {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 4px;
-  }
-  table.info td {
-    padding: 5px 8px;
-    vertical-align: top;
-    width: 25%;
-    font-size: 12.5px;
-  }
-  table.info td.label {
-    color: #666;
-    width: 15%;
-  }
-  table.pricing {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 4px;
-  }
-  table.pricing td {
-    padding: 6px 10px;
-    border-bottom: 1px solid #e8e8e8;
-  }
-  table.pricing td.amt {
-    text-align: right;
-    width: 160px;
-    font-variant-numeric: tabular-nums;
-  }
-  table.pricing tr.subtotal td {
-    border-top: 1px solid #999;
-    font-weight: 600;
-    background: #fafafa;
-  }
-  table.pricing tr.total td {
-    border-top: 2px solid #333;
-    border-bottom: none;
-    font-weight: bold;
-    font-size: 15px;
-    padding-top: 10px;
-  }
-  .calc-note {
-    font-size: 11px;
-    color: #666;
-    padding: 4px 10px 0 10px;
-    font-style: italic;
-  }
-  .terms {
-    margin-top: 22px;
-    font-size: 11px;
-    color: #555;
-    line-height: 1.5;
-  }
-  .signature-row {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 60px;
-  }
-  .signature-box {
-    text-align: center;
-    width: 220px;
-    border-top: 1px solid #333;
-    padding-top: 6px;
-    font-size: 12px;
-  }
-  @media print {
-    body { padding: 0 20px; }
-    .no-print { display: none; }
-  }
-</style>
+<style>${PRINT_STYLES}</style>
 </head>
 <body>
 
-  <div class="header">
-    <div>
-      <h1>Vehicle Quotation</h1>
-      <div class="sub">${d.dealerName ?? '-'}</div>
+  <div class="letterhead">
+    <div class="letterhead-dealer">
+      <h1>${d.dealerName ?? '-'}</h1>
+      <div class="dealer-line">${d.dealerAddress ?? '-'}</div>
+      <div class="dealer-line">${dealerContactLine || '-'}</div>
     </div>
-    <div class="quote-meta">
+    <div class="letterhead-meta">
+      <div class="doc-title">Vehicle Quotation</div>
       <div><strong>Quotation No:</strong> ${d.quotationNo ?? '-'}</div>
       <div><strong>Date:</strong> ${fmtDate(d.quotationDate)}</div>
       <div><strong>Valid Till:</strong> ${fmtDate(d.validTill ?? d.validTillDate)}</div>
@@ -355,6 +416,10 @@ export class VehicleQuotationListComponent implements OnInit {
       <td class="label">State</td><td>${d.stateName ?? '-'}</td>
       <td class="label">City</td><td>${d.cityName ?? '-'}</td>
     </tr>
+    <tr>
+      <td class="label">GST No</td><td>${d.customerGSTNo ?? '-'}</td>
+      <td class="label">PAN No</td><td>${d.customerPanNo ?? '-'}</td>
+    </tr>
   </table>
 
   <div class="section-title">Vehicle Details</div>
@@ -365,16 +430,16 @@ export class VehicleQuotationListComponent implements OnInit {
     </tr>
     <tr>
       <td class="label">Color</td><td>${d.colorName ?? '-'}</td>
-      <td class="label">Dealer</td><td>${d.dealerName ?? '-'}</td>
+      <td class="label">Dealer Code</td><td>${d.dealerCode ?? '-'}</td>
     </tr>
   </table>
 
   <div class="section-title">Ex-Showroom Price Calculation</div>
   <table class="pricing">
     ${coreRow('Customer Price (Base)', custPrice)}
-    ${coreRow('Add: SGST', sgst)}
-    ${coreRow('Add: CGST', cgst)}
-    ${igst !== 0 ? coreRow('Add: IGST', igst) : ''}
+    ${coreRow('Add: SGST' + (d.sgst ? ` (${num(d.sgst)}%)` : ''), sgst)}
+    ${coreRow('Add: CGST' + (d.cgst ? ` (${num(d.cgst)}%)` : ''), cgst)}
+    ${igst !== 0 ? coreRow('Add: IGST' + (d.igst ? ` (${num(d.igst)}%)` : ''), igst) : ''}
     ${coreRow('Less: FAME II Subsidy', fame2, { negative: true })}
     <tr class="subtotal">
       <td>Ex-Showroom Price</td>
