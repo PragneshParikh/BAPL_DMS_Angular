@@ -22,6 +22,7 @@ import { LotInspectionService } from '../../core/services/lotinspectionservice';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { VehicleInwardService } from '../../core/services/vehicle-inwardservice';
 import { PartsInwardService } from '../../core/services/partsinwardservice';
+import { PartInward } from '../../components/part-inward/part-inward';
 @Component({
   selector: 'app-topbar',
   templateUrl: './topbar.component.html',
@@ -302,11 +303,11 @@ export class TopbarComponent implements OnInit {
     this.vehicleInwardService.getByVehicleStatus(false, this.dealerCode).subscribe({
       next: (result) => {
         console.log(result);
-        
+
         this.vehicleInward = result;
 
         // Group by invoice number
-        const groupedInvoices = this.vehicleInward.filter((p:any)=>!p.isD2d).reduce((acc: any, item: any) => {
+        const groupedInvoices = this.vehicleInward.filter((p: any) => !p.isD2d).reduce((acc: any, item: any) => {
           const invoiceNo = item.invoiceNo;
           if (!acc[invoiceNo]) {
             acc[invoiceNo] = {
@@ -332,24 +333,24 @@ export class TopbarComponent implements OnInit {
     });
   }
 
-   getD2DVehicleNotification() {
+  getD2DVehicleNotification() {
     this.loader.show();
     this.vehicleInwardService.getByVehicleStatus(false, this.dealerCode).subscribe({
       next: (result) => {
         console.log(result);
-        
+
         this.vehicleInward = result;
 
         // Group by invoice number
-        const groupedInvoices = this.vehicleInward.filter((p:any)=>p.isD2d).reduce((acc: any, item: any) => {
+        const groupedInvoices = this.vehicleInward.filter((p: any) => p.isD2d).reduce((acc: any, item: any) => {
           const invoiceNo = item.invoiceNo;
           if (!acc[invoiceNo]) {
             acc[invoiceNo] = {
               invoiceNumber: invoiceNo,
               invoiceDate: item.invoiceDate,
               numberOfItems: 0,
-              issuedFrom:item.issuedDealerName,
-              issuedDealerCode:item.issuedDealerCode,
+              issuedFrom: item.issuedDealerName,
+              issuedDealerCode: item.issuedDealerCode,
               status: 'Received' // You can adjust this based on your logic
             };
           }
@@ -373,7 +374,7 @@ export class TopbarComponent implements OnInit {
     this.partInwardService.getPendingNotificationByDealer(this.dealerCode).subscribe({
       next: (res: any) => {
         console.log(res);
-        
+
         this.partsInward = res;
 
         // Group by invoice number
@@ -479,27 +480,29 @@ export class TopbarComponent implements OnInit {
 
   onClickPartNumber(item: any) {
 
-    const modalRef = this.modalService.open(InvoiceDetail, {
-      size: 'xl',      // modal size: 'sm', 'lg', 'xl'
-      backdrop: 'static', // prevent closing by clicking outside
-      keyboard: false    // prevent closing with ESC
-    });
+    this.router.navigate(['parts-inward'])
 
-    const invoiceDetails = this.partsInward.filter(x => x.invoiceNo === item.invoiceNumber);
-    modalRef.componentInstance.invoiceDetails = invoiceDetails;
-    modalRef.componentInstance.sourceType = 'parts';
+    // const modalRef = this.modalService.open(PartInward, {
+    //   size: 'xl',      // modal size: 'sm', 'lg', 'xl'
+    //   backdrop: 'static', // prevent closing by clicking outside
+    //   keyboard: false    // prevent closing with ESC
+    // });
 
-    modalRef.result.then(
-      (result) => {
-        if (result && result.isAccepted) {
-          this.loader.show();
-          this.updatePartInwardStatusByInvoice(item.invoiceNumber);
-          this.loader.hide();
-        }
-      },
-      (reason) => {
-      }
-    );
+    // const invoiceDetails = this.partsInward.filter(x => x.invoiceNo === item.invoiceNumber);
+    // modalRef.componentInstance.invoiceDetails = invoiceDetails;
+    // modalRef.componentInstance.sourceType = 'parts';
+
+    // modalRef.result.then(
+    //   (result) => {
+    //     if (result && result.isAccepted) {
+    //       this.loader.show();
+    //       this.updatePartInwardStatusByInvoice(item.invoiceNumber);
+    //       this.loader.hide();
+    //     }
+    //   },
+    //   (reason) => {
+    //   }
+    // );
 
   }
 

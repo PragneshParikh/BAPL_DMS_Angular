@@ -1,0 +1,149 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0 text-center">
+        <i class="ri-settings-line me-2"></i>
+        Parts Inward
+    </h4>
+</div>
+
+<div #partsInward id="partsInward">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header border-0 py-1"></div>
+                <div class="card-body pt-1 pb-2">
+                    <form #partsInwardForm="ngForm">
+                        <fieldset>
+                            <!-- Purchase Info Header -->
+                            <div class="row g-1 mb-2 align-items-end">
+                                <div class="col-md-1-5">
+                                    <label class="form-label mb-0 small">Date</label>
+                                    <input type="text" class="form-control form-control-sm bg-light" name="poDate"
+                                        #poDate="ngModel" [ngModel]="partsInwardData.poDate | date:'dd-MM-yyyy'"
+                                        [disabled]="true">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label mb-0 small">Location</label>
+                                    <select class="form-select form-select-sm border-start border-2" name="location"
+                                        #location="ngModel" [(ngModel)]=" partsInwardData.selectedLocation">
+                                        <option value="">-- Select --</option>
+                                        <option *ngFor="let loc of locationList" [value]="loc.loccode">{{loc.locname}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label mb-0 small">Prefix No.</label>
+                                    <input type="text" class="form-control form-control-sm" name="prefix"
+                                        #prefix="ngModel" [(ngModel)]="partsInwardData.prefixNo" placeholder="Prefix"
+                                        [disabled]="true">
+                                </div>
+
+                                <div class="col-md-1">
+                                    <label class="form-label mb-0 small">Order No.</label>
+                                    <input type="text" class="form-control form-control-sm bg-light" name="orderNo"
+                                        #orderNo="ngModel" [(ngModel)]="partsInwardData.orderNo" readonly>
+                                </div>
+
+                            </div>
+
+                            <div class="row g-1 mb-2">
+                                <div class="col-md-3">
+                                    <label class="form-label mb-0 small">Party</label>
+                                    <select class="form-select form-select-sm" [(ngModel)]="partsInwardData.partyName"
+                                        name="party" #party="ngModel" [disabled]="true">
+                                        <option *ngFor="let ledger of ledgerList" [value]="ledger.ledgerCode">
+                                            {{ledger.ledgerName}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+
+
+                    <!-- TABLE -->
+                    <fieldset>
+                        <div class="table-responsive border rounded mt-3">
+                            <table class="table table-sm table-striped table-bordered mb-0 small">
+                                <thead class="table-light text-center">
+                                    <tr>
+                                        <th>Sr.No</th>
+                                        <th>Part No.</th>
+                                        <th>Part Description</th>
+                                        <th>Rack No.</th>
+                                        <th>Bin No.</th>
+                                        <th>Qty</th>
+                                        <th>Rcpt Qty.</th>
+                                        <th>Rate w/o Tax</th>
+                                        <th>Disc.</th>
+                                        <th>Type</th>
+                                        <th>IGST</th>
+                                        <th>Cess</th>
+                                        <th>Amount</th>
+                                        <th>Sale Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="align-middle">
+                                    <tr *ngFor="let item of partsPurchaseDetails; let i = index">
+                                        <td class="text-center">{{(page - 1) * pageSize + i + 1}}</td>
+                                        <td>{{item.itemCode}}</td>
+                                        <td>{{item.itemDescription}}</td>
+                                        <td>{{item.rack}}</td>
+                                        <td>{{item.bin}}</td>
+                                        <td>{{item.qty | number:'1.2-2'}}</td>
+                                        <td>{{item.rcptqty | number:'1.2-2'}}</td>
+                                        <td>{{item.woTax | number:'1.2-2'}}</td>
+                                        <td>{{item.disc | number:'1.2-2'}}</td>
+                                        <td>{{item.type | number:'1.2-2'}}</td>
+                                        <td>{{item.igst}}</td>
+                                        <td>{{item.cess}}</td>
+                                        <td>{{item.amount}}</td>
+                                        <td>{{item.salerate}}</td>
+                                    </tr>
+                                    <!-- Total Row -->
+                                    <tr class="fw-bold table-secondary">
+                                        <td colspan="4" class="text-end">Total :</td>
+                                        <td class="text-center">{{totalQty}}</td>
+                                        <td></td>
+                                        <td class="text-end">{{totalSgst | number:'1.2-2'}}</td>
+                                        <td class="text-end">{{totalCgst | number:'1.2-2'}}</td>
+                                        <td class="text-end">{{totalIgst | number:'1.2-2'}}</td>
+                                        <td class="text-end">{{totalAmount | number:'1.2-2'}}</td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </fieldset>
+
+                    <!-- Pagination -->
+                    <div class="col-sm-12 col-md-12 mt-2">
+                        <div class="text-md-right float-md-end gridjs-pagination">
+                            <ngb-pagination [collectionSize]="purchaseDetails.length" [(page)]="page"
+                                [pageSize]="pageSize" (pageChange)="refreshPage()" [maxSize]="5" [boundaryLinks]="true">
+                            </ngb-pagination>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="card-footer bg-white border-top py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex gap-1">
+                            <!-- Left side slots for potential future use or matching Vehicle PO -->
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary btn-sm" (click)="onSave()" [disabled]="isSubmitted">
+                                Save
+                            </button>
+                            <button class="btn btn-danger btn-sm" (click)="redirectToPOList()"> Cancel </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
