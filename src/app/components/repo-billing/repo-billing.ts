@@ -246,6 +246,11 @@ export class RepoBilling {
       return
     }
 
+    if (!this.vehicleDetails.saleDate) {
+      this.toast.show("You cannot update the details, it is not sold yet.", { classname: 'bg-warning text-white', delay: 5000 });
+      return;
+    }
+
     const modalRef = this.modalService.open(CustomerLedger, {
       size: 'xl',
       backdrop: 'static',
