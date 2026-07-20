@@ -59,6 +59,9 @@ export class JobCardService {
     if (search.registerNo) {
       params = params.set('registerNo', search.registerNo);
     }
+    if (search.serviceLocation) {
+      params = params.set('serviceLocation', search.serviceLocation);
+    }
 
     if (search.chassisNo) {
       params = params.set('chassisNo', search.chassisNo);

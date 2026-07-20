@@ -43,6 +43,7 @@ dealerCode?:string;
 }
 
 export interface LocationName {
+  locareadidNo: number;
   locname: string;
   locCode:string;
 }

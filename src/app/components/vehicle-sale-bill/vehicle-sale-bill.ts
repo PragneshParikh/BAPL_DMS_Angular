@@ -103,8 +103,10 @@ export class VehicleSaleBill {
     if (!dealer) {
 
       this.dealerCode = '';
+      this.selectedDealer = 'All Dealers';
     } else {
       this.dealerCode = dealer.dealerCode;
+      this.selectedDealer = dealer.dealerName;
     }
 
     this.showDropdown = false;
