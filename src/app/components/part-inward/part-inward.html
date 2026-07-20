@@ -25,9 +25,10 @@
                                 <div class="col-md-3">
                                     <label class="form-label mb-0 small">Location</label>
                                     <select class="form-select form-select-sm border-start border-2" name="location"
-                                        #location="ngModel" [(ngModel)]=" partsInwardData.selectedLocation">
+                                        #location="ngModel" (change)="onLocationChange($event)"
+                                        [(ngModel)]=" partsInwardData.selectedLocation">
                                         <option value="">-- Select --</option>
-                                        <option *ngFor="let loc of locationList" [value]="loc.loccode">{{loc.locname}}
+                                        <option *ngFor="let loc of lstLocations" [value]="loc.loccode">{{loc.locname}}
                                         </option>
                                     </select>
                                 </div>
@@ -51,7 +52,7 @@
                                 <div class="col-md-3">
                                     <label class="form-label mb-0 small">Party</label>
                                     <select class="form-select form-select-sm" [(ngModel)]="partsInwardData.partyName"
-                                        name="party" #party="ngModel" [disabled]="true">
+                                        name="party" #party="ngModel">
                                         <option *ngFor="let ledger of ledgerList" [value]="ledger.ledgerCode">
                                             {{ledger.ledgerName}}
                                         </option>
@@ -120,8 +121,9 @@
                     <!-- Pagination -->
                     <div class="col-sm-12 col-md-12 mt-2">
                         <div class="text-md-right float-md-end gridjs-pagination">
-                            <ngb-pagination [collectionSize]="purchaseDetails.length" [(page)]="page"
-                                [pageSize]="pageSize" (pageChange)="refreshPage()" [maxSize]="5" [boundaryLinks]="true">
+                            <ngb-pagination [collectionSize]="lstPartsPurchaseDetails.length" [(page)]="page"
+                                [pageSize]="pageSize" (pageChange)="refreshPage()" [maxSize]="10"
+                                [boundaryLinks]="true">
                             </ngb-pagination>
                         </div>
                     </div>
@@ -136,10 +138,10 @@
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button class="btn btn-primary btn-sm" (click)="onSave()" [disabled]="isSubmitted">
+                            <button class="btn btn-primary btn-sm" (click)="onSave()">
                                 Save
                             </button>
-                            <button class="btn btn-danger btn-sm" (click)="redirectToPOList()"> Cancel </button>
+                            <button class="btn btn-danger btn-sm"> Cancel </button>
                         </div>
                     </div>
                 </div>
