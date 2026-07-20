@@ -242,7 +242,7 @@ export const routes: Routes = [
       { path: 'counter-bill/edit/:id', component: AddCounterBill, data: [77] },
       { path: 'add-counter-bill', component: AddCounterBill, data: [77] },
       { path: 'print-counter-bill/:id', component: CounterBillPrint, data: [77] },
-      { path: 'vehicle-open-stock', component:VehicleOpenStock, data: [89] }
+      { path: 'vehicle-open-stock', component:VehicleOpenStock, data: [89] },
       { path: 'vehicle-quotation', component: VehicleQuotationListComponent, data: [87] },
       { path: 'vehicle-quotation/add', component: VehicleQuotation, data: [87] },
       { path: 'vehicle-quotation/edit/:id', component: VehicleQuotation, data: [87] },

@@ -178,7 +178,9 @@ export class JobCardAddForm {
       next: (res: string) => {
         this.loader.hide();
         this.jobPrefix = res;
-        this.jobNo = Number(res.split('/').pop());
+        const parts = res.split('/');
+        this.jobNo = parseInt(parts[parts.length - 1], 10);
+        console.log(this.jobNo);
       }, error: (err) => {
         this.loader.hide();
         console.error(err);
@@ -191,6 +193,7 @@ export class JobCardAddForm {
   }
   //Fetech Dealer Location
   fetchLocations(): void {
+    this.loadPrefix();
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
     if (!this.isSuperAdmin) {
@@ -200,7 +203,7 @@ export class JobCardAddForm {
     }
     this.locationService.getLocationList(this.dealerCode).subscribe({
       next: (data: any[]) => {
-       
+
         // only Workshop (id = 2)
         this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
@@ -745,7 +748,7 @@ export class JobCardAddForm {
   //insert jobcard
   isSubmitted = false;
   saveJobCard() {
-
+    debugger
     this.isSubmitted = true;
     if (this.selectedJobtype == 1 && this.pdiCheckList.length == 0) {
       Swal.fire({
