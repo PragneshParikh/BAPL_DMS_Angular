@@ -223,13 +223,17 @@ export class ReportService {
   }
 
   exportJobCardReport(
-    dealerCode: string,
+    dealerCode?: string,
     fromDate?: Date,
     toDate?: Date
   ): Observable<JobReportViewModel[]> {
-    let params =
-      new HttpParams()
-        .set('dealerCode', dealerCode);
+    let params = new HttpParams();
+
+    if (dealerCode)
+      params = params.set(
+        'dealerCode',
+        dealerCode
+      );
 
     if (fromDate)
       params = params.set(
