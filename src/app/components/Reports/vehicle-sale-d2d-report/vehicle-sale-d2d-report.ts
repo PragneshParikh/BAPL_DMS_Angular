@@ -19,6 +19,7 @@ export class VehicleSaleD2dReport implements OnInit {
 
   filter: D2DReportFilter = {
     dealerCode: null,
+    fromDealerCode: null,
     locationCode: null,
     chassisNo: null,
     motorNo: null,
@@ -112,6 +113,7 @@ export class VehicleSaleD2dReport implements OnInit {
   resetFilters(): void {
     this.filter = {
       dealerCode: null,
+      fromDealerCode: null,
       locationCode: null,
       chassisNo: null,
       motorNo: null,

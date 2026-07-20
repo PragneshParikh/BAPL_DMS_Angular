@@ -58,5 +58,9 @@ export class VehicleQuotationService {
     getFinanceCompanies(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/finance-ledgers`);
   }
+
+    getPrintQuotation(id: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${id}/print`);
+  }
   
 }
