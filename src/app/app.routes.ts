@@ -187,7 +187,7 @@ export const routes: Routes = [
       { path: 'hsrp-order-list', component: HSRPOrderList, data: [48] },
       { path: 'hsrp-inward', component: HsrpInward, data: [48] },
 
-      
+
 
       { path: 'vehicle-sale-report', data: [43], loadComponent: () => import('./components/Reports/vehicle-sale-report/vehicle-sale-report').then(m => m.VehicleSaleReportComponent) },
       { path: 'vehicle-stocks-report', data: [46], loadComponent: () => import('./components/Reports/vehicle-stock-report/vehicle-stock-report').then(m => m.VehicleStockReportComponent) },
@@ -244,8 +244,8 @@ export const routes: Routes = [
       { path: 'counter-bill/edit/:id', component: AddCounterBill, data: [77] },
       { path: 'add-counter-bill', component: AddCounterBill, data: [77] },
       { path: 'print-counter-bill/:id', component: CounterBillPrint, data: [77] },
-      { path: 'repo-billing', component: RepoBilling, data: [88] }
-      { path: 'vehicle-open-stock', component:VehicleOpenStock, data: [89] }
+      { path: 'repo-billing', component: RepoBilling, data: [88] },
+      { path: 'vehicle-open-stock', component: VehicleOpenStock, data: [89] },
       { path: 'vehicle-quotation', component: VehicleQuotationListComponent, data: [87] },
       { path: 'vehicle-quotation/add', component: VehicleQuotation, data: [87] },
       { path: 'vehicle-quotation/edit/:id', component: VehicleQuotation, data: [87] },
