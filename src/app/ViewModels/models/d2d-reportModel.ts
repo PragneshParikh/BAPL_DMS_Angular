@@ -4,6 +4,7 @@ export interface D2DReportFilter {
   chassisNo?: string | null;
   motorNo?: string | null;
   batteryNo?: string | null;
+  fromDealerCode: string | null;
   chargerNo?: string | null;
   controllerNo?: string | null;
   stockStatus?: string | null;     // NEW

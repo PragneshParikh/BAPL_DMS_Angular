@@ -196,6 +196,8 @@ export class VehicleQuotation implements OnInit, OnChanges {
     this.quotationData.variantId = '';
     this.quotationData.colorId = '';
     this.quotationData.financeCompanyId = '';
+    this.quotationData.customerGSTNo = '';
+    this.quotationData.customerPanNo = '';
     this.colorLocked = false;
     this.lastFetchedItem = null;
     this.generateQuotationNo();
@@ -264,6 +266,9 @@ export class VehicleQuotation implements OnInit, OnChanges {
 
       this.quotationData.validTillDate =
         this.formatDate(response.validTillDate ?? response.validTill);
+
+      this.quotationData.customerGSTNo = response.customerGSTNo ?? '';
+      this.quotationData.customerPanNo = response.customerPanNo ?? '';
 
       // Populate city list for selected state
       this.onStateChange(true);
@@ -761,6 +766,8 @@ onSubmit(form: any): void {
     mobileNo: this.quotationData.mobileNo,
     emailId: this.quotationData.emailId,
     address: this.quotationData.address,
+    customerGSTNo: this.quotationData.customerGSTNo || null,
+    customerPanNo: this.quotationData.customerPanNo || null,
 
     stateId: this.quotationData.stateId
       ? Number(this.quotationData.stateId)
