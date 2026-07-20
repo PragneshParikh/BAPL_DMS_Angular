@@ -359,8 +359,6 @@ export class TopbarComponent implements OnInit {
 
         // Convert grouped object to array
         this.d2dNotificationList = Object.values(groupedInvoices);
-        console.log('D2D Notifications:', this.d2dNotificationList);
-
         this.loader.hide();
       },
       error: (err) => {
@@ -372,10 +370,7 @@ export class TopbarComponent implements OnInit {
   getPartsInwardNotification() {
     this.partInwardService.getPendingNotificationByDealer(this.dealerCode).subscribe({
       next: (res: any) => {
-        console.log(res);
-        
         this.partsInward = res;
-
         // Group by invoice number
         const groupedInvoices = this.partsInward.reduce((acc: any, item: any) => {
           const invoiceNo = item.invoiceNo;

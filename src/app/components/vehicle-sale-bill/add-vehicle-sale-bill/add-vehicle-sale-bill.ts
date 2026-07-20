@@ -162,12 +162,13 @@ export class AddVehicleSaleBill implements OnInit {
   private modalRef!: NgbModalRef;
   dealerCode: string = '';
   showD2D: boolean;
+  deletionCheck :any[] = [];
   constructor(private storageService: StorageService, private locationService: LocationMasterService,
     private receiptEntryService: ReceiptEntryService, private vehicleSaleBillService: VehicleSaleBillService,
     private modalService: NgbModal, private loader: LoaderService, private toaster: ToastService,
     private router: Router, private prefixService: PrefixService, private ledgerService: LedgerMasterService,
     private route: ActivatedRoute,) {
-      this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
     }
@@ -215,16 +216,15 @@ export class AddVehicleSaleBill implements OnInit {
   }
 
   getD2dProvision() {
-    if(!this.isSuperAdmin){
+    if (!this.isSuperAdmin) {
       this.ledgerService.getD2DProvision(this.dealerCode).subscribe({
         next: (res) => {
-          console.log(res);
-          
+
           this.showD2D = res;
         }
       });
     }
-    
+
   }
   filterInsurance() {
     const search = (this.model.insuranceName || '').trim().toLowerCase();
@@ -346,12 +346,15 @@ export class AddVehicleSaleBill implements OnInit {
   }
 
   loadChassisList(callback?: () => void) {
-    const dealerCode = this.storageService.getDealerCode();
+    let dealerCode = '';
     const isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-    this.vehicleSaleBillService.getAllChassisWithPDIStatus(dealerCode, this.selectedCustomerId)
+    if(!isSuperAdmin)
+      {
+        this.storageService.getDealerCode();
+      }
+    this.vehicleSaleBillService.getAllChassisWithPDIStatus(dealerCode, this.selectedCustomerId,this.model.location)
       .subscribe({
         next: (res) => {
-          console.log('Chassis list',res);
           this.chassisList = res;
           this.filteredChassis = res.filter(p => p.locationCode === this.model.location);
           if (callback) callback();
@@ -366,10 +369,12 @@ export class AddVehicleSaleBill implements OnInit {
   }
 
   getBillById(id: number) {
+   
     this.loader.show();
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
         this.loader.hide();
+        this.model.location =res.location;
         this.selectedCustomerId = res.ledgerId;
         this.Status = res.status || '';
         this.isErpLocked =
@@ -395,6 +400,14 @@ export class AddVehicleSaleBill implements OnInit {
         console.error(err);
       }
     });
+
+     if (this.isSuperAdmin ) {
+      this.vehicleSaleBillService.getVehicleDeletionPrerequisites(id).subscribe({
+        next: (res) => {
+         this.deletionCheck = res;
+        }
+      });
+    }
   }
 
   fetchLocations(): void {
@@ -884,7 +897,6 @@ export class AddVehicleSaleBill implements OnInit {
 
   onChassisChange() {
     const selected = this.chassisList.find(c => c.chassisNo === this.model.chassisNo);
-    console.log('Selected chassis:', selected);
     if (!selected) return;
     if ((!selected.pdiStatus || selected.pdiStatus === 'Not Done') && !this.model.isD2D) {
       this.toaster.show('Please complete PDI before proceeding', {
@@ -894,9 +906,18 @@ export class AddVehicleSaleBill implements OnInit {
       this.model.chassisNo = '';
       return;
     }
+
+     if ((!selected.repairBillStatus || selected.repairBillStatus === 'Not Done') && !this.model.isD2D) {
+      this.toaster.show('Job Card is opened for this.Please close it', {
+        classname: 'bg-danger text-light',
+        delay: 3000
+      });
+      this.model.chassisNo = '';
+      return;
+    }
     if (selected.proformaCreated && !selected.isD2D) {
       this.toaster.show(
-        `Proforma already generated fOR(Bill No: ${selected.proformaCreated}). Please select another chassis.`,
+        `Proforma already generated for(Bill No: ${selected.proformaCreated}). Please select another chassis.`,
         {
           classname: 'bg-warning text-dark',
           delay: 5000
@@ -1014,9 +1035,7 @@ export class AddVehicleSaleBill implements OnInit {
     modalRef.componentInstance.isInvoiced = this.isInvoiced;
     modalRef.result.then((updatedList) => {
       if (updatedList) {
-        console.log(updatedList);
-        console.log(this.vehicleList);
-        
+
         this.vehicleList = [...updatedList];
         //recalculate per-row finalAmount
         this.calculateVehicleAmounts();
@@ -1202,8 +1221,93 @@ export class AddVehicleSaleBill implements OnInit {
     this.filteredChassis = this.chassisList.filter(p => p.locationCode === this.model.location);
     this.showNotFound = false;
   }
-  
+
   onExtraChargesChange() {
     this.model.finalAmount = this.getGrandTotal();
+  }
+
+  deleteVehicleSaleBill() {
+
+    const isAccepted =this.deletionCheck.filter(x => x.isAccepted ==true);
+  const openedJobCards = this.deletionCheck.filter(x => x.isJobCardOpened == true);
+  const completedVDN = this.deletionCheck.filter(x => x.isVDNDone ==true);
+
+
+  if(isAccepted.length >0)
+  {
+Swal.fire({
+      title: 'Deletion Not Allowed',
+      text: 'Cannot delete as the dealer has already accepted this.',
+      icon: 'warning'
+    });
+
+    return;
+  }
+
+  if (openedJobCards.length > 0) {
+
+    const message = openedJobCards
+      .map(x =>
+        `Job Card <b>${x.jobCardNumber}</b> exists for Chassis <b>${x.chassisNo}</b>`
+      )
+      .join('<br><br>');
+
+    Swal.fire({
+      title: 'Deletion Not Allowed',
+      html: message,
+      icon: 'warning'
+    });
+
+    return;
+  }
+
+  // ASK CONFIRMATION FOR ALL OTHER CASES
+  let htmlMessage = 'Are you sure you want to delete this Vehicle Sale Bill?';
+
+  if (completedVDN.length > 0) {
+    const vdnMessage = completedVDN
+      .map(x => `VDN exists for Chassis <b>${x.chassisNo}</b>`)
+      .join('<br>');
+
+    htmlMessage = `
+      ${vdnMessage}
+      <br><br>
+      <b>Are you sure you want to delete this Vehicle Sale Bill?</b>
+    `;
+  }
+
+  Swal.fire({
+    title: 'Confirm Delete',
+    html: htmlMessage,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Delete',
+    cancelButtonText: 'No'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.performDelete();
+    }
+  });
 }
+
+private performDelete() {
+  this.vehicleSaleBillService.deleteVehicleSaleBill(this.billId).subscribe({
+    next: () => {
+      this.toaster.show(
+        'Vehicle Sale Bill Deleted Successfully',
+        { classname: 'bg-success text-light', delay: 3000 }
+      );
+      this.router.navigate(['/vehicle-sale-bill']);
+    },
+    error: (err) => {
+      console.error(err);
+      this.toaster.show(
+        'Failed to delete Vehicle Sale Bill',
+        { classname: 'bg-danger text-light', delay: 3000 }
+      );
+    }
+  });
+}
+
+
 }
