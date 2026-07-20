@@ -73,6 +73,14 @@ import {
   ModelWiseVariantStockPivotResponse,
   ModelWiseVariantStockCountFilter
 } from '../../ViewModels/models/Model wise variant stock count.model';
+
+import { D2DReportFilter, D2DReportRow, D2DReportResponse } from '../../ViewModels/models/d2d-reportModel';
+
+import {
+  MaterialTransferReportFilterModel,
+  MaterialTransferReportPagedResponse,
+  MaterialTransferReportRow
+} from '../../ViewModels/models/material-transferModel';
 @Injectable({
   providedIn: 'root'
 })
@@ -112,11 +120,29 @@ export class ReportService {
   // STOCK REPORT
   // =====================================================
 
-  getDealerWiseStockReport(dealerCode?: string):
-    Observable<StockReport[]> {
-    const params = dealerCode ? `?dealerCode=${dealerCode}` : '';
+  // FIX: was building the query string by hand (`?dealerCode=${dealerCode}`),
+  // which only ever supported one param. Switched to HttpParams — the same
+  // pattern every other method in this file already uses — so fromDate/toDate
+  // can be added without another one-off string concat. Dates are passed as
+  // plain strings straight from <input type="date">, matching
+  // getModelWiseSaleCountReport / getTotalSaleReportDealerWise below rather
+  // than the Date+toISOString() convention used by getDealerWiseJobReport —
+  // stock-report.ts never has a Date object, only the string the date input
+  // already gives it.
+  getDealerWiseStockReport(
+    dealerCode?: string,
+    fromDate?: string,
+    toDate?: string
+  ): Observable<StockReport[]> {
+    let params = new HttpParams();
+
+    if (dealerCode) params = params.set('dealerCode', dealerCode);
+    if (fromDate)   params = params.set('fromDate', fromDate);
+    if (toDate)     params = params.set('toDate', toDate);
+
     return this.http.get<StockReport[]>(
-      `${this.apiUrl}/dealer-wise${params}`
+      `${this.apiUrl}/dealer-wise`,
+      { params }
     );
   }
 
@@ -203,13 +229,17 @@ export class ReportService {
   }
 
   exportJobCardReport(
-    dealerCode: string,
+    dealerCode?: string,
     fromDate?: Date,
     toDate?: Date
   ): Observable<JobReportViewModel[]> {
-    let params =
-      new HttpParams()
-        .set('dealerCode', dealerCode);
+    let params = new HttpParams();
+
+    if (dealerCode)
+      params = params.set(
+        'dealerCode',
+        dealerCode
+      );
 
     if (fromDate)
       params = params.set(
@@ -620,4 +650,42 @@ export class ReportService {
     );
   }
 
+      getD2DReport(
+    filter: D2DReportFilter
+  ): Observable<D2DReportResponse> {
+    return this.http.post<D2DReportResponse>(
+      `${this.apiUrl}/d2d-report`,
+      filter
+    );
+  }
+
+  exportD2DReport(
+    filter: D2DReportFilter
+  ): Observable<D2DReportRow[]> {
+    return this.http.post<D2DReportRow[]>(
+      `${this.apiUrl}/d2d-report/export`,
+      filter
+    );
+  }
+
+  // =====================================================
+  // MATERIAL TRANSFER REPORT
+  // =====================================================
+  getMaterialTransferReport(
+    filter: MaterialTransferReportFilterModel
+  ): Observable<MaterialTransferReportPagedResponse> {
+    return this.http.post<MaterialTransferReportPagedResponse>(
+      `${this.apiUrl}/material-transfer`,
+      filter
+    );
+  }
+
+  exportMaterialTransferReport(
+    filter: MaterialTransferReportFilterModel
+  ): Observable<MaterialTransferReportRow[]> {
+    return this.http.post<MaterialTransferReportRow[]>(
+      `${this.apiUrl}/material-transfer/export`,
+      filter
+    );
+  }
 }

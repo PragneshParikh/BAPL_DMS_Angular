@@ -152,6 +152,20 @@
                             {{ errors.cityId }}
                         </small>
                     </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">GST No</label>
+                        <input type="text" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.customerGSTNo" name="customerGSTNo"
+                            placeholder="Optional">
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">PAN No</label>
+                        <input type="text" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.customerPanNo" name="customerPanNo"
+                            placeholder="Optional">
+                    </div>
                 </div>
 
                 <!-- ROW 3: Vehicle Details (Model -> Variant -> Color) -->
