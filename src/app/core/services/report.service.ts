@@ -75,6 +75,12 @@ import {
 } from '../../ViewModels/models/Model wise variant stock count.model';
 
 import { D2DReportFilter, D2DReportRow, D2DReportResponse } from '../../ViewModels/models/d2d-reportModel';
+
+import {
+  MaterialTransferReportFilterModel,
+  MaterialTransferReportPagedResponse,
+  MaterialTransferReportRow
+} from '../../ViewModels/models/material-transferModel';
 @Injectable({
   providedIn: 'root'
 })
@@ -658,6 +664,27 @@ export class ReportService {
   ): Observable<D2DReportRow[]> {
     return this.http.post<D2DReportRow[]>(
       `${this.apiUrl}/d2d-report/export`,
+      filter
+    );
+  }
+
+  // =====================================================
+  // MATERIAL TRANSFER REPORT
+  // =====================================================
+  getMaterialTransferReport(
+    filter: MaterialTransferReportFilterModel
+  ): Observable<MaterialTransferReportPagedResponse> {
+    return this.http.post<MaterialTransferReportPagedResponse>(
+      `${this.apiUrl}/material-transfer`,
+      filter
+    );
+  }
+
+  exportMaterialTransferReport(
+    filter: MaterialTransferReportFilterModel
+  ): Observable<MaterialTransferReportRow[]> {
+    return this.http.post<MaterialTransferReportRow[]>(
+      `${this.apiUrl}/material-transfer/export`,
       filter
     );
   }
