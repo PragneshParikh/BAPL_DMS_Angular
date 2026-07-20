@@ -261,7 +261,7 @@
                     <!-- Dealer Information -->
                     @for (dealer of dealerDetailsList; track $index) {
                     <fieldset class="border p-1 rounded mb-2" [disabled]="true">
-                        <legend class="float-none w-auto px-2 fs-6">Dealer Information</legend>
+                        <legend class="float-none w-auto px-2 fs-6">{{dealer.dealerOrder}} Dealer Information</legend>
                         <div>
                             <form>
                                 <div class="row mb-2 g-1">
@@ -315,7 +315,7 @@
                     <!-- First Party Information -->
                     @for (party of partyDetailsList; track $index) {
                     <fieldset class="border p-1 rounded mb-2" [disabled]="true">
-                        <legend class="float-none w-auto px-2 fs-6">Party Information</legend>
+                        <legend class="float-none w-auto px-2 fs-6">{{party.ownerOrder}} Party Information</legend>
                         <div>
                             <form>
                                 <div class="row mb-2 g-1">
