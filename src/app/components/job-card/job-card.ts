@@ -47,6 +47,7 @@ export class JobCard {
   serviceTypeList: any;
   selectedServiceType: string;
   chassisList: any[] = [];
+  dealerCode: string;
 
   // userRole: string = ''; when userrole api done then this var use
 
@@ -66,7 +67,8 @@ export class JobCard {
     serviceLocation: '',
     jobNo: null,
     customerName: '',
-    chassisNo: ''
+    chassisNo: '',
+    registerNo:''
   };
   ngOnInit(): void {
 
@@ -105,10 +107,17 @@ export class JobCard {
 
   //Fetech Dealer Location
   fetchLocations(): void {
-    const dealerCode = this.storageService.getDealerCode();
-    this.locationService.getLocationList(dealerCode).subscribe({
+   this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
+    this.locationService.getLocationList(this.dealerCode).subscribe({
       next: (data: LocationName[]) => {
-        this.locations = data;
+           // only Workshop (id = 2)
+        this.locations = data.filter(x => x.locareadidNo === 2);
       },
       error: (err) => {
         console.error('Error fetching locations', err);
@@ -155,7 +164,13 @@ export class JobCard {
   }
 
   loadJobCardList() {
-    this.searchModel.dealerCode = this.storageService.getDealerCode();
+    this.isSuperAdmin = this.storageService.getRole().toLocaleLowerCase() === 'superadmin';
+    let dealerCode = '';
+    if (!this.isSuperAdmin) {
+      this.searchModel.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.searchModel.dealerCode = null;
+    } 
     this.jobCardService.getJobCardList(this.searchModel)
       .subscribe({
         next: (res) => {
@@ -240,6 +255,7 @@ export class JobCard {
   onLocationChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedLocation = target.value;
+    this.searchModel.serviceLocation =  this.selectedLocation
 
   }
   onJobType(event: Event): void {
@@ -266,15 +282,25 @@ export class JobCard {
     this.selectedChassis = '';
   }
   search() {
+     this.isSuperAdmin = this.storageService.getRole().toLocaleLowerCase() === 'superadmin';
+    let dealerCode = '';
+    if (!this.isSuperAdmin) {
+      this.searchModel.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.searchModel.dealerCode = null;
+    } 
     const payload = {
-      dealerCode: this.storageService.getDealerCode(),
+      
+      dealerCode: this.searchModel.dealerCode||null,
       fromDate: this.searchModel.fromDate || null,
       toDate: this.searchModel.toDate || null,
       serviceLocation: this.searchModel.serviceLocation || null,
       jobNo: this.searchModel.jobNo ? Number(this.searchModel.jobNo) : null,
       customerName: this.searchModel.customerName || null,
-      chassisNo: this.searchModel.chassisNo || null
+      chassisNo: this.searchModel.chassisNo || null,
+      registerNo:this.searchModel.registerNo || null
     };
+    console.log(payload)
     this.jobCardService.getJobCardList(payload).subscribe(res => {
       this.jobCardList = res;
     });

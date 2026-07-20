@@ -3,6 +3,7 @@ export interface JobTypeModel {
   jobtypeName: string;
 }
 export interface JobCardSearchModel {
+
   dealerCode: string;
   fromDate?: string;
   toDate?: string;
@@ -10,4 +11,5 @@ export interface JobCardSearchModel {
   jobNo?: number;
   customerName?: string;
   chassisNo?: string;
+  registerNo?:string;
 }
