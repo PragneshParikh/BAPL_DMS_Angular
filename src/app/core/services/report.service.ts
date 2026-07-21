@@ -87,6 +87,18 @@ import {
   RepairBillReportPagedResponse,
   RepairBillReportRow
 } from '../../ViewModels/models/repair-billModel';
+
+import {
+  ComparisonReportFilterModel,
+  ComparisonReportPagedResponse,
+  ComparisonReportRow
+} from '../../ViewModels/models/Comaprision-reportModel';
+
+import {
+  VehicleInwardReportFilterModel,
+  VehicleInwardReportResponse,
+  VehicleInwardReportViewModel
+} from '../../ViewModels/models/vehicle-inward-report.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -714,6 +726,58 @@ export class ReportService {
     return this.http.post<RepairBillReportRow[]>(
       `${this.apiUrl}/repair-bill/export`,
       filter
+    );
+  }
+
+  // =====================================================
+  // COMPARISON REPORT (Performa vs Sale Bill)
+  // =====================================================
+  getComparisonReport(
+    filter: ComparisonReportFilterModel
+  ): Observable<ComparisonReportPagedResponse> {
+    return this.http.post<ComparisonReportPagedResponse>(
+      `${this.apiUrl}/comparison-report`,
+      filter
+    );
+  }
+
+  exportComparisonReport(
+    filter: ComparisonReportFilterModel
+  ): Observable<ComparisonReportRow[]> {
+    return this.http.post<ComparisonReportRow[]>(
+      `${this.apiUrl}/comparison-report/export`,
+      filter
+    );
+  }
+
+  // =====================================================
+  // VEHICLE INWARD REPORT
+  // Path confirmed as "vehicle-inward" (not "vehicle-inward-report") via
+  // the existing dedicated VehicleInwardReportService.getInwardReport() call.
+  // =====================================================
+  getVehicleInwardReport(
+    filter: VehicleInwardReportFilterModel
+  ): Observable<VehicleInwardReportResponse> {
+    return this.http.post<VehicleInwardReportResponse>(
+      `${this.apiUrl}/vehicle-inward`,
+      filter
+    );
+  }
+
+  exportVehicleInwardReport(
+    filter: VehicleInwardReportFilterModel
+  ): Observable<VehicleInwardReportViewModel[]> {
+    const exportFilter: VehicleInwardReportFilterModel = {
+      ...filter,
+      pageIndex: 1,
+      pageSize: 100000
+    };
+
+    return this.http.post<VehicleInwardReportResponse>(
+      `${this.apiUrl}/vehicle-inward`,
+      exportFilter
+    ).pipe(
+      map(res => res.data)
     );
   }
 }
