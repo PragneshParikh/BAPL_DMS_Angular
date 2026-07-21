@@ -134,5 +134,9 @@ export class PartInward implements OnInit {
 
   }
 
+  searchRecords() {
+
+  }
+
 
 }

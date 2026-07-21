@@ -16,9 +16,16 @@
                             <!-- Purchase Info Header -->
                             <div class="row g-1 mb-2 align-items-end">
                                 <div class="col-md-1-5">
-                                    <label class="form-label mb-0 small">Date</label>
+                                    <label class="form-label mb-0 small">Invoice Date</label>
                                     <input type="text" class="form-control form-control-sm bg-light" name="poDate"
-                                        #poDate="ngModel" [ngModel]="partsInwardData.poDate | date:'dd-MM-yyyy'"
+                                        #poDate="ngModel" [ngModel]="partsInwardData.invoiceDate | date:'dd-MM-yyyy'"
+                                        [disabled]="true">
+                                </div>
+
+                                <div class="col-md-1-5">
+                                    <label class="form-label mb-0 small">Receipt Date</label>
+                                    <input type="text" class="form-control form-control-sm bg-light" name="poDate"
+                                        #poDate="ngModel" [ngModel]="partsInwardData.receiptDate | date:'dd-MM-yyyy'"
                                         [disabled]="true">
                                 </div>
 
@@ -41,16 +48,19 @@
                                 </div>
 
                                 <div class="col-md-1">
-                                    <label class="form-label mb-0 small">Order No.</label>
+                                    <label class="form-label mb-0 small">Purchase No.</label>
                                     <input type="text" class="form-control form-control-sm bg-light" name="orderNo"
-                                        #orderNo="ngModel" [(ngModel)]="partsInwardData.orderNo" readonly>
+                                        #orderNo="ngModel" [(ngModel)]="partsInwardData.purchaseNo" readonly>
                                 </div>
 
-                            </div>
+                                <div class="col-md-2">
+                                    <label class="form-label mb-0 small">Document No.</label>
+                                    <input type="text" class="form-control form-control-sm" name="orderNo"
+                                        #orderNo="ngModel" [(ngModel)]="partsInwardData.documentNo">
+                                </div>
 
-                            <div class="row g-1 mb-2">
                                 <div class="col-md-3">
-                                    <label class="form-label mb-0 small">Party</label>
+                                    <label class="form-label mb-0 small">Party Name</label>
                                     <select class="form-select form-select-sm" [(ngModel)]="partsInwardData.partyName"
                                         name="party" #party="ngModel">
                                         <option *ngFor="let ledger of ledgerList" [value]="ledger.ledgerCode">
@@ -58,7 +68,32 @@
                                         </option>
                                     </select>
                                 </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label mb-0 small">Source System</label>
+                                    <select class="form-select form-select-sm border-start border-2" name="location"
+                                        #location="ngModel" (change)="onLocationChange($event)"
+                                        [(ngModel)]=" partsInwardData.sourceType">
+                                        <option value="">-- Select --</option>
+                                        <option value="erp">ERP</option>
+                                        <option value="dms">DMS</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-1-5">
+                                    <label class="form-label mb-0 small d-block">&nbsp;</label>
+                                    <div class="d-flex align-5-items-center gap-1">
+                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                            (click)="searchRecords()">
+                                            Search
+                                        </button>
+                                    </div>
+                                </div>
+
+
+
                             </div>
+
                         </fieldset>
                     </form>
 
