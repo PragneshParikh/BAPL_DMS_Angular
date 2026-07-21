@@ -92,6 +92,36 @@
     <div class="alert alert-danger">{{ errorMessage }}</div>
   </div>
 
+  <!-- ── Summary Cards ──────────────────────────────────────────────── -->
+  <div class="col-12" *ngIf="!isLoading && reportData.length > 0">
+    <div class="row g-3">
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <p class="text-muted text-uppercase fw-semibold mb-1">Total Amount</p>
+          <h5 class="mb-0">{{ formatCurrency(totalAmount) }}</h5>
+        </div></div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <p class="text-muted text-uppercase fw-semibold mb-1">Total MRP</p>
+          <h5 class="mb-0">{{ formatCurrency(totalMrp) }}</h5>
+        </div></div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <p class="text-muted text-uppercase fw-semibold mb-1">Total GST (C+S+I)</p>
+          <h5 class="mb-0">{{ formatCurrency(totalGstAmount) }}</h5>
+        </div></div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <p class="text-muted text-uppercase fw-semibold mb-1">Total Quantity</p>
+          <h5 class="mb-0">{{ totalQuantity }}</h5>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── Loading ────────────────────────────────────────────────────── -->
   <div class="col-12" *ngIf="isLoading">
     <div class="card">
@@ -125,6 +155,7 @@
                 </th>
                 <th>Dealer Code</th>
                 <th>Dealer Name</th>
+                <th>Dealer Location</th>
                 <th>Dealer City</th>
                 <th>Dealer State</th>
                 <th class="sortable" (click)="onSort('jobNo')">
@@ -135,12 +166,9 @@
                     'fa-sort':      sortColumn !== 'jobNo'
                   }"></i>
                 </th>
-                <th>Job Invoice No.</th>
                 <th>Chassis No.</th>
-                <th>Registration No.</th>
                 <th>Customer Name</th>
                 <th>Customer Mobile</th>
-                <th>Service Location</th>
                 <th>Material Prefix</th>
                 <th>Material Issue No.</th>
                 <th class="sortable" (click)="onSort('transferDate')">
@@ -156,15 +184,21 @@
                 <th>Item Description</th>
                 <th>HSN Code</th>
                 <th class="text-end">Qty</th>
-                <th class="text-end">Rate</th>
+                <th class="text-end">Item Rate</th>
+                <th class="text-end">MRP</th>
+                <th class="text-end">CGST %</th>
+                <th class="text-end">CGST Amt</th>
+                <th class="text-end">SGST %</th>
+                <th class="text-end">SGST Amt</th>
+                <th class="text-end">IGST %</th>
+                <th class="text-end">IGST Amt</th>
+                <th class="text-end">Total GST</th>
                 <th class="text-end">Amount</th>
-                <th>Issue Type</th>
                 <th>Serial No.</th>
                 <th>Remarks</th>
-                <th>Item Received</th>
-                <th>Valid Days</th>
                 <th>Rack No.</th>
                 <th>Bin</th>
+                <th>Issue Type</th>
                 <th>Job Card Status</th>
                 <th>Prepared By</th>
                 <th>Modified By</th>
@@ -175,15 +209,13 @@
                 <td>{{ item.srNo }}</td>
                 <td>{{ item.dealerCode }}</td>
                 <td>{{ item.dealerName }}</td>
+                <td>{{ item.dealerLocation }}</td>
                 <td>{{ item.dealerCity }}</td>
                 <td>{{ item.dealerState }}</td>
                 <td>{{ item.jobNo }}</td>
-                <td>{{ item.jobInvoiceNo }}</td>
                 <td>{{ item.chassisNo }}</td>
-                <td>{{ item.registerNo }}</td>
                 <td>{{ item.customerName }}</td>
                 <td>{{ item.customerMobile }}</td>
-                <td>{{ item.serviceLocationName }}</td>
                 <td>{{ item.materialPrefix }}</td>
                 <td>{{ item.materialIssueNumber }}</td>
                 <td class="text-nowrap">{{ formatDate(item.transferDate) }}</td>
@@ -193,14 +225,20 @@
                 <td>{{ item.hsncode }}</td>
                 <td class="text-end">{{ item.quantity }}</td>
                 <td class="text-end text-nowrap">{{ formatCurrency(item.itemRate) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.mrp) }}</td>
+                <td class="text-end">{{ item.cgstPercent }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.cgstAmount) }}</td>
+                <td class="text-end">{{ item.sgstPercent }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.sgstAmount) }}</td>
+                <td class="text-end">{{ item.igstPercent }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.igstAmount) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.totalGstAmount) }}</td>
                 <td class="text-end text-nowrap">{{ formatCurrency(item.amount) }}</td>
-                <td>{{ getIssueTypeLabel(item.issueType) }}</td>
                 <td>{{ item.serialNo }}</td>
                 <td>{{ item.remarks }}</td>
-                <td>{{ item.itemReceived }}</td>
-                <td>{{ item.validDays }}</td>
                 <td>{{ item.rackNo }}</td>
                 <td>{{ item.bin }}</td>
+                <td>{{ getIssueTypeLabel(item.issueType) }}</td>
                 <td>{{ item.jobCardStatus }}</td>
                 <td>{{ item.preparedByDealerCode }}</td>
                 <td>{{ item.modifiedByDealerCode }}</td>
@@ -208,11 +246,32 @@
             </tbody>
             <tfoot>
               <tr class="table-warning fw-bold">
-                <td colspan="19" class="text-end">TOTAL (this page)</td>
+                <!-- Cols 1–17: Sr.No through HSN Code -->
+                <td colspan="17" class="text-end">TOTAL (this page)</td>
+                <!-- Col 18: Qty -->
                 <td class="text-end">{{ totalQuantity }}</td>
+                <!-- Col 19: Item Rate (no total tracked) -->
                 <td></td>
+                <!-- Col 20: MRP -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalMrp) }}</td>
+                <!-- Col 21: CGST % -->
+                <td></td>
+                <!-- Col 22: CGST Amt -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalCgstAmount) }}</td>
+                <!-- Col 23: SGST % -->
+                <td></td>
+                <!-- Col 24: SGST Amt -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalSgstAmount) }}</td>
+                <!-- Col 25: IGST % -->
+                <td></td>
+                <!-- Col 26: IGST Amt -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalIgstAmount) }}</td>
+                <!-- Col 27: Total GST -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalGstAmount) }}</td>
+                <!-- Col 28: Amount -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalAmount) }}</td>
-                <td colspan="9"></td>
+                <!-- Cols 29–36: Serial No through Modified By -->
+                <td colspan="8"></td>
               </tr>
             </tfoot>
           </table>
