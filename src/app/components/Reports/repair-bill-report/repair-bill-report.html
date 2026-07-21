@@ -161,7 +161,7 @@
 
         <div class="table-responsive" *ngIf="reportData.length > 0">
           <table class="table table-bordered table-striped table-sm">
-            <thead class="table-light">
+        <thead class="table-light">
               <tr>
                 <th class="sortable" (click)="onSort('srNo')">
                   Sr.No
@@ -212,6 +212,7 @@
                 <th>Part Code Description</th>
                 <th>Issue Type</th>
                 <th class="text-end">Item Rate</th>
+                <th class="text-end">Labour Rate</th>
                 <th class="text-end">CGST %</th>
                 <th class="text-end">CGST Amt</th>
                 <th class="text-end">SGST %</th>
@@ -225,7 +226,7 @@
                 <th>Labour Description</th>
                 <th>Technician Name</th>
               </tr>
-            </thead>
+            </thead>            
             <tbody>
               <tr *ngFor="let item of reportData">
                 <td>{{ item.srNo }}</td>
@@ -248,6 +249,7 @@
                 <td>{{ item.partCode || '-' }}</td>
                 <td>{{ item.partCodeDescription || '-' }}</td>
                 <td>{{ getIssueTypeLabel(item.issueType) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.labourRateRaw) }}</td>
                 <td class="text-end text-nowrap">{{ formatCurrency(item.itemRate) }}</td>
                 <td class="text-end">{{ item.cgstPercent }}</td>
                 <td class="text-end text-nowrap">{{ formatCurrency(item.cgstAmount) }}</td>
@@ -265,16 +267,31 @@
             </tbody>
             <tfoot>
               <tr class="table-warning fw-bold">
-                <td colspan="19" class="text-end">TOTAL (this page)</td>
+                <!-- Cols 1–20: Sr.No through Issue Type -->
+                <td colspan="20" class="text-end">TOTAL (this page)</td>
+
+                <!-- Col 21: Item Rate -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalItemRate) }}</td>
+                <!-- Col 22: Labour Rate -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalLabourRate) }}</td>
+                <!-- Col 23: CGST % (no total — it's a rate, not a summable amount) -->
                 <td></td>
+                <!-- Col 24: CGST Amt -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalCgstAmount) }}</td>
+                <!-- Col 25: SGST % -->
                 <td></td>
+                <!-- Col 26: SGST Amt -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalSgstAmount) }}</td>
+                <!-- Col 27: IGST % -->
                 <td></td>
+                <!-- Col 28: IGST Amt -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalIgstAmount) }}</td>
+                <!-- Col 29: Total GST -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalGstAmount) }}</td>
+                <!-- Col 30: Discount -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalDiscount) }}</td>
+
+                <!-- Cols 31–34: Discount Type, Labour Code, Labour Description, Technician Name -->
                 <td colspan="4"></td>
               </tr>
             </tfoot>
