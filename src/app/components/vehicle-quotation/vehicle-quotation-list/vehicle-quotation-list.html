@@ -1,18 +1,31 @@
 <div class="card shadow-sm">
 
     <div class="card-header bg-white">
-        <div class="row align-items-center">
-            <div class="col-md-4">
+        <div class="row align-items-center g-2">
+            <div class="col-md-3">
                 <h5 class="mb-0">Vehicle Quotation List</h5>
             </div>
-            <div class="col-md-5">
+
+            <div class="col-md-3" *ngIf="isSuperAdmin">
+                <select class="form-select form-select-sm" [(ngModel)]="selectedDealerCode"
+                    (change)="onDealerFilterChange()">
+                    <option value="">-- All Dealers --</option>
+                    <option *ngFor="let d of dealers" [value]="d.dealerCode">
+                        {{ d.dealerName }}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-3" *ngIf="!isSuperAdmin"></div>
+
+            <div class="col-md-4">
                 <input
                     class="form-control"
                     placeholder="Search..."
                     [(ngModel)]="searchText"
                     (input)="search()">
             </div>
-            <div class="col-md-3 text-end">
+
+            <div class="col-md-2 text-end">
                 <button type="button" class="btn btn-primary" (click)="addNew()">
                     <i class="ri-add-line"></i>
                     New Quotation
@@ -72,7 +85,6 @@
                         </span>
                     </td>
 
-                    <!-- All three action buttons live in ONE cell, under the single "Action" header -->
                     <td class="text-center">
                         <button
                             class="btn btn-sm btn-primary me-1"
@@ -89,13 +101,6 @@
                             <i class="ri-printer-line" *ngIf="printingId !== row.vehicleQuotationId"></i>
                             <span *ngIf="printingId === row.vehicleQuotationId" class="spinner-border spinner-border-sm"></span>
                         </button>
-
-                        <!-- <button
-                            class="btn btn-sm btn-danger"
-                            (click)="delete(row.vehicleQuotationId)"
-                            title="Delete">
-                            <i class="ri-delete-bin-line"></i>
-                        </button> -->
                     </td>
 
                 </tr>
