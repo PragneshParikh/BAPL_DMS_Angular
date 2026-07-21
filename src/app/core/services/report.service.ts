@@ -81,6 +81,12 @@ import {
   MaterialTransferReportPagedResponse,
   MaterialTransferReportRow
 } from '../../ViewModels/models/material-transferModel';
+
+import {
+  RepairBillReportFilterModel,
+  RepairBillReportPagedResponse,
+  RepairBillReportRow
+} from '../../ViewModels/models/repair-billModel';
 @Injectable({
   providedIn: 'root'
 })
@@ -685,6 +691,28 @@ export class ReportService {
   ): Observable<MaterialTransferReportRow[]> {
     return this.http.post<MaterialTransferReportRow[]>(
       `${this.apiUrl}/material-transfer/export`,
+      filter
+    );
+  }
+
+
+  // =====================================================
+  // REPAIR BILL REPORT
+  // =====================================================
+  getRepairBillReport(
+    filter: RepairBillReportFilterModel
+  ): Observable<RepairBillReportPagedResponse> {
+    return this.http.post<RepairBillReportPagedResponse>(
+      `${this.apiUrl}/repair-bill`,
+      filter
+    );
+  }
+
+  exportRepairBillReport(
+    filter: RepairBillReportFilterModel
+  ): Observable<RepairBillReportRow[]> {
+    return this.http.post<RepairBillReportRow[]>(
+      `${this.apiUrl}/repair-bill/export`,
       filter
     );
   }
