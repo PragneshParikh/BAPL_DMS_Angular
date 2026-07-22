@@ -62,7 +62,7 @@ export class VehicleSaleBill {
   selectedInvoiceBills: any[] = [];
   dealers: any;
   filteredDealers: any[];
-  selectedDealer: string;
+  selectedDealer: string='All Dealers';
   showDropdown: boolean;
 
   constructor(private service: VehicleSaleBillService,
