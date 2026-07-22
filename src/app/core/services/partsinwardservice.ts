@@ -15,8 +15,8 @@ export class PartsInwardService {
     return this.httpClient.get(`${this.baseUrl}/parts-inward/notificationsbydealer/${dealerCode}`);
   }
 
-  update(invoiceNumber: any) {
-    return this.httpClient.put(`${this.baseUrl}/parts-inward/updatebyinvoice`, JSON.stringify(invoiceNumber), {
+  updatePartInwardDetailByInvoiceNo(data: any) {
+    return this.httpClient.put(`${this.baseUrl}/parts-inward/updatebyinvoice`, JSON.stringify(data), {
       headers: {
         'Content-Type': 'application/json'
       }
@@ -26,6 +26,10 @@ export class PartsInwardService {
   getPendingPartInwardDetailByLocation(locationCode: string): Observable<any> {
     let params = new HttpParams()
       .set('locationCode', locationCode);
-    return this.httpClient.get(`${this.baseUrl}/part-inward/GetPendingPartInwardDetailByLocation`, { params });
+    return this.httpClient.get(`${this.baseUrl}/parts-inward/GetPendingPartInwardDetailByLocation`, { params });
+  }
+
+  getInwardPartDetailByInvoiceNo(invoiceNo: string): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/parts-inward/GetInwardPartDetailsByInvoiceNo/${invoiceNo}`);
   }
 }

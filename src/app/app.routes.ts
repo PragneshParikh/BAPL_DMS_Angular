@@ -250,7 +250,7 @@ export const routes: Routes = [
       { path: 'vehicle-quotation', component: VehicleQuotationListComponent, data: [87] },
       { path: 'vehicle-quotation/add', component: VehicleQuotation, data: [87] },
       { path: 'vehicle-quotation/edit/:id', component: VehicleQuotation, data: [87] },
-      { path: 'parts-inward', data: [0], component: PartInward }
+      { path: 'parts-inward/:invoiceNo', data: [0], component: PartInward }
     ]
   },
   { path: '**', component: WorkInProgress }

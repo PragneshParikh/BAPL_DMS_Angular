@@ -479,8 +479,10 @@ export class TopbarComponent implements OnInit {
   }
 
   onClickPartNumber(item: any) {
-
-    this.router.navigate(['parts-inward'])
+    const invoiceNo = item?.invoiceNumber || '0';
+    const value = Date.now() + '|' + invoiceNo;
+    const encClaim = btoa(value);
+    this.router.navigate(['parts-inward', encClaim])
 
     // const modalRef = this.modalService.open(PartInward, {
     //   size: 'xl',      // modal size: 'sm', 'lg', 'xl'
@@ -506,20 +508,20 @@ export class TopbarComponent implements OnInit {
 
   }
 
-  updatePartInwardStatusByInvoice(invoiceNumber: string) {
-    this.partInwardService.update(invoiceNumber).subscribe({
-      next: (res) => {
-        this.toastService.show('Record updated sucessfully', {
-          classname: 'bg-success text-white',
-          delay: 5000
-        });
-      }, error: (err) => {
-        this.toastService.show('Something went wrong', {
-          classname: 'bg-danger text-white',
-          delay: 5000
-        });
-        console.error(err);
-      }
-    });
-  }
+  // updatePartInwardStatusByInvoice(invoiceNumber: string) {
+  //   this.partInwardService.update(invoiceNumber).subscribe({
+  //     next: (res) => {
+  //       this.toastService.show('Record updated sucessfully', {
+  //         classname: 'bg-success text-white',
+  //         delay: 5000
+  //       });
+  //     }, error: (err) => {
+  //       this.toastService.show('Something went wrong', {
+  //         classname: 'bg-danger text-white',
+  //         delay: 5000
+  //       });
+  //       console.error(err);
+  //     }
+  //   });
+  // }
 }

@@ -16,24 +16,30 @@
                             <!-- Purchase Info Header -->
                             <div class="row g-1 mb-2 align-items-end">
                                 <div class="col-md-1-5">
+                                    <label class="form-label mb-0 small">Invoice No.</label>
+                                    <input type="text" class="form-control form-control-sm bg-light" name="invoiceNo"
+                                        #invoiceNo="ngModel" [ngModel]="partsInwardData.invoiceNo" [disabled]="true">
+                                </div>
+
+                                <div class="col-md-1-5">
                                     <label class="form-label mb-0 small">Invoice Date</label>
-                                    <input type="text" class="form-control form-control-sm bg-light" name="poDate"
-                                        #poDate="ngModel" [ngModel]="partsInwardData.invoiceDate | date:'dd-MM-yyyy'"
-                                        [disabled]="true">
+                                    <input type="text" class="form-control form-control-sm bg-light" name="invoiceDate"
+                                        #invoiceDate="ngModel"
+                                        [ngModel]="partsInwardData.invoiceDate | date:'dd-MM-yyyy'" [disabled]="true">
                                 </div>
 
                                 <div class="col-md-1-5">
                                     <label class="form-label mb-0 small">Receipt Date</label>
-                                    <input type="text" class="form-control form-control-sm bg-light" name="poDate"
-                                        #poDate="ngModel" [ngModel]="partsInwardData.receiptDate | date:'dd-MM-yyyy'"
-                                        [disabled]="true">
+                                    <input type="text" class="form-control form-control-sm bg-light" name="receiptDate"
+                                        #receiptDate="ngModel"
+                                        [ngModel]="partsInwardData.receiptDate | date:'dd-MM-yyyy'" [disabled]="true">
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label mb-0 small">Location</label>
                                     <select class="form-select form-select-sm border-start border-2" name="location"
-                                        #location="ngModel" (change)="onLocationChange($event)"
-                                        [(ngModel)]=" partsInwardData.selectedLocation">
+                                        #location="ngModel" [(ngModel)]=" partsInwardData.selectedLocation"
+                                        [disabled]="true">
                                         <option value="">-- Select --</option>
                                         <option *ngFor="let loc of lstLocations" [value]="loc.loccode">{{loc.locname}}
                                         </option>
@@ -49,20 +55,20 @@
 
                                 <div class="col-md-1">
                                     <label class="form-label mb-0 small">Purchase No.</label>
-                                    <input type="text" class="form-control form-control-sm bg-light" name="orderNo"
-                                        #orderNo="ngModel" [(ngModel)]="partsInwardData.purchaseNo" readonly>
+                                    <input type="text" class="form-control form-control-sm bg-light" name="purchaseNo"
+                                        #purchaseNo="ngModel" [(ngModel)]="partsInwardData.purchaseNo" readonly>
                                 </div>
 
                                 <div class="col-md-2">
                                     <label class="form-label mb-0 small">Document No.</label>
-                                    <input type="text" class="form-control form-control-sm" name="orderNo"
-                                        #orderNo="ngModel" [(ngModel)]="partsInwardData.documentNo">
+                                    <input type="text" class="form-control form-control-sm" name="documentNo"
+                                        #documentNo="ngModel" [(ngModel)]="partsInwardData.documentNo">
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label mb-0 small">Party Name</label>
-                                    <select class="form-select form-select-sm" [(ngModel)]="partsInwardData.partyName"
-                                        name="party" #party="ngModel">
+                                    <select class="form-select form-select-sm" [(ngModel)]="partsInwardData.partyCode"
+                                        name="party" #party="ngModel" [disabled]="true">
                                         <option *ngFor="let ledger of ledgerList" [value]="ledger.ledgerCode">
                                             {{ledger.ledgerName}}
                                         </option>
@@ -71,16 +77,15 @@
 
                                 <div class="col-md-2">
                                     <label class="form-label mb-0 small">Source System</label>
-                                    <select class="form-select form-select-sm border-start border-2" name="location"
-                                        #location="ngModel" (change)="onLocationChange($event)"
-                                        [(ngModel)]=" partsInwardData.sourceType">
+                                    <select class="form-select form-select-sm border-start border-2" name="sourceType"
+                                        #sourceType="ngModel" [(ngModel)]=" partsInwardData.sourceType">
                                         <option value="">-- Select --</option>
                                         <option value="erp">ERP</option>
                                         <option value="dms">DMS</option>
                                     </select>
                                 </div>
 
-                                <div class="col-md-1-5">
+                                <!-- <div class="col-md-1-5">
                                     <label class="form-label mb-0 small d-block">&nbsp;</label>
                                     <div class="d-flex align-5-items-center gap-1">
                                         <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
@@ -88,9 +93,7 @@
                                             Search
                                         </button>
                                     </div>
-                                </div>
-
-
+                                </div> -->
 
                             </div>
 
@@ -100,13 +103,14 @@
 
                     <!-- TABLE -->
                     <fieldset>
-                        <div class="table-responsive border rounded mt-3">
+                        <div class="table-responsive border rounded mt-3" style="max-height: 400px; overflow-y: auto;">
                             <table class="table table-sm table-striped table-bordered mb-0 small">
                                 <thead class="table-light text-center">
                                     <tr>
                                         <th>Sr.No</th>
                                         <th>Part No.</th>
                                         <th>Part Description</th>
+                                        <th>HSN Code</th>
                                         <th>Rack No.</th>
                                         <th>Bin No.</th>
                                         <th>Qty</th>
@@ -114,6 +118,8 @@
                                         <th>Rate w/o Tax</th>
                                         <th>Disc.</th>
                                         <th>Type</th>
+                                        <th>CGST</th>
+                                        <th>SGST</th>
                                         <th>IGST</th>
                                         <th>Cess</th>
                                         <th>Amount</th>
@@ -123,30 +129,38 @@
                                 <tbody class="align-middle">
                                     <tr *ngFor="let item of partsPurchaseDetails; let i = index">
                                         <td class="text-center">{{(page - 1) * pageSize + i + 1}}</td>
-                                        <td>{{item.itemCode}}</td>
-                                        <td>{{item.itemDescription}}</td>
-                                        <td>{{item.rack}}</td>
-                                        <td>{{item.bin}}</td>
-                                        <td>{{item.qty | number:'1.2-2'}}</td>
-                                        <td>{{item.rcptqty | number:'1.2-2'}}</td>
-                                        <td>{{item.woTax | number:'1.2-2'}}</td>
-                                        <td>{{item.disc | number:'1.2-2'}}</td>
-                                        <td>{{item.type | number:'1.2-2'}}</td>
-                                        <td>{{item.igst}}</td>
-                                        <td>{{item.cess}}</td>
-                                        <td>{{item.amount}}</td>
-                                        <td>{{item.salerate}}</td>
+                                        <td>{{ item.partNo }}</td>
+                                        <td>{{ item.itemdesc }}</td>
+                                        <td>{{ item.itemHsncode}}</td>
+                                        <td>{{ item.rack }}</td>
+                                        <td>{{ item.bin }}</td>
+                                        <td class="text-center">{{ item.itemQty }}</td>
+                                        <td class="text-center">{{ item.itemQty }}</td>
+                                        <td class="text-end">{{ item.itemRate | number:'1.2-2' }}</td>
+                                        <td class="text-end">{{ item.itemDisc | number:'1.2-2' }}</td>
+                                        <td>{{ item.discountType }}</td>
+                                        <td>{{ item.cgst }}</td>
+                                        <td>{{ item.sgst }}</td>
+                                        <td>{{ item.igst }}</td>
+                                        <td>{{ item.cess }}</td>
+                                        <td class="text-end">{{ item.itemMrp }}</td>
+                                        <td>{{ item.salerate }}</td>
                                     </tr>
                                     <!-- Total Row -->
                                     <tr class="fw-bold table-secondary">
-                                        <td colspan="4" class="text-end">Total :</td>
+                                        <td colspan="5" class="text-end">Total :</td>
                                         <td class="text-center">{{totalQty}}</td>
                                         <td></td>
-                                        <td class="text-end">{{totalSgst | number:'1.2-2'}}</td>
-                                        <td class="text-end">{{totalCgst | number:'1.2-2'}}</td>
-                                        <td class="text-end">{{totalIgst | number:'1.2-2'}}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
                                         <td class="text-end">{{totalAmount | number:'1.2-2'}}</td>
-                                        <td colspan="2"></td>
+                                        <td></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -154,14 +168,14 @@
                     </fieldset>
 
                     <!-- Pagination -->
-                    <div class="col-sm-12 col-md-12 mt-2">
+                    <!-- <div class="col-sm-12 col-md-12 mt-2">
                         <div class="text-md-right float-md-end gridjs-pagination">
-                            <ngb-pagination [collectionSize]="lstPartsPurchaseDetails.length" [(page)]="page"
+                            <ngb-pagination [collectionSize]="partsPurchaseDetails.length" [(page)]="page"
                                 [pageSize]="pageSize" (pageChange)="refreshPage()" [maxSize]="10"
                                 [boundaryLinks]="true">
                             </ngb-pagination>
                         </div>
-                    </div>
+                    </div> -->
 
                 </div>
 
@@ -176,7 +190,7 @@
                             <button class="btn btn-primary btn-sm" (click)="onSave()">
                                 Save
                             </button>
-                            <button class="btn btn-danger btn-sm"> Cancel </button>
+                            <button class="btn btn-danger btn-sm" (click)="returnDashboard()"> Cancel </button>
                         </div>
                     </div>
                 </div>

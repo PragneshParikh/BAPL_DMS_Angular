@@ -1,40 +1,48 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit, ViewChild, viewChild } from '@angular/core';
+import { FormGroup, FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { StorageService } from '../../core/services/storage';
-import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { PartsInwardService } from '../../core/services/partsinwardservice';
-import { error } from 'console';
 import { LedgerMasterService } from '../../core/services/ledger-master';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TopbarComponent } from '../../layouts/topbar/topbar.component';
 
 @Component({
   selector: 'app-part-inward',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbPagination],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './part-inward.html',
   styleUrl: './part-inward.scss',
 })
 export class PartInward implements OnInit {
+  @ViewChild('partsInwardForm') partsInwardForm!: NgForm;
+  @ViewChild(TopbarComponent) topbarComponent!: TopbarComponent;
+
   partsInwardData: any = {
-    poDate: '',
+    invoiceNo: '',
+    invoiceDate: '',
+    receiptDate: '',
     selectedLocation: '',
     prefixNo: '',
-    orderNo: '',
-    partyName: '',
+    purchaseNo: '',
+    documentNo: '',
+    partyCode: '',
+    sourceType: '',
   }
 
   page = 1;
   pageSize = 10;
 
-  lstPartsPurchaseDetails: any[] = [];
+  // lstPartsPurchaseDetails: any[] = [];
   partsPurchaseDetails: any[] = [];
   lstLocations: any[] = [];
   ledgerList: any[] = [];
 
   isSuperAdmin: boolean = false;
   dealerCode: string = '';
+  invoiceNo: string = '';
 
   constructor(
     private locationMasterService: LocationMasterService,
@@ -42,7 +50,9 @@ export class PartInward implements OnInit {
     private toaster: ToastService,
     private storageService: StorageService,
     private partInwardService: PartsInwardService,
-    private ledgerMasterService: LedgerMasterService
+    private ledgerMasterService: LedgerMasterService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
@@ -52,6 +62,19 @@ export class PartInward implements OnInit {
   }
 
   ngOnInit(): void {
+
+    this.route.params.subscribe(params => {
+
+      const encClaim = params['invoiceNo'];
+      const decoded = atob(encClaim);
+
+      this.invoiceNo = decoded.split('|')[1];
+
+      if (this.invoiceNo && this.invoiceNo !== '') {
+        this.getInwardDetailsByInvoice();
+      }
+    });
+
     this.getLocationList();
     this.getLedgerList();
   }
@@ -80,23 +103,35 @@ export class PartInward implements OnInit {
       },
       error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
         this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', dealy: 5000 });
       }
     })
   }
 
-  onLocationChange(event: any) {
-    const locationCode = event.target.value;
-    console.log(locationCode);
-    this.getPartInwardByLocation(locationCode);
-  }
-
-  getPartInwardByLocation(locationCode: string) {
+  getInwardDetailsByInvoice() {
     this.loader.show();
-    this.partInwardService.getPendingPartInwardDetailByLocation(locationCode).subscribe({
+    this.partInwardService.getInwardPartDetailByInvoiceNo(this.invoiceNo).subscribe({
       next: (res) => {
-        console.log(res);
+        this.loader.hide();
+
+        if (res === null) {
+          this.returnDashboard();
+        }
+
+        const to = new Date();
+        this.partsInwardData = {
+          invoiceNo: res.invoiceNo,
+          invoiceDate: res.invoiceDate,
+          selectedLocation: res.locationCode,
+          receiptDate: to.toISOString().split('T')[0],
+          prefixNo: res.prefixNo,
+          purchaseNo: res.prefixNo.split('/').pop(),
+          documentNo: '',
+          partyCode: 'LED1',
+          sourceType: 'erp',
+        }
+        this.partsPurchaseDetails = res.partInwards;
       },
       error: (err) => {
         console.error(err);
@@ -106,12 +141,55 @@ export class PartInward implements OnInit {
     })
   }
 
-  onSave() {
+  // onLocationChange(event: any) {
+  //   // const locationCode = event.target.value;
+  //   // console.log(locationCode);
+  //   // this.getPartInwardByLocation(locationCode);
+  // }
 
+  // getPartInwardByLocation(locationCode: string) {
+  //   this.loader.show();
+  //   this.partInwardService.getPendingPartInwardDetailByLocation(locationCode).subscribe({
+  //     next: (res) => {
+  //       this.loader.hide();
+  //       console.log(res);
+  //     },
+  //     error: (err) => {
+  //       console.error(err);
+  //       this.loader.hide();
+  //       this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+  //     }
+  //   })
+  // }
+
+  onSave() {
+    if (this.partsInwardForm.invalid)
+      return;
+
+    this.partsInwardData.updatedBy = this.storageService.getUserId();
+    this.partsInwardData.updatedDate = new Date();
+
+    this.loader.show();
+    this.partInwardService.updatePartInwardDetailByInvoiceNo(this.partsInwardData).subscribe({
+      next: (res) => {
+        this.loader.hide();
+        this.toaster.show("Data updated sucessfully.", { classname: 'bg-success text-white', delay: 5000 });
+        this.topbarComponent.getPartsInwardNotification();
+        this.returnDashboard();
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
   }
 
   get totalQty() {
-    return 1;
+    return this.partsPurchaseDetails.reduce(
+      (total, item) => total + Number(item.itemQty || 0),
+      0
+    );;
   }
 
   get totalSgst() {
@@ -127,15 +205,18 @@ export class PartInward implements OnInit {
   }
 
   get totalAmount() {
-    return 10;
+    return this.partsPurchaseDetails.reduce(
+      (total, item) => total + (item.itemMrp || 0),
+      0
+    );
   }
 
-  refreshPage() {
+  // refreshPage() { }
 
-  }
+  // searchRecords() { }
 
-  searchRecords() {
-
+  returnDashboard() {
+    this.router.navigate(['/']);
   }
 
 
