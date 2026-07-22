@@ -32,7 +32,7 @@
                                     <label class="form-label mb-0 small">Location</label>
                                     <select class="form-select form-select-sm border-start border-2" name="location"
                                         #location="ngModel" [class.is-invalid]="locationInvalid"
-                                        (change)="onLocationChange($event)" [(ngModel)]=" partsPOData.selectedLocation">
+                                        (change)="onLocationChange($event)" [(ngModel)]="partsPOData.selectedLocation">
                                         <option value="">-- Select --</option>
                                         <option *ngFor="let loc of locationList" [value]="loc.loccode">{{loc.locname}}
                                         </option>
@@ -162,9 +162,52 @@
 
                             <!-- Last Price -->
                             <div class="col-md-1">
-                                <label class="form-label mb-0 small text-success">Last Price: 0.00</label>
-                                <input type="number" class="form-control form-control-sm text-end bg-light" readonly
-                                    placeholder="0.00">
+                                <label class="form-label mb-0 small text-success">Previous Ord.</label>
+
+                                <div class="btn-group w-100" ngbDropdown>
+                                    <button id="button-basic" ngbDropdownToggle type="button"
+                                        class="btn btn-sm btn-primary gap-2 dropdown-toggle"
+                                        (click)="getPreviousPurchaseDetails($event)">
+                                        View
+                                    </button>
+
+                                    <div ngbDropdownMenu class="dropdown-menu">
+                                        <table class="table table-sm table-striped table-bordered mb-0 small"
+                                            style="min-width: 600px;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 43px;">Sr.No</th>
+                                                    <th style="width: 145px;">Pur.No.</th>
+                                                    <th style="width: 80px;">Pur.Date</th>
+                                                    <th style="width: 249px;">Party Name</th>
+                                                    <th style="width: 59px;">Rate</th>
+                                                    <th style="width: 41px;">Qty</th>
+                                                    <th style="width: 49px;">GST</th>
+                                                    <th style="width: 42px;">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let item of previousPurchaseDetails; let i = index">
+                                                    <td class="text-center">{{i + 1}}</td>
+                                                    <td>{{item.poNumber}}</td>
+                                                    <td>{{item.purchaseDate | date}}</td>
+                                                    <td>{{item.ledgerName}}</td>
+                                                    <td>{{item.rate | currency:'INR':'₹ ':'1.2-2'}}</td>
+                                                    <td>{{item.qty}}</td>
+                                                    <td>{{ item.gst | currency:'INR':'₹ ':'1.2-2'}}</td>
+                                                    <td>{{item.amount | currency:'INR':'₹ ':'1.2-2'}}</td>
+                                                </tr>
+                                                <tr *ngIf="pagedPurchaseDetails.length == 0">
+                                                    <td colspan="13" class="text-center p-2">No Records Found</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+
+                                </div>
+
+
                             </div>
 
                             <!-- Part Description -->
@@ -222,6 +265,7 @@
                                         <th>Part Description</th>
                                         <th>Qty</th>
                                         <th>Rate</th>
+                                        <th>HSN Code</th>
                                         <th>(+) SGST Amt.</th>
                                         <th>(+) CGST Amt.</th>
                                         <th>(+) IGST Amt.</th>
@@ -255,6 +299,7 @@
                                         <td>{{item.itemDescription}}</td>
                                         <td class="text-center">{{item.qty}}</td>
                                         <td class="text-end">{{item.rate | number:'1.2-2'}}</td>
+                                        <td class="text-end">{{item.hsnCode}}</td>
                                         <td class="text-end">{{item.sgstAmt | number:'1.2-2'}}</td>
                                         <td class="text-end">{{item.cgstAmt | number:'1.2-2'}}</td>
                                         <td class="text-end">{{item.igstAmt | number:'1.2-2'}}</td>
@@ -262,10 +307,14 @@
                                         <td class="text-end">{{item.mrp | number:'1.2-2'}}</td>
                                         <!-- <td class="text-center">0</td> -->
                                     </tr>
+                                    <tr *ngIf="pagedPurchaseDetails.length == 0">
+                                        <td colspan="13" class="text-center p-2">No Records Found</td>
+                                    </tr>
                                     <!-- Total Row -->
                                     <tr class="fw-bold table-secondary">
                                         <td colspan="4" class="text-end">Total :</td>
                                         <td class="text-center">{{totalQty}}</td>
+                                        <td></td>
                                         <td></td>
                                         <td class="text-end">{{totalSgst | number:'1.2-2'}}</td>
                                         <td class="text-end">{{totalCgst | number:'1.2-2'}}</td>
@@ -273,6 +322,7 @@
                                         <td class="text-end">{{totalAmount | number:'1.2-2'}}</td>
                                         <td colspan="2"></td>
                                     </tr>
+
                                 </tbody>
                             </table>
                         </div>
