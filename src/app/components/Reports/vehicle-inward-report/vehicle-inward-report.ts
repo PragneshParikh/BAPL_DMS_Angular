@@ -1,80 +1,61 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-// import * as XLSX from 'xlsx';
-
-import { VehicleInwardReportService, VehicleInwardReportFilter } from '../../../core/services/vehicle-inward-report.service';
-import { DealerService } from '../../../core/services/dealer-service';
-
-interface VehicleInwardReportItem {
-  srNo: number;
-  receivingDate: string | null;
-  invoiceDate: string | null;
-  dealerCode: string | null;
-  dealerName: string | null;
-  bgInvoiceNo: string | null;
-  lotInspectionNo: number | null;
-  partyName: string | null;
-  purchaseReceivingLocation: string | null;
-  modelName: string | null;
-  quantity: number;
-  chassisNo: string | null;
-  motorNo: string | null;
-  colour: string | null;
-  mfgYear: number | null;
-  batteryNo: string | null;
-  batteryMake: string | null;
-  batteryCapacity: string | null;
-  batteryChemical: string | null;
-  chargerNo: string | null;
-  controllerNo: string | null;
-  rate: number;
-  subsidyAmountFame2: number;
-  sgst: number;
-  cgst: number;
-  igst: number;
-  hst: number;
-}
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
+import { ReportService } from '../../../core/services/report.service';
+import { StorageService } from '../../../core/services/storage';
+import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model';
+import {
+  VehicleInwardReportFilterModel,
+  VehicleInwardReportViewModel,
+  VehicleInwardReportResponse
+} from '../../../ViewModels/models/vehicle-inward-report.model';
 
 @Component({
   selector: 'app-vehicle-inward-report',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './vehicle-inward-report.html',
-  styleUrl: './vehicle-inward-report.scss',
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  templateUrl: './vehicle-inward-report.html'
 })
-export class VehicleInwardReport implements OnInit {
-
-  Math = Math;
+export class VehicleInwardReport implements OnInit, OnDestroy {
 
   filterForm!: FormGroup;
+  reportData: VehicleInwardReportViewModel[] = [];
+  dealerList: DealerDropdownItem[] = [];
+  Math = Math;
 
-  isLoading = false;
-  isDealer = false;
-  loggedInDealerCode = '';
-  dealerList: any[] = [];
+  isDealer: boolean = false;
+  loggedInDealerCode: string = '';
 
-  reportData: VehicleInwardReportItem[] = [];
+  pageIndex: number = 1;
+  pageSize: number = 100;
+  totalRecords: number = 0;
+  totalQuantity: number = 0;
+  totalRate: number = 0;
+  totalSubsidy: number = 0;
+  totalSgst: number = 0;
+  totalCgst: number = 0;
+  totalIgst: number = 0;
+  totalHst: number = 0;
+  grandTotal: number = 0;
 
-  pageIndex = 1;
-  pageSize = 25;
-  totalRecords = 0;
+  isLoading: boolean = false;
+  exporting: boolean = false;
+  errorMessage: string = '';
 
-  totals = {
-    quantity: 0, rate: 0, subsidy: 0, sgst: 0, cgst: 0, igst: 0, hst: 0, grandTotal: 0,
-  };
+  sortColumn: string = 'invoiceDate';
+  sortDirection: 'asc' | 'desc' = 'desc';
 
-  get averageRate(): number {
-    return this.totalRecords > 0 ? this.totals.rate / this.totalRecords : 0;
-  }
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
-    private inwardService: VehicleInwardReportService,
-    private dealerService: DealerService,
-  ) { }
-
-  ngOnInit(): void {
+    private reportService: ReportService,
+    private storageService: StorageService
+  ) {
+    // Dates start blank (not defaulted to "this month") so the report
+    // always shows every existing record on first load — same fix applied
+    // to Repair Bill Report after it opened empty by default.
     this.filterForm = this.fb.group({
       dealerCode: [''],
       fromDate: [''],
@@ -83,72 +64,75 @@ export class VehicleInwardReport implements OnInit {
       invoiceNo: [''],
       chassisNo: [''],
       motorNo: [''],
-      batteryNo: [''],
+      batteryNo: ['']
     });
+  }
 
-    // Assumes the same localStorage convention used elsewhere in this app
-    // (see bgemployee-master.ts loadLoggedInDealer()) — adjust if the app
-    // resolves the logged-in dealer/role differently.
-    this.loggedInDealerCode = localStorage.getItem('dealerCode') || '';
-    this.isDealer = !!this.loggedInDealerCode;
+  ngOnInit(): void {
+    const storedRole = (this.storageService.getRole() ?? '').trim().toLowerCase();
+    this.loggedInDealerCode = this.storageService.getDealerCode() ?? '';
 
-    if (!this.isDealer) {
-      this.loadDealers();
+    const adminRoles = ['superadmin', 'admin', 'administrator'];
+    this.isDealer = !adminRoles.includes(storedRole);
+
+    if (this.isDealer) {
+      this.filterForm.get('dealerCode')?.setValue(this.loggedInDealerCode);
+      this.filterForm.get('dealerCode')?.disable();
+    } else {
+      // SuperAdmin/Admin — load the full dealer list for the dropdown.
+      // ReportService.getDealerDropdown() has no dealer-scoping on the
+      // backend, so it always returns every dealer regardless of caller.
+      this.loadDealerDropdown();
     }
 
     this.loadReport();
   }
 
-  loadDealers(): void {
-    // NOTE: confirm the actual "get all dealers" method name on DealerService —
-    // only getByDealerCode() is confirmed to exist on it elsewhere in this app.
-    (this.dealerService as any).get?.().subscribe?.({
-      next: (res: any[]) => (this.dealerList = res ?? []),
-      error: (err: any) => console.error('Dealer list load error', err),
-    });
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  private buildFilter(): VehicleInwardReportFilter {
-    const f = this.filterForm.value;
-    return {
-      dealerCode: this.isDealer ? this.loggedInDealerCode : (f.dealerCode || undefined),
-      fromDate: f.fromDate || undefined,
-      toDate: f.toDate || undefined,
-      locationCode: f.locationCode || undefined,
-      invoiceNo: f.invoiceNo || undefined,
-      chassisNo: f.chassisNo || undefined,
-      motorNo: f.motorNo || undefined,
-      batteryNo: f.batteryNo || undefined,
-      pageIndex: this.pageIndex,
-      pageSize: this.pageSize,
-    };
+  loadDealerDropdown(): void {
+    this.reportService.getDealerDropdown()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: DealerDropdownItem[]) => (this.dealerList = data),
+        error: () => (this.dealerList = [])
+      });
   }
 
   loadReport(): void {
     this.isLoading = true;
-    this.inwardService.getInwardReport(this.buildFilter()).subscribe({
-      next: (res: any) => {
-        this.reportData = res?.data ?? [];
-        this.totalRecords = res?.totalRecords ?? 0;
-        this.totals = {
-          quantity: res?.totalQuantity ?? 0,
-          rate: res?.totalRate ?? 0,
-          subsidy: res?.totalSubsidy ?? 0,
-          sgst: res?.totalSgst ?? 0,
-          cgst: res?.totalCgst ?? 0,
-          igst: res?.totalIgst ?? 0,
-          hst: res?.totalHst ?? 0,
-          grandTotal: res?.grandTotal ?? 0,
-        };
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Vehicle Inward report load error', err);
-        this.reportData = [];
-        this.totalRecords = 0;
-        this.isLoading = false;
-      },
-    });
+    this.errorMessage = '';
+    const filter = this.buildFilterModel();
+
+    // Endpoint path confirmed as "vehicle-inward" (not "vehicle-inward-report")
+    this.reportService.getVehicleInwardReport(filter)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: VehicleInwardReportResponse) => {
+          this.reportData = response.data;
+          this.totalRecords = response.totalRecords;
+          this.pageIndex = response.pageIndex;
+          this.pageSize = response.pageSize;
+          this.totalQuantity = response.totalQuantity;
+          this.totalRate = response.totalRate;
+          this.totalSubsidy = response.totalSubsidy;
+          this.totalSgst = response.totalSgst;
+          this.totalCgst = response.totalCgst;
+          this.totalIgst = response.totalIgst;
+          this.totalHst = response.totalHst;
+          this.grandTotal = response.grandTotal;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          this.errorMessage = error?.error?.message || 'Failed to load vehicle inward report.';
+          this.reportData = [];
+          this.totalRecords = 0;
+          this.isLoading = false;
+        }
+      });
   }
 
   onSearch(): void {
@@ -157,78 +141,139 @@ export class VehicleInwardReport implements OnInit {
   }
 
   onReset(): void {
-    this.filterForm.reset({
-      dealerCode: '', fromDate: '', toDate: '', locationCode: '',
-      invoiceNo: '', chassisNo: '', motorNo: '', batteryNo: '',
-    });
+    this.filterForm.reset();
+
+    if (this.isDealer) {
+      this.filterForm.get('dealerCode')?.setValue(this.loggedInDealerCode);
+      this.filterForm.get('dealerCode')?.disable();
+    }
+
     this.pageIndex = 1;
     this.loadReport();
   }
 
-  firstPage(): void { this.pageIndex = 1; this.loadReport(); }
-  previousPage(): void { if (this.pageIndex > 1) { this.pageIndex--; this.loadReport(); } }
-  nextPage(): void { if (this.pageIndex * this.pageSize < this.totalRecords) { this.pageIndex++; this.loadReport(); } }
-  lastPage(): void { this.pageIndex = Math.ceil(this.totalRecords / this.pageSize) || 1; this.loadReport(); }
+  onSort(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
 
-  formatDate(value: any): string {
-    if (!value) return '-';
-    const d = new Date(value);
-    if (isNaN(d.getTime())) return '-';
-    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    this.reportData.sort((a, b) => {
+      const aValue = (a as any)[this.sortColumn];
+      const bValue = (b as any)[this.sortColumn];
+      if (aValue < bValue) return this.sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return this.sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  exportToExcel(): void {
+    this.exporting = true;
+    this.errorMessage = '';
+
+    const filter = this.buildFilterModel();
+
+    this.reportService.exportVehicleInwardReport(filter)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.exporting = false;
+
+          if (!data || data.length === 0) {
+            this.errorMessage = 'No data available to export.';
+            return;
+          }
+
+          this.generateCsv(data);
+        },
+        error: (error) => {
+          this.exporting = false;
+          this.errorMessage = error?.error?.message || 'Failed to export vehicle inward report.';
+        }
+      });
+  }
+
+  private generateCsv(data: VehicleInwardReportViewModel[]): void {
+    const headers = [
+      'Sr No', 'Receiving Date', 'Invoice Date', 'Dealer Code', 'Dealer Name',
+      'BG Invoice No', 'Lot Inspection No', 'Party Name', 'Purchase Receiving Location',
+      'Model Name', 'Quantity', 'Chassis No', 'Motor No', 'Colour', 'Mfg Year',
+      'Battery No', 'Battery Make', 'Battery Capacity', 'Battery Chemical',
+      'Charger No', 'Controller No', 'Rate', 'FAME2 Subsidy',
+      'SGST', 'CGST', 'IGST', 'HST'
+    ];
+
+    const fmt = (d: any) => d ? new Date(d).toLocaleDateString('en-IN') : '';
+
+    const csvRows = [
+      headers,
+      ...data.map(row => [
+        row.srNo, fmt(row.receivingDate), fmt(row.invoiceDate), row.dealerCode, row.dealerName,
+        row.bgInvoiceNo, row.lotInspectionNo, row.partyName, row.purchaseReceivingLocation,
+        row.modelName, row.quantity, row.chassisNo, row.motorNo, row.colour, row.mfgYear,
+        row.batteryNo, row.batteryMake, row.batteryCapacity, row.batteryChemical,
+        row.chargerNo, row.controllerNo, row.rate, row.subsidyAmountFame2,
+        row.sgst, row.cgst, row.igst, row.hst
+      ])
+    ];
+
+    const csvString = csvRows
+      .map(r => r.map(cell => `"${cell ?? ''}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvString], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vehicle-inward-report-${new Date().getTime()}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalRecords / this.pageSize));
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.pageIndex = page;
+    this.loadReport();
+  }
+
+  firstPage(): void { this.goToPage(1); }
+  previousPage(): void { this.goToPage(this.pageIndex - 1); }
+  nextPage(): void { this.goToPage(this.pageIndex + 1); }
+  lastPage(): void { this.goToPage(this.totalPages); }
+
+  private buildFilterModel(): VehicleInwardReportFilterModel {
+    const raw = this.filterForm.getRawValue();
+    return {
+      dealerCode: raw.dealerCode || undefined,
+      fromDate: raw.fromDate || undefined,
+      toDate: raw.toDate || undefined,
+      locationCode: raw.locationCode || undefined,
+      invoiceNo: raw.invoiceNo || undefined,
+      chassisNo: raw.chassisNo || undefined,
+      motorNo: raw.motorNo || undefined,
+      batteryNo: raw.batteryNo || undefined,
+      pageIndex: this.pageIndex,
+      pageSize: this.pageSize
+    };
+  }
+
+  formatDate(date: any): string {
+    if (!date) return '-';
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? '-' : d.toLocaleDateString('en-IN');
   }
 
   formatCurrency(value: number): string {
-    if (value == null) return '₹0.00';
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2 }).format(value);
-  }
-
-  // Export fetches the FULL filtered set (not just the current page) by
-  // requesting a large pageSize — there's no dedicated /export endpoint
-  // for this report yet, unlike Job Card / Vehicle Sale Bill reports.
-  exportToExcel(): void {
-    const exportFilter: VehicleInwardReportFilter = { ...this.buildFilter(), pageIndex: 1, pageSize: 100000 };
-
-    this.inwardService.getInwardReport(exportFilter).subscribe({
-      next: (res: any) => {
-        const data: VehicleInwardReportItem[] = res?.data ?? [];
-        if (!data.length) return;
-
-        const rows = data.map((r) => ({
-          'Sr No': r.srNo,
-          'Receving Date': this.formatDate(r.receivingDate),
-          'Invoice Date': this.formatDate(r.invoiceDate),
-          'Dealer Code': r.dealerCode,
-          'Dealer Name': r.dealerName,
-          'BG Invoice No': r.bgInvoiceNo,
-          'Lot Inspection No': r.lotInspectionNo,
-          'Party Name': r.partyName,
-          'Purchase Receving Location': r.purchaseReceivingLocation,
-          'Model Name (With Colour)': r.modelName,
-          'Quantity': r.quantity,
-          'Chassis No': r.chassisNo,
-          'Motor No': r.motorNo,
-          'Colour': r.colour,
-          'Mfg Year': r.mfgYear,
-          'Battery No': r.batteryNo,
-          'Battery Make': r.batteryMake,
-          'Battery Capacity': r.batteryCapacity,
-          'Battery Chemical': r.batteryChemical,
-          'Charger No': r.chargerNo,
-          'Controller No': r.controllerNo,
-          'Rate': r.rate,
-          'Subsidy Amount Fame 2': r.subsidyAmountFame2,
-          'SGST': r.sgst,
-          'CGST': r.cgst,
-          'IGST': r.igst,
-          'HST': r.hst,
-        }));
-
-        // const ws = XLSX.utils.json_to_sheet(rows);
-        // const wb = XLSX.utils.book_new();
-        // XLSX.utils.book_append_sheet(wb, ws, 'Inwards Report');
-        // XLSX.writeFile(wb, `vehicle-inward-report-${new Date().toISOString().slice(0, 10)}.xlsx`);
-      },
-      error: (err) => console.error('Export fetch error', err),
-    });
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2
+    }).format(value ?? 0);
   }
 }

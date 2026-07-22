@@ -31,7 +31,8 @@ export interface RepairBillReportRow {
   issueType: number | null;
 
   itemRate: number;
-
+  labourRateRaw: number;  
+  totalLabourRate: number; 
   cgstPercent: number;
   cgstAmount: number;
   sgstPercent: number;
@@ -73,6 +74,7 @@ export interface RepairBillReportPagedResponse {
   pageIndex: number;
   pageSize: number;
   totalItemRate: number;
+  totalLabourRate: number;
   totalCgstAmount: number;
   totalSgstAmount: number;
   totalIgstAmount: number;

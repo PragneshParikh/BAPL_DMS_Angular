@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { ReportService } from '../../../core/services/report.service';
 import { StorageService } from '../../../core/services/storage';
@@ -34,6 +34,7 @@ export class RepairBillReportComponent implements OnInit, OnDestroy {
   pageSize: number = 100;
   totalRecords: number = 0;
   totalItemRate: number = 0;
+  totalLabourRate: number = 0; 
   totalCgstAmount: number = 0;
   totalSgstAmount: number = 0;
   totalIgstAmount: number = 0;
@@ -60,10 +61,17 @@ export class RepairBillReportComponent implements OnInit, OnDestroy {
     private reportService: ReportService,
     private storageService: StorageService
   ) {
+    // FIX: fromDate/toDate are no longer Validators.required, and are never
+    // defaulted to "this month" on load. Previously the report opened
+    // already filtered to the current calendar month — if repair bills
+    // happened to sit outside that window, the report showed zero rows on
+    // first open, which read as "not working." Dates now start blank, so
+    // the initial (and post-Reset) load always requests every existing
+    // record; the backend already treats FromDate/ToDate as fully optional.
     this.filterForm = this.fb.group({
       dealerCode: [''],
-      fromDate: ['', Validators.required],
-      toDate: ['', Validators.required],
+      fromDate: [''],
+      toDate: [''],
       billNo: [null],
       jobNo: [null],
       chassisNo: [''],
@@ -89,26 +97,12 @@ export class RepairBillReportComponent implements OnInit, OnDestroy {
       this.loadDealerDropdown();
     }
 
-    this.initializeFormWithDefaultDates();
     this.loadReport();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  private initializeFormWithDefaultDates(): void {
-    const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    this.filterForm.patchValue({
-      fromDate: this.formatDateForInput(firstDayOfMonth),
-      toDate: this.formatDateForInput(today)
-    });
-  }
-
-  private formatDateForInput(date: Date): string {
-    return date.toISOString().split('T')[0];
   }
 
   loadDealerDropdown(): void {
@@ -138,6 +132,7 @@ export class RepairBillReportComponent implements OnInit, OnDestroy {
           this.pageIndex = response.pageIndex;
           this.pageSize = response.pageSize;
           this.totalItemRate = response.totalItemRate;
+          this.totalLabourRate = response.totalLabourRate;
           this.totalCgstAmount = response.totalCgstAmount;
           this.totalSgstAmount = response.totalSgstAmount;
           this.totalIgstAmount = response.totalIgstAmount;
@@ -161,7 +156,6 @@ export class RepairBillReportComponent implements OnInit, OnDestroy {
 
   onReset(): void {
     this.filterForm.reset();
-    this.initializeFormWithDefaultDates();
 
     if (this.isDealer) {
       this.filterForm.get('dealerCode')?.setValue(this.loggedInDealerCode);

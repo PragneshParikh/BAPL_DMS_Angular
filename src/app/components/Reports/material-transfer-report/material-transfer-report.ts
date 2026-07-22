@@ -1,16 +1,18 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { ReportService } from '../../../core/services/report.service';
 import { StorageService } from '../../../core/services/storage';
 import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model';
-import { IssueTypes } from '../../../constant';
 import {
   MaterialTransferReportFilterModel,
   MaterialTransferReportRow,
   MaterialTransferReportPagedResponse
 } from '../../../ViewModels/models/material-transferModel';
+// Same shared constants module used by Repair Bill Report — adjust path
+// if it differs.
+import { IssueTypes } from '../../../constant';
 
 @Component({
   selector: 'app-material-transfer-report',
@@ -33,6 +35,11 @@ export class MaterialTransferReportComponent implements OnInit, OnDestroy {
   totalRecords: number = 0;
   totalQuantity: number = 0;
   totalAmount: number = 0;
+  totalMrp: number = 0;
+  totalCgstAmount: number = 0;
+  totalSgstAmount: number = 0;
+  totalIgstAmount: number = 0;
+  totalGstAmount: number = 0;
 
   isLoading: boolean = false;
   exporting: boolean = false;
@@ -41,13 +48,10 @@ export class MaterialTransferReportComponent implements OnInit, OnDestroy {
   sortColumn: string = 'transferDate';
   sortDirection: 'asc' | 'desc' = 'desc';
 
-  // TODO: no Issue Type master/lookup table exists anywhere in the backend
-  // codebase — MaterialTransfer.IssueType is a bare int with no confirmed
-  // meaning. Populate this map with real code→label pairs once known;
-  // until then, getIssueTypeLabel() falls back to showing the raw code.
-    private issueTypeLabels: Record<number, string> = Object.fromEntries(
-        IssueTypes.map(t => [t.id, t.name])
-    )
+  private issueTypeLabels: Record<number, string> = Object.fromEntries(
+    IssueTypes.map((t: any) => [t.id, t.name])
+  );
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -57,8 +61,8 @@ export class MaterialTransferReportComponent implements OnInit, OnDestroy {
   ) {
     this.filterForm = this.fb.group({
       dealerCode: [''],
-      fromDate: ['', Validators.required],
-      toDate: ['', Validators.required],
+      fromDate: [''],
+      toDate: [''],
       jobNo: [null],
       chassisNo: [''],
       partyName: [''],
@@ -81,26 +85,12 @@ export class MaterialTransferReportComponent implements OnInit, OnDestroy {
       this.loadDealerDropdown();
     }
 
-    this.initializeFormWithDefaultDates();
     this.loadReport();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  private initializeFormWithDefaultDates(): void {
-    const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    this.filterForm.patchValue({
-      fromDate: this.formatDateForInput(firstDayOfMonth),
-      toDate: this.formatDateForInput(today)
-    });
-  }
-
-  private formatDateForInput(date: Date): string {
-    return date.toISOString().split('T')[0];
   }
 
   loadDealerDropdown(): void {
@@ -113,10 +103,6 @@ export class MaterialTransferReportComponent implements OnInit, OnDestroy {
   }
 
   loadReport(): void {
-    if (this.filterForm.invalid) {
-      return;
-    }
-
     this.isLoading = true;
     this.errorMessage = '';
     const filter = this.buildFilterModel();
@@ -131,6 +117,11 @@ export class MaterialTransferReportComponent implements OnInit, OnDestroy {
           this.pageSize = response.pageSize;
           this.totalQuantity = response.totalQuantity;
           this.totalAmount = response.totalAmount;
+          this.totalMrp = response.totalMrp;
+          this.totalCgstAmount = response.totalCgstAmount;
+          this.totalSgstAmount = response.totalSgstAmount;
+          this.totalIgstAmount = response.totalIgstAmount;
+          this.totalGstAmount = response.totalGstAmount;
           this.isLoading = false;
         },
         error: (error) => {
@@ -149,7 +140,6 @@ export class MaterialTransferReportComponent implements OnInit, OnDestroy {
 
   onReset(): void {
     this.filterForm.reset();
-    this.initializeFormWithDefaultDates();
 
     if (this.isDealer) {
       this.filterForm.get('dealerCode')?.setValue(this.loggedInDealerCode);
@@ -177,7 +167,6 @@ export class MaterialTransferReportComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Falls back to "Type {n}" for any code not yet mapped in issueTypeLabels.
   getIssueTypeLabel(issueType: number | null | undefined): string {
     if (issueType === null || issueType === undefined) return '-';
     return this.issueTypeLabels[issueType] ?? `Type ${issueType}`;
@@ -215,15 +204,15 @@ export class MaterialTransferReportComponent implements OnInit, OnDestroy {
 
   private generateCsv(data: MaterialTransferReportRow[]): void {
     const headers = [
-      'Sr No', 'Dealer Code', 'Dealer Name', 'Dealer City', 'Dealer State',
-      'Job No', 'Job Invoice No', 'Chassis No', 'Registration No',
-      'Customer Name', 'Customer Mobile', 'Service Location',
+      'Sr No', 'Dealer Code', 'Dealer Name', 'Dealer Location', 'Dealer City', 'Dealer State',
+      'Job No', 'Chassis No', 'Customer Name', 'Customer Mobile',
       'Material Prefix', 'Material Issue No', 'Transfer Date',
       'Item Code', 'Item Name', 'Item Description', 'HSN Code',
-      'Quantity', 'Item Rate', 'Amount',
-      'Issue Type',
-      'Serial No', 'Remarks', 'Item Received', 'Valid Days', 'Rack No', 'Bin',
-      'Job Card Status', 'Prepared By (Dealer Code)', 'Modified By (Dealer Code)'
+      'Quantity', 'Item Rate', 'MRP',
+      'CGST %', 'CGST Amt', 'SGST %', 'SGST Amt', 'IGST %', 'IGST Amt', 'Total GST',
+      'Amount',
+      'Serial No', 'Remarks', 'Rack No', 'Bin',
+      'Issue Type', 'Job Card Status', 'Prepared By (Dealer Code)', 'Modified By (Dealer Code)'
     ];
 
     const fmt = (d: any) => d ? new Date(d).toLocaleDateString('en-IN') : '';
@@ -231,15 +220,15 @@ export class MaterialTransferReportComponent implements OnInit, OnDestroy {
     const csvRows = [
       headers,
       ...data.map(row => [
-        row.srNo, row.dealerCode, row.dealerName, row.dealerCity, row.dealerState,
-        row.jobNo, row.jobInvoiceNo, row.chassisNo, row.registerNo,
-        row.customerName, row.customerMobile, row.serviceLocationName,
+        row.srNo, row.dealerCode, row.dealerName, row.dealerLocation, row.dealerCity, row.dealerState,
+        row.jobNo, row.chassisNo, row.customerName, row.customerMobile,
         row.materialPrefix, row.materialIssueNumber, fmt(row.transferDate),
         row.itemCode, row.itemName, row.itemDesc, row.hsncode,
-        row.quantity, row.itemRate, row.amount,
-        this.getIssueTypeLabel(row.issueType),
-        row.serialNo, row.remarks, row.itemReceived, row.validDays, row.rackNo, row.bin,
-        row.jobCardStatus, row.preparedByDealerCode, row.modifiedByDealerCode
+        row.quantity, row.itemRate, row.mrp,
+        row.cgstPercent, row.cgstAmount, row.sgstPercent, row.sgstAmount, row.igstPercent, row.igstAmount, row.totalGstAmount,
+        row.amount,
+        row.serialNo, row.remarks, row.rackNo, row.bin,
+        this.getIssueTypeLabel(row.issueType), row.jobCardStatus, row.preparedByDealerCode, row.modifiedByDealerCode
       ])
     ];
 

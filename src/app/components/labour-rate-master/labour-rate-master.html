@@ -3,39 +3,29 @@
     <div class="card-body">
 
         <!-- Search Section -->
-        <div class="row">
+        <div class="row g-2 align-items-end">
 
             <div class="col-md-3">
-
-                <label>Rate Type</label>
-
+                <label class="form-label">Rate Type</label>
                 <select class="form-select form-select-sm" [(ngModel)]="rateType">
-
-                    <option value="">
-                        --Select--
-                    </option>
-
-                    <option value="Modelwise Labour Rate">
-                        Modelwise Labour Rate
-                    </option>
-
-                    <option value="Partwise Labour Rate">
-                        Partwise Labour Rate
-                    </option>
-
+                    <option value="">--Select--</option>
+                    <option value="Modelwise Labour Rate">Modelwise Labour Rate</option>
+                    <option value="Partwise Labour Rate">Partwise Labour Rate</option>
                 </select>
-
             </div>
 
-            <div class="col-md-3 align-self-end">
-                <button class="btn btn-primary btn-sm" (click)="onSearch()">
+            <div class="col-auto d-flex gap-2">
+                <button type="button" class="btn btn-primary btn-sm" (click)="onSearch()">
                     <i class="ri-search-line"></i>
                 </button>
+
+                <button type="button" class="btn btn-success btn-sm" (click)="downloadExcel()" [disabled]="!rateType"
+                    title="Select a Rate Type to export">
+                    <i class="ri-file-excel-2-line align-bottom"></i> Export to Excel
+                </button>
             </div>
-
-        </div>
-
-        <!-- ===================================== -->
+        </div> 
+         <!-- ===================================== -->
         <!-- MODELWISE GRID -->
         <!-- ===================================== -->
 
