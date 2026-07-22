@@ -38,9 +38,9 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Sr. No.</th>
-                                <th>OemModel Name</th>
-                                <th>ChecklistName</th>
-                                <th>Status</th>
+                                <th class="sort" (click)="sort('oemModelName')">OemModel Name</th>
+                                <th class="sort" (click)="sort('checklistName')">ChecklistName</th>
+                                <th class="sort" (click)="sort('isActive')">Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -139,7 +139,7 @@
                         <div class="col-md-4 form-check form-switch form-switch-sm form-switch-success">
 
                             <input class="form-check-input form-check-input-sm" type="checkbox" id="isActive"
-                                name="isActive" [(ngModel)]="PdiChecklistmastermodel.isActive">
+                                name="isActive" [disabled]="userRole" [(ngModel)]="PdiChecklistmastermodel.isActive" [disabled]="userRole === 'Dealer'" >
 
                             <label class="form-check-label ms-2" for="isActive">
                                 Is Active

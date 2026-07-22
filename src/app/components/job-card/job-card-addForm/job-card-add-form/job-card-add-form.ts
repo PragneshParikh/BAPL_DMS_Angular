@@ -148,7 +148,13 @@ export class JobCardAddForm {
     private toaster: ToastService) { }
 
   ngOnInit(): void {
-    this.dealerCode = this.storageService.getDealerCode();
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
     this.loadPrefix();
     this.fetchLocations();
     this.loadJobTypes();
@@ -381,10 +387,17 @@ export class JobCardAddForm {
   }
 
   loadChassisList() {
-    const dealerCode = this.storageService.getDealerCode();
+
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
     this.jobTypeId = this.selectedJobtype
 
-    this.jobCardService.getAllInspectedChassis(dealerCode, this.jobTypeId).subscribe(res => {
+    this.jobCardService.getAllInspectedChassis(this.dealerCode, this.jobTypeId).subscribe(res => {
       this.chassisList = res;
 
       if (this.isEditMode && this.chassiseditData) {
@@ -425,11 +438,17 @@ export class JobCardAddForm {
 
     if (!this.selectedJobtype) return;
 
-    const dealerCode = this.storageService.getDealerCode();
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
 
     // Load chassis
     this.jobCardService
-      .getAllInspectedChassis(dealerCode, this.selectedJobtype)
+      .getAllInspectedChassis(this.dealerCode, this.selectedJobtype)
       .subscribe(res => {
         this.chassisList = res;
       });

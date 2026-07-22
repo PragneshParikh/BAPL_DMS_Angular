@@ -70,7 +70,7 @@
 
                 <div class="col-md-3">
                     <label>Motor No</label>
-                    <input class="form-control form-control-sm"  [(ngModel)]="vehicleObj.motorNo">
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.motorNo">
                 </div>
                 <div class="col-md-2">
                     <label>Fame2 Amount</label>
@@ -103,20 +103,29 @@
 
                 <div class="col-md-2">
                     <label>Rate</label>
-                    <input class="form-control form-control-sm text-end" [(ngModel)]="vehicleObj.rate" (input)="calculateTotalStock()">
+                    <input class="form-control form-control-sm text-end" [(ngModel)]="vehicleObj.rate"
+                        (input)="calculateTotalStock()">
                 </div>
                 <div class="col-md-2">
                     <label>Serv.Book No</label>
-                    <input class="form-control form-control-sm"  [(ngModel)]="vehicleObj.serviceBookNo">
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.serviceBookNo">
                 </div>
 
 
 
                 <div class="col-md-2">
                     <label>Battery Make</label>
-                    <select class="form-select form-select-sm"  [(ngModel)]="vehicleObj.batteryMake">
-                        <option>--Select Make--</option>
+                    <select class="form-select form-select-sm" [(ngModel)]="vehicleObj.batteryMake">
+                        <option [value]="">--Select Make--</option>
+
+                        <option *ngFor="let item of purposeofbatterymake" [value]="item.value">
+                            {{ item.value }}
+                        </option>
                     </select>
+                    <!-- <select class="form-select form-select-sm"  [(ngModel)]="vehicleObj.batteryMake">
+                        <option>--Select Make--</option>
+                        <option></option>
+                    </select> -->
                 </div>
 
                 <div class="col-md-2">
@@ -240,16 +249,16 @@
                     <tr *ngFor="let item of vehicleList; let i=index">
 
                         <td class="text-center">
+                            <div class="d-flex align-items-center">
+                                <button class="btn btn-primary btn-sm me-2" (click)="editVehicle(i)">
+                                    <i class="ri-edit-line"></i>
+                                </button>
 
-                            <button class="btn btn-warning btn-sm me-1" (click)="editVehicle(i)">
-                                <i class="ri-edit-line"></i>
-                            </button>
-
-                            <button class="btn btn-danger btn-sm">
-                                <!-- (click)="deleteVehicle(i)" -->
-                                <i class="ri-delete-bin-line"></i>
-                            </button>
-
+                                <button class="btn btn-danger btn-sm">
+                                    <!-- (click)="deleteVehicle(i)" -->
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
                         </td>
 
                         <td>{{item.chassisNo}}</td>
@@ -269,7 +278,7 @@
                         <td class="text-end">{{item.sgst}}</td>
                         <td class="text-end">{{item.cgst}}</td>
                         <td class="text-end">{{item.igst}}</td>
-                        <td class="text-end">{{item.totalStock | number:'1.2-2'}}</td>
+                        <td class="text-end">{{item.totalOpStock | number:'1.2-2'}}</td>
                     </tr>
 
                 </tbody>

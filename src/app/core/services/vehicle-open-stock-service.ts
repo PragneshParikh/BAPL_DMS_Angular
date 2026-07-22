@@ -12,8 +12,8 @@ export class VehicleOpenStockService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getVehicleSaleDetailsByModel(modelName: string): Observable<any[]> {
-      return this.httpClient.get<[]>(`${this.baseUrl}/VehicleOpeningStock/GetVehicleSaleDetailsByModel?modelName=${modelName}`);
+  getVehicleSaleDetailsByModel(modelName: string,dealerCode:string): Observable<any[]> {
+      return this.httpClient.get<[]>(`${this.baseUrl}/VehicleOpeningStock/GetVehicleSaleDetailsByModel/${modelName}/${dealerCode}`);
     }
   
 }
