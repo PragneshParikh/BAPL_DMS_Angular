@@ -25,6 +25,10 @@ export class VehicleSaleBillService {
     return this.http.post(`${this.apiUrl}/VehicleSaleBill`, data);
   }
 
+  deleteVehicleSaleBill(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/VehicleSaleBill/${id}`);
+  }
+
   getAllVehicleSaleBills(dealerCode?: string, search?: string, fromDate?: Date, toDate?: Date, erpStatus?: string): Observable<any[]> {
     let params = new HttpParams();
 
@@ -66,9 +70,9 @@ export class VehicleSaleBillService {
     );
   }
 
-  getAllChassisWithPDIStatus(dealerCode: string, ledgerId: number): Observable<VehicleSaleListChasisResponse[]> {
+  getAllChassisWithPDIStatus(dealerCode: string, ledgerId: number,locCode:string): Observable<VehicleSaleListChasisResponse[]> {
     return this.http.get<VehicleSaleListChasisResponse[]>(
-      `${this.apiUrl}/VehicleSaleBill/ChassisList?dealerCode=${dealerCode}&ledgerId=${ledgerId}`
+      `${this.apiUrl}/VehicleSaleBill/ChassisList?dealerCode=${dealerCode}&ledgerId=${ledgerId}&locCode=${locCode}`
     );
   }
 
@@ -76,6 +80,11 @@ export class VehicleSaleBillService {
     return this.http.get<any>(`${this.apiUrl}/VehicleSaleBill/${id}`);
   }
 
+   getVehicleDeletionPrerequisites(saleBillId: number): Observable<any> {
+  return this.http.get<any>(
+    `${this.apiUrl}/VehicleSaleBill/PreCheckDelete?saleBillId=${saleBillId}`
+  );
+}
   confirmInvoice(saleBillNo: string) {
     return this.http.put<number>(
       `${this.apiUrl}/VehicleSaleBill/ConfirmInvoice?saleBillNo=${saleBillNo}`,
@@ -98,7 +107,7 @@ export class VehicleSaleBillService {
   }
 
 
-  
+
 
   downloadExcel(fromDate?: Date, toDate?: Date) {
     let params = new HttpParams();
@@ -130,7 +139,7 @@ export class VehicleSaleBillService {
     });
   }
 
-    downloadSaleBillPdf(id: number) {
+  downloadSaleBillPdf(id: number) {
 
     return this.http.get(
       `${this.apiUrl}/VehicleSaleBill/Download/${id}`,
@@ -142,29 +151,29 @@ export class VehicleSaleBillService {
 
   downloadMultipleSaleBills(ids: number[]) {
 
-  return this.http.post(
-    `${this.apiUrl}/VehicleSaleBill/DownloadMultiple`,
-    ids,
-    {
-      responseType: 'blob'
-    }
-  );
+    return this.http.post(
+      `${this.apiUrl}/VehicleSaleBill/DownloadMultiple`,
+      ids,
+      {
+        responseType: 'blob'
+      }
+    );
 
-  
-}
-downloadMultipleForm22(ids: number[]) {
-  return this.http.post(
-    `${this.apiUrl}/VehicleSaleBill/DownloadMultipleForm22`,
-    ids,
-    { responseType: 'blob' }
-  );
-}
 
-downloadMultipleCombined(form22Ids: number[], invoiceIds: number[]) {
-  return this.http.post(
-    `${this.apiUrl}/VehicleSaleBill/DownloadMultipleCombined`,
-    { form22Ids, invoiceIds },
-    { responseType: 'blob' }
-  );
-}
+  }
+  downloadMultipleForm22(ids: number[]) {
+    return this.http.post(
+      `${this.apiUrl}/VehicleSaleBill/DownloadMultipleForm22`,
+      ids,
+      { responseType: 'blob' }
+    );
+  }
+
+  downloadMultipleCombined(form22Ids: number[], invoiceIds: number[]) {
+    return this.http.post(
+      `${this.apiUrl}/VehicleSaleBill/DownloadMultipleCombined`,
+      { form22Ids, invoiceIds },
+      { responseType: 'blob' }
+    );
+  }
 }

@@ -51,6 +51,7 @@ export class LabourRateMaster implements OnInit {
   selectedServiceHead: any;
   selectedServiceType: string;
   searchText: string = '';
+  
 
   ngOnInit(): void {
     this.loadOemModels();
@@ -460,4 +461,38 @@ export class LabourRateMaster implements OnInit {
 
     this.pagedData = this.pagedModelWiseLabourList.slice(start, end);
   }
+  downloadExcel(): void {
+  if (!this.rateType) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Select Rate Type',
+      text: 'Please select a Rate Type before exporting.'
+    });
+    return;
+  }
+
+    const isModelWise = this.rateType === 'Modelwise Labour Rate';
+
+      this.loader.show();
+      this.LabourMasterService.downloadLabourRateMasterExcel(this.rateType).subscribe({
+        next: (blob: Blob) => {
+          this.loader.hide();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${isModelWise ? 'ModelWiseLabourRateMaster' : 'PartWiseLabourRateMaster'}_${new Date().getTime()}.xlsx`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+        },
+        error: (err) => {
+          this.loader.hide();
+          console.error('Excel download error', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to download Excel file.'
+          });
+        }
+      });
+    }
 }

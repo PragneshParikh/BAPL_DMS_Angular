@@ -70,16 +70,7 @@
 
                 <!-- ROW 2: Customer Details -->
                 <div class="row mb-2">
-                    <div class="col-md-3">
-                        <label class="form-label mb-1">Existing Customer ID</label>
-                        <input type="text" class="form-control form-control-sm py-1"
-                            [(ngModel)]="quotationData.customerId" name="customerId"
-                            placeholder="Optional — leave blank for a new customer">
-                        <small class="text-muted d-block">Link this quotation to an existing customer record, if
-                            any.</small>
-                    </div>
-
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label class="form-label mb-1">Customer Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control form-control-sm py-1"
                             [class.is-invalid]="errors.customerName" [(ngModel)]="quotationData.customerName"
@@ -87,7 +78,7 @@
                         <small *ngIf="errors.customerName" class="text-danger">{{ errors.customerName }}</small>
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label class="form-label mb-1">Mobile No. <span class="text-danger">*</span></label>
                         <input type="text" class="form-control form-control-sm py-1"
                             [class.is-invalid]="errors.mobileNo" inputmode="numeric" maxlength="10"
@@ -96,7 +87,7 @@
                         <small *ngIf="errors.mobileNo" class="text-danger">{{ errors.mobileNo }}</small>
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label class="form-label mb-1">Email ID</label>
                         <input type="email" class="form-control form-control-sm py-1"
                             [class.is-invalid]="errors.emailId" [(ngModel)]="quotationData.emailId" name="emailId">
@@ -359,10 +350,24 @@
                             name="exchangeAmount" (input)="calculateTotal()">
                         <small *ngIf="errors.exchangeAmount" class="text-danger">{{ errors.exchangeAmount }}</small>
                     </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Old Company Name</label>
+                        <input type="text" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.oldCompanyName" name="oldCompanyName"
+                            placeholder="Optional">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Old Model Name</label>
+                        <input type="text" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.oldModelName" name="oldModelName"
+                            placeholder="Optional">
+                    </div>
                 </div>
 
                 <!-- ===================================================== -->
-                <!-- FINANCE (no checkbox — optional fields, drive off financeCompanyId) -->
+                <!-- FINANCE (no checkbox — optional fields, no cross-field validation) -->
                 <!-- ===================================================== -->
                 <div class="row mb-2 mt-1 p-2 mx-0 bg-light rounded">
                     <div class="col-12 mb-1">

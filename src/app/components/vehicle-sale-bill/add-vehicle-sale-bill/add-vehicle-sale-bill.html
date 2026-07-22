@@ -8,6 +8,9 @@
 <div class="card">
     <div class="card-header d-flex justify-content-end align-items-center">
 
+        <button *ngIf="(billId && isSuperAdmin) ||(billId && !isInvoiced)"  type="button" class="btn btn-danger btn-sm gap-2 me-3" (click)="deleteVehicleSaleBill()">
+                <i class="ri-delete-bin-line"></i>Delete
+            </button>
         <!-- PRINT DROPDOWN -->
         <div *ngIf="billId" class="btn-group gap-2 me-3" ngbDropdown>
             <button id="button-basic" ngbDropdownToggle type="button"
@@ -68,6 +71,7 @@
 
 
         <div class="d-flex justify-content-end gap-1 me-3">
+            
             <button *ngIf="!billId" class="btn btn-sm btn-primary" [disabled]="!canSave() || isErpLocked"
                 (click)="billId ? updateVehicleSaleBill() : saveVehicleDetailsOnly()">
                 Save As{{!this.model.isD2D ? ' Proforma' :' Invoice'}}
@@ -134,7 +138,7 @@
                                     #location="ngModel" (change)="onLocationChange()" required>
                                     <option value="">Select Location</option>
                                     <option *ngFor="let loc of locations" [value]="loc.loccode">
-                                        {{ loc.locname }} 
+                                        {{ loc.locname }}
                                     </option>
                                 </select>
                                 <small *ngIf="location.invalid && (location.touched || vehicleSaleForm.submitted)"

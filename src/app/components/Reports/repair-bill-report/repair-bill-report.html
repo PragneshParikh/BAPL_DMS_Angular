@@ -1,5 +1,5 @@
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-  <h4 class="mb-sm-0">Material Transfer Report</h4>
+  <h4 class="mb-sm-0">Repair Bill Report</h4>
   <span class="badge bg-light text-dark border px-3 py-2 fs-6">
     Total Records: {{ totalRecords }}
   </span>
@@ -44,6 +44,11 @@
             </div>
 
             <div class="col-xl-3 col-md-6">
+              <label class="form-label">Bill No.</label>
+              <input type="number" formControlName="billNo" class="form-control form-control-sm" placeholder="Enter bill number">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
               <label class="form-label">Job No.</label>
               <input type="number" formControlName="jobNo" class="form-control form-control-sm" placeholder="Enter job number">
             </div>
@@ -59,14 +64,27 @@
             </div>
 
             <div class="col-xl-3 col-md-6">
-              <label class="form-label">Item Code</label>
-              <input type="text" formControlName="itemCode" class="form-control form-control-sm" placeholder="Enter item code">
+              <label class="form-label">Part Code</label>
+              <input type="text" formControlName="partCode" class="form-control form-control-sm" placeholder="Enter part code">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Labour Code</label>
+              <input type="text" formControlName="labourCode" class="form-control form-control-sm" placeholder="Enter labour code">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Job Status</label>
+              <select formControlName="jobStatus" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option *ngFor="let status of jobStatusOptions" [value]="status">{{ status }}</option>
+              </select>
             </div>
 
             <div class="col-xl-3 col-md-6">
               <label class="form-label">Search</label>
               <input type="text" formControlName="search" class="form-control form-control-sm"
-                placeholder="Chassis / Item / Customer / Job No">
+                placeholder="Chassis / Bill No / Job No / Part / Labour / Customer">
             </div>
 
           </div>
@@ -97,14 +115,8 @@
     <div class="row g-3">
       <div class="col-xl-3 col-md-6">
         <div class="card h-100"><div class="card-body">
-          <p class="text-muted text-uppercase fw-semibold mb-1">Total Amount</p>
-          <h5 class="mb-0">{{ formatCurrency(totalAmount) }}</h5>
-        </div></div>
-      </div>
-      <div class="col-xl-3 col-md-6">
-        <div class="card h-100"><div class="card-body">
-          <p class="text-muted text-uppercase fw-semibold mb-1">Total MRP</p>
-          <h5 class="mb-0">{{ formatCurrency(totalMrp) }}</h5>
+          <p class="text-muted text-uppercase fw-semibold mb-1">Total Item Rate</p>
+          <h5 class="mb-0">{{ formatCurrency(totalItemRate) }}</h5>
         </div></div>
       </div>
       <div class="col-xl-3 col-md-6">
@@ -115,8 +127,14 @@
       </div>
       <div class="col-xl-3 col-md-6">
         <div class="card h-100"><div class="card-body">
-          <p class="text-muted text-uppercase fw-semibold mb-1">Total Quantity</p>
-          <h5 class="mb-0">{{ totalQuantity }}</h5>
+          <p class="text-muted text-uppercase fw-semibold mb-1">Total Discount</p>
+          <h5 class="mb-0">{{ formatCurrency(totalDiscount) }}</h5>
+        </div></div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <p class="text-muted text-uppercase fw-semibold mb-1">Line Items</p>
+          <h5 class="mb-0">{{ totalRecords }}</h5>
         </div></div>
       </div>
     </div>
@@ -143,7 +161,7 @@
 
         <div class="table-responsive" *ngIf="reportData.length > 0">
           <table class="table table-bordered table-striped table-sm">
-            <thead class="table-light">
+        <thead class="table-light">
               <tr>
                 <th class="sortable" (click)="onSort('srNo')">
                   Sr.No
@@ -156,36 +174,45 @@
                 <th>Dealer Code</th>
                 <th>Dealer Name</th>
                 <th>Dealer Location</th>
-                <th>Dealer City</th>
-                <th>Dealer State</th>
-                <th class="sortable" (click)="onSort('jobNo')">
-                  Job No.
+                <th>City</th>
+                <th>State</th>
+                <th class="sortable" (click)="onSort('jobDate')">
+                  Job Date
                   <i class="fas" [ngClass]="{
-                    'fa-sort-up':   sortColumn === 'jobNo' && sortDirection === 'asc',
-                    'fa-sort-down': sortColumn === 'jobNo' && sortDirection === 'desc',
-                    'fa-sort':      sortColumn !== 'jobNo'
+                    'fa-sort-up':   sortColumn === 'jobDate' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'jobDate' && sortDirection === 'desc',
+                    'fa-sort':      sortColumn !== 'jobDate'
                   }"></i>
                 </th>
-                <th>Chassis No.</th>
+                <th>Job Type</th>
+                <th>Service Head</th>
+                <th>Service Type</th>
                 <th>Customer Name</th>
                 <th>Customer Mobile</th>
-                <th>Material Prefix</th>
-                <th>Material Issue No.</th>
-                <th class="sortable" (click)="onSort('transferDate')">
-                  Transfer Date
+                <th>Chassis No.</th>
+                <th>Model Details</th>
+                <th>Job Status</th>
+                <th class="sortable" (click)="onSort('repairBillNo')">
+                  Repair Bill No.
                   <i class="fas" [ngClass]="{
-                    'fa-sort-up':   sortColumn === 'transferDate' && sortDirection === 'asc',
-                    'fa-sort-down': sortColumn === 'transferDate' && sortDirection === 'desc',
-                    'fa-sort':      sortColumn !== 'transferDate'
+                    'fa-sort-up':   sortColumn === 'repairBillNo' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'repairBillNo' && sortDirection === 'desc',
+                    'fa-sort':      sortColumn !== 'repairBillNo'
                   }"></i>
                 </th>
-                <th>Item Code</th>
-                <th>Item Name</th>
-                <th>Item Description</th>
-                <th>HSN Code</th>
-                <th class="text-end">Qty</th>
+                <th class="sortable" (click)="onSort('repairBillDate')">
+                  Repair Bill Date
+                  <i class="fas" [ngClass]="{
+                    'fa-sort-up':   sortColumn === 'repairBillDate' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'repairBillDate' && sortDirection === 'desc',
+                    'fa-sort':      sortColumn !== 'repairBillDate'
+                  }"></i>
+                </th>
+                <th>Part Code</th>
+                <th>Part Code Description</th>
+                <th>Issue Type</th>
                 <th class="text-end">Item Rate</th>
-                <th class="text-end">MRP</th>
+                <th class="text-end">Labour Rate</th>
                 <th class="text-end">CGST %</th>
                 <th class="text-end">CGST Amt</th>
                 <th class="text-end">SGST %</th>
@@ -193,39 +220,37 @@
                 <th class="text-end">IGST %</th>
                 <th class="text-end">IGST Amt</th>
                 <th class="text-end">Total GST</th>
-                <th class="text-end">Amount</th>
-                <th>Serial No.</th>
-                <th>Remarks</th>
-                <th>Rack No.</th>
-                <th>Bin</th>
-                <th>Issue Type</th>
-                <th>Job Card Status</th>
-                <th>Prepared By</th>
-                <th>Modified By</th>
+                <th class="text-end">Discount</th>
+                <th>Discount Type</th>
+                <th>Labour Code</th>
+                <th>Labour Description</th>
+                <th>Technician Name</th>
               </tr>
-            </thead>
+            </thead>            
             <tbody>
               <tr *ngFor="let item of reportData">
                 <td>{{ item.srNo }}</td>
                 <td>{{ item.dealerCode }}</td>
                 <td>{{ item.dealerName }}</td>
                 <td>{{ item.dealerLocation }}</td>
-                <td>{{ item.dealerCity }}</td>
-                <td>{{ item.dealerState }}</td>
-                <td>{{ item.jobNo }}</td>
-                <td>{{ item.chassisNo }}</td>
+                <td>{{ item.city }}</td>
+                <td>{{ item.state }}</td>
+                <td class="text-nowrap">{{ formatDate(item.jobDate) }}</td>
+                <td>{{ item.jobType }}</td>
+                <td>{{ item.serviceHead }}</td>
+                <td>{{ item.serviceType }}</td>
                 <td>{{ item.customerName }}</td>
                 <td>{{ item.customerMobile }}</td>
-                <td>{{ item.materialPrefix }}</td>
-                <td>{{ item.materialIssueNumber }}</td>
-                <td class="text-nowrap">{{ formatDate(item.transferDate) }}</td>
-                <td>{{ item.itemCode }}</td>
-                <td>{{ item.itemName }}</td>
-                <td>{{ item.itemDesc }}</td>
-                <td>{{ item.hsncode }}</td>
-                <td class="text-end">{{ item.quantity }}</td>
+                <td>{{ item.chassisNo }}</td>
+                <td>{{ item.modelDetails }}</td>
+                <td>{{ item.jobStatus }}</td>
+                <td>{{ item.repairBillNo }}</td>
+                <td class="text-nowrap">{{ formatDate(item.repairBillDate) }}</td>
+                <td>{{ item.partCode || '-' }}</td>
+                <td>{{ item.partCodeDescription || '-' }}</td>
+                <td>{{ getIssueTypeLabel(item.issueType) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.labourRateRaw) }}</td>
                 <td class="text-end text-nowrap">{{ formatCurrency(item.itemRate) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(item.mrp) }}</td>
                 <td class="text-end">{{ item.cgstPercent }}</td>
                 <td class="text-end text-nowrap">{{ formatCurrency(item.cgstAmount) }}</td>
                 <td class="text-end">{{ item.sgstPercent }}</td>
@@ -233,45 +258,41 @@
                 <td class="text-end">{{ item.igstPercent }}</td>
                 <td class="text-end text-nowrap">{{ formatCurrency(item.igstAmount) }}</td>
                 <td class="text-end text-nowrap">{{ formatCurrency(item.totalGstAmount) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(item.amount) }}</td>
-                <td>{{ item.serialNo }}</td>
-                <td>{{ item.remarks }}</td>
-                <td>{{ item.rackNo }}</td>
-                <td>{{ item.bin }}</td>
-                <td>{{ getIssueTypeLabel(item.issueType) }}</td>
-                <td>{{ item.jobCardStatus }}</td>
-                <td>{{ item.preparedByDealerCode }}</td>
-                <td>{{ item.modifiedByDealerCode }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.discount) }}</td>
+                <td>{{ item.discountType }}</td>
+                <td>{{ item.labourCode || '-' }}</td>
+                <td>{{ item.labourDescription || '-' }}</td>
+                <td>{{ item.technicianName }}</td>
               </tr>
             </tbody>
             <tfoot>
               <tr class="table-warning fw-bold">
-                <!-- Cols 1–17: Sr.No through HSN Code -->
-                <td colspan="17" class="text-end">TOTAL (this page)</td>
-                <!-- Col 18: Qty -->
-                <td class="text-end">{{ totalQuantity }}</td>
-                <!-- Col 19: Item Rate (no total tracked) -->
+                <!-- Cols 1–20: Sr.No through Issue Type -->
+                <td colspan="20" class="text-end">TOTAL (this page)</td>
+
+                <!-- Col 21: Item Rate -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalItemRate) }}</td>
+                <!-- Col 22: Labour Rate -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalLabourRate) }}</td>
+                <!-- Col 23: CGST % (no total — it's a rate, not a summable amount) -->
                 <td></td>
-                <!-- Col 20: MRP -->
-                <td class="text-end text-nowrap">{{ formatCurrency(totalMrp) }}</td>
-                <!-- Col 21: CGST % -->
-                <td></td>
-                <!-- Col 22: CGST Amt -->
+                <!-- Col 24: CGST Amt -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalCgstAmount) }}</td>
-                <!-- Col 23: SGST % -->
+                <!-- Col 25: SGST % -->
                 <td></td>
-                <!-- Col 24: SGST Amt -->
+                <!-- Col 26: SGST Amt -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalSgstAmount) }}</td>
-                <!-- Col 25: IGST % -->
+                <!-- Col 27: IGST % -->
                 <td></td>
-                <!-- Col 26: IGST Amt -->
+                <!-- Col 28: IGST Amt -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalIgstAmount) }}</td>
-                <!-- Col 27: Total GST -->
+                <!-- Col 29: Total GST -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalGstAmount) }}</td>
-                <!-- Col 28: Amount -->
-                <td class="text-end text-nowrap">{{ formatCurrency(totalAmount) }}</td>
-                <!-- Cols 29–36: Serial No through Modified By -->
-                <td colspan="8"></td>
+                <!-- Col 30: Discount -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalDiscount) }}</td>
+
+                <!-- Cols 31–34: Discount Type, Labour Code, Labour Description, Technician Name -->
+                <td colspan="4"></td>
               </tr>
             </tfoot>
           </table>
