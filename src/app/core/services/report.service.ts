@@ -75,6 +75,30 @@ import {
 } from '../../ViewModels/models/Model wise variant stock count.model';
 
 import { D2DReportFilter, D2DReportRow, D2DReportResponse } from '../../ViewModels/models/d2d-reportModel';
+
+import {
+  MaterialTransferReportFilterModel,
+  MaterialTransferReportPagedResponse,
+  MaterialTransferReportRow
+} from '../../ViewModels/models/material-transferModel';
+
+import {
+  RepairBillReportFilterModel,
+  RepairBillReportPagedResponse,
+  RepairBillReportRow
+} from '../../ViewModels/models/repair-billModel';
+
+import {
+  ComparisonReportFilterModel,
+  ComparisonReportPagedResponse,
+  ComparisonReportRow
+} from '../../ViewModels/models/Comaprision-reportModel';
+
+import {
+  VehicleInwardReportFilterModel,
+  VehicleInwardReportResponse,
+  VehicleInwardReportViewModel
+} from '../../ViewModels/models/vehicle-inward-report.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -223,13 +247,17 @@ export class ReportService {
   }
 
   exportJobCardReport(
-    dealerCode: string,
+    dealerCode?: string,
     fromDate?: Date,
     toDate?: Date
   ): Observable<JobReportViewModel[]> {
-    let params =
-      new HttpParams()
-        .set('dealerCode', dealerCode);
+    let params = new HttpParams();
+
+    if (dealerCode)
+      params = params.set(
+        'dealerCode',
+        dealerCode
+      );
 
     if (fromDate)
       params = params.set(
@@ -655,6 +683,101 @@ export class ReportService {
     return this.http.post<D2DReportRow[]>(
       `${this.apiUrl}/d2d-report/export`,
       filter
+    );
+  }
+
+  // =====================================================
+  // MATERIAL TRANSFER REPORT
+  // =====================================================
+  getMaterialTransferReport(
+    filter: MaterialTransferReportFilterModel
+  ): Observable<MaterialTransferReportPagedResponse> {
+    return this.http.post<MaterialTransferReportPagedResponse>(
+      `${this.apiUrl}/material-transfer`,
+      filter
+    );
+  }
+
+  exportMaterialTransferReport(
+    filter: MaterialTransferReportFilterModel
+  ): Observable<MaterialTransferReportRow[]> {
+    return this.http.post<MaterialTransferReportRow[]>(
+      `${this.apiUrl}/material-transfer/export`,
+      filter
+    );
+  }
+
+
+  // =====================================================
+  // REPAIR BILL REPORT
+  // =====================================================
+  getRepairBillReport(
+    filter: RepairBillReportFilterModel
+  ): Observable<RepairBillReportPagedResponse> {
+    return this.http.post<RepairBillReportPagedResponse>(
+      `${this.apiUrl}/repair-bill`,
+      filter
+    );
+  }
+
+  exportRepairBillReport(
+    filter: RepairBillReportFilterModel
+  ): Observable<RepairBillReportRow[]> {
+    return this.http.post<RepairBillReportRow[]>(
+      `${this.apiUrl}/repair-bill/export`,
+      filter
+    );
+  }
+
+  // =====================================================
+  // COMPARISON REPORT (Performa vs Sale Bill)
+  // =====================================================
+  getComparisonReport(
+    filter: ComparisonReportFilterModel
+  ): Observable<ComparisonReportPagedResponse> {
+    return this.http.post<ComparisonReportPagedResponse>(
+      `${this.apiUrl}/comparison-report`,
+      filter
+    );
+  }
+
+  exportComparisonReport(
+    filter: ComparisonReportFilterModel
+  ): Observable<ComparisonReportRow[]> {
+    return this.http.post<ComparisonReportRow[]>(
+      `${this.apiUrl}/comparison-report/export`,
+      filter
+    );
+  }
+
+  // =====================================================
+  // VEHICLE INWARD REPORT
+  // Path confirmed as "vehicle-inward" (not "vehicle-inward-report") via
+  // the existing dedicated VehicleInwardReportService.getInwardReport() call.
+  // =====================================================
+  getVehicleInwardReport(
+    filter: VehicleInwardReportFilterModel
+  ): Observable<VehicleInwardReportResponse> {
+    return this.http.post<VehicleInwardReportResponse>(
+      `${this.apiUrl}/vehicle-inward`,
+      filter
+    );
+  }
+
+  exportVehicleInwardReport(
+    filter: VehicleInwardReportFilterModel
+  ): Observable<VehicleInwardReportViewModel[]> {
+    const exportFilter: VehicleInwardReportFilterModel = {
+      ...filter,
+      pageIndex: 1,
+      pageSize: 100000
+    };
+
+    return this.http.post<VehicleInwardReportResponse>(
+      `${this.apiUrl}/vehicle-inward`,
+      exportFilter
+    ).pipe(
+      map(res => res.data)
     );
   }
 }

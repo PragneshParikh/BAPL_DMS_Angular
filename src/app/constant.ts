@@ -242,3 +242,8 @@ export const conditionModule = [
     { Id: 9, ConditionName: 'Form 22' }       // <-- NEW
 ];
 
+export const batteryMake = [
+    { Id: 1, value:'Trontek Electronics ltd' },
+    { Id: 2, value:'Trontek Electronics Pvt ltd' }
+];
+

@@ -6,21 +6,24 @@ import { ReportService } from '../../../core/services/report.service';
 import { StorageService } from '../../../core/services/storage';
 import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model';
 import {
-  VehicleInwardReportFilterModel,
-  VehicleInwardReportViewModel,
-  VehicleInwardReportResponse
-} from '../../../ViewModels/models/vehicle-inward-report.model';
+  RepairBillReportFilterModel,
+  RepairBillReportRow,
+  RepairBillReportPagedResponse
+} from '../../../ViewModels/models/repair-billModel';
+// Same shared constants module that supplies IssueTypes for the Material
+// Transfer Report — adjust path if it differs.
+import { IssueTypes } from '../../../constant';
 
 @Component({
-  selector: 'app-vehicle-inward-report',
+  selector: 'app-repair-bill-report',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './vehicle-inward-report.html'
+  templateUrl: './repair-bill-report.html'
 })
-export class VehicleInwardReport implements OnInit, OnDestroy {
+export class RepairBillReportComponent implements OnInit, OnDestroy {
 
   filterForm!: FormGroup;
-  reportData: VehicleInwardReportViewModel[] = [];
+  reportData: RepairBillReportRow[] = [];
   dealerList: DealerDropdownItem[] = [];
   Math = Math;
 
@@ -30,21 +33,26 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
   pageIndex: number = 1;
   pageSize: number = 100;
   totalRecords: number = 0;
-  totalQuantity: number = 0;
-  totalRate: number = 0;
-  totalSubsidy: number = 0;
-  totalSgst: number = 0;
-  totalCgst: number = 0;
-  totalIgst: number = 0;
-  totalHst: number = 0;
-  grandTotal: number = 0;
+  totalItemRate: number = 0;
+  totalLabourRate: number = 0; 
+  totalCgstAmount: number = 0;
+  totalSgstAmount: number = 0;
+  totalIgstAmount: number = 0;
+  totalGstAmount: number = 0;
+  totalDiscount: number = 0;
 
   isLoading: boolean = false;
   exporting: boolean = false;
   errorMessage: string = '';
 
-  sortColumn: string = 'invoiceDate';
+  sortColumn: string = 'repairBillDate';
   sortDirection: 'asc' | 'desc' = 'desc';
+
+  jobStatusOptions = ['Open', 'Closed'];
+
+  private issueTypeLabels: Record<number, string> = Object.fromEntries(
+    IssueTypes.map((t: any) => [t.id, t.name])
+  );
 
   private destroy$ = new Subject<void>();
 
@@ -53,18 +61,25 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
     private reportService: ReportService,
     private storageService: StorageService
   ) {
-    // Dates start blank (not defaulted to "this month") so the report
-    // always shows every existing record on first load — same fix applied
-    // to Repair Bill Report after it opened empty by default.
+    // FIX: fromDate/toDate are no longer Validators.required, and are never
+    // defaulted to "this month" on load. Previously the report opened
+    // already filtered to the current calendar month — if repair bills
+    // happened to sit outside that window, the report showed zero rows on
+    // first open, which read as "not working." Dates now start blank, so
+    // the initial (and post-Reset) load always requests every existing
+    // record; the backend already treats FromDate/ToDate as fully optional.
     this.filterForm = this.fb.group({
       dealerCode: [''],
       fromDate: [''],
       toDate: [''],
-      locationCode: [''],
-      invoiceNo: [''],
+      billNo: [null],
+      jobNo: [null],
       chassisNo: [''],
-      motorNo: [''],
-      batteryNo: ['']
+      partyName: [''],
+      partCode: [''],
+      labourCode: [''],
+      jobStatus: [''],
+      search: ['']
     });
   }
 
@@ -79,9 +94,6 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
       this.filterForm.get('dealerCode')?.setValue(this.loggedInDealerCode);
       this.filterForm.get('dealerCode')?.disable();
     } else {
-      // SuperAdmin/Admin — load the full dealer list for the dropdown.
-      // ReportService.getDealerDropdown() has no dealer-scoping on the
-      // backend, so it always returns every dealer regardless of caller.
       this.loadDealerDropdown();
     }
 
@@ -103,31 +115,33 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
   }
 
   loadReport(): void {
+    if (this.filterForm.invalid) {
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
     const filter = this.buildFilterModel();
 
-    // Endpoint path confirmed as "vehicle-inward" (not "vehicle-inward-report")
-    this.reportService.getVehicleInwardReport(filter)
+    this.reportService.getRepairBillReport(filter)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response: VehicleInwardReportResponse) => {
+        next: (response: RepairBillReportPagedResponse) => {
           this.reportData = response.data;
           this.totalRecords = response.totalRecords;
           this.pageIndex = response.pageIndex;
           this.pageSize = response.pageSize;
-          this.totalQuantity = response.totalQuantity;
-          this.totalRate = response.totalRate;
-          this.totalSubsidy = response.totalSubsidy;
-          this.totalSgst = response.totalSgst;
-          this.totalCgst = response.totalCgst;
-          this.totalIgst = response.totalIgst;
-          this.totalHst = response.totalHst;
-          this.grandTotal = response.grandTotal;
+          this.totalItemRate = response.totalItemRate;
+          this.totalLabourRate = response.totalLabourRate;
+          this.totalCgstAmount = response.totalCgstAmount;
+          this.totalSgstAmount = response.totalSgstAmount;
+          this.totalIgstAmount = response.totalIgstAmount;
+          this.totalGstAmount = response.totalGstAmount;
+          this.totalDiscount = response.totalDiscount;
           this.isLoading = false;
         },
         error: (error) => {
-          this.errorMessage = error?.error?.message || 'Failed to load vehicle inward report.';
+          this.errorMessage = error?.error?.message || 'Failed to load repair bill report.';
           this.reportData = [];
           this.totalRecords = 0;
           this.isLoading = false;
@@ -169,13 +183,22 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
     });
   }
 
+  getIssueTypeLabel(issueType: number | null | undefined): string {
+    if (issueType === null || issueType === undefined) return '-';
+    return this.issueTypeLabels[issueType] ?? `Type ${issueType}`;
+  }
+
   exportToExcel(): void {
     this.exporting = true;
     this.errorMessage = '';
 
-    const filter = this.buildFilterModel();
+    const filter: RepairBillReportFilterModel = {
+      ...this.buildFilterModel(),
+      pageIndex: 1,
+      pageSize: 100000
+    };
 
-    this.reportService.exportVehicleInwardReport(filter)
+    this.reportService.exportRepairBillReport(filter)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
@@ -190,19 +213,24 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.exporting = false;
-          this.errorMessage = error?.error?.message || 'Failed to export vehicle inward report.';
+          this.errorMessage = error?.error?.message || 'Failed to export repair bill report.';
         }
       });
   }
 
-  private generateCsv(data: VehicleInwardReportViewModel[]): void {
+  private generateCsv(data: RepairBillReportRow[]): void {
     const headers = [
-      'Sr No', 'Receiving Date', 'Invoice Date', 'Dealer Code', 'Dealer Name',
-      'BG Invoice No', 'Lot Inspection No', 'Party Name', 'Purchase Receiving Location',
-      'Model Name', 'Quantity', 'Chassis No', 'Motor No', 'Colour', 'Mfg Year',
-      'Battery No', 'Battery Make', 'Battery Capacity', 'Battery Chemical',
-      'Charger No', 'Controller No', 'Rate', 'FAME2 Subsidy',
-      'SGST', 'CGST', 'IGST', 'HST'
+      'Sr No', 'Dealer Code', 'Dealer Name', 'Dealer Location', 'City', 'State',
+      'Job Date', 'Job Type', 'Service Head', 'Service Type',
+      'Customer Name', 'Customer Mobile', 'Chassis No', 'Model Details', 'Job Status',
+      'Repair Bill No', 'Repair Bill Date',
+      'Part Code', 'Part Code Description',
+      'Issue Type',
+      'Item Rate',
+      'CGST %', 'CGST Amt', 'SGST %', 'SGST Amt', 'IGST %', 'IGST Amt', 'Total GST',
+      'Discount', 'Discount Type',
+      'Labour Code', 'Labour Description',
+      'Technician Name'
     ];
 
     const fmt = (d: any) => d ? new Date(d).toLocaleDateString('en-IN') : '';
@@ -210,12 +238,17 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
     const csvRows = [
       headers,
       ...data.map(row => [
-        row.srNo, fmt(row.receivingDate), fmt(row.invoiceDate), row.dealerCode, row.dealerName,
-        row.bgInvoiceNo, row.lotInspectionNo, row.partyName, row.purchaseReceivingLocation,
-        row.modelName, row.quantity, row.chassisNo, row.motorNo, row.colour, row.mfgYear,
-        row.batteryNo, row.batteryMake, row.batteryCapacity, row.batteryChemical,
-        row.chargerNo, row.controllerNo, row.rate, row.subsidyAmountFame2,
-        row.sgst, row.cgst, row.igst, row.hst
+        row.srNo, row.dealerCode, row.dealerName, row.dealerLocation, row.city, row.state,
+        fmt(row.jobDate), row.jobType, row.serviceHead, row.serviceType,
+        row.customerName, row.customerMobile, row.chassisNo, row.modelDetails, row.jobStatus,
+        row.repairBillNo, fmt(row.repairBillDate),
+        row.partCode, row.partCodeDescription,
+        this.getIssueTypeLabel(row.issueType),
+        row.itemRate,
+        row.cgstPercent, row.cgstAmount, row.sgstPercent, row.sgstAmount, row.igstPercent, row.igstAmount, row.totalGstAmount,
+        row.discount, row.discountType,
+        row.labourCode, row.labourDescription,
+        row.technicianName
       ])
     ];
 
@@ -227,7 +260,7 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `vehicle-inward-report-${new Date().getTime()}.csv`;
+    a.download = `repair-bill-report-${new Date().getTime()}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   }
@@ -247,17 +280,20 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
   nextPage(): void { this.goToPage(this.pageIndex + 1); }
   lastPage(): void { this.goToPage(this.totalPages); }
 
-  private buildFilterModel(): VehicleInwardReportFilterModel {
+  private buildFilterModel(): RepairBillReportFilterModel {
     const raw = this.filterForm.getRawValue();
     return {
       dealerCode: raw.dealerCode || undefined,
       fromDate: raw.fromDate || undefined,
       toDate: raw.toDate || undefined,
-      locationCode: raw.locationCode || undefined,
-      invoiceNo: raw.invoiceNo || undefined,
-      chassisNo: raw.chassisNo || undefined,
-      motorNo: raw.motorNo || undefined,
-      batteryNo: raw.batteryNo || undefined,
+      billNo: raw.billNo,
+      jobNo: raw.jobNo,
+      chassisNo: raw.chassisNo,
+      partyName: raw.partyName,
+      partCode: raw.partCode,
+      labourCode: raw.labourCode,
+      jobStatus: raw.jobStatus || undefined,
+      search: raw.search,
       pageIndex: this.pageIndex,
       pageSize: this.pageSize
     };

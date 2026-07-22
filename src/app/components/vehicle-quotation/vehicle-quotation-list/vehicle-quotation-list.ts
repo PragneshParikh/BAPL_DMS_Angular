@@ -4,17 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { VehicleQuotationService } from '../../../core/services/vehicle-quotationservice';
 import { AuthenticationService } from '../../../core/services/auth.service';
+import { ReportService } from '../../../core/services/report.service';
+import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model';
 import { VehicleQuotation } from '../../vehicle-quotation/vehicle-quotation';
 
 // =====================================
 // PRINT STYLES
 // Kept as a plain string constant (not a separate .scss file) so the print
 // window — a fully separate document opened via window.open() +
-// document.write() — can use it directly in a <style> tag. Angular's
-// component style encapsulation can't reach into that document anyway,
-// and a real .scss import here would need the esbuild-based builder plus
-// a '*.scss?raw' typings declaration, which added unnecessary setup for
-// something this self-contained.
+// document.write() — can use it directly in a <style> tag.
 // =====================================
 const PRINT_STYLES = `
 * { box-sizing: border-box; }
@@ -193,20 +191,24 @@ export class VehicleQuotationListComponent implements OnInit {
   showEditModal = false;
   selectedQuotationId?: number;
 
-  printingId?: number; // shows a spinner/disabled state on the row being printed
+  printingId?: number;
 
   // Access control — SuperAdmin sees every dealer's quotations; any other
-  // role only ever sees their own dealer's, same pattern already used by
-  // StockReportComponent. NOTE: this only controls what this screen *asks
-  // for* — the real boundary has to be enforced server-side too, otherwise
-  // a dealer user could still request another dealer's data by calling the
-  // API directly with a different dealerCode. See chat for what's needed
-  // on the service/backend side to close that gap.
+  // role only ever sees their own dealer's, same pattern already used
+  // elsewhere. NOTE: this only controls what this screen *asks for* — the
+  // real boundary is enforced server-side in VehicleQuotationService.
   isSuperAdmin = false;
+
+  // NEW — dealer-wise filter for SuperAdmin, sourced from the same
+  // ReportService.getDealerDropdown() every report screen already uses
+  // (returns {dealerCode, dealerName} — matches getQuotations(dealerCode)).
+  dealers: DealerDropdownItem[] = [];
+  selectedDealerCode: string = '';
 
   constructor(
     private quotationService: VehicleQuotationService,
     private authService: AuthenticationService,
+    private reportService: ReportService,
     private router: Router
   ) { }
 
@@ -214,6 +216,21 @@ export class VehicleQuotationListComponent implements OnInit {
     const currentUser = this.authService.currentUserValue;
     this.isSuperAdmin = currentUser?.role === 'SuperAdmin';
 
+    if (this.isSuperAdmin) {
+      this.loadDealerDropdown();
+    }
+
+    this.loadData();
+  }
+
+  loadDealerDropdown(): void {
+    this.reportService.getDealerDropdown().subscribe({
+      next: (data: DealerDropdownItem[]) => (this.dealers = data),
+      error: () => (this.dealers = [])
+    });
+  }
+
+  onDealerFilterChange(): void {
     this.loadData();
   }
 
@@ -222,7 +239,7 @@ export class VehicleQuotationListComponent implements OnInit {
 
     const currentUser = this.authService.currentUserValue;
     const dealerCode = this.isSuperAdmin
-      ? undefined
+      ? (this.selectedDealerCode || undefined)
       : (currentUser?.dealerCode ?? undefined);
 
     this.quotationService.getQuotations(dealerCode).subscribe({
@@ -296,16 +313,6 @@ export class VehicleQuotationListComponent implements OnInit {
     });
   }
 
-  // =====================================
-  // PRINT / PDF
-  // Fetches the FULL print record via GetPrintQuotationAsync (dealer
-  // address/mobile/email/GST, real GST split, finance details — none of
-  // which exist on the plain GetById DTO), builds a formatted A4 print
-  // layout in a new window, and triggers the browser's print dialog.
-  // The user can "Save as PDF" from there — no extra PDF library
-  // dependency needed since this uses the browser's native print-to-PDF
-  // renderer.
-  // =====================================
   printQuotation(id: number): void {
     if (!id) {
       console.error('Cannot print — id missing on row:', id);
@@ -347,16 +354,12 @@ export class VehicleQuotationListComponent implements OnInit {
       return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
-    // Always-shown core rows (even if 0) so the buyer sees the full calculation,
-    // matching the "Customer Price + GST − FAME2" note shown on-screen.
     const coreRow = (label: string, value: any, opts: { negative?: boolean } = {}) => {
       const amount = opts.negative ? -Math.abs(num(value)) : num(value);
       const sign = amount < 0 ? '- ' : '';
       return `<tr><td>${label}</td><td class="amt">${sign}₹ ${fmtCurrency(Math.abs(amount))}</td></tr>`;
     };
 
-    // Optional rows — only shown if the charge is actually non-zero, to avoid
-    // cluttering the quotation with a wall of "₹ 0.00" lines.
     const optionalRow = (label: string, value: any) =>
       num(value) !== 0 ? coreRow(label, value) : '';
 
@@ -368,9 +371,6 @@ export class VehicleQuotationListComponent implements OnInit {
     const gstTotal = num(d.taxAmount) || (sgst + cgst + igst);
     const exShowroom = num(d.exShowroomPrice);
 
-    // Build the dealer contact line for the letterhead — only include the
-    // parts that actually exist, joined with a separator, so a dealer
-    // missing (say) an email doesn't leave a stray "| |" in the output.
     const dealerContactParts: string[] = [];
     if (d.dealerMobile) dealerContactParts.push(`Mobile: ${d.dealerMobile}`);
     if (d.dealerEmail) dealerContactParts.push(`Email: ${d.dealerEmail}`);
@@ -470,6 +470,15 @@ export class VehicleQuotationListComponent implements OnInit {
       <td class="amt">₹ ${fmtCurrency(d.totalAmount)}</td>
     </tr>
   </table>
+
+  ${(num(d.exchangeAmount) !== 0 || d.oldCompanyName || d.oldModelName) ? `
+  <div class="section-title">Exchange Vehicle Details</div>
+  <table class="info">
+    <tr>
+      <td class="label">Old Company</td><td>${d.oldCompanyName ?? '-'}</td>
+      <td class="label">Old Model</td><td>${d.oldModelName ?? '-'}</td>
+    </tr>
+  </table>` : ''}
 
   ${d.isFinance ? `
   <div class="section-title">Finance Details</div>

@@ -7,6 +7,7 @@ export interface VehicleSaleListChasisResponse {
   itemColor: string;
   isD2D?: boolean;
   mfgYear?: number;
+  repairBillStatus:string;
 
   //  Battery & Components
   batteryNo?: string;

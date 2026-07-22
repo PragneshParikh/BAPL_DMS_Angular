@@ -6,21 +6,24 @@ import { ReportService } from '../../../core/services/report.service';
 import { StorageService } from '../../../core/services/storage';
 import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model';
 import {
-  VehicleInwardReportFilterModel,
-  VehicleInwardReportViewModel,
-  VehicleInwardReportResponse
-} from '../../../ViewModels/models/vehicle-inward-report.model';
+  MaterialTransferReportFilterModel,
+  MaterialTransferReportRow,
+  MaterialTransferReportPagedResponse
+} from '../../../ViewModels/models/material-transferModel';
+// Same shared constants module used by Repair Bill Report — adjust path
+// if it differs.
+import { IssueTypes } from '../../../constant';
 
 @Component({
-  selector: 'app-vehicle-inward-report',
+  selector: 'app-material-transfer-report',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './vehicle-inward-report.html'
+  templateUrl: './material-transfer-report.html'
 })
-export class VehicleInwardReport implements OnInit, OnDestroy {
+export class MaterialTransferReportComponent implements OnInit, OnDestroy {
 
   filterForm!: FormGroup;
-  reportData: VehicleInwardReportViewModel[] = [];
+  reportData: MaterialTransferReportRow[] = [];
   dealerList: DealerDropdownItem[] = [];
   Math = Math;
 
@@ -31,20 +34,23 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
   pageSize: number = 100;
   totalRecords: number = 0;
   totalQuantity: number = 0;
-  totalRate: number = 0;
-  totalSubsidy: number = 0;
-  totalSgst: number = 0;
-  totalCgst: number = 0;
-  totalIgst: number = 0;
-  totalHst: number = 0;
-  grandTotal: number = 0;
+  totalAmount: number = 0;
+  totalMrp: number = 0;
+  totalCgstAmount: number = 0;
+  totalSgstAmount: number = 0;
+  totalIgstAmount: number = 0;
+  totalGstAmount: number = 0;
 
   isLoading: boolean = false;
   exporting: boolean = false;
   errorMessage: string = '';
 
-  sortColumn: string = 'invoiceDate';
+  sortColumn: string = 'transferDate';
   sortDirection: 'asc' | 'desc' = 'desc';
+
+  private issueTypeLabels: Record<number, string> = Object.fromEntries(
+    IssueTypes.map((t: any) => [t.id, t.name])
+  );
 
   private destroy$ = new Subject<void>();
 
@@ -53,18 +59,15 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
     private reportService: ReportService,
     private storageService: StorageService
   ) {
-    // Dates start blank (not defaulted to "this month") so the report
-    // always shows every existing record on first load — same fix applied
-    // to Repair Bill Report after it opened empty by default.
     this.filterForm = this.fb.group({
       dealerCode: [''],
       fromDate: [''],
       toDate: [''],
-      locationCode: [''],
-      invoiceNo: [''],
+      jobNo: [null],
       chassisNo: [''],
-      motorNo: [''],
-      batteryNo: ['']
+      partyName: [''],
+      itemCode: [''],
+      search: ['']
     });
   }
 
@@ -79,9 +82,6 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
       this.filterForm.get('dealerCode')?.setValue(this.loggedInDealerCode);
       this.filterForm.get('dealerCode')?.disable();
     } else {
-      // SuperAdmin/Admin — load the full dealer list for the dropdown.
-      // ReportService.getDealerDropdown() has no dealer-scoping on the
-      // backend, so it always returns every dealer regardless of caller.
       this.loadDealerDropdown();
     }
 
@@ -107,27 +107,25 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
     this.errorMessage = '';
     const filter = this.buildFilterModel();
 
-    // Endpoint path confirmed as "vehicle-inward" (not "vehicle-inward-report")
-    this.reportService.getVehicleInwardReport(filter)
+    this.reportService.getMaterialTransferReport(filter)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response: VehicleInwardReportResponse) => {
+        next: (response: MaterialTransferReportPagedResponse) => {
           this.reportData = response.data;
           this.totalRecords = response.totalRecords;
           this.pageIndex = response.pageIndex;
           this.pageSize = response.pageSize;
           this.totalQuantity = response.totalQuantity;
-          this.totalRate = response.totalRate;
-          this.totalSubsidy = response.totalSubsidy;
-          this.totalSgst = response.totalSgst;
-          this.totalCgst = response.totalCgst;
-          this.totalIgst = response.totalIgst;
-          this.totalHst = response.totalHst;
-          this.grandTotal = response.grandTotal;
+          this.totalAmount = response.totalAmount;
+          this.totalMrp = response.totalMrp;
+          this.totalCgstAmount = response.totalCgstAmount;
+          this.totalSgstAmount = response.totalSgstAmount;
+          this.totalIgstAmount = response.totalIgstAmount;
+          this.totalGstAmount = response.totalGstAmount;
           this.isLoading = false;
         },
         error: (error) => {
-          this.errorMessage = error?.error?.message || 'Failed to load vehicle inward report.';
+          this.errorMessage = error?.error?.message || 'Failed to load material transfer report.';
           this.reportData = [];
           this.totalRecords = 0;
           this.isLoading = false;
@@ -169,13 +167,22 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
     });
   }
 
+  getIssueTypeLabel(issueType: number | null | undefined): string {
+    if (issueType === null || issueType === undefined) return '-';
+    return this.issueTypeLabels[issueType] ?? `Type ${issueType}`;
+  }
+
   exportToExcel(): void {
     this.exporting = true;
     this.errorMessage = '';
 
-    const filter = this.buildFilterModel();
+    const filter: MaterialTransferReportFilterModel = {
+      ...this.buildFilterModel(),
+      pageIndex: 1,
+      pageSize: 100000
+    };
 
-    this.reportService.exportVehicleInwardReport(filter)
+    this.reportService.exportMaterialTransferReport(filter)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
@@ -190,19 +197,22 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.exporting = false;
-          this.errorMessage = error?.error?.message || 'Failed to export vehicle inward report.';
+          this.errorMessage = error?.error?.message || 'Failed to export material transfer report.';
         }
       });
   }
 
-  private generateCsv(data: VehicleInwardReportViewModel[]): void {
+  private generateCsv(data: MaterialTransferReportRow[]): void {
     const headers = [
-      'Sr No', 'Receiving Date', 'Invoice Date', 'Dealer Code', 'Dealer Name',
-      'BG Invoice No', 'Lot Inspection No', 'Party Name', 'Purchase Receiving Location',
-      'Model Name', 'Quantity', 'Chassis No', 'Motor No', 'Colour', 'Mfg Year',
-      'Battery No', 'Battery Make', 'Battery Capacity', 'Battery Chemical',
-      'Charger No', 'Controller No', 'Rate', 'FAME2 Subsidy',
-      'SGST', 'CGST', 'IGST', 'HST'
+      'Sr No', 'Dealer Code', 'Dealer Name', 'Dealer Location', 'Dealer City', 'Dealer State',
+      'Job No', 'Chassis No', 'Customer Name', 'Customer Mobile',
+      'Material Prefix', 'Material Issue No', 'Transfer Date',
+      'Item Code', 'Item Name', 'Item Description', 'HSN Code',
+      'Quantity', 'Item Rate', 'MRP',
+      'CGST %', 'CGST Amt', 'SGST %', 'SGST Amt', 'IGST %', 'IGST Amt', 'Total GST',
+      'Amount',
+      'Serial No', 'Remarks', 'Rack No', 'Bin',
+      'Issue Type', 'Job Card Status', 'Prepared By (Dealer Code)', 'Modified By (Dealer Code)'
     ];
 
     const fmt = (d: any) => d ? new Date(d).toLocaleDateString('en-IN') : '';
@@ -210,12 +220,15 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
     const csvRows = [
       headers,
       ...data.map(row => [
-        row.srNo, fmt(row.receivingDate), fmt(row.invoiceDate), row.dealerCode, row.dealerName,
-        row.bgInvoiceNo, row.lotInspectionNo, row.partyName, row.purchaseReceivingLocation,
-        row.modelName, row.quantity, row.chassisNo, row.motorNo, row.colour, row.mfgYear,
-        row.batteryNo, row.batteryMake, row.batteryCapacity, row.batteryChemical,
-        row.chargerNo, row.controllerNo, row.rate, row.subsidyAmountFame2,
-        row.sgst, row.cgst, row.igst, row.hst
+        row.srNo, row.dealerCode, row.dealerName, row.dealerLocation, row.dealerCity, row.dealerState,
+        row.jobNo, row.chassisNo, row.customerName, row.customerMobile,
+        row.materialPrefix, row.materialIssueNumber, fmt(row.transferDate),
+        row.itemCode, row.itemName, row.itemDesc, row.hsncode,
+        row.quantity, row.itemRate, row.mrp,
+        row.cgstPercent, row.cgstAmount, row.sgstPercent, row.sgstAmount, row.igstPercent, row.igstAmount, row.totalGstAmount,
+        row.amount,
+        row.serialNo, row.remarks, row.rackNo, row.bin,
+        this.getIssueTypeLabel(row.issueType), row.jobCardStatus, row.preparedByDealerCode, row.modifiedByDealerCode
       ])
     ];
 
@@ -227,7 +240,7 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `vehicle-inward-report-${new Date().getTime()}.csv`;
+    a.download = `material-transfer-report-${new Date().getTime()}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   }
@@ -247,17 +260,17 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
   nextPage(): void { this.goToPage(this.pageIndex + 1); }
   lastPage(): void { this.goToPage(this.totalPages); }
 
-  private buildFilterModel(): VehicleInwardReportFilterModel {
+  private buildFilterModel(): MaterialTransferReportFilterModel {
     const raw = this.filterForm.getRawValue();
     return {
       dealerCode: raw.dealerCode || undefined,
       fromDate: raw.fromDate || undefined,
       toDate: raw.toDate || undefined,
-      locationCode: raw.locationCode || undefined,
-      invoiceNo: raw.invoiceNo || undefined,
-      chassisNo: raw.chassisNo || undefined,
-      motorNo: raw.motorNo || undefined,
-      batteryNo: raw.batteryNo || undefined,
+      jobNo: raw.jobNo,
+      chassisNo: raw.chassisNo,
+      partyName: raw.partyName,
+      itemCode: raw.itemCode,
+      search: raw.search,
       pageIndex: this.pageIndex,
       pageSize: this.pageSize
     };

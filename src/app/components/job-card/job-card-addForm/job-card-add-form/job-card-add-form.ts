@@ -148,7 +148,13 @@ export class JobCardAddForm {
     private toaster: ToastService) { }
 
   ngOnInit(): void {
-    this.dealerCode = this.storageService.getDealerCode();
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
     this.loadPrefix();
     this.fetchLocations();
     this.loadJobTypes();
@@ -178,7 +184,9 @@ export class JobCardAddForm {
       next: (res: string) => {
         this.loader.hide();
         this.jobPrefix = res;
-        this.jobNo = Number(res.split('/').pop());
+        const parts = res.split('/');
+        this.jobNo = parseInt(parts[parts.length - 1], 10);
+        console.log(this.jobNo);
       }, error: (err) => {
         this.loader.hide();
         console.error(err);
@@ -191,6 +199,7 @@ export class JobCardAddForm {
   }
   //Fetech Dealer Location
   fetchLocations(): void {
+    this.loadPrefix();
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
     if (!this.isSuperAdmin) {
@@ -200,7 +209,7 @@ export class JobCardAddForm {
     }
     this.locationService.getLocationList(this.dealerCode).subscribe({
       next: (data: any[]) => {
-       
+
         // only Workshop (id = 2)
         this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
@@ -378,10 +387,17 @@ export class JobCardAddForm {
   }
 
   loadChassisList() {
-    const dealerCode = this.storageService.getDealerCode();
+
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
     this.jobTypeId = this.selectedJobtype
 
-    this.jobCardService.getAllInspectedChassis(dealerCode, this.jobTypeId).subscribe(res => {
+    this.jobCardService.getAllInspectedChassis(this.dealerCode, this.jobTypeId).subscribe(res => {
       this.chassisList = res;
 
       if (this.isEditMode && this.chassiseditData) {
@@ -422,11 +438,17 @@ export class JobCardAddForm {
 
     if (!this.selectedJobtype) return;
 
-    const dealerCode = this.storageService.getDealerCode();
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
 
     // Load chassis
     this.jobCardService
-      .getAllInspectedChassis(dealerCode, this.selectedJobtype)
+      .getAllInspectedChassis(this.dealerCode, this.selectedJobtype)
       .subscribe(res => {
         this.chassisList = res;
       });
@@ -745,7 +767,7 @@ export class JobCardAddForm {
   //insert jobcard
   isSubmitted = false;
   saveJobCard() {
-
+    debugger
     this.isSubmitted = true;
     if (this.selectedJobtype == 1 && this.pdiCheckList.length == 0) {
       Swal.fire({

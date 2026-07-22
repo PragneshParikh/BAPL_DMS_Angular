@@ -1,5 +1,5 @@
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-  <h4 class="mb-sm-0">Vehicle Inward Report</h4>
+  <h4 class="mb-sm-0">Material Transfer Report</h4>
   <span class="badge bg-light text-dark border px-3 py-2 fs-6">
     Total Records: {{ totalRecords }}
   </span>
@@ -44,13 +44,8 @@
             </div>
 
             <div class="col-xl-3 col-md-6">
-              <label class="form-label">Location Code</label>
-              <input type="text" formControlName="locationCode" class="form-control form-control-sm" placeholder="Enter location code">
-            </div>
-
-            <div class="col-xl-3 col-md-6">
-              <label class="form-label">Invoice No.</label>
-              <input type="text" formControlName="invoiceNo" class="form-control form-control-sm" placeholder="Enter invoice number">
+              <label class="form-label">Job No.</label>
+              <input type="number" formControlName="jobNo" class="form-control form-control-sm" placeholder="Enter job number">
             </div>
 
             <div class="col-xl-3 col-md-6">
@@ -59,13 +54,19 @@
             </div>
 
             <div class="col-xl-3 col-md-6">
-              <label class="form-label">Motor No.</label>
-              <input type="text" formControlName="motorNo" class="form-control form-control-sm" placeholder="Enter motor number">
+              <label class="form-label">Customer Name</label>
+              <input type="text" formControlName="partyName" class="form-control form-control-sm" placeholder="Enter customer name">
             </div>
 
             <div class="col-xl-3 col-md-6">
-              <label class="form-label">Battery No.</label>
-              <input type="text" formControlName="batteryNo" class="form-control form-control-sm" placeholder="Enter battery number">
+              <label class="form-label">Item Code</label>
+              <input type="text" formControlName="itemCode" class="form-control form-control-sm" placeholder="Enter item code">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Search</label>
+              <input type="text" formControlName="search" class="form-control form-control-sm"
+                placeholder="Chassis / Item / Customer / Job No">
             </div>
 
           </div>
@@ -96,26 +97,26 @@
     <div class="row g-3">
       <div class="col-xl-3 col-md-6">
         <div class="card h-100"><div class="card-body">
+          <p class="text-muted text-uppercase fw-semibold mb-1">Total Amount</p>
+          <h5 class="mb-0">{{ formatCurrency(totalAmount) }}</h5>
+        </div></div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <p class="text-muted text-uppercase fw-semibold mb-1">Total MRP</p>
+          <h5 class="mb-0">{{ formatCurrency(totalMrp) }}</h5>
+        </div></div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <p class="text-muted text-uppercase fw-semibold mb-1">Total GST (C+S+I)</p>
+          <h5 class="mb-0">{{ formatCurrency(totalGstAmount) }}</h5>
+        </div></div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100"><div class="card-body">
           <p class="text-muted text-uppercase fw-semibold mb-1">Total Quantity</p>
           <h5 class="mb-0">{{ totalQuantity }}</h5>
-        </div></div>
-      </div>
-      <div class="col-xl-3 col-md-6">
-        <div class="card h-100"><div class="card-body">
-          <p class="text-muted text-uppercase fw-semibold mb-1">Total Rate</p>
-          <h5 class="mb-0">{{ formatCurrency(totalRate) }}</h5>
-        </div></div>
-      </div>
-      <div class="col-xl-3 col-md-6">
-        <div class="card h-100"><div class="card-body">
-          <p class="text-muted text-uppercase fw-semibold mb-1">Total FAME2 Subsidy</p>
-          <h5 class="mb-0">{{ formatCurrency(totalSubsidy) }}</h5>
-        </div></div>
-      </div>
-      <div class="col-xl-3 col-md-6">
-        <div class="card h-100"><div class="card-body">
-          <p class="text-muted text-uppercase fw-semibold mb-1">Grand Total</p>
-          <h5 class="mb-0">{{ formatCurrency(grandTotal) }}</h5>
         </div></div>
       </div>
     </div>
@@ -152,99 +153,125 @@
                     'fa-sort':      sortColumn !== 'srNo'
                   }"></i>
                 </th>
-                <th>Receiving Date</th>
-                <th class="sortable" (click)="onSort('invoiceDate')">
-                  Invoice Date
-                  <i class="fas" [ngClass]="{
-                    'fa-sort-up':   sortColumn === 'invoiceDate' && sortDirection === 'asc',
-                    'fa-sort-down': sortColumn === 'invoiceDate' && sortDirection === 'desc',
-                    'fa-sort':      sortColumn !== 'invoiceDate'
-                  }"></i>
-                </th>
                 <th>Dealer Code</th>
                 <th>Dealer Name</th>
-                <th>BG Invoice No.</th>
-                <th>Lot Inspection No.</th>
-                <th>Party Name</th>
-                <th>Purchase Receiving Location</th>
-                <th>Model Name</th>
-                <th class="text-end">Quantity</th>
-                <th class="sortable" (click)="onSort('chassisNo')">
-                  Chassis No.
+                <th>Dealer Location</th>
+                <th>Dealer City</th>
+                <th>Dealer State</th>
+                <th class="sortable" (click)="onSort('jobNo')">
+                  Job No.
                   <i class="fas" [ngClass]="{
-                    'fa-sort-up':   sortColumn === 'chassisNo' && sortDirection === 'asc',
-                    'fa-sort-down': sortColumn === 'chassisNo' && sortDirection === 'desc',
-                    'fa-sort':      sortColumn !== 'chassisNo'
+                    'fa-sort-up':   sortColumn === 'jobNo' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'jobNo' && sortDirection === 'desc',
+                    'fa-sort':      sortColumn !== 'jobNo'
                   }"></i>
                 </th>
-                <th>Motor No.</th>
-                <th>Colour</th>
-                <th>Mfg Year</th>
-                <th>Battery No.</th>
-                <th>Battery Make</th>
-                <th>Battery Capacity</th>
-                <th>Battery Chemical</th>
-                <th>Charger No.</th>
-                <th>Controller No.</th>
-                <th class="text-end">Rate</th>
-                <th class="text-end">FAME2 Subsidy</th>
-                <th class="text-end">SGST</th>
-                <th class="text-end">CGST</th>
-                <th class="text-end">IGST</th>
-                <th class="text-end">HST</th>
+                <th>Chassis No.</th>
+                <th>Customer Name</th>
+                <th>Customer Mobile</th>
+                <th>Material Prefix</th>
+                <th>Material Issue No.</th>
+                <th class="sortable" (click)="onSort('transferDate')">
+                  Transfer Date
+                  <i class="fas" [ngClass]="{
+                    'fa-sort-up':   sortColumn === 'transferDate' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'transferDate' && sortDirection === 'desc',
+                    'fa-sort':      sortColumn !== 'transferDate'
+                  }"></i>
+                </th>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th>Item Description</th>
+                <th>HSN Code</th>
+                <th class="text-end">Qty</th>
+                <th class="text-end">Item Rate</th>
+                <th class="text-end">MRP</th>
+                <th class="text-end">CGST %</th>
+                <th class="text-end">CGST Amt</th>
+                <th class="text-end">SGST %</th>
+                <th class="text-end">SGST Amt</th>
+                <th class="text-end">IGST %</th>
+                <th class="text-end">IGST Amt</th>
+                <th class="text-end">Total GST</th>
+                <th class="text-end">Amount</th>
+                <th>Serial No.</th>
+                <th>Remarks</th>
+                <th>Rack No.</th>
+                <th>Bin</th>
+                <th>Issue Type</th>
+                <th>Job Card Status</th>
+                <th>Prepared By</th>
+                <th>Modified By</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let item of reportData">
                 <td>{{ item.srNo }}</td>
-                <td class="text-nowrap">{{ formatDate(item.receivingDate) }}</td>
-                <td class="text-nowrap">{{ formatDate(item.invoiceDate) }}</td>
                 <td>{{ item.dealerCode }}</td>
                 <td>{{ item.dealerName }}</td>
-                <td>{{ item.bgInvoiceNo }}</td>
-                <td>{{ item.lotInspectionNo }}</td>
-                <td>{{ item.partyName || '-' }}</td>
-                <td>{{ item.purchaseReceivingLocation }}</td>
-                <td>{{ item.modelName }}</td>
-                <td class="text-end">{{ item.quantity }}</td>
+                <td>{{ item.dealerLocation }}</td>
+                <td>{{ item.dealerCity }}</td>
+                <td>{{ item.dealerState }}</td>
+                <td>{{ item.jobNo }}</td>
                 <td>{{ item.chassisNo }}</td>
-                <td>{{ item.motorNo }}</td>
-                <td>{{ item.colour }}</td>
-                <td>{{ item.mfgYear }}</td>
-                <td>{{ item.batteryNo }}</td>
-                <td>{{ item.batteryMake }}</td>
-                <td>{{ item.batteryCapacity }}</td>
-                <td>{{ item.batteryChemical }}</td>
-                <td>{{ item.chargerNo }}</td>
-                <td>{{ item.controllerNo }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(item.rate) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(item.subsidyAmountFame2) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(item.sgst) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(item.cgst) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(item.igst) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(item.hst) }}</td>
+                <td>{{ item.customerName }}</td>
+                <td>{{ item.customerMobile }}</td>
+                <td>{{ item.materialPrefix }}</td>
+                <td>{{ item.materialIssueNumber }}</td>
+                <td class="text-nowrap">{{ formatDate(item.transferDate) }}</td>
+                <td>{{ item.itemCode }}</td>
+                <td>{{ item.itemName }}</td>
+                <td>{{ item.itemDesc }}</td>
+                <td>{{ item.hsncode }}</td>
+                <td class="text-end">{{ item.quantity }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.itemRate) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.mrp) }}</td>
+                <td class="text-end">{{ item.cgstPercent }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.cgstAmount) }}</td>
+                <td class="text-end">{{ item.sgstPercent }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.sgstAmount) }}</td>
+                <td class="text-end">{{ item.igstPercent }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.igstAmount) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.totalGstAmount) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.amount) }}</td>
+                <td>{{ item.serialNo }}</td>
+                <td>{{ item.remarks }}</td>
+                <td>{{ item.rackNo }}</td>
+                <td>{{ item.bin }}</td>
+                <td>{{ getIssueTypeLabel(item.issueType) }}</td>
+                <td>{{ item.jobCardStatus }}</td>
+                <td>{{ item.preparedByDealerCode }}</td>
+                <td>{{ item.modifiedByDealerCode }}</td>
               </tr>
             </tbody>
             <tfoot>
               <tr class="table-warning fw-bold">
-                <!-- Cols 1–10: Sr.No through Model Name -->
-                <td colspan="10" class="text-end">TOTAL (this page)</td>
-                <!-- Col 11: Quantity -->
+                <!-- Cols 1–17: Sr.No through HSN Code -->
+                <td colspan="17" class="text-end">TOTAL (this page)</td>
+                <!-- Col 18: Qty -->
                 <td class="text-end">{{ totalQuantity }}</td>
-                <!-- Cols 12–21: Chassis No through Controller No -->
-                <td colspan="10"></td>
-                <!-- Col 22: Rate -->
-                <td class="text-end text-nowrap">{{ formatCurrency(totalRate) }}</td>
-                <!-- Col 23: FAME2 Subsidy -->
-                <td class="text-end text-nowrap">{{ formatCurrency(totalSubsidy) }}</td>
-                <!-- Col 24: SGST -->
-                <td class="text-end text-nowrap">{{ formatCurrency(totalSgst) }}</td>
-                <!-- Col 25: CGST -->
-                <td class="text-end text-nowrap">{{ formatCurrency(totalCgst) }}</td>
-                <!-- Col 26: IGST -->
-                <td class="text-end text-nowrap">{{ formatCurrency(totalIgst) }}</td>
-                <!-- Col 27: HST -->
-                <td class="text-end text-nowrap">{{ formatCurrency(totalHst) }}</td>
+                <!-- Col 19: Item Rate (no total tracked) -->
+                <td></td>
+                <!-- Col 20: MRP -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalMrp) }}</td>
+                <!-- Col 21: CGST % -->
+                <td></td>
+                <!-- Col 22: CGST Amt -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalCgstAmount) }}</td>
+                <!-- Col 23: SGST % -->
+                <td></td>
+                <!-- Col 24: SGST Amt -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalSgstAmount) }}</td>
+                <!-- Col 25: IGST % -->
+                <td></td>
+                <!-- Col 26: IGST Amt -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalIgstAmount) }}</td>
+                <!-- Col 27: Total GST -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalGstAmount) }}</td>
+                <!-- Col 28: Amount -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalAmount) }}</td>
+                <!-- Cols 29–36: Serial No through Modified By -->
+                <td colspan="8"></td>
               </tr>
             </tfoot>
           </table>

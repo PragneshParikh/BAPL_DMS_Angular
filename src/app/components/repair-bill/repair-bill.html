@@ -191,7 +191,7 @@
                             <input class="form-control form-control-sm bg-light text-muted"
                                 [value]="selectedJobCard?.jobCardHeader?.jobinDate" readonly>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-1">
                             <label>Job No.</label>
                             <input class="form-control form-control-sm bg-light text-muted"
                                 [value]="selectedJobCard?.jobCardHeader?.jobNo" readonly>
@@ -203,14 +203,14 @@
                                 [value]="selectedJobCard?.jobCardCustomer?.registerNo" readonly>
                         </div>
 
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label>Model</label>
                             <input class="form-control form-control-sm bg-light text-muted"
                                 [value]="selectedJobCard?.jobCardCustomer?.modelName" readonly>
                         </div>
 
-                        <div class="col-md-2">
-                            <label>ODO Reading</label>
+                        <div class="col-md-1">
+                            <label>KMs</label>
                             <input class="form-control form-control-sm bg-light text-muted"
                                 [value]="selectedJobCard?.jobCardHeader?.vehiclekms" readonly>
                         </div>
@@ -551,7 +551,12 @@
                                     </td> -->
 
                                     <td class="text-end">
-                                        {{item.netAmount | number:'1.2-2'}}
+                                        {{item.issuetypeName === 'U/W'
+                                        ? 0.00
+                                        : item.issuetypeName === 'FSC'
+                                        ? 0.00
+                                        : item.netAmount | number:'1.2-2'}}
+                                        <!-- {{item.netAmount | number:'1.2-2'}} -->
                                     </td>
 
                                     <td>
@@ -559,7 +564,15 @@
                                     </td>
 
                                     <td class="text-end">
-                                        {{item.waveRate | number:'1.2-2'}}
+                                        {{
+                                        item.issuetypeName === 'U/W'
+                                        ? item.rate
+                                        : item.issuetypeName === 'FSC'
+                                        ? item.waveRate
+                                        : 0
+                                        | number:'1.2-2'
+                                        }}
+                                        <!-- {{item.waveRate | number:'1.2-2'}} -->
                                     </td>
 
                                     <td class="text-end">
@@ -664,7 +677,8 @@
                                     | number:'1.2-2'
                                     }}
                                 </td>
-                                <td>{{ (item.igst ? item.igst : item.totalTaxPer) | number:'1.2-2' }}</td>
+                                <td>{{ (item.igst ? item.igst : (item.totalTaxPer ? item.totalTaxPer : (item.cgst +
+                                    item.sgst))) | number:'1.2-2' }}</td>
 
                             </tr>
 

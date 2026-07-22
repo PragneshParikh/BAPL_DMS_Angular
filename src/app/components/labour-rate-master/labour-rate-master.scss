@@ -1,3 +1,11 @@
-.btn-search{
+.btn-search {
     margin-top: 25px;
+}
+
+.table .sort::before {
+    top: 6px;
+}
+
+.table .sort::after {
+    top: 0px;
 }

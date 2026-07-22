@@ -199,6 +199,9 @@ export const routes: Routes = [
       { path: 'total-sale-dealer-wise', data: [81], loadComponent: () => import('./components/Reports/total-sale-report/total-sale-report').then(m => m.TotalSaleDealerWiseComponent) },
 
       { path: 'model-wise-variant-stock', data: [66], loadComponent: () => import('./components/Reports/model-wise-variant-report/model-wise-variant-report').then(m => m.ModelWiseVariantStockComponent) },
+      { path: 'comparison-report', data: [90], loadComponent: () => import('./components/Reports/comparision-report/comparision-report').then(m => m.ComparisonReportComponent) },
+      { path: 'material-transfer-report', data: [91], loadComponent: () => import('./components/Reports/material-transfer-report/material-transfer-report').then(m => m.MaterialTransferReportComponent) },
+      { path: 'repair-bill-report', data: [92], loadComponent: () => import('./components/Reports/repair-bill-report/repair-bill-report').then(m => m.RepairBillReportComponent) },
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
 
       { path: 'repair-bill-performa/:repairBillId', component: RepairBillPerforma, data: [51] },
@@ -245,6 +248,7 @@ export const routes: Routes = [
       { path: 'counter-bill/edit/:id', component: AddCounterBill, data: [77] },
       { path: 'add-counter-bill', component: AddCounterBill, data: [77] },
       { path: 'print-counter-bill/:id', component: CounterBillPrint, data: [77] },
+      { path: 'vehicle-open-stock', component:VehicleOpenStock, data: [89] },
       { path: 'repo-billing', component: RepoBilling, data: [88] },
       { path: 'vehicle-open-stock', component: VehicleOpenStock, data: [89] },
       { path: 'vehicle-quotation', component: VehicleQuotationListComponent, data: [87] },
