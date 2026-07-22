@@ -12,6 +12,7 @@ export interface RepairBillReportRow {
 
   jobDate: string | Date | null;
   jobType: string;
+  jobNo: number | null;  
   serviceHead: string;
   serviceType: string;
 
