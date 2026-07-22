@@ -338,6 +338,13 @@ export class EmployeeMasterComponent implements OnInit {
   // FIX: extended to cover every field isFormValid() already requires,
   // each with its own inline message instead of relying solely on a
   // disabled Save button (which gives no explanation of what's missing).
+  //
+  // FIX 2: Email / Password / Category are no longer mandatory when
+  // "Create Login Account" is checked. If the user leaves them blank, the
+  // employee is simply saved without a login (handled server-side). If
+  // something IS entered, we still validate its format/strength so we
+  // don't save garbage. Role is only required if a Category was actually
+  // picked, since a role with no category makes no sense.
   // =====================================
   validateForm(): boolean {
     this.errors = {};
@@ -407,30 +414,26 @@ export class EmployeeMasterComponent implements OnInit {
       valid = false;
     }
 
-    // Login-only fields
+    // Login-only fields — Email, Password and Category are now OPTIONAL.
+    // We only validate format/strength when the user actually typed
+    // something in; a blank value no longer blocks Save/Update.
     if (d.createLogin) {
       const email = String(d.emailId ?? '').trim();
-      if (!email) {
-        this.errors.emailId = 'Email is required to create a login.';
-        valid = false;
-      } else if (!this.emailPattern.test(email)) {
+      if (email && !this.emailPattern.test(email)) {
         this.errors.emailId = 'Enter a valid email address.';
         valid = false;
       }
 
       const pwd = String(d.password ?? '');
-      if (!this.strongPasswordPattern.test(pwd)) {
+      if (pwd && !this.strongPasswordPattern.test(pwd)) {
         this.errors.password =
           'Password must be at least 6 characters and include uppercase, lowercase, a digit, and a special character.';
         valid = false;
       }
 
-      if (this.selectedDepartments.length === 0) {
-        this.errors.category = 'Select at least one category.';
-        valid = false;
-      }
-
-      if (this.selectedRoles.length === 0) {
+      // Role is only required if a category was actually checked —
+      // no category means there's nothing to attach a role to.
+      if (this.selectedDepartments.length > 0 && this.selectedRoles.length === 0) {
         this.errors.role = 'Select at least one role.';
         valid = false;
       }
@@ -459,14 +462,18 @@ export class EmployeeMasterComponent implements OnInit {
 
     if (!coreFilled) return false;
 
-    // if creating a login: valid email, strong password, a category, and at least one role
+    // If creating a login: Email/Password/Category are optional. Only
+    // validate format when something was actually entered, and only
+    // require a role when a category was actually picked.
     if (d.createLogin) {
-      const emailOk = this.emailPattern.test(String(d.emailId ?? '').trim());
-      const strongPwd = this.strongPasswordPattern.test(String(d.password ?? ''));
-      const categoryOk = this.selectedDepartments.length > 0;   // at least one category checked
-      const roleOk = this.selectedRoles.length > 0;             // at least one role checked
+      const email = String(d.emailId ?? '').trim();
+      const pwd = String(d.password ?? '');
 
-      if (!emailOk || !strongPwd || !categoryOk || !roleOk) return false;
+      const emailOk = !email || this.emailPattern.test(email);
+      const strongPwd = !pwd || this.strongPasswordPattern.test(pwd);
+      const roleOk = this.selectedDepartments.length === 0 || this.selectedRoles.length > 0;
+
+      if (!emailOk || !strongPwd || !roleOk) return false;
     }
 
     return true;
