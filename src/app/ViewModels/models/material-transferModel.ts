@@ -3,18 +3,19 @@ export interface MaterialTransferReportRow {
 
   dealerCode: string;
   dealerName: string;
+
+  // NEW — replaces serviceLocationCode/serviceLocationName, shown right
+  // after Dealer Code/Name.
+  dealerLocation: string;
+
   dealerCity: string;
   dealerState: string;
 
   jobId: number;
   jobNo: number | null;
-  jobInvoiceNo: string;
   chassisNo: string;
-  registerNo: string;
   customerName: string;
   customerMobile: string;
-  serviceLocationCode: string;
-  serviceLocationName: string;
 
   materialPrefix: string;
   materialIssueNumber: number;
@@ -29,10 +30,21 @@ export interface MaterialTransferReportRow {
   itemRate: number;
   amount: number;
 
+  // NEW — sourced from ItemMaster.Custprice, per instruction
+  mrp: number;
+
+  // NEW — GST calculation, sourced from ItemMaster rate fields
+  cgstPercent: number;
+  cgstAmount: number;
+  sgstPercent: number;
+  sgstAmount: number;
+  igstPercent: number;
+  igstAmount: number;
+  totalGstAmount: number;
+
   serialNo: string;
   remarks: string;
-  itemReceived: string;
-  validDays: number | null;
+
   rackNo: number | null;
   bin: number | null;
 
@@ -65,4 +77,9 @@ export interface MaterialTransferReportPagedResponse {
   pageSize: number;
   totalQuantity: number;
   totalAmount: number;
+  totalMrp: number;
+  totalCgstAmount: number;
+  totalSgstAmount: number;
+  totalIgstAmount: number;
+  totalGstAmount: number;
 }

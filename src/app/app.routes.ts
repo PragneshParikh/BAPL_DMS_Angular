@@ -78,6 +78,7 @@ import { RepoBilling } from './components/repo-billing/repo-billing';
 import { VehicleOpenStock } from './components/vehicle-open-stock/vehicle-open-stock';
 import { VehicleQuotation } from './components/vehicle-quotation/vehicle-quotation';
 import { VehicleQuotationListComponent } from './components/vehicle-quotation/vehicle-quotation-list/vehicle-quotation-list';
+import { PartInward } from './components/part-inward/part-inward';
 
 
 
@@ -198,6 +199,7 @@ export const routes: Routes = [
       { path: 'total-sale-dealer-wise', data: [81], loadComponent: () => import('./components/Reports/total-sale-report/total-sale-report').then(m => m.TotalSaleDealerWiseComponent) },
 
       { path: 'model-wise-variant-stock', data: [66], loadComponent: () => import('./components/Reports/model-wise-variant-report/model-wise-variant-report').then(m => m.ModelWiseVariantStockComponent) },
+      { path: 'comparison-report', data: [90], loadComponent: () => import('./components/Reports/comparision-report/comparision-report').then(m => m.ComparisonReportComponent) },
       { path: 'material-transfer-report', data: [91], loadComponent: () => import('./components/Reports/material-transfer-report/material-transfer-report').then(m => m.MaterialTransferReportComponent) },
       { path: 'repair-bill-report', data: [92], loadComponent: () => import('./components/Reports/repair-bill-report/repair-bill-report').then(m => m.RepairBillReportComponent) },
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
@@ -252,6 +254,7 @@ export const routes: Routes = [
       { path: 'vehicle-quotation', component: VehicleQuotationListComponent, data: [87] },
       { path: 'vehicle-quotation/add', component: VehicleQuotation, data: [87] },
       { path: 'vehicle-quotation/edit/:id', component: VehicleQuotation, data: [87] },
+      { path: 'parts-inward/:invoiceNo', data: [0], component: PartInward }
     ]
   },
   { path: '**', component: WorkInProgress }

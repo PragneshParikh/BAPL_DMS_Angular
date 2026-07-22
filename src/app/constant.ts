@@ -156,7 +156,8 @@ export const ModuleTypes = [
     { name: 'job_card', moduleName: 'Job Card' },
     { name: 'wclaim_prefix', moduleName: 'Warranty Claim Prefix' },
     { name: 'material_transfer', moduleName: 'Material Transfer' },
-    {name:'counter-bill',moduleName:'Counter Bill'}
+    { name: 'counter-bill', moduleName: 'Counter Bill' },
+    { name: 'part_inward', moduleName: 'Parts Inward' }
 ]
 
 export const EmployeeDesignations = [
@@ -239,5 +240,10 @@ export const conditionModule = [
     { Id: 7, ConditionName: 'Counter Bill' },
     { Id: 8, ConditionName: 'EBW Invoice Creation' },
     { Id: 9, ConditionName: 'Form 22' }       // <-- NEW
+];
+
+export const batteryMake = [
+    { Id: 1, value:'Trontek Electronics ltd' },
+    { Id: 2, value:'Trontek Electronics Pvt ltd' }
 ];
 
