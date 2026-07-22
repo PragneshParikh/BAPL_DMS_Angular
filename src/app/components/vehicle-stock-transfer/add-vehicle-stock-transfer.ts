@@ -97,11 +97,19 @@ export class AddVehicleStockTransfer implements OnInit {
   }
 
   getEmployeesByDesignation() {
-    const dealerCode = this.storageService.getDealerCode();
-    const designation = EmployeeDesignations.find(x => x.id === 1)?.value;
+    let dealerCode = '';
+    const isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    if(!isSuperAdmin)
+    {
+
+      dealerCode=this.storageService.getDealerCode();
+    }
+    //const designation = EmployeeDesignations.find(x => x.id === 1)?.value;
 
     this.employeeMasterService.getEmployeesByDesignation(dealerCode, "1").subscribe({
       next: (data) => {
+        console.log(data);
+        
         this.employeeList = data;
         this.filteredIssueEmployeeList = data;
         this.filteredReceiveEmployeeList = data;
@@ -114,7 +122,12 @@ export class AddVehicleStockTransfer implements OnInit {
   }
 
   getLocations() {
-    const dealerCode = this.storageService.getDealerCode();
+    let dealerCode =null;
+    const isSuperAdmin= this.storageService.getRole().toLowerCase()==='superadmin';
+    if(!isSuperAdmin){
+
+      dealerCode=this.storageService.getDealerCode();
+    }
     this.locationMasterService.getLocationList(dealerCode).subscribe({
       next: (data) => {
         this.locationList = data.filter(x=>x.locareadidNo === 1);

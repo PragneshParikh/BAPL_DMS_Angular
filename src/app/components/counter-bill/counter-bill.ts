@@ -37,6 +37,7 @@ export class CounterBill implements OnInit {
   filteredDealers: any[] = [];
   dealerFilter: string = '';
   selectedDealer: string = '';
+  dealerSelected:string='';
   showDropdown: boolean=false;
 
   constructor(private router: Router, private counterBillService: CounterBillService,private loader: LoaderService,
@@ -67,6 +68,7 @@ onDocumentClick(event: MouseEvent) {
 
 
   getDealerList() {
+    this.dealerSelected ='All Dealers';
     this.dealerService.getDealerDropdown(null).subscribe((res) => {
       this.dealers = res.data;
       this.filteredDealers = [...this.dealers];
@@ -89,12 +91,15 @@ onDocumentClick(event: MouseEvent) {
   }
 
   selectDealer(dealer: any) {
+console.log(dealer);
 
   if (!dealer) {
     
     this.selectedDealer = '';
+    this.dealerSelected ='All Dealer'
   } else {
     this.selectedDealer = dealer.dealerCode;
+    this.dealerSelected =this.selectedDealer + '-'+ dealer.dealerName ;
   }
 
   this.showDropdown = false;
@@ -149,12 +154,23 @@ onDocumentClick(event: MouseEvent) {
     console.log('Export Excel');
   }
 
+  // editCounterBill(item: any): void {
+  //   this.router.navigate([
+  //     '/counter-bill/edit',
+  //     item.header.id
+  //   ]);
+  // }
+
   editCounterBill(item: any): void {
-    this.router.navigate([
-      '/counter-bill/edit',
-      item.header.id
-    ]);
-  }
+  this.router.navigate(
+    ['/counter-bill/edit'],
+    {
+      state: {
+        counterBillId: item.header.id
+      }
+    }
+  );
+}
   
   loadData(): void {
     this.loader.show();
