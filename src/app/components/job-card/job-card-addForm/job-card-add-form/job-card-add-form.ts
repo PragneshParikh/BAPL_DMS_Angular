@@ -347,6 +347,7 @@ export class JobCardAddForm {
     });
   }
   loadServiceHistory(chassisNo: string) {
+    debugger
     let jobCardId: number | null = 0;
 
     if (this.chassiseditData?.jobCardHeader?.id) {
@@ -435,7 +436,7 @@ export class JobCardAddForm {
 
 
   onJobType(isEdit = false) {
-
+debugger;
     if (!this.selectedJobtype) return;
 
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
