@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import { LoaderService } from '../../core/services/loader';
 import { Form22MasterService } from '../../core/services/form22masterservice';
 import * as bootstrap from 'bootstrap';
+import { StorageService } from '../../core/services/storage';
 
 
 @Component({
@@ -32,14 +33,22 @@ export class PdiChecklistmaster implements OnInit {
     isActive: true,
     createdBy: 'Admin'
   };
+  sortColumn: string;
+  sortDirection: string;
+  filteredData: any;
+  pagedData: any;
+  userRole: string = '';
 
 
   constructor(private Pdichecklistmasterservice: PdiChecklistMasterService,
     private form22service: Form22MasterService,
+    private storageService : StorageService,
     private modalService: NgbModal,
     private loader: LoaderService
   ) { }
   ngOnInit() {
+     this.userRole = this.storageService.getRole();
+      console.log("userRole",this.userRole)
     this.loadPdiChecklistList();
     this.loadOemModels();
   }
@@ -214,6 +223,44 @@ export class PdiChecklistmaster implements OnInit {
 
       }
     });
+  }
+
+  sort(column: string) {
+
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+
+    this.checklistList.sort((a, b) => {
+      let valueA = a[column] ?? '';
+      let valueB = b[column] ?? '';
+
+      // Special handling for Status column
+      if (column === 'isActive') {
+        valueA = valueA ? 1 : 0;
+        valueB = valueB ? 1 : 0;
+      }
+
+      const result = valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+      return this.sortDirection === 'asc' ? result : -result;
+    });
+
+    this.refreshTable();
+  }
+
+  refreshTable() {
+
+    if (!Array.isArray(this.checklistList)) {
+      this.filteredData = [];
+    }
+
+    const start = (this.page - 1) * this.pageSize;
+    const end = start + this.pageSize;
+
+    this.pagedData = this.checklistList.slice(start, end);
   }
 
 }

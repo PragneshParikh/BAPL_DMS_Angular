@@ -27,15 +27,17 @@ export class LabourMasterService {
     return this.httpClient.put(`${this.baseUrl}/LabourMaster/UpdatePartWiseLabourMasterDataApi`, data)
   }
 
-  getLabourMasterModelwiseListApi(): Observable<any> {
-    return this.httpClient.get(`${this.baseUrl}/LabourMaster/GetLabourMasterModelwiseListApi`);
+  getLabourMasterModelwiseListApi(searchText: string): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/LabourMaster/GetLabourMasterModelwiseListApi`,
+      { params: { searchText: searchText } }
+    );
   }
 
-  getLabourMasterPartwiseListApi(): Observable<any> {
-    return this.httpClient.get(`${this.baseUrl}/LabourMaster/GetLabourMasterPartwiseListApi`);
+  getLabourMasterPartwiseListApi(searchText: string): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/LabourMaster/GetLabourMasterPartwiseListApi`,{ params: { searchText: searchText } });
   }
 
-  getLabourRateDropDown(oemmodelName: string,customerLedgerId:number,dealerCode:string): Observable<any> {
+  getLabourRateDropDown(oemmodelName: string, customerLedgerId: number, dealerCode: string): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/LabourMaster/GetLabourRateDropDown/${oemmodelName}/${customerLedgerId}/${dealerCode}`);
   }
 }

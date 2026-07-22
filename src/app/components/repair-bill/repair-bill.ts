@@ -324,7 +324,7 @@ export class RepairBill implements OnInit {
     this.locationService.getLocationList(this.dealerCode).subscribe({
       next: (data: any[]) => {
         // only Workshop
-      this.loader.hide();
+        this.loader.hide();
         this.locations = data.filter(x => x.locareadidNo === 2);
         // auto select first workshop location
         if (this.locations.length > 0) {
@@ -427,7 +427,7 @@ export class RepairBill implements OnInit {
         this.loader.hide();
 
         this.materialedJobCarDList = res;
-
+        console.log("bind in grid part details 1", this.materialedJobCarDList);
         // Part Grid
         this.materialedJobCarDList = res.map((x: any) => ({
           ...x,
@@ -461,7 +461,7 @@ export class RepairBill implements OnInit {
         });
 
         this.partItems = [...this.materialedJobCarDList];
-        console.log("bind in grid part details", this.partItems);
+        console.log("bind in grid part details last =>", this.partItems);
 
         this.calculateTotals();
 
@@ -631,29 +631,33 @@ export class RepairBill implements OnInit {
         grossAmount * discountAmount / 100;
     }
 
-    const taxableAmount =
+    let taxableAmount =
       grossAmount - discountAmount;
 
     let cgstAmount = 0;
     let sgstAmount = 0;
     let igstAmount = 0;
 
-    if (isSameState) {
+    if (selectedIssue?.name === 'U/W' || selectedIssue?.name === 'FSC')
+       { cgstAmount = 0; sgstAmount = 0; igstAmount = 0; taxableAmount=0; this.totalTaxPer = 0; }
+    else {
+      if (isSameState) {
 
-      // Intrastate
-      cgstAmount = taxableAmount * (this.selectedLabour?.cgst || 0) / 100;
-      sgstAmount = taxableAmount * (this.selectedLabour?.sgst || 0) / 100;
-      igstAmount = 0;
-      this.totalTaxPer = this.selectedLabour?.cgst + this.selectedLabour?.sgst
+        // Intrastate
+        cgstAmount = taxableAmount * (this.selectedLabour?.cgst || 0) / 100;
+        sgstAmount = taxableAmount * (this.selectedLabour?.sgst || 0) / 100;
+        igstAmount = 0;
+        this.totalTaxPer = this.selectedLabour?.cgst + this.selectedLabour?.sgst
 
 
-    } else {
+      } else {
 
-      // Interstate
-      cgstAmount = 0;
-      sgstAmount = 0;
-      igstAmount = taxableAmount * (this.selectedLabour?.igst || 0) / 100;
-      this.totalTaxPer = this.selectedLabour?.igst
+        // Interstate
+        cgstAmount = 0;
+        sgstAmount = 0;
+        igstAmount = taxableAmount * (this.selectedLabour?.igst || 0) / 100;
+        this.totalTaxPer = this.selectedLabour?.igst || 0
+      }
     }
 
     // const cgstAmount =
@@ -669,6 +673,7 @@ export class RepairBill implements OnInit {
       cgstAmount +
       sgstAmount +
       igstAmount;
+
 
     const netAmount =
       taxableAmount + this.totalTax;

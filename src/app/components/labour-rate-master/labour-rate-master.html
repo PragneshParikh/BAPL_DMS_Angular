@@ -26,6 +26,10 @@
                 </select>
 
             </div>
+            <div class="col-md-3">
+                <label>Search any value</label>
+                <input type="text" class="form-control form-control-sm" name="search" [(ngModel)]="searchText">
+            </div>
 
             <div class="col-md-3 align-self-end">
                 <button class="btn btn-primary btn-sm" (click)="onSearch()">
@@ -49,21 +53,21 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Sr No.</th>
-                                <th>Labour Code</th>
-                                <th>Labour Description</th>
-                                <th>Labour Rate</th>
-                                <th>OemModel Name</th>
+                                <th class="sort" (click)="sort('labourCode')">Labour Code</th>
+                                <th class="sort" (click)="sort('labourDescription')">Labour Description</th>
+                                <th class="sort" (click)="sort('labourRate')">Labour Rate</th>
+                                <th class="sort" (click)="sort('oemModelName')">OemModel Name</th>
                                 <th>City Tier</th>
                                 <th>SGST</th>
                                 <th>CGST</th>
                                 <th>IGST</th>
-                                <th>HSN Code</th>
+                                <th class="sort" (click)="sort('hsnCode')">HSN Code</th>
                                 <th>Job Type</th>
                                 <th>Service Head</th>
                                 <th>Service Type</th>
-                                <th>Created Date</th>
-                                <th>Effective Date</th>
-                                <th>Status</th>
+                                <th class="sort" (click)="sort('createdDate')">Created Date</th>
+                                <th class="sort" (click)="sort('effectiveDate')">Effective Date</th>
+                                <th class="sort" (click)="sort('isLabourRateActive')">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -82,8 +86,8 @@
                                 <td>{{item.jobTypeName}}</td>
                                 <td>{{item.serviceHeadName}}</td>
                                 <td>{{item.servicetypeName}}</td>
-                                <td>{{item.createdDate}}</td>
-                                <td>{{item.effectiveDate}}</td>
+                                <td>{{item.createdDate | date:'dd-MM-yyyy hh:mm a'}}</td>
+                                <td>{{item.effectiveDate | date:'dd-MM-yyyy hh:mm a'}}</td>
                                 <td>
                                     <span class="badge bg-success" *ngIf="item.isLabourRateActive">Active </span>
                                     <span class="badge bg-danger" *ngIf="!item.isLabourRateActive">Inactive </span>
@@ -124,25 +128,25 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Sr No.</th>
-                                <th>Labour Code</th>
-                                <th>Labour Name</th>
-                                <th>Part Code</th>
-                                <th>Part Description</th>
-                                <th>Model Name</th>
+                                <th class="sort" (click)="sort('labourCode')">Labour Code</th>
+                                <th class="sort" (click)="sort('labourName')">Labour Name</th>
+                                <th class="sort" (click)="sort('partCode')">Part Code</th>
+                                <th class="sort" (click)="sort('partDescription')">Part Description</th>
+                                <th class="sort" (click)="sort('oemModelName')">Model Name</th>
                                 <th>City Tier</th>
-                                <th>Labour Rate</th>
-                                <th>Labour Hrs</th>
+                                <th class="sort" (click)="sort('labourRate')">Labour Rate</th>
+                                <th class="sort" (click)="sort('labourHrs')">Labour Hrs</th>
                                 <th>CGST</th>
                                 <th>SGST</th>
                                 <th>IGST</th>
                                 <th>Job Type</th>
                                 <th>Service Head</th>
                                 <th>Service Type</th>
-                                <th>Created Date</th>
-                                <th>Effective Date</th>
-                                <th>Dealer Code</th>
-                                <th>HSN Code</th>
-                                <th>Status</th>
+                                <th class="sort" (click)="sort('createdDate')">Created Date</th>
+                                <th class="sort" (click)="sort('effectiveDate')">Effective Date</th>
+                                <th class="sort" (click)="sort('dealerCode')">Dealer Code</th>
+                                <th class="sort" (click)="sort('hsnCode')">HSN Code</th>
+                                <th class="sort" (click)="sort('isActive')">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -163,8 +167,8 @@
                                 <td>{{item.jobTypeName}}</td>
                                 <td>{{item.serviceHeadName}}</td>
                                 <td>{{item.servicetypeName}}</td>
-                                 <td>{{item.createdDate}}</td>
-                                <td>{{item.effectiveDate}}</td>
+                                <td>{{item.createdDate | date:'dd-MM-yyyy hh:mm a'}}</td>
+                                <td>{{item.effectiveDate | date:'dd-MM-yyyy hh:mm a'}}</td>
                                 <td>{{item.dealerCode}}</td>
                                 <td>{{item.hsnCode}}</td>
                                 <td>
@@ -228,6 +232,10 @@
                         <label>Effective Date</label>
                         <input type="date" class="form-control form-control-sm"
                             [value]="selectedLabour.effectiveDate | date:'yyyy-MM-dd'">
+                    </div>
+                    <div class="col-md-4">
+                        <label>HSNCODE</label>
+                        <input type="number" class="form-control form-control-sm" [value]="selectedLabour.hsnCode">
                     </div>
                     <div class="col-md-4">
                         <label>OemModelName</label>

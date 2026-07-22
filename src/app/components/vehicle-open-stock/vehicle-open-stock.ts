@@ -7,6 +7,7 @@ import { LoaderService } from '../../core/services/loader';
 import { StorageService } from '../../core/services/storage';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { VehicleOpenStockService } from '../../core/services/vehicle-open-stock-service';
+import { batteryMake } from '../../constant';
 
 @Component({
   selector: 'app-vehicle-open-stock',
@@ -26,6 +27,7 @@ export class VehicleOpenStock {
   locations: any[];
   selectedLocation: string;
   isEditMode: any;
+  purposeofbatterymake = batteryMake;
 
 
   constructor(private itemService: ItemMasterService,
@@ -67,6 +69,10 @@ export class VehicleOpenStock {
     const day = ('0' + date.getDate()).slice(-2);
 
     return `${year}-${month}-${day}`;
+  }
+
+  loadBatteryMake():void{
+    
   }
 
 
@@ -113,7 +119,7 @@ export class VehicleOpenStock {
 
   }
   onModelChange() {
-
+debugger
     const selectedModel = this.modelList.find(
       x => x.id === this.itemObj.modelId
     );
@@ -135,8 +141,9 @@ export class VehicleOpenStock {
 
   loadVehicleOpenDetails(itemName) {
     const modelName = itemName;
+    const dealerCode = this.storageService.getDealerCode();
 
-    this.vehicleOpenStockService.getVehicleSaleDetailsByModel(modelName).subscribe({
+    this.vehicleOpenStockService.getVehicleSaleDetailsByModel(modelName,dealerCode).subscribe({
       next: (res: any) => {
         this.vehicleList = res;
         console.log(this.vehicleList);
@@ -185,6 +192,9 @@ export class VehicleOpenStock {
     taxAmount = rate * igst / 100;
   }
 
+  this.vehicleObj.cgst = cgst;
+  this.vehicleObj.sgst = sgst;
+  this.vehicleObj.igst = igst;
   this.vehicleObj.totalOpStock = +(rate + taxAmount).toFixed(2);
 }
 
@@ -193,6 +203,9 @@ export class VehicleOpenStock {
     if (this.isEditMode) {
 
       // Update same row
+      this.itemObj.cgst = this.vehicleObj.cgst;
+      this.itemObj.sgst = this.vehicleObj.sgst;
+      this.itemObj.igst = this.vehicleObj.igst;
       this.vehicleList[this.editIndex] = { ...this.vehicleObj };
 
       this.isEditMode = false;

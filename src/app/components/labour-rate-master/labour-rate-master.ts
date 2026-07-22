@@ -17,6 +17,10 @@ import { debug } from 'console';
   styleUrl: './labour-rate-master.scss',
 })
 export class LabourRateMaster implements OnInit {
+  sortColumn: string;
+  sortDirection: string;
+  page: number;
+  pagedData: any;
 
   constructor(private LabourMasterService: LabourMasterService,
     private storageService: StorageService,
@@ -46,6 +50,7 @@ export class LabourRateMaster implements OnInit {
   serviceTypeList: any[] = [];
   selectedServiceHead: any;
   selectedServiceType: string;
+  searchText: string = '';
 
   ngOnInit(): void {
     this.loadOemModels();
@@ -67,13 +72,13 @@ export class LabourRateMaster implements OnInit {
     });
   }
   onSearch(): void {
-    this.loadModelWiseLabourRateList();
-    this.loadPartWiseLabourRateList();
+    this.loadModelWiseLabourRateList(this.searchText);
+    this.loadPartWiseLabourRateList(this.searchText);
   }
-  loadModelWiseLabourRateList(): void {
+  loadModelWiseLabourRateList(searchText: string): void {
     this.loader.show();
 
-    this.LabourMasterService.getLabourMasterModelwiseListApi().subscribe({
+    this.LabourMasterService.getLabourMasterModelwiseListApi(searchText).subscribe({
       next: (res: any) => {
         this.loader.hide();
         this.modelWiseLabourList = res.data || res;
@@ -96,10 +101,10 @@ export class LabourRateMaster implements OnInit {
     });
   }
 
-  loadPartWiseLabourRateList(): void {
+  loadPartWiseLabourRateList(searchText: string): void {
     this.loader.show();
 
-    this.LabourMasterService.getLabourMasterPartwiseListApi().subscribe({
+    this.LabourMasterService.getLabourMasterPartwiseListApi(searchText).subscribe({
       next: (res: any) => {
         this.loader.hide();
         this.partWiseLabourList = res.data || res;
@@ -139,7 +144,7 @@ export class LabourRateMaster implements OnInit {
     this.selectedLabour = {
       ...item
     };
-    console.log( this.selectedLabour)
+    console.log(this.selectedLabour)
     if (this.selectedLabour.jobType) {
       this.jobCardService.getServiceHead(
         this.selectedLabour.jobType
@@ -202,7 +207,7 @@ export class LabourRateMaster implements OnInit {
     debugger;
 
     if (type === 'model') {
-debugger
+      debugger
       if (!this.selectedLabour.jobType) {
         return;
       }
@@ -360,7 +365,7 @@ debugger
           text: res.message || 'Updated Successfully'
         });
         this.showEditPopup = false;
-        this.loadModelWiseLabourRateList();
+        this.loadModelWiseLabourRateList(this.searchText);
       },
       error: (err) => {
         this.loader.hide();
@@ -386,7 +391,7 @@ debugger
           text: res.message || 'Updated Successfully'
         });
         this.showPartwiseEditPopup = false;
-        this.loadPartWiseLabourRateList();
+        this.loadPartWiseLabourRateList(this.searchText);
       },
       error: (err) => {
         this.loader.hide();
@@ -399,5 +404,60 @@ debugger
         });
       }
     });
+  }
+
+  sort(column: string) {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+
+    if (this.rateType === 'Modelwise Labour Rate') {
+
+      this.pagedModelWiseLabourList.sort((a, b) => {
+        let valueA = a[column] ?? '';
+        let valueB = b[column] ?? '';
+
+        if (column === 'isLabourRateActive') {
+          valueA = valueA ? 1 : 0;
+          valueB = valueB ? 1 : 0;
+        }
+
+        const result = valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+        return this.sortDirection === 'asc' ? result : -result;
+      });
+
+    } else {
+
+      this.pagedPartWiseLabourList.sort((a, b) => {
+        let valueA = a[column] ?? '';
+        let valueB = b[column] ?? '';
+
+        if (column === 'isActive') {
+          valueA = valueA ? 1 : 0;
+          valueB = valueB ? 1 : 0;
+        }
+
+        const result = valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+        return this.sortDirection === 'asc' ? result : -result;
+      });
+
+    }
+
+    this.refreshTable();
+  }
+
+  refreshTable() {
+
+    if (!Array.isArray(this.pagedModelWiseLabourList)) {
+      this.pagedModelWiseLabourList = [];
+    }
+
+    const start = (this.page - 1) * this.pageSize;
+    const end = start + this.pageSize;
+
+    this.pagedData = this.pagedModelWiseLabourList.slice(start, end);
   }
 }
