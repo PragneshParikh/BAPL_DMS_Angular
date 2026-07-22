@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit } from '@angular/core';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -6,7 +6,7 @@ import { StorageService } from '../../core/services/storage';
 import { ItemMasterService } from '../../core/services/item-master-service';
 import { KitCreationService } from '../../core/services/kit-creation.service';
 import { KitDetailService } from '../../core/services/kit-detail-service';
-import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TRANSACTION_TYPES } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
@@ -14,7 +14,6 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { JobCardService } from '../../core/services/job-card-service';
 import Swal from 'sweetalert2';
 import { PrefixService } from '../../core/services/prefix';
-import { TaxService } from '../../core/services/tax';
 import { PurchaseService } from '../../core/services/purchase-service';
 import { LedgerMasterService } from '../../core/services/ledger-master';
 import _ from 'lodash';
@@ -24,7 +23,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 @Component({
   selector: 'app-parts-po',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbPaginationModule, NgSelectModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbPaginationModule, NgSelectModule, NgbDropdownModule],
   templateUrl: './parts-po.html',
   styleUrl: './parts-po.scss',
 })
@@ -82,7 +81,8 @@ export class PartsPo implements OnInit {
     createdDate: new Date(),
     updatedBy: null,
     updatedDate: null,
-    isEdit: false
+    isEdit: false,
+    minOrdQty: 0,
   };
 
   partsPOData: any = {
@@ -105,6 +105,7 @@ export class PartsPo implements OnInit {
   taxDetails: any[] = [];
   isEdit: boolean = false;
   ledgerList: any[] = [];
+  previousPurchaseDetails: any[] = [];
 
   constructor(
     private locationService: LocationMasterService,
@@ -119,10 +120,9 @@ export class PartsPo implements OnInit {
     private kitDetailService: KitDetailService,
     private jobCardService: JobCardService,
     private prefixService: PrefixService,
-    private taxService: TaxService,
     private ledgerService: LedgerMasterService,
-    private modalService: NgbModal
-  ) {
+    private modalService: NgbModal,
+    private eRef: ElementRef) {
 
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
@@ -413,6 +413,8 @@ export class PartsPo implements OnInit {
       const totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage) //+ Number(this.newItem.igst);
       const taxDetails = this.calculateGST(selectedItem.dlrprice, totalGST);
 
+      this.currentItem.qty = selectedItem.minOrderQty || 1;
+      this.currentItem.minOrdQty = selectedItem.minOrderQty || 1;
       this.currentItem.itemDescription = selectedItem.itemdesc;
       this.currentItem.itemCode = selectedItem.itemcode;
       this.currentItem.itemId = selectedItem.id;
@@ -638,6 +640,25 @@ export class PartsPo implements OnInit {
       return;
     }
 
+    if (this.currentItem.qty <= 0 || this.currentItem.qty === null || this.currentItem.qty === undefined) {
+      this.toaster.show('Quantity must be greater than zero.', { classname: 'bg-warning text-white', delay: 5000 });
+      return;
+    }
+
+    if (this.currentItem.minOrdQty && this.currentItem.minOrdQty > 0) {
+
+      if (this.currentItem.qty < this.currentItem.minOrdQty) {
+        this.toaster.show(`Quantity must be at least ${this.currentItem.minOrdQty}.`, { classname: 'bg-warning text-white', delay: 5000 }
+        );
+        return;
+      }
+
+      if (this.currentItem.qty % this.currentItem.minOrdQty !== 0) {
+        this.toaster.show(`Quantity must be a multiple of ${this.currentItem.minOrdQty} (e.g., ${this.currentItem.minOrdQty}, ${this.currentItem.minOrdQty * 2}, ${this.currentItem.minOrdQty * 3}).`, { classname: 'bg-warning text-white', delay: 5000 });
+        return;
+      }
+    }
+
     if (this.partsPOData.isKit) {
       if (this.currentItem.qty > 1) {
         this.toaster.show('Only 1 kit can be purchased at a time.', { classname: 'bg-danger text-white', delay: 3000 });
@@ -801,7 +822,8 @@ export class PartsPo implements OnInit {
       createdDate: new Date(),
       updatedBy: null,
       updatedDate: null,
-      isEdit: false
+      isEdit: false,
+      minOrdQty: 0,
     };
     // this.editingIndex = null;
   }
@@ -1155,6 +1177,20 @@ export class PartsPo implements OnInit {
     // if (this.currentItem.modelNo) {
     //   this.calculateRowTotals();
     // }
+  }
+
+  getPreviousPurchaseDetails(event: any) {
+    const dealerCode = this.locationList.filter(x => x.loccode === this.partsPOData.selectedLocation)[0].dealercode;
+    this.purchaseService.getItemDetailsByItemCode(this.currentItem.itemCode, dealerCode).subscribe({
+      next: (res) => {
+        if (res) {
+          this.previousPurchaseDetails = res;
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching previous part:', err);
+      }
+    });
   }
 
 }

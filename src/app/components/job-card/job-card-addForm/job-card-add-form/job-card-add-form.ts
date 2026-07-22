@@ -438,13 +438,13 @@ export class JobCardAddForm {
 
     if (!this.selectedJobtype) return;
 
-    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    // this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
-    if (!this.isSuperAdmin) {
-      this.dealerCode = this.storageService.getDealerCode();
-    } else {
-      this.dealerCode = null;
-    }
+    // if (!this.isSuperAdmin) {
+    this.dealerCode = this.storageService.getDealerCode();
+    // } else {
+    //   this.dealerCode = null;
+    // }
 
     // Load chassis
     this.jobCardService

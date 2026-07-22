@@ -84,4 +84,11 @@ export class PurchaseService {
   // getPartsPOList(): Observable<any> {
   //   return this.httpClient.get<any>(`${this.baseUrl}/PurchaseOrder/parts/Polist`);
   // }
+  getItemDetailsByItemCode(itemCode: string, dealerCode: string): Observable<any> {
+    const params = new HttpParams()
+      .set('itemCode', itemCode)
+      .set('dealerCode', dealerCode);
+
+    return this.httpClient.get<any>(`${this.baseUrl}/PurchaseOrder/GetItemDetailsByItemCode`, { params });
+  }
 }
