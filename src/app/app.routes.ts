@@ -78,6 +78,7 @@ import { RepoBilling } from './components/repo-billing/repo-billing';
 import { VehicleOpenStock } from './components/vehicle-open-stock/vehicle-open-stock';
 import { VehicleQuotation } from './components/vehicle-quotation/vehicle-quotation';
 import { VehicleQuotationListComponent } from './components/vehicle-quotation/vehicle-quotation-list/vehicle-quotation-list';
+import { PartInward } from './components/part-inward/part-inward';
 
 
 
@@ -253,6 +254,7 @@ export const routes: Routes = [
       { path: 'vehicle-quotation', component: VehicleQuotationListComponent, data: [87] },
       { path: 'vehicle-quotation/add', component: VehicleQuotation, data: [87] },
       { path: 'vehicle-quotation/edit/:id', component: VehicleQuotation, data: [87] },
+      { path: 'parts-inward/:invoiceNo', data: [0], component: PartInward }
     ]
   },
   { path: '**', component: WorkInProgress }

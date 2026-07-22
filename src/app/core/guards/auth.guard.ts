@@ -41,6 +41,10 @@ export class AuthGuard {
 
         const subMenuId = route.data[0];
 
+        if (subMenuId === 0) {
+            return true;
+        }
+
         if (!subMenuId) {
             this.router.navigate(['/']);
             return false;
