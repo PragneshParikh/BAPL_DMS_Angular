@@ -76,6 +76,10 @@ import { AddCounterBill } from './components/counter-bill/add-counter-bill/add-c
 import { CounterBillPrint } from './components/Reports/counter-bill-print/counter-bill-print';
 import { VehicleQuotation } from './components/vehicle-quotation/vehicle-quotation';
 import { VehicleQuotationListComponent } from './components/vehicle-quotation/vehicle-quotation-list/vehicle-quotation-list';
+import { EstimateList } from './components/estimate/estimate-list/estimate-list';
+import { Estimate } from './components/estimate/estimate';
+
+
 
 
 
@@ -247,6 +251,10 @@ export const routes: Routes = [
       { path: 'vehicle-quotation', component: VehicleQuotationListComponent, data: [87] },
       { path: 'vehicle-quotation/add', component: VehicleQuotation, data: [87] },
       { path: 'vehicle-quotation/edit/:id', component: VehicleQuotation, data: [87] },
+      { path: 'estimate', component: EstimateList, data: [98] },
+      { path: 'estimate/add', component: Estimate, data: [98] },
+      { path: 'estimate/edit/:id', component: Estimate, data: [98] },
+
     ]
   },
   { path: '**', component: WorkInProgress }
