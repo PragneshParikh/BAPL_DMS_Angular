@@ -16,6 +16,15 @@ export interface PartSearchResult {
   cgstPercent: number;
   sgstPercent: number;
   igstPercent: number;
+
+  // Linked labour auto-fetched alongside this part (from
+  // PartWiseLabourMaster), if the part has one associated.
+  linkedLabourCode?: string;
+  linkedLabourDescription?: string;
+  linkedLabourRate?: number;
+  linkedLabourCgstPercent?: number;
+  linkedLabourSgstPercent?: number;
+  linkedLabourIgstPercent?: number;
 }
 
 export interface LabourSearchResult {
@@ -51,6 +60,21 @@ export interface EstimateListRow {
   dealerCode: string;
   status: string;
   createdDate: string;
+
+  // ── Insurance ──
+  // Populated now that EstimateRepo.GetAllAsync maps these through from
+  // EstimateHeader on the backend.
+  insuranceId?: number;
+  insDescription?: string;
+  surveyorName?: string;
+  contactNumber?: string;
+  policyNo?: string;
+  insValidTill?: string;
+  zeroDepo?: boolean;
+
+  // Job Card created from this estimate, if any — undefined/null until one
+  // has been created via "Create Job Card" and actually saved.
+  jobCardNo?: number;
 }
 
 export interface EstimatePagedResponse {
@@ -92,6 +116,18 @@ export interface EstimateDetailResponse {
   status: string;
   createdDate: string;
   details: EstimateDetailLine[];
+
+  // ── Insurance ──
+  // Populated once the backend adds matching columns/mapping (see note in
+  // EstimateRepo / EstimateCreateViewModel). Optional so existing responses
+  // that don't include these fields still type-check.
+  insuranceId?: number;
+  insDescription?: string;
+  surveyorName?: string;
+  contactNumber?: string;
+  policyNo?: string;
+  insValidTill?: string;
+  zeroDepo?: boolean;
 }
 @Injectable({ providedIn: 'root' })
 export class EstimateService {

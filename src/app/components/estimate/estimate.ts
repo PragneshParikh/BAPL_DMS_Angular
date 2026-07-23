@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -6,6 +6,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { EstimateService, JobTypeDropdownItem } from '../../core/services/estimate.service';
 import { ReportService } from '../../core/services/report.service';
+import { LedgerMasterService } from '../../core/services/ledger-master';
 import { Observable } from 'rxjs';
 
 interface PartyDetails {
@@ -64,7 +65,20 @@ export class Estimate implements OnInit {
 
   // ── Edit mode ──
   isEditMode = false;
-  estimateId: number | null = null;
+
+  // When routed to directly (/estimate/edit/:id) this is read from the URL.
+  // When used embedded inside a modal (e.g. from the Estimate List's Edit
+  // button) the host passes it in directly via this same @Input().
+  @Input() estimateId: number | null = null;
+
+  // True when this component is hosted inside another page's popup/modal
+  // (rather than being navigated to as its own routed page). Suppresses the
+  // page title and swaps "save then navigate + alert" for emitting `saved`
+  // so the host can close its modal and refresh its own list.
+  @Input() embedded = false;
+
+  @Output() saved = new EventEmitter<void>();
+  @Output() closed = new EventEmitter<void>();
 
   // ── Chassis autosuggest ──
   chassisList: string[] = [];
@@ -82,13 +96,28 @@ export class Estimate implements OnInit {
   rowShowDropdown: { [index: number]: boolean } = {};
   private searchDebounce: any = null;
 
+  // ── Insurance ──
+  showInsurancePopup = false;
+  showInsuranceDropdown = false;
+  insurancelist: any[] = [];
+  filteredInsuranceList: any[] = [];
+  insuranceParty = '';          // display-only text, resolved from selectedInsuranceId
+  insuranceDescription = '';
+  surveyorName = '';
+  contactNumber = '';
+  policyNo = '';
+  insValidTill: string | null = null;
+  zeroDep: 'Y' | 'N' = 'N';
+  selectedInsuranceId: number | null = null;
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
     private router: Router,
     private route: ActivatedRoute,
     private estimateService: EstimateService,
-    private reportService: ReportService
+    private reportService: ReportService,
+    private ledgerMasterService: LedgerMasterService
   ) {
     this.form = this.fb.group({
       estimationNo: [{ value: '', disabled: true }],
@@ -111,15 +140,33 @@ export class Estimate implements OnInit {
   ngOnInit(): void {
     this.loadJobTypes();
     this.loadChassisList();
+    this.loadInsuranceName();
 
-    const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam) {
+    // Embedded usage (e.g. the Estimate List's Edit modal) passes the id
+    // straight in via @Input(); routed usage reads it from the URL instead.
+    const routeIdParam = this.route.snapshot.paramMap.get('id');
+    const idToLoad = this.estimateId ?? (routeIdParam ? +routeIdParam : null);
+
+    if (idToLoad) {
       this.isEditMode = true;
-      this.estimateId = +idParam;
+      this.estimateId = idToLoad;
       this.loadEstimateForEdit(this.estimateId);
     } else {
       this.loadNextEstimationNo();
     }
+  }
+
+  // Lets a host modal close this without saving (e.g. its own header ✕,
+  // or a Cancel/Close button rendered here when embedded).
+  onClose(): void {
+    this.closed.emit();
+  }
+
+  // Only relevant for the routed (non-embedded) page — the embedded modal
+  // version uses onClose()/Cancel instead, since there's no route to
+  // navigate away from.
+  goBack(): void {
+    this.router.navigate(['/estimate']);
   }
 
   get detailsArray(): FormArray {
@@ -183,6 +230,22 @@ export class Estimate implements OnInit {
         });
 
         this.customerFound = true;
+
+        // ── Insurance ──
+        // These fields are optional on EstimateDetailResponse until the
+        // backend adds matching columns — safe to read even if undefined.
+        this.selectedInsuranceId = res.insuranceId || null;
+        this.insuranceDescription = res.insDescription || '';
+        this.surveyorName = res.surveyorName || '';
+        this.contactNumber = res.contactNumber || '';
+        this.policyNo = res.policyNo || '';
+        this.insValidTill = res.insValidTill ? res.insValidTill.substring(0, 10) : null;
+        this.zeroDep = res.zeroDepo ? 'Y' : 'N';
+
+        if (this.selectedInsuranceId && this.insurancelist.length) {
+          const match = this.insurancelist.find(x => x.id === this.selectedInsuranceId);
+          this.insuranceParty = match?.ledgerName || '';
+        }
 
         this.detailsArray.clear();
         (res.details || []).forEach(d => {
@@ -457,6 +520,13 @@ export class Estimate implements OnInit {
         sgstPercent: item.sgstPercent,
         igstPercent: item.igstPercent
       });
+
+      // This part carries a linked Labour code (PartWiseLabourMaster) —
+      // auto-fetch it straight into the Labour grid, same as RepairBill
+      // does when loading a part's labourCodeDetailslist.
+      if (item.linkedLabourCode) {
+        this.addLinkedLabour(item);
+      }
     } else {
       row.patchValue({
         itemCode: item.labourCode,
@@ -471,6 +541,31 @@ export class Estimate implements OnInit {
     this.rowShowDropdown[index] = false;
   }
 
+  // Adds a Part's linked Labour to the Labour grid automatically, skipping
+  // it if a Labour row with that exact code has already been added (e.g.
+  // two parts sharing the same linked labour, or the user already added
+  // it manually).
+  private addLinkedLabour(part: any): void {
+    const code = (part.linkedLabourCode || '').trim();
+    if (!code) return;
+
+    const alreadyAdded = this.labourIndices.some(i =>
+      (this.detailsArray.at(i).value.itemCode || '').trim().toLowerCase() === code.toLowerCase()
+    );
+    if (alreadyAdded) return;
+
+    const row = this.newDetailRow('Labour');
+    row.patchValue({
+      itemCode: code,
+      itemDescription: part.linkedLabourDescription || '',
+      rate: part.linkedLabourRate ?? 0,
+      cgstPercent: part.linkedLabourCgstPercent ?? 0,
+      sgstPercent: part.linkedLabourSgstPercent ?? 0,
+      igstPercent: part.linkedLabourIgstPercent ?? 0
+    });
+    this.detailsArray.push(row);
+  }
+
   clearItemSelection(index: number): void {
     const row = this.detailsArray.at(index);
     row.patchValue({
@@ -483,6 +578,86 @@ export class Estimate implements OnInit {
     });
     this.rowSuggestions[index] = [];
     this.rowShowDropdown[index] = false;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // INSURANCE
+  // ═══════════════════════════════════════════════════════════════════
+
+  private loadInsuranceName(): void {
+    this.ledgerMasterService.getInsuranceLedgers().subscribe({
+      next: (res: any[]) => {
+        this.insurancelist = res || [];
+        this.filteredInsuranceList = [...this.insurancelist];
+
+        // If we already loaded an estimate in edit mode before this
+        // resolved, back-fill the display name now that the list exists.
+        if (this.selectedInsuranceId && !this.insuranceParty) {
+          const match = this.insurancelist.find(x => x.id === this.selectedInsuranceId);
+          if (match) this.insuranceParty = match.ledgerName;
+        }
+      },
+      error: (err) => console.error('Failed to fetch insurance ledgers', err)
+    });
+  }
+
+  openInsurancePopup(): void {
+    this.showInsurancePopup = true;
+  }
+
+  closeInsurancePopup(): void {
+    this.showInsurancePopup = false;
+    this.showInsuranceDropdown = false;
+  }
+
+  onInsuranceSearch(): void {
+    if (!this.insuranceParty?.trim()) {
+      this.filteredInsuranceList = [...this.insurancelist];
+      this.showInsuranceDropdown = this.insurancelist.length > 0;
+      return;
+    }
+
+    this.filteredInsuranceList = this.insurancelist.filter((x: any) =>
+      x.ledgerName?.toLowerCase().includes(this.insuranceParty.toLowerCase())
+    );
+    this.showInsuranceDropdown = true;
+  }
+
+  selectInsurance(item: any): void {
+    this.insuranceParty = item.ledgerName;
+    this.selectedInsuranceId = item.id;
+    this.showInsuranceDropdown = false;
+  }
+
+  saveInsurance(): void {
+    this.showInsurancePopup = false;
+  }
+
+  clearInsurance(): void {
+    this.insuranceParty = '';
+    this.insuranceDescription = '';
+    this.surveyorName = '';
+    this.contactNumber = '';
+    this.policyNo = '';
+    this.insValidTill = null;
+    this.zeroDep = 'N';
+    this.selectedInsuranceId = null;
+  }
+
+  // True once ANY insurance detail has been entered/loaded — checking all
+  // fields (not just party/id) so the button reliably flips to "Edit"
+  // after Save even if the user filled in e.g. Policy No. or Surveyor Name
+  // without picking/typing an Insurance Party.
+  get hasInsurance(): boolean {
+    return !!(
+      this.selectedInsuranceId ||
+      this.insuranceParty?.trim() ||
+      this.insuranceDescription?.trim() ||
+      this.surveyorName?.trim() ||
+      this.contactNumber?.trim() ||
+      this.policyNo?.trim() ||
+      this.insValidTill
+    );
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -508,6 +683,19 @@ export class Estimate implements OnInit {
       customerState: raw.customerState,
       kms: raw.kms,
       jobTypeId: raw.jobTypeId,
+
+      // ── Insurance ──
+      // NOTE: the backend EstimateCreateViewModel / EstimateHeader entity
+      // need matching properties for these to actually persist. Until then
+      // ASP.NET Core's model binder will silently drop the unknown fields.
+      insuranceId: this.selectedInsuranceId || null,
+      insDescription: this.insuranceDescription || '',
+      surveyorName: this.surveyorName || '',
+      contactNumber: this.contactNumber || '',
+      policyNo: this.policyNo || '',
+      insValidTill: this.insValidTill || null,
+      zeroDepo: this.zeroDep === 'Y',
+
       details: raw.details.map((d: any, i: number) => ({
         id: d.id || 0,
         itemType: d.itemType,
@@ -530,8 +718,15 @@ export class Estimate implements OnInit {
     save$.subscribe({
       next: (result: any) => {
         this.isSaving = false;
-        alert(this.isEditMode ? 'Estimate updated successfully.' : `Estimate saved successfully (Id: ${result}).`);
-        this.router.navigate(['/estimate']);
+
+        if (this.embedded) {
+          // Let the host (e.g. the Estimate List's Edit modal) decide what
+          // happens next — it closes the modal and refreshes its own list.
+          this.saved.emit();
+        } else {
+          alert(this.isEditMode ? 'Estimate updated successfully.' : `Estimate saved successfully (Id: ${result}).`);
+          this.router.navigate(['/estimate']);
+        }
       },
       error: (err) => {
         this.isSaving = false;

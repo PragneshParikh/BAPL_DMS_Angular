@@ -1,5 +1,8 @@
-<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent" *ngIf="!embedded">
   <h4 class="mb-sm-0">Estimate</h4>
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+    ← Back
+  </button>
 </div>
 
 <div class="row g-3">
@@ -369,20 +372,152 @@
   <!-- ── Action buttons ───────────────────────────────────────────────── -->
   <div class="col-12">
     <div class="d-flex justify-content-between">
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-2 align-items-center flex-wrap">
         <button type="button" class="btn btn-outline-dark" (click)="onCreateJobCard()">
           Create Job Card
         </button>
+
+        <!-- No insurance captured yet -->
+        <button type="button" class="btn btn-outline-info" *ngIf="!hasInsurance"
+          (click)="openInsurancePopup()">
+          🛡️ Add Insurance
+        </button>
+
+        <!-- Insurance already captured — show a quick summary + Edit -->
+        <div class="d-flex align-items-center gap-2 border rounded px-2 py-1 bg-light" *ngIf="hasInsurance">
+          <span class="small text-nowrap">
+            🛡️ <strong>{{ insuranceParty || '—' }}</strong>
+            <span *ngIf="policyNo"> · Policy {{ policyNo }}</span>
+          </span>
+          <button type="button" class="btn btn-outline-secondary btn-sm" title="Edit Insurance"
+            (click)="openInsurancePopup()">
+            ✏️ Edit
+          </button>
+        </div>
+
         <button type="button" class="btn btn-outline-secondary" *ngIf="isEditMode" (click)="onPrint()">
           Print
         </button>
       </div>
-      <button type="button" class="btn btn-success" (click)="onSave()" [disabled]="isSaving">
-        <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-1"></span>
-        {{ isSaving ? 'Saving...' : 'Save' }}
-      </button>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-light border" *ngIf="embedded" (click)="onClose()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-success" (click)="onSave()" [disabled]="isSaving">
+          <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-1"></span>
+          {{ isSaving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
     </div>
     <div class="alert alert-danger mt-2 py-2" *ngIf="saveError">{{ saveError }}</div>
+  </div>
+
+  <!-- ── Insurance Popup ───────────────────────────────────────────────── -->
+  <!-- Built with inline styles for the overlay/positioning (rather than
+       Bootstrap's .modal/.modal-dialog classes) so it isn't affected by
+       whatever is overriding/conflicting with .modal in this project.
+       Buttons, inputs, and the grid below still use normal Bootstrap
+       utility/component classes since those render fine elsewhere. -->
+  <div *ngIf="showInsurancePopup"
+    class="d-flex align-items-center justify-content-center"
+    style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 2100; padding: 16px;">
+    <div style="background: #ffffff; width: 100%; max-width: 720px; max-height: 92vh; overflow-y: auto; border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.35);">
+
+      <div class="d-flex justify-content-between align-items-center"
+        style="background: #3f4b7a; color: #fff; padding: 14px 20px; border-radius: 10px 10px 0 0;">
+        <h5 class="mb-0" style="color: #ffffff;">Insurance Detail</h5>
+        <button type="button" class="btn-close btn-close-white" aria-label="Close"
+          (click)="closeInsurancePopup()"></button>
+      </div>
+
+      <div style="padding: 20px;">
+          <div class="row g-3">
+
+            <div class="col-md-6 position-relative">
+              <label class="form-label fw-semibold">Insurance Party</label>
+              <input type="text" class="form-control"
+                placeholder="Search insurance party..."
+                autocomplete="off"
+                [(ngModel)]="insuranceParty"
+                [ngModelOptions]="{standalone: true}"
+                (input)="onInsuranceSearch()"
+                (focus)="onInsuranceSearch()">
+
+              <div class="list-group position-absolute w-100 shadow-sm"
+                style="z-index: 1000; max-height: 200px; overflow-y: auto;"
+                *ngIf="showInsuranceDropdown">
+                <button type="button" class="list-group-item list-group-item-action py-1 px-2"
+                  style="font-size: 12px;"
+                  *ngFor="let item of filteredInsuranceList"
+                  (mousedown)="selectInsurance(item)">
+                  {{ item.ledgerName }}
+                </button>
+                <span *ngIf="filteredInsuranceList.length === 0"
+                  class="list-group-item text-muted py-1 px-2" style="font-size: 12px;">
+                  No matching insurance party found
+                </span>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Description</label>
+              <input type="text" class="form-control"
+                [(ngModel)]="insuranceDescription" [ngModelOptions]="{standalone: true}">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Surveyor Name</label>
+              <input type="text" class="form-control"
+                [(ngModel)]="surveyorName" [ngModelOptions]="{standalone: true}">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Contact Number</label>
+              <input type="text" class="form-control"
+                [(ngModel)]="contactNumber" [ngModelOptions]="{standalone: true}">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Policy No.</label>
+              <input type="text" class="form-control"
+                [(ngModel)]="policyNo" [ngModelOptions]="{standalone: true}">
+            </div>
+
+            <div class="col-md-6">
+              <div class="row g-2">
+                <div class="col-7">
+                  <label class="form-label fw-semibold">Valid Till</label>
+                  <input type="date" class="form-control"
+                    [(ngModel)]="insValidTill" [ngModelOptions]="{standalone: true}">
+                </div>
+                <div class="col-5">
+                  <label class="form-label fw-semibold d-block">Zero Dep.</label>
+                  <div class="form-check form-switch pt-1">
+                    <input class="form-check-input" type="checkbox" role="switch" id="zeroDep"
+                      style="width: 2.5em; height: 1.25em;"
+                      [checked]="zeroDep === 'Y'"
+                      (change)="zeroDep = $any($event.target).checked ? 'Y' : 'N'">
+                    <label class="form-check-label" for="zeroDep">
+                      {{ zeroDep === 'Y' ? 'Yes' : 'No' }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+      </div>
+
+      <div class="d-flex gap-2" style="padding: 0 20px 20px;">
+        <button type="button" class="btn btn-primary" (click)="saveInsurance()">
+          ✓ Save
+        </button>
+        <button type="button" class="btn btn-light border" (click)="closeInsurancePopup()">
+          ✕ Close
+        </button>
+      </div>
+
+    </div>
   </div>
 
 </div>

@@ -12,11 +12,16 @@ import {
 } from '../../../core/services/estimate.service';
 import { StorageService } from '../../../core/services/storage';
 import { ReportService } from '../../../core/services/report.service';
+// ⚠️ Adjust this path if your project layout differs — it should point at
+// the Estimate (add/edit form) component, e.g. '../estimate' or
+// '../estimate-form/estimate'. The class is exported as `Estimate` and its
+// selector is 'app-estimate'.
+import { Estimate } from '../estimate';
 
 @Component({
   selector: 'app-estimate-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Estimate],
   templateUrl: './estimate-list.html'
 })
 export class EstimateList implements OnInit, OnDestroy {
@@ -46,6 +51,10 @@ export class EstimateList implements OnInit, OnDestroy {
   showEstimationDropdown = false;
 
   private static readonly MAX_SUGGESTIONS = 20;
+
+  // ── Edit Estimate popup ──
+  showEstimateModal = false;
+  selectedEstimateId: number | null = null;
 
   private destroy$ = new Subject<void>();
 
@@ -160,8 +169,24 @@ export class EstimateList implements OnInit, OnDestroy {
     this.router.navigate(['/estimate/add']);
   }
 
+  // ═══════════════════════════════════════════════════════════════════
+  // EDIT ESTIMATE POPUP
+  // ═══════════════════════════════════════════════════════════════════
+
   onEdit(id: number): void {
-    this.router.navigate(['/estimate/edit', id]);
+    this.selectedEstimateId = id;
+    this.showEstimateModal = true;
+  }
+
+  closeEstimateModal(): void {
+    this.showEstimateModal = false;
+    this.selectedEstimateId = null;
+  }
+
+  onEstimateSaved(): void {
+    this.closeEstimateModal();
+    this.pageIndex = 1;
+    this.loadList();
   }
 
   // ═══════════════════════════════════════════════════════════════════

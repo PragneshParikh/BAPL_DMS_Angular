@@ -124,7 +124,7 @@
                 <th>City</th>
                 <th>State</th>
                 <th>Job Type</th>
-                <th>Status</th>
+                <th>Job Card No.</th>
                 <th>Created Date</th>
                 <th style="width: 80px;">Action</th>
               </tr>
@@ -139,7 +139,10 @@
                 <td>{{ item.customerCity }}</td>
                 <td>{{ item.customerState }}</td>
                 <td>{{ item.jobTypeName || '-' }}</td>
-                <td><span class="badge bg-secondary">{{ item.status }}</span></td>
+                <td>
+                  <span *ngIf="item.jobCardNo" class="badge bg-success">{{ item.jobCardNo }}</span>
+                  <span *ngIf="!item.jobCardNo" class="text-muted">-</span>
+                </td>
                 <td class="text-nowrap">{{ formatDate(item.createdDate) }}</td>
 
               <td class="text-center text-nowrap">
@@ -181,4 +184,37 @@
     </div>
   </div>
 
+</div>
+
+<!-- ── Edit Estimate Popup ─────────────────────────────────────────────── -->
+<!-- Built with inline styles for the overlay/positioning (rather than
+     Bootstrap's .modal/.modal-dialog classes) — see estimate.html's
+     Insurance popup for why: .modal wasn't rendering as a proper
+     full-screen fixed overlay in this project. -->
+<div *ngIf="showEstimateModal"
+  class="d-flex align-items-center justify-content-center"
+  style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 2000; padding: 16px;">
+  <div style="background: #ffffff; width: 100%; max-width: 1140px; max-height: 92vh; overflow-y: auto; border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.35);">
+
+    <div class="d-flex justify-content-between align-items-center"
+      style="background: #3f4b7a; color: #fff; padding: 14px 20px; border-radius: 10px 10px 0 0; position: sticky; top: 0; z-index: 1;">
+      <h5 class="mb-0" style="color: #ffffff;">Edit Estimate</h5>
+      <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="closeEstimateModal()"></button>
+    </div>
+
+    <div style="padding: 20px;">
+      <!-- *ngIf keyed on selectedEstimateId (in addition to the outer
+           *ngIf on showEstimateModal) guarantees a fresh component
+           instance per estimate, so there's no stale state carried over
+           from a previously edited row. -->
+      <app-estimate
+        *ngIf="selectedEstimateId"
+        [estimateId]="selectedEstimateId"
+        [embedded]="true"
+        (saved)="onEstimateSaved()"
+        (closed)="closeEstimateModal()">
+      </app-estimate>
+    </div>
+
+  </div>
 </div>
