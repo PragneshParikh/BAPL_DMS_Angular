@@ -190,7 +190,14 @@ export class JobCard {
 
 
   deleteJobCard(id: number) {
-    const dealerCode = this.storageService.getDealerCode();
+     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
+    //const dealerCode = this.storageService.getDealerCode();
     Swal.fire({
       title: 'Are you sure?',
       text: 'You will not be able to recover this Job Card!',

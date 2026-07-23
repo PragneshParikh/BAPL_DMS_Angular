@@ -134,6 +134,7 @@ export class JobCardAddForm {
   oemModelId: any;
   showComplaintValidation: boolean;
   isSuperAdmin: boolean;
+  estNo: string;
 
 
   constructor(private storageService: StorageService,
@@ -907,6 +908,7 @@ debugger;
       jobinTime: this.jobInTime || null,
       jobNo: Number(this.jobNo) || 0,
       manualjobNo: Number(this.manualJobNo) || 0,
+      estNo : this.estNo || 0,
       estdelDate: this.estDelDate || null,
       estdelTime: this.estDelTime || null,
       jobSource: this.selectedJobSources || 0,
@@ -1038,6 +1040,7 @@ debugger;
     this.jobInTime = data.jobCardHeader.jobinTime;
     this.jobNo = data.jobCardHeader.jobNo;
     this.manualJobNo = data.jobCardHeader.manualjobNo;
+    this.estNo = data.jobCardHeader.estNo;
     this.estDelDate = data.jobCardHeader.estdelDate;
     this.estDelTime = data.jobCardHeader.estdelTime;
 
@@ -1149,6 +1152,7 @@ debugger;
     this.jobInTime = '';
     this.jobNo = 0;
     this.manualJobNo = 0;
+    this.estNo ='';
     this.estDelDate = '';
     this.estDelTime = '';
     this.supervisor = '';
