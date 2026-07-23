@@ -440,4 +440,8 @@ export class FFIR implements OnInit {
     }
   }
 
+  onNavigate() {
+    this.router.navigate(['/ffirlisting']);
+  }
+
 }

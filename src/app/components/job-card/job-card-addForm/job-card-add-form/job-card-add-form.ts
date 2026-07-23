@@ -134,6 +134,7 @@ export class JobCardAddForm {
   oemModelId: any;
   showComplaintValidation: boolean;
   isSuperAdmin: boolean;
+  estNo: string;
 
 
   constructor(private storageService: StorageService,
@@ -347,6 +348,7 @@ export class JobCardAddForm {
     });
   }
   loadServiceHistory(chassisNo: string) {
+    debugger
     let jobCardId: number | null = 0;
 
     if (this.chassiseditData?.jobCardHeader?.id) {
@@ -435,7 +437,7 @@ export class JobCardAddForm {
 
 
   onJobType(isEdit = false) {
-
+debugger;
     if (!this.selectedJobtype) return;
 
     // this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
@@ -906,6 +908,7 @@ export class JobCardAddForm {
       jobinTime: this.jobInTime || null,
       jobNo: Number(this.jobNo) || 0,
       manualjobNo: Number(this.manualJobNo) || 0,
+      estNo : this.estNo || 0,
       estdelDate: this.estDelDate || null,
       estdelTime: this.estDelTime || null,
       jobSource: this.selectedJobSources || 0,
@@ -1037,6 +1040,7 @@ export class JobCardAddForm {
     this.jobInTime = data.jobCardHeader.jobinTime;
     this.jobNo = data.jobCardHeader.jobNo;
     this.manualJobNo = data.jobCardHeader.manualjobNo;
+    this.estNo = data.jobCardHeader.estNo;
     this.estDelDate = data.jobCardHeader.estdelDate;
     this.estDelTime = data.jobCardHeader.estdelTime;
 
@@ -1148,6 +1152,7 @@ export class JobCardAddForm {
     this.jobInTime = '';
     this.jobNo = 0;
     this.manualJobNo = 0;
+    this.estNo ='';
     this.estDelDate = '';
     this.estDelTime = '';
     this.supervisor = '';
