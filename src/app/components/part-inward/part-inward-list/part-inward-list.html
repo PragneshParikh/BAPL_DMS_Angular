@@ -1,6 +1,6 @@
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">
-        Parts Stock Details
+        Parts Inward Details
     </h4>
 </div>
 
@@ -16,7 +16,7 @@
 
             <div class="card-body">
 
-                <form #stockReportFilterForm="ngForm">
+                <form #partInwardfilterForm="ngForm">
 
                     <div class="row g-3">
 
@@ -24,7 +24,7 @@
                         <div class="col-xl-3 col-lg-3 col-md-6">
                             <label class="form-label">Dealer</label>
                             <select class="form-select form-select-sm" #dealerCode="ngModel" name="dealerCode"
-                                [(ngModel)]="stockReportFilterFormData.selectedDealerCode" required>
+                                [(ngModel)]="filterFormData.selectedDealerCode" required>
                                 <option value="">-- Select --</option>
                                 <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
                                     {{ dealer.dealerName }}
@@ -41,31 +41,40 @@
                         <div class="col-xl-2 col-lg-2 col-md-6">
                             <label class="form-label">From Date</label>
                             <input type="date" class="form-control form-control-sm" #fromDate="ngModel" name="fromDate"
-                                [(ngModel)]="stockReportFilterFormData.fromDate">
+                                [(ngModel)]="filterFormData.fromDate" required>
+                            @if (fromDate.invalid && fromDate.touched) {
+                            <small class="text-danger">
+                                Date is required
+                            </small>
+                            }
                         </div>
 
                         <!-- To Date -->
                         <div class="col-xl-2 col-lg-2 col-md-6">
                             <label class="form-label">To Date</label>
                             <input type="date" class="form-control form-control-sm" #toDate="ngModel" name="toDate"
-                                [(ngModel)]="stockReportFilterFormData.toDate">
+                                [(ngModel)]="filterFormData.toDate" required>
+                            @if (toDate.invalid && toDate.touched) {
+                            <small class="text-danger">
+                                Date is required
+                            </small>
+                            }
                         </div>
 
                         <!-- Buttons -->
                         <div class="col-xl-2 col-lg-2 col-md-12 align-items-end">
                             <label class="form-label d-block">&nbsp;</label>
                             <div class="d-flex gap-2 justify-content-start">
-                                <button type="button" class="btn btn-primary btn-sm"
-                                    (click)="onFilterRecords(stockReportFilterForm)">
+                                <button type="button" class="btn btn-primary btn-sm" (click)="onFilterRecords()">
                                     Search
                                 </button>
-                                <button type="button" class="btn btn-primary btn-sm border" (click)="resetForm()">
+                                <button type="button" class="btn btn-primary btn-sm " (click)="resetForm()">
                                     Reset
                                 </button>
-                                <button type="button" class="btn btn-success btn-sm" [ngbTooltip]="'Export To Excel'">
+                                <button type="button" class="btn btn-success btn-sm" [ngbTooltip]="'Export To Excel'"
+                                    (click)="downloadExcel()">
                                     <i class="ri-file-excel-2-line"></i>
                                 </button>
-
                             </div>
                         </div>
 
@@ -87,12 +96,15 @@
                         <thead class="table-light sticky-top" style="z-index: 1;">
                             <tr>
                                 <th>Sr No</th>
-                                <th>Part Code</th>
-                                <th>Part Description</th>
-                                <th>Item Type</th>
-                                <th>Current Stock</th>
-                                <th>HSN Code</th>
-                                <th>Rate</th>
+                                <th>Invoice No</th>
+                                <th>Invoice Date</th>
+                                <th>Dealer Code</th>
+                                <th>Location Code</th>
+                                <th>Location Name</th>
+                                <th>Accepted</th>
+                                <th>Party Name</th>
+                                <th>Total Amount</th>
+                                <th>Total Qty</th>
                                 <th>GST</th>
                             </tr>
                         </thead>
@@ -101,36 +113,37 @@
 
                             <!-- No Data -->
                             <tr>
-                                <td colspan="14" *ngIf="partsStockData.length === 0" class="text-center">
+                                <td colspan="14" *ngIf="partsInwardData.length === 0" class="text-center">
                                     No data available
                                 </td>
                             </tr>
 
                             <!-- Data Rows -->
-                            <tr *ngFor="let item of partsStockData">
+                            <tr *ngFor="let item of partsInwardData" (dblclick)="goToInvoice(item)"
+                                style="cursor: pointer;">
                                 <td>{{ item.srNo }}</td>
-                                <td>{{ item.itemcode }}</td>
-                                <td>{{ item.itemdesc }}</td>
-                                <td>{{ item.groupType }}</td>
-                                <td class="text-end">{{ item.batchClosingQty }}</td>
-                                <td>{{ item.hsncode }}</td>
-                                <td class="text-end">{{ item.dlrprice | number:'1.2-2' }}</td>
+                                <td>{{ item.invoiceNo }}</td>
+                                <td>{{ item.invoiceDate | date:'dd-MM-yyyy'}}</td>
+                                <td>{{ item.dealerCode }}</td>
+                                <td>{{ item.locationCode }}</td>
+                                <td>{{ item.locationName }}</td>
+                                <td>{{ item.isAccepted }}</td>
+                                <td>{{ item.partyName }}</td>
+                                <td class="text-end">{{ item.totalAmount }}</td>
+                                <td class="text-end">{{ item.totalQty }}</td>
                                 <td class="text-end">{{ item.gst }}%</td>
                             </tr>
                         </tbody>
-                        <tfoot class="table-secondary">
-                            <tr>
-                                <td class="text-end" colspan="6"><strong>Total</strong></td>
-                                <!-- <td></td> -->
-                                <!-- <td></td> -->
-                                <!-- <td></td> -->
-                                <!-- <td></td> -->
-                                <!-- <td></td> -->
-                                <td class="text-end"><strong>{{getTotalRate() | number:'1.2-2'}}</strong></td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
                     </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="col-sm-12 col-md-12 mt-2">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+                        <ngb-pagination [collectionSize]="partsInwardData.length" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="onPageChange($event)" [boundaryLinks]="true" [maxSize]="10">
+                        </ngb-pagination>
+                    </div>
                 </div>
 
             </div>

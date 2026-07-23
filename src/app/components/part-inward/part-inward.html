@@ -11,8 +11,9 @@
             <div class="card">
                 <div class="card-header border-0 py-1"></div>
                 <div class="card-body pt-1 pb-2">
+
                     <form #partsInwardForm="ngForm">
-                        <fieldset>
+                        <fieldset [disabled]="isFormDisabled">
                             <!-- Purchase Info Header -->
                             <div class="row g-1 mb-2 align-items-end">
                                 <div class="col-md-1-5">
@@ -96,7 +97,6 @@
                                 </div> -->
 
                             </div>
-
                         </fieldset>
                     </form>
 
@@ -187,10 +187,12 @@
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button class="btn btn-primary btn-sm" (click)="onSave()">
+                            <button class="btn btn-primary btn-sm" (click)="onSave()" *ngIf="!isFormDisabled">
                                 Save
                             </button>
-                            <button class="btn btn-danger btn-sm" (click)="returnDashboard()"> Cancel </button>
+                            <button class="btn btn-danger btn-sm" (click)="returnToList()">
+                                Cancel
+                            </button>
                         </div>
                     </div>
                 </div>

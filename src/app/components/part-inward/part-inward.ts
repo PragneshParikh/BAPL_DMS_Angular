@@ -30,6 +30,7 @@ export class PartInward implements OnInit {
     documentNo: '',
     partyCode: '',
     sourceType: '',
+    isAccepted: false,
   }
 
   page = 1;
@@ -43,6 +44,8 @@ export class PartInward implements OnInit {
   isSuperAdmin: boolean = false;
   dealerCode: string = '';
   invoiceNo: string = '';
+
+  isFormDisabled: boolean = false;
 
   constructor(
     private locationMasterService: LocationMasterService,
@@ -116,7 +119,7 @@ export class PartInward implements OnInit {
         this.loader.hide();
 
         if (res === null) {
-          this.returnDashboard();
+          this.returnToList();
         }
 
         const to = new Date();
@@ -124,14 +127,19 @@ export class PartInward implements OnInit {
           invoiceNo: res.invoiceNo,
           invoiceDate: res.invoiceDate,
           selectedLocation: res.locationCode,
-          receiptDate: to.toISOString().split('T')[0],
+          receiptDate: res.receiptDate === null ? to.toISOString().split('T')[0] : res.receiptDate,
           prefixNo: res.prefixNo,
           purchaseNo: res.prefixNo.split('/').pop(),
-          documentNo: '',
+          documentNo: res.documentNo,
           partyCode: 'LED1',
           sourceType: 'erp',
+          isAccepted: res.isAccepted
         }
         this.partsPurchaseDetails = res.partInwards;
+
+        if (res.isAccepted) {
+          this.isFormDisabled = true;
+        }
       },
       error: (err) => {
         console.error(err);
@@ -175,7 +183,7 @@ export class PartInward implements OnInit {
         this.loader.hide();
         this.toaster.show("Data updated sucessfully.", { classname: 'bg-success text-white', delay: 5000 });
         this.topbarComponent.getPartsInwardNotification();
-        this.returnDashboard();
+        this.returnToList();
       },
       error: (err) => {
         this.loader.hide();
@@ -215,8 +223,8 @@ export class PartInward implements OnInit {
 
   // searchRecords() { }
 
-  returnDashboard() {
-    this.router.navigate(['/']);
+  returnToList() {
+    this.router.navigate(['/parts-inward']);
   }
 
 
