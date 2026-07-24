@@ -126,9 +126,9 @@ export class AddCounterBill implements OnInit {
     this.getLocations();
     this.getParties();
     this.getStateList();
-    
-   // const id = this.route.snapshot.paramMap.get('id');
-     const id = history.state?.counterBillId;
+
+    // const id = this.route.snapshot.paramMap.get('id');
+    const id = history.state?.counterBillId;
     if (id) {
       this.isEditMode = true;
       this.counterBillId = +id;
@@ -144,8 +144,6 @@ export class AddCounterBill implements OnInit {
     this.loader.show();
     this.counterBillService.getCounterBillById(id).subscribe({
       next: (res: any) => {
-        console.log(res);
-        debugger
         const header = res.header;
         this.model.counterBillNo = header.billNo;
         this.model.conterBillDate = header.billDate?.split('T')[0];
@@ -275,7 +273,6 @@ export class AddCounterBill implements OnInit {
 
     this.ledgerService.getLedgerForSale(this.dealerCode, isSuperAdmin).subscribe({
       next: (res) => {
-        console.log(res);
 
         this.parties = res.filter(p => (p.ledgerType?.toLowerCase() === 'dealer' && p.dealerCode !== this.dealerCode) || (p.ledgerType?.toLowerCase() === 'party') || (p.ledgerType.toLowerCase() === 'institunoial'));
         //this.parties = res.filter(p => p.ledgerType?.toLowerCase() === 'party');
@@ -725,7 +722,6 @@ export class AddCounterBill implements OnInit {
   }
 
   save(): void {
-    console.log(this.counterBillItems);
 
     this.loader.show();
 

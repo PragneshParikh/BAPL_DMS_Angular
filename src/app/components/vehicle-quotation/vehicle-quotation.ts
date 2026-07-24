@@ -97,7 +97,7 @@ export class VehicleQuotation implements OnInit, OnChanges {
         this.models = this.toArray(result.models);
         this.states = this.toArray(result.states);
         this.cities = this.toArray(result.cities);
-        
+
         this.financeCompanies = this.toArray(result.financeCompanies);
 
         this.masterDataLoaded = true;
@@ -184,8 +184,6 @@ export class VehicleQuotation implements OnInit, OnChanges {
 
     this.quotationService.getQuotationById(id).subscribe({
       next: (response: any) => {
-
-        console.log('Quotation Response', response);
 
         this.quotationData = { ...response };
 

@@ -51,7 +51,7 @@ export class LabourRateMaster implements OnInit {
   selectedServiceHead: any;
   selectedServiceType: string;
   searchText: string = '';
-  
+
 
   ngOnInit(): void {
     this.loadOemModels();
@@ -83,7 +83,6 @@ export class LabourRateMaster implements OnInit {
       next: (res: any) => {
         this.loader.hide();
         this.modelWiseLabourList = res.data || res;
-        console.log(this.modelWiseLabourList);
         this.totalPages = Math.ceil(
           this.modelWiseLabourList.length /
           this.pageSize
@@ -141,11 +140,9 @@ export class LabourRateMaster implements OnInit {
   }
 
   openEditPopup(item: any): void {
-    debugger;
     this.selectedLabour = {
       ...item
     };
-    console.log(this.selectedLabour)
     if (this.selectedLabour.jobType) {
       this.jobCardService.getServiceHead(
         this.selectedLabour.jobType
@@ -205,10 +202,8 @@ export class LabourRateMaster implements OnInit {
   }
 
   onJobType(type: 'model' | 'part'): void {
-    debugger;
 
     if (type === 'model') {
-      debugger
       if (!this.selectedLabour.jobType) {
         return;
       }
@@ -462,37 +457,37 @@ export class LabourRateMaster implements OnInit {
     this.pagedData = this.pagedModelWiseLabourList.slice(start, end);
   }
   downloadExcel(): void {
-  if (!this.rateType) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Select Rate Type',
-      text: 'Please select a Rate Type before exporting.'
-    });
-    return;
-  }
+    if (!this.rateType) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Select Rate Type',
+        text: 'Please select a Rate Type before exporting.'
+      });
+      return;
+    }
 
     const isModelWise = this.rateType === 'Modelwise Labour Rate';
 
-      this.loader.show();
-      this.LabourMasterService.downloadLabourRateMasterExcel(this.rateType).subscribe({
-        next: (blob: Blob) => {
-          this.loader.hide();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${isModelWise ? 'ModelWiseLabourRateMaster' : 'PartWiseLabourRateMaster'}_${new Date().getTime()}.xlsx`;
-          a.click();
-          window.URL.revokeObjectURL(url);
-        },
-        error: (err) => {
-          this.loader.hide();
-          console.error('Excel download error', err);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to download Excel file.'
-          });
-        }
-      });
-    }
+    this.loader.show();
+    this.LabourMasterService.downloadLabourRateMasterExcel(this.rateType).subscribe({
+      next: (blob: Blob) => {
+        this.loader.hide();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${isModelWise ? 'ModelWiseLabourRateMaster' : 'PartWiseLabourRateMaster'}_${new Date().getTime()}.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error('Excel download error', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to download Excel file.'
+        });
+      }
+    });
+  }
 }

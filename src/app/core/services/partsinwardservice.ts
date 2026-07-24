@@ -46,4 +46,18 @@ export class PartsInwardService {
     }
     return this.httpClient.get(`${this.baseUrl}/parts-inward/GetPartsInwardDetailsByDealer`, { params });
   }
+
+  getExcelDownload(fromDate: Date, toDate: Date, dealerCode: string | null): Observable<any> {
+
+    let params = new HttpParams();
+
+    params = params.set("fromDate", fromDate.toISOString());
+    params = params.set("toDate", toDate.toISOString());
+
+    if (dealerCode) {
+      params = params.set("dealerCode", dealerCode);
+    }
+
+    return this.httpClient.get(`${this.baseUrl}/parts-inward/DownloadPartsInwardExcel`, { params, responseType: 'blob' });
+  }
 }

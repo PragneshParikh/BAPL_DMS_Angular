@@ -187,7 +187,6 @@ export class JobCardAddForm {
         this.jobPrefix = res;
         const parts = res.split('/');
         this.jobNo = parseInt(parts[parts.length - 1], 10);
-        console.log(this.jobNo);
       }, error: (err) => {
         this.loader.hide();
         console.error(err);
@@ -348,7 +347,6 @@ export class JobCardAddForm {
     });
   }
   loadServiceHistory(chassisNo: string) {
-    debugger
     let jobCardId: number | null = 0;
 
     if (this.chassiseditData?.jobCardHeader?.id) {
@@ -437,7 +435,6 @@ export class JobCardAddForm {
 
 
   onJobType(isEdit = false) {
-debugger;
     if (!this.selectedJobtype) return;
 
     // this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
@@ -769,7 +766,6 @@ debugger;
   //insert jobcard
   isSubmitted = false;
   saveJobCard() {
-    debugger
     this.isSubmitted = true;
     if (this.selectedJobtype == 1 && this.pdiCheckList.length == 0) {
       Swal.fire({
@@ -908,7 +904,7 @@ debugger;
       jobinTime: this.jobInTime || null,
       jobNo: Number(this.jobNo) || 0,
       manualjobNo: Number(this.manualJobNo) || 0,
-      estNo : this.estNo || 0,
+      estNo: this.estNo || 0,
       estdelDate: this.estDelDate || null,
       estdelTime: this.estDelTime || null,
       jobSource: this.selectedJobSources || 0,
@@ -1152,7 +1148,7 @@ debugger;
     this.jobInTime = '';
     this.jobNo = 0;
     this.manualJobNo = 0;
-    this.estNo ='';
+    this.estNo = '';
     this.estDelDate = '';
     this.estDelTime = '';
     this.supervisor = '';
