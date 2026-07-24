@@ -16,17 +16,17 @@
         <form [formGroup]="filterForm">
           <div class="row g-2">
 
-            <div class="col-xl-3 col-md-6" *ngIf="!isDealer">
-              <label class="form-label">Dealer Name</label>
-              <select formControlName="dealerCode" class="form-select form-select-sm">
-                <option value="">-- All Dealers --</option>
-                <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
-                  {{ dealer.dealerName }}
-                </option>
-              </select>
-            </div>
+       <div class="col-xl-3 col-md-6">
+          <label class="form-label">Dealer Name</label>
+          <select formControlName="dealerCode" class="form-select form-select-sm">
+            <option value="">-- All Dealers --</option>
+            <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
+              {{ dealer.dealerName }}
+            </option>
+          </select>
+        </div>
 
-            <div class="col-xl-3 col-md-6" *ngIf="isDealer">
+            <!-- <div class="col-xl-3 col-md-6" *ngIf="isDealer">
               <label class="form-label">Dealer</label>
               <div class="input-group input-group-sm">
                 <span class="input-group-text bg-light">
@@ -37,7 +37,7 @@
                   [value]="loggedInDealerCode"
                   readonly>
               </div>
-            </div>
+            </div> -->
 
             <div class="col-xl-3 col-md-6">
               <label class="form-label">From Date</label>
@@ -66,12 +66,30 @@
               <input type="text" formControlName="partyName"
                 class="form-control form-control-sm" placeholder="Enter customer name">
             </div>
+              <div class="col-xl-3 col-md-6 position-relative">
+                <label class="form-label">Chassis No.</label>
+                <input type="text" formControlName="chassisNo"
+                  class="form-control form-control-sm" placeholder="Enter chassis number"
+                  autocomplete="off"
+                  (input)="onChassisInput()"
+                  (focus)="onChassisFocus()"
+                  (blur)="onChassisBlur()">
 
-            <div class="col-xl-3 col-md-6">
-              <label class="form-label">Chassis No.</label>
-              <input type="text" formControlName="chassisNo"
-                class="form-control form-control-sm" placeholder="Enter chassis number">
-            </div>
+                <div class="list-group position-absolute w-100 shadow-sm"
+                  style="z-index: 1000; max-height: 220px; overflow-y: auto;"
+                  *ngIf="showChassisDropdown">
+                  <button type="button" class="list-group-item list-group-item-action py-1 px-2"
+                    style="font-size: 12px;"
+                    *ngFor="let chassis of filteredChassisList"
+                    (mousedown)="selectChassisSuggestion(chassis)">
+                    {{ chassis }}
+                  </button>
+                  <span *ngIf="filteredChassisList.length === 0"
+                    class="list-group-item text-muted py-1 px-2" style="font-size: 12px;">
+                    No matching chassis found
+                  </span>
+                </div>
+              </div>
 
             <div class="col-xl-3 col-md-6">
               <label class="form-label">Reg No.</label>

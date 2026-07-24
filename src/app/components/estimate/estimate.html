@@ -1,0 +1,523 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent" *ngIf="!embedded">
+  <h4 class="mb-sm-0">Estimate</h4>
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+    ← Back
+  </button>
+</div>
+
+<div class="row g-3">
+
+  <!-- ── Header fields ──────────────────────────────────────────────── -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Estimate Details</h5>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="form">
+          <div class="row g-2 align-items-end">
+
+            <div class="col-md-2">
+              <label class="form-label">Estimate No</label>
+              <input type="text" formControlName="estimationNo"
+                class="form-control form-control-sm bg-light fw-semibold" readonly>
+            </div>
+
+            <div class="col-md-2">
+              <label class="form-label">Estimate Date</label>
+              <input type="date" formControlName="estimateDate" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-5 position-relative">
+              <label class="form-label">Chassis / Registration No</label>
+              <div class="input-group input-group-sm">
+                <input type="text" formControlName="searchNo"
+                  class="form-control" placeholder="Search chassis or reg. no..."
+                  autocomplete="off"
+                  (input)="onChassisInput()"
+                  (focus)="onChassisFocus()"
+                  (blur)="onChassisBlur()"
+                  (keydown.enter)="onSearchEnter($event)">
+                <button type="button" class="btn btn-primary" (click)="searchVehicle()"
+                  [disabled]="isSearching">
+                  <span *ngIf="isSearching" class="spinner-border spinner-border-sm me-1"></span>
+                  <span *ngIf="!isSearching">🔍</span>
+                </button>
+              </div>
+
+              <div class="list-group position-absolute w-100 shadow-sm"
+                style="z-index: 1000; max-height: 220px; overflow-y: auto;"
+                *ngIf="showChassisDropdown">
+
+                <button type="button" class="list-group-item list-group-item-action py-1 px-2"
+                  style="font-size: 12px;"
+                  *ngFor="let chassis of filteredChassisList"
+                  (mousedown)="selectChassisSuggestion(chassis)">
+                  {{ chassis }}
+                </button>
+
+                <span *ngIf="filteredChassisList.length === 0"
+                  class="list-group-item text-muted py-1 px-2" style="font-size: 12px;">
+                  No matching chassis found
+                </span>
+
+              </div>
+            </div>
+
+          </div>
+        </form>
+
+        <div class="alert alert-danger mt-3 py-2 mb-0" *ngIf="searchError">{{ searchError }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Customer details (auto-filled on search, editable where applicable) ── -->
+  <div class="col-12" *ngIf="customerFound">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Customer Details</h5>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="form">
+          <div class="row g-2">
+
+            <div class="col-md-3">
+              <label class="form-label">Name</label>
+              <input type="text" formControlName="customerName" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Contact No</label>
+              <input type="text" formControlName="customerMobile" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Pin</label>
+              <input type="text" formControlName="customerPin" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Email</label>
+              <input type="text" formControlName="customerEmail" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Address</label>
+              <input type="text" formControlName="customerAddress" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">City</label>
+              <input type="text" formControlName="customerCity" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">State</label>
+              <input type="text" formControlName="customerState" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Chassis No</label>
+              <input type="text" formControlName="chassisNo" class="form-control form-control-sm bg-light" readonly>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Battery No</label>
+              <input type="text" class="form-control form-control-sm bg-light" readonly
+                [value]="batteryNos.join(', ') || '-'">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Motor No</label>
+              <input type="text" class="form-control form-control-sm bg-light" readonly
+                [value]="motorNos.join(', ') || '-'">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Charger No</label>
+              <input type="text" class="form-control form-control-sm bg-light" readonly
+                [value]="chargerNos.join(', ') || '-'">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Kms</label>
+              <input type="number" formControlName="kms" class="form-control form-control-sm" placeholder="Odometer">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Job Type</label>
+              <select formControlName="jobTypeId" class="form-select form-select-sm">
+                <option [ngValue]="null">-- Select Job Type --</option>
+                <option *ngFor="let jt of jobTypeList" [ngValue]="jt.id">{{ jt.jobTypeName }}</option>
+              </select>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Parts ─────────────────────────────────────────────────────────── -->
+<div class="col-12">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">Add Part</h5>
+      <button type="button" class="btn btn-outline-primary btn-sm" (click)="addPart()">+ Add Part</button>
+    </div>
+    <div class="card-body p-0">
+
+      <div class="text-center text-muted p-4" *ngIf="partIndices.length === 0">
+        No parts added yet. Use the button above.
+      </div>
+
+      <div class="table-responsive" *ngIf="partIndices.length > 0">
+        <form [formGroup]="form">
+          <table class="table table-bordered table-sm mb-0" formArrayName="details">
+            <thead class="table-light">
+              <tr>
+                <th style="min-width: 220px;">Code / Description</th>
+                <th class="text-end" style="width: 80px;">Qty</th>
+                <th class="text-end" style="width: 100px;">Rate</th>
+                <th class="text-end" style="width: 90px;">Disc %</th>
+                <th class="text-end" style="width: 80px;">CGST %</th>
+                <th class="text-end" style="width: 80px;">SGST %</th>
+                <th class="text-end" style="width: 80px;">IGST %</th>
+                <th class="text-end" style="width: 110px;">Amount</th>
+                <th style="width: 60px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let i of partIndices" [formGroupName]="i">
+                <td class="position-relative">
+                  <div class="input-group input-group-sm">
+                    <input type="text" formControlName="itemCode" class="form-control form-control-sm"
+                      placeholder="Code..."
+                      autocomplete="off"
+                      (input)="onItemCodeInput(i)"
+                      (focus)="onItemCodeFocus(i)"
+                      (blur)="onItemCodeBlur(i)">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" title="Search"
+                      (mousedown)="triggerItemSearch(i)">
+                      🔍
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" title="Clear selection"
+                      *ngIf="detailsArray.at(i).value.itemCode"
+                      (mousedown)="clearItemSelection(i)">
+                      ✕
+                    </button>
+                  </div>
+
+                  <input type="text" formControlName="itemDescription" class="form-control form-control-sm mt-1"
+                    placeholder="Description">
+
+                  <div class="list-group position-absolute shadow-sm"
+                    style="z-index: 1000; max-height: 220px; overflow-y: auto; min-width: 300px;"
+                    *ngIf="rowShowDropdown[i]">
+
+                    <button type="button" class="list-group-item list-group-item-action py-1 px-2"
+                      style="font-size: 12px;"
+                      *ngFor="let item of rowSuggestions[i]"
+                      (mousedown)="selectItemSuggestion(i, item)">
+                      <strong>{{ item.itemCode }}</strong> — {{ item.itemDescription }}
+                    </button>
+
+                    <span *ngIf="!rowSuggestions[i] || rowSuggestions[i].length === 0"
+                      class="list-group-item text-muted py-1 px-2" style="font-size: 12px;">
+                      No matches found
+                    </span>
+
+                  </div>
+                </td>
+
+                <td><input type="number" formControlName="qty" class="form-control form-control-sm text-end"></td>
+                <td><input type="number" formControlName="rate" class="form-control form-control-sm text-end"></td>
+                <td><input type="number" formControlName="discountPercent" class="form-control form-control-sm text-end"></td>
+                <td><input type="number" formControlName="cgstPercent" class="form-control form-control-sm text-end"></td>
+                <td><input type="number" formControlName="sgstPercent" class="form-control form-control-sm text-end"></td>
+                <td><input type="number" formControlName="igstPercent" class="form-control form-control-sm text-end"></td>
+                <td class="text-end fw-semibold text-nowrap">
+                  {{ getRowAmount(i) | currency:'INR':'symbol':'1.2-2' }}
+                </td>
+                <td class="text-center">
+                  <button type="button" class="btn btn-outline-danger btn-sm" title="Remove row"
+                    (click)="removeDetail(i)">
+                    🗑
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="d-flex justify-content-between align-items-center px-3 py-2 bg-light border-top">
+            <span class="fw-semibold">Sub Total (Parts)</span>
+            <span class="fw-bold">{{ subTotalParts | currency:'INR':'symbol':'1.2-2' }}</span>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── Labour ────────────────────────────────────────────────────────── -->
+<div class="col-12">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">Add Labour</h5>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addLabour()">+ Add Labour</button>
+    </div>
+    <div class="card-body p-0">
+
+      <div class="text-center text-muted p-4" *ngIf="labourIndices.length === 0">
+        No labour added yet. Use the button above.
+      </div>
+
+      <div class="table-responsive" *ngIf="labourIndices.length > 0">
+        <form [formGroup]="form">
+          <table class="table table-bordered table-sm mb-0" formArrayName="details">
+            <thead class="table-light">
+              <tr>
+                <th style="min-width: 220px;">Code / Description</th>
+                <th class="text-end" style="width: 80px;">Qty</th>
+                <th class="text-end" style="width: 100px;">Rate</th>
+                <th class="text-end" style="width: 90px;">Disc %</th>
+                <th class="text-end" style="width: 80px;">CGST %</th>
+                <th class="text-end" style="width: 80px;">SGST %</th>
+                <th class="text-end" style="width: 80px;">IGST %</th>
+                <th class="text-end" style="width: 110px;">Amount</th>
+                <th style="width: 60px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let i of labourIndices" [formGroupName]="i">
+                <td class="position-relative">
+                  <div class="input-group input-group-sm">
+                    <input type="text" formControlName="itemCode" class="form-control form-control-sm"
+                      placeholder="Code..."
+                      autocomplete="off"
+                      (input)="onItemCodeInput(i)"
+                      (focus)="onItemCodeFocus(i)"
+                      (blur)="onItemCodeBlur(i)">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" title="Search"
+                      (mousedown)="triggerItemSearch(i)">
+                      🔍
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" title="Clear selection"
+                      *ngIf="detailsArray.at(i).value.itemCode"
+                      (mousedown)="clearItemSelection(i)">
+                      ✕
+                    </button>
+                  </div>
+
+                  <input type="text" formControlName="itemDescription" class="form-control form-control-sm mt-1"
+                    placeholder="Description">
+
+                  <div class="list-group position-absolute shadow-sm"
+                    style="z-index: 1000; max-height: 220px; overflow-y: auto; min-width: 300px;"
+                    *ngIf="rowShowDropdown[i]">
+
+                    <button type="button" class="list-group-item list-group-item-action py-1 px-2"
+                      style="font-size: 12px;"
+                      *ngFor="let item of rowSuggestions[i]"
+                      (mousedown)="selectItemSuggestion(i, item)">
+                      <strong>{{ item.labourCode }}</strong> — {{ item.labourDescription }}
+                    </button>
+
+                    <span *ngIf="!rowSuggestions[i] || rowSuggestions[i].length === 0"
+                      class="list-group-item text-muted py-1 px-2" style="font-size: 12px;">
+                      No matches found
+                    </span>
+
+                  </div>
+                </td>
+
+                <td><input type="number" formControlName="qty" class="form-control form-control-sm text-end"></td>
+                <td><input type="number" formControlName="rate" class="form-control form-control-sm text-end"></td>
+                <td><input type="number" formControlName="discountPercent" class="form-control form-control-sm text-end"></td>
+                <td><input type="number" formControlName="cgstPercent" class="form-control form-control-sm text-end"></td>
+                <td><input type="number" formControlName="sgstPercent" class="form-control form-control-sm text-end"></td>
+                <td><input type="number" formControlName="igstPercent" class="form-control form-control-sm text-end"></td>
+                <td class="text-end fw-semibold text-nowrap">
+                  {{ getRowAmount(i) | currency:'INR':'symbol':'1.2-2' }}
+                </td>
+                <td class="text-center">
+                  <button type="button" class="btn btn-outline-danger btn-sm" title="Remove row"
+                    (click)="removeDetail(i)">
+                    🗑
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="d-flex justify-content-between align-items-center px-3 py-2 bg-light border-top">
+            <span class="fw-semibold">Sub Total (Labour)</span>
+            <span class="fw-bold">{{ subTotalLabour | currency:'INR':'symbol':'1.2-2' }}</span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Grand Total ───────────────────────────────────────────────────── -->
+<div class="col-12">
+  <div class="card">
+    <div class="card-body d-flex justify-content-between align-items-center py-2">
+      <span class="fw-bold">Grand Total</span>
+      <span class="fw-bold fs-5">{{ grandTotal | currency:'INR':'symbol':'1.2-2' }}</span>
+    </div>
+  </div>
+</div>
+  <!-- ── Action buttons ───────────────────────────────────────────────── -->
+  <div class="col-12">
+    <div class="d-flex justify-content-between">
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        <button type="button" class="btn btn-outline-dark" (click)="onCreateJobCard()">
+          Create Job Card
+        </button>
+
+        <!-- No insurance captured yet -->
+        <button type="button" class="btn btn-outline-info" *ngIf="!hasInsurance"
+          (click)="openInsurancePopup()">
+          🛡️ Add Insurance
+        </button>
+
+        <!-- Insurance already captured — show a quick summary + Edit -->
+        <div class="d-flex align-items-center gap-2 border rounded px-2 py-1 bg-light" *ngIf="hasInsurance">
+          <span class="small text-nowrap">
+            🛡️ <strong>{{ insuranceParty || '—' }}</strong>
+            <span *ngIf="policyNo"> · Policy {{ policyNo }}</span>
+          </span>
+          <button type="button" class="btn btn-outline-secondary btn-sm" title="Edit Insurance"
+            (click)="openInsurancePopup()">
+            ✏️ Edit
+          </button>
+        </div>
+
+        <button type="button" class="btn btn-outline-secondary" *ngIf="isEditMode" (click)="onPrint()">
+          Print
+        </button>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-light border" *ngIf="embedded" (click)="onClose()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-success" (click)="onSave()" [disabled]="isSaving">
+          <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-1"></span>
+          {{ isSaving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </div>
+    <div class="alert alert-danger mt-2 py-2" *ngIf="saveError">{{ saveError }}</div>
+  </div>
+
+  <!-- ── Insurance Popup ───────────────────────────────────────────────── -->
+  <!-- Built with inline styles for the overlay/positioning (rather than
+       Bootstrap's .modal/.modal-dialog classes) so it isn't affected by
+       whatever is overriding/conflicting with .modal in this project.
+       Buttons, inputs, and the grid below still use normal Bootstrap
+       utility/component classes since those render fine elsewhere. -->
+  <div *ngIf="showInsurancePopup"
+    class="d-flex align-items-center justify-content-center"
+    style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 2100; padding: 16px;">
+    <div style="background: #ffffff; width: 100%; max-width: 720px; max-height: 92vh; overflow-y: auto; border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.35);">
+
+      <div class="d-flex justify-content-between align-items-center"
+        style="background: #3f4b7a; color: #fff; padding: 14px 20px; border-radius: 10px 10px 0 0;">
+        <h5 class="mb-0" style="color: #ffffff;">Insurance Detail</h5>
+        <button type="button" class="btn-close btn-close-white" aria-label="Close"
+          (click)="closeInsurancePopup()"></button>
+      </div>
+
+      <div style="padding: 20px;">
+          <div class="row g-3">
+
+            <div class="col-md-6 position-relative">
+              <label class="form-label fw-semibold">Insurance Party</label>
+              <input type="text" class="form-control"
+                placeholder="Search insurance party..."
+                autocomplete="off"
+                [(ngModel)]="insuranceParty"
+                [ngModelOptions]="{standalone: true}"
+                (input)="onInsuranceSearch()"
+                (focus)="onInsuranceSearch()">
+
+              <div class="list-group position-absolute w-100 shadow-sm"
+                style="z-index: 1000; max-height: 200px; overflow-y: auto;"
+                *ngIf="showInsuranceDropdown">
+                <button type="button" class="list-group-item list-group-item-action py-1 px-2"
+                  style="font-size: 12px;"
+                  *ngFor="let item of filteredInsuranceList"
+                  (mousedown)="selectInsurance(item)">
+                  {{ item.ledgerName }}
+                </button>
+                <span *ngIf="filteredInsuranceList.length === 0"
+                  class="list-group-item text-muted py-1 px-2" style="font-size: 12px;">
+                  No matching insurance party found
+                </span>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Description</label>
+              <input type="text" class="form-control"
+                [(ngModel)]="insuranceDescription" [ngModelOptions]="{standalone: true}">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Surveyor Name</label>
+              <input type="text" class="form-control"
+                [(ngModel)]="surveyorName" [ngModelOptions]="{standalone: true}">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Contact Number</label>
+              <input type="text" class="form-control"
+                [(ngModel)]="contactNumber" [ngModelOptions]="{standalone: true}">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Policy No.</label>
+              <input type="text" class="form-control"
+                [(ngModel)]="policyNo" [ngModelOptions]="{standalone: true}">
+            </div>
+
+            <div class="col-md-6">
+              <div class="row g-2">
+                <div class="col-7">
+                  <label class="form-label fw-semibold">Valid Till</label>
+                  <input type="date" class="form-control"
+                    [(ngModel)]="insValidTill" [ngModelOptions]="{standalone: true}">
+                </div>
+                <div class="col-5">
+                  <label class="form-label fw-semibold d-block">Zero Dep.</label>
+                  <div class="form-check form-switch pt-1">
+                    <input class="form-check-input" type="checkbox" role="switch" id="zeroDep"
+                      style="width: 2.5em; height: 1.25em;"
+                      [checked]="zeroDep === 'Y'"
+                      (change)="zeroDep = $any($event.target).checked ? 'Y' : 'N'">
+                    <label class="form-check-label" for="zeroDep">
+                      {{ zeroDep === 'Y' ? 'Yes' : 'No' }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+      </div>
+
+      <div class="d-flex gap-2" style="padding: 0 20px 20px;">
+        <button type="button" class="btn btn-primary" (click)="saveInsurance()">
+          ✓ Save
+        </button>
+        <button type="button" class="btn btn-light border" (click)="closeInsurancePopup()">
+          ✕ Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

@@ -53,6 +53,7 @@ export interface JobReportViewModel {
   supervisorComment: string;
 
   jobStatus: string;
+  closedDate?: string;   
 
   saleDate: Date | string | null;
 

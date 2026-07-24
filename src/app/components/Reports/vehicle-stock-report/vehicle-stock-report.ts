@@ -70,6 +70,30 @@ export class VehicleStockReportComponent
 
     pageSize: number = 20;
 
+get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalRecords / this.pageSize));
+}
+
+get pageStartRecord(): number {
+    return this.totalRecords === 0 ? 0 : ((this.pageIndex - 1) * this.pageSize) + 1;
+}
+
+get pageEndRecord(): number {
+    return Math.min(this.pageIndex * this.pageSize, this.totalRecords);
+}
+get pageNumbers(): number[] {
+    const total = this.totalPages;
+    const current = this.pageIndex;
+    const windowSize = 5;
+
+    let start = Math.max(1, current - Math.floor(windowSize / 2));
+    let end = Math.min(total, start + windowSize - 1);
+    start = Math.max(1, end - windowSize + 1);
+
+    const pages: number[] = [];
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+}
     constructor(
         private fb: FormBuilder,
         private reportService: ReportService
@@ -297,6 +321,19 @@ export class VehicleStockReportComponent
         this.loadReport();
     }
 
+    goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages || page === this.pageIndex) return;
+    this.pageIndex = page;
+    this.loadReport();
+}
+
+previousPage(): void {
+    this.goToPage(this.pageIndex - 1);
+}
+
+nextPage(): void {
+    this.goToPage(this.pageIndex + 1);
+}
     // =====================================================
     // RESET
     // =====================================================

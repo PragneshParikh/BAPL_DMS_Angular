@@ -1,0 +1,220 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">Estimate List</h4>
+  <span class="badge bg-light text-dark border px-3 py-2 fs-6">
+    Total Records: {{ totalRecords }}
+  </span>
+</div>
+
+<div class="row g-3">
+
+  <!-- ── Filters ────────────────────────────────────────────────────── -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Filters</h5>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="filterForm">
+          <div class="row g-2">
+
+            <div class="col-xl-3 col-md-6 position-relative">
+              <label class="form-label">Estimate No.</label>
+              <input type="text" formControlName="estimationNo" class="form-control form-control-sm"
+                placeholder="Enter estimate no"
+                autocomplete="off"
+                (input)="onEstimationInput()"
+                (focus)="onEstimationFocus()"
+                (blur)="onEstimationBlur()">
+
+              <div class="list-group position-absolute w-100 shadow-sm"
+                style="z-index: 1000; max-height: 220px; overflow-y: auto;"
+                *ngIf="showEstimationDropdown">
+                <button type="button" class="list-group-item list-group-item-action py-1 px-2"
+                  style="font-size: 12px;"
+                  *ngFor="let no of filteredEstimationNoList"
+                  (mousedown)="selectEstimationSuggestion(no)">
+                  {{ no }}
+                </button>
+                <span *ngIf="filteredEstimationNoList.length === 0"
+                  class="list-group-item text-muted py-1 px-2" style="font-size: 12px;">
+                  No matching estimate no found
+                </span>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 position-relative">
+              <label class="form-label">Chassis No.</label>
+              <input type="text" formControlName="chassisNo" class="form-control form-control-sm"
+                placeholder="Enter chassis number"
+                autocomplete="off"
+                (input)="onChassisInput()"
+                (focus)="onChassisFocus()"
+                (blur)="onChassisBlur()">
+
+              <div class="list-group position-absolute w-100 shadow-sm"
+                style="z-index: 1000; max-height: 220px; overflow-y: auto;"
+                *ngIf="showChassisDropdown">
+                <button type="button" class="list-group-item list-group-item-action py-1 px-2"
+                  style="font-size: 12px;"
+                  *ngFor="let chassis of filteredChassisList"
+                  (mousedown)="selectChassisSuggestion(chassis)">
+                  {{ chassis }}
+                </button>
+                <span *ngIf="filteredChassisList.length === 0"
+                  class="list-group-item text-muted py-1 px-2" style="font-size: 12px;">
+                  No matching chassis found
+                </span>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">From Date</label>
+              <input type="date" formControlName="fromDate" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">To Date</label>
+              <input type="date" formControlName="toDate" class="form-control form-control-sm">
+            </div>
+
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn btn-primary btn-sm" (click)="onSearch()">Search</button>
+            <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">Reset</button>
+            <button type="button" class="btn btn-success btn-sm ms-auto" (click)="onAddNew()">+ New Estimate</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12" *ngIf="errorMessage">
+    <div class="alert alert-danger">{{ errorMessage }}</div>
+  </div>
+
+  <!-- ── Loading ────────────────────────────────────────────────────── -->
+  <div class="col-12" *ngIf="isLoading">
+    <div class="card">
+      <div class="card-body text-center py-5">
+        <div class="spinner-border text-primary mb-3"></div>
+        <p class="text-muted fw-semibold mb-0">Loading estimates...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Table ──────────────────────────────────────────────────────── -->
+  <div class="col-12" *ngIf="!isLoading">
+    <div class="card">
+      <div class="card-body">
+
+        <div class="text-center p-4" *ngIf="reportData.length === 0">
+          No estimates found. Adjust filters or create a new estimate.
+        </div>
+
+        <div class="table-responsive" *ngIf="reportData.length > 0">
+          <table class="table table-bordered table-striped table-sm">
+            <thead class="table-light">
+              <tr>
+                <th>Estimate No.</th>
+                <th>Estimate Date</th>
+                <th>Chassis No.</th>
+                <th>Customer Name</th>
+                <th>Mobile</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Job Type</th>
+                <th>Job Card No.</th>
+                <th>JC_Create Date</th>
+                <th style="width: 80px;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of reportData">
+                <td class="fw-semibold">{{ item.estimationNo }}</td>
+                <td class="text-nowrap">{{ formatDate(item.estimateDate) }}</td>
+                <td>{{ item.chassisNo }}</td>
+                <td>{{ item.customerName }}</td>
+                <td>{{ item.customerMobile }}</td>
+                <td>{{ item.customerCity }}</td>
+                <td>{{ item.customerState }}</td>
+                <td>{{ item.jobTypeName || '-' }}</td>
+                <td>
+                    <span *ngIf="item.jobCardNo" class="badge bg-success">{{ item.jobCardNo }}</span>
+                    <span *ngIf="!item.jobCardNo" class="text-muted">-</span>
+                </td>
+                <td class="text-nowrap">{{ formatDate(item.jobCardCreatedDate) }}</td>
+
+              <td class="text-center text-nowrap">
+                  <button type="button" class="btn btn-outline-primary btn-sm me-1" title="Edit"
+                    (click)="onEdit(item.id)">
+                    ✏️ 
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" title="Print"
+                    (click)="onPrint(item.id)">
+                    🖨️ 
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="row mt-3" *ngIf="reportData.length > 0">
+          <div class="col-md-6 d-flex align-items-center mb-2 mb-md-0">
+            <p class="text-muted mb-0">
+              Showing {{ (pageIndex - 1) * pageSize + 1 }} to
+              {{ Math.min(pageIndex * pageSize, totalRecords) }} of
+              {{ totalRecords }} records
+            </p>
+          </div>
+          <div class="col-md-6 d-flex justify-content-md-end">
+            <div class="d-flex align-items-center flex-wrap gap-2">
+              <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex === 1" (click)="firstPage()">First</button>
+              <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex === 1" (click)="previousPage()">Previous</button>
+              <span class="badge bg-light text-dark border px-3 py-2">Page {{ pageIndex }} of {{ totalPages }}</span>
+              <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex >= totalPages" (click)="nextPage()">Next</button>
+              <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex >= totalPages" (click)="lastPage()">Last</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Edit Estimate Popup ─────────────────────────────────────────────── -->
+<!-- Built with inline styles for the overlay/positioning (rather than
+     Bootstrap's .modal/.modal-dialog classes) — see estimate.html's
+     Insurance popup for why: .modal wasn't rendering as a proper
+     full-screen fixed overlay in this project. -->
+<div *ngIf="showEstimateModal"
+  class="d-flex align-items-center justify-content-center"
+  style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 2000; padding: 16px;">
+  <div style="background: #ffffff; width: 100%; max-width: 1140px; max-height: 92vh; overflow-y: auto; border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.35);">
+
+    <div class="d-flex justify-content-between align-items-center"
+      style="background: #3f4b7a; color: #fff; padding: 14px 20px; border-radius: 10px 10px 0 0; position: sticky; top: 0; z-index: 1;">
+      <h5 class="mb-0" style="color: #ffffff;">Edit Estimate</h5>
+      <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="closeEstimateModal()"></button>
+    </div>
+
+    <div style="padding: 20px;">
+      <!-- *ngIf keyed on selectedEstimateId (in addition to the outer
+           *ngIf on showEstimateModal) guarantees a fresh component
+           instance per estimate, so there's no stale state carried over
+           from a previously edited row. -->
+      <app-estimate
+        *ngIf="selectedEstimateId"
+        [estimateId]="selectedEstimateId"
+        [embedded]="true"
+        (saved)="onEstimateSaved()"
+        (closed)="closeEstimateModal()">
+      </app-estimate>
+    </div>
+
+  </div>
+</div>
