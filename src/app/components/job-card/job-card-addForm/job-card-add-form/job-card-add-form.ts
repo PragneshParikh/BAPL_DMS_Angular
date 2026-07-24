@@ -446,7 +446,7 @@ export class JobCardAddForm {
   }
 
 
-  onJobType(isEdit = false) {
+  onJobType(isEdit = false, isFromEstimate: boolean = false) {
     if (!this.selectedJobtype) return;
 
     // this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
@@ -490,8 +490,7 @@ export class JobCardAddForm {
           .subscribe(res => {
             this.chassisList = res;
 
-            // if (isFromEstimate && this.fromEstimateData?.chassisNo) {
-            if (this.fromEstimateData?.chassisNo) {
+            if (isFromEstimate && this.fromEstimateData?.chassisNo) {
               const match = this.chassisList.find(
                 x => x.chassisNumber == this.fromEstimateData.chassisNo
               );
