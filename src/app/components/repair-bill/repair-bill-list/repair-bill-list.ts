@@ -11,6 +11,7 @@ import { LocationName } from '../../../ViewModels/ReceiptEntryModel';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 import { LoaderService } from '../../../core/services/loader';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-repair-bill-list',
@@ -31,9 +32,11 @@ export class RepairBillList implements OnInit {
   page = 1;
   pageSize = 10;
   collectionSize = 0;
-  isSuperAdmin: boolean = false;
+  isSuperAdmin: boolean;
 
   private searchTimeout: any;
+  dealerCode: string;
+  role: string;
 
   constructor(
     private router: Router,
@@ -55,6 +58,20 @@ export class RepairBillList implements OnInit {
   };
 
   ngOnInit(): void {
+
+     
+       this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+  
+      if (!this.isSuperAdmin) {
+        this.dealerCode = this.storageService.getDealerCode();
+       
+      } else {
+         this.dealerCode = null;
+         this.role = this.storageService.getRole();
+         console.log(this.isSuperAdmin);
+        
+      }
+
     const today = new Date();
 
     // Current month first date
@@ -95,6 +112,7 @@ export class RepairBillList implements OnInit {
   }
 
   search(): void {
+    debugger;
     const payload = {
       locationCode: this.repairbillsearchModel.serviceLocation || null,
       billNo:       this.repairbillsearchModel.billNo           || null,
@@ -151,6 +169,61 @@ export class RepairBillList implements OnInit {
     
     this.router.navigate(['/repair-bill', item.id]);
   }
+  deleteRepairbill(id: number) {
+      console.log('Delete Id:', id);
+       this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+  
+      if (!this.isSuperAdmin) {
+        this.dealerCode = this.storageService.getDealerCode();
+       
+      } else {
+         this.dealerCode = null;
+         this.role = this.storageService.getRole();
+         console.log(this.isSuperAdmin);
+        
+      }
+      //const dealerCode = this.storageService.getDealerCode();
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'You will not be able to recover this RepairBill!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel',
+        width: '350px'
+      }).then((result) => {
+  
+        if (result.isConfirmed) {
+  
+          this.repairBillService.deleteRepairbill(id,this.role).subscribe({
+            next: (res: any) => {
+  
+              Swal.fire({
+                icon: 'success',
+                title: 'Deleted!',
+                text: 'Repair Bill deleted successfully',
+                width: '350px'
+              });
+  
+              //  Refresh list
+              this.router.navigate(['/repair-bill-list']);
+  
+            },
+            error: (err) => {
+              console.error(err);
+  
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err?.error || 'Delete failed',
+                width: '300px'
+              });
+            }
+          });
+  
+        }
+      });
+    }
   printInvoice(item: any): void {
     this.router.navigate(['/repair-bill-invoice', item.id]);
   }

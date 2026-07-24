@@ -31,16 +31,19 @@ export class RepairBillService {
   // generateRepairBillPerformaDetails(dealerCode:string,repairBillId :number){
   //   return this.httpClient.post<any[]>(`${this.baseUrl}/RepairBill/GenerateRepairBillPerformaDetails/${dealerCode}/${repairBillId}`,{})
   // }
+  deleteRepairbill(id: number, role: string) {
+    return this.httpClient.delete(`${this.baseUrl}/RepairBill/DeleteRepairbill/${id}/${role}`);
+  }
   generateRepairBillPerformaDetails(
-  dealerCode: string,
-  repairBillId: number
-): Observable<any> {
+    dealerCode: string,
+    repairBillId: number
+  ): Observable<any> {
 
-  return this.httpClient.post<any>(
-    `${this.baseUrl}/RepairBill/GenerateRepairBillPerformaDetails/${dealerCode}/${repairBillId}`,
-    {}
-  );
-}
+    return this.httpClient.post<any>(
+      `${this.baseUrl}/RepairBill/GenerateRepairBillPerformaDetails/${dealerCode}/${repairBillId}`,
+      {}
+    );
+  }
 
 
 }

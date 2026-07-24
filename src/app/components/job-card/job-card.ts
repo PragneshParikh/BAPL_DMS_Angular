@@ -48,6 +48,7 @@ export class JobCard {
   selectedServiceType: string;
   chassisList: any[] = [];
   dealerCode: string;
+  role: string;
 
   // userRole: string = ''; when userrole api done then this var use
 
@@ -183,6 +184,7 @@ export class JobCard {
   }
 
   onEdit(row: any) {
+    console.log("row",row)
     this.router.navigate(['/job-card-addForm/job-card-add-form'], {
       state: { data: row }
     });
@@ -190,12 +192,15 @@ export class JobCard {
 
 
   deleteJobCard(id: number) {
+    console.log('Delete Id:', id);
      this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
+     
     } else {
       this.dealerCode = null;
+       this.role = this.storageService.getRole();
     }
     //const dealerCode = this.storageService.getDealerCode();
     Swal.fire({
@@ -210,7 +215,7 @@ export class JobCard {
 
       if (result.isConfirmed) {
 
-        this.jobCardService.deleteJobCard(id).subscribe({
+        this.jobCardService.deleteJobCard(id,this.role).subscribe({
           next: (res: any) => {
 
             Swal.fire({

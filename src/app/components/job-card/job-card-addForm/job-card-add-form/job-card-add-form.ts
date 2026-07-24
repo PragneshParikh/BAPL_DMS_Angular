@@ -80,6 +80,7 @@ export class JobCardAddForm {
   durationType: string = '';
   expireWarrentyDate: string = '';
   chassiseditData: any = null;
+  repairBillStatus:string;
 
 
   chargerMake: string = '';
@@ -437,7 +438,7 @@ export class JobCardAddForm {
 
 
   onJobType(isEdit = false) {
-debugger;
+    debugger;
     if (!this.selectedJobtype) return;
 
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
@@ -908,7 +909,7 @@ debugger;
       jobinTime: this.jobInTime || null,
       jobNo: Number(this.jobNo) || 0,
       manualjobNo: Number(this.manualJobNo) || 0,
-      estNo : this.estNo || 0,
+      estNo: this.estNo || 0,
       estdelDate: this.estDelDate || null,
       estdelTime: this.estDelTime || null,
       jobSource: this.selectedJobSources || 0,
@@ -1013,10 +1014,24 @@ debugger;
         this.isEditMode = false;
         this.loader.hide();
       },
+      // error: (err) => {
+      //   console.error(err);
+      //   this.loader.hide();
+      //   this.toastr.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+      // }
       error: (err) => {
         console.error(err);
         this.loader.hide();
-        this.toastr.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+
+        const message =
+          err?.error?.message ||
+          err?.error ||
+          'Something went wrong.';
+
+        this.toastr.show(message, {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
       }
     });
   }
@@ -1025,6 +1040,7 @@ debugger;
   patchEditData(data: any) {
 
     // ================= HEADER =================
+    this.repairBillStatus = data.repairBillStatus;
     this.selectedJobtype = data.jobCardHeader.jobtype;
     this.selectedServiceHead = data.jobCardHeader.servicehead;
     this.selectedServiceType = data.jobCardHeader.servicetype;
@@ -1152,7 +1168,7 @@ debugger;
     this.jobInTime = '';
     this.jobNo = 0;
     this.manualJobNo = 0;
-    this.estNo ='';
+    this.estNo = '';
     this.estDelDate = '';
     this.estDelTime = '';
     this.supervisor = '';
