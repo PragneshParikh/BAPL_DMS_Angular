@@ -217,8 +217,6 @@ export class WarrantyJobCardClaim implements OnInit {
       x.rootCauseAnalysis = '';
     });
 
-    console.log(this.selectedJob);
-
     modal.close();
   }
 
@@ -303,7 +301,7 @@ export class WarrantyJobCardClaim implements OnInit {
       );
       return;
     }
-     const dealerCode = this.storageService.getDealerCode();
+    const dealerCode = this.storageService.getDealerCode();
     const model = {
 
       dealerCode: dealerCode,
@@ -324,12 +322,10 @@ export class WarrantyJobCardClaim implements OnInit {
       ffirId: this.selectedJob?.ffirId,
 
       claimAccount: this.claimAccount,
-      CreatedBy : '',
+      CreatedBy: '',
 
       repairBillDetails: this.selectedJob?.repairBillDetails
     };
-
-    console.log(model.repairBillDetails); 
 
     this.loader.show();
 
@@ -363,12 +359,8 @@ export class WarrantyJobCardClaim implements OnInit {
         },
 
         error: (err) => {
-
           this.loader.hide();
-
-          console.log(err);
-
-
+          console.error(err);
           this.toaster.show('Something went wrong.', {
             classname: 'bg-danger text-white',
             delay: 3000

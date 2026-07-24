@@ -198,7 +198,6 @@ export class JobCardAddForm {
         this.jobPrefix = res;
         const parts = res.split('/');
         this.jobNo = parseInt(parts[parts.length - 1], 10);
-        console.log(this.jobNo);
       }, error: (err) => {
         this.loader.hide();
         console.error(err);
@@ -360,7 +359,6 @@ export class JobCardAddForm {
     });
   }
   loadServiceHistory(chassisNo: string) {
-    debugger
     let jobCardId: number | null = 0;
 
     if (this.chassiseditData?.jobCardHeader?.id) {
@@ -448,9 +446,41 @@ export class JobCardAddForm {
   }
 
 
-  onJobType(isEdit = false, isFromEstimate = false) {
-  debugger;
-  if (!this.selectedJobtype) return;
+  onJobType(isEdit = false) {
+    if (!this.selectedJobtype) return;
+
+    // this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    // if (!this.isSuperAdmin) {
+    this.dealerCode = this.storageService.getDealerCode();
+    // } else {
+    //   this.dealerCode = null;
+    // }
+
+    // Load chassis
+    this.jobCardService
+      .getAllInspectedChassis(this.dealerCode, this.selectedJobtype)
+      .subscribe(res => {
+        this.chassisList = res;
+      });
+
+    // Load service heads
+    this.jobCardService
+      .getServiceHead(this.selectedJobtype)
+      .subscribe((res: any[]) => {
+
+        this.serviceHeadList = res;
+
+        // EDIT MODE
+        if (isEdit) {
+
+          this.selectedServiceHead =
+            this.chassiseditData.jobCardHeader.servicehead;
+
+          this.loadServiceType(this.selectedServiceHead, true);
+
+          return;
+        }
 
   this.dealerCode = this.storageService.getDealerCode();
 
@@ -775,7 +805,6 @@ export class JobCardAddForm {
   //insert jobcard
   isSubmitted = false;
   saveJobCard() {
-    debugger
     this.isSubmitted = true;
     if (this.selectedJobtype == 1 && this.pdiCheckList.length == 0) {
       Swal.fire({
@@ -914,7 +943,7 @@ export class JobCardAddForm {
       jobinTime: this.jobInTime || null,
       jobNo: Number(this.jobNo) || 0,
       manualjobNo: Number(this.manualJobNo) || 0,
-      estNo : this.estNo || 0,
+      estNo: this.estNo || 0,
       estdelDate: this.estDelDate || null,
       estdelTime: this.estDelTime || null,
       jobSource: this.selectedJobSources || 0,
@@ -1158,7 +1187,7 @@ export class JobCardAddForm {
     this.jobInTime = '';
     this.jobNo = 0;
     this.manualJobNo = 0;
-    this.estNo ='';
+    this.estNo = '';
     this.estDelDate = '';
     this.estDelTime = '';
     this.supervisor = '';

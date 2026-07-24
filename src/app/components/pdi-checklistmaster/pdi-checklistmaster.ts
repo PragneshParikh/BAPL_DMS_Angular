@@ -42,13 +42,12 @@ export class PdiChecklistmaster implements OnInit {
 
   constructor(private Pdichecklistmasterservice: PdiChecklistMasterService,
     private form22service: Form22MasterService,
-    private storageService : StorageService,
+    private storageService: StorageService,
     private modalService: NgbModal,
     private loader: LoaderService
   ) { }
   ngOnInit() {
-     this.userRole = this.storageService.getRole();
-      console.log("userRole",this.userRole)
+    this.userRole = this.storageService.getRole();
     this.loadPdiChecklistList();
     this.loadOemModels();
   }

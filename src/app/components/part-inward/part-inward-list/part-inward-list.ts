@@ -91,7 +91,6 @@ export class PartInwardList implements OnInit {
     this.partsInwardService.getInwardDetailsByDealer(this.page, this.pageSize, fromDate, toDate, dealerCode).subscribe({
       next: (res) => {
         this.loader.hide();
-        console.log('part inward: ', res);
         this.partsInwardData = res;
       },
       error: (err) => {
@@ -134,6 +133,37 @@ export class PartInwardList implements OnInit {
   }
 
   downloadExcel() {
-    alert("Excel download");
+    this.loader.show();
+
+    const dealerCode = this.filterFormData.selectedDealerCode === 'ALL' ? null : this.filterFormData.selectedDealerCode;
+    const fromDate = new Date(this.filterFormData.fromDate);
+    const toDate = new Date(this.filterFormData.toDate);
+
+    this.partsInwardService.getExcelDownload(fromDate, toDate, dealerCode).subscribe({
+      next: (data: Blob) => {
+        const blob = new Blob([data], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const downloadURL = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = downloadURL;
+        link.download = 'PartsInwardList.xlsx';
+
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadURL);
+      },
+      error: (err) => {
+        console.error(err);
+        this.toast.show('Failed to download file', { classname: 'bg-danger text-white', delay: 5000 });
+      },
+      complete: () => {
+        this.loader.hide();
+      }
+    });
   }
 }
