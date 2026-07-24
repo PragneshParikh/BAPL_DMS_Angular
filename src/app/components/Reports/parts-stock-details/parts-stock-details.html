@@ -89,10 +89,16 @@
                                 <th>Sr No</th>
                                 <th>Part Code</th>
                                 <th>Part Description</th>
+                                <th>Dealer Code</th>
+                                <th>Location Code</th>
+                                <th>Location Name</th>
                                 <th>Item Type</th>
-                                <th>Current Stock</th>
+                                <th>Pur.Qty</th>
+                                <th>MT</th>
+                                <th>Bal.Qty</th>
                                 <th>HSN Code</th>
                                 <th>Rate</th>
+                                <th>MRP</th>
                                 <th>GST</th>
                             </tr>
                         </thead>
@@ -111,22 +117,29 @@
                                 <td>{{ item.srNo }}</td>
                                 <td>{{ item.itemcode }}</td>
                                 <td>{{ item.itemdesc }}</td>
+                                <td>{{ item.vendorCode }}</td>
+                                <td>{{ item.dealerLocation }}</td>
+                                <td>{{ item.locname }}</td>
                                 <td>{{ item.groupType }}</td>
+                                <td>{{ item.purchaseQty }}</td>
+                                <td>{{ item.mtQty }}</td>
                                 <td class="text-end">{{ item.batchClosingQty }}</td>
                                 <td>{{ item.hsncode }}</td>
                                 <td class="text-end">{{ item.dlrprice | number:'1.2-2' }}</td>
+                                <td class="text-end">{{ item.itemMRP | number:'1.2-2' }}</td>
                                 <td class="text-end">{{ item.gst }}%</td>
                             </tr>
                         </tbody>
                         <tfoot class="table-secondary">
                             <tr>
                                 <td class="text-end" colspan="6"><strong>Total</strong></td>
-                                <!-- <td></td> -->
-                                <!-- <td></td> -->
-                                <!-- <td></td> -->
-                                <!-- <td></td> -->
-                                <!-- <td></td> -->
                                 <td class="text-end"><strong>{{getTotalRate() | number:'1.2-2'}}</strong></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
                                 <td></td>
                             </tr>
                         </tfoot>
