@@ -151,7 +151,6 @@ export class PartInward implements OnInit {
 
   // onLocationChange(event: any) {
   //   // const locationCode = event.target.value;
-  //   // console.log(locationCode);
   //   // this.getPartInwardByLocation(locationCode);
   // }
 
@@ -160,7 +159,6 @@ export class PartInward implements OnInit {
   //   this.partInwardService.getPendingPartInwardDetailByLocation(locationCode).subscribe({
   //     next: (res) => {
   //       this.loader.hide();
-  //       console.log(res);
   //     },
   //     error: (err) => {
   //       console.error(err);

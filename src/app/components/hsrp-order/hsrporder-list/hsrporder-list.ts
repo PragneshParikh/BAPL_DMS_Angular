@@ -63,10 +63,6 @@ export class HSRPOrderList implements OnInit {
     this.hsrpService.getAllHSRPOrders(dealerCode, this.formatDate(this.filter.fromDate), this.formatDate(this.filter.toDate)).subscribe({
       next: (res: any) => {
 
-console.log(res);
-
-
-
         this.orders = (res || []).map((x: any) => ({
           ...x,
           isFrontPlate: x.isFrontPlate ?? false,

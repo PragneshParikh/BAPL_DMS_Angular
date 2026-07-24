@@ -14,7 +14,7 @@ import { LoaderService } from '../../../core/services/loader';
 
 @Component({
   selector: 'app-repair-bill-list',
-  imports: [FormsModule, CommonModule, NgbTooltip, NgbPagination,NgbDropdownModule],
+  imports: [FormsModule, CommonModule, NgbTooltip, NgbPagination, NgbDropdownModule],
   templateUrl: './repair-bill-list.html',
   styleUrl: './repair-bill-list.scss',
 })
@@ -70,7 +70,7 @@ export class RepairBillList implements OnInit {
     this.search();
   }
 
-  
+
   // Dealer Locations
   fetchLocations(): void {
     const dealerCode = this.storageService.getDealerCode();
@@ -80,7 +80,7 @@ export class RepairBillList implements OnInit {
     });
   }
 
-   formatDate(date: Date): string {
+  formatDate(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -97,19 +97,18 @@ export class RepairBillList implements OnInit {
   search(): void {
     const payload = {
       locationCode: this.repairbillsearchModel.serviceLocation || null,
-      billNo:       this.repairbillsearchModel.billNo           || null,
-      jobNo:        this.repairbillsearchModel.jobNo            || null,
-      chassisNo:    this.repairbillsearchModel.chassisNo        || null,
-      dateFrom:     this.repairbillsearchModel.fromDate         || null,
-      dateTo:       this.repairbillsearchModel.toDate           || null
+      billNo: this.repairbillsearchModel.billNo || null,
+      jobNo: this.repairbillsearchModel.jobNo || null,
+      chassisNo: this.repairbillsearchModel.chassisNo || null,
+      dateFrom: this.repairbillsearchModel.fromDate || null,
+      dateTo: this.repairbillsearchModel.toDate || null
     };
 
     this.loader.show();
     this.repairBillService.getAllRepairBillList(payload).subscribe({
       next: (res: any[]) => {
         this.repairBillList = res;
-        this.filteredData   = [...res];
-        console.log("edit item",this.filteredData)
+        this.filteredData = [...res];
         this.collectionSize = this.filteredData.length;
         this.loader.hide();
         this.refreshTable();
@@ -117,10 +116,10 @@ export class RepairBillList implements OnInit {
       error: (err) => {
         console.error('Repair Bill Search Error', err);
         this.loader.hide();
-        this.repairBillList  = [];
-        this.filteredData    = [];
-        this.pagedData       = [];
-        this.collectionSize  = 0;
+        this.repairBillList = [];
+        this.filteredData = [];
+        this.pagedData = [];
+        this.collectionSize = 0;
       }
     });
   }
@@ -148,7 +147,7 @@ export class RepairBillList implements OnInit {
   }
 
   editRepairBill(item: any): void {
-    
+
     this.router.navigate(['/repair-bill', item.id]);
   }
   printInvoice(item: any): void {
