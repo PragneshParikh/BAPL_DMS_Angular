@@ -23,6 +23,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { VehicleInwardService } from '../../core/services/vehicle-inwardservice';
 import { PartsInwardService } from '../../core/services/partsinwardservice';
 import { PartInward } from '../../components/part-inward/part-inward';
+import { NotificationService } from '../../core/services/notification-service';
 @Component({
   selector: 'app-topbar',
   templateUrl: './topbar.component.html',
@@ -34,8 +35,7 @@ import { PartInward } from '../../components/part-inward/part-inward';
     ReactiveFormsModule,
     SimplebarAngularModule,
     NgbDropdownModule,
-    RouterLink,
-    NgbAccordionItem
+    RouterLink
   ],
   standalone: true
 })
@@ -83,7 +83,8 @@ export class TopbarComponent implements OnInit {
     private storageService: StorageService,
     private lotInspectionService: LotInspectionService,
     private toastService: ToastService,
-    private partInwardService: PartsInwardService
+    private partInwardService: PartsInwardService,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -125,6 +126,10 @@ export class TopbarComponent implements OnInit {
 
     // Fetch Data
     this.saleInvoice = saleInvoice;
+
+    this.notificationService.refreshPartsNotification.subscribe(() => {
+      this.getPartsInwardNotification();
+    });
   }
 
   /**
