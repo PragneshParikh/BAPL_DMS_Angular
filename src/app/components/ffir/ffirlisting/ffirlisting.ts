@@ -7,6 +7,7 @@ import { StorageService } from '../../../core/services/storage';
 import { FFIRService } from '../../../core/services/ffirservice';
 import { Router } from '@angular/router';
 import { NgbPaginationModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-ffirlisting',
@@ -26,6 +27,9 @@ export class Ffirlisting {
   collectionSize: number = 0;
   pagedData: any[] = [];
   filteredData: any[] = [];
+  isSuperAdmin: boolean;
+  dealerCode: string;
+  role: string;
 
   constructor(
     private storageService: StorageService,
@@ -43,6 +47,17 @@ export class Ffirlisting {
   };
 
   ngOnInit(): void {
+
+     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    
+        if (!this.isSuperAdmin) {
+          this.dealerCode = this.storageService.getDealerCode();
+         
+        } else {
+           this.dealerCode = null;
+           this.role = this.storageService.getRole();
+           console.log(this.isSuperAdmin);
+        }
 
     const today = new Date();
 
@@ -180,6 +195,60 @@ export class Ffirlisting {
       });
   }
 
+   deleteFFIR(id: number) {
+        console.log('Delete Id:', id);
+         this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    
+        if (!this.isSuperAdmin) {
+          this.dealerCode = this.storageService.getDealerCode();
+         
+        } else {
+           this.dealerCode = null;
+           this.role = this.storageService.getRole();
+           console.log(this.isSuperAdmin);
+          
+        }
+        //const dealerCode = this.storageService.getDealerCode();
+        Swal.fire({
+          title: 'Are you sure?',
+          text: 'You will not be able to recover this FFIR!',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, delete it!',
+          cancelButtonText: 'Cancel',
+          width: '350px'
+        }).then((result) => {
+    
+          if (result.isConfirmed) {
+    
+            this.FFIRService.deleteFFIR(id,this.role).subscribe({
+              next: (res: any) => {
+    
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Deleted!',
+                  text: 'FFIR deleted successfully',
+                  width: '350px'
+                });
+    
+                //  Refresh list
+               this.loadFFIRList();
+              },
+              error: (err) => {
+                console.error(err);
+    
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: err?.error || 'Delete failed',
+                  width: '300px'
+                });
+              }
+            });
+    
+          }
+        });
+      }
   onSearchChange() {
 
     clearTimeout(this.searchTimeout);

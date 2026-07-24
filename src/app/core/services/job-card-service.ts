@@ -117,8 +117,8 @@ export class JobCardService {
     return this.httpClient.get(`${this.baseUrl}/JobCard/${id}`);
   }
 
-  deleteJobCard(id: number) {
-    return this.httpClient.delete(`${this.baseUrl}/JobCard/DeleteJobCard/${id}`);
+  deleteJobCard(id: number,role:string) {
+    return this.httpClient.delete(`${this.baseUrl}/JobCard/DeleteJobCard/${id}/${role}`);
   }
 
   searchJobCard(payload: any) {
