@@ -71,13 +71,12 @@ export class VehicleOpenStock {
     return `${year}-${month}-${day}`;
   }
 
-  loadBatteryMake():void{
-    
+  loadBatteryMake(): void {
+
   }
 
 
   fetchLocations(): void {
-    debugger;
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
     if (!this.isSuperAdmin) {
@@ -109,7 +108,6 @@ export class VehicleOpenStock {
       next: (res: any) => {
 
         this.modelList = res;
-        //console.log(this.modelList)
 
       },
       error: (err) => {
@@ -119,7 +117,6 @@ export class VehicleOpenStock {
 
   }
   onModelChange() {
-debugger
     const selectedModel = this.modelList.find(
       x => x.id === this.itemObj.modelId
     );
@@ -134,7 +131,6 @@ debugger
       this.itemObj.itemdesc = '';
       this.itemObj.fame2amount = 0;
     }
-    console.log(this.itemObj.itemname)
     this.loadVehicleOpenDetails(this.itemObj.itemname);
 
   }
@@ -143,10 +139,9 @@ debugger
     const modelName = itemName;
     const dealerCode = this.storageService.getDealerCode();
 
-    this.vehicleOpenStockService.getVehicleSaleDetailsByModel(modelName,dealerCode).subscribe({
+    this.vehicleOpenStockService.getVehicleSaleDetailsByModel(modelName, dealerCode).subscribe({
       next: (res: any) => {
         this.vehicleList = res;
-        console.log(this.vehicleList);
       }
     })
   }
@@ -159,7 +154,6 @@ debugger
     this.isEditMode = true;
 
     this.vehicleObj = { ...this.vehicleList[index] };
-    console.log(this.vehicleObj);
 
     if (this.vehicleObj.saleDate) {
       this.vehicleObj.saleDate = this.vehicleObj.saleDate.substring(0, 10);
@@ -169,34 +163,34 @@ debugger
       this.vehicleObj.saleBillCreatedDate =
         this.vehicleObj.saleBillCreatedDate.substring(0, 10);
     }
-     this.calculateTotalStock();
+    this.calculateTotalStock();
   }
 
   calculateTotalStock(): void {
 
-  const rate = Number(this.vehicleObj.rate) || 0;
+    const rate = Number(this.vehicleObj.rate) || 0;
 
-  const cgst = Number(this.itemObj.cgst) || 0;
-  const sgst = Number(this.itemObj.sgst) || 0;
-  const igst = Number(this.itemObj.igst) || 0;
+    const cgst = Number(this.itemObj.cgst) || 0;
+    const sgst = Number(this.itemObj.sgst) || 0;
+    const igst = Number(this.itemObj.igst) || 0;
 
-  let taxAmount = 0;
+    let taxAmount = 0;
 
-  // Same State
-  if (cgst > 0 || sgst > 0) {
-    taxAmount = rate * (cgst + sgst) / 100;
+    // Same State
+    if (cgst > 0 || sgst > 0) {
+      taxAmount = rate * (cgst + sgst) / 100;
+    }
+
+    // Other State
+    else if (igst > 0) {
+      taxAmount = rate * igst / 100;
+    }
+
+    this.vehicleObj.cgst = cgst;
+    this.vehicleObj.sgst = sgst;
+    this.vehicleObj.igst = igst;
+    this.vehicleObj.totalOpStock = +(rate + taxAmount).toFixed(2);
   }
-
-  // Other State
-  else if (igst > 0) {
-    taxAmount = rate * igst / 100;
-  }
-
-  this.vehicleObj.cgst = cgst;
-  this.vehicleObj.sgst = sgst;
-  this.vehicleObj.igst = igst;
-  this.vehicleObj.totalOpStock = +(rate + taxAmount).toFixed(2);
-}
 
   addVehicle(): void {
 

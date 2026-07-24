@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CashTypeOptions } from '../../../constant';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -106,6 +106,18 @@ export class AddCounterBill implements OnInit {
     private route: ActivatedRoute, private loader: LoaderService
 
   ) { }
+  @ViewChild('dealerContainer')
+  dealerContainer!: ElementRef;
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+
+    if (
+      this.dealerContainer &&
+      !this.dealerContainer.nativeElement.contains(event.target)
+    ) {
+      this.showDropdown = false;
+    }
+  }
   ngOnInit(): void {
     this.loader.show();
     this.userRole = this.storageService.getRole().toLowerCase();
@@ -114,7 +126,9 @@ export class AddCounterBill implements OnInit {
     this.getLocations();
     this.getParties();
     this.getStateList();
-    const id = this.route.snapshot.paramMap.get('id');
+
+    // const id = this.route.snapshot.paramMap.get('id');
+    const id = history.state?.counterBillId;
     if (id) {
       this.isEditMode = true;
       this.counterBillId = +id;
@@ -125,7 +139,8 @@ export class AddCounterBill implements OnInit {
     this.loader.hide();
   }
 
-  loadCounterBill(id: number): void {
+  async loadCounterBill(id: number): Promise<any> {
+    await this.getStateList();
     this.loader.show();
     this.counterBillService.getCounterBillById(id).subscribe({
       next: (res: any) => {
@@ -151,11 +166,18 @@ export class AddCounterBill implements OnInit {
           const sgstPer = Number(x.sgstper || 0);
           const gstPer = igstPer + cgstPer + sgstPer;
           const mrp = Number(x.mrp || 0);
-          const originalItemRate = mrp - ((mrp * gstPer) / 100);
+          //const originalItemRate = mrp - ((mrp * gstPer) / 100);
           const itemRate = Number(x.rate || 0);
           const igstAmount = Number(x.igstamnt || 0);
           const cgstAmount = Number(x.cgstamnt || 0);
           const sgstAmount = Number(x.sgstamnt || 0);
+          let discount = 0;
+          const discountAmount = x.discType === '%' ? (itemRate * Number(x.discount || 0)) / 100 : Number(x.discount || 0);
+          const discountedRate = itemRate - discountAmount;
+          const recalculatedIgstAmount = discountedRate * igstPer / 100;
+          const recalculatedCgstAmount = discountedRate * cgstPer / 100;
+          const recalculatedSgstAmount = discountedRate * sgstPer / 100;
+          const lineAmount = (discountedRate + recalculatedIgstAmount + recalculatedCgstAmount + recalculatedSgstAmount) * x.qty;
           const qty = Number(x.qty || 1);
           return {
             itemCode: x.partCode,
@@ -163,7 +185,7 @@ export class AddCounterBill implements OnInit {
             qty: qty,
             saleType: x.saleType,
             itemMrp: mrp,
-            originalItemRate: originalItemRate,
+            originalItemRate: itemRate,
             itemRate: itemRate,
             discount: Number(x.discount || 0),
             discountType: x.discType || 'Value',
@@ -175,7 +197,8 @@ export class AddCounterBill implements OnInit {
             sgstAmount: sgstAmount,
             itemDiscount: Number(x.discount || 0),
             itemDiscountType: x.discType || 'Value',
-            amount: (itemRate + igstAmount + cgstAmount + sgstAmount) * qty
+            amount: Number(lineAmount.toFixed(2))
+
           };
 
         });
@@ -207,19 +230,19 @@ export class AddCounterBill implements OnInit {
     let dealerCode = '';
     const isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     if (!isSuperAdmin) {
-       dealerCode = this.storageService.getDealerCode();
+      dealerCode = this.storageService.getDealerCode();
     }
     this.locationMasterService.getLocationDropdownByDealerCode(dealerCode).subscribe({
-      next: (data) => {      
+      next: (data) => {
         this.locationList = data.filter(p => p.locareaidno == 2);
         if (!this.isEditMode) {
-         this.model.locationCode = this.locationList?.[0]?.loccode ?? null;
+          this.model.locationCode = this.locationList?.[0]?.loccode ?? null;
         }
       }
     });
   }
 
-  
+
   openCustomerLedgerAdd() {
     const modalRef = this.modalService.open(CustomerLedger, {
       size: 'lg',
@@ -250,7 +273,6 @@ export class AddCounterBill implements OnInit {
 
     this.ledgerService.getLedgerForSale(this.dealerCode, isSuperAdmin).subscribe({
       next: (res) => {
-        console.log(res);
 
         this.parties = res.filter(p => (p.ledgerType?.toLowerCase() === 'dealer' && p.dealerCode !== this.dealerCode) || (p.ledgerType?.toLowerCase() === 'party') || (p.ledgerType.toLowerCase() === 'institunoial'));
         //this.parties = res.filter(p => p.ledgerType?.toLowerCase() === 'party');
@@ -323,31 +345,7 @@ export class AddCounterBill implements OnInit {
     this.filteredChassis = this.chassisList.filter(x => x.chassisNo?.toLowerCase().includes(term));
     this.showChassisDropdown = true;
   }
-  // selectChassis(chassis: any) {
-  //   this.model.chassisNo = chassis.chassisNo;
-  //   this.showChassisDropdown = false;
 
-  //   const party = this.parties.find(
-  //     p => Number(p.id) === Number(chassis.custId)
-  //   );
-
-  //   if (party) {
-
-  //     this.selectedCustomerId = party.id;
-  //     this.model.partyName = party.ledgerName;
-  //     this.model.mobileNo = party.mobileNumber;
-
-  //     const state = this.stateList.find(
-  //       (x: any) => Number(x.stateId) === Number(party.state)
-  //     );
-
-  //     this.model.partyState = state?.stateName || '';
-
-  //     this.isExistingParty = true;
-
-  //     this.getItemsByLocation();
-  //   }
-  // }
 
 
   selectChassis(chassis: any) {
@@ -420,7 +418,7 @@ export class AddCounterBill implements OnInit {
       return;
     }
     this.selectedItem = item;
-    this.itemSearch = item.itemName;
+    this.itemSearch = item.itemName + '-' + item.itemCode;
     this.showDropdown = false;
     this.model.itemCode = item.itemCode;
     this.model.itemMrp = Number(item.itemMrp || 0);
@@ -453,52 +451,12 @@ export class AddCounterBill implements OnInit {
       this.getItemsByLocation();
     }
   }
-  // addItem() {
 
-  //   const itemData = {
-  //     itemCode: this.selectedItem.itemCode,
-  //     itemName: this.selectedItem.itemName,
-  //     qty: this.model.qty,
-  //     saleType: this.model.saleType,
-  //     itemMrp: this.model.itemMrp,
-  //     originalItemRate: this.model.baseItemRate,
-  //     itemRate: this.model.itemRate,
-  //     igstPer: this.model.igstPer,
-  //     igstAmount: this.model.igstAmount,
-  //     cgstPer: this.model.cgstPer,
-  //     cgstAmount: this.model.cgstAmount,
-  //     sgstPer: this.model.sgstPer,
-  //     sgstAmount: this.model.sgstAmount,
-  //     discount: this.model.itemDiscount,
-  //     discountType: this.model.discountType,
-  //     amount: this.model.itemTotalAmount,
-  //     itemDiscount: this.model.itemDiscount,
-  //     itemDiscountType: this.model.discountType,
-  //   };
-
-  //   if (this.editIndex >= 0) {
-  //     this.counterBillItems[this.editIndex] = itemData;
-  //     this.editIndex = -1;
-  //   } else {
-  //     this.counterBillItems.push(itemData);
-  //   }
-
-  //   this.showTable = this.counterBillItems.length > 0;
-  //   this.selectedItem = null;
-  //   this.itemSearch = '';
-  //   this.model.qty = 1;
-  //   this.model.itemMrp = 0;
-  //   this.model.itemRate = 0;
-  //   this.model.itemDiscount = 0;
-  //   this.model.itemTotalAmount = 0;
-  //   this.calculateSummary();
-  // }
 
   addItem() {
 
     let discountAmount = Number(this.model.itemDiscount) || 0;
 
-    // Convert % discount to amount for table display
     if (this.model.discountType === '%') {
       discountAmount =
         (Number(this.model.baseItemRate || 0) * discountAmount) / 100;
@@ -512,25 +470,17 @@ export class AddCounterBill implements OnInit {
       itemMrp: this.model.itemMrp,
       originalItemRate: this.model.baseItemRate,
       itemRate: this.model.itemRate,
-
       igstPer: this.model.igstPer,
       igstAmount: this.model.igstAmount,
-
       cgstPer: this.model.cgstPer,
       cgstAmount: this.model.cgstAmount,
-
       sgstPer: this.model.sgstPer,
       sgstAmount: this.model.sgstAmount,
-
-      // Table value (amount)
-      discount: Number(discountAmount.toFixed(2)),
-
-      // Table value (% or Value)
+      //discount: Number(discountAmount.toFixed(2)),
+      discount: this.model.itemDiscount,
+      discountApplied: this.model.itemDiscount,
       discountType: this.model.discountType,
-
       amount: this.model.itemTotalAmount,
-
-      // Edit mode values
       itemDiscount: this.model.itemDiscount,
       itemDiscountType: this.model.discountType
     };
@@ -541,21 +491,18 @@ export class AddCounterBill implements OnInit {
     } else {
       this.counterBillItems.push(itemData);
     }
-
     this.showTable = this.counterBillItems.length > 0;
-
     this.selectedItem = null;
     this.itemSearch = '';
-
     this.model.qty = 1;
     this.model.itemMrp = 0;
     this.model.itemRate = 0;
     this.model.itemDiscount = 0;
     this.model.discountType = 'Value';
     this.model.itemTotalAmount = 0;
-
     this.calculateSummary();
   }
+
   removeItem(index: number) {
     this.counterBillItems.splice(index, 1);
 
@@ -564,27 +511,6 @@ export class AddCounterBill implements OnInit {
     }
     this.calculateSummary();
   }
-  // editItem(index: number) {
-
-  //   const item = this.counterBillItems[index];
-  //   this.selectedItem = item;
-  //   this.itemSearch = item.itemName;
-  //   this.model.saleType = item.saleType;
-  //   this.model.qty = item.qty;
-  //   this.model.itemMrp = item.itemMrp;
-  //   this.model.itemDiscount = item.discount;
-  //   this.model.discountType = item.discountType;
-  //   this.model.itemRate = item.itemRate;
-  //   this.model.baseItemRate = item.originalItemRate;
-  //   this.model.igstPer = item.igstPer;
-  //   this.model.igstAmount = item.igstAmount;
-  //   this.model.cgstPer = item.cgstPer;
-  //   this.model.cgstAmount = item.cgstAmount;
-  //   this.model.sgstPer = item.sgstPer;
-  //   this.model.sgstAmount = item.sgstAmount;
-  //   this.model.itemTotalAmount = item.amount;
-  //   this.editIndex = index;
-  // }
 
   editItem(index: number) {
 
@@ -634,35 +560,7 @@ export class AddCounterBill implements OnInit {
       this.selectedCustomerId = null;
     }
   }
-  //   calculateAmounts() {
 
-  //   let itemRate = this.model.itemRate || 0;
-
-  //   // Apply Discount
-  //   if (this.model.discountType === 'Value') {
-  //     itemRate = itemRate - (this.model.itemDiscount || 0);
-  //   }
-  //   else if (this.model.discountType === '%') {
-  //     itemRate = itemRate -
-  //       (itemRate * (this.model.itemDiscount || 0) / 100);
-  //   }
-
-  //   this.model.discountedRate = itemRate;
-
-  //   // GST %
-  //   const totalGstPer =
-  //     (this.model.igstPer || 0) +
-  //     (this.model.cgstPer || 0) +
-  //     (this.model.sgstPer || 0);
-
-  //   // GST Amount
-  //   this.model.gstAmount =
-  //     itemRate * totalGstPer / 100;
-
-  //   // Final Amount
-  //   this.model.itemAmount =
-  //     itemRate + this.model.gstAmount;
-  // }
   calculateAmounts() {
 
     const mrp = Number(this.model.itemMrp) || 0;
@@ -671,53 +569,48 @@ export class AddCounterBill implements OnInit {
     const gstPer = (Number(this.model.igstPer) || 0) + (Number(this.model.cgstPer) || 0) + (Number(this.model.sgstPer) || 0);
     const gstOnMrp = (mrp * gstPer) / 100;
     const baseItemRate = mrp - gstOnMrp;
-    // STORE FOR FUTURE DISCOUNT RE-CALCULATION
     this.model.baseItemRate = baseItemRate;
     const discount = Number(this.model.itemDiscount) || 0;
-    // NO DISCOUNT
     if (discount === 0) {
 
       this.model.itemRate = baseItemRate;
       this.model.igstAmount = mrp * (this.model.igstPer || 0) / 100;
       this.model.cgstAmount = mrp * (this.model.cgstPer || 0) / 100;
-
       this.model.sgstAmount = mrp * (this.model.sgstPer || 0) / 100;
-
       this.model.itemTotalAmount = mrp * qty;
-
       return;
     }
 
     let discountedRate = baseItemRate;
 
     if (this.model.discountType === 'Value') {
-
       discountedRate = baseItemRate - discount;
-
     } else {
-
       discountedRate = baseItemRate - ((baseItemRate * discount) / 100);
     }
 
     this.model.itemRate = discountedRate;
-
     this.model.igstAmount = discountedRate * (this.model.igstPer || 0) / 100;
-
     this.model.cgstAmount = discountedRate * (this.model.cgstPer || 0) / 100;
-
     this.model.sgstAmount = discountedRate * (this.model.sgstPer || 0) / 100;
-
     const totalGst = this.model.igstAmount + this.model.cgstAmount + this.model.sgstAmount;
-
     this.model.itemTotalAmount = (discountedRate + totalGst) * qty;
   }
 
   calculateSummary() {
-
-    this.model.partsAmount = this.counterBillItems.reduce(
+    this.model.partsAmount = Math.round(this.counterBillItems.reduce(
       (sum, item) => sum + Number(item.amount || 0),
       0
-    );
+    ));
+    this.model.partsDiscountAmount = this.counterBillItems.reduce((sum, item) => {
+
+      if (item.discountType === '%') {
+        return ((sum + ((Number(item.originalItemRate || 0) * Number(item.discount || 0)) / 100)) * item.qty);
+      }
+
+      return ((sum + Number(item.discount || 0) * item.qty));
+
+    }, 0).toFixed(2);
 
     this.model.partsDiscount = this.counterBillItems.reduce(
       (sum, item) => sum + Number(item.discount || 0),
@@ -726,15 +619,15 @@ export class AddCounterBill implements OnInit {
 
     const discAmount = Number(this.model.discAmount) || 0;
 
-    this.model.netAmount = Math.round(
-      this.model.partsAmount - discAmount - this.model.partsDiscount
-    );
+    this.model.netAmount = Math.round(this.model.partsAmount);
+    // this.model.netAmount = Math.round(
+    //   this.model.partsAmount - discAmount - this.model.partsDiscount
+    // );
 
     this.model.receiptAmount = this.model.netAmount;
   }
 
   openDiscountPopup(): void {
-
     if (!this.counterBillItems || this.counterBillItems.length === 0) {
 
       Swal.fire({
@@ -754,24 +647,21 @@ export class AddCounterBill implements OnInit {
   }
 
   submitDiscount(): void {
+    this.showDiscountPopup = false;
 
     this.counterBillItems.forEach(item => {
-
       this.applyDiscountToItem(item);
-
     });
 
-    this.model.partsDiscount =
-      this.discountModel.partsDiscount || 0;
+    this.model.partsDiscount = this.discountModel.partsDiscount || 0;
+
 
     this.calculateTotals();
 
-    this.showDiscountPopup = false;
   }
   private applyDiscountToItem(item: any) {
 
-    const originalRate =
-      Number(item.originalItemRate || 0);
+    const originalRate = Number(item.originalItemRate || 0);
 
     let discountAmount = 0;
 
@@ -785,8 +675,7 @@ export class AddCounterBill implements OnInit {
       discountAmount = originalRate * (this.discountModel.partsDiscount || 0) / 100;
     }
 
-    const discountedRate =
-      Math.max(0, originalRate - discountAmount);
+    const discountedRate = Math.max(0, originalRate - discountAmount);
 
     item.itemRate = Number(discountedRate.toFixed(2));
 
@@ -798,35 +687,42 @@ export class AddCounterBill implements OnInit {
 
     const totalTax = item.igstAmount + item.cgstAmount + item.sgstAmount;
 
-    item.discount = Number(discountAmount.toFixed(2));
+    item.discount = this.discountModel.partsDiscount;
+    item.discountType = this.discountModel.partsDiscountType;
 
     item.amount = Number(((discountedRate + totalTax) * (item.qty || 1)).toFixed(2));
   }
   calculateTotals() {
-    this.model.partsAmount = this.counterBillItems.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    this.model.partsDiscountAmount = this.counterBillItems.reduce((sum, item) => {
 
-    this.model.netAmount = this.model.partsAmount;
+      if (item.discountType === '%') {
+        return sum + ((Number(item.originalItemRate || 0) * Number(item.discount || 0)) / 100);
+      }
 
-    this.model.receiptAmount = this.model.netAmount;
-    this.model.partsDiscount = this.counterBillItems.reduce((sum, item) => sum + Number(item.discount || 0), 0);
+      return sum + Number(item.discount || 0);
+
+    }, 0).toFixed(2);
+    this.model.partsAmount = this.counterBillItems.reduce((sum, item) => sum + Number(item.amount || 0), 0).toFixed(2);
+    this.model.netAmount = this.model.partsAmount.toFixed(2);
+    this.model.receiptAmount = this.model.netAmount.toFixed(2);;
+    this.model.partsDiscount = this.counterBillItems.reduce((sum, item) => sum + Number(item.discount || 0), 0).toFixed(2);
   }
+
   calculateNetAmount() {
 
     const partsAmount = this.counterBillItems.reduce((sum, item) => sum + (item.amount || 0), 0);
-
     this.model.partsAmount = partsAmount;
-
     this.model.netAmount = partsAmount - (this.model.partsDiscount || 0);
     this.model.partsDiscount = this.counterBillItems.reduce((sum, item) => sum + Number(item.discount || 0), 0);
   }
+
   getPartyStateId(): number | null {
-
     const state = this.stateList.find((x: any) => x.stateName === this.model.partyState);
-
     return state ? state.stateId : null;
   }
 
   save(): void {
+
     this.loader.show();
 
     if (this.counterBillItems.length === 0) {
@@ -859,8 +755,8 @@ export class AddCounterBill implements OnInit {
         partCode: item.itemCode,
         saleType: item.saleType,
         qty: item.qty,
-        rate: item.itemRate,
-        discType: this.model.discountType,
+        rate: item.originalItemRate,
+        discType: item.discountType,
         discount: item.discount,
         mrp: item.itemMrp,
         igstper: item.igstPer,
@@ -872,8 +768,7 @@ export class AddCounterBill implements OnInit {
       }))
     };
 
-    const request = this.isEditMode
-      ? this.counterBillService.updateCounterBill(this.counterBillId, payload)
+    const request = this.isEditMode ? this.counterBillService.updateCounterBill(this.counterBillId, payload)
       : this.counterBillService.saveCounterBill(payload);
 
     request.subscribe({
@@ -907,21 +802,20 @@ export class AddCounterBill implements OnInit {
     if (!this.counterBillId) {
       return;
     }
-    console.log(this.counterBillId);
-
     this.router.navigate(['/print-counter-bill', this.counterBillId]);
   }
+
   isItemAlreadyAdded(itemCode: string): boolean {
 
     return this.counterBillItems.some(
       x => x.itemCode === itemCode
     );
   }
+
   deleteCounterBill(): void {
 
     Swal.fire({
       title: 'Delete Counter Bill?',
-      // text: 'Stock will be restored and bill will be marked as deleted.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, Delete',
@@ -964,8 +858,7 @@ export class AddCounterBill implements OnInit {
     const input = event.target as HTMLInputElement;
 
     let value = input.value
-      .replace(/\D/g, '') // Remove non-digits
-      .slice(0, 10);      // Limit to 10 digits
+      .replace(/\D/g, '').slice(0, 10);
 
     input.value = value;
     this.model.mobileNo = value;

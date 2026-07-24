@@ -156,6 +156,7 @@
                 <th>Dealer Code</th>
                 <th>Dealer Name</th>
                 <th>Dealer Location</th>
+                <th>Location Name</th>
                 <th>Dealer City</th>
                 <th>Dealer State</th>
                 <th class="sortable" (click)="onSort('jobNo')">
@@ -210,6 +211,7 @@
                 <td>{{ item.dealerCode }}</td>
                 <td>{{ item.dealerName }}</td>
                 <td>{{ item.dealerLocation }}</td>
+                <td>{{ item.locationName }}</td>
                 <td>{{ item.dealerCity }}</td>
                 <td>{{ item.dealerState }}</td>
                 <td>{{ item.jobNo }}</td>
@@ -246,31 +248,31 @@
             </tbody>
             <tfoot>
               <tr class="table-warning fw-bold">
-                <!-- Cols 1–17: Sr.No through HSN Code -->
-                <td colspan="17" class="text-end">TOTAL (this page)</td>
-                <!-- Col 18: Qty -->
+                <!-- Cols 1–18: Sr.No through HSN Code (Location Name added) -->
+                <td colspan="18" class="text-end">TOTAL (this page)</td>
+                <!-- Col 19: Qty -->
                 <td class="text-end">{{ totalQuantity }}</td>
-                <!-- Col 19: Item Rate (no total tracked) -->
+                <!-- Col 20: Item Rate (no total tracked) -->
                 <td></td>
-                <!-- Col 20: MRP -->
+                <!-- Col 21: MRP -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalMrp) }}</td>
-                <!-- Col 21: CGST % -->
+                <!-- Col 22: CGST % -->
                 <td></td>
-                <!-- Col 22: CGST Amt -->
+                <!-- Col 23: CGST Amt -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalCgstAmount) }}</td>
-                <!-- Col 23: SGST % -->
+                <!-- Col 24: SGST % -->
                 <td></td>
-                <!-- Col 24: SGST Amt -->
+                <!-- Col 25: SGST Amt -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalSgstAmount) }}</td>
-                <!-- Col 25: IGST % -->
+                <!-- Col 26: IGST % -->
                 <td></td>
-                <!-- Col 26: IGST Amt -->
+                <!-- Col 27: IGST Amt -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalIgstAmount) }}</td>
-                <!-- Col 27: Total GST -->
+                <!-- Col 28: Total GST -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalGstAmount) }}</td>
-                <!-- Col 28: Amount -->
+                <!-- Col 29: Amount -->
                 <td class="text-end text-nowrap">{{ formatCurrency(totalAmount) }}</td>
-                <!-- Cols 29–36: Serial No through Modified By -->
+                <!-- Cols 30–37: Serial No through Modified By -->
                 <td colspan="8"></td>
               </tr>
             </tfoot>

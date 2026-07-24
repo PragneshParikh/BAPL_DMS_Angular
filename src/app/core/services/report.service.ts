@@ -155,8 +155,8 @@ export class ReportService {
     let params = new HttpParams();
 
     if (dealerCode) params = params.set('dealerCode', dealerCode);
-    if (fromDate)   params = params.set('fromDate', fromDate);
-    if (toDate)     params = params.set('toDate', toDate);
+    if (fromDate) params = params.set('fromDate', fromDate);
+    if (toDate) params = params.set('toDate', toDate);
 
     return this.http.get<StockReport[]>(
       `${this.apiUrl}/dealer-wise`,
@@ -313,8 +313,8 @@ export class ReportService {
     ).pipe(
       map(rows => (rows || []).map(r => ({
         ...r,
-        customerName:   r.customerName   ?? r.name,
-        customerType:   r.customerType   ?? r.type,
+        customerName: r.customerName ?? r.name,
+        customerType: r.customerType ?? r.type,
         customerMobile: r.customerMobile ?? r.mobileNo,
       } as UnifiedSaleReportViewModel)))
     );
@@ -343,7 +343,7 @@ export class ReportService {
     );
   }
 
-      getVehicleSaleBillOnlyReport(
+  getVehicleSaleBillOnlyReport(
     filter: VehicleSaleBillReportFilterModel
   ): Observable<UnifiedSaleReportResponse> {
     return this.http.post<UnifiedSaleReportResponse>(
@@ -668,7 +668,7 @@ export class ReportService {
     );
   }
 
-      getD2DReport(
+  getD2DReport(
     filter: D2DReportFilter
   ): Observable<D2DReportResponse> {
     return this.http.post<D2DReportResponse>(
@@ -780,4 +780,16 @@ export class ReportService {
       map(res => res.data)
     );
   }
+
+  getPartsStockDetailsByDealer(groupId: number, dealerCode: string | null): Observable<any> {
+    let params = new HttpParams();
+    params = params.set("groupId", groupId);
+
+    if (dealerCode) {
+      params = params.set("dealerCode", dealerCode)
+    }
+
+    return this.http.get(`${this.apiUrl}/GetPartsStockDetailsByDealer`, { params });
+  }
+
 }

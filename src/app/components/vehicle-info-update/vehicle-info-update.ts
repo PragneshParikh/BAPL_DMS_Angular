@@ -91,7 +91,6 @@ export class VehicleInfoUpdate implements OnInit {
       dealerCode = this.storageService.getDealerCode();
     }
 
-    debugger;
     this.vehicleInfoService
       .getVehicleInfo(regNo ?? undefined, chassisNo ?? undefined, dealerCode ?? undefined)
       .subscribe({
@@ -134,7 +133,6 @@ export class VehicleInfoUpdate implements OnInit {
 
           this.showVehicleDetails = true;
           this.loader.hide();
-          console.log(this.vehicle);
 
         },
         error: (error) => {

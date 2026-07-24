@@ -15,7 +15,7 @@ import { CurrencyService } from '../../../core/services/currency-service';
 })
 
 export class CounterBillPrint implements OnInit {
-  
+
   billData!: CounterBillPrintModel;
 
   id!: number;
@@ -24,7 +24,7 @@ export class CounterBillPrint implements OnInit {
 
   constructor(
     private reportService: ReportService,
-    private route: ActivatedRoute,private currencyService:CurrencyService
+    private route: ActivatedRoute, private currencyService: CurrencyService
   ) { }
 
   ngOnInit(): void {
@@ -35,22 +35,19 @@ export class CounterBillPrint implements OnInit {
       this.loadCounterBillPrint();
     }
   }
-formatTerms(text: string): string {
-  if (!text) return '';
+  formatTerms(text: string): string {
+    if (!text) return '';
 
-  return text.replace(/(\d+\.)/g, '<br>$1');
-}
+    return text.replace(/(\d+\.)/g, '<br>$1');
+  }
   loadCounterBillPrint() {
     this.reportService.getCounterBillPrint(this.id)
       .subscribe({
         next: (response) => {
-          console.log(response);
-          
-
           this.billData = response;
 
           this.amountInWords = this.currencyService.convertToWords(
-            this.getTotalAmount()
+            this.getInvoiceTotal()
           );
 
         },
@@ -60,6 +57,24 @@ formatTerms(text: string): string {
       });
   }
 
+  // getSubTotal(): number {
+
+  //   if (!this.billData?.details?.length) {
+  //     return 0;
+  //   }
+
+  //   return this.billData.details.reduce(
+  //     (sum, item) => sum + (item.qty * item.rate),
+  //     0
+  //   );
+  // }
+  getRoundOff(): number {
+
+    const total = this.getTotalAmount();
+
+    return Number((Math.round(total) - total).toFixed(2));
+  }
+
   getSubTotal(): number {
 
     if (!this.billData?.details?.length) {
@@ -67,7 +82,7 @@ formatTerms(text: string): string {
     }
 
     return this.billData.details.reduce(
-      (sum, item) => sum + (item.qty * item.rate),
+      (sum, item) => sum + this.getLineTotal(item),
       0
     );
   }
@@ -148,7 +163,9 @@ formatTerms(text: string): string {
 
     }, 0);
   }
-
+  getInvoiceTotal(): number {
+    return Math.round(this.getSubTotal());
+  }
   printInvoice(): void {
     window.print();
   }
@@ -157,28 +174,82 @@ formatTerms(text: string): string {
     history.back();
   }
 
-  // Temporary amount in words
-  // convertNumberToWords(amount: number): string {
-
-  //   if (!amount) {
-  //     return 'Zero Only';
-  //   }
-
-  //   return amount.toFixed(2) + ' Rupees Only';
-  // }
 
   getTaxableAmount(item: CounterBillPrintDetail): number {
-  return (item.qty * item.rate) - item.discount;
-}
+    const discountAmount = item.discType === '%' ? (item.rate * Number(item.discount || 0)) / 100 : Number(item.discount || 0);
+    return (item.rate - discountAmount) * item.qty;
+  }
 
-getLineTotal(item: CounterBillPrintDetail): number {
+  getLineTotal(item: CounterBillPrintDetail): number {
+    const taxableAmount = this.getTaxableAmount(item);
+    const GstAmount = ((taxableAmount * item.igstper || 0) / 100) + ((taxableAmount * item.sgstper || 0) / 100) + ((taxableAmount * item.cgstper || 0) / 100);
+    return (
 
-  return (
-    this.getTaxableAmount(item) +
-    item.igstamnt +
-    item.cgstamnt +
-    item.sgstamnt
-  );
-}
+      taxableAmount + (GstAmount))
+  }
 
+
+  getGstWiseSummary(): any[] {
+
+    if (!this.billData?.details?.length) {
+      return [];
+    }
+
+    const groups: any = {};
+
+    this.billData.details.forEach(item => {
+
+      const key = `${item.sgstper}_${item.cgstper}_${item.igstper}`;
+
+      if (!groups[key]) {
+        groups[key] = {
+          taxableValue: 0,
+          sgstper: item.sgstper || 0,
+          sgstamnt: 0,
+          cgstper: item.cgstper || 0,
+          cgstamnt: 0,
+          igstper: item.igstper || 0,
+          igstamnt: 0
+        };
+      }
+
+      groups[key].taxableValue += this.getTaxableAmount(item);
+      groups[key].sgstamnt += item.sgstamnt || 0;
+      groups[key].cgstamnt += item.cgstamnt || 0;
+      groups[key].igstamnt += item.igstamnt || 0;
+    });
+
+    return Object.values(groups);
+  }
+
+  getTotalTaxableAmount(): number {
+    return this.billData?.details?.reduce(
+      (sum, item) => sum + this.getTaxableAmount(item),
+      0
+    ) || 0;
+  }
+
+  getTotalSGSTCalculated(): number {
+    return this.billData?.details?.reduce(
+      (sum, item) =>
+        sum + ((this.getTaxableAmount(item) * (item.sgstper || 0)) / 100),
+      0
+    ) || 0;
+  }
+
+  getTotalCGSTCalculated(): number {
+    return this.billData?.details?.reduce(
+      (sum, item) =>
+        sum + ((this.getTaxableAmount(item) * (item.cgstper || 0)) / 100),
+      0
+    ) || 0;
+  }
+
+  getTotalIGSTCalculated(): number {
+    return this.billData?.details?.reduce(
+      (sum, item) =>
+        sum + ((this.getTaxableAmount(item) * (item.igstper || 0)) / 100),
+      0
+    ) || 0;
+  }
 }

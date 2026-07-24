@@ -126,7 +126,6 @@ export class LotInspectionDetails implements OnInit {
   }
 
   fetchLocations(): void {
-    debugger;
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
     if (!this.isSuperAdmin) {
@@ -183,7 +182,6 @@ export class LotInspectionDetails implements OnInit {
       next: (res: any) => {
 
         if (res?.data?.length > 0) {
-          console.log(res?.data[0]);
           this.isLotInspected = res?.data[0]?.islotinspected;
           this.IsD2d = res?.data[0]?.isD2D;
           this.inwardType = res?.data[0].inwardType;
@@ -259,7 +257,6 @@ export class LotInspectionDetails implements OnInit {
     });
   }
   getlotPartyName(isD2D: boolean, invoiceNo: string) {
-    debugger;
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
@@ -271,7 +268,6 @@ export class LotInspectionDetails implements OnInit {
       next: (res: any) => {
 
         this.lotPartyList = res;
-        console.log("**",this.lotPartyList)
         if (this.lotPartyList.length === 1) {
           this.selectedlotPartyId = this.lotPartyList[0].id;
         }

@@ -19,6 +19,8 @@ import { LoaderService } from '../../../../core/services/loader';
 import { LocationMasterService } from '../../../../core/services/location-master-service';
 import { ComplaintmasterService } from '../../../../core/services/complaintmaster-service';
 import { PrefixService } from '../../../../core/services/prefix';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-job-card-add-form',
@@ -82,6 +84,7 @@ export class JobCardAddForm {
   expireWarrentyDate: string = '';
   chassiseditData: any = null;
   repairBillStatus: string;
+  fromEstimateData: any = null;
 
 
   chargerMake: string = '';
@@ -146,6 +149,7 @@ export class JobCardAddForm {
     private router: Router,
     private jobCardService: JobCardService,
     private complaintMasterService: ComplaintmasterService,
+    private http: HttpClient,
     private prefixService: PrefixService,
     public toastr: ToastService,
     private modalService: NgbModal,
@@ -159,6 +163,13 @@ export class JobCardAddForm {
       this.dealerCode = this.storageService.getDealerCode();
     } else {
       this.dealerCode = null;
+    }
+
+    if (history.state?.fromEstimate) {
+      this.fromEstimateData = history.state;
+      this.vehicleKms = Number(this.fromEstimateData.vehiclekms) || 0;
+      this.jobEstimate = Number(this.fromEstimateData.estimateId) || 0;
+      this.estNo = this.fromEstimateData.estimationNo || '';
     }
     this.loadPrefix();
     this.fetchLocations();
@@ -340,9 +351,10 @@ export class JobCardAddForm {
 
         if (this.isEditMode) {
           this.selectedJobtype = this.chassiseditData.jobCardHeader.jobtype;
-
-          //  IMPORTANT FIX
           this.onJobType(true);
+        } else if (this.fromEstimateData?.jobtype) {
+          this.selectedJobtype = this.fromEstimateData.jobtype;
+          this.onJobType(false, true);
         }
       },
       error: (err) => {
@@ -351,7 +363,6 @@ export class JobCardAddForm {
     });
   }
   loadServiceHistory(chassisNo: string) {
-    debugger
     let jobCardId: number | null = 0;
 
     if (this.chassiseditData?.jobCardHeader?.id) {
@@ -440,17 +451,16 @@ export class JobCardAddForm {
   }
 
 
-  onJobType(isEdit = false) {
-    debugger;
+  onJobType(isEdit = false, isFromEstimate: boolean = false) {
     if (!this.selectedJobtype) return;
 
-    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    // this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
-    if (!this.isSuperAdmin) {
-      this.dealerCode = this.storageService.getDealerCode();
-    } else {
-      this.dealerCode = null;
-    }
+    // if (!this.isSuperAdmin) {
+    this.dealerCode = this.storageService.getDealerCode();
+    // } else {
+    //   this.dealerCode = null;
+    // }
 
     // Load chassis
     this.jobCardService
@@ -477,25 +487,53 @@ export class JobCardAddForm {
           return;
         }
 
-        // ADD MODE
-        if (this.serviceHeadList.length > 0) {
+        this.dealerCode = this.storageService.getDealerCode();
 
-          // auto select first service head
-          this.selectedServiceHead =
-            this.serviceHeadList[0].serviceHeadId;
+        // Load chassis
+        this.jobCardService
+          .getAllInspectedChassis(this.dealerCode, this.selectedJobtype)
+          .subscribe(res => {
+            this.chassisList = res;
 
-          // auto load service type
-          this.loadServiceType(this.selectedServiceHead);
+            if (isFromEstimate && this.fromEstimateData?.chassisNo) {
+              const match = this.chassisList.find(
+                x => x.chassisNumber == this.fromEstimateData.chassisNo
+              );
 
-        }
-        else {
+              if (match) {
+                // Found in the inspected-lot list — reuse the normal path so we
+                // get full battery/motor/warranty data, same as edit mode.
+                this.selectedChassis = this.fromEstimateData.chassisNo;
+                this.onChassisChange();
+              } else {
+                // Estimate chassis isn't in this dealer's inspected-lot list
+                // (e.g. a walk-in) — fall back to what Estimate already resolved.
+                this.applyEstimateVehicleFallback();
+              }
+            }
+          });
 
-          this.selectedServiceHead = '';
-          this.selectedServiceType = '';
-          this.serviceTypeList = [];
+        // Load service heads
+        this.jobCardService
+          .getServiceHead(this.selectedJobtype)
+          .subscribe((res: any[]) => {
+            this.serviceHeadList = res;
 
-        }
+            if (isEdit) {
+              this.selectedServiceHead = this.chassiseditData.jobCardHeader.servicehead;
+              this.loadServiceType(this.selectedServiceHead, true);
+              return;
+            }
 
+            if (this.serviceHeadList.length > 0) {
+              this.selectedServiceHead = this.serviceHeadList[0].serviceHeadId;
+              this.loadServiceType(this.selectedServiceHead);
+            } else {
+              this.selectedServiceHead = '';
+              this.selectedServiceType = '';
+              this.serviceTypeList = [];
+            }
+          });
       });
   }
   onServiceHeadChange() {
@@ -534,7 +572,6 @@ export class JobCardAddForm {
 
       });
   }
-
 
 
   // onChassisChange() {
@@ -775,7 +812,6 @@ export class JobCardAddForm {
   //insert jobcard
   isSubmitted = false;
   saveJobCard() {
-    debugger
     this.isSubmitted = true;
 
     if (this.selectedJobtype == 1 && this.pdiCheckList.length == 0) {
@@ -1292,6 +1328,44 @@ export class JobCardAddForm {
     });
   }
 
+  // Estimate already resolved model/battery/motor for this chassis via
+  // /VehicleInfo when the user searched it there. If the chassis isn't part
+  // of this dealer's inspected-lot list (so onChassisChange() has nothing to
+  // match against), repeat that same lookup here rather than leaving those
+  // fields blank.
+  private applyEstimateVehicleFallback(): void {
+    const est = this.fromEstimateData;
+    if (!est?.chassisNo) return;
+
+    this.selectedChassis = est.chassisNo;
+    this.couponNo = est.chassisNo.slice(-13);
+    this.registerNo = est.registerNo || '';
+    this.customerObj.customerName = est.customerName || '';
+    this.customerObj.customerMobile = est.customerMobile || '';
+
+    this.loadServiceHistory(est.chassisNo);
+
+    this.http.get<any>(`${environment.apiUrl}/VehicleInfo`, {
+      params: { chassisNo: est.chassisNo, regNo: est.chassisNo }
+    }).subscribe({
+      next: (res) => {
+        const vd = res?.vehicleDetails;
+        if (!vd) return;
+
+        this.modelName = vd.modelName
+          ? vd.modelName + (vd.colorName ? ` (${vd.colorName})` : '')
+          : this.modelName;
+        this.registerNo = vd.regNo || this.registerNo;
+
+        this.batteryNumber = vd.batteries?.[0]?.batteryNo || this.batteryNumber;
+        this.motorNo = vd.motors?.[0]?.componentNo || this.motorNo;
+        this.chargerNumber = vd.chargers?.[0]?.componentNo || this.chargerNumber;
+      },
+      error: () => {
+        // Best-effort only — same pattern Estimate's own loadVehicleReferenceData uses.
+      }
+    });
+  }
   onCancelClick() {
     this.router.navigate(['/job-card']);
   }

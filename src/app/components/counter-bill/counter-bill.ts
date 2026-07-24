@@ -37,22 +37,23 @@ export class CounterBill implements OnInit {
   filteredDealers: any[] = [];
   dealerFilter: string = '';
   selectedDealer: string = '';
-  showDropdown: boolean=false;
+  dealerSelected: string = '';
+  showDropdown: boolean = false;
 
-  constructor(private router: Router, private counterBillService: CounterBillService,private loader: LoaderService,
-    private storageService: StorageService, private dealerService: DealerService,private eRef: ElementRef) { }
-@ViewChild('dealerContainer')
-dealerContainer!: ElementRef;
-    @HostListener('document:click', ['$event'])
-onDocumentClick(event: MouseEvent) {
+  constructor(private router: Router, private counterBillService: CounterBillService, private loader: LoaderService,
+    private storageService: StorageService, private dealerService: DealerService, private eRef: ElementRef) { }
+  @ViewChild('dealerContainer')
+  dealerContainer!: ElementRef;
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
 
-  if (
-    this.dealerContainer &&
-    !this.dealerContainer.nativeElement.contains(event.target)
-  ) {
-    this.showDropdown = false;
+    if (
+      this.dealerContainer &&
+      !this.dealerContainer.nativeElement.contains(event.target)
+    ) {
+      this.showDropdown = false;
+    }
   }
-}
   ngOnInit(): void {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     if (!this.isSuperAdmin) {
@@ -67,6 +68,7 @@ onDocumentClick(event: MouseEvent) {
 
 
   getDealerList() {
+    this.dealerSelected = 'All Dealers';
     this.dealerService.getDealerDropdown(null).subscribe((res) => {
       this.dealers = res.data;
       this.filteredDealers = [...this.dealers];
@@ -75,10 +77,10 @@ onDocumentClick(event: MouseEvent) {
 
   filterDealers(event: any) {
     const search = event.target.value.toLowerCase();
- if (!search) {
-    this.selectedDealer = '';
-    this.loadData(); 
-  }
+    if (!search) {
+      this.selectedDealer = '';
+      this.loadData();
+    }
     this.filteredDealers = this.dealers.filter(
       d =>
         d.dealerCode.toLowerCase().includes(search) ||
@@ -90,19 +92,20 @@ onDocumentClick(event: MouseEvent) {
 
   selectDealer(dealer: any) {
 
-  if (!dealer) {
-    
-    this.selectedDealer = '';
-  } else {
-    this.selectedDealer = dealer.dealerCode;
-  }
+    if (!dealer) {
 
-  this.showDropdown = false;
-  this.loadData();
-}
+      this.selectedDealer = '';
+      this.dealerSelected = 'All Dealer'
+    } else {
+      this.selectedDealer = dealer.dealerCode;
+      this.dealerSelected = this.selectedDealer + '-' + dealer.dealerName;
+    }
+
+    this.showDropdown = false;
+    this.loadData();
+  }
   onDealerSelect(dealer: any) {
     this.dealerFilter = dealer.dealerCode;
-    console.log('Selected Dealer Code:', this.dealerFilter);
   }
 
   onSearch(): void {
@@ -125,7 +128,6 @@ onDocumentClick(event: MouseEvent) {
     this.updatePagination();
   }
   onSort(column: string): void {
-    console.log('Sort:', column);
   }
 
   onPageChange(pageNo: number): void {
@@ -146,22 +148,32 @@ onDocumentClick(event: MouseEvent) {
   }
 
   exportExcel(): void {
-    console.log('Export Excel');
   }
 
+  // editCounterBill(item: any): void {
+  //   this.router.navigate([
+  //     '/counter-bill/edit',
+  //     item.header.id
+  //   ]);
+  // }
+
   editCounterBill(item: any): void {
-    this.router.navigate([
-      '/counter-bill/edit',
-      item.header.id
-    ]);
+    this.router.navigate(
+      ['/counter-bill/edit'],
+      {
+        state: {
+          counterBillId: item.header.id
+        }
+      }
+    );
   }
-  
+
   loadData(): void {
     this.loader.show();
     const fromDate = this.filter.fromDate ? new Date(this.filter.fromDate) : undefined;
     const toDate = this.filter.toDate ? new Date(this.filter.toDate) : undefined;
 
-    this.counterBillService.getAllCounterBills(this.dealerCode, fromDate, toDate, this.searchTerm,this.selectedDealer)
+    this.counterBillService.getAllCounterBills(this.dealerCode, fromDate, toDate, this.searchTerm, this.selectedDealer)
       .subscribe({
         next: (res) => {
           this.loader.hide();
@@ -187,7 +199,7 @@ onDocumentClick(event: MouseEvent) {
     )
       .subscribe({
         next: (response: Blob) => {
-this.loader.hide();
+          this.loader.hide();
           const blob = new Blob(
             [response],
             {

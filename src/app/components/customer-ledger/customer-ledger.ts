@@ -214,7 +214,6 @@ export class CustomerLedger {
     this.loader.show();
     this.ledgerService.getLedgerById(id).subscribe({
       next: (res) => {
-        console.log(res);
 
         this.formData = {
           id: res.id,
@@ -243,18 +242,18 @@ export class CustomerLedger {
           ledgerVisibility: res.ledgerVisibility
         }
 
-         if (
-        this.formData.ledgerType &&
-        !this.ledgerTypes.some(x => x.value === this.formData.ledgerType)
-      ) {
-        const currentType = LedgerTypes.find(
-          x => x.value === this.formData.ledgerType
-        );
+        if (
+          this.formData.ledgerType &&
+          !this.ledgerTypes.some(x => x.value === this.formData.ledgerType)
+        ) {
+          const currentType = LedgerTypes.find(
+            x => x.value === this.formData.ledgerType
+          );
 
-        if (currentType) {
-          this.ledgerTypes = [currentType, ...this.ledgerTypes];
+          if (currentType) {
+            this.ledgerTypes = [currentType, ...this.ledgerTypes];
+          }
         }
-      }
 
         this.loader.hide();
         this.changeCityOptions(this.formData.state);
@@ -282,14 +281,13 @@ export class CustomerLedger {
 
   onSubmit(form: any) {
     const dealerCode = this.storageService.getDealerCode();
-    if(!this.isModify){
+    if (!this.isModify) {
       this.formData.dealerCode = dealerCode;
     }
-    else{
+    else {
       this.formData.dealerCode = this.formData.dealerCode;
     }
     const isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-console.log("Call",this.formData);
 
     this.formData.ledgerVisibility = (isSuperAdmin && !this.isExternalCall) ? 'All' : dealerCode;
     if (!form.valid) return;

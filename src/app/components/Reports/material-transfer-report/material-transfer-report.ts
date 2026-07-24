@@ -204,7 +204,7 @@ export class MaterialTransferReportComponent implements OnInit, OnDestroy {
 
   private generateCsv(data: MaterialTransferReportRow[]): void {
     const headers = [
-      'Sr No', 'Dealer Code', 'Dealer Name', 'Dealer Location', 'Dealer City', 'Dealer State',
+      'Sr No', 'Dealer Code', 'Dealer Name', 'Dealer Location', 'Location Name', 'Dealer City', 'Dealer State',
       'Job No', 'Chassis No', 'Customer Name', 'Customer Mobile',
       'Material Prefix', 'Material Issue No', 'Transfer Date',
       'Item Code', 'Item Name', 'Item Description', 'HSN Code',
@@ -220,7 +220,7 @@ export class MaterialTransferReportComponent implements OnInit, OnDestroy {
     const csvRows = [
       headers,
       ...data.map(row => [
-        row.srNo, row.dealerCode, row.dealerName, row.dealerLocation, row.dealerCity, row.dealerState,
+        row.srNo, row.dealerCode, row.dealerName, row.dealerLocation, row.locationName, row.dealerCity, row.dealerState,
         row.jobNo, row.chassisNo, row.customerName, row.customerMobile,
         row.materialPrefix, row.materialIssueNumber, fmt(row.transferDate),
         row.itemCode, row.itemName, row.itemDesc, row.hsncode,

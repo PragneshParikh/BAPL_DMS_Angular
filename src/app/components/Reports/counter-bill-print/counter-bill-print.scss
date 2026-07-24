@@ -19,6 +19,7 @@
     }
 
     .a4-page {
+        box-shadow: none;
         width: 100%;
         min-height: auto !important;
         height: auto !important;
@@ -57,4 +58,11 @@
     display:inline-block;
      width: 120px;
   }
+}
+@media print {
+    #reportContent {
+        transform: scale(0.80);
+        transform-origin: top left;
+        width: 125%;
+    }
 }

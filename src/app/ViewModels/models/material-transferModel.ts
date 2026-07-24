@@ -7,6 +7,7 @@ export interface MaterialTransferReportRow {
   // NEW — replaces serviceLocationCode/serviceLocationName, shown right
   // after Dealer Code/Name.
   dealerLocation: string;
+  locationName?: string;
 
   dealerCity: string;
   dealerState: string;

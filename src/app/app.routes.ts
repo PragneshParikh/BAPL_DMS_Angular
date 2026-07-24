@@ -78,8 +78,10 @@ import { RepoBilling } from './components/repo-billing/repo-billing';
 import { VehicleOpenStock } from './components/vehicle-open-stock/vehicle-open-stock';
 import { VehicleQuotation } from './components/vehicle-quotation/vehicle-quotation';
 import { VehicleQuotationListComponent } from './components/vehicle-quotation/vehicle-quotation-list/vehicle-quotation-list';
-
-
+import { EstimateList } from './components/estimate/estimate-list/estimate-list';
+import { Estimate } from './components/estimate/estimate';
+import { PartInward } from './components/part-inward/part-inward';
+import { PartInwardList } from './components/part-inward/part-inward-list/part-inward-list';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
@@ -244,15 +246,22 @@ export const routes: Routes = [
       { path: 'vehicle-info', component: VehicleInfoUpdate, data: [73] },
 
       { path: 'counter-bill', component: CounterBill, data: [77] },
-      { path: 'counter-bill/edit/:id', component: AddCounterBill, data: [77] },
+      { path: 'counter-bill/edit', component: AddCounterBill, data: [77] },
       { path: 'add-counter-bill', component: AddCounterBill, data: [77] },
       { path: 'print-counter-bill/:id', component: CounterBillPrint, data: [77] },
-      { path: 'vehicle-open-stock', component:VehicleOpenStock, data: [89] },
+      { path: 'vehicle-open-stock', component: VehicleOpenStock, data: [89] },
       { path: 'repo-billing', component: RepoBilling, data: [88] },
       { path: 'vehicle-open-stock', component: VehicleOpenStock, data: [89] },
       { path: 'vehicle-quotation', component: VehicleQuotationListComponent, data: [87] },
       { path: 'vehicle-quotation/add', component: VehicleQuotation, data: [87] },
       { path: 'vehicle-quotation/edit/:id', component: VehicleQuotation, data: [87] },
+      { path: 'parts-inward', data: [0], component: PartInwardList },
+      { path: 'parts-inward/:invoiceNo', data: [0], component: PartInward },
+      { path: 'parts-stock-details', data: [93], loadComponent: () => import('./components/Reports/parts-stock-details/parts-stock-details').then(m => m.PartsStockDetails) },
+      { path: 'estimate', component: EstimateList, data: [98] },
+      { path: 'estimate/add', component: Estimate, data: [98] },
+      { path: 'estimate/edit/:id', component: Estimate, data: [98] },
+
     ]
   },
   { path: '**', component: WorkInProgress }
