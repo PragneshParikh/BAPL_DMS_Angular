@@ -132,7 +132,7 @@
                                 <i class="ri-pencil-fill fs-12"></i>
                             </button>
                             <button class="btn btn-sm btn-soft-danger" 
-                                title="Only SuperAdmin can delete" (click)="deleteJobCard(item.id)" [disabled]="!this.isSuperAdmin">
+                                title="Only SuperAdmin can delete" (click)="deleteJobCard(item.jobCardHeader.id)" [disabled]="!this.isSuperAdmin">
                                 <i class="ri-delete-bin-fill fs-12"></i>
                                 <!-- [disabled]="currentUserRole !== 'SuperAdmin'" -->
                             </button>

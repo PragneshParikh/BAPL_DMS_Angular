@@ -52,6 +52,7 @@ export class JobCardAddForm {
   selectedChassis: string = '';
   invoiceNo: string = '';
   couponNo: string = '';
+  inwardType: string = '';
   modelName = '';
   registerNo = '';
   vehicleKms: number = 0;
@@ -82,6 +83,7 @@ export class JobCardAddForm {
   durationType: string = '';
   expireWarrentyDate: string = '';
   chassiseditData: any = null;
+  repairBillStatus: string;
   fromEstimateData: any = null;
 
 
@@ -138,6 +140,8 @@ export class JobCardAddForm {
   showComplaintValidation: boolean;
   isSuperAdmin: boolean;
   estNo: string;
+  vehiclePrevkms: any;
+  kmsError: string;
 
 
   constructor(private storageService: StorageService,
@@ -411,6 +415,7 @@ export class JobCardAddForm {
 
     this.jobCardService.getAllInspectedChassis(this.dealerCode, this.jobTypeId).subscribe(res => {
       this.chassisList = res;
+      console.log("Chassislist bind", this.chassisList);
 
       if (this.isEditMode && this.chassiseditData) {
         this.customerObj.saleDate = this.chassisList[0].saleDate?.split('T')[0];
@@ -623,6 +628,8 @@ export class JobCardAddForm {
 
     this.invoiceNo = selected.invoiceNo;
     this.couponNo = this.selectedChassis.slice(-13);
+    this.inwardType = selected.inwardType;
+    this.vehiclePrevkms = selected.vehiclePrevkms;
     this.customerObj.customerLedgerId = selected.customerLedgerId;
     this.customerObj.customerName = selected.customerName;
     this.customerObj.customerMobile = selected.customerMobile;
@@ -806,6 +813,7 @@ export class JobCardAddForm {
   isSubmitted = false;
   saveJobCard() {
     this.isSubmitted = true;
+
     if (this.selectedJobtype == 1 && this.pdiCheckList.length == 0) {
       Swal.fire({
         icon: 'warning',
@@ -843,6 +851,12 @@ export class JobCardAddForm {
       });
       return;
     }
+    if (this.vehicleKms < this.vehiclePrevkms) {
+      this.kmsError =
+        `Vehicle KM cannot be less than Previous KM (${this.vehiclePrevkms})`;
+      return;
+    }
+
     const jobIn = new Date(`${this.jobInDate}T${this.jobInTime}`);
     const estDel = new Date(`${this.estDelDate}T${this.estDelTime}`);
 
@@ -938,6 +952,7 @@ export class JobCardAddForm {
       servicetype: this.selectedServiceType || 0,
       serviceloc: this.selectedLocation || "",
       couponno: this.couponNo,
+      inwardType: this.inwardType,
       jobprefix: this.jobPrefix,
       jobinDate: this.jobInDate || null,
       jobinTime: this.jobInTime || null,
@@ -1048,10 +1063,24 @@ export class JobCardAddForm {
         this.isEditMode = false;
         this.loader.hide();
       },
+      // error: (err) => {
+      //   console.error(err);
+      //   this.loader.hide();
+      //   this.toastr.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+      // }
       error: (err) => {
         console.error(err);
         this.loader.hide();
-        this.toastr.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+
+        const message =
+          err?.error?.message ||
+          err?.error ||
+          'Something went wrong.';
+
+        this.toastr.show(message, {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
       }
     });
   }
@@ -1060,6 +1089,7 @@ export class JobCardAddForm {
   patchEditData(data: any) {
 
     // ================= HEADER =================
+    this.repairBillStatus = data.repairBillStatus;
     this.selectedJobtype = data.jobCardHeader.jobtype;
     this.selectedServiceHead = data.jobCardHeader.servicehead;
     this.selectedServiceType = data.jobCardHeader.servicetype;
@@ -1070,6 +1100,8 @@ export class JobCardAddForm {
     this.selectedLocation = data.jobCardHeader.serviceloc;
 
     this.couponNo = data.jobCardHeader.couponno;
+    this.inwardType = data.jobCardHeader.inwardType;
+    this.inwardType = data.jobCardHeader.inwardType;
     this.jobPrefix = data.jobCardHeader.jobprefix;
     this.jobInDate = data.jobCardHeader.jobinDate;
     this.jobInTime = data.jobCardHeader.jobinTime;
@@ -1146,7 +1178,17 @@ export class JobCardAddForm {
     }, 300);
   }
 
+
   validateWarranty(): boolean {
+
+    if (this.vehicleKms && this.vehiclePrevkms &&
+      this.vehicleKms < this.vehiclePrevkms) {
+
+      this.kmsError = `Vehicle KM cannot be less than Previous KM (${this.vehiclePrevkms})`;
+    } else {
+      this.kmsError = '';
+    }
+
 
     if (!this.selectedJobtype || !this.vehicleKms || !this.odoReading) {
       return true; // skip validation (no error)
@@ -1181,6 +1223,7 @@ export class JobCardAddForm {
 
     this.invoiceNo = '';
     this.couponNo = '';
+    this.inwardType = '';
     this.vehicleKms = 0;
     this.jobPrefix = '';
     this.jobInDate = '';

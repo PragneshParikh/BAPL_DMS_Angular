@@ -209,7 +209,7 @@ export class LotInspectionDetails implements OnInit {
             plasticCover: first.plasticCover || this.selectedPlastingcover,
             nameSupervisor: first.nameSupervisor || this.selectedSupervisor,
             locationName: first.locationName || this.selectedLocation,
-            isD2D: first.IsD2D,
+            isD2D: this.IsD2d,
             inwardType: first.inwardType || this.inwardType,
             dealerCode: this.storageService.getDealerCode()
           };
@@ -280,7 +280,8 @@ export class LotInspectionDetails implements OnInit {
   // ================= SAVE DATA =================
   saveData() {
     // VALIDATION FIRST
-
+debugger;
+console.log("Save time ",this.headerObj)
     if (!this.headerObj.arrivalDate) {
       this.toaster.show('Arrival Date is required', {
         classname: 'bg-warning text-white',

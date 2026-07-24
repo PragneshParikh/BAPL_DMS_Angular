@@ -111,6 +111,11 @@
                                 (click)="editRepairBill(item); $event.stopPropagation()">
                                 <i class="ri-pencil-fill fs-12"></i>
                             </button>
+                            <button class="btn btn-sm btn-soft-danger" 
+                                title="Only SuperAdmin can delete" (click)="deleteRepairbill(item.id)" [disabled]="!this.isSuperAdmin">
+                                <i class="ri-delete-bin-fill fs-12"></i>
+                                <!-- [disabled]="currentUserRole !== 'SuperAdmin'" -->
+                            </button>
 
                             <button class="btn btn-sm btn-soft-success"
                                 [ngbTooltip]="'Download Invoice'"

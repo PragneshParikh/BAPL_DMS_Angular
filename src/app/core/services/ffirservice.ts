@@ -39,6 +39,9 @@ export class FFIRService {
     );
   }
 
+   deleteFFIR(id: number, role: string) {
+    return this.httpClient.delete(`${this.baseUrl}/FFIR/DeleteFFIR/${id}/${role}`);
+  }
   getFFIRById(id: number): Observable<any> {
     return this.httpClient.get(
       `${environment.apiUrl}/FFIR/GetFFIRById/${id}`
