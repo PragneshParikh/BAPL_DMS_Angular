@@ -82,6 +82,9 @@ import { EstimateList } from './components/estimate/estimate-list/estimate-list'
 import { Estimate } from './components/estimate/estimate';
 import { PartInward } from './components/part-inward/part-inward';
 import { PartInwardList } from './components/part-inward/part-inward-list/part-inward-list';
+import { BgRoleMasterList } from './components/bg-role-master/bg-role-master-list/bg-role-master-list';
+import { BgRoleMaster } from './components/bg-role-master/bg-role-master';
+import { DealerCreationManagerList } from './components/dealer-creation/dealer-creation-manager-list/dealer-creation-manager-list';;
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
@@ -231,6 +234,12 @@ export const routes: Routes = [
       { path: 'role-master', component: RoleMasterList, data: [75] },
       { path: 'role-master/add', component: RoleMaster, data: [75] },
       { path: 'role-master/edit/:id', component: RoleMaster, data: [75] },
+      { path: 'bg-role-master', component: BgRoleMasterList, data: [100] },
+      { path: 'bg-role-master/add', component: BgRoleMaster, data: [100] },
+      { path: 'bg-role-master/edit/:id', component: BgRoleMaster, data: [100] },
+      { path: 'dealer-creation-manager', component: DealerCreationManagerList, data: [101] },
+
+
 
       { path: 'free-service-claim', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim-list/free-service-claim-list').then(m => m.FreeServiceClaimList) },
       { path: 'free-service-claim/:id', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim').then(m => m.FreeServiceClaim) },
