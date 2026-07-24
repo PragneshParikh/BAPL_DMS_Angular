@@ -44,9 +44,6 @@ export class CounterBillPrint implements OnInit {
     this.reportService.getCounterBillPrint(this.id)
       .subscribe({
         next: (response) => {
-          console.log(response);
-
-
           this.billData = response;
 
           this.amountInWords = this.currencyService.convertToWords(
@@ -71,24 +68,24 @@ export class CounterBillPrint implements OnInit {
   //     0
   //   );
   // }
-getRoundOff(): number {
+  getRoundOff(): number {
 
-  const total = this.getTotalAmount();
+    const total = this.getTotalAmount();
 
-  return Number((Math.round(total) - total).toFixed(2));
-}
-
-getSubTotal(): number {
-
-  if (!this.billData?.details?.length) {
-    return 0;
+    return Number((Math.round(total) - total).toFixed(2));
   }
 
-  return this.billData.details.reduce(
-    (sum, item) => sum + this.getLineTotal(item),
-    0
-  );
-}
+  getSubTotal(): number {
+
+    if (!this.billData?.details?.length) {
+      return 0;
+    }
+
+    return this.billData.details.reduce(
+      (sum, item) => sum + this.getLineTotal(item),
+      0
+    );
+  }
 
   getDiscountTotal(): number {
 
@@ -166,9 +163,9 @@ getSubTotal(): number {
 
     }, 0);
   }
-getInvoiceTotal(): number {
-  return Math.round(this.getSubTotal());
-}
+  getInvoiceTotal(): number {
+    return Math.round(this.getSubTotal());
+  }
   printInvoice(): void {
     window.print();
   }
@@ -179,81 +176,80 @@ getInvoiceTotal(): number {
 
 
   getTaxableAmount(item: CounterBillPrintDetail): number {
-    console.log(item, 'inside');
     const discountAmount = item.discType === '%' ? (item.rate * Number(item.discount || 0)) / 100 : Number(item.discount || 0);
-    return (item.rate - discountAmount) *item.qty;
+    return (item.rate - discountAmount) * item.qty;
   }
 
   getLineTotal(item: CounterBillPrintDetail): number {
     const taxableAmount = this.getTaxableAmount(item);
-    const GstAmount =( (taxableAmount * item.igstper ||0)/100) + ((taxableAmount * item.sgstper ||0)/100) + ((taxableAmount * item.cgstper ||0)/100);
+    const GstAmount = ((taxableAmount * item.igstper || 0) / 100) + ((taxableAmount * item.sgstper || 0) / 100) + ((taxableAmount * item.cgstper || 0) / 100);
     return (
 
-      taxableAmount +(GstAmount ))
+      taxableAmount + (GstAmount))
   }
 
 
   getGstWiseSummary(): any[] {
 
-  if (!this.billData?.details?.length) {
-    return [];
-  }
-
-  const groups: any = {};
-
-  this.billData.details.forEach(item => {
-
-    const key = `${item.sgstper}_${item.cgstper}_${item.igstper}`;
-
-    if (!groups[key]) {
-      groups[key] = {
-        taxableValue: 0,
-        sgstper: item.sgstper || 0,
-        sgstamnt: 0,
-        cgstper: item.cgstper || 0,
-        cgstamnt: 0,
-        igstper: item.igstper || 0,
-        igstamnt: 0
-      };
+    if (!this.billData?.details?.length) {
+      return [];
     }
 
-    groups[key].taxableValue += this.getTaxableAmount(item);
-    groups[key].sgstamnt += item.sgstamnt || 0;
-    groups[key].cgstamnt += item.cgstamnt || 0;
-    groups[key].igstamnt += item.igstamnt || 0;
-  });
+    const groups: any = {};
 
-  return Object.values(groups);
-}
+    this.billData.details.forEach(item => {
 
-getTotalTaxableAmount(): number {
-  return this.billData?.details?.reduce(
-    (sum, item) => sum + this.getTaxableAmount(item),
-    0
-  ) || 0;
-}
+      const key = `${item.sgstper}_${item.cgstper}_${item.igstper}`;
 
-getTotalSGSTCalculated(): number {
-  return this.billData?.details?.reduce(
-    (sum, item) =>
-      sum + ((this.getTaxableAmount(item) * (item.sgstper || 0)) / 100),
-    0
-  ) || 0;
-}
+      if (!groups[key]) {
+        groups[key] = {
+          taxableValue: 0,
+          sgstper: item.sgstper || 0,
+          sgstamnt: 0,
+          cgstper: item.cgstper || 0,
+          cgstamnt: 0,
+          igstper: item.igstper || 0,
+          igstamnt: 0
+        };
+      }
 
-getTotalCGSTCalculated(): number {
-  return this.billData?.details?.reduce(
-    (sum, item) =>
-      sum + ((this.getTaxableAmount(item) * (item.cgstper || 0)) / 100),
-    0
-  ) || 0;
-}
+      groups[key].taxableValue += this.getTaxableAmount(item);
+      groups[key].sgstamnt += item.sgstamnt || 0;
+      groups[key].cgstamnt += item.cgstamnt || 0;
+      groups[key].igstamnt += item.igstamnt || 0;
+    });
 
-getTotalIGSTCalculated(): number {
-  return this.billData?.details?.reduce(
-    (sum, item) =>
-      sum + ((this.getTaxableAmount(item) * (item.igstper || 0)) / 100),
-    0
-  ) || 0;
-}
+    return Object.values(groups);
+  }
+
+  getTotalTaxableAmount(): number {
+    return this.billData?.details?.reduce(
+      (sum, item) => sum + this.getTaxableAmount(item),
+      0
+    ) || 0;
+  }
+
+  getTotalSGSTCalculated(): number {
+    return this.billData?.details?.reduce(
+      (sum, item) =>
+        sum + ((this.getTaxableAmount(item) * (item.sgstper || 0)) / 100),
+      0
+    ) || 0;
+  }
+
+  getTotalCGSTCalculated(): number {
+    return this.billData?.details?.reduce(
+      (sum, item) =>
+        sum + ((this.getTaxableAmount(item) * (item.cgstper || 0)) / 100),
+      0
+    ) || 0;
+  }
+
+  getTotalIGSTCalculated(): number {
+    return this.billData?.details?.reduce(
+      (sum, item) =>
+        sum + ((this.getTaxableAmount(item) * (item.igstper || 0)) / 100),
+      0
+    ) || 0;
+  }
 }

@@ -105,7 +105,6 @@ export class RepoBilling {
     this.loader.show();
     this.repoBillingService.getRepoBillingData(chassisNo, regNo).subscribe({
       next: (res: any) => {
-        console.log(res);
         this.loader.hide();
         // const dealer = res.dealerDetails;
         // const party = res.partyDetails;

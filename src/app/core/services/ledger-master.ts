@@ -99,7 +99,6 @@ export class LedgerMasterService {
   }
 
   getLotRelatedLedgers(invoiceNo: string | null, IsD2D: boolean | null): Observable<any> {
-    debugger;
     let params = new HttpParams()
       .set('invoiceNo', invoiceNo ?? null)
       .set('IsD2D', (IsD2D ?? false));

@@ -302,7 +302,6 @@ export class TopbarComponent implements OnInit {
     this.loader.show();
     this.vehicleInwardService.getByVehicleStatus(false, this.dealerCode).subscribe({
       next: (result) => {
-        console.log(result);
 
         this.vehicleInward = result;
 
@@ -337,7 +336,6 @@ export class TopbarComponent implements OnInit {
     this.loader.show();
     this.vehicleInwardService.getByVehicleStatus(false, this.dealerCode).subscribe({
       next: (result) => {
-        console.log(result);
 
         this.vehicleInward = result;
 

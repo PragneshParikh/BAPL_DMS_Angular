@@ -37,14 +37,14 @@ export class ItemMaster implements OnInit {
   sortDirection: 'asc' | 'desc' = 'asc';
 
   groupId = 1; // static group id
-  supplierlist: any[]=[];
+  supplierlist: any[] = [];
 
   constructor(
     private itemService: ItemMasterService,
     private loader: LoaderService,
     private modalService: NgbModal,
     private toaster: ToastService,
-    private ledgerservice : LedgerMasterService,
+    private ledgerservice: LedgerMasterService,
     private storageService: StorageService
   ) { }
 
@@ -75,18 +75,17 @@ export class ItemMaster implements OnInit {
 
   }
 
-  loadsuplier(){
+  loadsuplier() {
 
     const dealerCode = this.storageService.getDealerCode();
 
     this.ledgerservice.getSupplierLedgers(dealerCode).subscribe({
-      next:(res:any)=>{
+      next: (res: any) => {
 
         this.supplierlist = res;
-        console.log(this.supplierlist)
 
       },
-      error:(err)=>{
+      error: (err) => {
         console.error(err);
       }
     })
@@ -197,217 +196,217 @@ export class ItemMaster implements OnInit {
   }
 
   // ===============================
-// Item Object
-// ===============================
+  // Item Object
+  // ===============================
 
-itemObj: any = this.getEmptyItem();
-
-
-// ===============================
-// Dropdown Lists
-// ===============================
-
-modelList: any[] = [];
-// durationTypes: any[] = [
-//   { id: 1, title: 'Month' },
-//   { id: 2, title: 'Year' }
-// ];
-
-groupList = [
-  { id: 1, title: 'Spares' },
-  { id: 2, title: 'FG' }
-];
-
-itemTypeList = [
-  { id: 1, title: 'Vehicle' },
-  { id: 2, title: 'Parts' }
-];
-
-uomList = [
-  'PCS',
-  'NOS',
-  'SET',
-  'BOX'
-];
+  itemObj: any = this.getEmptyItem();
 
 
+  // ===============================
+  // Dropdown Lists
+  // ===============================
+
+  modelList: any[] = [];
+  // durationTypes: any[] = [
+  //   { id: 1, title: 'Month' },
+  //   { id: 2, title: 'Year' }
+  // ];
+
+  groupList = [
+    { id: 1, title: 'Spares' },
+    { id: 2, title: 'FG' }
+  ];
+
+  itemTypeList = [
+    { id: 1, title: 'Vehicle' },
+    { id: 2, title: 'Parts' }
+  ];
+
+  uomList = [
+    'PCS',
+    'NOS',
+    'SET',
+    'BOX'
+  ];
 
 
-// ===============================
-// Empty Object
-// ===============================
 
-getEmptyItem() {
 
-  return {
+  // ===============================
+  // Empty Object
+  // ===============================
 
-    id: 0,
+  getEmptyItem() {
 
-    itemtype: 0,
+    return {
 
-    itemname: '',
-    itemdesc: '',
-    itemcode: '',
+      id: 0,
 
-    iselectric: false,
+      itemtype: 0,
 
-    oemPartNo: '',
-    oemPartDescription: '',
+      itemname: '',
+      itemdesc: '',
+      itemcode: '',
 
-    grpidno: 1,
-    oemModelId: null,
+      iselectric: false,
 
-    uom: 'PCS',
+      oemPartNo: '',
+      oemPartDescription: '',
 
-    hsncode: '',
+      grpidno: 1,
+      oemModelId: null,
 
-    taxPercent: 0,
+      uom: 'PCS',
 
-    cgst: 0,
-    sgst: 0,
-    igst: 0,
-    ugst: 0,
+      hsncode: '',
 
-    gstCess: 0,
-    tcs: 0,
+      taxPercent: 0,
 
-    itemCategory: 'Parts',
+      cgst: 0,
+      sgst: 0,
+      igst: 0,
+      ugst: 0,
 
-    hrsTat: 0,
+      gstCess: 0,
+      tcs: 0,
 
-    dlrprice: 0,
-    itemMrp: 0,
-    oemMrp: 0,
+      itemCategory: 'Parts',
 
-    ipurrate: 0,
-    custprice: 0,
+      hrsTat: 0,
 
-    margin: 0,
-    partLabour: 0,
+      dlrprice: 0,
+      itemMrp: 0,
+      oemMrp: 0,
 
-    reOrderQty: 0,
+      ipurrate: 0,
+      custprice: 0,
 
-    minBillQty: 0,
-    minOrderQty: 0,
+      margin: 0,
+      partLabour: 0,
 
-    warrantyPeriod: 0,
-    warrantyDurationType: 1,
-    warrantyKms: 0,
+      reOrderQty: 0,
 
-    isWarrantyApproval: false,
+      minBillQty: 0,
+      minOrderQty: 0,
 
-    vorRate: 0,
-    isVOR: false,
+      warrantyPeriod: 0,
+      warrantyDurationType: 1,
+      warrantyKms: 0,
 
-    remarks: '',
+      isWarrantyApproval: false,
 
-    isExempted: false,
-    isToolkitFirstAid: false,
-    isStockRequired: false,
-    isHelmet: false,
-    isInventory: false,
-    isInEligibleInput: false,
-    dealerCode:'',
-    status:true,
-    supplierId:0
+      vorRate: 0,
+      isVOR: false,
 
-  };
+      remarks: '',
 
-}
+      isExempted: false,
+      isToolkitFirstAid: false,
+      isStockRequired: false,
+      isHelmet: false,
+      isInventory: false,
+      isInEligibleInput: false,
+      dealerCode: '',
+      status: true,
+      supplierId: 0
 
-// ===============================
-// Reset Form
-// ===============================
-resetForm() {
-  this.itemObj = this.getEmptyItem();
-}
+    };
 
-// ===============================
-// Open Add Popup
-// ===============================
-
-openAddItem(content: any) {
-
-  this.resetForm();
-
-  this.modalService.open(content, {
-
-    size: 'xl',
-    backdrop: 'static',
-    keyboard: false
-
-  });
-
-}
-
-// ===============================
-// Validation
-// ===============================
-
-validateItem(): boolean {
-
-  if (!this.itemObj.itemname?.trim()) {
-     this.toaster.show('Enter Part NO.', { classname: 'bg-warning text-light', delay: 5000 });
-    return false;
   }
 
-  if (!this.itemObj.itemdesc?.trim()) {
-     this.toaster.show('Enter Item Description', { classname: 'bg-warning text-light', delay: 5000 });
-    return false;
+  // ===============================
+  // Reset Form
+  // ===============================
+  resetForm() {
+    this.itemObj = this.getEmptyItem();
   }
 
-  if (!this.itemObj.hsncode?.trim()) {
-     this.toaster.show('Enter HSNCode', { classname: 'bg-warning text-light', delay: 5000 });
-    return false;
+  // ===============================
+  // Open Add Popup
+  // ===============================
+
+  openAddItem(content: any) {
+
+    this.resetForm();
+
+    this.modalService.open(content, {
+
+      size: 'xl',
+      backdrop: 'static',
+      keyboard: false
+
+    });
+
   }
 
-  if (this.itemObj.custprice <= 0) {
-     this.toaster.show('Enter Sale Rate', { classname: 'bg-warning text-light', delay: 5000 });
-    return false;
-  }
+  // ===============================
+  // Validation
+  // ===============================
 
-  if (this.itemObj.ipurrate <= 0) { 
-     this.toaster.show('Enter Purchase Rate', { classname: 'bg-warning text-light', delay: 5000 });
-    return false;
-  }
-  return true;
-}
+  validateItem(): boolean {
 
-
-
-// ===============================
-// Save Item
-// ===============================
-
-saveItem() {
-
-  if (!this.validateItem())
-    return;
-  const dealerCode = this.storageService.getDealerCode();
-  this.itemObj.dealerCode = dealerCode;
-
-  this.itemService.insertItem(this.itemObj).subscribe({
-
-    next: (res: any) => {
-
-      this.toaster.show('Item Saved Successfully.', { classname: 'bg-success text-light', delay: 5000 });
-      
-
-      this.modalService.dismissAll();
-
-      this.loadItems();
-
-    },
-
-    error: (err) => {
-
-      console.log(err);
-
-      this.toaster.show('something went wrong', { classname: 'bg-danger text-light', delay: 5000 });
-
+    if (!this.itemObj.itemname?.trim()) {
+      this.toaster.show('Enter Part NO.', { classname: 'bg-warning text-light', delay: 5000 });
+      return false;
     }
 
-  });
+    if (!this.itemObj.itemdesc?.trim()) {
+      this.toaster.show('Enter Item Description', { classname: 'bg-warning text-light', delay: 5000 });
+      return false;
+    }
 
-}
+    if (!this.itemObj.hsncode?.trim()) {
+      this.toaster.show('Enter HSNCode', { classname: 'bg-warning text-light', delay: 5000 });
+      return false;
+    }
+
+    if (this.itemObj.custprice <= 0) {
+      this.toaster.show('Enter Sale Rate', { classname: 'bg-warning text-light', delay: 5000 });
+      return false;
+    }
+
+    if (this.itemObj.ipurrate <= 0) {
+      this.toaster.show('Enter Purchase Rate', { classname: 'bg-warning text-light', delay: 5000 });
+      return false;
+    }
+    return true;
+  }
+
+
+
+  // ===============================
+  // Save Item
+  // ===============================
+
+  saveItem() {
+
+    if (!this.validateItem())
+      return;
+    const dealerCode = this.storageService.getDealerCode();
+    this.itemObj.dealerCode = dealerCode;
+
+    this.itemService.insertItem(this.itemObj).subscribe({
+
+      next: (res: any) => {
+
+        this.toaster.show('Item Saved Successfully.', { classname: 'bg-success text-light', delay: 5000 });
+
+
+        this.modalService.dismissAll();
+
+        this.loadItems();
+
+      },
+
+      error: (err) => {
+
+        console.error(err);
+
+        this.toaster.show('something went wrong', { classname: 'bg-danger text-light', delay: 5000 });
+
+      }
+
+    });
+
+  }
 }

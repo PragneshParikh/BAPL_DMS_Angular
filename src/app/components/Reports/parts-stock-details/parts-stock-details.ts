@@ -80,7 +80,6 @@ export class PartsStockDetails implements OnInit {
     this.reportService.getPartsStockDetailsByDealer(1, this.dealerCode).subscribe({
       next: (res) => {
         this.loader.hide();
-        console.log('Parts Stock Details : ', res);
         this.partsStockData = res;
       },
       error: (err) => {

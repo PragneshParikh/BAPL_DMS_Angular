@@ -261,7 +261,7 @@
           <div class="row mb-2 p-2 mx-0 bg-light rounded" *ngIf="employeeData.createLogin">
 
             <div class="col-md-3">
-              <label class="form-label mb-1">Email ID <span class="text-danger">*</span></label>
+              <label class="form-label mb-1">Email ID <span class="text-danger"></span></label>
               <input type="email" class="form-control form-control-sm py-1"
                 [class.is-invalid]="errors.emailId"
                 [(ngModel)]="employeeData.emailId" name="emailId" autocomplete="off">
@@ -269,7 +269,7 @@
             </div>
 
             <div class="col-md-3">
-              <label class="form-label mb-1">Password <span class="text-danger">*</span></label>
+              <label class="form-label mb-1">Password <span class="text-danger"></span></label>
               <input type="password" class="form-control form-control-sm py-1"
                 [class.is-invalid]="errors.password"
                 [(ngModel)]="employeeData.password" name="password" autocomplete="new-password">
@@ -278,7 +278,7 @@
 
             <!-- DEPARTMENT CHECKBOXES (from DepartmentMaster) -->
             <div class="col-md-6">
-              <label class="form-label mb-1 d-block">Category <span class="text-danger">*</span></label>
+              <label class="form-label mb-1 d-block">Category <span class="text-danger"></span></label>
               <div class="d-flex flex-wrap gap-3 pt-1">
                 <div class="form-check" *ngFor="let dept of departmentOptions">
                   <input class="form-check-input" type="checkbox"

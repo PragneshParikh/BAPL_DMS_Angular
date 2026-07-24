@@ -379,7 +379,6 @@ export class RepairBill implements OnInit {
   }
 
   onSelect(item: any) {
-    debugger;
     if (item.isMaterialTransfer === false || item.isMaterialTransfer === "null") {
       this.toaster.show('Material Transfer is not completed for this Job Card', {
         classname: 'bg-warning text-dark',
@@ -388,7 +387,6 @@ export class RepairBill implements OnInit {
 
     }
     this.selectedJobCard = item;
-    console.log("onselect", this.selectedJobCard);
     this.chassisNo = this.selectedJobCard.jobCardHeader.chassisno;
     this.insValidTill = this.selectedJobCard.jobCardCustomer.insuranceExpDate;
     this.vehicleSaleBillService.getPolicyNo(this.chassisNo).subscribe({
@@ -423,11 +421,9 @@ export class RepairBill implements OnInit {
 
       next: (res) => {
 
-        console.log(res[0]);
         this.loader.hide();
 
         this.materialedJobCarDList = res;
-        console.log("bind in grid part details 1", this.materialedJobCarDList);
         // Part Grid
         this.materialedJobCarDList = res.map((x: any) => ({
           ...x,
@@ -461,7 +457,6 @@ export class RepairBill implements OnInit {
         });
 
         this.partItems = [...this.materialedJobCarDList];
-        console.log("bind in grid part details last =>", this.partItems);
 
         this.calculateTotals();
 
@@ -539,7 +534,6 @@ export class RepairBill implements OnInit {
   }
 
   loadLabourCodelist(): void {
-    //debugger;
     this.loader.show();
     this.oemmodelName = this.selectedJobCard?.jobCardCustomer?.modelName
     this.customerLedgerId = this.selectedJobCard?.jobCardCustomer?.customerLedgerId
@@ -548,7 +542,6 @@ export class RepairBill implements OnInit {
       next: (res) => {
         this.loader.hide();
         this.labourCodeList = res;
-        console.log(this.labourCodeList)
       },
       error: (err) => {
         this.loader.hide();
@@ -590,7 +583,6 @@ export class RepairBill implements OnInit {
   }
 
   selectLabour(item: any): void {
-    debugger
     this.selectedLabour = item;
     this.labourId = item.labourId;
     this.labourCode = item.labourCode;
@@ -611,8 +603,6 @@ export class RepairBill implements OnInit {
   }
 
   addLabour(): void {
-    debugger;
-
     const isSameState =
       (this.selectedLabour?.dealerState || '').trim().toUpperCase() ===
       (this.selectedLabour?.custState).trim().toUpperCase();
@@ -638,8 +628,7 @@ export class RepairBill implements OnInit {
     let sgstAmount = 0;
     let igstAmount = 0;
 
-    if (selectedIssue?.name === 'U/W' || selectedIssue?.name === 'FSC')
-       { cgstAmount = 0; sgstAmount = 0; igstAmount = 0; taxableAmount=0; this.totalTaxPer = 0; }
+    if (selectedIssue?.name === 'U/W' || selectedIssue?.name === 'FSC') { cgstAmount = 0; sgstAmount = 0; igstAmount = 0; taxableAmount = 0; this.totalTaxPer = 0; }
     else {
       if (isSameState) {
 
@@ -765,9 +754,6 @@ export class RepairBill implements OnInit {
   }
 
   calculateTotals(): void {
-    debugger;
-
-    //debugger
     const labourDiscount =
       this.labourItems.reduce(
         (sum, x) => sum + (x.discount || 0),
@@ -816,9 +802,7 @@ export class RepairBill implements OnInit {
       this.totalNetAmount;
   }
   editLabour(index: number): void {
-    debugger
     const item = this.labourItems[index];
-    console.log(this.labourItems[index])
 
     this.editIndex = index;
     this.labourCode = item.labourCode;
@@ -844,14 +828,7 @@ export class RepairBill implements OnInit {
 
   }
   editPart(index: number) {
-    debugger
     const item = this.partItems[index];
-    console.log("Before Edit", {
-      id: item.id,
-      partItemId: item.partItemId,
-      materialId: item.materialId
-    });
-    console.log("edit index wise part", this.partItems[index]);
 
     // const item = this.materialedJobCarDList[index];
 
@@ -900,8 +877,6 @@ export class RepairBill implements OnInit {
     this.editPartIndex = -1;
   }
   calculatePart(item: PartItem): void {
-    debugger
-
     const grossAmount = Number(item.partQty || 0) * Number(item.partRate || 0);
 
     let discountAmount = Number(item.discount || 0);
@@ -1028,7 +1003,6 @@ export class RepairBill implements OnInit {
   }
 
   applyLabourDiscount(): void {
-    //debugger
     this.labourItems.forEach(item => {
       this.selectedIssueType = item.issuetypeId;
       const isSameState =
@@ -1388,17 +1362,12 @@ export class RepairBill implements OnInit {
   }
 
   getRepairBillById(id: number): void {
-    debugger;
     this.loader.show();
 
     this.repairBillService.getRepairBillById(id).subscribe({
 
       next: (res: any) => {
-        console.log(res)
         const header = res.repairBillheader;
-        // console.log("header",header)
-
-
 
         // =====================
         // EDIT MODE
@@ -1457,7 +1426,6 @@ export class RepairBill implements OnInit {
         res.repairBillDetail
           .filter((x: any) => x.itemType === 'Part')
           .forEach((d: any) => {
-            console.log("d", d)
             const partItem: PartItem = {
 
               id: d.id,
@@ -1504,7 +1472,6 @@ export class RepairBill implements OnInit {
             this.partItems.push(partItem);
 
             this.materialedJobCarDList = [...this.partItems];
-            console.log("edit materialedJobCarDList", this.materialedJobCarDList);
           });
 
         // =====================
@@ -1514,7 +1481,6 @@ export class RepairBill implements OnInit {
         res.repairBillDetail
           .filter((x: any) => x.itemType === 'Labour')
           .forEach((d: any) => {
-            console.log(d);
             this.labourItems.push({
 
               labourId: d.labourId || 0,
@@ -1596,7 +1562,6 @@ export class RepairBill implements OnInit {
   }
 
   updateRepairBill(): void {
-    debugger;
     let dealerCode = this.storageService.getDealerCode();
 
     // if (!this.isSuperAdmin) {
@@ -1609,7 +1574,6 @@ export class RepairBill implements OnInit {
 
     //   return;
     // }
-    //console.log("update repairbill",...this.partItems)
     const payload = {
 
       repairBillheader: {
@@ -1746,7 +1710,6 @@ export class RepairBill implements OnInit {
     };
 
     this.loader.show();
-    console.log("Updated Repairbill", ...this.partItems)
     this.repairBillService.updateRepairBill(payload)
       .subscribe({
         next: (res) => {

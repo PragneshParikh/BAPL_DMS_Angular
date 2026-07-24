@@ -77,7 +77,6 @@ export class EmployeeMasterList
   ngOnInit(): void {
 
     this.getEmployees();
-    this.loadLocations();
     this.loadDepartments();
     this.loadDesignations();
     this.loadRoles();
@@ -184,6 +183,13 @@ export class EmployeeMasterList
 
           this.employeeList = response;
           this.applyDealerFilter();
+
+          // FIX: Location Name wasn't showing for most employees — see
+          // loadLocationsForCurrentEmployees() below for the reason. This
+          // re-runs on every list refresh, including right after an
+          // edit/save (closePopup() calls getEmployees()), so a newly
+          // saved employee's location resolves immediately too.
+          this.loadLocationsForCurrentEmployees();
         },
 
         error: (error) => {
@@ -196,26 +202,60 @@ export class EmployeeMasterList
       });
   }
 
-  loadLocations(): void {
-    const dealerCode = localStorage.getItem('dealerCode');
-    if (!dealerCode) return;
+  // =====================================
+  // LOAD LOCATIONS
+  // FIX: this used to be loadLocations(), which only fetched locations for
+  // the CURRENTLY LOGGED-IN user's own dealerCode (read from localStorage).
+  // That's why Location Name only ever resolved for that one dealer's
+  // employees and stayed permanently blank for every other dealer's
+  // employees — editing/saving changed nothing because locationMap never
+  // contained THAT dealer's codes to begin with, regardless of what was
+  // saved.
+  //
+  // Now we look at whichever employees are actually loaded, collect every
+  // distinct DealerCode among them, and fetch + merge each dealer's
+  // locations into locationMap. Works whether this list is scoped to one
+  // dealer or showing SuperAdmin's "All Dealers" view.
+  // =====================================
+  loadLocationsForCurrentEmployees(): void {
+    const dealerCodes = Array.from(
+      new Set(
+        (this.employeeList ?? [])
+          .map(e => (e.dealerCode ?? '').trim())
+          .filter(code => !!code)
+      )
+    );
 
-    this.locationService.getLocationByDealerCode(dealerCode).subscribe({
-      next: (response: any[]) => {
-        this.locationMap = {};
-        (response ?? []).forEach(l => {
-          const code = l.locCode ?? l.loccode ?? l.Loccode;
-          const name = l.locName ?? l.locname ?? l.Locname;
-          if (code != null) this.locationMap[code] = name;
-        });
-      },
-      error: (error) => console.error('Location load error', error)
+    if (dealerCodes.length === 0) return;
+
+    dealerCodes.forEach(dealerCode => {
+      this.locationService.getLocationByDealerCode(dealerCode).subscribe({
+        next: (response: any[]) => {
+          (response ?? []).forEach(l => {
+            const code = l.locCode ?? l.loccode ?? l.Loccode;
+            const name = l.locName ?? l.locname ?? l.Locname;
+            if (code != null) {
+              this.locationMap[String(code).trim()] = name;
+            }
+          });
+        },
+        error: (error) => console.error(`Location load error for dealer ${dealerCode}`, error)
+      });
     });
   }
 
-
+  // Handles a single location code or a comma-separated list of codes
+  // (an employee can be assigned to more than one dealer location).
   getLocationName(code: string): string {
-    return this.locationMap[code] ?? '';
+    if (!code) return '';
+
+    return String(code)
+      .split(',')
+      .map(c => c.trim())
+      .filter(c => !!c)
+      .map(c => this.locationMap[c])
+      .filter(name => !!name)
+      .join(', ');
   }
 
   // =====================================

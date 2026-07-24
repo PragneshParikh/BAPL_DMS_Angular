@@ -221,7 +221,7 @@ export class RepairBillReportComponent implements OnInit, OnDestroy {
   private generateCsv(data: RepairBillReportRow[]): void {
     const headers = [
       'Sr No', 'Dealer Code', 'Dealer Name', 'Dealer Location', 'City', 'State',
-      'Job Date', 'Job Type', 'Service Head', 'Service Type',
+      'Job Date', 'Job No', 'Job Type', 'Service Head', 'Service Type',   // ← Job No inserted
       'Customer Name', 'Customer Mobile', 'Chassis No', 'Model Details', 'Job Status',
       'Repair Bill No', 'Repair Bill Date',
       'Part Code', 'Part Code Description',
