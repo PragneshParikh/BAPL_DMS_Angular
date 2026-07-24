@@ -162,11 +162,11 @@ export class JobCardAddForm {
     }
 
     if (history.state?.fromEstimate) {
-    this.fromEstimateData = history.state;
-    this.vehicleKms = Number(this.fromEstimateData.vehiclekms) || 0;
-    this.jobEstimate = Number(this.fromEstimateData.estimateId) || 0;
-    this.estNo = this.fromEstimateData.estimationNo || '';
-  }
+      this.fromEstimateData = history.state;
+      this.vehicleKms = Number(this.fromEstimateData.vehiclekms) || 0;
+      this.jobEstimate = Number(this.fromEstimateData.estimateId) || 0;
+      this.estNo = this.fromEstimateData.estimationNo || '';
+    }
     this.loadPrefix();
     this.fetchLocations();
     this.loadJobTypes();
@@ -482,54 +482,56 @@ export class JobCardAddForm {
           return;
         }
 
-  this.dealerCode = this.storageService.getDealerCode();
+        this.dealerCode = this.storageService.getDealerCode();
 
-  // Load chassis
-  this.jobCardService
-    .getAllInspectedChassis(this.dealerCode, this.selectedJobtype)
-    .subscribe(res => {
-      this.chassisList = res;
+        // Load chassis
+        this.jobCardService
+          .getAllInspectedChassis(this.dealerCode, this.selectedJobtype)
+          .subscribe(res => {
+            this.chassisList = res;
 
-      if (isFromEstimate && this.fromEstimateData?.chassisNo) {
-        const match = this.chassisList.find(
-          x => x.chassisNumber == this.fromEstimateData.chassisNo
-        );
+            // if (isFromEstimate && this.fromEstimateData?.chassisNo) {
+            if (this.fromEstimateData?.chassisNo) {
+              const match = this.chassisList.find(
+                x => x.chassisNumber == this.fromEstimateData.chassisNo
+              );
 
-        if (match) {
-          // Found in the inspected-lot list — reuse the normal path so we
-          // get full battery/motor/warranty data, same as edit mode.
-          this.selectedChassis = this.fromEstimateData.chassisNo;
-          this.onChassisChange();
-        } else {
-          // Estimate chassis isn't in this dealer's inspected-lot list
-          // (e.g. a walk-in) — fall back to what Estimate already resolved.
-          this.applyEstimateVehicleFallback();
-        }
-      }
-    });
+              if (match) {
+                // Found in the inspected-lot list — reuse the normal path so we
+                // get full battery/motor/warranty data, same as edit mode.
+                this.selectedChassis = this.fromEstimateData.chassisNo;
+                this.onChassisChange();
+              } else {
+                // Estimate chassis isn't in this dealer's inspected-lot list
+                // (e.g. a walk-in) — fall back to what Estimate already resolved.
+                this.applyEstimateVehicleFallback();
+              }
+            }
+          });
 
-  // Load service heads
-  this.jobCardService
-    .getServiceHead(this.selectedJobtype)
-    .subscribe((res: any[]) => {
-      this.serviceHeadList = res;
+        // Load service heads
+        this.jobCardService
+          .getServiceHead(this.selectedJobtype)
+          .subscribe((res: any[]) => {
+            this.serviceHeadList = res;
 
-      if (isEdit) {
-        this.selectedServiceHead = this.chassiseditData.jobCardHeader.servicehead;
-        this.loadServiceType(this.selectedServiceHead, true);
-        return;
-      }
+            if (isEdit) {
+              this.selectedServiceHead = this.chassiseditData.jobCardHeader.servicehead;
+              this.loadServiceType(this.selectedServiceHead, true);
+              return;
+            }
 
-      if (this.serviceHeadList.length > 0) {
-        this.selectedServiceHead = this.serviceHeadList[0].serviceHeadId;
-        this.loadServiceType(this.selectedServiceHead);
-      } else {
-        this.selectedServiceHead = '';
-        this.selectedServiceType = '';
-        this.serviceTypeList = [];
-      }
-    });
-}
+            if (this.serviceHeadList.length > 0) {
+              this.selectedServiceHead = this.serviceHeadList[0].serviceHeadId;
+              this.loadServiceType(this.selectedServiceHead);
+            } else {
+              this.selectedServiceHead = '';
+              this.selectedServiceType = '';
+              this.serviceTypeList = [];
+            }
+          });
+      });
+  }
   onServiceHeadChange() {
     this.loadServiceType(this.selectedServiceHead);
   }
@@ -566,7 +568,6 @@ export class JobCardAddForm {
 
       });
   }
-
 
 
   // onChassisChange() {
@@ -1286,10 +1287,10 @@ export class JobCardAddForm {
   }
 
   // Estimate already resolved model/battery/motor for this chassis via
-// /VehicleInfo when the user searched it there. If the chassis isn't part
-// of this dealer's inspected-lot list (so onChassisChange() has nothing to
-// match against), repeat that same lookup here rather than leaving those
-// fields blank.
+  // /VehicleInfo when the user searched it there. If the chassis isn't part
+  // of this dealer's inspected-lot list (so onChassisChange() has nothing to
+  // match against), repeat that same lookup here rather than leaving those
+  // fields blank.
   private applyEstimateVehicleFallback(): void {
     const est = this.fromEstimateData;
     if (!est?.chassisNo) return;
