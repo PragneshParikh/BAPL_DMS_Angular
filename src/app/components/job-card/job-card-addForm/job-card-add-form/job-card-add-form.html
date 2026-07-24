@@ -106,7 +106,7 @@
 
           |
 
-          Previous Kms : 0
+          Previous Kms : {{vehiclePrevkms || 0}}
         </div>
 
         <div *ngIf="selectedJobtype != 1">
@@ -154,6 +154,7 @@
                 <label>Vehicle Kms.</label>
                 <input class="form-control form-control-sm" [(ngModel)]="vehicleKms"
                   (ngModelChange)="validateWarranty()">
+                  <div *ngIf="kmsError" class="text-danger">{{ kmsError }} </div>
               </div>
               <div class="col-md-4">
                 <label>Service Head</label>

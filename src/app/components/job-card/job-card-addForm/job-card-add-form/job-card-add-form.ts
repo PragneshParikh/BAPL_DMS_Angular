@@ -50,7 +50,7 @@ export class JobCardAddForm {
   selectedChassis: string = '';
   invoiceNo: string = '';
   couponNo: string = '';
-  inwardType : string = '';
+  inwardType: string = '';
   modelName = '';
   registerNo = '';
   vehicleKms: number = 0;
@@ -81,7 +81,7 @@ export class JobCardAddForm {
   durationType: string = '';
   expireWarrentyDate: string = '';
   chassiseditData: any = null;
-  repairBillStatus:string;
+  repairBillStatus: string;
 
 
   chargerMake: string = '';
@@ -137,6 +137,8 @@ export class JobCardAddForm {
   showComplaintValidation: boolean;
   isSuperAdmin: boolean;
   estNo: string;
+  vehiclePrevkms: any;
+  kmsError: string;
 
 
   constructor(private storageService: StorageService,
@@ -189,7 +191,6 @@ export class JobCardAddForm {
         this.jobPrefix = res;
         const parts = res.split('/');
         this.jobNo = parseInt(parts[parts.length - 1], 10);
-        console.log(this.jobNo);
       }, error: (err) => {
         this.loader.hide();
         console.error(err);
@@ -403,7 +404,7 @@ export class JobCardAddForm {
 
     this.jobCardService.getAllInspectedChassis(this.dealerCode, this.jobTypeId).subscribe(res => {
       this.chassisList = res;
-      
+      console.log("Chassislist bind", this.chassisList);
 
       if (this.isEditMode && this.chassiseditData) {
         this.customerObj.saleDate = this.chassisList[0].saleDate?.split('T')[0];
@@ -591,6 +592,7 @@ export class JobCardAddForm {
     this.invoiceNo = selected.invoiceNo;
     this.couponNo = this.selectedChassis.slice(-13);
     this.inwardType = selected.inwardType;
+    this.vehiclePrevkms = selected.vehiclePrevkms;
     this.customerObj.customerLedgerId = selected.customerLedgerId;
     this.customerObj.customerName = selected.customerName;
     this.customerObj.customerMobile = selected.customerMobile;
@@ -775,6 +777,7 @@ export class JobCardAddForm {
   saveJobCard() {
     debugger
     this.isSubmitted = true;
+
     if (this.selectedJobtype == 1 && this.pdiCheckList.length == 0) {
       Swal.fire({
         icon: 'warning',
@@ -812,6 +815,12 @@ export class JobCardAddForm {
       });
       return;
     }
+    if (this.vehicleKms < this.vehiclePrevkms) {
+      this.kmsError =
+        `Vehicle KM cannot be less than Previous KM (${this.vehiclePrevkms})`;
+      return;
+    }
+
     const jobIn = new Date(`${this.jobInDate}T${this.jobInTime}`);
     const estDel = new Date(`${this.estDelDate}T${this.estDelTime}`);
 
@@ -907,7 +916,7 @@ export class JobCardAddForm {
       servicetype: this.selectedServiceType || 0,
       serviceloc: this.selectedLocation || "",
       couponno: this.couponNo,
-      inwardType : this.inwardType,
+      inwardType: this.inwardType,
       jobprefix: this.jobPrefix,
       jobinDate: this.jobInDate || null,
       jobinTime: this.jobInTime || null,
@@ -1133,7 +1142,17 @@ export class JobCardAddForm {
     }, 300);
   }
 
+
   validateWarranty(): boolean {
+
+    if (this.vehicleKms && this.vehiclePrevkms &&
+      this.vehicleKms < this.vehiclePrevkms) {
+
+      this.kmsError = `Vehicle KM cannot be less than Previous KM (${this.vehiclePrevkms})`;
+    } else {
+      this.kmsError = '';
+    }
+
 
     if (!this.selectedJobtype || !this.vehicleKms || !this.odoReading) {
       return true; // skip validation (no error)
