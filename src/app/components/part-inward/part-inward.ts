@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, viewChild } from '@angular/core';
-import { FormGroup, FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
@@ -8,7 +8,6 @@ import { StorageService } from '../../core/services/storage';
 import { PartsInwardService } from '../../core/services/partsinwardservice';
 import { LedgerMasterService } from '../../core/services/ledger-master';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TopbarComponent } from '../../layouts/topbar/topbar.component';
 import { NotificationService } from '../../core/services/notification-service';
 
 @Component({
@@ -36,7 +35,6 @@ export class PartInward implements OnInit {
   page = 1;
   pageSize = 10;
 
-  // lstPartsPurchaseDetails: any[] = [];
   partsPurchaseDetails: any[] = [];
   lstLocations: any[] = [];
   ledgerList: any[] = [];
@@ -150,25 +148,6 @@ export class PartInward implements OnInit {
     })
   }
 
-  // onLocationChange(event: any) {
-  //   // const locationCode = event.target.value;
-  //   // this.getPartInwardByLocation(locationCode);
-  // }
-
-  // getPartInwardByLocation(locationCode: string) {
-  //   this.loader.show();
-  //   this.partInwardService.getPendingPartInwardDetailByLocation(locationCode).subscribe({
-  //     next: (res) => {
-  //       this.loader.hide();
-  //     },
-  //     error: (err) => {
-  //       console.error(err);
-  //       this.loader.hide();
-  //       this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
-  //     }
-  //   })
-  // }
-
   onSave() {
     if (this.partsInwardForm.invalid)
       return;
@@ -199,32 +178,15 @@ export class PartInward implements OnInit {
     );;
   }
 
-  get totalSgst() {
-    return 10;
-  }
-
-  get totalCgst() {
-    return 10;
-  }
-
-  get totalIgst() {
-    return 10;
-  }
-
   get totalAmount() {
     return this.partsPurchaseDetails.reduce(
-      (total, item) => total + (item.itemMrp || 0),
+      (total, item) => total + (item.itemAmount || 0),
       0
     );
   }
 
-  // refreshPage() { }
-
-  // searchRecords() { }
-
   returnToList() {
     this.router.navigate(['/parts-inward']);
   }
-
 
 }
