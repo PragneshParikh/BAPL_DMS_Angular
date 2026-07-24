@@ -9,6 +9,7 @@ import { ReportService } from '../../core/services/report.service';
 import { LedgerMasterService } from '../../core/services/ledger-master';
 import { Observable } from 'rxjs';
 
+
 interface PartyDetails {
   partyName: string;
   partyMobile: string;
@@ -753,6 +754,7 @@ export class Estimate implements OnInit {
       state: {
         fromEstimate: true,
         estimateId: this.estimateId,
+        estimationNo: raw.estimationNo, 
         chassisNo: raw.chassisNo,
         vehiclekms: raw.kms,
         jobtype: raw.jobTypeId,

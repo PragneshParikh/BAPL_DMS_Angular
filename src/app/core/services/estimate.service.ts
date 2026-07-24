@@ -60,10 +60,6 @@ export interface EstimateListRow {
   dealerCode: string;
   status: string;
   createdDate: string;
-
-  // ── Insurance ──
-  // Populated now that EstimateRepo.GetAllAsync maps these through from
-  // EstimateHeader on the backend.
   insuranceId?: number;
   insDescription?: string;
   surveyorName?: string;
@@ -71,10 +67,8 @@ export interface EstimateListRow {
   policyNo?: string;
   insValidTill?: string;
   zeroDepo?: boolean;
-
-  // Job Card created from this estimate, if any — undefined/null until one
-  // has been created via "Create Job Card" and actually saved.
   jobCardNo?: number;
+  jobCardCreatedDate?: string;
 }
 
 export interface EstimatePagedResponse {

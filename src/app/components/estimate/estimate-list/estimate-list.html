@@ -125,7 +125,7 @@
                 <th>State</th>
                 <th>Job Type</th>
                 <th>Job Card No.</th>
-                <th>Created Date</th>
+                <th>JC_Create Date</th>
                 <th style="width: 80px;">Action</th>
               </tr>
             </thead>
@@ -140,10 +140,10 @@
                 <td>{{ item.customerState }}</td>
                 <td>{{ item.jobTypeName || '-' }}</td>
                 <td>
-                  <span *ngIf="item.jobCardNo" class="badge bg-success">{{ item.jobCardNo }}</span>
-                  <span *ngIf="!item.jobCardNo" class="text-muted">-</span>
+                    <span *ngIf="item.jobCardNo" class="badge bg-success">{{ item.jobCardNo }}</span>
+                    <span *ngIf="!item.jobCardNo" class="text-muted">-</span>
                 </td>
-                <td class="text-nowrap">{{ formatDate(item.createdDate) }}</td>
+                <td class="text-nowrap">{{ formatDate(item.jobCardCreatedDate) }}</td>
 
               <td class="text-center text-nowrap">
                   <button type="button" class="btn btn-outline-primary btn-sm me-1" title="Edit"
