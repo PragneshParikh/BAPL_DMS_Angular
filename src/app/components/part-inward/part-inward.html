@@ -120,9 +120,8 @@
                                         <th>CGST</th>
                                         <th>SGST</th>
                                         <th>IGST</th>
-                                        <th>Cess</th>
                                         <th>Amount</th>
-                                        <th>Sale Rate</th>
+                                        <th>MRP</th>
                                     </tr>
                                 </thead>
                                 <tbody class="align-middle">
@@ -141,13 +140,12 @@
                                         <td>{{ item.cgst }}</td>
                                         <td>{{ item.sgst }}</td>
                                         <td>{{ item.igst }}</td>
-                                        <td>{{ item.cess }}</td>
-                                        <td class="text-end">{{ item.itemMrp }}</td>
-                                        <td>{{ item.salerate }}</td>
+                                        <td class="text-end">{{ item.itemAmount | number:'1.2-2' }}</td>
+                                        <td>{{ item.itemMrp | number:'1.2-2' }}</td>
                                     </tr>
                                     <!-- Total Row -->
                                     <tr class="fw-bold table-secondary">
-                                        <td colspan="5" class="text-end">Total :</td>
+                                        <td colspan="6" class="text-end">Total :</td>
                                         <td class="text-center">{{totalQty}}</td>
                                         <td></td>
                                         <td></td>
@@ -156,9 +154,7 @@
                                         <td></td>
                                         <td></td>
                                         <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="text-end">{{totalAmount | number:'1.2-2'}}</td>
+                                        <td class="text-end">{{ totalAmount | number:'1.2-2'}}</td>
                                         <td></td>
                                     </tr>
                                 </tbody>
