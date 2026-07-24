@@ -9,6 +9,7 @@ import { PartsInwardService } from '../../core/services/partsinwardservice';
 import { LedgerMasterService } from '../../core/services/ledger-master';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TopbarComponent } from '../../layouts/topbar/topbar.component';
+import { NotificationService } from '../../core/services/notification-service';
 
 @Component({
   selector: 'app-part-inward',
@@ -18,7 +19,6 @@ import { TopbarComponent } from '../../layouts/topbar/topbar.component';
 })
 export class PartInward implements OnInit {
   @ViewChild('partsInwardForm') partsInwardForm!: NgForm;
-  @ViewChild(TopbarComponent) topbarComponent!: TopbarComponent;
 
   partsInwardData: any = {
     invoiceNo: '',
@@ -55,7 +55,8 @@ export class PartInward implements OnInit {
     private partInwardService: PartsInwardService,
     private ledgerMasterService: LedgerMasterService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
@@ -180,7 +181,7 @@ export class PartInward implements OnInit {
       next: (res) => {
         this.loader.hide();
         this.toaster.show("Data updated sucessfully.", { classname: 'bg-success text-white', delay: 5000 });
-        this.topbarComponent.getPartsInwardNotification();
+        this.notificationService.refreshPartsNotification.next();
         this.returnToList();
       },
       error: (err) => {
