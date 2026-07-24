@@ -50,6 +50,7 @@ export class JobCardAddForm {
   selectedChassis: string = '';
   invoiceNo: string = '';
   couponNo: string = '';
+  inwardType : string = '';
   modelName = '';
   registerNo = '';
   vehicleKms: number = 0;
@@ -402,6 +403,7 @@ export class JobCardAddForm {
 
     this.jobCardService.getAllInspectedChassis(this.dealerCode, this.jobTypeId).subscribe(res => {
       this.chassisList = res;
+      
 
       if (this.isEditMode && this.chassiseditData) {
         this.customerObj.saleDate = this.chassisList[0].saleDate?.split('T')[0];
@@ -588,6 +590,7 @@ export class JobCardAddForm {
 
     this.invoiceNo = selected.invoiceNo;
     this.couponNo = this.selectedChassis.slice(-13);
+    this.inwardType = selected.inwardType;
     this.customerObj.customerLedgerId = selected.customerLedgerId;
     this.customerObj.customerName = selected.customerName;
     this.customerObj.customerMobile = selected.customerMobile;
@@ -904,6 +907,7 @@ export class JobCardAddForm {
       servicetype: this.selectedServiceType || 0,
       serviceloc: this.selectedLocation || "",
       couponno: this.couponNo,
+      inwardType : this.inwardType,
       jobprefix: this.jobPrefix,
       jobinDate: this.jobInDate || null,
       jobinTime: this.jobInTime || null,
@@ -1051,6 +1055,8 @@ export class JobCardAddForm {
     this.selectedLocation = data.jobCardHeader.serviceloc;
 
     this.couponNo = data.jobCardHeader.couponno;
+    this.inwardType = data.jobCardHeader.inwardType;
+    this.inwardType = data.jobCardHeader.inwardType;
     this.jobPrefix = data.jobCardHeader.jobprefix;
     this.jobInDate = data.jobCardHeader.jobinDate;
     this.jobInTime = data.jobCardHeader.jobinTime;
@@ -1162,6 +1168,7 @@ export class JobCardAddForm {
 
     this.invoiceNo = '';
     this.couponNo = '';
+    this.inwardType = '';
     this.vehicleKms = 0;
     this.jobPrefix = '';
     this.jobInDate = '';

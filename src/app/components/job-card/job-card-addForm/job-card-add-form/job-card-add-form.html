@@ -204,6 +204,16 @@
                 <label>Coupon No</label>
                 <input class="form-control form-control-sm" [(ngModel)]="couponNo" readonly>
               </div>
+              <div class="col-md-4">
+                <label class="form-label d-block mb-1 ">Job Category</label>
+                <div class="btn-group w-auto" role="group">
+                  <input type="radio" class="btn-check" id="b2c" checked  value="B2C" [(ngModel)]="inwardType"> 
+                  <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2c">B2C</label>
+
+                  <input type="radio" class="btn-check" id="b2b"  value="B2B" [(ngModel)]="inwardType">
+                  <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2b">B2B</label>
+                </div>
+              </div>
 
               <h6 class="section-title">
                 <strong>Job Details</strong>
@@ -728,8 +738,8 @@
   </div>
   <!-- FOOTER -->
   <div class="card-footer d-flex justify-content-end gap-2">
-    <button type="button" class="btn btn-primary btn-sm" [disabled]="repairBillStatus === 'Billed' || (selectedJobtype == 1 && !isPdiSaved)"
-      (click)="saveJobCard()">
+    <button type="button" class="btn btn-primary btn-sm"
+      [disabled]="repairBillStatus === 'Billed' || (selectedJobtype == 1 && !isPdiSaved)" (click)="saveJobCard()">
       Save
     </button>
     <!--<button type="button" class="btn btn-primary btn-sm" [disabled]="!isPdiSaved" (click)="saveJobCard()">Save</button>-->
