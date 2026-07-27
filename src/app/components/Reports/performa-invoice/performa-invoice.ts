@@ -204,6 +204,7 @@ export class PerformaInvoice implements OnInit {
   getBillById(id: number) {
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
+       
         this.saleBill = res;
         this.getDealerDetails(this.saleBill.dealerCode);
         if (this.saleBill.status == "Invoiced") {
@@ -215,6 +216,7 @@ export class PerformaInvoice implements OnInit {
 
           this.ledgerService.getLedgerById(this.saleBill.ledgerId).subscribe({
             next: (ledgerRes) => {
+               
               this.CustomerLedger = ledgerRes;
             },
             error: (err) => console.error(err)

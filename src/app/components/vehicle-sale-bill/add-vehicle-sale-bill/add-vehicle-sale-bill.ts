@@ -373,6 +373,8 @@ export class AddVehicleSaleBill implements OnInit {
     this.loader.show();
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
+        console.log(res);
+        
         this.loader.hide();
         this.model.location =res.location;
         this.selectedCustomerId = res.ledgerId;
@@ -1308,6 +1310,7 @@ private performDelete() {
     }
   });
 }
+
 
 
 }

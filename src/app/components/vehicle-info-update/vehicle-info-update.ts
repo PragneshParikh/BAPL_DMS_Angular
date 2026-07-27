@@ -91,7 +91,7 @@ export class VehicleInfoUpdate implements OnInit {
       dealerCode = this.storageService.getDealerCode();
     }
 
-    this.vehicleInfoService
+       this.vehicleInfoService
       .getVehicleInfo(regNo ?? undefined, chassisNo ?? undefined, dealerCode ?? undefined)
       .subscribe({
         next: (response) => {
@@ -133,6 +133,7 @@ export class VehicleInfoUpdate implements OnInit {
 
           this.showVehicleDetails = true;
           this.loader.hide();
+          
 
         },
         error: (error) => {

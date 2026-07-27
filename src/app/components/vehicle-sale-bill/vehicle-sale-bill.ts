@@ -1,4 +1,4 @@
-import { Component, NgModule } from '@angular/core';
+import { Component, HostListener, NgModule } from '@angular/core';
 import { VehicleSaleBillService } from '../../core/services/vehicle-sale-bill-service';
 import { VehicleSaleBillResponseViewModel } from '../../ViewModels/VehicleSaleBill';
 import { FormsModule, NgModel } from '@angular/forms';
@@ -62,9 +62,14 @@ export class VehicleSaleBill {
   selectedInvoiceBills: any[] = [];
   dealers: any;
   filteredDealers: any[];
-  selectedDealer: string='All Dealers';
+  selectedDealer: string = 'All Dealers';
   showDropdown: boolean;
-
+expandedBillId: number | null = null;
+  expandedBill: null;
+@HostListener('document:click')
+closePopup(): void {
+  this.expandedBill = null;
+}
   constructor(private service: VehicleSaleBillService,
     private router: Router, private dealerService: DealerService,
     private loader: LoaderService,
@@ -138,6 +143,8 @@ export class VehicleSaleBill {
     this.service.getAllVehicleSaleBills(this.dealerCode, this.searchText, from, to, Status)
       .subscribe({
         next: (res) => {
+          console.log(res);
+
           this.vehicleBills = res;
           this.filteredBills = [...this.vehicleBills];
           this.updatePagination();
@@ -344,5 +351,14 @@ export class VehicleSaleBill {
       a.click();
       window.URL.revokeObjectURL(url);
     });
+  }
+
+
+  toggleChassis(item: any, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    this.expandedBill = this.expandedBill === item ? null : item;
   }
 }

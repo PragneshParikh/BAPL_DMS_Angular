@@ -260,7 +260,8 @@
     </table>
 
     <!-- TAX SUMMARY -->
-    <table class="table table-sm mb-0" style="width:100%; border-collapse:collapse; border:2px solid #000;"style="font-size: 10px;">
+    <table class="table table-sm mb-0" style="width:100%; border-collapse:collapse; border:2px solid #000;"
+        style="font-size: 10px;">
 
         <!-- Title -->
         <tr>
@@ -438,72 +439,72 @@
 
         <!-- Data Row -->
         <!-- Data Rows -->
-<tr *ngFor="let item of billData?.details; let i = index">
+        <tr *ngFor="let item of billData?.details; let i = index">
 
-    <td style="border:1px solid #000; text-align:center;">
-        {{ i + 1 }}
-    </td>
+            <td style="border:1px solid #000; text-align:center;">
+                {{ i + 1 }}
+            </td>
 
-    <td style="border:1px solid #000; text-align:right;">
-        {{ getTaxableAmount(item) | number:'1.2-2' }}
-    </td>
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTaxableAmount(item) | number:'1.2-2' }}
+            </td>
 
-    <td style="border:1px solid #000; text-align:right;">
-        {{ item.sgstper }}
-    </td>
+            <td style="border:1px solid #000; text-align:right;">
+                {{ item.sgstper }}
+            </td>
 
-    <td style="border:1px solid #000; text-align:right;">
-        {{ ((getTaxableAmount(item) * (item.sgstper || 0)) / 100) | number:'1.2-2' }}
-    </td>
+            <td style="border:1px solid #000; text-align:right;">
+                {{ ((getTaxableAmount(item) * (item.sgstper || 0)) / 100) | number:'1.2-2' }}
+            </td>
 
-    <td style="border:1px solid #000; text-align:right;">
-        {{ item.cgstper }}
-    </td>
+            <td style="border:1px solid #000; text-align:right;">
+                {{ item.cgstper }}
+            </td>
 
-    <td style="border:1px solid #000; text-align:right;">
-        {{ ((getTaxableAmount(item) * (item.cgstper || 0)) / 100) | number:'1.2-2' }}
-    </td>
+            <td style="border:1px solid #000; text-align:right;">
+                {{ ((getTaxableAmount(item) * (item.cgstper || 0)) / 100) | number:'1.2-2' }}
+            </td>
 
-    <td style="border:1px solid #000; text-align:right;">
-        {{ item.igstper }}
-    </td>
+            <td style="border:1px solid #000; text-align:right;">
+                {{ item.igstper }}
+            </td>
 
-    <td style="border:1px solid #000; text-align:right;">
-        {{ ((getTaxableAmount(item) * (item.igstper || 0)) / 100) | number:'1.2-2' }}
-    </td>
+            <td style="border:1px solid #000; text-align:right;">
+                {{ ((getTaxableAmount(item) * (item.igstper || 0)) / 100) | number:'1.2-2' }}
+            </td>
 
-</tr>
+        </tr>
 
         <!-- Total Row -->
-       <tr style="font-weight:bold;">
+        <tr style="font-weight:bold;">
 
-    <td style="border:1px solid #000; text-align:center;">
-        Total
-    </td>
+            <td style="border:1px solid #000; text-align:center;">
+                Total
+            </td>
 
-    <td style="border:1px solid #000; text-align:right;">
-        {{ getTotalTaxableAmount() | number:'1.2-2' }}
-    </td>
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTotalTaxableAmount() | number:'1.2-2' }}
+            </td>
 
-    <td style="border:1px solid #000;"></td>
+            <td style="border:1px solid #000;"></td>
 
-    <td style="border:1px solid #000; text-align:right;">
-        {{ getTotalSGSTCalculated() | number:'1.2-2' }}
-    </td>
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTotalSGSTCalculated() | number:'1.2-2' }}
+            </td>
 
-    <td style="border:1px solid #000;"></td>
+            <td style="border:1px solid #000;"></td>
 
-    <td style="border:1px solid #000; text-align:right;">
-        {{ getTotalCGSTCalculated() | number:'1.2-2' }}
-    </td>
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTotalCGSTCalculated() | number:'1.2-2' }}
+            </td>
 
-    <td style="border:1px solid #000;"></td>
+            <td style="border:1px solid #000;"></td>
 
-    <td style="border:1px solid #000; text-align:right;">
-        {{ getTotalIGSTCalculated() | number:'1.2-2' }}
-    </td>
+            <td style="border:1px solid #000; text-align:right;">
+                {{ getTotalIGSTCalculated() | number:'1.2-2' }}
+            </td>
 
-</tr>
+        </tr>
 
     </table>
 

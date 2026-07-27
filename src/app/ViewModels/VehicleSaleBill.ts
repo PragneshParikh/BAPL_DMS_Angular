@@ -60,6 +60,7 @@ export interface VehicleSaleBillDetailVM {
   narration: string;
   finalAmount: number;
   isAgainstExchange: boolean;
+  modelName?:string;
 }
 
 export interface VehicleSaleBillResponseViewModel {

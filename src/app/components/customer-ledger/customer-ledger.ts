@@ -214,6 +214,7 @@ export class CustomerLedger {
     this.loader.show();
     this.ledgerService.getLedgerById(id).subscribe({
       next: (res) => {
+      
 
         this.formData = {
           id: res.id,
@@ -288,7 +289,6 @@ export class CustomerLedger {
       this.formData.dealerCode = this.formData.dealerCode;
     }
     const isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-
     this.formData.ledgerVisibility = (isSuperAdmin && !this.isExternalCall) ? 'All' : dealerCode;
     if (!form.valid) return;
     this.loader.show();

@@ -307,7 +307,6 @@ export class TopbarComponent implements OnInit {
     this.loader.show();
     this.vehicleInwardService.getByVehicleStatus(false, this.dealerCode).subscribe({
       next: (result) => {
-
         this.vehicleInward = result;
 
         // Group by invoice number
@@ -341,8 +340,7 @@ export class TopbarComponent implements OnInit {
     this.loader.show();
     this.vehicleInwardService.getByVehicleStatus(false, this.dealerCode).subscribe({
       next: (result) => {
-
-        this.vehicleInward = result;
+          this.vehicleInward = result;
 
         // Group by invoice number
         const groupedInvoices = this.vehicleInward.filter((p: any) => p.isD2d).reduce((acc: any, item: any) => {
