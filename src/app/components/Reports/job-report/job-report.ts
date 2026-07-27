@@ -284,12 +284,14 @@ export class JobReportComponent implements OnInit, OnDestroy {
     ];
 
     const fmt = (d: any) => d ? new Date(d).toLocaleDateString() : '';
+    const jobEndDate = (row: JobReportViewModel) =>
+    row.jobStatus === 'Closed' && row.closedDate ? fmt(row.closedDate) : '';
 
     const csvData = [
       headers,
       ...data.map(row => [
         row.srNo, row.dealerCode, row.dealerName, row.dealerLocation, row.city, row.state,
-        this.getDaysCount(row) ?? '', fmt(row.jobInDate), fmt(row.estimatedDeliveryDate), row.jobStatus,
+        this.getDaysCount(row) ?? '', fmt(row.jobInDate), jobEndDate(row), row.jobStatus,
         row.jobType, row.serviceHead, row.serviceType, row.kms,
         row.partyName, row.partyMobileNo, row.chassisNo, row.regNo,
         row.motorNo, row.batteryNo, row.chargerNo, row.customerVoice, row.customerCode,
@@ -390,5 +392,12 @@ export class JobReportComponent implements OnInit, OnDestroy {
 
     this.filteredChassisList = source.slice(0, JobReportComponent.MAX_CHASSIS_SUGGESTIONS);
     this.showChassisDropdown = true;
+  }
+
+    getJobEndDate(item: JobReportViewModel): string {
+    if (item.jobStatus === 'Closed' && item.closedDate) {
+      return this.formatDate(item.closedDate);
+    }
+    return '-'; // still open — there is no actual end date yet
   }
 }

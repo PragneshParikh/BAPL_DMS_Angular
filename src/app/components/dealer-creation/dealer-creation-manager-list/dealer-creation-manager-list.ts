@@ -8,8 +8,8 @@ import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { ReportService } from '../../../core/services/report.service';
 import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model';
-import { RoleService } from '../../../core/services/Deptrole';
-import { RoleModel } from '../../../ViewModels/RoleModel';
+import { BgRoleService } from '../../../core/services/bg-role';
+import { BgRoleMappingModel } from '../../../ViewModels/models/BgRoleMappingModel';
 
 @Component({
   selector: 'app-dealer-creation-manager-list',
@@ -42,9 +42,12 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   editForm!: FormGroup;
 
   // ── Role search (autosuggest, inside the Edit popup) ──
-  allRoles: RoleModel[] = [];
+  // Sourced from BG Role Master's curated mapping list (BgRoleCategoryMapping),
+  // not the raw full AspNetRoles table — only roles set up via BG Role Master
+  // are assignable here.
+  allRoles: BgRoleMappingModel[] = [];
   roleSearchText = '';
-  filteredRoles: RoleModel[] = [];
+  filteredRoles: BgRoleMappingModel[] = [];
   showRoleDropdown = false;
 
   private destroy$ = new Subject<void>();
@@ -54,7 +57,7 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private dealerService: DealerCreationManagerService,
     private reportService: ReportService,
-    private roleService: RoleService,
+    private bgRoleService: BgRoleService,
     private loader: LoaderService,
     private toaster: ToastService
   ) {
@@ -77,8 +80,6 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     this.loadDealers();
     this.loadRoles();
 
-    // Auto-search — dealer selection (via autosuggest) or free-text search
-    // both re-run the list after a short pause, no Search button needed.
     this.filterForm.valueChanges
       .pipe(
         debounceTime(DealerCreationManagerList.AUTO_SEARCH_DEBOUNCE_MS),
@@ -97,8 +98,6 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   }
 
   private loadDealerDropdown(): void {
-    // Reuses the same dealer dropdown source as Job Card Report —
-    // no separate endpoint needed here.
     this.reportService.getDealerDropdown()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -107,14 +106,12 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
       });
   }
 
-  // Loads every system role once — same AspNetRoles list that powers Role
-  // Master / BG Role Master — for the searchable Role field in the Edit popup.
   private loadRoles(): void {
-    this.roleService.getRoles()
+    this.bgRoleService.getMappings()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (res: RoleModel[]) => this.allRoles = res ?? [],
-        error: (err) => console.error('Failed to fetch roles', err)
+        next: (res: BgRoleMappingModel[]) => this.allRoles = res ?? [],
+        error: (err) => console.error('Failed to fetch BG role mappings', err)
       });
   }
 
@@ -183,9 +180,6 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
       isActive: raw.isActive
     }).subscribe({
       next: () => {
-        // Role assignment only fires if a role is actually selected — an
-        // empty/untouched Role field leaves any existing assignment as-is
-        // rather than clearing it.
         if (raw.roleId) {
           this.dealerService.assignRole(this.editTarget!.id, raw.roleId).subscribe({
             next: () => this.finishSave(),
@@ -220,9 +214,6 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     this.showRoleDropdown = false;
   }
 
-  // Soft delete — DealerMaster.Dealercode is referenced across
-  // ChassisDetails, JobCardHeader, ItemMaster, LocationMaster, and more,
-  // so history tied to a dealer is preserved rather than erased.
   onDelete(dealer: DealerListModel): void {
     if (!confirm(`Delete dealer "${dealer.compname}" (${dealer.dealercode})? This marks it inactive; history tied to it is preserved.`)) return;
 
@@ -262,10 +253,6 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     return isNaN(d.getTime()) ? '-' : d.toLocaleDateString('en-IN');
   }
 
-  // ═══════════════════════════════════════════════════════════════════
-  // DEALER FILTER — AUTOSUGGEST
-  // ═══════════════════════════════════════════════════════════════════
-
   onDealerSearchInput(): void {
     this.updateDealerSuggestions();
     if (!this.dealerSearchText.trim()) {
@@ -304,14 +291,8 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     this.showDealerDropdown = true;
   }
 
-  // ═══════════════════════════════════════════════════════════════════
-  // ROLE SEARCH (autosuggest, inside the Edit popup)
-  // ═══════════════════════════════════════════════════════════════════
-
   onRoleSearchInput(): void {
     this.updateRoleSuggestions();
-    // Typing invalidates a previously-picked exact match until a suggestion
-    // is clicked again.
     this.editForm.patchValue({ roleId: '' });
   }
 
@@ -323,9 +304,9 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     setTimeout(() => { this.showRoleDropdown = false; }, 150);
   }
 
-  selectRoleSuggestion(role: RoleModel): void {
-    this.roleSearchText = role.name;
-    this.editForm.patchValue({ roleId: role.id });
+  selectRoleSuggestion(role: BgRoleMappingModel): void {
+    this.roleSearchText = role.roleName;
+    this.editForm.patchValue({ roleId: role.roleId });
     this.showRoleDropdown = false;
   }
 
@@ -338,7 +319,7 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   private updateRoleSuggestions(): void {
     const text = this.roleSearchText.trim().toLowerCase();
     this.filteredRoles = text
-      ? this.allRoles.filter(r => r.name?.toLowerCase().includes(text))
+      ? this.allRoles.filter(r => r.roleName?.toLowerCase().includes(text))
       : [...this.allRoles];
     this.showRoleDropdown = true;
   }

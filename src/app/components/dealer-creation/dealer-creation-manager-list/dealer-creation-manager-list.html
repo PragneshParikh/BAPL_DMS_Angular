@@ -187,7 +187,7 @@
               style="font-size: 13px;"
               *ngFor="let r of filteredRoles"
               (mousedown)="selectRoleSuggestion(r)">
-              {{ r.name }}
+              {{ r.roleName }} <span class="text-muted">({{ r.category }})</span>
             </button>
             <span *ngIf="filteredRoles.length === 0"
               class="list-group-item text-muted py-1 px-2" style="font-size: 13px;">

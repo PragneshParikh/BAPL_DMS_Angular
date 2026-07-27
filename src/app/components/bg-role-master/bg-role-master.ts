@@ -18,7 +18,6 @@ export class BgRoleMaster implements OnInit {
   category = '';
   categories: { id: string; name: string }[] = [];
 
-  // ── Edit mode ──
   isEditMode = false;
   mappingId: number | null = null;
 
@@ -66,30 +65,30 @@ export class BgRoleMaster implements OnInit {
   }
 
   save(): void {
-  if (!this.roleName.trim() || !this.category) {
-    Swal.fire('Validation', 'Role name and category are required', 'warning');
-    return;
-  }
+    if (!this.roleName.trim() || !this.category) {
+      Swal.fire('Validation', 'Role name and category are required', 'warning');
+      return;
+    }
 
-  if (this.isEditMode && this.mappingId) {
-    this.bgRoleService.updateMapping(this.mappingId, this.roleName.trim(), this.category).subscribe({
+    if (this.isEditMode && this.mappingId) {
+      this.bgRoleService.updateMapping(this.mappingId, this.roleName.trim(), this.category).subscribe({
+        next: () => {
+          Swal.fire('Saved', 'BG Role updated', 'success');
+          this.router.navigate(['/bg-role-master']);
+        },
+        error: (err) => Swal.fire('Error', err?.error?.message || 'Update failed', 'error')
+      });
+      return;
+    }
+
+    this.bgRoleService.createWithCategory({ name: this.roleName.trim(), category: this.category }).subscribe({
       next: () => {
-        Swal.fire('Saved', 'BG Role updated', 'success');
+        Swal.fire('Saved', 'BG Role saved and mapped to category', 'success');
         this.router.navigate(['/bg-role-master']);
       },
-      error: (err) => Swal.fire('Error', err?.error?.message || 'Update failed', 'error')
+      error: (err) => Swal.fire('Error', err?.error?.message || 'Save failed', 'error')
     });
-    return;
   }
-
-  this.bgRoleService.createWithCategory({ name: this.roleName.trim(), category: this.category }).subscribe({
-    next: () => {
-      Swal.fire('Saved', 'BG Role saved and mapped to category', 'success');
-      this.router.navigate(['/bg-role-master']);
-    },
-    error: (err) => Swal.fire('Error', err?.error?.message || 'Save failed', 'error')
-  });
-}
 
   backToList(): void {
     this.router.navigate(['/bg-role-master']);
