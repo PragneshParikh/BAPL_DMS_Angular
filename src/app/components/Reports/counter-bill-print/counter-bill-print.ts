@@ -45,7 +45,6 @@ export class CounterBillPrint implements OnInit {
       .subscribe({
         next: (response) => {
           this.billData = response;
-
           this.amountInWords = this.currencyService.convertToWords(
             this.getInvoiceTotal()
           );

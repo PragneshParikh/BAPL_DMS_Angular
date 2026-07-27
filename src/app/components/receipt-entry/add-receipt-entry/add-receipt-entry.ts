@@ -263,7 +263,13 @@ export class AddReceiptEntry implements OnInit {
 
   fetchLocations(): void {
     this.getNextReceiptNo();
-    const dealerCode = this.storageService.getDealerCode();
+    let dealerCode =null;
+    const isSuoerAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    if(!isSuoerAdmin)
+    {
+
+      dealerCode=this.storageService.getDealerCode();
+    }
 
     this.locationService.getLocationList(dealerCode).subscribe({
       next: (data: any[]) => {

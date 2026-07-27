@@ -524,7 +524,7 @@
                                         <tr>
                                             <th>Action</th>
                                             <th>Sr No</th>
-                                            <th>Chasis/Engine No</th>
+                                            <th>Chasis/Motor No</th>
                                             <th>Model</th>
                                             <th>Colour</th>
                                             <th>Mfg Year</th>
@@ -578,7 +578,7 @@
                                             </td>
 
                                             <td>{{ i + 1 }}</td>
-                                            <td>{{ row.chassisNo }}</td>
+                                            <td>{{ row.chassisNo }}<br>{{row.motorNo}}</td>
                                             <td>{{ row.modelName || row.model }}</td>
                                             <td>{{ row.colour }}</td>
                                             <td>{{ row.mfgYear }}</td>

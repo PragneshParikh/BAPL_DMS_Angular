@@ -72,6 +72,7 @@ export class HsrpInward implements OnInit {
     this.hsrpService.getHSRPInward(dealerCode, fromDate, toDate)
       .subscribe({
         next: (res: any) => {
+
           this.orders = (res || []).map((x: any) => ({
             ...x
           }));

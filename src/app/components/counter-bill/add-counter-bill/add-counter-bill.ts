@@ -275,7 +275,7 @@ export class AddCounterBill implements OnInit {
       next: (res) => {
 
         this.parties = res.filter(p => (p.ledgerType?.toLowerCase() === 'dealer' && p.dealerCode !== this.dealerCode) || (p.ledgerType?.toLowerCase() === 'party') || (p.ledgerType.toLowerCase() === 'institunoial'));
-        //this.parties = res.filter(p => p.ledgerType?.toLowerCase() === 'party');
+       
         if (this.model.customerName && !this.selectedCustomerId) {
           const match = this.parties.find(p => p.ledgerName?.toLowerCase() === this.model.customerName?.toLowerCase());
           if (match) {
@@ -722,6 +722,7 @@ export class AddCounterBill implements OnInit {
   }
 
   save(): void {
+  
 
     this.loader.show();
 
