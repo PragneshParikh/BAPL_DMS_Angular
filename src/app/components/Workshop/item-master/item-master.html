@@ -148,6 +148,23 @@
 
   <div class="modal-body">
     <div class="row">
+       <div class="col-md-2">
+        <label class="form-label">
+          Item Type <span class="text-danger">*</span>
+        </label>
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.itemtype" name="itemtype">
+          <option [ngValue]="1">Vehicle</option>
+          <option [ngValue]="2" selected>Parts</option>
+          <option [ngValue]="3">Labour</option>
+          <option [ngValue]="4">Accessory</option>
+          <option [ngValue]="6">Outside Work</option>
+          <option [ngValue]="7">Complain</option>
+          <option [ngValue]="8">Tyre</option>
+          <option [ngValue]="9">Oil</option>
+          <option [ngValue]="10">Gift</option>
+          <option [ngValue]="12">Battery/E-Device</option>
+        </select>
+      </div>
       <div class="col-md-2">
         <label class="form-label">Item Type</label>
         <input class="form-control form-control-sm" [value]="selectedItem?.itemtype == 1 ? 'Vehicle' : 'Parts'"
@@ -187,7 +204,7 @@
         <input class="form-control form-control-sm" [value]="" readonly>
       </div>
       <div class="col-md-2">
-         <label class="form-label">
+        <label class="form-label">
           Supplier
         </label>
         <select class="form-select form-select-sm" [(ngModel)]="itemObj.supplierId" name="supplierId">
@@ -200,9 +217,17 @@
 
         </select>
       </div>
+      <!-- UOM -->
       <div class="col-md-2">
-        <label class="form-label">UOM</label>
-        <input class="form-control form-control-sm" [value]="'PCS'" readonly>
+        <label class="form-label">
+          UOM
+        </label>
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.uom" name="uom">
+          <option value="39">Kit</option>
+          <option value="40">Make</option>
+          <option value="42">PCS</option>
+          <option value="56">Unit</option>
+        </select>
       </div>
 
       <div class="col-md-2">
@@ -326,6 +351,16 @@
           </label>
         </div>
       </div>
+      <div class="col-md-2">
+        <label class="form-label">Active</label><br>
+        <div class="form-check form-switch d-inline-block">
+          <input type="checkbox" class="form-check-input" name="status" #status="ngModel"
+            [(ngModel)]="selectedItem.status">
+          <label class="form-check-label small" for="status">
+            {{ selectedItem.status ? 'Yes' : 'No' }}
+          </label>
+        </div>
+      </div>
       <div class="col-md-12">
         <label class="form-label">Remarks</label>
         <input class="form-control form-control-sm" [(ngModel)]="selectedItem.remarks">
@@ -363,7 +398,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button class="btn btn-primary btn-sm" (click)="updateItem()">Update</button>
+    <button class="btn btn-primary btn-sm" (click)="updateItem()" [disabled]="!isSuperAdmin">Update</button>
     <button class="btn btn-danger btn-sm" (click)="modal.close()">Close</button>
   </div>
 </ng-template>
@@ -525,7 +560,7 @@
 
       </div>
       <div class="col-md-2">
-         <label class="form-label">
+        <label class="form-label">
           Supplier
         </label>
         <select class="form-select form-select-sm" [(ngModel)]="itemObj.supplierId" name="supplierId">

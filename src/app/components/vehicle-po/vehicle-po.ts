@@ -383,9 +383,11 @@ export class VehiclePO implements OnInit {
       next: (res: any[]) => {
         this.modelList = Array.isArray(res)
           ? res
+            .filter(item => item.status === true)
             .filter(item => item.grpid === 6 || item.grppid === 6 || !item.grpid)
             .sort((a, b) => a.itemdesc.localeCompare(b.itemdesc))
           : [];
+           console.log("res",res);
         // Supplement missing info in purchaseDetails if needed
         if (this.purchaseDetails.length > 0) {
           this.purchaseDetails.forEach(item => {

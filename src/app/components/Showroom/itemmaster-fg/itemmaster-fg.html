@@ -145,8 +145,15 @@
         <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 11 ? 'Spares' : 'FG'" readonly>
       </div>
       <div class="col-md-2">
-        <label class="form-label">UOM</label>
-        <input class="form-control form-control-sm" [value]="'Pcs'" readonly>
+        <label class="form-label">
+          UOM
+        </label>
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.uom" name="uom">
+          <option value="39">Kit</option>
+          <option value="40">Make</option>
+          <option value="42">PCS</option>
+          <option value="56">Unit</option>
+        </select>
       </div>
       <div class="col-md-2">
         <label class="form-label">HSN Code</label>
@@ -242,7 +249,7 @@
       </div>
       <div class="col-md-2">
         <label class="form-label">FAME || INCENTIVE</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.fame2amount" readonly>
+        <input class="form-control form-control-sm" [value]="selectedItem?.fame2amount">
       </div>
       <div class="col-md-2">
         <label class="form-label">OEM Model Name</label>
@@ -260,13 +267,18 @@
         <label class="form-label">Warranty Period</label>
         <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
-      <div class="col-md-2">
+       <div class="col-md-2">
         <label class="form-label">Month/Year</label>
-        <input class="form-control form-control-sm" [value]="'Month'" readonly>
+        <select class="form-select form-select-sm" name="durationType" [(ngModel)]="selectedItem.warrantyDurationType"
+          >
+          <option *ngFor="let durationType of durationTypes" [value]="durationType.id">
+            {{ durationType.title }}
+          </option>
+        </select>
       </div>
       <div class="col-md-2">
         <label class="form-label">Warranty Kms.</label>
-        <input class="form-control form-control-sm" [value]="'0'" readonly>
+        <input class="form-control form-control-sm" [value]="'0'">
       </div>
       <div class="col-md-2">
         <label class="form-label">Form-22 Header</label>
@@ -284,10 +296,21 @@
         <label class="form-label">No. Of Tyres</label>
         <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
+      <div class="col-md-2">
+        <label class="form-label">Active</label><br>
+        <div class="form-check form-switch d-inline-block">
+          <input type="checkbox" class="form-check-input" name="status" #status="ngModel"
+            [(ngModel)]="selectedItem.status">
+          <label class="form-check-label small" for="status">
+            {{ selectedItem.status ? 'Yes' : 'No' }}
+          </label>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="modal-footer">
+    <button class="btn btn-primary btn-sm" (click)="updateItem()" [disabled]="!isSuperAdmin">Update</button>
     <button class="btn btn-light btn-sm" (click)="modal.close()">Close</button>
   </div>
 

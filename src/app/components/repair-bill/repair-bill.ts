@@ -348,6 +348,7 @@ export class RepairBill implements OnInit {
     this.showPopup = false;
   }
   loadJobCardList(): void {
+    debugger;
     let dealerCode = '';
     if (!this.isSuperAdmin) {
       dealerCode = this.storageService.getDealerCode();
