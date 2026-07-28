@@ -30,6 +30,7 @@ export class PartInward implements OnInit {
     partyCode: '',
     sourceType: '',
     isAccepted: false,
+    poType: 'B2C'
   }
 
   page = 1;
@@ -132,7 +133,8 @@ export class PartInward implements OnInit {
           documentNo: res.documentNo,
           partyCode: 'LED1',
           sourceType: 'erp',
-          isAccepted: res.isAccepted
+          isAccepted: res.isAccepted,
+          poType: 'B2C'
         }
         this.partsPurchaseDetails = res.partInwards;
 
