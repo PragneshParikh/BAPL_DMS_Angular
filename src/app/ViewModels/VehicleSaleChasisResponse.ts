@@ -56,7 +56,7 @@ export interface VehicleSaleListChasisResponse {
   convertorNo?: string;
   chargerNoFull?: string;
   controllerNoFull?: string;
-
+motorNo?:string;
   key?: string;
   book?: string;
 

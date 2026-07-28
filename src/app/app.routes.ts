@@ -84,7 +84,9 @@ import { PartInward } from './components/part-inward/part-inward';
 import { PartInwardList } from './components/part-inward/part-inward-list/part-inward-list';
 import { BgRoleMasterList } from './components/bg-role-master/bg-role-master-list/bg-role-master-list';
 import { BgRoleMaster } from './components/bg-role-master/bg-role-master';
-import { DealerCreationManagerList } from './components/dealer-creation/dealer-creation-manager-list/dealer-creation-manager-list';;
+import { DealerCreationManagerList } from './components/dealer-creation/dealer-creation-manager-list/dealer-creation-manager-list';
+import { WhoAmI } from './components/who-am-i/who-am-i';
+;
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },

@@ -256,16 +256,16 @@
                 </div>
 
                 <!-- PAGINATION -->
-                <div class="row mt-3">
-                    <div class="col-md-12 d-flex justify-content-end">
+                
+            </div>
+            <div class="row mt-5">
+                <div class="col-md-12 d-flex justify-content-end">
 
-                        <ngb-pagination [collectionSize]="filteredBills.length" [(page)]="page" [pageSize]="pageSize"
-                            (pageChange)="onPageChange($event)" [boundaryLinks]="true">
-                        </ngb-pagination>
+                    <ngb-pagination [collectionSize]="filteredBills.length" [(page)]="page" [pageSize]="pageSize"
+                        (pageChange)="onPageChange($event)" [maxSize]="5" [boundaryLinks]="true">
+                    </ngb-pagination>
 
-                    </div>
                 </div>
-
             </div>
         </div>
 
