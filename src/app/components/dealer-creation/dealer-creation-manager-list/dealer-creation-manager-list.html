@@ -1,5 +1,5 @@
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-  <h4 class="mb-sm-0">Dealer Creation Manager</h4>
+  <h4 class="mb-sm-0">Dealer Role Assignment</h4>
   <span class="badge bg-light text-dark border px-3 py-2 fs-6">
     Total Records: {{ totalRecords }}
   </span>
@@ -90,25 +90,114 @@
                 <th>Mail Id</th>
                 <th>Creation Date</th>
                 <th>Status</th>
-                <th style="width: 140px;" class="text-center">Action</th>
+                <th style="width: 130px;" class="text-center">Action</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let dealer of dealerList">
-                <td class="fw-semibold">{{ dealer.dealercode }}</td>
-                <td>{{ dealer.compname }}</td>
-                <td>{{ dealer.email }}</td>
-                <td class="text-nowrap">{{ formatDate(dealer.createdDate) }}</td>
-                <td>
-                  <span class="badge" [ngClass]="dealer.isActive ? 'bg-success' : 'bg-secondary'">
-                    {{ dealer.isActive ? 'Active' : 'Inactive' }}
-                  </span>
-                </td>
-                <td class="text-center">
-                  <button class="btn btn-sm btn-outline-primary me-1" (click)="onEdit(dealer)">Edit</button>
-                  <button class="btn btn-sm btn-danger" [disabled]="!dealer.isActive" (click)="onDelete(dealer)">Delete</button>
-                </td>
-              </tr>
+              <ng-container *ngFor="let dealer of dealerList">
+                <tr>
+                  <td class="fw-semibold">{{ dealer.dealercode }}</td>
+                  <td>
+                    <button type="button"
+                      class="btn btn-link p-0 text-start fw-normal text-decoration-none d-flex align-items-center gap-1"
+                      (click)="onToggleDealerLocations(dealer)">
+                      <i [class]="expandedDealerId === dealer.id ? 'ri-arrow-down-s-line' : 'ri-arrow-right-s-line'"></i>
+                      {{ dealer.compname }}
+                    </button>
+                  </td>
+                  <td>{{ dealer.email }}</td>
+                  <td class="text-nowrap">{{ formatDate(dealer.createdDate) }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="dealer.isActive ? 'bg-success' : 'bg-secondary'">
+                      {{ dealer.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <button class="btn btn-sm btn-outline-primary me-1" title="Edit" (click)="onEdit(dealer)">
+                      <i class="ri-edit-line"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary me-1" title="Menu Access" (click)="onMenuAccess(dealer)">
+                      <i class="ri-list-check-2"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" title="Delete" [disabled]="!dealer.isActive" (click)="onDelete(dealer)">
+                      <i class="ri-delete-bin-2-line"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Expanded locations row — only rendered for the currently expanded dealer -->
+                <tr *ngIf="expandedDealerId === dealer.id">
+                  <td colspan="6" class="p-0">
+                    <div class="p-3 bg-light border-top">
+
+                      <div *ngIf="locationsLoading" class="text-center py-3">
+                        <div class="spinner-border spinner-border-sm text-primary"></div>
+                      </div>
+
+                      <div *ngIf="!locationsLoading && locationsError" class="alert alert-danger mb-0">
+                        {{ locationsError }}
+                      </div>
+
+                      <ng-container *ngIf="!locationsLoading && !locationsError">
+                        <table class="table table-sm table-bordered mb-2 bg-white">
+                          <thead class="table-light">
+                            <tr>
+                              <th style="width: 40px;" class="text-center">
+                                <input type="checkbox" [checked]="allLocationsSelected" (change)="toggleSelectAllLocations()">
+                              </th>
+                              <th>Location Code</th>
+                              <th>Location Name</th>
+                              <th style="width: 100px;">Status</th>
+                              <th style="width: 70px;" class="text-center">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let loc of dealerLocations">
+                              <td class="text-center">
+                                <input type="checkbox"
+                                  [checked]="selectedLocationIds.has(loc.id)"
+                                  (change)="toggleLocationSelection(loc)">
+                              </td>
+                              <td>{{ loc.locCode }}</td>
+                              <td>{{ loc.locName }}</td>
+                              <td>
+                                <span class="badge" [ngClass]="loc.isActive ? 'bg-success' : 'bg-secondary'">
+                                  {{ loc.isActive ? 'Active' : 'Inactive' }}
+                                </span>
+                              </td>
+                              <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary" title="Edit" (click)="onEditLocation(loc)">
+                                  <i class="ri-edit-line"></i>
+                                </button>
+                              </td>
+                            </tr>
+                            <tr *ngIf="dealerLocations.length === 0">
+                              <td colspan="5" class="text-center text-muted py-3">No locations found for this dealer.</td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <div class="d-flex justify-content-between align-items-center" *ngIf="dealerLocations.length > 0">
+                          <small class="text-muted">{{ selectedLocationIds.size }} selected</small>
+                          <div>
+                            <button class="btn btn-outline-success btn-sm me-2"
+                              [disabled]="selectedLocationIds.size === 0 || bulkActionLoading"
+                              (click)="bulkUpdateLocationStatus(true)">
+                              Activate Selected
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm"
+                              [disabled]="selectedLocationIds.size === 0 || bulkActionLoading"
+                              (click)="bulkUpdateLocationStatus(false)">
+                              Deactivate Selected
+                            </button>
+                          </div>
+                        </div>
+                      </ng-container>
+
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
             </tbody>
           </table>
         </div>
@@ -138,7 +227,7 @@
 
 </div>
 
-<!-- ── Inline Edit modal ─────────────────────────────────────────────── -->
+<!-- ── Dealer Edit modal ─────────────────────────────────────────────── -->
 <div *ngIf="showEditModal"
   class="d-flex align-items-center justify-content-center"
   style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 2000; padding: 16px;">
@@ -187,7 +276,7 @@
               style="font-size: 13px;"
               *ngFor="let r of filteredRoles"
               (mousedown)="selectRoleSuggestion(r)">
-              {{ r.roleName }} <span class="text-muted">({{ r.category }})</span>
+              {{ r.roleName }}<span class="text-muted" *ngIf="r.category"> ({{ r.category }})</span>
             </button>
             <span *ngIf="filteredRoles.length === 0"
               class="list-group-item text-muted py-1 px-2" style="font-size: 13px;">
@@ -195,9 +284,6 @@
             </span>
           </div>
 
-          <!-- Clarifies whose login account this Role field actually edits —
-               it's the linked AspNetUser's role (matched by Dealer Code),
-               not a field stored on DealerMaster itself. -->
           <small class="text-muted d-block mt-1" *ngIf="editTarget?.linkedUserName">
             Login: {{ editTarget?.linkedUserName }}
           </small>
@@ -216,6 +302,198 @@
         <button class="btn btn-secondary btn-sm me-2" (click)="closeEditModal()">Cancel</button>
         <button class="btn btn-primary btn-sm" (click)="saveEdit()">Save</button>
       </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Dealer Menu Access modal ──────────────────────────────────────── -->
+<div *ngIf="showMenuAccessModal"
+  class="d-flex align-items-center justify-content-center"
+  style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 2000; padding: 16px;">
+  <div style="background: #ffffff; width: 100%; max-width: 720px; max-height: 90vh; overflow-y: auto; border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.35);">
+
+    <div class="d-flex justify-content-between align-items-center"
+      style="background: #3f4b7a; color: #fff; padding: 14px 20px; border-radius: 10px 10px 0 0; position: sticky; top: 0;">
+      <h5 class="mb-0" style="color: #ffffff;">
+        Menu Access — {{ menuAccessTarget?.dealercode }}
+      </h5>
+      <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="closeMenuAccessModal()"></button>
+    </div>
+
+    <div style="padding: 20px;">
+
+      <div class="mb-3">
+        <label class="form-label mb-1">Role</label>
+        <select class="form-select form-select-sm"
+          [(ngModel)]="menuAccessSelectedRoleId" [ngModelOptions]="{standalone: true}"
+          (change)="onMenuAccessRoleChange()">
+          <option value="">-- Select Role --</option>
+          <option *ngFor="let r of allRoles" [value]="r.roleId">{{ r.roleName }}</option>
+        </select>
+        <small class="text-muted d-block mt-1" *ngIf="!menuAccessSelectedRoleId">
+          Select a role to view or edit its Process/Reports menu access.
+        </small>
+      </div>
+
+      <div *ngIf="menuAccessLoading" class="text-center py-4">
+        <div class="spinner-border text-primary"></div>
+      </div>
+
+      <table class="table table-sm table-bordered mb-0" *ngIf="!menuAccessLoading && menuAccessSelectedRoleId">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 50px;" class="text-center">Access</th>
+            <th>Process</th>
+            <th style="width: 50px;" class="text-center">Access</th>
+            <th>Reports</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of pairedMenuRows">
+            <td class="text-center">
+              <input type="checkbox" *ngIf="row.process"
+                [checked]="row.process.isGranted"
+                (change)="toggleMenuItem(row.process)">
+            </td>
+            <td>{{ row.process?.menuName }}</td>
+            <td class="text-center">
+              <input type="checkbox" *ngIf="row.report"
+                [checked]="row.report.isGranted"
+                (change)="toggleMenuItem(row.report)">
+            </td>
+            <td>{{ row.report?.menuName }}</td>
+          </tr>
+          <tr *ngIf="pairedMenuRows.length === 0">
+            <td colspan="4" class="text-center text-muted">No Process/Reports menus found.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="text-end mt-3">
+        <button class="btn btn-secondary btn-sm me-2" (click)="closeMenuAccessModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" [disabled]="!menuAccessSelectedRoleId" (click)="saveMenuAccess()">Save</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Location Edit modal — Name, Code, its OWN Role + Menu Access ──── -->
+<div *ngIf="showLocationEditModal"
+  class="d-flex align-items-center justify-content-center"
+  style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 2500; padding: 16px;">
+  <div style="background: #ffffff; width: 100%; max-width: 760px; max-height: 92vh; overflow-y: auto; border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.35);">
+
+    <div class="d-flex justify-content-between align-items-center"
+      style="background: #3f4b7a; color: #fff; padding: 14px 20px; border-radius: 10px 10px 0 0; position: sticky; top: 0;">
+      <h5 class="mb-0" style="color: #ffffff;">Edit Location</h5>
+      <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="closeLocationEditModal()"></button>
+    </div>
+
+    <div style="padding: 20px;">
+
+      <div *ngIf="locationEditLoading" class="text-center py-4">
+        <div class="spinner-border text-primary"></div>
+      </div>
+
+      <form [formGroup]="locationEditForm" *ngIf="!locationEditLoading">
+
+        <div class="row g-2 mb-3">
+          <div class="col-md-6">
+            <label class="form-label mb-1">Location Code *</label>
+            <input type="text" class="form-control form-control-sm" formControlName="locCode">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label mb-1">Location Name *</label>
+            <input type="text" class="form-control form-control-sm" formControlName="locName">
+          </div>
+        </div>
+
+        <div class="mb-3 position-relative">
+          <label class="form-label mb-1">Role Assignment</label>
+          <input type="text" class="form-control form-control-sm"
+            [(ngModel)]="locationRoleSearchText" [ngModelOptions]="{standalone: true}"
+            placeholder="Search role..."
+            autocomplete="off"
+            (input)="onLocationRoleSearchInput()"
+            (focus)="onLocationRoleSearchFocus()"
+            (blur)="onLocationRoleSearchBlur()">
+
+          <button *ngIf="locationRoleSearchText" type="button"
+            class="btn btn-sm btn-link position-absolute p-0"
+            style="right: 10px; top: 32px; text-decoration: none;"
+            (mousedown)="clearLocationRoleSearch()">✕</button>
+
+          <div class="list-group position-absolute w-100 shadow-sm"
+            style="z-index: 3000; max-height: 200px; overflow-y: auto;"
+            *ngIf="showLocationRoleDropdown">
+            <button type="button" class="list-group-item list-group-item-action py-1 px-2"
+              style="font-size: 13px;"
+              *ngFor="let r of filteredLocationRoles"
+              (mousedown)="selectLocationRoleSuggestion(r)">
+              {{ r.roleName }}<span class="text-muted" *ngIf="r.category"> ({{ r.category }})</span>
+            </button>
+            <span *ngIf="filteredLocationRoles.length === 0"
+              class="list-group-item text-muted py-1 px-2" style="font-size: 13px;">
+              No matching role found
+            </span>
+          </div>
+
+          <small class="text-muted d-block mt-1">
+            This role belongs to this location alone — assigning the same role to another
+            location shares that role's Process/Reports grants across both.
+          </small>
+        </div>
+
+        <label class="form-label mb-1">Access Menu</label>
+
+        <div *ngIf="locationMenuAccessLoading" class="text-center py-3">
+          <div class="spinner-border spinner-border-sm text-primary"></div>
+        </div>
+
+        <table class="table table-sm table-bordered mb-0" *ngIf="!locationMenuAccessLoading && locationEditForm.value.roleId">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 50px;" class="text-center">Access</th>
+              <th>Process</th>
+              <th style="width: 50px;" class="text-center">Access</th>
+              <th>Reports</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of pairedLocationMenuRows">
+              <td class="text-center">
+                <input type="checkbox" *ngIf="row.process"
+                  [checked]="row.process.isGranted"
+                  (change)="toggleLocationMenuItem(row.process)">
+              </td>
+              <td>{{ row.process?.menuName }}</td>
+              <td class="text-center">
+                <input type="checkbox" *ngIf="row.report"
+                  [checked]="row.report.isGranted"
+                  (change)="toggleLocationMenuItem(row.report)">
+              </td>
+              <td>{{ row.report?.menuName }}</td>
+            </tr>
+            <tr *ngIf="pairedLocationMenuRows.length === 0">
+              <td colspan="4" class="text-center text-muted">No Process/Reports menus found.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <small class="text-muted d-block mt-2" *ngIf="!locationEditForm.value.roleId">
+          Assign a role above to manage this location's menu access.
+        </small>
+
+      </form>
+
+      <div class="text-end mt-3">
+        <button class="btn btn-secondary btn-sm me-2" (click)="closeLocationEditModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" [disabled]="locationEditLoading" (click)="saveLocationEdit()">Save</button>
+      </div>
+
     </div>
 
   </div>

@@ -16,14 +16,6 @@
           Renaming updates the underlying role everywhere it's assigned.
         </small>
       </div>
-
-      <div class="col-md-4">
-        <label class="form-label mb-1">Category</label>
-        <select class="form-select form-select-sm" [(ngModel)]="category" name="category">
-          <option value="">Select Category</option>
-          <option *ngFor="let c of categories" [value]="c.name">{{ c.name }}</option>
-        </select>
-      </div>
     </div>
 
     <div class="text-end mt-3">

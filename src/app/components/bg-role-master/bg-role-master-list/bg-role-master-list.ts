@@ -50,11 +50,9 @@ export class BgRoleMasterList {
     this.filteredList = !text
       ? [...this.roleList]
       : this.roleList.filter(r =>
-          r.roleName?.toLowerCase().includes(text) ||
-          r.category?.toLowerCase().includes(text)
+          r.roleName?.toLowerCase().includes(text)
         );
-  }
-
+}
   onAdd() {
     this.router.navigate(['/bg-role-master/add']);
   }

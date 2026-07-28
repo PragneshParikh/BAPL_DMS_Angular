@@ -22,11 +22,11 @@ export class BgRoleService {
     return this.http.get<BgRoleMappingModel[]>(`${this.apiUrl}/mappings`);
   }
 
-  createWithCategory(payload: { name: string; category: string }): Observable<any> {
+  createWithCategory(payload: { name: string; category?: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/with-category`, payload);
   }
 
-  updateMapping(id: number, name: string, category: string): Observable<any> {
+  updateMapping(id: number, name: string, category?: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/mappings/${id}`, { name, category });
   }
 
