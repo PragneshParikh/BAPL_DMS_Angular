@@ -121,7 +121,7 @@
                 </thead>
 
                 <tbody>
-                    <tr *ngFor="let item of jobCardList; let i = index" (dblclick)="onEdit(item)">
+                    <tr *ngFor="let item of pagedData; let i = index" (dblclick)="onEdit(item)">
 
                         <!-- SR NO -->
                         <td>{{ i + 1 }}</td>
@@ -197,7 +197,7 @@
                     </tr>
 
                     <!-- No Data -->
-                    <tr *ngIf="jobCardList.length === 0">
+                    <tr *ngIf="pagedData.length === 0">
                         <td colspan="13" class="text-center text-muted py-3">
                             No Data Available
                         </td>

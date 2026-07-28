@@ -9,7 +9,7 @@
       <div ngbDropdown class="d-inline-block">
 
         <button class="btn btn-primary btn-sm" ngbDropdownToggle>
-          Service History
+          Service Schedule
         </button>
 
         <div ngbDropdownMenu class="p-2 shadow-lg" style="min-width: 900px;">
@@ -58,7 +58,7 @@
 
                 <tr *ngIf="serviceHistoryList.length === 0">
                   <td colspan="8" class="text-center text-muted">
-                    No service history available
+                    No service schedule available
                   </td>
                 </tr>
 
@@ -203,7 +203,7 @@
               </div>
               <div class="col-md-4">
                 <label>Coupon No</label>
-                <input class="form-control form-control-sm" [(ngModel)]="couponNo" readonly>
+                <input class="form-control form-control-sm" [(ngModel)]="couponNo" [disabled]="!isSuperAdmin">
               </div>
               <div class="col-md-4">
                 <label class="form-label d-block mb-1 ">Job Category</label>
@@ -740,7 +740,7 @@
   <!-- FOOTER -->
   <div class="card-footer d-flex justify-content-end gap-2">
     <button type="button" class="btn btn-primary btn-sm"
-      [disabled]="repairBillStatus === 'Billed' || (selectedJobtype == 1 && !isPdiSaved)" (click)="saveJobCard()">
+      [disabled]="repairBillStatus === 'Billed' && !isSuperAdmin || (selectedJobtype == 1 && !isPdiSaved)" (click)="saveJobCard()">
       Save
     </button>
     <!--<button type="button" class="btn btn-primary btn-sm" [disabled]="!isPdiSaved" (click)="saveJobCard()">Save</button>-->

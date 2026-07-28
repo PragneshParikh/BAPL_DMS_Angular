@@ -415,7 +415,7 @@ export class JobCardAddForm {
 
     this.jobCardService.getAllInspectedChassis(this.dealerCode, this.jobTypeId).subscribe(res => {
       this.chassisList = res;
-      console.log("Chassislist bind", this.chassisList);
+      //console.log("Chassislist bind", this.chassisList);
 
       if (this.isEditMode && this.chassiseditData) {
         this.customerObj.saleDate = this.chassisList[0].saleDate?.split('T')[0];
@@ -573,50 +573,8 @@ export class JobCardAddForm {
       });
   }
 
-
-  // onChassisChange() {
-
-  //   if (!this.selectedChassis) return;
-  //   this.loadServiceHistory(this.selectedChassis);
-
-  //   const selected = this.chassisList.find(
-  //     x => x.chassisNumber == this.selectedChassis
-  //     //  use ==
-  //   );
-
-  //   if (!selected) return;
-
-  //   // ALWAYS FILL (EDIT + ADD)
-  //   this.invoiceNo = selected.invoiceNo;
-  //   this.couponNo = this.selectedChassis.slice(-13);
-  //   this.customerObj.customerLedgerId = selected.customerLedgerId;
-  //   this.customerObj.customerName = selected.customerName;
-  //   this.customerObj.customerMobile = selected.customerMobile;
-  //   this.customerObj.customerAltMobile = selected.customerAltMobile;
-
-  //   this.modelName = selected.modelName;
-  //   this.registerNo = selected.registerNo;
-
-  //   this.batteryCapacity = selected.batteryCapacity;
-  //   this.batteryMake = selected.batteryMake;
-  //   this.batteryChemestry = selected.batteryChemestry;
-  //   this.batteryNumber = selected.batteryNumber;
-
-  //   this.motorNo = selected.motorNo;
-  //   this.controllerNo = selected.controllerNo;
-  //   this.converterNo = selected.converterNo;
-  //   this.chargerNumber = selected.chargerNumber;
-
-  //   this.odoReading = selected.odoReading;
-  //   this.duration = selected.duration;
-  //   this.durationType = selected.durationType;
-  //   this.expireWarrentyDate = selected.expireWarrentyDate;
-  //   this.oemModelId = selected.oemModelId;
-  //   if (this.oemModelId) {
-  //     this.loadPdiData(this.oemModelId);
-  //   }
-  // }
   onChassisChange() {
+    debugger;
     if (!this.selectedChassis) return;
     this.loadServiceHistory(this.selectedChassis);
 
@@ -1094,6 +1052,7 @@ export class JobCardAddForm {
     this.selectedServiceHead = data.jobCardHeader.servicehead;
     this.selectedServiceType = data.jobCardHeader.servicetype;
     this.selectedJobSources = data.jobCardHeader.jobSource;
+
 
     this.selectedChassis = data.jobCardHeader.chassisno;
     this.vehicleKms = data.jobCardHeader.vehiclekms;

@@ -11,6 +11,7 @@ import { JobCardService } from '../../core/services/job-card-service';
 import Swal from 'sweetalert2';
 import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
 import { LocationMasterService } from '../../core/services/location-master-service';
+import { LoaderService } from '../../core/services/loader';
 
 @Component({
   selector: 'app-job-card',
@@ -58,6 +59,7 @@ export class JobCard {
   constructor(private locationService: LocationMasterService,
     private storageService: StorageService,
     private jobCardService: JobCardService,
+    private loader: LoaderService,
     private router: Router
   ) { }
 
@@ -165,6 +167,7 @@ export class JobCard {
   }
 
   loadJobCardList() {
+
     this.isSuperAdmin = this.storageService.getRole().toLocaleLowerCase() === 'superadmin';
     let dealerCode = '';
     if (!this.isSuperAdmin) {
@@ -172,19 +175,32 @@ export class JobCard {
     } else {
       this.searchModel.dealerCode = null;
     }
+    this.loader.show();
     this.jobCardService.getJobCardList(this.searchModel)
       .subscribe({
         next: (res) => {
           this.jobCardList = res;
+
+          this.filteredData = Array.isArray(res)
+            ? res
+            : (res.data || []);
+
+          this.collectionSize = this.filteredData.length;
+          this.page = 1;
+
+          this.refreshTable();
+          this.loader.hide();
+
         },
         error: (err) => {
+          this.loader.hide();
           console.error('Error fetching job cards', err);
         }
       });
   }
 
   onEdit(row: any) {
-    console.log("row",row)
+    console.log("row", row)
     this.router.navigate(['/job-card-addForm/job-card-add-form'], {
       state: { data: row }
     });
@@ -196,10 +212,10 @@ export class JobCard {
 
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
-     
+
     } else {
       this.dealerCode = null;
-       this.role = this.storageService.getRole();
+      this.role = this.storageService.getRole();
     }
     //const dealerCode = this.storageService.getDealerCode();
     Swal.fire({
@@ -214,7 +230,7 @@ export class JobCard {
 
       if (result.isConfirmed) {
 
-        this.jobCardService.deleteJobCard(id,this.role).subscribe({
+        this.jobCardService.deleteJobCard(id, this.role).subscribe({
           next: (res: any) => {
 
             Swal.fire({
@@ -293,6 +309,7 @@ export class JobCard {
     this.selectedChassis = '';
   }
   search() {
+    this.loader.show();
     this.isSuperAdmin = this.storageService.getRole().toLocaleLowerCase() === 'superadmin';
     let dealerCode = '';
     if (!this.isSuperAdmin) {
@@ -311,8 +328,24 @@ export class JobCard {
       chassisNo: this.searchModel.chassisNo || null,
       registerNo: this.searchModel.registerNo || null
     };
-    this.jobCardService.getJobCardList(payload).subscribe(res => {
-      this.jobCardList = res;
+    console.log(payload)
+    this.jobCardService.getJobCardList(payload).subscribe({
+      next: (res) => {
+        this.jobCardList = res;
+        this.filteredData = Array.isArray(res)
+            ? res
+            : (res.data || []);
+
+          this.collectionSize = this.filteredData.length;
+          this.page = 1;
+
+          this.refreshTable();
+          this.loader.hide();
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error('Error fetching job cards', err);
+      }
     });
   }
 
