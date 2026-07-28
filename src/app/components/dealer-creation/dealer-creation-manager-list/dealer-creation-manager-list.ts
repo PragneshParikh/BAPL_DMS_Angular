@@ -8,8 +8,12 @@ import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { ReportService } from '../../../core/services/report.service';
 import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model';
-import { RoleService } from '../../../core/services/Deptrole';
-import { RoleModel } from '../../../ViewModels/RoleModel';
+import { BgRoleService } from '../../../core/services/bg-role';
+import { BgRoleMappingModel } from '../../../ViewModels/models/BgRoleMappingModel';
+import { DealerMenuAccessResponse, DealerMenuAccessItem, DealerLocationModel } from '../../../ViewModels/models/DealerMenuAccessModel';
+import { LocationDetailModel } from '../../../ViewModels/models/LocationDetailModel';
+import { LocationMenuAccessResponse } from '../../../ViewModels/models/LocationMenuAccessModel';
+import { LocationMasterService } from '../../../core/services/location-master-service';
 
 @Component({
   selector: 'app-dealer-creation-manager-list',
@@ -35,17 +39,46 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   showDealerDropdown = false;
   private static readonly MAX_DEALER_SUGGESTIONS = 20;
 
-  // Inline Edit modal — no separate route/component; this screen is
-  // list-only, Edit just patches the fields shown here.
+  // Inline Edit modal
   showEditModal = false;
   editTarget: DealerListModel | null = null;
   editForm!: FormGroup;
 
-  // ── Role search (autosuggest, inside the Edit popup) ──
-  allRoles: RoleModel[] = [];
+  // ── Role search (autosuggest, inside the Dealer Edit popup) ──
+  allRoles: BgRoleMappingModel[] = [];
   roleSearchText = '';
-  filteredRoles: RoleModel[] = [];
+  filteredRoles: BgRoleMappingModel[] = [];
   showRoleDropdown = false;
+
+  // ── Menu Access modal (dealer-level) ──
+  showMenuAccessModal = false;
+  menuAccessTarget: DealerListModel | null = null;
+  menuAccessData: DealerMenuAccessResponse | null = null;
+  menuAccessLoading = false;
+  menuAccessSelectedRoleId = '';
+
+  // ── Dealer Locations — inline expandable row (accordion: one open at a time) ──
+  expandedDealerId: number | null = null;
+  locationsTarget: DealerListModel | null = null;
+  dealerLocations: DealerLocationModel[] = [];
+  locationsLoading = false;
+  locationsError = '';
+  selectedLocationIds: Set<number> = new Set();
+  bulkActionLoading = false;
+
+  // ── Location Edit modal — Name, Code, its OWN Role, its OWN Menu Access ──
+  showLocationEditModal = false;
+  locationEditTarget: DealerLocationModel | null = null;
+  locationEditDetail: LocationDetailModel | null = null;
+  locationEditForm!: FormGroup;
+  locationEditLoading = false;
+
+  locationRoleSearchText = '';
+  filteredLocationRoles: BgRoleMappingModel[] = [];
+  showLocationRoleDropdown = false;
+
+  locationMenuAccessData: LocationMenuAccessResponse | null = null;
+  locationMenuAccessLoading = false;
 
   private destroy$ = new Subject<void>();
   private static readonly AUTO_SEARCH_DEBOUNCE_MS = 400;
@@ -54,7 +87,8 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private dealerService: DealerCreationManagerService,
     private reportService: ReportService,
-    private roleService: RoleService,
+    private bgRoleService: BgRoleService,
+    private locationManagerService: LocationMasterService,
     private loader: LoaderService,
     private toaster: ToastService
   ) {
@@ -70,6 +104,12 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
       isActive: [true],
       roleId: ['']
     });
+
+    this.locationEditForm = this.fb.group({
+      locCode: [''],
+      locName: [''],
+      roleId: ['']
+    });
   }
 
   ngOnInit(): void {
@@ -77,8 +117,6 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     this.loadDealers();
     this.loadRoles();
 
-    // Auto-search — dealer selection (via autosuggest) or free-text search
-    // both re-run the list after a short pause, no Search button needed.
     this.filterForm.valueChanges
       .pipe(
         debounceTime(DealerCreationManagerList.AUTO_SEARCH_DEBOUNCE_MS),
@@ -97,8 +135,6 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   }
 
   private loadDealerDropdown(): void {
-    // Reuses the same dealer dropdown source as Job Card Report —
-    // no separate endpoint needed here.
     this.reportService.getDealerDropdown()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -107,14 +143,12 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
       });
   }
 
-  // Loads every system role once — same AspNetRoles list that powers Role
-  // Master / BG Role Master — for the searchable Role field in the Edit popup.
   private loadRoles(): void {
-    this.roleService.getRoles()
+    this.bgRoleService.getMappings()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (res: RoleModel[]) => this.allRoles = res ?? [],
-        error: (err) => console.error('Failed to fetch roles', err)
+        next: (res: BgRoleMappingModel[]) => this.allRoles = res ?? [],
+        error: (err) => console.error('Failed to fetch BG role mappings', err)
       });
   }
 
@@ -135,6 +169,10 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
           this.dealerList = res.data ?? [];
           this.totalRecords = res.totalRecords ?? 0;
           this.isLoading = false;
+
+          if (this.expandedDealerId !== null && !this.dealerList.some(d => d.id === this.expandedDealerId)) {
+            this.collapseLocations();
+          }
         },
         error: (err) => {
           this.isLoading = false;
@@ -183,9 +221,6 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
       isActive: raw.isActive
     }).subscribe({
       next: () => {
-        // Role assignment only fires if a role is actually selected — an
-        // empty/untouched Role field leaves any existing assignment as-is
-        // rather than clearing it.
         if (raw.roleId) {
           this.dealerService.assignRole(this.editTarget!.id, raw.roleId).subscribe({
             next: () => this.finishSave(),
@@ -220,9 +255,6 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     this.showRoleDropdown = false;
   }
 
-  // Soft delete — DealerMaster.Dealercode is referenced across
-  // ChassisDetails, JobCardHeader, ItemMaster, LocationMaster, and more,
-  // so history tied to a dealer is preserved rather than erased.
   onDelete(dealer: DealerListModel): void {
     if (!confirm(`Delete dealer "${dealer.compname}" (${dealer.dealercode})? This marks it inactive; history tied to it is preserved.`)) return;
 
@@ -305,13 +337,11 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // ROLE SEARCH (autosuggest, inside the Edit popup)
+  // ROLE SEARCH (autosuggest, inside the Dealer Edit popup)
   // ═══════════════════════════════════════════════════════════════════
 
   onRoleSearchInput(): void {
     this.updateRoleSuggestions();
-    // Typing invalidates a previously-picked exact match until a suggestion
-    // is clicked again.
     this.editForm.patchValue({ roleId: '' });
   }
 
@@ -323,9 +353,9 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     setTimeout(() => { this.showRoleDropdown = false; }, 150);
   }
 
-  selectRoleSuggestion(role: RoleModel): void {
-    this.roleSearchText = role.name;
-    this.editForm.patchValue({ roleId: role.id });
+  selectRoleSuggestion(role: BgRoleMappingModel): void {
+    this.roleSearchText = role.roleName;
+    this.editForm.patchValue({ roleId: role.roleId });
     this.showRoleDropdown = false;
   }
 
@@ -338,8 +368,352 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   private updateRoleSuggestions(): void {
     const text = this.roleSearchText.trim().toLowerCase();
     this.filteredRoles = text
-      ? this.allRoles.filter(r => r.name?.toLowerCase().includes(text))
+      ? this.allRoles.filter(r => r.roleName?.toLowerCase().includes(text))
       : [...this.allRoles];
     this.showRoleDropdown = true;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // MENU ACCESS (dealer-level)
+  // ═══════════════════════════════════════════════════════════════════
+
+  onMenuAccess(dealer: DealerListModel): void {
+    this.menuAccessTarget = dealer;
+    this.menuAccessData = null;
+    this.menuAccessSelectedRoleId = '';
+    this.menuAccessLoading = true;
+    this.showMenuAccessModal = true;
+
+    this.dealerService.getMenuAccess(dealer.id).subscribe({
+      next: (res) => {
+        this.menuAccessData = res;
+        this.menuAccessSelectedRoleId = res.roleId || '';
+        this.menuAccessLoading = false;
+      },
+      error: (err) => {
+        this.menuAccessLoading = false;
+        this.toaster.show(err?.error?.message || 'Failed to load menu access.', { classname: 'bg-warning text-white', delay: 5000 });
+        this.closeMenuAccessModal();
+      }
+    });
+  }
+
+  onMenuAccessRoleChange(): void {
+    if (!this.menuAccessTarget || !this.menuAccessSelectedRoleId) return;
+
+    this.menuAccessLoading = true;
+    this.dealerService.getMenuAccess(this.menuAccessTarget.id, this.menuAccessSelectedRoleId).subscribe({
+      next: (res) => {
+        this.menuAccessData = res;
+        this.menuAccessLoading = false;
+      },
+      error: (err) => {
+        this.menuAccessLoading = false;
+        this.toaster.show(err?.error?.message || 'Failed to load menu access.', { classname: 'bg-warning text-white', delay: 5000 });
+      }
+    });
+  }
+
+  get pairedMenuRows(): { process: DealerMenuAccessItem | null; report: DealerMenuAccessItem | null }[] {
+    if (!this.menuAccessData) return [];
+    return this.buildPairedRows(this.menuAccessData.groups);
+  }
+
+  private buildPairedRows(groups: { topMenuName: string; items: DealerMenuAccessItem[] }[]) {
+    const processItems = groups.find(g => g.topMenuName === 'Process')?.items ?? [];
+    const reportItems = groups.find(g => g.topMenuName === 'Reports')?.items ?? [];
+
+    const maxLen = Math.max(processItems.length, reportItems.length);
+    const rows: { process: DealerMenuAccessItem | null; report: DealerMenuAccessItem | null }[] = [];
+
+    for (let i = 0; i < maxLen; i++) {
+      rows.push({
+        process: processItems[i] ?? null,
+        report: reportItems[i] ?? null
+      });
+    }
+
+    return rows;
+  }
+
+  toggleMenuItem(item: DealerMenuAccessItem): void {
+    item.isGranted = !item.isGranted;
+  }
+
+  saveMenuAccess(): void {
+    if (!this.menuAccessTarget || !this.menuAccessData || !this.menuAccessSelectedRoleId) return;
+
+    const grantedSubMenuIds = this.menuAccessData.groups
+      .flatMap(g => g.items)
+      .filter(i => i.isGranted)
+      .map(i => i.subMenuId);
+
+    this.loader.show();
+    this.dealerService.updateMenuAccess(this.menuAccessTarget.id, this.menuAccessSelectedRoleId, grantedSubMenuIds).subscribe({
+      next: () => {
+        this.loader.hide();
+        this.toaster.show('Menu access updated', { classname: 'bg-success text-white', delay: 5000 });
+        this.closeMenuAccessModal();
+      },
+      error: (err) => {
+        this.loader.hide();
+        this.toaster.show(err?.error?.message || 'Failed to update menu access.', { classname: 'bg-warning text-white', delay: 5000 });
+      }
+    });
+  }
+
+  closeMenuAccessModal(): void {
+    this.showMenuAccessModal = false;
+    this.menuAccessTarget = null;
+    this.menuAccessData = null;
+    this.menuAccessSelectedRoleId = '';
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // DEALER LOCATIONS — inline expandable row under the clicked dealer name
+  // ═══════════════════════════════════════════════════════════════════
+
+  onToggleDealerLocations(dealer: DealerListModel): void {
+    if (this.expandedDealerId === dealer.id) {
+      this.collapseLocations();
+      return;
+    }
+
+    this.expandedDealerId = dealer.id;
+    this.locationsTarget = dealer;
+    this.dealerLocations = [];
+    this.locationsError = '';
+    this.selectedLocationIds = new Set();
+    this.locationsLoading = true;
+
+    this.dealerService.getLocations(dealer.id).subscribe({
+      next: (data) => {
+        this.dealerLocations = data ?? [];
+        this.locationsLoading = false;
+      },
+      error: (err) => {
+        this.locationsLoading = false;
+        this.locationsError = err?.error?.message || 'Failed to load locations for this dealer.';
+      }
+    });
+  }
+
+  private collapseLocations(): void {
+    this.expandedDealerId = null;
+    this.locationsTarget = null;
+    this.dealerLocations = [];
+    this.selectedLocationIds = new Set();
+    this.locationsError = '';
+  }
+
+  toggleLocationSelection(loc: DealerLocationModel): void {
+    if (this.selectedLocationIds.has(loc.id)) {
+      this.selectedLocationIds.delete(loc.id);
+    } else {
+      this.selectedLocationIds.add(loc.id);
+    }
+  }
+
+  get allLocationsSelected(): boolean {
+    return this.dealerLocations.length > 0 &&
+      this.dealerLocations.every(l => this.selectedLocationIds.has(l.id));
+  }
+
+  toggleSelectAllLocations(): void {
+    if (this.allLocationsSelected) {
+      this.selectedLocationIds = new Set();
+    } else {
+      this.selectedLocationIds = new Set(this.dealerLocations.map(l => l.id));
+    }
+  }
+
+  bulkUpdateLocationStatus(isActive: boolean): void {
+    if (!this.locationsTarget || this.selectedLocationIds.size === 0) return;
+
+    this.bulkActionLoading = true;
+    const ids = Array.from(this.selectedLocationIds);
+
+    this.dealerService.updateLocationsStatus(this.locationsTarget.id, ids, isActive).subscribe({
+      next: () => {
+        this.bulkActionLoading = false;
+        this.toaster.show(
+          `${ids.length} location(s) ${isActive ? 'activated' : 'deactivated'}.`,
+          { classname: 'bg-success text-white', delay: 5000 }
+        );
+        this.selectedLocationIds = new Set();
+        this.reloadExpandedLocations();
+      },
+      error: (err) => {
+        this.bulkActionLoading = false;
+        this.toaster.show(err?.error?.message || 'Failed to update location status.', { classname: 'bg-warning text-white', delay: 5000 });
+      }
+    });
+  }
+
+  private reloadExpandedLocations(): void {
+    if (!this.locationsTarget) return;
+
+    this.locationsLoading = true;
+    this.dealerService.getLocations(this.locationsTarget.id).subscribe({
+      next: (data) => {
+        this.dealerLocations = data ?? [];
+        this.locationsLoading = false;
+      },
+      error: (err) => {
+        this.locationsLoading = false;
+        this.locationsError = err?.error?.message || 'Failed to reload locations.';
+      }
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // LOCATION EDIT modal — Name, Code, its OWN Role, its OWN Menu Access
+  // ═══════════════════════════════════════════════════════════════════
+
+  onEditLocation(loc: DealerLocationModel): void {
+    this.locationEditTarget = loc;
+    this.locationEditDetail = null;
+    this.locationMenuAccessData = null;
+    this.locationRoleSearchText = '';
+    this.locationEditLoading = true;
+    this.showLocationEditModal = true;
+
+    this.locationManagerService.getDetail(loc.id).subscribe({
+      next: (detail) => {
+        this.locationEditDetail = detail;
+        this.locationEditForm.patchValue({
+          locCode: detail.locCode,
+          locName: detail.locName,
+          roleId: detail.roleId || ''
+        });
+        this.locationRoleSearchText = detail.roleName || '';
+        this.locationEditLoading = false;
+
+        this.loadLocationMenuAccess(loc.id, detail.roleId);
+      },
+      error: (err) => {
+        this.locationEditLoading = false;
+        this.toaster.show(err?.error?.message || 'Failed to load location.', { classname: 'bg-warning text-white', delay: 5000 });
+        this.closeLocationEditModal();
+      }
+    });
+  }
+
+  private loadLocationMenuAccess(locationId: number, roleId?: string): void {
+    this.locationMenuAccessLoading = true;
+    this.locationManagerService.getMenuAccess(locationId, roleId).subscribe({
+      next: (res) => {
+        this.locationMenuAccessData = res;
+        this.locationMenuAccessLoading = false;
+      },
+      error: (err) => {
+        this.locationMenuAccessLoading = false;
+        this.toaster.show(err?.error?.message || 'Failed to load menu access.', { classname: 'bg-warning text-white', delay: 5000 });
+      }
+    });
+  }
+
+  onLocationRoleSearchInput(): void {
+    this.updateLocationRoleSuggestions();
+    this.locationEditForm.patchValue({ roleId: '' });
+  }
+
+  onLocationRoleSearchFocus(): void {
+    this.updateLocationRoleSuggestions();
+  }
+
+  onLocationRoleSearchBlur(): void {
+    setTimeout(() => { this.showLocationRoleDropdown = false; }, 150);
+  }
+
+  selectLocationRoleSuggestion(role: BgRoleMappingModel): void {
+    this.locationRoleSearchText = role.roleName;
+    this.locationEditForm.patchValue({ roleId: role.roleId });
+    this.showLocationRoleDropdown = false;
+
+    if (this.locationEditTarget) {
+      this.loadLocationMenuAccess(this.locationEditTarget.id, role.roleId);
+    }
+  }
+
+  clearLocationRoleSearch(): void {
+    this.locationRoleSearchText = '';
+    this.locationEditForm.patchValue({ roleId: '' });
+    this.showLocationRoleDropdown = false;
+    this.locationMenuAccessData = null;
+  }
+
+  private updateLocationRoleSuggestions(): void {
+    const text = this.locationRoleSearchText.trim().toLowerCase();
+    this.filteredLocationRoles = text
+      ? this.allRoles.filter(r => r.roleName?.toLowerCase().includes(text))
+      : [...this.allRoles];
+    this.showLocationRoleDropdown = true;
+  }
+
+  get pairedLocationMenuRows(): { process: DealerMenuAccessItem | null; report: DealerMenuAccessItem | null }[] {
+    if (!this.locationMenuAccessData) return [];
+    return this.buildPairedRows(this.locationMenuAccessData.groups);
+  }
+
+  toggleLocationMenuItem(item: DealerMenuAccessItem): void {
+    item.isGranted = !item.isGranted;
+  }
+
+  saveLocationEdit(): void {
+    if (!this.locationEditTarget) return;
+
+    const raw = this.locationEditForm.value;
+    if (!raw.locCode?.trim() || !raw.locName?.trim()) {
+      this.toaster.show('Location Code and Location Name are required.', { classname: 'bg-warning text-white', delay: 4000 });
+      return;
+    }
+
+    this.loader.show();
+    this.locationManagerService.updateDetail(this.locationEditTarget.id, {
+      locCode: raw.locCode,
+      locName: raw.locName,
+      roleId: raw.roleId || undefined
+    }).subscribe({
+      next: () => {
+        if (raw.roleId && this.locationMenuAccessData) {
+          const grantedSubMenuIds = this.locationMenuAccessData.groups
+            .flatMap(g => g.items)
+            .filter(i => i.isGranted)
+            .map(i => i.subMenuId);
+
+          this.locationManagerService.updateMenuAccess(this.locationEditTarget!.id, raw.roleId, grantedSubMenuIds).subscribe({
+            next: () => this.finishLocationEditSave(),
+            error: (err) => {
+              this.loader.hide();
+              this.toaster.show(err?.error?.message || 'Location saved, but menu access update failed.', { classname: 'bg-warning text-white', delay: 6000 });
+              this.closeLocationEditModal();
+              this.reloadExpandedLocations();
+            }
+          });
+        } else {
+          this.finishLocationEditSave();
+        }
+      },
+      error: (err) => {
+        this.loader.hide();
+        this.toaster.show(err?.error?.message || 'Failed to update location.', { classname: 'bg-warning text-white', delay: 5000 });
+      }
+    });
+  }
+
+  private finishLocationEditSave(): void {
+    this.loader.hide();
+    this.toaster.show('Location updated', { classname: 'bg-success text-white', delay: 5000 });
+    this.closeLocationEditModal();
+    this.reloadExpandedLocations();
+  }
+
+  closeLocationEditModal(): void {
+    this.showLocationEditModal = false;
+    this.locationEditTarget = null;
+    this.locationEditDetail = null;
+    this.locationMenuAccessData = null;
+    this.showLocationRoleDropdown = false;
   }
 }

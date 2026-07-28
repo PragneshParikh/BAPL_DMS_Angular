@@ -131,11 +131,11 @@
                                 name="mfgYear" readonly>
                         </div>
 
-                        <div class="col-md-1">
+                        <!-- <div class="col-md-1">
                             <label class="form-label mb-1">Key No.</label>
                             <input type="text" class="form-control form-control-sm" [(ngModel)]="model.keyNo"
                                 name="keyNo" readonly>
-                        </div>
+                        </div> -->
 
                         <div class="col-md-2">
                             <label class="form-label mb-1">Battery Make</label>
@@ -166,11 +166,11 @@
                                 name="charger" readonly>
                         </div>
 
-                        <div class="col-md-2">
+                        <!-- <div class="col-md-2">
                             <label class="form-label mb-1">Converter</label>
                             <input type="text" class="form-control form-control-sm" [(ngModel)]="model.convertor"
                                 name="convertor" readonly>
-                        </div>
+                        </div> -->
 
                         <div class="col-md-2">
                             <label class="form-label mb-1">Controller</label>
@@ -178,17 +178,23 @@
                                 name="controller" readonly>
                         </div>
 
-                        <!-- <div class="col-md-1">
-                            <label class="form-label mb-1">FAME II</label>
-                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.fameII"
-                                name="fameII" readonly>
-                        </div>
-
                         <div class="col-md-1">
                             <label class="form-label mb-1">Rate</label>
                             <input type="number" class="form-control form-control-sm" [(ngModel)]="model.rate"
-                                name="rate" readonly>
-                        </div> -->
+                                name="rate"  readonly>
+                        </div>
+
+                        <div class="col-md-1">
+                            <label class="form-label mb-1">Margin</label>
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.margin"
+                                name="margin">
+                        </div>
+
+                        <div class="col-md-1">
+                            <label class="form-label mb-1">Fame II</label>
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.fameII"
+                                name="fameII">
+                        </div>
 
                     </div>
 
@@ -214,12 +220,14 @@
                             <tr>
                                 <th>Action</th>
                                 <th>Sr No</th>
-                                <th>Chassis No /<br> Model Name</th>
+                                <th>Chassis No /<br> Motor No</th>
                                 <th>Colour/ <br> Mfg Year</th>
                                 <th>Battery Make/ <br>Battery Capacity</th>
                                 <th>Battery No/ <br>Charger No</th>
-                                <th>Controller No/ <br>Convertor No</th>
-                                <th>Key</th>
+                                <th>Controller No/ <br>Model Name</th>
+                                <th>Rate/<br>Fame II</th>
+                                <th>Margin</th>
+                                <th>Total</th>
                                 <!-- <th>Rate</th> -->
                             </tr>
                         </thead>
@@ -238,13 +246,56 @@
                                 </td>
 
                                 <td style="font-size: 12px;">{{ i + 1 }}</td>
-                                <td style="font-size: 12px;">{{ row.chassisNo }}/<br>{{row.modelName}}</td>
+                                <td style="font-size: 12px;">{{ row.chassisNo }}/<br>{{row.motorNo}}</td>
                                 <td style="font-size: 12px;">{{ row.colour }}/<br>{{ row.mfgYear }}</td>
                                 <td style="font-size: 12px;">{{ row.batteryMake }}/<br>{{row.batteryCapacity}}</td>
                                 <td style="font-size: 12px;">{{ row.batteryNo }}/<br>{{row.charger}}</td>
-                                <td style="font-size: 12px;">{{ row.controller }}/<br>{{row.convertor}}</td>
-                                <td style="font-size: 12px;">{{ row.key }}</td>
+                                <td style="font-size: 12px;">{{ row.controller }}/<br>{{row.modelName}}</td>
+                                <td style="font-size: 12px;">{{ row.rate| number:'1.2-2' }}<br>{{ row.fameII| number:'1.2-2' }}</td>
+                                <td style="font-size: 12px;">{{ row.margin| number:'1.2-2' }}</td>
+                                <td style="font-size: 12px;">{{ row.total| number:'1.2-2'  }}</td>
 
+                            </tr>
+
+                            <!-- Total Row -->
+                            <!-- Total Row -->
+                            <tr style="font-weight:bold;">
+                                <td style=" text-align:right;font-size: 12px;">
+                                    Total
+                                </td>
+
+                                <!-- Sr No -->
+                               <td style=" text-align:right;font-size: 12px;"></td>
+
+                                <!-- Chassis No / Model Name -->
+                                <td style=" text-align:right;font-size: 12px;"></td>
+
+                                <!-- Colour / Mfg Year -->
+                                <td style=" text-align:right;font-size: 12px;"></td>
+
+                                <!-- Battery Make / Capacity -->
+                                <td style=" text-align:right;font-size: 12px;"></td>
+
+                                <!-- Battery No / Charger No -->
+                                <td style=" text-align:right;font-size: 12px;"></td>
+
+                                <!-- Controller No / Convertor No -->
+                                <td style=" text-align:right;font-size: 12px;"></td>
+
+                                <!-- Rate Total -->
+                                <td style=" text-align:right;font-size: 12px;">
+                                    {{ getTotalRate() | number:'1.2-2' }}
+                                </td>
+
+                                <!-- Margin Total -->
+                                <td style=" text-align:right;font-size: 12px;">
+                                    {{ getTotalMargin() | number:'1.2-2' }}
+                                </td>
+
+                                <!-- Grand Total -->
+                                <td style=" text-align:right;font-size: 12px;">
+                                    {{ getTotalAmount() | number:'1.2-2' }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>

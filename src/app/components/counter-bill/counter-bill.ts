@@ -147,10 +147,7 @@ export class CounterBill implements OnInit {
     this.router.navigate(['/add-counter-bill']);
   }
 
-  exportExcel(): void {
-  }
-
-  // editCounterBill(item: any): void {
+    // editCounterBill(item: any): void {
   //   this.router.navigate([
   //     '/counter-bill/edit',
   //     item.header.id

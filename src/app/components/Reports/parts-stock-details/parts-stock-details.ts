@@ -77,9 +77,14 @@ export class PartsStockDetails implements OnInit {
 
   getPartsStockDetails() {
     this.loader.show();
-    this.reportService.getPartsStockDetailsByDealer(1, this.dealerCode).subscribe({
+    const dealerCode = this.stockReportFilterFormData.selectedDealerCode === "ALL" ? null : this.stockReportFilterFormData.selectedDealerCode;
+    const fromDate = new Date(this.stockReportFilterFormData.fromDate);
+    const toDate = new Date(this.stockReportFilterFormData.toDate);
+
+    this.reportService.getPartsStockDetailsByDealer(1, fromDate, toDate, dealerCode).subscribe({
       next: (res) => {
         this.loader.hide();
+        console.log("stock repot data: ", res);
         this.partsStockData = res;
       },
       error: (err) => {

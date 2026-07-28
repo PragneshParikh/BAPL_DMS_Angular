@@ -31,4 +31,8 @@ export class DealerCreationManagerService {
   deactivate(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
+  assignRole(id: number, roleId: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/assign-role`, { roleId });
+  }
 }

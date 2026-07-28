@@ -37,7 +37,8 @@ export class ItemMaster implements OnInit {
   sortDirection: 'asc' | 'desc' = 'asc';
 
   groupId = 1; // static group id
-  supplierlist: any[] = [];
+  supplierlist: any[]=[];
+  isSuperAdmin: boolean;
 
   constructor(
     private itemService: ItemMasterService,
@@ -49,6 +50,7 @@ export class ItemMaster implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     this.loadItems();
     this.loadsuplier();
   }
@@ -177,7 +179,7 @@ export class ItemMaster implements OnInit {
     this.loader.show();
     this.selectedItem.dealerCode = this.storageService.getDealerCode();
     this.selectedItem.uom = this.itemObj.uom;
-    this.selectedItem.status = true;
+    this.itemObj.status = this.selectedItem.status 
     this.selectedItem.updatedBy = this.storageService.getUserId();
     this.selectedItem.updatedDate = new Date();
     this.itemService.updateItem(this.selectedItem).subscribe({
@@ -242,7 +244,7 @@ export class ItemMaster implements OnInit {
 
       id: 0,
 
-      itemtype: 0,
+    itemtype: 2,
 
       itemname: '',
       itemdesc: '',
@@ -256,7 +258,7 @@ export class ItemMaster implements OnInit {
       grpidno: 1,
       oemModelId: null,
 
-      uom: 'PCS',
+    uom: '',
 
       hsncode: '',
 
@@ -300,15 +302,15 @@ export class ItemMaster implements OnInit {
 
       remarks: '',
 
-      isExempted: false,
-      isToolkitFirstAid: false,
-      isStockRequired: false,
-      isHelmet: false,
-      isInventory: false,
-      isInEligibleInput: false,
-      dealerCode: '',
-      status: true,
-      supplierId: 0
+    isExempted: false,
+    isToolkitFirstAid: false,
+    isStockRequired: false,
+    isHelmet: false,
+    isInventory: false,
+    isInEligibleInput: false,
+    dealerCode:'',
+    status:false,
+    supplierId:0
 
     };
 

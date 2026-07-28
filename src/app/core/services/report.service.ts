@@ -781,9 +781,11 @@ export class ReportService {
     );
   }
 
-  getPartsStockDetailsByDealer(groupId: number, dealerCode: string | null): Observable<any> {
+  getPartsStockDetailsByDealer(groupId: number, fromDate: Date, toDate: Date, dealerCode: string | null): Observable<any> {
     let params = new HttpParams();
     params = params.set("groupId", groupId);
+    params = params.set("fromDate", fromDate.toISOString());
+    params = params.set("toDate", toDate.toISOString());
 
     if (dealerCode) {
       params = params.set("dealerCode", dealerCode)

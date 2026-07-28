@@ -71,7 +71,7 @@ export class CustomerLedgerList implements OnInit {
     this.loader.show();
     this.ledgerMasterService.getLedgerByPaged(this.searchTerm, this.page - 1, this.pageSize, this.dealerCode).subscribe({
       next: (res) => {
-
+               
         this.collectionSize = 0;
         if (res) {
           this.dataSource = res.data;
@@ -173,7 +173,7 @@ export class CustomerLedgerList implements OnInit {
 
         this.collectionSize = 0;
         if (res) {
-
+               
           this.dataSource = res.data;
           this.collectionSize = res.totalRecords;
         }

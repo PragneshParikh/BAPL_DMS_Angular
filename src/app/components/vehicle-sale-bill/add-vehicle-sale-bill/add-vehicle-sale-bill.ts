@@ -157,7 +157,8 @@ export class AddVehicleSaleBill implements OnInit {
     finalAmount: 0,
     key: '',
     book: '',
-    Status: ''
+    Status: '',
+    motorNo:''
   };
   private modalRef!: NgbModalRef;
   dealerCode: string = '';
@@ -355,6 +356,8 @@ export class AddVehicleSaleBill implements OnInit {
     this.vehicleSaleBillService.getAllChassisWithPDIStatus(dealerCode, this.selectedCustomerId,this.model.location)
       .subscribe({
         next: (res) => {
+          console.log(res);
+          
           this.chassisList = res;
           this.filteredChassis = res.filter(p => p.locationCode === this.model.location);
           if (callback) callback();
@@ -373,6 +376,8 @@ export class AddVehicleSaleBill implements OnInit {
     this.loader.show();
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
+        console.log(res);
+        
         this.loader.hide();
         this.model.location =res.location;
         this.selectedCustomerId = res.ledgerId;
@@ -553,6 +558,7 @@ export class AddVehicleSaleBill implements OnInit {
       battery: this.model.battery || '',
       convertorNo: this.model.convertorNo || '',
       chargerNo: this.model.chargerNo || '',
+      motorNo:this.model.motorNo||'',
       controllerNo: this.model.controllerNo || '',
       key: this.model.key || '',
       bookNo: this.model.book || '',
@@ -940,6 +946,7 @@ export class AddVehicleSaleBill implements OnInit {
     this.model.controllerNo = selected.controllerNo;
     this.model.key = selected.keyNo;
     this.model.book = selected.bookNo;
+    this.model.motorNo=selected.motorNo;
     // Extra details
     this.model.batteryChemical = selected.batteryChemical;
     this.model.batteryCapacity = selected.batteryCapacity;
@@ -1308,6 +1315,7 @@ private performDelete() {
     }
   });
 }
+
 
 
 }

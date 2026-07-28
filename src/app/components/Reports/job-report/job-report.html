@@ -193,7 +193,7 @@
                 <td>{{ item.state }}</td>
                 <td class="text-center">{{ getDaysCount(item) ?? '-' }}</td>
                 <td class="text-nowrap">{{ formatDate(item.jobInDate) }}</td>
-                <td class="text-nowrap">{{ formatDate(item.estimatedDeliveryDate) }}</td>
+                <td class="text-nowrap">{{ getJobEndDate(item) }}</td>
                 <td>{{ item.jobStatus }}</td>
                 <td>{{ item.jobType }}</td>
                 <td>{{ item.serviceHead }}</td>
