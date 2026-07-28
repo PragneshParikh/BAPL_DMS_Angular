@@ -77,7 +77,7 @@ export class PartsStockDetails implements OnInit {
 
   getPartsStockDetails() {
     this.loader.show();
-    const dealerCode = this.stockReportFilterFormData.selectedDealerCode;
+    const dealerCode = this.stockReportFilterFormData.selectedDealerCode === "ALL" ? null : this.stockReportFilterFormData.selectedDealerCode;
     const fromDate = new Date(this.stockReportFilterFormData.fromDate);
     const toDate = new Date(this.stockReportFilterFormData.toDate);
 
