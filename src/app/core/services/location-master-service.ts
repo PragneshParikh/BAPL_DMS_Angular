@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { LocationDetailModel, UpdateLocationDetail } from '../../ViewModels/models/LocationDetailModel';
+import { LocationMenuAccessResponse } from '../../ViewModels/models/LocationMenuAccessModel';
+
 
 @Injectable({
   providedIn: 'root'
@@ -55,6 +58,24 @@ export class LocationMasterService {
     params = params.set('locCode', locCode);
 
     return this.httpClient.get(`${this.baseUrl}/LocationMaster/GetDealerPrimaryLocationByAreaId`, { params });
+  }
+
+getDetail(id: number): Observable<LocationDetailModel> {
+    return this.httpClient.get<LocationDetailModel>(`${this.baseUrl}/bg-role/location/${id}`);
+  }
+
+  updateDetail(id: number, model: UpdateLocationDetail): Observable<any> {
+    return this.httpClient.put(`${this.baseUrl}/bg-role/location/${id}`, model);
+  }
+
+  getMenuAccess(id: number, roleId?: string): Observable<LocationMenuAccessResponse> {
+    let params = new HttpParams();
+    if (roleId) params = params.set('roleId', roleId);
+    return this.httpClient.get<LocationMenuAccessResponse>(`${this.baseUrl}/bg-role/location/${id}/menu-access`, { params });
+  }
+
+  updateMenuAccess(id: number, roleId: string, grantedSubMenuIds: number[]): Observable<any> {
+    return this.httpClient.put(`${this.baseUrl}/bg-role/location/${id}/menu-access`, { roleId, grantedSubMenuIds });
   }
 
 }

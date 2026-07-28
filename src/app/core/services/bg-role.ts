@@ -15,26 +15,22 @@ export class BgRoleService {
   }
 
   getByCategory(category: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/by-category/${category}`);
+    return this.http.get<any[]>(`${this.apiUrl}/by-category/${encodeURIComponent(category)}`);
   }
 
   getMappings(): Observable<BgRoleMappingModel[]> {
     return this.http.get<BgRoleMappingModel[]>(`${this.apiUrl}/mappings`);
   }
 
-  createWithCategory(payload: { name: string; category: string }): Observable<any> {
+  createWithCategory(payload: { name: string; category?: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/with-category`, payload);
+  }
+
+  updateMapping(id: number, name: string, category?: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/mappings/${id}`, { name, category });
   }
 
   deleteMapping(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/mappings/${id}`);
-  }
-
-    getMappingById(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/mappings/${id}`);
-  }
-
-  updateMapping(id: number, name: string, category: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/mappings/${id}`, { name, category });
   }
 }

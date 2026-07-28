@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { DealerListModel, DealerListFilter, DealerListPagedResponse, DealerQuickUpdate } from '../../ViewModels/models/DealerListModel';
+import { DealerListModel, DealerListFilter, DealerListPagedResponse, DealerQuickUpdate, } from '../../ViewModels/models/DealerListModel';
+import { DealerMenuAccessResponse, DealerLocationModel  } from '../../ViewModels/models/DealerMenuAccessModel';
 
 @Injectable({ providedIn: 'root' })
 export class DealerCreationManagerService {
@@ -34,5 +35,23 @@ export class DealerCreationManagerService {
 
   assignRole(id: number, roleId: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/assign-role`, { roleId });
+  }
+
+  getMenuAccess(id: number, roleId?: string): Observable<DealerMenuAccessResponse> {
+    let params = new HttpParams();
+    if (roleId) params = params.set('roleId', roleId);
+    return this.http.get<DealerMenuAccessResponse>(`${this.apiUrl}/${id}/menu-access`, { params });
+  }
+
+  updateMenuAccess(id: number, roleId: string, grantedSubMenuIds: number[]): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/menu-access`, { roleId, grantedSubMenuIds });
+  }
+
+    getLocations(dealerId: number): Observable<DealerLocationModel[]> {
+    return this.http.get<DealerLocationModel[]>(`${this.apiUrl}/${dealerId}/locations`);
+  }
+
+  updateLocationsStatus(dealerId: number, locationIds: number[], isActive: boolean): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${dealerId}/locations/bulk-status`, { locationIds, isActive });
   }
 }
