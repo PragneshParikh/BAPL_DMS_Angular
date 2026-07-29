@@ -8,6 +8,7 @@ import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { MaterialTransferService } from '../../core/services/material-transfer';
 import { StorageService } from '../../core/services/storage';
+import { LocationMasterService } from '../../core/services/location-master-service';
 
 @Component({
   selector: 'app-material-transfer',
@@ -36,30 +37,47 @@ export class MaterialTransfer implements OnInit {
   collectionSize = 0;
 
   dealerCode: string = '';
+  isSuperAdmin: boolean = false;
+  selectedLocation: string = '';
+
+  lstLocations: any[] = [];
 
   constructor(
     private router: Router,
     private loader: LoaderService,
     private toast: ToastService,
     private materialTransfterService: MaterialTransferService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private locationMasterService: LocationMasterService
   ) { }
 
   ngOnInit(): void {
-    this.dealerCode = this.storageService.getDealerCode();
-    this.getMaterialTransfer();
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    }
+
+    this.loadWorkShopLocations();
   }
 
   onSearchChange() {
-    this.getMaterialTransfer();
+    const _dealerCode = this.lstLocations.filter(x => x.loccode === this.selectedLocation)[0].dealerCode;
+    this.getMaterialTransfer(_dealerCode);
   }
 
   addMaterialTransfer() {
-    this.router.navigate(['/material-transfer', 0]);
+    const materialId = 0;
+    const value = Date.now() + '|' + materialId;
+    const encId = btoa(value);
+    this.router.navigate(['/material-transfer', encId]);
   }
 
   onMaterialClick(row: any) {
-    this.router.navigate(['/material-transfer', row.id]);
+    const materialId = row.id || 0;
+    const value = Date.now() + '|' + materialId;
+    const encMaterialId = btoa(value);
+    this.router.navigate(['/material-transfer', encMaterialId]);
   }
 
   onPageChange(page: number) {
@@ -73,12 +91,20 @@ export class MaterialTransfer implements OnInit {
       this.sortColumn = column;
       this.sortDirection = 'asc';
     }
-    // Logic to sort data based on sortColumn and sortDirection
+
+    this.dataSource.sort((a, b) => {
+      let valueA = a[column] ?? '';
+      let valueB = b[column] ?? '';
+
+      const result = valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+      return this.sortDirection === 'asc' ? result : -result;
+    });
+
   }
 
-  getMaterialTransfer() {
+  getMaterialTransfer(dealerCode: string) {
     this.loader.show();
-    this.materialTransfterService.getByDealer(this.searchTerm, this.dealerCode, this.page, this.pageSize).subscribe({
+    this.materialTransfterService.getByDealer(this.searchTerm, dealerCode, this.page, this.pageSize).subscribe({
       next: (res: any) => {
         this.loader.hide();
         this.dataSource = res.data;
@@ -111,5 +137,27 @@ export class MaterialTransfer implements OnInit {
       this.loader.hide();
       this.toast.show('File downloaded successfully', { classname: 'bg-success text-light', delay: 5000 });
     });
+  }
+
+  loadWorkShopLocations() {
+    this.loader.show();
+    this.locationMasterService.getLocationByDealerCodeAndAreaId(this.dealerCode, 2).subscribe({
+      next: (res: any) => {
+        this.lstLocations = res;
+        this.loader.hide();
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toast.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    })
+  }
+
+  onChangeLocation(event: any) {
+    const locCode = (event.target as HTMLSelectElement).value;
+    const _dealerCode = this.lstLocations.filter(x => x.loccode === locCode)[0].dealerCode;
+
+    this.getMaterialTransfer(_dealerCode);
   }
 }

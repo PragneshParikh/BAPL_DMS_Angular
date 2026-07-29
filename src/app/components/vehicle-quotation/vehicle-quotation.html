@@ -1,0 +1,441 @@
+<!-- ===================================================== -->
+<!-- PAGE HEADER -->
+<!-- ===================================================== -->
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h4 class="fw-bold mb-0 text-uppercase">
+        {{ isEditMode ? 'Edit Quotation' : 'Quotation' }}
+    </h4>
+
+    <button type="button" class="btn btn-secondary btn-sm" (click)="backToList()">
+        <i class="ri-arrow-left-line"></i> Back
+    </button>
+</div>
+
+<!-- ===================================================== -->
+<!-- QUOTATION FORM -->
+<!-- ===================================================== -->
+<div class="card shadow-sm mx-2">
+    <div class="card-body p-3">
+        <form #quotationForm="ngForm" (ngSubmit)="onSubmit(quotationForm)" autocomplete="off">
+            <div class="row">
+
+                <!-- ROW 1: Quotation No / Date / Dealer / Status -->
+                <div class="row mb-2">
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Quotation No.</label>
+                        <input type="text" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.quotationNo" name="quotationNo" readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Quotation Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control form-control-sm py-1"
+                            [class.is-invalid]="errors.quotationDate" [(ngModel)]="quotationData.quotationDate"
+                            name="quotationDate">
+                        <small *ngIf="errors.quotationDate" class="text-danger">{{ errors.quotationDate }}</small>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">
+                            Dealer <span class="text-danger">*</span>
+                        </label>
+
+                        <select class="form-select form-select-sm py-1" [class.is-invalid]="errors.dealerId"
+                            [ngModel]="quotationData.dealerId ?? ''"
+                            (ngModelChange)="quotationData.dealerId = $event; onDealerChange()" name="dealerId">
+
+                            <option value="">Select Dealer</option>
+
+                            <option *ngFor="let d of dealers; trackBy: trackById" [value]="d.id">
+                                {{ d.dealerName }}
+                            </option>
+
+                        </select>
+
+                        <small *ngIf="errors.dealerId" class="text-danger">
+                            {{ errors.dealerId }}
+                        </small>
+                        <small *ngIf="!dealers.length" class="text-muted d-block">Loading dealers…</small>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Status <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm py-1" [class.is-invalid]="errors.status"
+                            [(ngModel)]="quotationData.status" name="status">
+                            <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+                        </select>
+                        <small *ngIf="errors.status" class="text-danger">{{ errors.status }}</small>
+                    </div>
+                </div>
+
+                <!-- ROW 2: Customer Details -->
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Customer Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm py-1"
+                            [class.is-invalid]="errors.customerName" [(ngModel)]="quotationData.customerName"
+                            name="customerName">
+                        <small *ngIf="errors.customerName" class="text-danger">{{ errors.customerName }}</small>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Mobile No. <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm py-1"
+                            [class.is-invalid]="errors.mobileNo" inputmode="numeric" maxlength="10"
+                            [(ngModel)]="quotationData.mobileNo" name="mobileNo"
+                            (input)="onlyDigits($event, 'mobileNo', 10)">
+                        <small *ngIf="errors.mobileNo" class="text-danger">{{ errors.mobileNo }}</small>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Email ID</label>
+                        <input type="email" class="form-control form-control-sm py-1"
+                            [class.is-invalid]="errors.emailId" [(ngModel)]="quotationData.emailId" name="emailId">
+                        <small *ngIf="errors.emailId" class="text-danger">{{ errors.emailId }}</small>
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">Address</label>
+                        <input type="text" class="form-control form-control-sm py-1" [(ngModel)]="quotationData.address"
+                            name="address">
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">
+                            State <span class="text-danger">*</span>
+                        </label>
+
+                        <select class="form-select form-select-sm py-1" [class.is-invalid]="errors.stateId"
+                            [(ngModel)]="quotationData.stateId" name="stateId" (change)="onStateChange()">
+
+                            <option value="">Select State</option>
+
+                            <option *ngFor="let state of states" [value]="state.stateId">
+                                {{ state.stateName }}
+                            </option>
+
+                        </select>
+
+                        <small *ngIf="errors.stateId" class="text-danger">
+                            {{ errors.stateId }}
+                        </small>
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">
+                            City <span class="text-danger">*</span>
+                        </label>
+
+                        <select class="form-select form-select-sm py-1" [class.is-invalid]="errors.cityId"
+                            [(ngModel)]="quotationData.cityId" name="cityId">
+
+                            <option value="">Select City</option>
+
+                        <option
+                            *ngFor="let city of filteredCities"
+                            [value]="city.cityId ?? city.id">
+                            {{ city.cityName }}
+                        </option>
+
+                        </select>
+
+                        <small *ngIf="errors.cityId" class="text-danger">
+                            {{ errors.cityId }}
+                        </small>
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">GST No</label>
+                        <input type="text" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.customerGSTNo" name="customerGSTNo"
+                            placeholder="Optional">
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">PAN No</label>
+                        <input type="text" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.customerPanNo" name="customerPanNo"
+                            placeholder="Optional">
+                    </div>
+                </div>
+
+                <!-- ROW 3: Vehicle Details (Model -> Variant -> Color) -->
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Model <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm py-1" [class.is-invalid]="errors.modelId"
+                            [ngModel]="quotationData.modelId ?? ''"
+                            (ngModelChange)="quotationData.modelId = $event; onModelChange()" name="modelId">
+                            <option value="">Select Model</option>
+                            <option *ngFor="let m of models; trackBy: trackById" [value]="m.id ?? m.modelId">{{
+                                m.modelName ?? m.modelname }}</option>
+                        </select>
+                        <small *ngIf="errors.modelId" class="text-danger">{{ errors.modelId }}</small>
+                        <small *ngIf="!models.length" class="text-muted d-block">Loading models…</small>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Variant <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm py-1" [class.is-invalid]="errors.variantId"
+                            [ngModel]="quotationData.variantId ?? ''" (ngModelChange)="onVariantChange($event)"
+                            name="variantId" [disabled]="!quotationData.modelId">
+                            <option value="">Select Variant</option>
+                            <option *ngFor="let v of filteredVariants; trackBy: trackById" [value]="v.id ?? v.itemId">{{
+                                v.itemname ?? v.itemName ?? v.name }}</option>
+                        </select>
+                        <small *ngIf="errors.variantId" class="text-danger">{{ errors.variantId }}</small>
+                    </div>
+
+                    <!-- COLOR: auto-selected once the variant's item details are fetched,
+                 then locked (disabled) so the user can't override it. Stays
+                 editable if the fetched item has no fixed color. -->
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Color</label>
+                        <select class="form-select form-select-sm py-1" [ngModel]="quotationData.colorId ?? ''"
+                            (ngModelChange)="quotationData.colorId = $event" name="colorId" [disabled]="colorLocked">
+                            <option value="">Select Color</option>
+                            <option *ngFor="let c of colors; trackBy: trackById" [value]="c.id ?? c.colorId">{{
+                                c.colorname ?? c.colorName ?? c.name }}</option>
+                        </select>
+                        <small *ngIf="colorLocked" class="text-muted d-block">Color auto-selected for this
+                            variant.</small>
+                        <small *ngIf="!colorLocked && !quotationData.variantId" class="text-muted d-block">Select a
+                            variant to auto-fill color.</small>
+                    </div>
+                </div>
+
+                <!-- ROW 4: Pricing -->
+                <div class="row mb-2 p-2 mx-0 bg-light rounded">
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Ex-Showroom Price <span class="text-danger">*</span></label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [class.is-invalid]="errors.exShowroomPrice" [ngModel]="quotationData.exShowroomPrice"
+                            name="exShowroomPrice" readonly>
+                        <small *ngIf="errors.exShowroomPrice" class="text-danger">{{ errors.exShowroomPrice }}</small>
+                        <small *ngIf="quotationData.variantId" class="text-muted d-block">
+                            Customer Price {{ quotationData.custPrice | number:'1.2-2' }}
+                            + GST {{ quotationData.taxAmount | number:'1.2-2' }}
+                            − FAME2 {{ quotationData.fame2Amount | number:'1.2-2' }}
+                        </small>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">RTO Charges</label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.rtoCharges" name="rtoCharges" (input)="calculateTotal()">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Insurance Amount</label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.insuranceAmount" name="insuranceAmount"
+                            (input)="calculateTotal()">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Accessories Amount</label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.accessoriesAmount" name="accessoriesAmount"
+                            (input)="calculateTotal()">
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">Extended Warranty</label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.extendedWarrantyAmount" name="extendedWarrantyAmount"
+                            (input)="calculateTotal()">
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">AMC Amount</label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.amcAmount" name="amcAmount" (input)="calculateTotal()">
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">Other Charges</label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.otherCharges" name="otherCharges" (input)="calculateTotal()">
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">Discount Amount</label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.discountAmount" name="discountAmount" (input)="calculateTotal()">
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">GST Amount</label>
+                        <input type="number" class="form-control form-control-sm py-1"
+                            [ngModel]="quotationData.taxAmount" name="taxAmount" readonly>
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">SGST Amount</label>
+                        <input type="number" class="form-control form-control-sm py-1"
+                            [ngModel]="quotationData.sgstAmount" name="sgstAmount" readonly>
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">CGST Amount</label>
+                        <input type="number" class="form-control form-control-sm py-1"
+                            [ngModel]="quotationData.cgstAmount" name="cgstAmount" readonly>
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">IGST Amount</label>
+                        <input type="number" class="form-control form-control-sm py-1"
+                            [ngModel]="quotationData.igstAmount" name="igstAmount" readonly>
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">FAME II Amount</label>
+                        <input type="number" class="form-control form-control-sm py-1"
+                            [ngModel]="quotationData.fame2Amount" name="fame2Amount" readonly>
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">Hypothecation Amount</label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.hypothecationAmount" name="hypothecationAmount"
+                            (input)="calculateTotal()">
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">Plate Amount</label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.plateAmount" name="plateAmount" (input)="calculateTotal()">
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">Handling Charges</label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.handlingCharges" name="handlingCharges"
+                            (input)="calculateTotal()">
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1">
+                            Valid Till Date
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="date" class="form-control form-control-sm py-1"
+                            [class.is-invalid]="errors.validTillDate" [(ngModel)]="quotationData.validTillDate"
+                            name="validTillDate">
+
+                        <small *ngIf="errors.validTillDate" class="text-danger">
+                            {{ errors.validTillDate }}
+                        </small>
+                    </div>
+
+                    <div class="col-md-3 mt-2">
+                        <label class="form-label mb-1 fw-semibold">Total Amount</label>
+                        <input type="text" class="form-control form-control-sm py-1 fw-bold"
+                            [value]="quotationData.totalAmount | number:'1.2-2'" readonly>
+                    </div>
+                </div>
+
+                <!-- ===================================================== -->
+                <!-- EXCHANGE (no checkbox — optional fields, drive off amount) -->
+                <!-- ===================================================== -->
+                <div class="row mb-2 mt-2 p-2 mx-0 bg-light rounded">
+                    <div class="col-12 mb-1">
+                        <label class="fw-semibold mb-0">Exchange (optional)</label>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Exchange Amount</label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [class.is-invalid]="errors.exchangeAmount" [(ngModel)]="quotationData.exchangeAmount"
+                            name="exchangeAmount" (input)="calculateTotal()">
+                        <small *ngIf="errors.exchangeAmount" class="text-danger">{{ errors.exchangeAmount }}</small>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Old Company Name</label>
+                        <input type="text" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.oldCompanyName" name="oldCompanyName"
+                            placeholder="Optional">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Old Model Name</label>
+                        <input type="text" class="form-control form-control-sm py-1"
+                            [(ngModel)]="quotationData.oldModelName" name="oldModelName"
+                            placeholder="Optional">
+                    </div>
+                </div>
+
+                <!-- ===================================================== -->
+                <!-- FINANCE (no checkbox — optional fields, no cross-field validation) -->
+                <!-- ===================================================== -->
+                <div class="row mb-2 mt-1 p-2 mx-0 bg-light rounded">
+                    <div class="col-12 mb-1">
+                        <label class="fw-semibold mb-0">Finance (optional)</label>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Finance Company</label>
+                        <select class="form-select form-select-sm py-1" [class.is-invalid]="errors.financeCompanyId"
+                            [ngModel]="quotationData.financeCompanyId ?? ''"
+                            (ngModelChange)="quotationData.financeCompanyId = $event" name="financeCompanyId">
+                            <option value="">Select Finance Company</option>
+                            <option *ngFor="let f of financeCompanies; trackBy: trackById" [value]="f.id">{{
+                                f.ledgerName }}</option>
+                        </select>
+                        <small *ngIf="errors.financeCompanyId" class="text-danger">{{ errors.financeCompanyId }}</small>
+                        <small *ngIf="!financeCompanies.length" class="text-muted d-block">Loading finance
+                            companies…</small>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Loan Amount</label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [class.is-invalid]="errors.loanAmount" [(ngModel)]="quotationData.loanAmount"
+                            name="loanAmount">
+                        <small *ngIf="errors.loanAmount" class="text-danger">{{ errors.loanAmount }}</small>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Down Payment</label>
+                        <input type="number" min="0" class="form-control form-control-sm py-1"
+                            [class.is-invalid]="errors.downPayment" [(ngModel)]="quotationData.downPayment"
+                            name="downPayment">
+                        <small *ngIf="errors.downPayment" class="text-danger">{{ errors.downPayment }}</small>
+                    </div>
+                </div>
+
+                <!-- REMARKS -->
+                <div class="row mb-2">
+                    <div class="col-md-12">
+                        <label class="form-label mb-1">Remarks</label>
+                        <textarea rows="2" class="form-control form-control-sm" [(ngModel)]="quotationData.remarks"
+                            name="remarks"></textarea>
+                    </div>
+                </div>
+
+                <!-- STATUS (edit mode active/inactive badge) -->
+                <div class="row mb-2" *ngIf="isEditMode">
+                    <div class="col-md-2">
+                        <label class="form-label mb-1">Active</label>
+                        <div>
+                            <span *ngIf="quotationData.isActive" class="badge bg-success px-3 py-2">Active</span>
+                            <span *ngIf="!quotationData.isActive" class="badge bg-danger px-3 py-2">Inactive</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BUTTONS -->
+                <div class="text-end mt-2">
+                    <button type="button" class="btn btn-secondary btn-sm px-2 py-1 me-2" (click)="backToList()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm px-2 py-1">
+                        {{ isEditMode ? 'Update' : 'Save' }}
+                    </button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>

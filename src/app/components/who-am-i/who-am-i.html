@@ -1,0 +1,44 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">Who Am I</h4>
+</div>
+
+<div class="modal-body">
+
+    <div class="row">
+
+        <!-- HSN Code -->
+        <div class="col-md-4">
+            <label class="form-label">Dealer Email<span class="text-danger">*</span></label>
+
+            <input class="form-control form-control-sm" name="email" required pattern="^[0-9]*$" #email="ngModel"
+                [(ngModel)]="model.email" />
+
+
+
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Dealer Password</label>
+
+            <input class="form-control form-control-sm" name="password" pattern="^[0-9]*$" #password="ngModel"
+                [(ngModel)]="model.password" />
+
+
+
+        </div>
+    </div>
+
+
+</div>
+<div class="d-flex justify-content mt-4">
+
+
+    <div>
+        <button type="submit" class="btn btn-primary btn-sm me-2" (click)="fetch()">
+            Fetch
+        </button>
+
+
+    </div>
+
+</div>

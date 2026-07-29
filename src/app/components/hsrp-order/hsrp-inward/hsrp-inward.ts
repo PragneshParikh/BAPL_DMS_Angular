@@ -6,6 +6,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
 import { Route, Router } from '@angular/router';
+import { ToastService } from '../../../shared/toaster/toast-service';
 
 @Component({
   selector: 'app-hsrp-inward',
@@ -40,7 +41,8 @@ export class HsrpInward implements OnInit {
   constructor(
     private hsrpService: HsrpService,
     private storageService: StorageService,
-    private router: Router
+    private router: Router, private toasterService: ToastService
+
   ) { }
 
   ngOnInit(): void {
@@ -79,7 +81,7 @@ export class HsrpInward implements OnInit {
           this.page = 1;
           this.updatePagination();
         },
-        error: (err) => console.log(err)
+        error: (err) => console.error(err)
       });
   }
 
@@ -119,11 +121,14 @@ export class HsrpInward implements OnInit {
   navigateToListingPage() {
     this.router.navigate(['/hsrp-order-list']);
   }
-get isSaveDisabled(): boolean {
-  return this.paginatedOrders.some(
-    item => item.selected && (!item.inwardStatus || item.inwardStatus === 'Pending' || item.inwardStatus === null)
-  );
-}
+  get isSaveDisabled(): boolean {
+    const selectedItems = this.paginatedOrders.filter(x => x.selected);
+
+    return (
+      selectedItems.length === 0 ||
+      selectedItems.some(x => x.inwardStatus !== 'Received')
+    );
+  }
   onSearchChange(): void {
 
     const term = this.searchTerm.toLowerCase();
@@ -140,9 +145,36 @@ get isSaveDisabled(): boolean {
     this.page = 1;
     this.updatePagination();
   }
+  // submitHSRPInward() {
+
+  //   const selectedItems = this.orders.filter(x => x.selected);
+
+  //   const payload = selectedItems.map(x => ({
+  //     id: x.id,
+  //     inwardStatus: x.inwardStatus
+  //   }));
+
+  //   this.hsrpService.updateBulkHSRPInward(payload).subscribe({
+  //     next: (res) => {
+  //       this.getInwardList(); // refresh
+  //     },
+  //     error: (err) => {
+  //       console.error(err);
+  //     }
+  //   });
+  // }
+
   submitHSRPInward() {
 
     const selectedItems = this.orders.filter(x => x.selected);
+
+    if (selectedItems.length === 0) {
+      this.toasterService.show('Please select atleast one row', {
+        classname: 'bg-warning text-white',
+        delay: 5000
+      });
+      return;
+    }
 
     const payload = selectedItems.map(x => ({
       id: x.id,
@@ -150,11 +182,37 @@ get isSaveDisabled(): boolean {
     }));
 
     this.hsrpService.updateBulkHSRPInward(payload).subscribe({
-      next: (res) => {
-        this.getInwardList(); // refresh
+      next: (res: any[]) => {
+
+        const failedOrder = res.find(x =>
+          x.inwardStatus === 'Failed' ||
+          x.inwardStatus === '0'
+        );
+
+        if (failedOrder) {
+          this.toasterService.show(
+            failedOrder.inwardResponse || 'HSRP Inward Failed',
+            {
+              classname: 'bg-danger text-white',
+              delay: 5000
+            }
+          );
+        } else {
+          this.toasterService.show('HSRP Inward Successful', {
+            classname: 'bg-success text-white',
+            delay: 5000
+          });
+        }
+
+        this.getInwardList();
       },
       error: (err) => {
         console.error(err);
+
+        this.toasterService.show('Error while processing HSRP Inward', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
       }
     });
   }

@@ -53,7 +53,11 @@ export interface VehicleStockReportViewModel {
 
   vehicleStatus?: string;
 
-  location?: string;
+  locationCode?: string;
+
+  locationName?: string;
+  
+  currentLocation?: string;
 
   daysInStock: number;
 }

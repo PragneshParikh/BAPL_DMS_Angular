@@ -49,10 +49,22 @@
 }
 
 .small-dropdown {
-  max-height: 150px;   /* controls height */
-  overflow-y: auto;    /* enables scroll */
-  font-size: 12px;     /* makes it compact */
-  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+}
+
+.small-dropdown .list-group-item {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #212529;
+  
+  cursor:pointer;
+}
+
+.small-dropdown .list-group-item:hover {
+  background-color: #b9bcbe;
 }
 .form-control-sm {
     min-height: 30px;
@@ -69,4 +81,8 @@
 
 .dropdown-item:hover {
   background-color: #f1f5f9;
+}
+.small-dropdown {
+    position: absolute;
+    z-index: 999999 !important;
 }

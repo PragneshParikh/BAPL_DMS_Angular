@@ -1,5 +1,10 @@
 <div class="a4-page mx-auto bg-white p-4 shadow-sm">
-
+ <div class="d-flex justify-content-end align-items-end gap-1 no-print">
+    <button type="button" class="btn btn-sm btn-primary" (click)="goBack()"> Back </button>
+    <button type="button" class="btn btn-sm btn-primary" (click)="printInvoice()">
+      Print
+    </button>
+  </div>
     <!-- HEADER -->
     <div class="d-flex justify-content-between">
 
@@ -15,10 +20,12 @@
             <div>Dealer Code :{{dealer.dealercode}}</div>
         </div>
 
-        <!-- RIGHT: LOGO -->
-        <!-- <div class="text-end">
-            <img src="assets/bgauss-logo.png" alt="BGAUSS" style="height:60px;">
-        </div> -->
+      <div class="ms-3 mt-5">
+    <img
+      src="assets/images/BGaussLightLogo.png"
+      alt="BGauss Logo"
+      height="40">
+  </div>
 
     </div>
 

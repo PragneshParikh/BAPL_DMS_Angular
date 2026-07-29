@@ -7,6 +7,7 @@ import { StorageService } from '../../../core/services/storage';
 import { FFIRService } from '../../../core/services/ffirservice';
 import { Router } from '@angular/router';
 import { NgbPaginationModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-ffirlisting',
@@ -26,6 +27,9 @@ export class Ffirlisting {
   collectionSize: number = 0;
   pagedData: any[] = [];
   filteredData: any[] = [];
+  isSuperAdmin: boolean;
+  dealerCode: string;
+  role: string;
 
   constructor(
     private storageService: StorageService,
@@ -44,10 +48,39 @@ export class Ffirlisting {
 
   ngOnInit(): void {
 
+     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    
+        if (!this.isSuperAdmin) {
+          this.dealerCode = this.storageService.getDealerCode();
+         
+        } else {
+           this.dealerCode = null;
+           this.role = this.storageService.getRole();
+           console.log(this.isSuperAdmin);
+        }
+
+    const today = new Date();
+
+    // Current month first date
+    const firstDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    );
+
+    this.searchModel.fromDate = this.formatDate(firstDayOfMonth);
+    this.searchModel.toDate = this.formatDate(today);
     this.loadFFIRList();
 
   }
 
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
   loadFFIRList() {
 
     const dealerCode = this.storageService.getDealerCode();
@@ -66,8 +99,6 @@ export class Ffirlisting {
           this.collectionSize = this.filteredData.length;
 
           this.refreshTable();
-
-          console.log("FFIRList :", res);
 
         },
 
@@ -164,6 +195,60 @@ export class Ffirlisting {
       });
   }
 
+   deleteFFIR(id: number) {
+        console.log('Delete Id:', id);
+         this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    
+        if (!this.isSuperAdmin) {
+          this.dealerCode = this.storageService.getDealerCode();
+         
+        } else {
+           this.dealerCode = null;
+           this.role = this.storageService.getRole();
+           console.log(this.isSuperAdmin);
+          
+        }
+        //const dealerCode = this.storageService.getDealerCode();
+        Swal.fire({
+          title: 'Are you sure?',
+          text: 'You will not be able to recover this FFIR!',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, delete it!',
+          cancelButtonText: 'Cancel',
+          width: '350px'
+        }).then((result) => {
+    
+          if (result.isConfirmed) {
+    
+            this.FFIRService.deleteFFIR(id,this.role).subscribe({
+              next: (res: any) => {
+    
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Deleted!',
+                  text: 'FFIR deleted successfully',
+                  width: '350px'
+                });
+    
+                //  Refresh list
+               this.loadFFIRList();
+              },
+              error: (err) => {
+                console.error(err);
+    
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: err?.error || 'Delete failed',
+                  width: '300px'
+                });
+              }
+            });
+    
+          }
+        });
+      }
   onSearchChange() {
 
     clearTimeout(this.searchTimeout);
@@ -200,14 +285,14 @@ export class Ffirlisting {
     this.pagedData = this.filteredData.slice(start, end);
 
   }
-  
+
   onFFIREdit(item: any) {
 
-  this.router.navigate(['/ffir'], {
-    queryParams: {
-      id: item.id
-    }
-  });
-}
+    this.router.navigate(['/ffir'], {
+      queryParams: {
+        id: item.id
+      }
+    });
+  }
 
 }

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { ComplaintMasterModel } from '../../ViewModels/ComplaintMasterModel';
 import { NgbModal, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { ComplaintmasterService } from '../../core/services/complaintmaster-service';
+import { GroupMasterService } from '../../core/services/group-master-service';
 
 
 @Component({
@@ -29,11 +30,13 @@ export class ComplaintMaster implements OnInit {
   page = 1;
   pageSize = 10;
   collectionSize = 0;
+  groupNameList: any;
 
   constructor(
     private fb: FormBuilder,
     private modalService: NgbModal,
-    private complaintService: ComplaintmasterService
+    private complaintService: ComplaintmasterService,
+     private groupMasterService: GroupMasterService
   ) { }
 
   ngOnInit(): void {
@@ -41,19 +44,35 @@ export class ComplaintMaster implements OnInit {
     this.complaintForm = this.fb.group({
       complaintId: [0],
       complaintName: ['', Validators.required],
-      groupName: ['Complaint'],
+      groupName: [0, Validators.required],
       isActive: [true]
     });
 
     this.getComplaintMasterList();
+    this.getGroupMasterList();
   }
 
+  getGroupMasterList(): void {
+
+    this.groupMasterService.getGroupMasterList().subscribe({
+      next: (response: any) => {
+
+        this.groupNameList = response || [];
+
+        this.refreshGrid();
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
   getComplaintMasterList(): void {
 
     this.complaintService.getComplaintMasterList().subscribe({
       next: (response: any) => {
 
         this.complaintMasterModelList = response || [];
+        
 
         this.refreshGrid();
       },
@@ -68,7 +87,7 @@ export class ComplaintMaster implements OnInit {
     this.complaintForm.reset({
       complaintId: 0,
       complaintName: '',
-      groupName: 'Complaint',
+      groupName: 0,
       isActive: true
     });
 
@@ -81,7 +100,6 @@ export class ComplaintMaster implements OnInit {
   openEditPopup(item: any): void {
 
     this.selectedComplaint = { ...item };
-
     this.modalService.open(this.complaintitemModal, {
       size: 'xl',
       backdrop: 'static'

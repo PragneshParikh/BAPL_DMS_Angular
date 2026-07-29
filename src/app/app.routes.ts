@@ -54,7 +54,39 @@ import { RepairBillPerforma } from './components/Reports/repair-bill-performa/re
 import { ComplaintMaster } from './components/complaint-master/complaint-master';
 import { AddVehicleStockTransfer } from './components/vehicle-stock-transfer/add-vehicle-stock-transfer';
 import { VehicleStockTransferList } from './components/vehicle-stock-transfer/vehicle-stock-transfer-list/vehicle-stock-transfer-list';
-
+import { GroupMaster } from './components/group-master/group-master';
+import { TermConditionMaster } from './components/term-condition-master/term-condition-master';
+import { OccupationMaster } from './components/occupation-master/occupation-master';
+import { VehicleInfoUpdate } from './components/vehicle-info-update/vehicle-info-update';
+import { DepartmentMasterList } from './components/department-master/department-master-list/department-master-list';
+import { DepartmentMaster } from './components/department-master/department-master';
+import { DesignationMasterList } from './components/designation-master/designation-master-list/designation-master-list';
+import { DesignationMaster } from './components/designation-master/designation-master';
+import { JobTypeMaster } from './components/job-type-master/job-type-master';
+import { ServiceHeadMaster } from './components/service-head-master/service-head-master';
+import { ServiceTypeMaster } from './components/service-type-master/service-type-master';
+import { JobSourceMaster } from './components/job-source-master/job-source-master';
+import { RoleMasterList } from './components/role-master/role-list-master/role-list-master';
+import { RoleMaster } from './components/role-master/role-master';
+import { BgemployeeMaster } from './components/bgemployee-master/bgemployee-master';
+import { BgemployeeMasterList } from './components/bgemployee-master/bgemployee-master-list/bgemployee-master-list';
+import { WarrantyJobCardClaim } from './components/warranty-job-card-claim/warranty-job-card-claim';
+import { CounterBill } from './components/counter-bill/counter-bill';
+import { AddCounterBill } from './components/counter-bill/add-counter-bill/add-counter-bill';
+import { CounterBillPrint } from './components/Reports/counter-bill-print/counter-bill-print';
+import { RepoBilling } from './components/repo-billing/repo-billing';
+import { VehicleOpenStock } from './components/vehicle-open-stock/vehicle-open-stock';
+import { VehicleQuotation } from './components/vehicle-quotation/vehicle-quotation';
+import { VehicleQuotationListComponent } from './components/vehicle-quotation/vehicle-quotation-list/vehicle-quotation-list';
+import { EstimateList } from './components/estimate/estimate-list/estimate-list';
+import { Estimate } from './components/estimate/estimate';
+import { PartInward } from './components/part-inward/part-inward';
+import { PartInwardList } from './components/part-inward/part-inward-list/part-inward-list';
+import { BgRoleMasterList } from './components/bg-role-master/bg-role-master-list/bg-role-master-list';
+import { BgRoleMaster } from './components/bg-role-master/bg-role-master';
+import { DealerCreationManagerList } from './components/dealer-creation/dealer-creation-manager-list/dealer-creation-manager-list';
+import { WhoAmI } from './components/who-am-i/who-am-i';
+;
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
@@ -95,8 +127,8 @@ export const routes: Routes = [
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [23] },
       { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-search/chassis-search').then(m => m.ChassisSearch) },
       { path: 'proforma-invoice', component: ProformaInvoice, data: [22] },
-      { path: 'form22-certificate/:chassisNo', component: Form22Certificate, data: [22] },
-      { path: 'delivery-checkList', component: DeliveryChecklist, data: [22] },
+      { path: 'form22-certificate/:saleBillId/:chassisNo', component: Form22Certificate, data: [22] },
+      { path: 'delivery-checkList/:saleBillId', component: DeliveryChecklist, data: [22] },
       { path: 'delivery-slip', component: DeliverySlip, data: [22] },
       { path: 'sale-Letter/:saleBillNo', component: SaleLetter, data: [22] },
 
@@ -140,24 +172,34 @@ export const routes: Routes = [
       { path: 'employee/add', component: EmployeeMasterComponent, data: [49] },
       { path: 'employee/edit/:id', component: EmployeeMasterComponent, data: [49] },
 
+      { path: 'bgemployee-master', component: BgemployeeMasterList, data: [76] },
+      { path: 'bgemployee-master/add', component: BgemployeeMaster, data: [76] },
+      { path: 'bgemployee-master/edit/:id', component: BgemployeeMaster, data: [76] },
+
       { path: 'hsrp-order', component: HSRPOrder, data: [48] },
       { path: 'hsrp-order/:id', component: HSRPOrder, data: [48] },
       { path: 'hsrp-order-list', component: HSRPOrderList, data: [48] },
       { path: 'hsrp-inward', component: HsrpInward, data: [48] },
 
+
+
       { path: 'vehicle-sale-report', data: [43], loadComponent: () => import('./components/Reports/vehicle-sale-report/vehicle-sale-report').then(m => m.VehicleSaleReportComponent) },
-
       { path: 'vehicle-stocks-report', data: [46], loadComponent: () => import('./components/Reports/vehicle-stock-report/vehicle-stock-report').then(m => m.VehicleStockReportComponent) },
-
       { path: 'po-tracking-report', data: [47], loadComponent: () => import('./components/Reports/po-tracking-report/po-tracking-report').then(m => m.POTrackingReportComponent) },
-
       { path: 'parts-dispatch-report', data: [50], loadComponent: () => import('./components/Reports/parts-dispatch-report/parts-dispatch-report').then(m => m.PartsDispatchReport) },
-
       { path: 'part-dispatch-kit-report', data: [51], loadComponent: () => import('./components/Reports/part-dispatch-kit-report/part-dispatch-kit-report').then(m => m.PartDispatchKitReport) },
+      { path: 'vehicle-sale-d2d-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-d2d-report/vehicle-sale-d2d-report').then(m => m.VehicleSaleD2dReport) },
+      { path: 'total-sale-dealer-wise', data: [81], loadComponent: () => import('./components/Reports/total-sale-report/total-sale-report').then(m => m.TotalSaleDealerWiseComponent) },
 
+      { path: 'model-wise-variant-stock', data: [66], loadComponent: () => import('./components/Reports/model-wise-variant-report/model-wise-variant-report').then(m => m.ModelWiseVariantStockComponent) },
+      { path: 'comparison-report', data: [90], loadComponent: () => import('./components/Reports/comparision-report/comparision-report').then(m => m.ComparisonReportComponent) },
+      { path: 'material-transfer-report', data: [91], loadComponent: () => import('./components/Reports/material-transfer-report/material-transfer-report').then(m => m.MaterialTransferReportComponent) },
+      { path: 'repair-bill-report', data: [92], loadComponent: () => import('./components/Reports/repair-bill-report/repair-bill-report').then(m => m.RepairBillReportComponent) },
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
 
-      { path: 'repair-bill-performa', component: RepairBillPerforma, data: [51] },
+      { path: 'repair-bill-performa/:repairBillId', component: RepairBillPerforma, data: [51] },
+
+      { path: 'repair-bill-invoice/:id', loadComponent: () => import('./components/repair-bill-invoice/repair-bill-invoice').then(m => m.RepairBillInvoiceComponent), data: [51] },
 
       { path: 'complaint-master', component: ComplaintMaster, data: [56] },
 
@@ -166,6 +208,60 @@ export const routes: Routes = [
       { path: 'vehicle-stock-transfer/edit/:id', component: AddVehicleStockTransfer, data: [57] },
 
       { path: 'stock-summary-detail', data: [58], loadComponent: () => import('./components/stock-summary-detail/stock-summary-detail').then(m => m.StockSummaryDetail) }
+      { path: 'group-master', component: GroupMaster, data: [59] },
+      { path: 'term-condition-master', component: TermConditionMaster, data: [60] },
+      { path: 'vehicle-sale-d2d-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-d2d-report/vehicle-sale-d2d-report').then(m => m.VehicleSaleD2dReport) },
+      // { path: 'vehicle-sale-bill-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-bill-report/vehicle-sale-bill-report').then(m => m.VehicleSaleBillReport) },
+      { path: 'vehicle-inward-report', data: [78], loadComponent: () => import('./components/Reports/vehicle-inward-report/vehicle-inward-report').then(m => m.VehicleInwardReport) },
+      { path: 'model-wise-sale-report', data: [79], loadComponent: () => import('./components/Reports/model-wise-sale-report/model-wise-sale-report').then(m => m.ModelWiseSaleReportComponent) },
+      { path: 'model-wise-current-stock', data: [80], loadComponent: () => import('./components/Reports/model-wise-current-stock/model-wise-current-stock').then(m => m.ModelWiseCurrentStockComponent) },
+      { path: 'occupation-master', component: OccupationMaster, data: [62] },
+      { path: 'department-master', component: DepartmentMasterList, data: [63] },
+      { path: 'department-master/add', component: DepartmentMaster, data: [63] },
+      { path: 'department-master/edit/:id', component: DepartmentMaster, data: [63] },
+      { path: 'designation-master', component: DesignationMasterList, data: [64] },
+      { path: 'designation-master/add', component: DesignationMaster, data: [64] },
+      { path: 'designation-master/edit/:id', component: DesignationMaster, data: [64] },
+      { path: 'role-master', component: RoleMasterList, data: [75] },
+      { path: 'role-master/add', component: RoleMaster, data: [75] },
+      { path: 'role-master/edit/:id', component: RoleMaster, data: [75] },
+      { path: 'bg-role-master', component: BgRoleMasterList, data: [100] },
+      { path: 'bg-role-master/add', component: BgRoleMaster, data: [100] },
+      { path: 'bg-role-master/edit/:id', component: BgRoleMaster, data: [100] },
+      { path: 'dealer-creation-manager', component: DealerCreationManagerList, data: [101] },
+
+
+
+      { path: 'free-service-claim', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim-list/free-service-claim-list').then(m => m.FreeServiceClaimList) },
+      { path: 'free-service-claim/:id', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim').then(m => m.FreeServiceClaim) },
+
+      { path: 'free-service-rate', data: [67], loadComponent: () => import('./components/free-service-rate/free-service-rate-list/free-service-rate-list').then(m => m.FreeServiceRateList) },
+      { path: 'free-service-rate/:id', data: [67], loadComponent: () => import('./components/free-service-rate/free-service-rate').then(m => m.FreeServiceRate) },
+
+      { path: 'job-type-master', component: JobTypeMaster, data: [68] },
+      { path: 'service-head-master', component: ServiceHeadMaster, data: [69] },
+      { path: 'service-type-master', component: ServiceTypeMaster, data: [70] },
+      { path: 'job-source-master', component: JobSourceMaster, data: [71] },
+      { path: 'warranty-job-card-claim', component: WarrantyJobCardClaim, data: [74] },
+      { path: 'vehicle-info', component: VehicleInfoUpdate, data: [73] },
+
+      { path: 'counter-bill', component: CounterBill, data: [77] },
+      { path: 'counter-bill/edit', component: AddCounterBill, data: [77] },
+      { path: 'add-counter-bill', component: AddCounterBill, data: [77] },
+      { path: 'print-counter-bill/:id', component: CounterBillPrint, data: [77] },
+      { path: 'vehicle-open-stock', component: VehicleOpenStock, data: [89] },
+      { path: 'repo-billing', component: RepoBilling, data: [88] },
+      { path: 'vehicle-open-stock', component: VehicleOpenStock, data: [89] },
+      { path: 'vehicle-quotation', component: VehicleQuotationListComponent, data: [87] },
+      { path: 'vehicle-quotation/add', component: VehicleQuotation, data: [87] },
+      { path: 'vehicle-quotation/edit/:id', component: VehicleQuotation, data: [87] },
+      { path: 'parts-inward', data: [0], component: PartInwardList },
+      { path: 'parts-inward/:invoiceNo', data: [0], component: PartInward },
+      { path: 'parts-stock-details', data: [93], loadComponent: () => import('./components/Reports/parts-stock-details/parts-stock-details').then(m => m.PartsStockDetails) },
+      { path: 'estimate', component: EstimateList, data: [98] },
+      { path: 'estimate/add', component: Estimate, data: [98] },
+      { path: 'estimate/edit/:id', component: Estimate, data: [98] },
+
     ]
   },
   { path: '**', component: WorkInProgress }

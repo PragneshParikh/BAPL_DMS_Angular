@@ -1,4 +1,4 @@
-import { Component, NgModule } from '@angular/core';
+import { Component, HostListener, NgModule } from '@angular/core';
 import { VehicleSaleBillService } from '../../core/services/vehicle-sale-bill-service';
 import { VehicleSaleBillResponseViewModel } from '../../ViewModels/VehicleSaleBill';
 import { FormsModule, NgModel } from '@angular/forms';
@@ -46,38 +46,88 @@ export class VehicleSaleBill {
   filter: any = {
     fromDate: null,
     toDate: null,
-    status: ""
+    status: "",
+    customerType: ''
+
   };
   searchChanged: Subject<string> = new Subject();
   isSuperAdmin: boolean;
   dealerCode: string;
+  customerTypeOptions: { value: string; name: string }[] = [];
   billingTypeOptions = BillingTypeOptions;
   locations: any[] = [];
-
+  selectAllForm22 = false;
+  selectAllInvoice = false;
+  selectedForm22Bills: any[] = [];
+  selectedInvoiceBills: any[] = [];
+  dealers: any;
+  filteredDealers: any[];
+  selectedDealer: string = 'All Dealers';
+  showDropdown: boolean;
+expandedBillId: number | null = null;
+  expandedBill: null;
+@HostListener('document:click')
+closePopup(): void {
+  this.expandedBill = null;
+}
   constructor(private service: VehicleSaleBillService,
-    private router: Router,
+    private router: Router, private dealerService: DealerService,
     private loader: LoaderService,
     private toaster: ToastService,
     private storageService: StorageService,
-    private locationService: LocationMasterService  ,
+    private locationService: LocationMasterService,
   ) { }
 
   ngOnInit() {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-this.fetchLocations();
+    if (this.isSuperAdmin) {
+      this.getDealerList();
+    }
+    this.fetchLocations();
     const today = new Date();
     const sevenDaysBefore = new Date(today);
     sevenDaysBefore.setDate(today.getDate() - 7);
     this.filter.fromDate = sevenDaysBefore;
     this.filter.toDate = today;
-    
+
     this.searchChanged.pipe(debounceTime(400)).subscribe(() => {
       this.loadData();
     });
     this.loadData();
-
   }
 
+  getDealerList() {
+    this.dealerService.getDealerDropdown(null).subscribe((res) => {
+      this.dealers = res.data;
+      this.filteredDealers = [...this.dealers];
+    });
+  }
+
+  selectDealer(dealer: any) {
+
+    if (!dealer) {
+
+      this.dealerCode = '';
+      this.selectedDealer = 'All Dealers';
+    } else {
+      this.dealerCode = dealer.dealerCode;
+      this.selectedDealer = dealer.dealerName;
+    }
+
+    this.showDropdown = false;
+    this.loadData();
+  }
+
+  filterDealers(event: any) {
+    const search = event.target.value.toLowerCase();
+    if (!search) {
+      this.selectedDealer = '';
+      this.loadData();
+    }
+    this.filteredDealers = this.dealers.filter(d => d.dealerCode.toLowerCase().includes(search) || d.dealerName.toLowerCase().includes(search));
+
+    this.showDropdown = true;
+  }
 
   loadData() {
     this.loader.show();
@@ -88,11 +138,13 @@ this.fetchLocations();
     const from = this.filter.fromDate ? new Date(this.filter.fromDate) : undefined;
 
     const to = this.filter.toDate ? new Date(this.filter.toDate) : undefined;
-    const Status = this.filter.Status ? this.filter.Status : undefined;
+    const Status = this.filter.status ? this.filter.status : undefined;
 
     this.service.getAllVehicleSaleBills(this.dealerCode, this.searchText, from, to, Status)
       .subscribe({
         next: (res) => {
+          console.log(res);
+
           this.vehicleBills = res;
           this.filteredBills = [...this.vehicleBills];
           this.updatePagination();
@@ -132,9 +184,6 @@ this.fetchLocations();
     this.page = page;
     this.updatePagination();
   }
-
-
-
 
   onSort(field: string) {
     this.sortField = field;
@@ -187,57 +236,42 @@ this.fetchLocations();
   }
 
   fetchLocations(): void {
-    const dealerCode: any = this.storageService.getDealerCode();
-
-    this.locationService.getLocationByDealerCode(dealerCode).subscribe({
-      next: (data: any[]) => {
-        
-        
-        this.locations = data;
-
-             },
+    this.isSuperAdmin = this.storageService.getRole()?.toLowerCase() === 'superadmin';
+    let dealerCode: string | null = null;
+    if (!this.isSuperAdmin) {
+      dealerCode = this.storageService.getDealerCode();
+    }
+    this.locationService.getLocationDropdownByDealerCode(dealerCode).subscribe({
+      next: (res: any[]) => {
+        this.locations = res;
+      },
       error: (err) => {
         console.error('Error fetching locations', err);
       }
     });
   }
   getLocationName(locCode: string): string {
-    debugger;
-  return this.locations.find(x => x.loccode === locCode)?.locname || locCode;
-}
+    return this.locations.find(x => x.loccode === locCode)?.locname || locCode;
+  }
   downloadDealerExcel(): void {
     this.loader.show();
 
-    const from = this.filter.fromDate
-      ? new Date(this.filter.fromDate)
-      : undefined;
-
-    const to = this.filter.toDate
-      ? new Date(this.filter.toDate)
-      : undefined;
-
+    const from = this.filter.fromDate ? new Date(this.filter.fromDate) : undefined;
+    const to = this.filter.toDate ? new Date(this.filter.toDate) : undefined;
     this.loader.show();
-
     this.service.downloadExcel(from, to).subscribe({
       next: (data: Blob) => {
-
         const blob = new Blob([data], {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
-
         const url = window.URL.createObjectURL(blob);
-
         const link = document.createElement('a');
         link.href = url;
         link.download = 'SaleBillList.xlsx';
         link.click();
-
         window.URL.revokeObjectURL(url);
-
         this.loader.hide();
-
-        this.toaster.show(
-          'Excel downloaded successfully',
+        this.toaster.show('Excel downloaded successfully',
           {
             classname: 'bg-success text-light',
             delay: 3000
@@ -249,7 +283,82 @@ this.fetchLocations();
       }
     });
   }
+
+  get hasAnySelection(): boolean {
+    return this.selectedForm22Bills.length > 0 || this.selectedInvoiceBills.length > 0;
+  }
+
+  toggleSelectAllForm22() {
+    this.paginatedBills.forEach(x => x.selectedForm22 = this.selectAllForm22);
+    this.updateSelection();
+  }
+
+  toggleSelectAllInvoice() {
+    this.paginatedBills.forEach(x => x.selectedInvoice = this.selectAllInvoice);
+    this.updateSelection();
+  }
+
+  updateSelection() {
+    this.selectedForm22Bills = this.vehicleBills.filter(x => x.selectedForm22);
+    this.selectedInvoiceBills = this.vehicleBills.filter(x => x.selectedInvoice);
+  }
+
+  getCustomerTypeName(value: string): string {
+    return this.customerTypeOptions.find(ct => ct.value === value)?.name ?? value ?? '-';
+  }
+
+  downloadSelectedBills() {
+    const form22Ids = this.selectedForm22Bills.map(x => x.id);
+    const invoiceIds = this.selectedInvoiceBills.map(x => x.id);
+
+    if (form22Ids.length === 0 && invoiceIds.length === 0) return;
+
+    this.loader.show();
+
+    this.service.downloadMultipleCombined(form22Ids, invoiceIds).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'SaleBills.zip';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.loader.hide();
+        this.toaster.show('Downloaded successfully', {
+          classname: 'bg-success text-light',
+          delay: 3000
+        });
+      },
+      error: () => {
+        this.loader.hide();
+        this.toaster.show('Download failed', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+      }
+    });
+  }
   getBillingTypeName(id: number): string {
     return this.billingTypeOptions.find(x => x.id === id)?.value ?? '';
+  }
+
+  downloadSaleBill(id: number) {
+    this.service.downloadSaleBillPdf(id).subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `SaleBill_${id}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }
+
+
+  toggleChassis(item: any, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    this.expandedBill = this.expandedBill === item ? null : item;
   }
 }

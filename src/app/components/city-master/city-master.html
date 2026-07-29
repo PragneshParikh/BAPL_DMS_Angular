@@ -130,7 +130,7 @@
 
                     <!-- PAGINATION -->
                     <div class="d-flex justify-content-end mt-3">
-                        <ngb-pagination [collectionSize]="filteredList.length" [(page)]="page" [pageSize]="pageSize"
+                        <ngb-pagination [collectionSize]="filteredList.length" [(page)]="page" [pageSize]="pageSize" [maxSize]="2" [boundaryLinks]="true"
                             (pageChange)="onPageChange($event)">
                         </ngb-pagination>
                     </div>

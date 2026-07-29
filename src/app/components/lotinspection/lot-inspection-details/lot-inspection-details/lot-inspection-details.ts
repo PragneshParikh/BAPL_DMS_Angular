@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { LotInspectionUpdate, Header, Detail } from '../../../../ViewModels/LotInspectionViewModel';
 import { LotInspectionDetailsService } from '../../../../core/services/lot-inspection-details-service';
 import { StorageService } from '../../../../core/services/storage';
@@ -10,6 +11,7 @@ import { ToastService } from '../../../../shared/toaster/toast-service';
 import { LocationName } from '../../../../ViewModels/ReceiptEntryModel';
 import Swal from 'sweetalert2';
 import { LocationMasterService } from '../../../../core/services/location-master-service';
+import { LedgerMasterService } from '../../../../core/services/ledger-master';
 
 @Component({
   selector: 'app-lot-inspection-details',
@@ -28,14 +30,23 @@ export class LotInspectionDetails implements OnInit {
   selectedvehiclefasteringcover: string = '';
   selectedPlastingcover: string = '';
   selectedSupervisor: string = '';
-  router: any;
+  selectedlotPartyId: any;
+
+  isLotInspected: any;
+  isSuperAdmin: boolean;
+  dealerCode: any;
+  IsD2d: boolean = false;
+  inwardType: string;
+  lotPartyList: any;
 
   constructor(
     private route: ActivatedRoute,
     private lotInspectionDetailservice: LotInspectionDetailsService,
     private locationService: LocationMasterService,
+    private ledgerService: LedgerMasterService,
     public toaster: ToastService,
     private loader: LoaderService,
+    private router: Router,
     private storageService: StorageService
   ) { }
 
@@ -48,19 +59,86 @@ export class LotInspectionDetails implements OnInit {
       if (this.invoiceNo) {
         this.getInvoiceData();
       } else {
-        console.log('error')
-        //this.loader.hide(); // important if no invoiceNo
+        console.error('error')
       }
     });
   }
 
+
+  allowOnlyNumbers(event: any, field: 'driverContact' | 'keyFobSetQty' | 'chargerQty' | 'mirrorSetQty' | 'firstAidKitQty' | 'toolkitQty' | 'ownersManual' | 'ignitionKeySet' | 'attributeCard' | 'chargingKit') {
+    const value = event.target.value.replace(/\D/g, '');
+    event.target.value = value;
+
+    switch (field) {
+      case 'driverContact':
+        this.headerObj.driverContact = value;
+        break;
+      case 'keyFobSetQty':
+        this.detailList[0].keyFobSetQty = value;
+        break;
+      case 'chargerQty':
+        this.detailList[0].chargerQty = value;
+        break;
+      case 'mirrorSetQty':
+        this.detailList[0].mirrorSetQty = value;
+        break;
+      case 'firstAidKitQty':
+        this.detailList[0].firstAidKitQty = value;
+        break;
+
+      case 'toolkitQty':
+        this.detailList[0].toolkitQty = value;
+        break;
+      case 'ownersManual':
+        this.detailList[0].ownersManual = value;
+        break;
+      case 'ignitionKeySet':
+        this.detailList[0].ignitionKeySet = value;
+        break;
+      case 'attributeCard':
+        this.detailList[0].attributeCard = value;
+        break;
+      case 'chargingKit':
+        this.detailList[0].chargingKit = value;
+        break;
+
+    }
+  }
+
+  allowCharactersOnly(event: KeyboardEvent): boolean {
+    const char = event.key;
+
+    if (!/^[a-zA-Z\s]$/.test(char)) {
+      event.preventDefault();
+      return false;
+    }
+
+    return true;
+  }
+
+  onDriverNameInput() {
+    this.headerObj.driverName = (this.headerObj.driverName || '')
+      .replace(/[^a-zA-Z\s]/g, '');
+  }
+  onTransporterNameInput() {
+    this.headerObj.transporterName = (this.headerObj.transporterName || '')
+      .replace(/[^a-zA-Z\s]/g, '');
+  }
+
   fetchLocations(): void {
-    const dealerCode = this.storageService.getDealerCode();
-    this.locationService.getLocationList(dealerCode).subscribe({
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
+
+
+    this.locationService.getLocationList(this.dealerCode).subscribe({
       next: (data: any[]) => {
-        // only Workshop (id = 2)
-        this.locations = data.filter(x => x.locareadidNo === 2);
-        //console.log("Workshop Locations", this.locations);
+        // only showroom (id = 1)
+        this.locations = data.filter(x => x.locareadidNo === 1);
       },
       error: (err) => {
         console.error('Error fetching locations', err);
@@ -70,26 +148,20 @@ export class LotInspectionDetails implements OnInit {
   onLocationChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedLocation = target.value;
-
-    console.log('Selected Location:', this.selectedLocation);
   }
+
   onvehiclefasteringcoverChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedvehiclefasteringcover = target.value;
-
-    console.log('Selected vehcilefasteringcover:', this.selectedvehiclefasteringcover);
   }
   onPlastingCoverChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedPlastingcover = target.value;
-
-    console.log('Selected Plastingcover:', this.selectedPlastingcover);
   }
+
   onSupervicsorChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedSupervisor = target.value;
-
-    console.log('Selected Supervisor:', this.selectedSupervisor);
   }
 
   // ================= GET DATA =================
@@ -104,11 +176,18 @@ export class LotInspectionDetails implements OnInit {
     const formattedTime =
       String(now.getHours()).padStart(2, '0') + ':' +
       String(now.getMinutes()).padStart(2, '0');
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
     this.lotInspectionDetailservice.getAllDetailsByInvoice(this.invoiceNo).subscribe({
       next: (res: any) => {
 
-        if (res?.data?.length) {
+        if (res?.data?.length > 0) {
+          this.isLotInspected = res?.data[0]?.islotinspected;
+          this.IsD2d = res?.data[0]?.isD2D;
+          this.inwardType = res?.data[0].inwardType;
+          this.invoiceNo = res?.data[0].invoiceNo;
+          this.getlotPartyName(this.IsD2d, this.invoiceNo);
+
 
           const first = res.data[0];
 
@@ -130,6 +209,8 @@ export class LotInspectionDetails implements OnInit {
             plasticCover: first.plasticCover || this.selectedPlastingcover,
             nameSupervisor: first.nameSupervisor || this.selectedSupervisor,
             locationName: first.locationName || this.selectedLocation,
+            isD2D: this.IsD2d,
+            inwardType: first.inwardType || this.inwardType,
             dealerCode: this.storageService.getDealerCode()
           };
 
@@ -164,8 +245,6 @@ export class LotInspectionDetails implements OnInit {
             preview: null
           }));
           //this.loader.hide();
-          console.log("Header:", this.headerObj);
-          console.log("Details:", this.detailList);
         }
         setTimeout(() => {
           this.loader.hide();
@@ -177,11 +256,125 @@ export class LotInspectionDetails implements OnInit {
       }
     });
   }
+  getlotPartyName(isD2D: boolean, invoiceNo: string) {
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
+    this.IsD2d = isD2D;
+    this.ledgerService.getLotRelatedLedgers(invoiceNo, this.IsD2d).subscribe({
+      next: (res: any) => {
 
+        this.lotPartyList = res;
+        if (this.lotPartyList.length === 1) {
+          this.selectedlotPartyId = this.lotPartyList[0].id;
+        }
+      }, error: (err) => {
+        this.loader.hide();
+        console.error(err);
+      }
+    })
+  }
   // ================= SAVE DATA =================
   saveData() {
-
     // VALIDATION FIRST
+debugger;
+console.log("Save time ",this.headerObj)
+    if (!this.headerObj.arrivalDate) {
+      this.toaster.show('Arrival Date is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.arrivalTime) {
+      this.toaster.show('Arrival Time is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.lrNo) {
+      this.toaster.show('L.R. No is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.lrDate) {
+      this.toaster.show('L.R. Date is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.truckNo) {
+      this.toaster.show('Truck No is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.transporterName) {
+      this.toaster.show('Transporter Name is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.driverName) {
+      this.toaster.show('Driver Name is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.driverContact) {
+      this.toaster.show('Driver Contact is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.locationName) {
+      this.toaster.show('Location Name is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.nameSupervisor) {
+      this.toaster.show('Name of Supervisor Name is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.plasticCover) {
+      this.toaster.show('Plastic Cover is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.vehicleFasteningBracket) {
+      this.toaster.show('Vvehicle Fastening Bracket is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+    if (!this.headerObj.inwardType) {
+      this.toaster.show('Inward Type is required', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+
+
     const invalidRows = this.detailList.filter(x => !x.vehicleStatus || x.vehicleStatus === '');
 
     if (invalidRows.length > 0) {
@@ -219,6 +412,8 @@ export class LotInspectionDetails implements OnInit {
       plasticCover: this.headerObj.plasticCover || '',
       nameSupervisor: this.headerObj.nameSupervisor || '',
       LocationName: this.headerObj.locationName || '',
+      IsD2D: this.headerObj.isD2D || false,
+      InwardType: this.headerObj.inwardType,
       updatedBy: 'Admin',
       updatedDate: new Date().toISOString(),
       IsLotInspected: true
@@ -265,6 +460,7 @@ export class LotInspectionDetails implements OnInit {
           classname: 'bg-success text-white',
           delay: 3000
         });
+        this.router.navigate(['/lotinspection']);
       },
       error: (err) => {
         console.error(err);

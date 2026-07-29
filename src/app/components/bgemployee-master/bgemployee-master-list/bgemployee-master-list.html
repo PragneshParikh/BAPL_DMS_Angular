@@ -1,0 +1,248 @@
+<!-- ===================================================== -->
+<!-- STAT CARDS -->
+<!-- ===================================================== -->
+<div class="row g-2 mb-2 mx-2">
+  <div class="col-md-3">
+    <div class="card shadow-sm">
+      <div class="card-body py-2">
+        <div class="text-muted small">Total Employees</div>
+        <div class="fs-4 fw-bold">{{ employeeList.length }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm">
+      <div class="card-body py-2">
+        <div class="text-muted small">Active</div>
+        <div class="fs-4 fw-bold text-success">{{ activeCount }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm">
+      <div class="card-body py-2">
+        <div class="text-muted small">Inactive</div>
+        <div class="fs-4 fw-bold text-danger">{{ inactiveCount }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm">
+      <div class="card-body py-2">
+        <div class="text-muted small">Departments</div>
+        <div class="fs-4 fw-bold">{{ departmentCount }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- EMPLOYEE TABLE CARD -->
+<!-- ===================================================== -->
+<div class="card mt-2 shadow-sm mx-2">
+
+  <!-- HEADER -->
+  <div class="card-header py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+    <h5 class="mb-0 fw-bold">
+      <i class="ri-group-line"></i>
+      Employee List
+    </h5>
+
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-success btn-sm" title="Export to Excel" (click)="downloadExcel()">
+        <i class="ri-file-excel-2-line"></i>
+        Export Excel
+      </button>
+
+      <button class="btn btn-primary btn-sm" routerLink="/bgemployee-master/add">
+        <i class="ri-add-line"></i>
+        Add Employee
+      </button>
+    </div>
+
+  </div>
+
+  <!-- SEARCH & FILTER BAR -->
+  <div class="card-body pb-0">
+    <div class="row g-2 mb-2">
+
+      <div class="col-md-5">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text"><i class="ri-search-line"></i></span>
+          <input type="text" class="form-control"
+            placeholder="Search by name, code, dealer, zone, role, reporting to…"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="applyFilters()">
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <select class="form-select form-select-sm" [(ngModel)]="selectedDept" (ngModelChange)="applyFilters()">
+          <option value="">All Departments</option>
+          <option *ngFor="let dept of departmentList" [value]="dept.departmentId">
+            {{ dept.departmentName }}
+          </option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <select class="form-select form-select-sm" [(ngModel)]="selectedStatus" (ngModelChange)="applyFilters()">
+          <option value="">All Status</option>
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card-body table-responsive p-2" style="font-size:13px;">
+
+    <table class="table table-bordered table-hover table-sm align-middle mb-0">
+
+      <thead class="table-light text-nowrap">
+        <tr>
+          <th>Sr</th>
+          <th>Profile</th>
+          <th>Emp Code</th>
+          <th>Employee Name</th>
+          <th>Dealer Code</th>
+          <th>Dealer Name</th>
+          <th>Zone</th>
+          <th>Job Roles</th>
+          <th>Created On</th>
+          <th>Updated On</th>
+          <th>Reporting To</th>
+          <th>Created By</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <!-- NO DATA -->
+        <tr *ngIf="filteredList.length === 0">
+          <td colspan="14" class="text-center text-muted">
+            No Employee Data Found
+          </td>
+        </tr>
+
+        <!-- EMPLOYEE ROWS -->
+        <tr *ngFor="let emp of filteredList; let i = index"
+            class="cursor-pointer" (click)="openEditPopup(emp)">
+
+          <!-- SR -->
+          <td>{{ i + 1 }}</td>
+
+          <!-- PROFILE -->
+          <td class="text-center">
+            <img *ngIf="emp.profileImage" [src]="emp.profileImage" width="35" height="35"
+              class="rounded-circle border shadow-sm" style="object-fit:cover;" />
+            <div *ngIf="!emp.profileImage"
+              class="rounded-circle border bg-light d-flex align-items-center justify-content-center"
+              style="width:35px; height:35px; margin:auto;">
+              <i class="ri-user-3-line text-muted"></i>
+            </div>
+          </td>
+
+          <!-- EMP CODE -->
+          <td>{{ emp.employeeCode || '—' }}</td>
+
+          <!-- EMPLOYEE NAME -->
+          <td class="fw-semibold" [title]="emp.employeeName">{{ emp.employeeName || '—' }}</td>
+
+          <!-- DEALER CODE -->
+          <td [title]="emp.dealerCode">{{ emp.dealerCode || '—' }}</td>
+
+          <!-- DEALER NAME -->
+          <td [title]="emp.dealerName">
+            <ol class="mb-0 ps-3" *ngIf="getDealerNames(emp).length; else noDealer">
+              <li *ngFor="let d of getDealerNames(emp)">{{ d }}</li>
+            </ol>
+            <ng-template #noDealer>—</ng-template>
+          </td>
+
+          <!-- ZONE -->
+          <td>
+            <span *ngFor="let z of getZones(emp)"
+                  class="badge bg-primary-subtle text-primary me-1" style="font-size:11px;">
+              {{ z }}
+            </span>
+            <span *ngIf="!emp.zone">—</span>
+          </td>
+
+          <!-- JOB ROLES -->
+          <td [title]="emp.jobRoles">{{ emp.jobRoles || '—' }}</td>
+
+          <!-- CREATED ON -->
+          <td class="text-muted" style="white-space:nowrap;">{{ formatDate(emp.createdDate) }}</td>
+
+          <!-- UPDATED ON -->
+          <td class="text-muted" style="white-space:nowrap;">{{ formatDate(emp.updatedDate) }}</td>
+
+          <!-- REPORTING TO -->
+          <td>{{ emp.reportingTo || '—' }}</td>
+
+          <!-- CREATED BY -->
+          <td>{{ emp.createdBy || '—' }}</td>
+
+          <!-- STATUS -->
+          <td>
+            <span class="badge cursor-pointer" [ngClass]="emp.isActive ? 'bg-success' : 'bg-danger'"
+                  title="Click to toggle status" (click)="toggleStatus(emp, $event)">
+              {{ emp.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+
+          <!-- ACTION -->
+          <td class="text-center">
+            <button class="btn btn-sm btn-soft-primary"
+                    (click)="openEditPopup(emp); $event.stopPropagation()">
+              <i class="ri-pencil-fill fs-12"></i> Edit
+            </button>
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+<!-- ===================================================== -->
+<!-- EDIT EMPLOYEE MODAL -->
+<!-- ===================================================== -->
+<div *ngIf="showModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="ri-pencil-line"></i>
+          Edit Employee
+        </h5>
+        <button type="button" class="btn-close" (click)="closePopup()"></button>
+      </div>
+
+      <div class="modal-body">
+        <app-bgemployee-master
+          *ngIf="selectedEmployee"
+          [popupData]="selectedEmployee"
+          [isPopupMode]="true"
+          (closed)="closePopup()">
+        </app-bgemployee-master>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

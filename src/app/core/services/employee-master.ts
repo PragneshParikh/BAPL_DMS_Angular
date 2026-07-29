@@ -8,11 +8,6 @@ import { environment } from '../../../environments/environment';
 })
 export class EmployeeMasterService {
 
-  // private apiUrl = 'http://localhost:5215/api/Employee';
-
-  // private stateApi = 'http://localhost:5215/api/state';
-
-  // private cityApi = 'http://localhost:5215/api/city';  
   private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
@@ -22,43 +17,28 @@ export class EmployeeMasterService {
   // =========================================
 
   getEmployees(): Observable<any[]> {
-
     return this.http.get<any[]>(`${this.apiUrl}/Employee`);
   }
 
   // =========================================
   // GET EMPLOYEE BY ID
   // =========================================
-
-  getEmployeeById(id: number): Observable<any> {
-
-    return this.http.get<any>(
-      `${this.apiUrl}/GetById/${id}`
-    );
+  getEmployeeById(id: number) {
+    return this.http.get<any>(`${environment.apiUrl}/Employee/GetById/${id}`);
   }
 
   // =========================================
   // INSERT EMPLOYEE
   // =========================================
-
   saveEmployee(employeeObj: any): Observable<any> {
-
-    return this.http.post<any>(
-      this.apiUrl,
-      employeeObj
-    );
+    return this.http.post<any>(`${this.apiUrl}/Employee`, employeeObj);
   }
 
   // =========================================
   // UPDATE EMPLOYEE
   // =========================================
-
   updateEmployee(employeeObj: any): Observable<any> {
-
-    return this.http.put<any>(
-      this.apiUrl,
-      employeeObj
-    );
+    return this.http.put<any>(`${this.apiUrl}/Employee`, employeeObj);
   }
 
   // =========================================
@@ -66,7 +46,6 @@ export class EmployeeMasterService {
   // =========================================
 
   deleteEmployee(id: number): Observable<any> {
-
     return this.http.delete<any>(
       `${this.apiUrl}/${id}`
     );
@@ -77,7 +56,6 @@ export class EmployeeMasterService {
   // =========================================
 
   getStates(): Observable<any[]> {
-
     return this.http.get<any[]>(
       `${this.apiUrl}/state`
     );
@@ -88,23 +66,43 @@ export class EmployeeMasterService {
   // =========================================
 
   getCities(): Observable<any[]> {
-
     return this.http.get<any[]>(
       `${this.apiUrl}/city`
     );
   }
 
-   getEmployeesByDesignation(dealerCode?: string, designation?: string): Observable<any[]> {
-  let params = new HttpParams();
-  if (dealerCode) {
-    params = params.set('dealerCode', dealerCode);
+  getEmployeesByDesignation(dealerCode?: string, designation?: string): Observable<any[]> {
+    let params = new HttpParams();
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
+    }
+    if (designation) {
+      params = params.set('designation', designation);
+    }
+    return this.http.get<any[]>(
+      `${this.apiUrl}/Employee/employeeByDesignation`,
+      { params }
+    );
   }
-  if (designation) {
-    params = params.set('designation', designation);
+
+  getLocationByDealerCode(dealerCode: string) {
+    return this.http.get<any[]>(
+      `${environment.apiUrl}/LocationMaster/GetLocationByDealerCode/${dealerCode}`
+    );
   }
-  return this.http.get<any[]>(
-    `${this.apiUrl}/Employee/employeeByDesignation`,
-    { params }
-  );
-}
+
+  // =========================================
+  // EXCEL EXPORT
+  // =========================================
+
+  downloadEmployeeExcel(dealerCode?: string | null): Observable<Blob> {
+    let params = new HttpParams();
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
+    }
+    return this.http.get(`${this.apiUrl}/Employee/download`, {
+      params,
+      responseType: 'blob'
+    });
+  }
 }

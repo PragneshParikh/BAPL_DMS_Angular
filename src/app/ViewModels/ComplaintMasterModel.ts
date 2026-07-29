@@ -1,5 +1,6 @@
 export interface ComplaintMasterModel {
   complaintName: string;
-  groupName: string;
+  groupName: number;
+  complaintGroupName : string;
   isActive: boolean;
 }

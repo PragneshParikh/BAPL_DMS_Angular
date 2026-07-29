@@ -1,6 +1,6 @@
 <!--PAGE Title-->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
-    <h5 class="mb-0">PCR/CIR List</h5>
+    <h5 class="mb-0">FFIR List</h5>
 </div>
 <!--End-->
 
@@ -21,7 +21,7 @@
                     (change)="search()">
             </div>
             <div class="col-md-3">
-                <label class="form-label">CIR NO.</label>
+                <label class="form-label">FFIR NO.</label>
                 <input type="text" class="form-control form-control-sm" [(ngModel)]="searchModel.cirNo"
                     (ngModelChange)="onSearchChange()" placeholder="Enter CIR No." />
             </div>
@@ -71,8 +71,8 @@
                     <tr>
                         <th>SR.No.</th>
                         <th>Action</th>
-                        <th>CIR No/CIR Date</th>
-                        <th>CIR Against</th>
+                        <th>FFIR No/FFIR Date</th>
+                        <th>FFIR Against</th>
                         <th>Customer</th>
                         <th>Model</th>
                         <th>Purpose</th>
@@ -90,6 +90,11 @@
                         <td>
                             <button class="btn btn-sm btn-soft-primary" (click)="onFFIREdit(item)"><i
                                     class="ri-pencil-fill fs-12"></i></button>
+                             <button class="btn btn-sm btn-soft-danger" 
+                                title="Only SuperAdmin can delete" (click)="deleteFFIR(item.id)" [disabled]="!this.isSuperAdmin">
+                                <i class="ri-delete-bin-fill fs-12"></i>
+                                <!-- [disabled]="currentUserRole !== 'SuperAdmin'" -->
+                            </button>
                             <!--<button class="btn btn-sm btn-soft-danger" [disabled]="currentUserRole !== 'SuperAdmin'"
                                 title="Only SuperAdmin can delete" (click)="deleteJobCard(item.id)">
                                 <i class="ri-delete-bin-fill fs-12"></i>

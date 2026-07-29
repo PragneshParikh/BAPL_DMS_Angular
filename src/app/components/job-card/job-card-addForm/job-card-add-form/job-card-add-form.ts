@@ -6,7 +6,7 @@ import { StorageService } from '../../../../core/services/storage';
 import { LocationName } from '../../../../ViewModels/ReceiptEntryModel';
 import { JobCardService } from '../../../../core/services/job-card-service';
 import { selectLeadData } from '../../../../store/CRM/crm_selector';
-import { NgbModal, NgbTimepickerModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbModal, NgbTimepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
 import { icons } from '../../../../core/data';
 import { Console, error, info } from 'console';
@@ -18,11 +18,14 @@ import { delay } from 'lodash';
 import { LoaderService } from '../../../../core/services/loader';
 import { LocationMasterService } from '../../../../core/services/location-master-service';
 import { ComplaintmasterService } from '../../../../core/services/complaintmaster-service';
+import { PrefixService } from '../../../../core/services/prefix';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-job-card-add-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NgbDropdownModule],
   templateUrl: './job-card-add-form.html',
   styleUrl: './job-card-add-form.scss',
 })
@@ -38,6 +41,7 @@ export class JobCardAddForm {
   complaintList: any[] = [];
   jobCardDetailsView: any[] = []
   serviceHistoryList: any[] = []
+  filteredChassisList: any[] = [];
   jobTypeId: number = 0
 
   selectedJobtype: any;
@@ -48,10 +52,11 @@ export class JobCardAddForm {
   selectedChassis: string = '';
   invoiceNo: string = '';
   couponNo: string = '';
+  inwardType: string = '';
   modelName = '';
   registerNo = '';
   vehicleKms: number = 0;
-  jobPrefix: '';
+  jobPrefix: string = '';
   jobInDate: any = new Date().toISOString().split('T')[0];
   jobInTime: any = this.getCurrentTime();
   jobNo: number = 0;
@@ -78,6 +83,8 @@ export class JobCardAddForm {
   durationType: string = '';
   expireWarrentyDate: string = '';
   chassiseditData: any = null;
+  repairBillStatus: string;
+  fromEstimateData: any = null;
 
 
   chargerMake: string = '';
@@ -101,6 +108,7 @@ export class JobCardAddForm {
   };
 
   customerObj = {
+    customerLedgerId: 0,
     customerName: '',
     customerMobile: '',
     customerAltMobile: '',
@@ -128,20 +136,48 @@ export class JobCardAddForm {
   complaintMasterList: any[] = [];
   filteredComplaints: any[] = [];
   showComplaintDropdown = false;
+  oemModelId: any;
+  showComplaintValidation: boolean;
+  isSuperAdmin: boolean;
+  estNo: string;
+  vehiclePrevkms: any;
+  kmsError: string;
+
 
   constructor(private storageService: StorageService,
     private locationService: LocationMasterService,
     private router: Router,
     private jobCardService: JobCardService,
     private complaintMasterService: ComplaintmasterService,
+    private http: HttpClient,
+    private prefixService: PrefixService,
     public toastr: ToastService,
     private modalService: NgbModal,
     private loader: LoaderService,
     private toaster: ToastService) { }
 
   ngOnInit(): void {
-    console.log('Date :', new Date().toISOString().split('T')[0]);
-    this.dealerCode = this.storageService.getDealerCode();
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
+
+    if (history.state?.fromEstimate) {
+      this.fromEstimateData = history.state;
+      this.vehicleKms = Number(this.fromEstimateData.vehiclekms) || 0;
+      this.jobEstimate = Number(this.fromEstimateData.estimateId) || 0;
+      this.estNo = this.fromEstimateData.estimationNo || '';
+    }
+    this.loadPrefix();
+    this.fetchLocations();
+    this.loadJobTypes();
+    this.loadChassisList();
+    this.loadJobSorces();
+    this.loadComplaintMaster();
+
     const data = history.state.data;
 
     if (data) {
@@ -149,24 +185,54 @@ export class JobCardAddForm {
       this.chassiseditData = data;
       this.patchEditData(data);
     }
-    this.fetchLocations();
-    this.loadJobTypes();
-    this.loadChassisList();
-    this.loadJobSorces();
-    this.loadComplaintMaster();
-    this.loadPdiData();
 
+    //this.loadPdiData(this.oemModelId);
     if (!this.isEditMode) {
       this.getJobNo();
     }
   }
 
+  loadPrefix(): void {
+    this.loader.show();
+    const dealerCode = this.storageService.getDealerCode();
+    const module = 'job_card';
+    this.prefixService.getPrefixByDealerByModule(dealerCode, module).subscribe({
+      next: (res: string) => {
+        this.loader.hide();
+        this.jobPrefix = res;
+        const parts = res.split('/');
+        this.jobNo = parseInt(parts[parts.length - 1], 10);
+      }, error: (err) => {
+        this.loader.hide();
+        console.error(err);
+
+      }
+    })
+  }
+  get isBatteryReadOnly(): boolean {
+    return !!this.selectedJobtype;
+  }
   //Fetech Dealer Location
   fetchLocations(): void {
-    const dealerCode = this.storageService.getDealerCode();
-    this.locationService.getLocationList(dealerCode).subscribe({
+    this.loadPrefix();
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
+    this.locationService.getLocationList(this.dealerCode).subscribe({
       next: (data: any[]) => {
+
         // only Workshop (id = 2)
+        this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+        if (!this.isSuperAdmin) {
+          this.dealerCode = this.storageService.getDealerCode();
+        } else {
+          this.dealerCode = null;
+        }
         this.locations = data.filter(x => x.locareadidNo === 2);
         // EDIT MODE FIX
         if (this.isEditMode && this.chassiseditData) {
@@ -191,13 +257,67 @@ export class JobCardAddForm {
     this.complaintMasterService.getComplaintMasterList().subscribe({
       next: (res: any) => {
         this.complaintMasterList = res;
+
       }
     });
   }
 
+  filterChassis() {
+    const value = (this.selectedChassis || '').toLowerCase();
+
+    this.filteredChassisList = this.chassisList
+      .filter(x =>
+        x.chassisNumber?.toLowerCase().includes(value)
+      )
+      .slice(0, 10);
+  }
+
+  selectChassis(item: any) {
+    this.selectedChassis = item.chassisNumber;
+    this.filteredChassisList = [];
+
+    this.onChassisChange(); // existing method call
+  }
+
+  hideChassisDropdown() {
+    setTimeout(() => {
+      this.filteredChassisList = [];
+    }, 200);
+  }
+
+  allowOnlyNumbers(
+    event: any,
+    field: 'rear' | 'front' | 'altMobile' | 'manualno'
+  ) {
+    const value = event.target.value.replace(/\D/g, '');
+    event.target.value = value;
+
+    switch (field) {
+      case 'rear':
+        this.airPressureRear = value;
+        break;
+
+      case 'front':
+        this.airPressureFront = value;
+        break;
+
+      case 'altMobile':
+        this.customerObj.customerAltMobile = value;
+        break;
+
+      case 'manualno':
+        this.manualJobNo = value;
+        break;
+    }
+  }
+
+
   onComplaintSearch(event: any): void {
 
     const value = event.target.value?.trim().toLowerCase();
+
+    // User ne typing start ki -> previous selection invalid
+    this.complaintObj.complaintId = 0;
 
     if (!value) {
       this.filteredComplaints = [];
@@ -212,14 +332,16 @@ export class JobCardAddForm {
     this.showComplaintDropdown = this.filteredComplaints.length > 0;
   }
 
+
+
   selectComplaint(item: any): void {
+    this.complaintObj.complaintCode = item.complaintName;
+    this.complaintObj.complaint = item.complaintName;
+    this.complaintObj.complaintId = item.id;
 
-  this.complaintObj.complaintCode = item.complaintName;
-  this.complaintObj.complaint = item.complaintName;
-
-  this.filteredComplaints = [];
-  this.showComplaintDropdown = false;
-}
+    this.filteredComplaints = [];
+    this.showComplaintDropdown = false;
+  }
 
   loadJobTypes() {
     this.selectedJobtype = '';
@@ -229,9 +351,10 @@ export class JobCardAddForm {
 
         if (this.isEditMode) {
           this.selectedJobtype = this.chassiseditData.jobCardHeader.jobtype;
-
-          //  IMPORTANT FIX
           this.onJobType(true);
+        } else if (this.fromEstimateData?.jobtype) {
+          this.selectedJobtype = this.fromEstimateData.jobtype;
+          this.onJobType(false, true);
         }
       },
       error: (err) => {
@@ -240,8 +363,12 @@ export class JobCardAddForm {
     });
   }
   loadServiceHistory(chassisNo: string) {
+    let jobCardId: number | null = 0;
 
-    this.jobCardService.getJobCardServiceHistory(chassisNo).subscribe({
+    if (this.chassiseditData?.jobCardHeader?.id) {
+      jobCardId = this.chassiseditData.jobCardHeader.id;
+    }
+    this.jobCardService.getJobCardServiceHistory(chassisNo, jobCardId).subscribe({
       next: (res: any) => {
         if (!res || res.length === 0) {
           // this.toastr.show('This chassis number is not sold History not available', {
@@ -276,14 +403,24 @@ export class JobCardAddForm {
   }
 
   loadChassisList() {
-    //debugger
-    const dealerCode = this.storageService.getDealerCode();
+
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
     this.jobTypeId = this.selectedJobtype
 
-    this.jobCardService.getAllInspectedChassis(dealerCode, this.jobTypeId).subscribe(res => {
+    this.jobCardService.getAllInspectedChassis(this.dealerCode, this.jobTypeId).subscribe(res => {
       this.chassisList = res;
+      //console.log("Chassislist bind", this.chassisList);
 
       if (this.isEditMode && this.chassiseditData) {
+        this.customerObj.saleDate = this.chassisList[0].saleDate?.split('T')[0];
+        this.customerObj.insuranceExpDate = this.chassisList[0].insuranceExpDate?.split('T')[0];
+        this.customerObj.nextServiceDueDate = this.chassisList[0].nextserviceDueDate?.split('T')[0];
         this.selectedChassis = this.chassiseditData.jobCardHeader.chassisno;
 
         setTimeout(() => {
@@ -294,8 +431,9 @@ export class JobCardAddForm {
     });
   }
 
-  loadPdiData() {
-    this.jobCardService.getPdiChecklist().subscribe(res => {
+  loadPdiData(oemModelId: number) {
+
+    this.jobCardService.getPdiChecklist(oemModelId).subscribe(res => {
       this.pdiCheckList = res
     });
   }
@@ -313,15 +451,20 @@ export class JobCardAddForm {
   }
 
 
-  onJobType(isEdit = false) {
-
+  onJobType(isEdit = false, isFromEstimate: boolean = false) {
     if (!this.selectedJobtype) return;
 
-    const dealerCode = this.storageService.getDealerCode();
+    // this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    // if (!this.isSuperAdmin) {
+    this.dealerCode = this.storageService.getDealerCode();
+    // } else {
+    //   this.dealerCode = null;
+    // }
 
     // Load chassis
     this.jobCardService
-      .getAllInspectedChassis(dealerCode, this.selectedJobtype)
+      .getAllInspectedChassis(this.dealerCode, this.selectedJobtype)
       .subscribe(res => {
         this.chassisList = res;
       });
@@ -344,25 +487,53 @@ export class JobCardAddForm {
           return;
         }
 
-        // ADD MODE
-        if (this.serviceHeadList.length > 0) {
+        this.dealerCode = this.storageService.getDealerCode();
 
-          // auto select first service head
-          this.selectedServiceHead =
-            this.serviceHeadList[0].serviceHeadId;
+        // Load chassis
+        this.jobCardService
+          .getAllInspectedChassis(this.dealerCode, this.selectedJobtype)
+          .subscribe(res => {
+            this.chassisList = res;
 
-          // auto load service type
-          this.loadServiceType(this.selectedServiceHead);
+            if (isFromEstimate && this.fromEstimateData?.chassisNo) {
+              const match = this.chassisList.find(
+                x => x.chassisNumber == this.fromEstimateData.chassisNo
+              );
 
-        }
-        else {
+              if (match) {
+                // Found in the inspected-lot list — reuse the normal path so we
+                // get full battery/motor/warranty data, same as edit mode.
+                this.selectedChassis = this.fromEstimateData.chassisNo;
+                this.onChassisChange();
+              } else {
+                // Estimate chassis isn't in this dealer's inspected-lot list
+                // (e.g. a walk-in) — fall back to what Estimate already resolved.
+                this.applyEstimateVehicleFallback();
+              }
+            }
+          });
 
-          this.selectedServiceHead = '';
-          this.selectedServiceType = '';
-          this.serviceTypeList = [];
+        // Load service heads
+        this.jobCardService
+          .getServiceHead(this.selectedJobtype)
+          .subscribe((res: any[]) => {
+            this.serviceHeadList = res;
 
-        }
+            if (isEdit) {
+              this.selectedServiceHead = this.chassiseditData.jobCardHeader.servicehead;
+              this.loadServiceType(this.selectedServiceHead, true);
+              return;
+            }
 
+            if (this.serviceHeadList.length > 0) {
+              this.selectedServiceHead = this.serviceHeadList[0].serviceHeadId;
+              this.loadServiceType(this.selectedServiceHead);
+            } else {
+              this.selectedServiceHead = '';
+              this.selectedServiceType = '';
+              this.serviceTypeList = [];
+            }
+          });
       });
   }
   onServiceHeadChange() {
@@ -402,46 +573,53 @@ export class JobCardAddForm {
       });
   }
 
-
-
   onChassisChange() {
-
+    debugger;
     if (!this.selectedChassis) return;
     this.loadServiceHistory(this.selectedChassis);
 
     const selected = this.chassisList.find(
-      x => x.chassisNumber == this.selectedChassis   //  use ==
+      x => x.chassisNumber == this.selectedChassis
     );
 
     if (!selected) return;
 
-    // ALWAYS FILL (EDIT + ADD)
     this.invoiceNo = selected.invoiceNo;
     this.couponNo = this.selectedChassis.slice(-13);
-
+    this.inwardType = selected.inwardType;
+    this.vehiclePrevkms = selected.vehiclePrevkms;
+    this.customerObj.customerLedgerId = selected.customerLedgerId;
     this.customerObj.customerName = selected.customerName;
     this.customerObj.customerMobile = selected.customerMobile;
     this.customerObj.customerAltMobile = selected.customerAltMobile;
+    this.customerObj.saleDate = selected.saleDate?.split('T')[0];
+    this.customerObj.nextServiceDueDate = selected.nextserviceDueDate?.split('T')[0];
+    this.customerObj.insuranceExpDate = selected.insuranceExpDate?.split('T')[0];
 
-    this.modelName = selected.modelName;
+    // Model + Colour combined
+    this.modelName = selected.modelName
+      + (selected.colourName ? ' (' + selected.colourName + ')' : '');
+
     this.registerNo = selected.registerNo;
 
     this.batteryCapacity = selected.batteryCapacity;
     this.batteryMake = selected.batteryMake;
     this.batteryChemestry = selected.batteryChemestry;
     this.batteryNumber = selected.batteryNumber;
-
     this.motorNo = selected.motorNo;
     this.controllerNo = selected.controllerNo;
     this.converterNo = selected.converterNo;
     this.chargerNumber = selected.chargerNumber;
-
     this.odoReading = selected.odoReading;
     this.duration = selected.duration;
     this.durationType = selected.durationType;
     this.expireWarrentyDate = selected.expireWarrentyDate;
-  }
+    this.oemModelId = selected.oemModelId;
 
+    if (this.oemModelId) {
+      this.loadPdiData(this.oemModelId);
+    }
+  }
   // PDiChecklist popup
   openPdiModal(content: any) {
 
@@ -521,6 +699,15 @@ export class JobCardAddForm {
       return;
     }
 
+    // Complaint Code Validation
+    if (!this.complaintObj.complaintId) {
+      this.toastr.show('Please select a valid Complaint Code from dropdown', {
+        classname: 'bg-warning text-white',
+        delay: 2000
+      });
+      return;
+    }
+
     this.complaintList.push({ ...this.complaintObj });
 
     // Reset fields
@@ -534,24 +721,171 @@ export class JobCardAddForm {
   deleteComplaint(index: number) {
     this.complaintList.splice(index, 1);
   }
+  calculateEstimatedDelivery() {
+
+    if (!this.jobInDate || !this.jobInTime) {
+      return;
+    }
+
+    const dateTime = new Date(`${this.jobInDate}T${this.jobInTime}`);
+
+    // Add 30 minutes
+    dateTime.setMinutes(dateTime.getMinutes() + 30);
+
+    // Date
+    this.estDelDate = dateTime.toISOString().split('T')[0];
+
+    // Time
+    this.estDelTime = dateTime.toTimeString().substring(0, 5);
+  }
+
   savePdi() {
+
+    if (this.pdiCheckList.length == 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please Add atleast one checklist for this model.',
+        width: '300px'
+      });
+      return;
+    }
     this.pdiCheckList = this.pdiCheckList.map(x => ({
       ...x,
-      isStatus: x.isStatus === true,   // normalize
+      isStatus: x.isStatus === true,
       remarks: x.remarks || ''
     }));
 
-    this.isPdiSaved = true; // optional flag
+    this.isPdiSaved = true;
 
-    this.modalService.dismissAll();
+    Swal.fire({
+      icon: 'success',
+      title: 'PDI Checklist has been done.',
+      timer: 1500,
+      showConfirmButton: false
+    }).then(() => {
+      this.modalService.dismissAll();
+    });
   }
   //insert jobcard
+  isSubmitted = false;
   saveJobCard() {
+    this.isSubmitted = true;
+
+    if (this.selectedJobtype == 1 && this.pdiCheckList.length == 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please Add atleast one checklist for this model.',
+        width: '300px'
+      });
+      return;
+    }
+
+    if (!this.supervisor) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please select Supervisor.',
+        width: '300px'
+      });
+      return;
+    }
+    if (!this.technician) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please select Technician.',
+        width: '300px'
+      });
+      return;
+    }
+    if (!this.selectedJobSources) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please select Job Source.',
+        width: '300px'
+      });
+      return;
+    }
+    if (this.vehicleKms < this.vehiclePrevkms) {
+      this.kmsError =
+        `Vehicle KM cannot be less than Previous KM (${this.vehiclePrevkms})`;
+      return;
+    }
+
+    const jobIn = new Date(`${this.jobInDate}T${this.jobInTime}`);
+    const estDel = new Date(`${this.estDelDate}T${this.estDelTime}`);
+
+    if (estDel <= jobIn) {
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Estimated Delivery Date & Time should be greater than Job In Date & Time.',
+        width: '350px'
+      });
+
+      return;
+    }
+    if (!this.observation) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Observation required.',
+        width: '350px'
+      });
+
+      return;
+    }
+    if (!this.supervisorComment) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Supervisor Comment required.',
+        width: '350px'
+      });
+
+      return;
+    }
+
+    this.showComplaintValidation = false;
+
+    // Pending entry exists but not added
+    if (
+      this.complaintObj.customerVoice?.trim() ||
+      this.complaintObj.complaint?.trim()
+    ) {
+
+      this.showComplaintValidation = true;
+      this.isOpen.voice = true;
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please click Add to save the Customer Voice details.',
+        width: '350px'
+      });
+      return;
+    }
+
+    // At least one record should exist
+    if (this.complaintList.length === 0) {
+      this.showComplaintValidation = true;
+      this.isOpen.voice = true;
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please add at least one Customer Voice.',
+        width: '350px'
+      });
+      return;
+    }
     //  VALIDATION (recommended)
-    // if (!this.isPdiSaved) {
-    //   Swal.fire('Error', 'Please complete PDI first', 'error');
-    //   return;
-    // }
+    if (this.selectedJobtype == 1 && !this.isPdiSaved) {
+      Swal.fire('Error', 'Please complete PDI first', 'error');
+      return;
+    }
 
     if (!this.selectedChassis || this.selectedChassis.trim() === '') {
       this.toaster.show("Please select chassis number.", { classname: 'bg-warning text-white', delay: 5000 })
@@ -576,11 +910,13 @@ export class JobCardAddForm {
       servicetype: this.selectedServiceType || 0,
       serviceloc: this.selectedLocation || "",
       couponno: this.couponNo,
+      inwardType: this.inwardType,
       jobprefix: this.jobPrefix,
       jobinDate: this.jobInDate || null,
       jobinTime: this.jobInTime || null,
       jobNo: Number(this.jobNo) || 0,
       manualjobNo: Number(this.manualJobNo) || 0,
+      estNo: this.estNo || 0,
       estdelDate: this.estDelDate || null,
       estdelTime: this.estDelTime || null,
       jobSource: this.selectedJobSources || 0,
@@ -619,6 +955,7 @@ export class JobCardAddForm {
 
     //  CUSTOMER
     const jobCardCustomer = {
+      customerLedgerId: this.customerObj.customerLedgerId || 0,
       customerName: this.customerObj.customerName || null,
       customerMobile: this.customerObj.customerMobile || null,
       customerAltMobile: this.customerObj.customerAltMobile || null,
@@ -655,6 +992,7 @@ export class JobCardAddForm {
     const JobCardpdiChecklist = this.pdiCheckList.map(x => ({
 
       pdichecklistMasterId: x.id,
+      oemModelId: x.oemModelId,
       isStatus: x.isStatus,   // use normalized value
       remarks: x.remarks,
       createdBy: userId,
@@ -683,10 +1021,24 @@ export class JobCardAddForm {
         this.isEditMode = false;
         this.loader.hide();
       },
+      // error: (err) => {
+      //   console.error(err);
+      //   this.loader.hide();
+      //   this.toastr.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+      // }
       error: (err) => {
         console.error(err);
         this.loader.hide();
-        this.toastr.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+
+        const message =
+          err?.error?.message ||
+          err?.error ||
+          'Something went wrong.';
+
+        this.toastr.show(message, {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
       }
     });
   }
@@ -695,21 +1047,26 @@ export class JobCardAddForm {
   patchEditData(data: any) {
 
     // ================= HEADER =================
+    this.repairBillStatus = data.repairBillStatus;
     this.selectedJobtype = data.jobCardHeader.jobtype;
     this.selectedServiceHead = data.jobCardHeader.servicehead;
     this.selectedServiceType = data.jobCardHeader.servicetype;
     this.selectedJobSources = data.jobCardHeader.jobSource;
+
 
     this.selectedChassis = data.jobCardHeader.chassisno;
     this.vehicleKms = data.jobCardHeader.vehiclekms;
     this.selectedLocation = data.jobCardHeader.serviceloc;
 
     this.couponNo = data.jobCardHeader.couponno;
+    this.inwardType = data.jobCardHeader.inwardType;
+    this.inwardType = data.jobCardHeader.inwardType;
     this.jobPrefix = data.jobCardHeader.jobprefix;
     this.jobInDate = data.jobCardHeader.jobinDate;
     this.jobInTime = data.jobCardHeader.jobinTime;
     this.jobNo = data.jobCardHeader.jobNo;
     this.manualJobNo = data.jobCardHeader.manualjobNo;
+    this.estNo = data.jobCardHeader.estNo;
     this.estDelDate = data.jobCardHeader.estdelDate;
     this.estDelTime = data.jobCardHeader.estdelTime;
 
@@ -725,6 +1082,7 @@ export class JobCardAddForm {
 
     // ================= CUSTOMER =================
     this.customerObj = {
+      customerLedgerId: data.jobCardCustomer?.customerLedgerId || 0,
       customerName: data.jobCardCustomer?.customerName || '',
       customerMobile: data.jobCardCustomer?.customerMobile || '',
       customerAltMobile: data.jobCardCustomer?.customerAltMobile || '',
@@ -779,7 +1137,17 @@ export class JobCardAddForm {
     }, 300);
   }
 
+
   validateWarranty(): boolean {
+
+    if (this.vehicleKms && this.vehiclePrevkms &&
+      this.vehicleKms < this.vehiclePrevkms) {
+
+      this.kmsError = `Vehicle KM cannot be less than Previous KM (${this.vehiclePrevkms})`;
+    } else {
+      this.kmsError = '';
+    }
+
 
     if (!this.selectedJobtype || !this.vehicleKms || !this.odoReading) {
       return true; // skip validation (no error)
@@ -814,12 +1182,14 @@ export class JobCardAddForm {
 
     this.invoiceNo = '';
     this.couponNo = '';
+    this.inwardType = '';
     this.vehicleKms = 0;
     this.jobPrefix = '';
     this.jobInDate = '';
     this.jobInTime = '';
     this.jobNo = 0;
     this.manualJobNo = 0;
+    this.estNo = '';
     this.estDelDate = '';
     this.estDelTime = '';
     this.supervisor = '';
@@ -848,6 +1218,7 @@ export class JobCardAddForm {
 
     // CUSTOMER
     this.customerObj = {
+      customerLedgerId: 0,
       customerName: '',
       customerMobile: '',
       customerAltMobile: '',
@@ -876,7 +1247,7 @@ export class JobCardAddForm {
     this.isPdiSaved = false;
 
     // IMPORTANT: reload PDI checklist (not empty)
-    this.loadPdiData();
+    this.loadPdiData(0);
   }
   goToFFIR() {
 
@@ -914,6 +1285,48 @@ export class JobCardAddForm {
         this.toaster.show("Something went wrong", { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
+  }
+
+  // Estimate already resolved model/battery/motor for this chassis via
+  // /VehicleInfo when the user searched it there. If the chassis isn't part
+  // of this dealer's inspected-lot list (so onChassisChange() has nothing to
+  // match against), repeat that same lookup here rather than leaving those
+  // fields blank.
+  private applyEstimateVehicleFallback(): void {
+    const est = this.fromEstimateData;
+    if (!est?.chassisNo) return;
+
+    this.selectedChassis = est.chassisNo;
+    this.couponNo = est.chassisNo.slice(-13);
+    this.registerNo = est.registerNo || '';
+    this.customerObj.customerName = est.customerName || '';
+    this.customerObj.customerMobile = est.customerMobile || '';
+
+    this.loadServiceHistory(est.chassisNo);
+
+    this.http.get<any>(`${environment.apiUrl}/VehicleInfo`, {
+      params: { chassisNo: est.chassisNo, regNo: est.chassisNo }
+    }).subscribe({
+      next: (res) => {
+        const vd = res?.vehicleDetails;
+        if (!vd) return;
+
+        this.modelName = vd.modelName
+          ? vd.modelName + (vd.colorName ? ` (${vd.colorName})` : '')
+          : this.modelName;
+        this.registerNo = vd.regNo || this.registerNo;
+
+        this.batteryNumber = vd.batteries?.[0]?.batteryNo || this.batteryNumber;
+        this.motorNo = vd.motors?.[0]?.componentNo || this.motorNo;
+        this.chargerNumber = vd.chargers?.[0]?.componentNo || this.chargerNumber;
+      },
+      error: () => {
+        // Best-effort only — same pattern Estimate's own loadVehicleReferenceData uses.
+      }
+    });
+  }
+  onCancelClick() {
+    this.router.navigate(['/job-card']);
   }
 
 }

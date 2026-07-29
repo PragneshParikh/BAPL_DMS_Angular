@@ -2,24 +2,24 @@
 <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
     <h5 class="mb-0">Repair Bill List</h5>
 </div>
-<!--End-->
+
 <!-- Filter Card -->
 <div class="card">
     <div class="card-body">
         <div class="row g-3 align-items-end">
-            <!-- Date From -->
+
             <div class="col-md-3">
                 <label class="form-label">Date From</label>
-                <input type="date" class="form-control form-control-sm" [(ngModel)]="repairbillsearchModel.fromDate"
-                    (change)="search()">
+                <input type="date" class="form-control form-control-sm"
+                    [(ngModel)]="repairbillsearchModel.fromDate" (change)="search()">
             </div>
 
-            <!-- Date To -->
             <div class="col-md-3">
                 <label class="form-label">Date To</label>
-                <input type="date" class="form-control form-control-sm" [(ngModel)]="repairbillsearchModel.toDate"
-                    (change)="search()">
+                <input type="date" class="form-control form-control-sm"
+                    [(ngModel)]="repairbillsearchModel.toDate" (change)="search()">
             </div>
+
             <div class="col-md-3">
                 <label class="form-label">Service Location</label>
                 <select class="form-select form-select-sm text-truncate"
@@ -30,14 +30,18 @@
                     </option>
                 </select>
             </div>
+
             <div class="col-md-3">
                 <label class="form-label">Bill No.</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="repairbillsearchModel.billNo"
+                <input type="text" class="form-control form-control-sm"
+                    [(ngModel)]="repairbillsearchModel.billNo"
                     (ngModelChange)="onSearchChange()" placeholder="Enter Bill No." />
             </div>
+
             <div class="col-md-3">
                 <label class="form-label">Job No.</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="repairbillsearchModel.jobNo"
+                <input type="text" class="form-control form-control-sm"
+                    [(ngModel)]="repairbillsearchModel.jobNo"
                     (ngModelChange)="onSearchChange()" placeholder="Enter Job No." />
             </div>
 
@@ -51,44 +55,34 @@
                     </option>
                 </select>
             </div>
-            <!-- Search Button -->
+
             <div class="col-md-1 d-grid">
-                <button class="btn btn-sm btn-primary" (click)="search()">
-                    Search
-                </button>
+                <button class="btn btn-sm btn-primary" (click)="search()">Search</button>
             </div>
-            <!--End search button-->
-            <!-- Download Excel Button (click)="downloadItemMasterExcel()" -->
+
             <div class="col-md-1 d-grid">
                 <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'">
                     <i class="ri-file-excel-2-line"></i>
                 </button>
             </div>
-            <!--End Excel button-->
-            <!-- Add Button-->
+
             <div class="col-md-1 d-grid">
-                <button class="btn btn-primary btn-sm" (click)="onNavigate()">
-                    Add
-                </button>
+                <button class="btn btn-primary btn-sm" (click)="onNavigate()">Add</button>
             </div>
-            <!--End add button-->
+
         </div>
     </div>
 </div>
-<!--End-->
 
-
-
-
-<!--Table Card-->
+<!-- Table Card -->
 <div class="card">
     <div class="card-body p-0">
-        <div class="table-responsive table-responsive-sm" style="max-height: 400px; overflow: auto;">
+        <div class="table-responsive table-responsive-sm" style="max-height: 460px; overflow: auto;">
 
             <table class="table table-sm table-hover table-bordered mb-0 text-nowrap">
                 <thead class="table-light">
                     <tr>
-                        <!-- <th>Action</th> -->
+                        <th class="text-center">Action</th>
                         <th>SR.No</th>
                         <th>Bill No</th>
                         <th>Date</th>
@@ -98,7 +92,7 @@
                         <th>Location</th>
                         <th>Bill Type</th>
                         <th>Job No</th>
-                        <th>Bill Amount</th>
+                        <th class="text-end">Bill Amount</th>
                         <th>Status</th>
                         <th>Prepared by</th>
                         <th>Modified by</th>
@@ -106,99 +100,75 @@
                 </thead>
 
                 <tbody>
+                    <tr *ngFor="let item of pagedData; let i = index"
+                        (dblclick)="editRepairBill(item)" style="cursor:pointer">
 
-                    <tr *ngFor="let item of pagedData; let i = index" (dblclick)="editRepairBill(item)"
-                        style="cursor: pointer;">
+                        <!-- Action column: Edit + Invoice Download -->
+                        <td class="text-center" style="min-width:88px; white-space:nowrap">
 
-                        <!-- Action -->
-                        <!-- <td>
-                            <button class="btn btn-sm btn-soft-primary">
+                            <button class="btn btn-sm btn-soft-primary me-1"
+                                [ngbTooltip]="'Edit Bill'"
+                                (click)="editRepairBill(item); $event.stopPropagation()">
                                 <i class="ri-pencil-fill fs-12"></i>
                             </button>
-                        </td> -->
+                            <button class="btn btn-sm btn-soft-danger" 
+                                title="Only SuperAdmin can delete" (click)="deleteRepairbill(item.id)" [disabled]="!this.isSuperAdmin">
+                                <i class="ri-delete-bin-fill fs-12"></i>
+                                <!-- [disabled]="currentUserRole !== 'SuperAdmin'" -->
+                            </button>
 
-                        <!-- SR No -->
-                        <td>
-                            {{ ((page - 1) * pageSize) + i + 1 }}
-                        </td>
+                            <button class="btn btn-sm btn-soft-success"
+                                [ngbTooltip]="'Download Invoice'"
+                                (click)="printInvoice(item); $event.stopPropagation()">
+                                <i class="ri-file-download-line fs-12"></i>
+                            </button>
 
-                        <!-- Bill No -->
-                        <td>
-                            {{ item.billNo }}
-                        </td>
-
-                        <!-- Date -->
-                        <td>
-                            {{ item.createdDate | date:'dd-MM-yyyy' }}
                         </td>
 
-                        <!-- Party Name -->
+                        <td>{{ ((page - 1) * pageSize) + i + 1 }}</td>
+                        <td>{{ item.billNo }}</td>
+                        <td>{{ item.createdDate | date:'dd-MM-yyyy' }}</td>
+                        <td>{{ item.partyName }}</td>
+                        <td>{{ item.registrationNo }}</td>
+                        <td>{{ item.chassisNumber }}</td>
+                        <td>{{ item.locationCode }}</td>
+                        <td>{{ item.billType }}</td>
+                        <td>{{ item.jobCardNo }}</td>
+                        <td class="text-end">{{ item.totalNetAmount | number:'1.2-2' }}</td>
+
+                        <!-- Colour-coded status badge -->
                         <td>
-                            {{ item.partyName }}
+                            <span class="badge"
+                                [ngClass]="{
+                                    'bg-success':           item.repairBillStatus === 'Billed',
+                                    'bg-warning text-dark': item.repairBillStatus === 'Performa created',
+                                    'bg-secondary':         item.repairBillStatus !== 'Billed' && item.repairBillStatus !== 'Performa created'
+                                }">
+                                {{ item.repairBillStatus }}
+                            </span>
                         </td>
 
-                        <!-- Reg No -->
-                        <td>
-                            {{ item.registrationNo }}
-                        </td>
-
-                        <!-- Chassis No -->
-                        <td>
-                            {{ item.chassisNumber }}
-                        </td>
-
-                        <!-- Location -->
-                        <td>
-                            {{ item.locationCode }}
-                        </td>
-
-                        <!-- Bill Type -->
-                        <td>
-                            {{ item.billType }}
-                        </td>
-
-                        <!-- Job No -->
-                        <td>
-                            {{ item.jobCardNo }}
-                        </td>
-
-                        <!-- Bill Amount -->
-                        <td class="text-end">
-                            {{ item.totalNetAmount | number:'1.2-2' }}
-                        </td>
-                        <!--Repair Bill Status-->
-                        <td>
-                            {{item.repairBillStatus}}
-                        </td>
-                        <!-- Prepared By -->
-                        <td>
-                            {{ item.createdBy }}
-                        </td>
-
-                        <!-- Modified By -->
-                        <td>
-                            {{ item.updatedBy }}
-                        </td>
+                        <td>{{ item.createdBy }}</td>
+                        <td>{{ item.updatedBy }}</td>
 
                     </tr>
 
-                    <!-- No Data -->
                     <tr *ngIf="pagedData.length === 0">
-                        <td colspan="13" class="text-center text-muted py-3">
-                            No Data Available
-                        </td>
+                        <td colspan="14" class="text-center text-muted py-3">No Data Available</td>
                     </tr>
 
                 </tbody>
             </table>
         </div>
-        <!-- PAGINATION -->
+
         <div class="d-flex justify-content-end p-2">
-            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
-                (pageChange)="pageChange($event)" [boundaryLinks]="true">
+            <ngb-pagination
+                [collectionSize]="collectionSize"
+                [(page)]="page"
+                [pageSize]="pageSize"
+                (pageChange)="pageChange($event)"
+                [boundaryLinks]="true">
             </ngb-pagination>
         </div>
-        <!--End Pagination-->
     </div>
 </div>
-<!--End-->

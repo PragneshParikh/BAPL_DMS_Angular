@@ -18,6 +18,7 @@ import { TRANSACTION_TYPES } from '../../../constant';
 import { PrefixService } from '../../../core/services/prefix';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 import { LMSLeadService } from '../../../core/services/lmslead-service';
+import { LedgerMasterService } from '../../../core/services/ledger-master';
 
 @Component({
   selector: 'app-add-receipt-entry',
@@ -45,7 +46,8 @@ export class AddReceiptEntry implements OnInit {
   parties: LedgerMaster[] = [];
   products: any[] = [];
   selectedProduct: any;
-
+  editingRowIndex: number | null = null;
+  isRowEditMode: boolean = false;
   formData: any = {
     location: null,
     receiptNo: null,
@@ -61,7 +63,8 @@ export class AddReceiptEntry implements OnInit {
     refNo: null,
     narration: null,
     totalAmount: 0.00,
-    customerType: 'b2c'
+    customerType: 'b2c',
+    receiptEntryDetail: ''
   };
 
   selectedFinancier: string = '';
@@ -72,7 +75,17 @@ export class AddReceiptEntry implements OnInit {
   apiResponse!: ReceiptEntryEditModel;
   isEditMode: boolean = false;
   id: any;
+  receiptDetails: any[] = [];
 
+  receiptRow = {
+    receiptType: '',
+    amount: 0,
+    refNo: '',
+    instType: '',
+    instNo: '',
+    lineDate: this.today,
+    bankName: ''
+  };
   model: any;
   modalRef: any;
   filteredParties: LedgerMaster[] = [];
@@ -80,16 +93,18 @@ export class AddReceiptEntry implements OnInit {
   selectedSaleType: string;
   selectedParty: string;
   isSearchMobileInvalid: boolean;
+  showPartyDropdown: boolean;
   constructor(private router: ActivatedRoute,
     private receiptEntryService: ReceiptEntryService,
     private lmsService: LMSLeadService,
-    private locationService: LocationMasterService  ,
+    private locationService: LocationMasterService,
     private storageService: StorageService,
     private itemService: ItemMasterService, private modalService: NgbModal,
     private navigation: Router,
     private loader: LoaderService,
     public toaster: ToastService,
-    public prefixService: PrefixService ,
+    public prefixService: PrefixService,
+    public ledgerService:LedgerMasterService
   ) {
     this.router.paramMap.subscribe(params => {
       this.id = params.get('id');
@@ -97,35 +112,29 @@ export class AddReceiptEntry implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-  this.loader.show();
-
-  //  Get ID synchronously
-  this.id = this.router.snapshot.paramMap.get('id');
-  
-  this.isEditMode = !!this.id;
-
-  
-
-  await this.getParties();
-  await this.loadProducts();
-  this.fetchLocations();
-  this.getFinanciers();
-
-  if (this.isEditMode) {
-    await this.loadReceiptById(this.id);
-  } else {
-    this.formData.receiptDate = this.today;
+    this.loader.show();
+    this.id = this.router.snapshot.paramMap.get('id');
+    this.isEditMode = !!this.id;
+    await this.getParties();
+    await this.loadProducts();
+    this.fetchLocations();
+    this.getFinanciers();
+    if (this.isEditMode) {
+      await this.loadReceiptById(this.id);
+    } else {
+      this.formData.receiptDate = this.today;
+    }
+    this.loader.hide();
   }
 
-  this.loader.hide();
-}
+
 
 
   loadReceiptById(id: number): Promise<any> {
     return new Promise((resolve) => {
       this.receiptEntryService.getReceiptById(id).subscribe({
         next: (res: ReceiptEntryEditModel) => {
-          
+
           this.apiResponse = res;
           this.formData = {
             location: res.location,
@@ -137,7 +146,6 @@ export class AddReceiptEntry implements OnInit {
             financier: res.financier,
             productName: res.productCode,
             salesExecutive: res.salesExecutive,
-            receiptType: res.receiptType,
             mobileNo: res.mobileNo,
             refNo: res.refNo,
             narration: res.narration,
@@ -145,16 +153,18 @@ export class AddReceiptEntry implements OnInit {
             customerType: res.businessType
           };
 
-          // apply filter
-          //  CALL HERE ALSO
+          this.receiptDetails = res.receiptEntryDetail ? [...res.receiptEntryDetail] : [];
           this.mapEditDropdowns();
           this.onCustomerTypeChange();
 
-          return resolve(true);
+          resolve(true);
+        },
+        error: (err) => {
+          console.error(err);
+          resolve(false);
         }
       });
     });
-
   }
 
   mapEditDropdowns() {
@@ -212,7 +222,7 @@ export class AddReceiptEntry implements OnInit {
   }
   getFinanciers() {
 
-    this.receiptEntryService.getLedgerByType('Financier').subscribe({
+    this.ledgerService.getLedgerByType('Financier').subscribe({
       next: (res) => {
         this.financiers = res;
 
@@ -223,8 +233,9 @@ export class AddReceiptEntry implements OnInit {
 
   getParties(): Promise<any> {
     return new Promise((resolve) => {
-      this.receiptEntryService.getLedgerByType('Party').subscribe({
+      this.ledgerService.getLedgerByType('Receipt').subscribe({
         next: (res) => {
+
           this.parties = res;
           this.onCustomerTypeChange();
 
@@ -252,11 +263,18 @@ export class AddReceiptEntry implements OnInit {
 
   fetchLocations(): void {
     this.getNextReceiptNo();
-    const dealerCode = this.storageService.getDealerCode();
+    let dealerCode =null;
+    const isSuoerAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    if(!isSuoerAdmin)
+    {
+
+      dealerCode=this.storageService.getDealerCode();
+    }
 
     this.locationService.getLocationList(dealerCode).subscribe({
-      next: (data: LocationName[]) => {
-        this.locations = data;
+      next: (data: any[]) => {
+        this.locations = data.filter(p => p.locareadidNo == 1);
+
         if (!this.isEditMode && this.locations.length > 0) {
           this.formData.location = this.locations[0].locname;
         }
@@ -290,15 +308,13 @@ export class AddReceiptEntry implements OnInit {
 
   onSaleTypeChange() {
     if (this.formData.saleType === 'Against Lead') {
-     if (!this.isEditMode) {
-  this.formData.customerType = 'b2c';
-}
+      if (!this.isEditMode) {
+        this.formData.customerType = 'b2c';
+      }
       this.onCustomerTypeChange(); // Filter parties
 
-      // Open modal immediately
       this.openLeadSearchModal();
     } else {
-      // Clear all lead-related fields
       this.formData.customerType = 'b2c';
       this.formData.partyName = '';
       this.formData.bookingId = '';
@@ -314,8 +330,8 @@ export class AddReceiptEntry implements OnInit {
 
   searchLead() {
     if (this.searchType === 'Mobile No' && this.isSearchMobileInvalid) {
-    return;
-  }
+      return;
+    }
     let mobileNo: string | null = null;
     let bookingId: string | null = null;
 
@@ -346,16 +362,15 @@ export class AddReceiptEntry implements OnInit {
     }
 
     const bookingIdNumber = bookingId ? Number(bookingId) : null;
-
+    const dealerCode = this.storageService.getDealerCode();
     this.loader.show();
-
     // Check duplicate receipt
-    this.receiptEntryService.checkLeadExist(mobileNo, bookingId).subscribe({
+    this.receiptEntryService.checkReceiptExist(mobileNo, bookingId, this.formData.saleType, dealerCode).subscribe({
       next: (exists: boolean) => {
         if (exists) {
           this.loader.hide();
           this.leadResult = null;
-
+          this.disableSave = true;
           this.toaster.show('Receipt already exists for this Mobile No / Booking ID!', {
             classname: 'bg-danger text-white',
             delay: 5000
@@ -382,9 +397,10 @@ export class AddReceiptEntry implements OnInit {
               }
 
               //OPEN CUSTOMER LEDGER IF NEW
-              if (res.isNew && res.ledgerId) {
+              if (res.isNew) {
                 this.formData.partyName = res.lead?.name || '';
-                this.toaster.show('Ledger created. Please complete details.', {
+                this.formData.mobileNo = res.lead?.mobile || res.lead?.mobileNumber || '';
+                this.toaster.show('Please complete Ledger', {
                   classname: 'bg-success text-white',
                   delay: 5000
                 });
@@ -396,7 +412,8 @@ export class AddReceiptEntry implements OnInit {
                   backdrop: 'static'
                 });
 
-                modalRef.componentInstance.ledgerId = res.ledgerId;
+                modalRef.componentInstance.defaultLedgerType = 'Party';
+                modalRef.componentInstance.leadData = res.lead;
               }
             },
             error: () => {
@@ -436,54 +453,27 @@ export class AddReceiptEntry implements OnInit {
     this.formData.email = this.leadResult.email || '';
     this.formData.pinCode = this.leadResult.pincode ?? null;
     this.model = this.leadResult.model || '';
-
-    // Close the modal
     modal.close();
+
+    // Open Customer Ledger
+    const modalRef = this.modalService.open(CustomerLedger, {
+      size: 'lg',
+      backdrop: 'static'
+    });
+
+    modalRef.componentInstance.defaultLedgerType = 'Party';
+    modalRef.componentInstance.leadData = this.leadResult;
+    modalRef.componentInstance.fromReceiptEntry = true;
+
+    modalRef.result.then((ledgerId) => {
+      if (ledgerId) {
+        this.getParties();
+      }
+    }).catch(() => { });
+
   }
 
-  // onAddClick() {
-  //   this.disableSave=true;
-  //   this.loader.show();
-  //   const payload: ReceiptEntryAddViewModel = {
-  //     location: this.formData.location,
-  //     receiptNo: this.formData.receiptNo || this.nextReceiptNo,
-  //     saleType: this.formData.saleType,
-  //     bookingId: this.formData.bookingId,
-  //     partyName: this.formData.partyName,
-  //     financier: this.formData.financier,
-  //     productCode: this.formData?.productName || '',
-  //     salesExecutive: this.formData.salesExecutive,
-  //     receiptType: this.formData.receiptType,
-  //     mobileNo: this.formData.mobileNo,
-  //     billDate: this.formData.receiptDate,
-  //     billNo: '',
-  //     refNo: this.formData.refNo,
-  //     narration: this.formData.narration,
-  //     totalAmount: this.formData.totalAmount,
-  //     businessType:this.formData.customerType
-  //   };
 
-
-  //   this.receiptEntryService.addReceiptEntry(payload).subscribe({
-  //     next: (res) => {
-  //       this.loader.hide();
-  //       this.toaster.show('Receipt added Succesfully!', {
-  //         classname: 'bg-success text-white',
-  //         delay: 5000
-  //       });
-  //       this.resetForm();
-  //       this.navigation.navigate(['/receipt-entry']);
-  //     },
-  //     error: (err) => {
-  //       this.disableSave=false;
-  //       console.error('API Error:', err);
-  //       this.toaster.show('Failed to add receipt entry', {
-  //         classname: 'bg-danger text-white',
-  //         delay: 5000
-  //       });
-  //     }
-  //   });
-  // }
 
   resetForm() {
     this.formData.selectedLocation = '';
@@ -515,19 +505,21 @@ export class AddReceiptEntry implements OnInit {
 
   }
 
-  onSubmit(receiptForm: any) {
 
+
+  onSubmit(receiptForm: any) {
+    this.disableSave = true;
+    this.loader.show();
     if (!receiptForm.valid) {
-      // Mark all fields as touched to show validation messages
       Object.keys(receiptForm.controls).forEach(field => {
-        const control = receiptForm.controls[field];
-        control.markAsTouched({ onlySelf: true });
+        receiptForm.controls[field].markAsTouched({ onlySelf: true });
       });
+      this.loader.hide();
       return;
     }
 
     const payload: ReceiptEntryAddViewModel = {
-      dealerCode:this.storageService.getDealerCode(),
+      dealerCode: this.storageService.getDealerCode(),
       location: this.formData.location,
       receiptNo: this.formData.receiptNo || this.nextReceiptNo,
       saleType: this.formData.saleType,
@@ -543,15 +535,20 @@ export class AddReceiptEntry implements OnInit {
       refNo: this.formData.refNo,
       narration: this.formData.narration,
       businessType: this.formData.customerType,
-      totalAmount: this.formData.totalAmount
+      totalAmount: this.getReceiptTotal(),
+
+      receiptEntryDetail: this.receiptDetails.map((x, index) => ({
+        lineItemNo: index + 1,
+        amount: Number(x.amount),
+        receiptType: x.receiptType,
+        lineDate: x.instDate
+      }))
     };
-
     if (this.isEditMode && this.id) {
-
-      
-      // Call Update API
+      this.disableSave = false;
+      this.loader.hide();
       this.receiptEntryService.updateReceipt(this.id, payload).subscribe({
-        next: (res) => {
+        next: () => {
           this.toaster.show('Receipt updated successfully!', {
             classname: 'bg-success text-white',
             delay: 5000
@@ -559,7 +556,9 @@ export class AddReceiptEntry implements OnInit {
           this.navigation.navigate(['/receipt-entry']);
         },
         error: (err) => {
-          console.error('Update error:', err);
+          this.loader.hide();
+          this.disableSave = false;
+          console.error(err);
           this.toaster.show('Failed to update the receipt!', {
             classname: 'bg-danger text-white',
             delay: 5000
@@ -567,9 +566,9 @@ export class AddReceiptEntry implements OnInit {
         }
       });
     } else {
-      //  Call Add API
       this.receiptEntryService.addReceiptEntry(payload).subscribe({
         next: (res) => {
+          this.loader.hide();
           this.toaster.show('Receipt added successfully!', {
             classname: 'bg-success text-white',
             delay: 5000
@@ -578,7 +577,8 @@ export class AddReceiptEntry implements OnInit {
           this.navigation.navigate(['/receipt-entry']);
         },
         error: (err) => {
-          console.error('Add error:', err);
+          this.loader.hide();
+          console.error(err);
           this.toaster.show('Failed to add receipt!', {
             classname: 'bg-danger text-white',
             delay: 5000
@@ -586,6 +586,7 @@ export class AddReceiptEntry implements OnInit {
         }
       });
     }
+
   }
 
   onCancel() {
@@ -597,46 +598,47 @@ export class AddReceiptEntry implements OnInit {
     this.navigation.navigate(['/receipt-entry']);
   }
 
- openCustomerLedgerAdd(type: string) {
+  openCustomerLedgerAdd(type: string) {
 
-  const modalRef = this.modalService.open(CustomerLedger, {
-    size: 'lg',
-    backdrop: 'static'
-  });
+    const modalRef = this.modalService.open(CustomerLedger, {
+      size: 'lg',
+      backdrop: 'static'
+    });
 
-  modalRef.componentInstance.defaultLedgerType = type;
-  modalRef.componentInstance.fromReceiptEntry = true;
+    modalRef.componentInstance.defaultLedgerType = type;
+    modalRef.componentInstance.fromReceiptEntry = true;
 
-  modalRef.result.then((newId) => {
-    if (newId) {
 
-      this.receiptEntryService.getLedgerByType(type).subscribe({
-        next: (res) => {
+    modalRef.result.then((newId) => {
+      if (newId) {
 
-          if (type === 'Financier') {
-            this.financiers = [...res];
-          } else {
-            this.parties = [...res];
-          }
+        this.ledgerService.getLedgerByType(type).subscribe({
+          next: (res) => {
 
-          // Auto select newly added
-          const added = res.find((x: any) => x.id === newId);
-
-          if (added) {
             if (type === 'Financier') {
-              this.formData.financier = added.ledgerName;
-              this.selectedFinancier = added.ledgerName;
+              this.financiers = [...res];
             } else {
-              this.formData.partyName = added.ledgerName;
-              this.selectedParty = added.ledgerName;
+              this.parties = [...res];
+            }
+
+            // Auto select newly added
+            const added = res.find((x: any) => x.id === newId);
+
+            if (added) {
+              if (type === 'Financier') {
+                this.formData.financier = added.ledgerName;
+                this.selectedFinancier = added.ledgerName;
+              } else {
+                this.formData.partyName = added.ledgerName;
+                this.selectedParty = added.ledgerName;
+              }
             }
           }
-        }
-      });
-    }
-  }).catch(() => {});
-}
-sanitizeMobile(event: any) {
+        });
+      }
+    }).catch(() => { });
+  }
+  sanitizeMobile(event: any) {
     let value = event.target.value;
 
     value = value.replace(/[^0-9]/g, '');
@@ -647,16 +649,134 @@ sanitizeMobile(event: any) {
     this.formData.mobileNumber = value;
   }
   onSearchInput(event: any) {
-  if (this.searchType === 'Mobile No') {
-    this.sanitizeMobile(event); // reuse existing function
+    if (this.searchType === 'Mobile No') {
+      this.sanitizeMobile(event); // reuse existing function
 
-    // validate AFTER sanitize
-    const value = event.target.value;
-    this.isSearchMobileInvalid = value.length !== 10;
-    this.searchText = value;
-  } else {
-    this.searchText = event.target.value;
-    this.isSearchMobileInvalid = false;
+      // validate AFTER sanitize
+      const value = event.target.value;
+      this.isSearchMobileInvalid = value.length !== 10;
+      this.searchText = value;
+    } else {
+      this.searchText = event.target.value;
+      this.isSearchMobileInvalid = false;
+    }
   }
-}
+
+  filterPartyList() {
+
+    const search = (this.formData.partyName || '').toLowerCase();
+
+    this.filteredParties = this.parties.filter((x: any) =>
+      x.ledgerName.toLowerCase().includes(search)
+    );
+
+    this.showPartyDropdown = true;
+  }
+
+  selectParty(party: any) {
+    this.formData.partyName = party.ledgerName;
+    this.formData.mobileNo = party.mobileNumber;
+    this.formData.partyCode = party.ledgerCode;
+    this.formData.partyState = party.stateName;
+    this.showPartyDropdown = false;
+    this.checkNo(this.formData.mobileNo);
+
+  }
+
+
+  isPartyValid(): boolean {
+    return this.parties.some(
+      (x: any) => x.ledgerName?.toLowerCase() === this.formData.partyName?.toLowerCase());
+  }
+
+  deleteReceiptRow(index: number) {
+    this.receiptDetails.splice(index, 1);
+  }
+  getReceiptTotal(): number {
+    return this.receiptDetails.reduce((sum, x) => sum + Number(x.amount || 0), 0);
+  }
+
+  addReceiptRow() {
+
+    const row = {
+      receiptType: this.receiptRow.receiptType,
+      amount: this.receiptRow.amount,
+      instType: this.receiptRow.instType,
+      instNo: this.receiptRow.instNo,
+      lineDate: this.receiptRow.lineDate,
+      bankName: this.receiptRow.bankName,
+      refNo: this.receiptRow.refNo
+    };
+
+    // UPDATE MODE
+    if (this.isRowEditMode && this.editingRowIndex !== null) {
+      this.receiptDetails[this.editingRowIndex] = row;
+
+      this.isRowEditMode = false;
+      this.editingRowIndex = null;
+    }
+    // ADD MODE
+    else {
+      this.receiptDetails.push(row);
+    }
+
+    this.resetReceiptRow();
+  }
+  editReceiptRow(index: number) {
+    const row = this.receiptDetails[index];
+
+    this.receiptRow = {
+      ...row,
+      lineDate: row.lineDate
+        ? row.lineDate.split('T')[0]
+        : this.today
+    };
+
+    this.isRowEditMode = true;
+    this.editingRowIndex = index;
+  }
+  resetReceiptRow() {
+    this.receiptRow = {
+      receiptType: '',
+      amount: 0,
+      refNo: '',
+      instType: '',
+      instNo: '',
+      lineDate: this.today,
+      bankName: ''
+    };
+  }
+  checkNo(mobileNo: string) {
+    const dealerCode = this.storageService.getDealerCode();
+    this.receiptEntryService.checkReceiptExist(mobileNo, null, this.formData.saleType, dealerCode).subscribe({
+      next: (exists: boolean) => {
+
+        if (exists) {
+          this.loader.hide();
+          this.leadResult = null;
+
+          this.toaster.show(
+            'Receipt already exists for this Mobile No / Booking ID!',
+            {
+              classname: 'bg-danger text-white',
+              delay: 5000
+            }
+          );
+
+          return;
+        }
+
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+
+        this.toaster.show('Something went wrong', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+      }
+    });
+  }
+
 }

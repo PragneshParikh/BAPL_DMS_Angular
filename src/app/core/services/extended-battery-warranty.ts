@@ -30,4 +30,10 @@ export class ExtendedBatteryWarrantyService {
   update(id: number, data: any): Observable<any> {
     return this.httpClient.put(`${this.baseUrl}/extended-battery-warranty/${id}`, data);
   }
+
+  downloadExcel(): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/extended-battery-warranty/downloadExcel`, { responseType: 'blob' });
+  }
+
+
 }

@@ -1,0 +1,107 @@
+<div id="free-service-claim-list">
+    <!-- Start Breadcrumbs -->
+    <app-breadcrumbs title="Free Service Claim"></app-breadcrumbs>
+    <!-- End Breadcrumbs -->
+
+    <div class="card-body">
+        <div class="page-content p-0">
+            <div class="container-fluid px-1">
+
+                <!-- Table Card -->
+                <div class="card">
+                    <div class="card-body">
+                        <form #poFilterForm="ngForm" (ngSubmit)="onSearch()">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-2">
+                                    <label class="form-label">Date from</label>
+                                    <input type="date" class="form-control form-control-sm"
+                                        [(ngModel)]="filterFormData.dateFrom" name="dateFrom">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Date to</label>
+                                    <input type="date" class="form-control form-control-sm "
+                                        [(ngModel)]="filterFormData.dateTo" name="dateTo">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Location</label>
+                                    <select class="form-select form-select-sm" [(ngModel)]="filterFormData.location"
+                                        name="location">
+                                        <option value=""> --Select-- </option>
+                                        <option *ngFor="let loc of locationList" [value]="loc.loccode">{{loc.locname}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label"> Claim No</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                        [(ngModel)]="filterFormData.claimNo" name="claimNo">
+                                </div>
+
+                                <div class="col-md-3 mt-2">
+                                    <button type="submit" class="btn btn-primary btn-sm me-1">
+                                        <i class="align-bottom me-1"></i> Search
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-sm ms-2"
+                                        (click)="addNewClaim(null)">
+                                        <i class="align-bottom me-1"></i> Add
+                                    </button>
+                                    <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'"
+                                        (click)="downloadExcel()">
+                                        <i class="ri-file-excel-2-line"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover table-bordered mb-0 table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th> Sr. No. </th>
+                                        <th> Claim Prefix </th>
+                                        <th> Claim No / Claim Date </th>
+                                        <th> Location Name </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr *ngFor="let claim of dataSource;" class="table-row"
+                                        (dblclick)="onDoubleClick(claim)">
+                                        <td>{{ claim?.id }}</td>
+                                        <td>{{ claim?.claimPrefix }}</td>
+                                        <td>
+                                            {{ claim?.claimNo }} <br>
+                                            {{ claim?.claimDate }}
+                                        </td>
+                                        <td>{{ claim?.locationCode }}</td>
+                                    </tr>
+
+                                    <!-- No Data -->
+                                    <tr *ngIf="!dataSource || dataSource.length === 0">
+                                        <td colspan="7" class="text-center text-muted py-3">
+                                            No Data Available
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <!-- PAGINATION -->
+                        <div class="col-sm-12 col-md-12 mt-2">
+                            <div class="text-md-right float-md-end gridjs-pagination">
+                                <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                                    (pageChange)="onPageChange($event)" [maxSize]="5" [boundaryLinks]="true">
+                                </ngb-pagination>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

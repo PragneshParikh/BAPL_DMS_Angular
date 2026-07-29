@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LedgerMaster } from '../../ViewModels/LedgerMasterViewModel';
 import { ReceiptEntryService } from '../../core/services/receipt-entry-service';
+import { LedgerMasterService } from '../../core/services/ledger-master';
 
 @Component({
   selector: 'app-vehicle-registrationdetails',
@@ -19,7 +20,7 @@ export class VehicleRegistrationdetails implements OnInit {
   showInsuranceDropdown: boolean = false;
   filteredInsurance: LedgerMaster[];
   constructor(private activeModal: NgbActiveModal,
-    private receiptEntryService: ReceiptEntryService
+    private ledgerService: LedgerMasterService
     
   ) { }
   vehicleList: any[] = [];
@@ -32,7 +33,7 @@ editChassisNo: string | null = null;
     regNo: '',
     regAmount: null,
     insNo: '',
-    insAmount: null,
+    insuranceAmount: null,
     insStartDate: this.today,
     insExpDate: this.getInsuranceExpiryDate(this.today),
     insuranceName: '',
@@ -72,7 +73,7 @@ ngOnInit(): void {
     regNo: row.regNo,
     regAmount: row.regAmount,
     insNo: row.insNo,
-    insAmount: row.insuranceAmount,
+    insuranceAmount: row.insuranceAmount,
     insStartDate: row.insStartDate,
     insExpDate: row.insExpDate,
     insuranceName: row.insuranceName,
@@ -91,9 +92,9 @@ saveRow() {
   this.vehicleList[index] = {
     ...this.vehicleList[index],
     regNo: this.model.regNo,
-    regAmt: this.model.regAmount,
+    regAmount: this.model.regAmount,
     insNo: this.model.insNo,
-    insuranceAmount: this.model.insAmount,
+    insuranceAmount: this.model.insuranceAmount,
     insStartDate: this.model.insStartDate,
     insExpDate: this.model.insExpDate,
     insuranceName: this.model.insuranceName,
@@ -108,9 +109,9 @@ addRow() {
   // update selected row immediately (temporary UI update)
   this.selectedRow.chassisNo = this.model.chassisNo;
   this.selectedRow.regNo = this.model.regNo;
-  this.selectedRow.regAmt = this.model.regAmount;
+  this.selectedRow.regAmount = this.model.regAmount;
   this.selectedRow.insNo = this.model.insNo;
-  this.selectedRow.insAmt = this.model.insAmount;
+  this.selectedRow.insuranceAmount = this.model.insuranceAmount;
   this.selectedRow.insStartDate = this.model.insStartDate;
   this.selectedRow.insExpDate = this.model.insExpDate;
   this.selectedRow.insuranceName = this.model.insuranceName;
@@ -121,7 +122,7 @@ addRow() {
   this.selectedRow = null;
 }
 getInsuranceCompanies(){
-  this.receiptEntryService.getLedgerByType('Insurance').subscribe({
+  this.ledgerService.getLedgerByType('Insurance').subscribe({
       next: (res) => {
         this.insurance = res;
       }

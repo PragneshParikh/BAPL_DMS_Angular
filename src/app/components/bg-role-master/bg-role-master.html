@@ -1,0 +1,26 @@
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h5 class="mb-0">{{ isEditMode ? 'Edit BG Role' : 'Add BG Role' }}</h5>
+  <button class="btn btn-secondary btn-sm" (click)="backToList()">
+    <i class="ri-arrow-left-line"></i> Back
+  </button>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-4">
+        <label class="form-label mb-1">Role Name</label>
+        <input type="text" class="form-control form-control-sm"
+          [(ngModel)]="roleName" name="roleName" placeholder="Enter role name">
+        <small class="text-muted" *ngIf="isEditMode">
+          Renaming updates the underlying role everywhere it's assigned.
+        </small>
+      </div>
+    </div>
+
+    <div class="text-end mt-3">
+      <button class="btn btn-secondary btn-sm me-2" (click)="backToList()">Cancel</button>
+      <button class="btn btn-primary btn-sm" (click)="save()">Save</button>
+    </div>
+  </div>
+</div>

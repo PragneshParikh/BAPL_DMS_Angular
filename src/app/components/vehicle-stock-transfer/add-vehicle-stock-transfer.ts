@@ -38,6 +38,7 @@ export class AddVehicleStockTransfer implements OnInit {
         rate: 0,
         batteryMake: '',
         modelName: '',
+        motorNo:'',
         colour: '',
         mfgYear: null,
         keyNo: '',
@@ -47,7 +48,8 @@ export class AddVehicleStockTransfer implements OnInit {
         convertor: '',
         controller: '',
         fameII: 0,
-
+        margin:0,
+        total:0
       }
     ]
   };
@@ -97,10 +99,13 @@ export class AddVehicleStockTransfer implements OnInit {
   }
 
   getEmployeesByDesignation() {
-    const dealerCode = this.storageService.getDealerCode();
-    const designation = EmployeeDesignations.find(x => x.id === 1)?.value;
+    let dealerCode = '';
+    const isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    if (!isSuperAdmin) {
 
-    this.employeeMasterService.getEmployeesByDesignation(dealerCode, designation).subscribe({
+      dealerCode = this.storageService.getDealerCode();
+    }
+    this.employeeMasterService.getEmployeesByDesignation(dealerCode, "1").subscribe({
       next: (data) => {
         this.employeeList = data;
         this.filteredIssueEmployeeList = data;
@@ -114,12 +119,17 @@ export class AddVehicleStockTransfer implements OnInit {
   }
 
   getLocations() {
-    const dealerCode = this.storageService.getDealerCode();
+    let dealerCode = null;
+    const isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    if (!isSuperAdmin) {
+
+      dealerCode = this.storageService.getDealerCode();
+    }
     this.locationMasterService.getLocationList(dealerCode).subscribe({
       next: (data) => {
-        this.locationList = data;
-        this.filteredIssuingLocationList = data;
-        this.filteredReceivingLocationList = data;
+        this.locationList = data.filter(x => x.locareadidNo === 1);
+        this.filteredIssuingLocationList = this.locationList;
+        this.filteredReceivingLocationList = this.locationList;
       }
     });
   }
@@ -129,6 +139,8 @@ export class AddVehicleStockTransfer implements OnInit {
     this.filteredIssueEmployeeList = this.employeeList.filter(x => x.locationCode === this.model.issuingLocation);
     this.chassisSearchService.getChassisDetailsByLocationCode(this.model.issuingLocation).subscribe({
       next: (data) => {
+
+console.log(data);
         this.chassisDetails = data;
         this.filteredChassis = [...data];
       }
@@ -173,6 +185,7 @@ export class AddVehicleStockTransfer implements OnInit {
     this.model.fameII = chassis.fameII;
     this.model.mfgYear = chassis.mfgYear;
     this.model.keyNo = chassis.keyNo;
+    this.model.motorNo =chassis.motorNo;
     //this.showChassisDropdown = false;
   }
   addVehicle() {
@@ -190,7 +203,11 @@ export class AddVehicleStockTransfer implements OnInit {
       convertor: this.model.convertor,
       controller: this.model.controller,
       fameII: this.model.fameII,
-      rate: this.model.rate
+      rate: this.model.rate,
+      margin:this.model.margin ||0,
+      total: this.model.rate + (this.model.margin || 0),
+      motorNo:this.model.motorNo
+      
     };
     if (this.editIndex >= 0) {
       this.vehicleList[this.editIndex] = vehicleData;
@@ -218,6 +235,7 @@ export class AddVehicleStockTransfer implements OnInit {
     this.model.controller = '';
     this.model.fameII = null;
     this.model.rate = null;
+    this.model.margin=null;
   }
 
   deleteVehicle(index: number) {
@@ -244,6 +262,7 @@ export class AddVehicleStockTransfer implements OnInit {
     this.model.controller = row.controller;
     this.model.fameII = row.fameII;
     this.model.rate = row.rate;
+    this.model.margin=row.margin;
   }
 
   onSubmit(form: NgForm) {
@@ -273,7 +292,10 @@ export class AddVehicleStockTransfer implements OnInit {
         this.vehicleList.map(x => ({
           chassisNo: x.chassisNo,
           itemCode: x.itemCode,
-          itemRate: x.rate
+          itemRate: x.rate,
+          itemAmount:x.total,
+          margin:x.margin,
+          fameII:x.fameII
         }))
     };
     this.vehicleStockTransferService.createStockTransfer(payload).subscribe({
@@ -309,6 +331,8 @@ export class AddVehicleStockTransfer implements OnInit {
     this.getEmployeesByDesignation();
     this.vehicleStockTransferService.getTransferById(id).subscribe({
       next: (data) => {
+          console.log(data);
+          
         this.model.transferNo = data.transferNo;
         this.model.transferDate = data.transferDate.split('T')[0];
         this.model.issuingLocation = data.issuingLocationCode;
@@ -333,10 +357,46 @@ export class AddVehicleStockTransfer implements OnInit {
             convertor: x.convertor,
             controller: x.controller,
             fameII: x.fameII,
-            rate: x.rate
+            rate: x.rate,
+            total:x.itemAmount,
+            margin:x.margin,
+            motorNo:x.motorNo
           }));
       }
     });
   }
+  getTotalRate(): number {
+  return this.vehicleList.reduce(
+    (sum, item) => sum + (Number(item.rate) || 0),
+    0
+  );
+}
+
+getTotalMargin(): number {
+  return this.vehicleList.reduce(
+    (sum, item) => sum + (Number(item.margin) || 0),
+    0
+  );
+}
+
+getTotalAmount(): number {
+  const totalAmount = this.vehicleList.reduce(
+    (sum, item) => sum + (Number(item.total) || 0),
+    0
+  );
+
+  // If total is 0, use Rate + Margin for each item
+  if (totalAmount === 0) {
+    return this.vehicleList.reduce(
+      (sum, item) =>
+        sum +
+        (Number(item.rate) || 0) +
+        (Number(item.margin) || 0),
+      0
+    );
+  }
+
+  return totalAmount;
+}
 }
 

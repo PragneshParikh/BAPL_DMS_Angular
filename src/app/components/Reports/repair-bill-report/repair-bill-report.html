@@ -1,0 +1,360 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">Repair Bill Report</h4>
+  <span class="badge bg-light text-dark border px-3 py-2 fs-6">
+    Total Records: {{ totalRecords }}
+  </span>
+</div>
+
+<div class="row g-3">
+
+  <!-- ── Filters ────────────────────────────────────────────────────── -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Filters</h5>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="filterForm">
+          <div class="row g-2">
+
+            <div class="col-xl-3 col-md-6" *ngIf="!isDealer">
+              <label class="form-label">Dealer</label>
+              <select formControlName="dealerCode" class="form-select form-select-sm">
+                <option value="">-- All Dealers --</option>
+                <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
+                  {{ dealer.dealerName }}
+                </option>
+              </select>
+            </div>
+
+            <div class="col-xl-3 col-md-6" *ngIf="isDealer">
+              <label class="form-label">Dealer</label>
+              <input type="text" class="form-control form-control-sm bg-light fw-semibold"
+                [value]="loggedInDealerCode" readonly>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">From Date</label>
+              <input type="date" formControlName="fromDate" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">To Date</label>
+              <input type="date" formControlName="toDate" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Bill No.</label>
+              <input type="number" formControlName="billNo" class="form-control form-control-sm" placeholder="Enter bill number">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Job No.</label>
+              <input type="number" formControlName="jobNo" class="form-control form-control-sm" placeholder="Enter job number">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Chassis No.</label>
+              <input type="text" formControlName="chassisNo" class="form-control form-control-sm" placeholder="Enter chassis number">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Customer Name</label>
+              <input type="text" formControlName="partyName" class="form-control form-control-sm" placeholder="Enter customer name">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Part Code</label>
+              <input type="text" formControlName="partCode" class="form-control form-control-sm" placeholder="Enter part code">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Labour Code</label>
+              <input type="text" formControlName="labourCode" class="form-control form-control-sm" placeholder="Enter labour code">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Job Status</label>
+              <select formControlName="jobStatus" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option *ngFor="let status of jobStatusOptions" [value]="status">{{ status }}</option>
+              </select>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Search</label>
+              <input type="text" formControlName="search" class="form-control form-control-sm"
+                placeholder="Chassis / Bill No / Job No / Part / Labour / Customer">
+            </div>
+
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn btn-primary btn-sm" (click)="onSearch()">
+              <i class="fas fa-search me-1"></i>Search
+            </button>
+            <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">
+              <i class="fas fa-redo me-1"></i>Reset
+            </button>
+            <button type="button" class="btn btn-success btn-sm" (click)="exportToExcel()" [disabled]="exporting || isLoading">
+              <span *ngIf="exporting" class="spinner-border spinner-border-sm me-1"></span>
+              {{ exporting ? 'Exporting...' : 'Export to Excel' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12" *ngIf="errorMessage">
+    <div class="alert alert-danger">{{ errorMessage }}</div>
+  </div>
+
+  <!-- ── Summary Cards ──────────────────────────────────────────────── -->
+  <div class="col-12" *ngIf="!isLoading && reportData.length > 0">
+    <div class="row g-3">
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <p class="text-muted text-uppercase fw-semibold mb-1">Total Item Rate</p>
+          <h5 class="mb-0">{{ formatCurrency(totalItemRate) }}</h5>
+        </div></div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <p class="text-muted text-uppercase fw-semibold mb-1">Total GST (C+S+I)</p>
+          <h5 class="mb-0">{{ formatCurrency(totalGstAmount) }}</h5>
+        </div></div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <p class="text-muted text-uppercase fw-semibold mb-1">Total Discount</p>
+          <h5 class="mb-0">{{ formatCurrency(totalDiscount) }}</h5>
+        </div></div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <p class="text-muted text-uppercase fw-semibold mb-1">Line Items</p>
+          <h5 class="mb-0">{{ totalRecords }}</h5>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Loading ────────────────────────────────────────────────────── -->
+  <div class="col-12" *ngIf="isLoading">
+    <div class="card">
+      <div class="card-body text-center py-5">
+        <div class="spinner-border text-primary mb-3"></div>
+        <p class="text-muted fw-semibold mb-0">Loading report data...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Table ──────────────────────────────────────────────────────── -->
+  <div class="col-12" *ngIf="!isLoading">
+    <div class="card">
+      <div class="card-body">
+
+        <div class="text-center p-4" *ngIf="reportData.length === 0">
+          No records found. Please adjust your filters and try again.
+        </div>
+
+        <div class="table-responsive" *ngIf="reportData.length > 0">
+          <table class="table table-bordered table-striped table-sm">
+        <thead class="table-light">
+              <tr>
+                <th class="sortable" (click)="onSort('srNo')">
+                  Sr.No
+                  <i class="fas" [ngClass]="{
+                    'fa-sort-up':   sortColumn === 'srNo' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'srNo' && sortDirection === 'desc',
+                    'fa-sort':      sortColumn !== 'srNo'
+                  }"></i>
+                </th>
+                <th>Dealer Code</th>
+                <th>Dealer Name</th>
+                <th>Dealer Location</th>
+                <th>City</th>
+                <th>State</th>
+                <th class="sortable" (click)="onSort('jobDate')">
+                  Job Date
+                  <i class="fas" [ngClass]="{
+                    'fa-sort-up':   sortColumn === 'jobDate' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'jobDate' && sortDirection === 'desc',
+                    'fa-sort':      sortColumn !== 'jobDate'
+                  }"></i>
+                </th>
+                <th>Job Type</th>
+                <th class="sortable" (click)="onSort('jobNo')">
+                  Job No.
+                  <i class="fas" [ngClass]="{
+                    'fa-sort-up':   sortColumn === 'jobNo' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'jobNo' && sortDirection === 'desc',
+                    'fa-sort':      sortColumn !== 'jobNo'
+                  }"></i>
+                </th>
+                <th>Service Head</th>
+                <th>Service Type</th>
+                <th>Customer Name</th>
+                <th>Customer Mobile</th>
+                <th>Chassis No.</th>
+                <th>Model Details</th>
+                <th>Job Status</th>
+                <th class="sortable" (click)="onSort('repairBillNo')">
+                  Repair Bill No.
+                  <i class="fas" [ngClass]="{
+                    'fa-sort-up':   sortColumn === 'repairBillNo' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'repairBillNo' && sortDirection === 'desc',
+                    'fa-sort':      sortColumn !== 'repairBillNo'
+                  }"></i>
+                </th>
+                <th class="sortable" (click)="onSort('repairBillDate')">
+                  Repair Bill Date
+                  <i class="fas" [ngClass]="{
+                    'fa-sort-up':   sortColumn === 'repairBillDate' && sortDirection === 'asc',
+                    'fa-sort-down': sortColumn === 'repairBillDate' && sortDirection === 'desc',
+                    'fa-sort':      sortColumn !== 'repairBillDate'
+                  }"></i>
+                </th>
+                <th>Part Code</th>
+                <th>Part Code Description</th>
+                <th>Issue Type</th>
+                <th class="text-end">Item Rate</th>
+                <th class="text-end">Labour Rate</th>
+                <th class="text-end">CGST %</th>
+                <th class="text-end">CGST Amt</th>
+                <th class="text-end">SGST %</th>
+                <th class="text-end">SGST Amt</th>
+                <th class="text-end">IGST %</th>
+                <th class="text-end">IGST Amt</th>
+                <th class="text-end">Total GST</th>
+                <th class="text-end">Discount</th>
+                <th>Discount Type</th>
+                <th>Labour Code</th>
+                <th>Labour Description</th>
+                <th>Technician Name</th>
+              </tr>
+            </thead>            
+            <tbody>
+              <tr *ngFor="let item of reportData">
+                <td>{{ item.srNo }}</td>
+                <td>{{ item.dealerCode }}</td>
+                <td>{{ item.dealerName }}</td>
+                <td>{{ item.dealerLocation }}</td>
+                <td>{{ item.city }}</td>
+                <td>{{ item.state }}</td>
+                <td class="text-nowrap">{{ formatDate(item.jobDate) }}</td>
+                <td>{{ item.jobType }}</td>
+                <td>{{ item.jobNo ?? '-' }}</td>
+                <td>{{ item.serviceHead }}</td>
+                <td>{{ item.serviceType }}</td>
+                <td>{{ item.customerName }}</td>
+                <td>{{ item.customerMobile }}</td>
+                <td>{{ item.chassisNo }}</td>
+                <td>{{ item.modelDetails }}</td>
+                <td>{{ item.jobStatus }}</td>
+                <td>{{ item.repairBillNo }}</td>
+                <td class="text-nowrap">{{ formatDate(item.repairBillDate) }}</td>
+                <td>{{ item.partCode || '-' }}</td>
+                <td>{{ item.partCodeDescription || '-' }}</td>
+                <td>{{ getIssueTypeLabel(item.issueType) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.itemRate) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.labourRateRaw) }}</td>
+                <td class="text-end">{{ item.cgstPercent }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.cgstAmount) }}</td>
+                <td class="text-end">{{ item.sgstPercent }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.sgstAmount) }}</td>
+                <td class="text-end">{{ item.igstPercent }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.igstAmount) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.totalGstAmount) }}</td>
+                <td class="text-end text-nowrap">{{ formatCurrency(item.discount) }}</td>
+                <td>{{ item.discountType }}</td>
+                <td>{{ item.labourCode || '-' }}</td>
+                <td>{{ item.labourDescription || '-' }}</td>
+                <td>{{ item.technicianName }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+                <tr class="table-warning fw-bold">
+
+                  <!-- Cols 1–21: Sr.No, Dealer Code, Dealer Name, Dealer Location, City,
+                      State, Job Date, Job No., Job Type, Service Head, Service Type,
+                      Customer Name, Customer Mobile, Chassis No., Model Details,
+                      Job Status, Repair Bill No., Repair Bill Date, Part Code,
+                      Part Code Description, Issue Type -->
+                  <td colspan="21" class="text-end">TOTAL (this page)</td>
+
+                  <!-- Col 22: Item Rate -->
+                  <td class="text-end text-nowrap">{{ formatCurrency(totalItemRate) }}</td>
+
+                  <!-- Col 23: Labour Rate -->
+                  <td class="text-end text-nowrap">{{ formatCurrency(totalLabourRate) }}</td>
+
+                  <!-- Col 24: CGST % — no total shown; it's a rate, not a summable amount -->
+                  <td></td>
+
+                  <!-- Col 25: CGST Amt -->
+                  <td class="text-end text-nowrap">{{ formatCurrency(totalCgstAmount) }}</td>
+
+                  <!-- Col 26: SGST % -->
+                  <td></td>
+
+                  <!-- Col 27: SGST Amt -->
+                  <td class="text-end text-nowrap">{{ formatCurrency(totalSgstAmount) }}</td>
+
+                  <!-- Col 28: IGST % -->
+                  <td></td>
+
+                  <!-- Col 29: IGST Amt -->
+                  <td class="text-end text-nowrap">{{ formatCurrency(totalIgstAmount) }}</td>
+
+                  <!-- Col 30: Total GST -->
+                  <td class="text-end text-nowrap">{{ formatCurrency(totalGstAmount) }}</td>
+
+                  <!-- Col 31: Discount -->
+                  <td class="text-end text-nowrap">{{ formatCurrency(totalDiscount) }}</td>
+
+                  <!-- Cols 32–35: Discount Type, Labour Code, Labour Description,
+                      Technician Name — no totals applicable -->
+                  <td colspan="4"></td>
+
+                </tr>
+              </tfoot>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="row mt-3" *ngIf="reportData.length > 0">
+          <div class="col-md-6 d-flex align-items-center mb-2 mb-md-0">
+            <p class="text-muted mb-0">
+              Showing {{ (pageIndex - 1) * pageSize + 1 }} to
+              {{ Math.min(pageIndex * pageSize, totalRecords) }} of
+              {{ totalRecords }} records
+            </p>
+          </div>
+          <div class="col-md-6 d-flex justify-content-md-end">
+            <div class="d-flex align-items-center flex-wrap gap-2">
+              <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex === 1" (click)="firstPage()">
+                <i class="fas fa-chevron-left me-1"></i>First
+              </button>
+              <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex === 1" (click)="previousPage()">
+                <i class="fas fa-chevron-left me-1"></i>Previous
+              </button>
+              <span class="badge bg-light text-dark border px-3 py-2">
+                Page {{ pageIndex }} of {{ totalPages }}
+              </span>
+              <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex >= totalPages" (click)="nextPage()">
+                Next<i class="fas fa-chevron-right ms-1"></i>
+              </button>
+              <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex >= totalPages" (click)="lastPage()">
+                Last<i class="fas fa-chevron-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

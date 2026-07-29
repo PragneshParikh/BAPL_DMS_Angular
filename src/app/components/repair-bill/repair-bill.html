@@ -2,27 +2,25 @@
 
     <!-- Header -->
     <div class="card shadow-sm mb-2">
-        <div class="card-header text-white py-2 d-flex justify-content-between align-items-center">
-
+        <div class="card-header">
             <h6 class="mb-0">Repair Bill [GST]</h6>
+            <div class="text-white py-2 d-flex justify-content-end">
+                <div ngbDropdown class="d-inline-block me-3">
 
-            <div class="d-flex align-items-center gap-2">
-
-                <div ngbDropdown>
-
-                    <button class="btn btn-primary btn-sm" ngbDropdownToggle>
-
+                    <button type="button" class="btn btn-primary btn-sm" ngbDropdownToggle>
                         <i class="ri-printer-line"></i>
                     </button>
 
                     <div ngbDropdownMenu>
 
-                        <button ngbDropdownItem (click)="printPerforma()">
+                        <button ngbDropdownItem type="button" (click)="printPerforma()">
+
                             <i class="ri-file-text-line me-2"></i>
                             Performa Print
                         </button>
 
-                        <button ngbDropdownItem (click)="printInvoice()">
+                        <button ngbDropdownItem type="button" (click)="printInvoice()">
+
                             <i class="ri-bill-line me-2"></i>
                             Invoice Print
                         </button>
@@ -34,10 +32,8 @@
                 <button class="btn btn-light btn-sm" (click)="onNavigate()">
                     <i class="ri-menu-line"></i>
                 </button>
-
             </div>
         </div>
-
         <div class="card-body p-2">
 
             <!-- Row 1 -->
@@ -102,7 +98,8 @@
 
                     <div class="input-group input-group-sm">
 
-                        <select class="form-select form-select-sm" [(ngModel)]="selectedCashAccount">
+                        <select class="form-select form-select-sm" [(ngModel)]="selectedCashAccount" #cash="ngModel"
+                            required>
 
                             <option value=null>--Select Cash--</option>
 
@@ -110,6 +107,9 @@
                                 {{ item.accountName }}
                             </option>
                         </select>
+                        <div class="text-danger" *ngIf="cash.invalid && (cash.touched || isSaveClicked)">
+                            Please select a Cash Account.
+                        </div>
 
                         <!-- Search Button -->
                         <!-- <button class="btn btn-outline-primary" (click)="openPopup()">
@@ -158,7 +158,7 @@
 
                 <div class="col-md-1">
                     <label class="form-label">Job Search</label>
-                    <button class="btn btn-light btn-sm w-100" (click)="openPopup()">
+                    <button class="btn btn-primary btn-sm w-100" (click)="openPopup()">
                         <i class="ri-car-line"></i>
                     </button>
                 </div>
@@ -191,7 +191,7 @@
                             <input class="form-control form-control-sm bg-light text-muted"
                                 [value]="selectedJobCard?.jobCardHeader?.jobinDate" readonly>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-1">
                             <label>Job No.</label>
                             <input class="form-control form-control-sm bg-light text-muted"
                                 [value]="selectedJobCard?.jobCardHeader?.jobNo" readonly>
@@ -203,14 +203,14 @@
                                 [value]="selectedJobCard?.jobCardCustomer?.registerNo" readonly>
                         </div>
 
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label>Model</label>
                             <input class="form-control form-control-sm bg-light text-muted"
                                 [value]="selectedJobCard?.jobCardCustomer?.modelName" readonly>
                         </div>
 
-                        <div class="col-md-2">
-                            <label>ODO Reading</label>
+                        <div class="col-md-1">
+                            <label>KMs</label>
                             <input class="form-control form-control-sm bg-light text-muted"
                                 [value]="selectedJobCard?.jobCardHeader?.vehiclekms" readonly>
                         </div>
@@ -304,7 +304,7 @@
 
                     </div> -->
                     <div class="col-md-1">
-                        <label class="form-label">Qty/Hrs.</label>
+                        <label class="form-label">Qty</label>
                         <input type="number" class="form-control form-control-sm text-end bg-light text-muted"
                             [value]="1" readonly>
                     </div>
@@ -324,14 +324,7 @@
                             [(ngModel)]="selectedPartRate" readonly>
 
                     </div> -->
-
-
                     <div class="col-md-1">
-                        <label class="form-label">Discount</label>
-                        <input type="number" class="form-control form-control-sm text-end" [(ngModel)]="discount">
-                    </div>
-
-                    <div class="col-md-2">
                         <label class="form-label">Disc. Type</label>
                         <select class="form-select form-select-sm" [(ngModel)]="discountType">
                             <option value="Value">Value</option>
@@ -339,13 +332,18 @@
                         </select>
                     </div>
 
+                    <div class="col-md-1">
+                        <label class="form-label">Discount</label>
+                        <input type="number" class="form-control form-control-sm text-end" [(ngModel)]="discount">
+                    </div>
+
                     <div class="col-md-2">
                         <label class="form-label">Issue Type</label>
                         <select class="form-select form-select-sm" [(ngModel)]="selectedIssueType">
 
-                            <option value=null>--Select Cash--</option>
+                            <option [ngValue]=null>--Select Cash--</option>
 
-                            <option *ngFor="let item of IssueType" [value]="item.id">
+                            <option *ngFor="let item of IssueType" [ngValue]="item.id">
                                 {{ item.name }}
                             </option>
                         </select>
@@ -360,8 +358,8 @@
                             <option value="Vishal">Vishal</option>
                         </select>
                     </div> -->
-                    <div class="col-md-2">
-                        <button class="btn btn-sm btn-soft-primary" (click)="addLabour()">
+                    <div class="col-md-1">
+                        <button class="btn btn-sm btn-primary" (click)="addLabour()">
                             + Add
                         </button>
                     </div>
@@ -399,6 +397,77 @@
 
                 </div> -->
 
+                <div class="border rounded p-2 mb-2 bg-light-subtle">
+
+                    <div class="row g-2 align-items-end">
+
+                        <!-- Part & Description -->
+                        <div class="col-md-2">
+
+                            <label class="form-label">Part</label>
+                            <input type="text" class="form-control form-control-sm bg-light text-muted"
+                                [(ngModel)]="itemcode" [readonly]="isPartEditMode">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-control form-control-sm bg-light text-muted"
+                                [(ngModel)]="selectedPartDescription" readonly>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">Qty</label>
+                            <input type="number" class="form-control form-control-sm text-end bg-light text-muted"
+                                [(ngModel)]="selectedPartQty" readonly>
+                        </div>
+                        <div class="col-md-1">
+
+                            <label class="form-label">Rate</label>
+
+                            <input type="number" class="form-control form-control-sm text-end bg-light text-muted"
+                                [(ngModel)]="selectedPartRate" readonly>
+
+                        </div>
+
+                        <div class="col-md-1">
+                            <label class="form-label">Disc. Type</label>
+                            <select class="form-select form-select-sm" [(ngModel)]="discountPartType">
+                                <option value="Value">Value</option>
+                                <option value="%">%</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">Discount</label>
+                            <input type="number" class="form-control form-control-sm text-end"
+                                [(ngModel)]="partdiscount">
+                        </div>
+
+
+                        <!-- Issue Type -->
+                        <!-- <div class="col-md-2">
+                            <label class="form-label">Issue Type</label>
+                            <select class="form-select form-select-sm" [(ngModel)]="selectedIssueType"
+                                [disabled]="isPartEditMode">
+
+                                <option [ngValue]=null>--Select Cash--</option>
+
+                                <option *ngFor="let item of IssueType" [ngValue]="item.id">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                        </div> -->
+                        <!-- Button -->
+                        <div class="col-md-1 d-grid">
+                            <button class="btn btn-sm btn-primary" (click)="isPartEditMode ? updatePart() : ''">
+                                + Add
+                            </button>
+                        </div>
+                        <!-- <div class="col-md-1 d-grid mb-2">
+                            <button class="btn btn-primary btn-sm" (click)="isPartEditMode ? updatePart() : ''">+Add
+                            </button>
+                        </div> -->
+
+                    </div>
+
+                </div>
                 <!-- Labour Grid -->
                 <div *ngIf="selectedItemType === 'Labour'">
 
@@ -410,14 +479,18 @@
 
                             <thead class="table-secondary">
                                 <tr>
+                                    <!-- <th>json</th> -->
                                     <th>Action</th>
                                     <th>Sr.No</th>
                                     <th>Labour Code</th>
                                     <th>Description</th>
                                     <th>Qty</th>
                                     <th>Rate</th>
-                                    <th>Discount</th>
+                                    <th>HSNCode</th>
+                                    <th>Discount Amt.</th>
                                     <th>Disc.Type</th>
+                                    <th>CGST Amt.</th>
+                                    <th>SGST Amt.</th>
                                     <th>IGST Amt.</th>
                                     <th>Net Amount</th>
                                     <th>Issue Type</th>
@@ -430,7 +503,7 @@
                             <tbody>
 
                                 <tr *ngFor="let item of labourItems; let i=index">
-
+                                    <!-- <pre>{{labourItems| json}}</pre> -->
                                     <td>
 
                                         <button class="btn btn-sm btn-primary me-1" (click)="editLabour(i)"
@@ -462,19 +535,28 @@
                                     <td class="text-end">
                                         {{item.rate | number:'1.2-2'}}
                                     </td>
-
+                                    <td>{{item.labourHsnCode}}</td>
                                     <td class="text-end">
                                         {{item.discount | number:'1.2-2'}}
                                     </td>
 
-                                    <td>{{item.discountType}}</td>
-
-                                    <td class="text-end">
-                                        {{item.igstAmount | number:'1.2-2'}}
+                                    <td>
+                                        {{item.discountValue}}({{item.discountType === 'Value'? 'RS': '%'}})
                                     </td>
+                                    <td>{{item.cgstAmount | number:'1.2-2'}}</td>
+                                    <td>{{item.sgstAmount | number:'1.2-2'}}</td>
+                                    <td>{{item.igstAmount | number:'1.2-2'}}</td>
+                                    <!-- <td class="text-end">
+                                        {{item.igstAmount | number:'1.2-2'}}
+                                    </td> -->
 
                                     <td class="text-end">
-                                        {{item.netAmount | number:'1.2-2'}}
+                                        {{item.issuetypeName === 'U/W'
+                                        ? 0.00
+                                        : item.issuetypeName === 'FSC'
+                                        ? 0.00
+                                        : item.netAmount | number:'1.2-2'}}
+                                        <!-- {{item.netAmount | number:'1.2-2'}} -->
                                     </td>
 
                                     <td>
@@ -482,11 +564,19 @@
                                     </td>
 
                                     <td class="text-end">
-                                        {{item.waveRate | number:'1.2-2'}}
+                                        {{
+                                        item.issuetypeName === 'U/W'
+                                        ? item.rate
+                                        : item.issuetypeName === 'FSC'
+                                        ? item.waveRate
+                                        : 0
+                                        | number:'1.2-2'
+                                        }}
+                                        <!-- {{item.waveRate | number:'1.2-2'}} -->
                                     </td>
 
                                     <td class="text-end">
-                                        {{item.igst}}
+                                        {{item.igst | number:'1.2-2'}}
                                     </td>
 
                                     <!-- <td>
@@ -511,20 +601,27 @@
 
                 <hr />
 
+
                 <!-- Part Grid -->
                 <div class="table-responsive" *ngIf="isPartSelected === true">
-
+                    <h6 class="mb-2">Part Details List</h6>
                     <table class="table table-bordered table-sm">
 
                         <thead class="table-secondary">
                             <tr>
+
+                                <th>Action</th>
                                 <th>Sr.No</th>
-                                <th>Part No</th>
+                                <th>Part No.</th>
                                 <th>Description</th>
                                 <th>Qty</th>
                                 <th>Rate</th>
+                                <th>HSNCode</th>
+                                <th>MRP</th>
                                 <th>Discount</th>
                                 <th>Discount Type</th>
+                                <th>CGST Amt.</th>
+                                <th>SGST Amt.</th>
                                 <th>IGST Amt.</th>
                                 <th>Amount</th>
                                 <th>IssueType</th>
@@ -535,21 +632,53 @@
 
                         <tbody>
 
-                            <tr *ngFor="let item of materialedJobCarDList; let i=index">
+                            <tr *ngFor="let item of partItems; let i=index">
+                                <!-- <pre>{{partItems|json}}</pre> -->
+
+                                <td><button class="btn btn-sm btn-primary me-1" (click)="editPart(i)"
+                                        [disabled]="item.isAutoGenerated">
+                                        <i class="ri-edit-line"></i>
+                                    </button></td>
                                 <td>{{i+1}}</td>
                                 <td>{{item.partCode}}</td>
                                 <td>{{item.partDesc}}</td>
                                 <td>{{item.partQty}}</td>
                                 <td>{{item.partRate}}</td>
+                                <td>{{item.partHsnCode}}</td>
+                                <td>{{item.partMRP}}</td>
                                 <td>{{item.discount | number:'1.2-2'}}</td>
                                 <td>
-                                    {{item.discountType}}
+                                    {{item.discountValue}}({{item.discountType === 'Value'? 'RS': '%'}})
                                 </td>
-                                <td>{{item.igstAmount | number:'1.2-2'}}</td>
-                                <td>{{item.netAmount | number:'1.2-2'}}</td>
+                                <td>{{item.cgstAmount | number:'1.2-2'}}</td>
+                                <td>{{item.sgstAmount | number:'1.2-2'}}</td>
+                                <td>
+                                    {{
+                                    item.issuetypeName === 'U/W'
+                                    ? 0.00
+                                    : item.issuetypeName === 'FSC'
+                                    ? 0.00
+                                    : item.igstAmount | number:'1.2-2'
+                                    }}
+                                </td>
+                                <td>{{item.issuetypeName === 'U/W'
+                                    ? 0.00
+                                    : item.issuetypeName === 'FSC'
+                                    ? 0.00
+                                    : item.netAmount | number:'1.2-2'}}</td>
                                 <td>{{item.issuetypeName}}</td>
-                                <td>{{item.fscRate | number:'1.2-2'}}</td>
-                                <td>{{item.igst | number:'1.2-2'}}</td>
+                                <td>
+                                    {{
+                                    item.issuetypeName === 'U/W'
+                                    ? item.partRate
+                                    : item.issuetypeName === 'FSC'
+                                    ? item.fscRate
+                                    : 0
+                                    | number:'1.2-2'
+                                    }}
+                                </td>
+                                <td>{{ (item.igst ? item.igst : (item.totalTaxPer ? item.totalTaxPer : (item.cgst +
+                                    item.sgst))) | number:'1.2-2' }}</td>
 
                             </tr>
 
@@ -627,10 +756,10 @@
                         readonly>
                 </div>
 
-                <div class="col-md-2">
+                <!-- <div class="col-md-2">
                     <label class="form-label">Discount</label>
-                    <input class="form-control form-control-sm text-end" [value]="discount | number:'1.2-2'" readonly>
-                </div>
+                    <input class="form-control form-control-sm text-end" [value]="discountValue | number:'1.2-2'" readonly>
+                </div> -->
 
                 <div class="col-md-2">
                     <label class="form-label">Disc. Amount(-)</label>
@@ -660,14 +789,18 @@
                 </div>
 
                 <div class="d-flex gap-2">
-                    <button *ngIf="!isEditMode" class="btn btn-primary btn-sm" (click)="saveRepairBill()">
+                    <button *ngIf="!isEditMode && selectedJobCard?.jobCardHeader?.jobtype != 1"
+                        class="btn btn-primary btn-sm" (click)="saveRepairBill()">
                         <i class="ri-save-line"></i> Save As Performa
                     </button>
-                    <button class="btn btn-primary btn-sm" [disabled]="repairBillStatus === 'Billed'"
-                        (click)="updateRepairBill()">
-                        <i class="ri-save-line"></i> Save As Invoice
-                    </button>
+                    <button class="btn btn-primary btn-sm"
+                        [disabled]="selectedJobCard?.jobCardHeader?.jobtype != 1 && (!isEditMode || repairBillStatus === 'Billed')"
+                        (click)="saveOrUpdateRepairBill()">
 
+                        <i class="ri-save-line"></i>
+                        Save As Invoice
+
+                    </button>
 
                     <button class="btn btn-light btn-sm" (click)="onNavigate()">
                         <i class="ri-close-line"></i> Close
@@ -709,13 +842,13 @@
                     <div class="col-md-2">
                         <label>Date From</label>
 
-                        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateFrom">
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="searchModel.fromDate">
                     </div>
 
                     <div class="col-md-2">
                         <label>Date To</label>
 
-                        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateTo">
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="searchModel.toDate">
                     </div>
 
                     <div class="col-md-2">
@@ -1062,15 +1195,15 @@
                     <!-- Policy No -->
                     <div class="col-md-6">
                         <label class="form-label">Policy No.</label>
-                        <input type="text" class="form-control form-control-sm bg-light text-muted"
-                            [(ngModel)]="policyNo" readonly>
+                        <input type="text" class="form-control form-control-sm"
+                            [(ngModel)]="policyNo">
                     </div>
 
                     <!-- Valid Till -->
                     <div class="col-md-3">
                         <label class="form-label"> Valid Till </label>
-                        <input type="date" class="form-control form-control-sm bg-light text-muted"
-                            [ngModel]="insValidTill | date:'yyyy-MM-dd'" readonly>
+                        <input type="date" class="form-control form-control-sm"
+                            [ngModel]="insValidTill | date:'yyyy-MM-dd'">
                     </div>
 
                     <!-- Zero Dep -->

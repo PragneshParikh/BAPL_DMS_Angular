@@ -60,6 +60,7 @@ export interface VehicleSaleBillDetailVM {
   narration: string;
   finalAmount: number;
   isAgainstExchange: boolean;
+  modelName?:string;
 }
 
 export interface VehicleSaleBillResponseViewModel {
@@ -79,6 +80,12 @@ export interface VehicleSaleBillResponseViewModel {
   cashAccount?: string;
   status?: string;
   details: VehicleSaleBillDetailVM[];
+  selected?: boolean;
+  selectedForm22?: boolean;
+  selectedInvoice?: boolean;
+  customerType?: string;
+  
+  
 }
 
 export interface VehicleSaleChasisRequest {

@@ -10,7 +10,8 @@ export class RepairBillService {
 
   private baseUrl = environment.apiUrl
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient) {
+  }
 
   insertRepairBill(model: any): Observable<any> {
     return this.httpClient.post(`${this.baseUrl}/RepairBill/InsertRepairBill`, model);
@@ -27,5 +28,22 @@ export class RepairBillService {
   getRepairBillById(id: number): Observable<any> {
     return this.httpClient.get<any>(`${this.baseUrl}/RepairBill/GetRepairBillById/${id}`);
   }
+  // generateRepairBillPerformaDetails(dealerCode:string,repairBillId :number){
+  //   return this.httpClient.post<any[]>(`${this.baseUrl}/RepairBill/GenerateRepairBillPerformaDetails/${dealerCode}/${repairBillId}`,{})
+  // }
+  deleteRepairbill(id: number, role: string) {
+    return this.httpClient.delete(`${this.baseUrl}/RepairBill/DeleteRepairbill/${id}/${role}`);
+  }
+  generateRepairBillPerformaDetails(
+    dealerCode: string,
+    repairBillId: number
+  ): Observable<any> {
+
+    return this.httpClient.post<any>(
+      `${this.baseUrl}/RepairBill/GenerateRepairBillPerformaDetails/${dealerCode}/${repairBillId}`,
+      {}
+    );
+  }
+
 
 }

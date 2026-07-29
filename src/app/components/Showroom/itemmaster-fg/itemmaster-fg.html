@@ -24,113 +24,48 @@
 
       <div class="card-body">
         <div class="table-responsive">
-          <table class="table table-hover table-bordered mb-0 table-sm">
-            <thead class="table-bgColor">
+          <table class="table table-sm table-bordered align-middle text-nowrap table-hover">
+            <thead>
               <tr>
                 <th>Sr No.</th>
                 <th class="sort" (click)="sort('itemtype')" data-sort="itemtype">Item Type</th>
                 <th class="sort" (click)="sort('itemname')" data-sort="itemname">Vehicle Name</th>
                 <th class="sort" (click)="sort('itemcode')" data-sort="itemcode">Vehicle Code</th>
                 <th class="sort" (click)="sort('itemdesc')" data-sort="itemdesc">Item Description</th>
-                <!-- <th class="sort" (click)="sort('iselectric')" data-sort="iselectric">Is OEM Model</th>
-                <th class="sort" (click)="sort('hsncode')" data-sort="hsncode">HSNCode</th> -->
-                <!-- <th class="sort" (click)="sort('custprice')" style="cursor:pointer" data-sort="custprice">Customer Price</th>
-                <th class="sort" (click)="sort('dlrprice')" style="cursor:pointer" data-sort="dlrprice">Dealer Price</th> -->
-                <!-- <th class="sort" (click)="sort('igst')" data-sort="igst">IGST</th> -->
                 <th class="sort" (click)="sort('status')" data-sort="status">Status</th>
               </tr>
             </thead>
             <tbody>
-              <!-- @for ( data of griddata ; track $index) {
-              <tr>
-                <td><ngb-highlight [result]="data.id" [term]="service.searchTerm"></ngb-highlight></td>
-                <td><ngb-highlight [result]="data.name" [term]="service.searchTerm"></ngb-highlight></td>
-                <td><ngb-highlight [result]="data.email" [term]="service.searchTerm"></ngb-highlight></td>
-                <td><ngb-highlight [result]="data.position" [term]="service.searchTerm"></ngb-highlight></td>
-                <td><ngb-highlight [result]="data.company" [term]="service.searchTerm"></ngb-highlight></td>
-                <td><ngb-highlight [result]="data.country" [term]="service.searchTerm"></ngb-highlight></td>
-                <td data-column-id="actions" class="gridjs-td"><span><button type="button" class="btn btn-sm btn-light">Details</button></span></td>
-              </tr>
-              } -->
-
 
               @for (data of pagedData; track $index) {
 
               <tr (dblclick)="openDetails(itemModal,data)" style="cursor:pointer">
-                <td>
-                  {{ (page - 1) * pageSize + $index + 1 }}
-                </td>
-                <td>
-                  <ngb-highlight [result]="data?.grpid == 11 ? 'Parts' : 'Vehicle'" [term]="searchTerm"></ngb-highlight>
-                </td>
-                <td>
-                  <ngb-highlight [result]="data.itemname" [term]="searchTerm"></ngb-highlight>
-                </td>
-
-                <td>
-                  <ngb-highlight [result]="data.itemcode" [term]="searchTerm"></ngb-highlight>
-                </td>
-
-                <td>
-                  <ngb-highlight [result]="data.itemdesc" [term]="searchTerm"></ngb-highlight>
-                </td>
-                <!-- <td>
-                  <span class="badge" [ngClass]="data.iselectric ? 'bg-success' : 'bg-danger'">
-                    {{ data.iselectric ? 'Yes' : 'No' }}
-                  </span>
-                </td>
-
-                <td>
-                  <ngb-highlight [result]="data.hsncode" [term]="searchTerm"></ngb-highlight>
-                </td> -->
-
-                <!-- <td>
-                  <ngb-highlight [result]="data.custprice" [term]="searchTerm"></ngb-highlight>
-                </td>
-
-                <td>
-                  <ngb-highlight [result]="data.dlrprice" [term]="searchTerm"></ngb-highlight>
-                </td> -->
-                <!-- <td>
-                  <ngb-highlight [result]="data.igst" [term]="searchTerm"></ngb-highlight>
-                </td> -->
+                <td> {{ (page - 1) * pageSize + $index + 1 }} </td>
+                <td> {{data?.grpid == 11 ? 'Parts' : 'Vehicle'}} </td>
+                <td> {{data.itemname}} </td>
+                <td> {{data.itemcode}} </td>
+                <td> {{data.itemdesc}} </td>
                 <td>
                   <span class="badge" [ngClass]="data.status ? 'bg-success' : 'bg-danger'">
                     {{ data.status ? 'Active' : 'Inactive' }}
                   </span>
                 </td>
-
-                <!-- <td>
-                    <button class="btn btn-sm btn-light"
-                      (click)="openDetails(itemModal,data); $event.stopPropagation()">Details</button>
-                  </td> -->
-
               </tr>
-
               }
-
             </tbody>
           </table>
         </div>
-        <div class="row justify-content-md-between align-items-md-center">
-          <div class="col-sm-12 col-md-5">
-            <div class="dataTables_info mb-2" id="tickets-table_info" role="status" aria-live="polite">
-              <!-- Showing
-              {{service.startIndex}} to
-              {{service.endIndex}} of {{service.totalRecords}}
-              entries -->
-            </div>
+
+        <!-- Pagination -->
+        <div class="col-sm-12 col-md-12">
+          <div class="text-md-right float-md-end gridjs-pagination">
+            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+              (pageChange)="pageChange($event)" [maxSize]="5" [boundaryLinks]="true">
+            </ngb-pagination>
           </div>
-          <!-- Pagination -->
-          <div class="col-sm-12 col-md-5">
-            <div class="text-md-right float-md-end gridjs-pagination">
-              <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
-                (pageChange)="pageChange($event)">
-              </ngb-pagination>
-            </div>
-          </div>
-          <!-- End Pagination -->
         </div>
+        <!-- End Pagination -->
+
       </div><!-- end card-body -->
     </div><!-- end card -->
   </div>
@@ -210,8 +145,15 @@
         <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 11 ? 'Spares' : 'FG'" readonly>
       </div>
       <div class="col-md-2">
-        <label class="form-label">UOM</label>
-        <input class="form-control form-control-sm" [value]="'Pcs'" readonly>
+        <label class="form-label">
+          UOM
+        </label>
+        <select class="form-select form-select-sm" [(ngModel)]="itemObj.uom" name="uom">
+          <option value="39">Kit</option>
+          <option value="40">Make</option>
+          <option value="42">PCS</option>
+          <option value="56">Unit</option>
+        </select>
       </div>
       <div class="col-md-2">
         <label class="form-label">HSN Code</label>
@@ -307,7 +249,7 @@
       </div>
       <div class="col-md-2">
         <label class="form-label">FAME || INCENTIVE</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.fame2amount" readonly>
+        <input class="form-control form-control-sm" [value]="selectedItem?.fame2amount">
       </div>
       <div class="col-md-2">
         <label class="form-label">OEM Model Name</label>
@@ -325,13 +267,18 @@
         <label class="form-label">Warranty Period</label>
         <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
-      <div class="col-md-2">
+       <div class="col-md-2">
         <label class="form-label">Month/Year</label>
-        <input class="form-control form-control-sm" [value]="'Month'" readonly>
+        <select class="form-select form-select-sm" name="durationType" [(ngModel)]="selectedItem.warrantyDurationType"
+          >
+          <option *ngFor="let durationType of durationTypes" [value]="durationType.id">
+            {{ durationType.title }}
+          </option>
+        </select>
       </div>
       <div class="col-md-2">
         <label class="form-label">Warranty Kms.</label>
-        <input class="form-control form-control-sm" [value]="'0'" readonly>
+        <input class="form-control form-control-sm" [value]="'0'">
       </div>
       <div class="col-md-2">
         <label class="form-label">Form-22 Header</label>
@@ -349,10 +296,21 @@
         <label class="form-label">No. Of Tyres</label>
         <input class="form-control form-control-sm" [value]="'0'" readonly>
       </div>
+      <div class="col-md-2">
+        <label class="form-label">Active</label><br>
+        <div class="form-check form-switch d-inline-block">
+          <input type="checkbox" class="form-check-input" name="status" #status="ngModel"
+            [(ngModel)]="selectedItem.status">
+          <label class="form-check-label small" for="status">
+            {{ selectedItem.status ? 'Yes' : 'No' }}
+          </label>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="modal-footer">
+    <button class="btn btn-primary btn-sm" (click)="updateItem()" [disabled]="!isSuperAdmin">Update</button>
     <button class="btn btn-light btn-sm" (click)="modal.close()">Close</button>
   </div>
 

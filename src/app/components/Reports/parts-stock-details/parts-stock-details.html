@@ -1,0 +1,148 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">
+        Parts Stock Details
+    </h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <!-- FILTER CARD -->
+        <div class="card">
+
+            <div class="card-header">
+                <h5 class="card-title mb-0">Filters</h5>
+            </div>
+
+            <div class="card-body">
+
+                <form #stockReportFilterForm="ngForm">
+
+                    <div class="row g-3">
+
+                        <!-- Dealer -->
+                        <div class="col-xl-3 col-lg-3 col-md-6">
+                            <label class="form-label">Dealer</label>
+                            <select class="form-select form-select-sm" #dealerCode="ngModel" name="dealerCode"
+                                [(ngModel)]="stockReportFilterFormData.selectedDealerCode" required>
+                                <option value="">-- Select --</option>
+                                <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
+                                    {{ dealer.dealerName }}
+                                </option>
+                            </select>
+                            @if (dealerCode.invalid && dealerCode.touched) {
+                            <small class="text-danger">
+                                Dealer is required
+                            </small>
+                            }
+                        </div>
+
+                        <!-- From Date -->
+                        <div class="col-xl-2 col-lg-2 col-md-6">
+                            <label class="form-label">From Date</label>
+                            <input type="date" class="form-control form-control-sm" #fromDate="ngModel" name="fromDate"
+                                [(ngModel)]="stockReportFilterFormData.fromDate">
+                        </div>
+
+                        <!-- To Date -->
+                        <div class="col-xl-2 col-lg-2 col-md-6">
+                            <label class="form-label">To Date</label>
+                            <input type="date" class="form-control form-control-sm" #toDate="ngModel" name="toDate"
+                                [(ngModel)]="stockReportFilterFormData.toDate">
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-xl-2 col-lg-2 col-md-12 align-items-end">
+                            <label class="form-label d-block">&nbsp;</label>
+                            <div class="d-flex gap-2 justify-content-start">
+                                <button type="button" class="btn btn-primary btn-sm"
+                                    (click)="onFilterRecords(stockReportFilterForm)">
+                                    Search
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm border" (click)="resetForm()">
+                                    Reset
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm" [ngbTooltip]="'Export To Excel'">
+                                    <i class="ri-file-excel-2-line"></i>
+                                </button>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+        <!-- REPORT TABLE CARD -->
+        <div class="card">
+            <div class="card-body">
+                <!-- Table -->
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-sm table-striped align-middle text-nowrap mb-0">
+
+                        <thead class="table-light sticky-top" style="z-index: 1;">
+                            <tr>
+                                <th>Sr No</th>
+                                <th>Dealer Code</th>
+                                <th>Location Code</th>
+                                <th>Location Name</th>
+                                <th>Part Code</th>
+                                <th>Part Description</th>
+                                <th>Item Type</th>
+                                <th>Pur.Qty</th>
+                                <th>MT</th>
+                                <th>Bal.Qty</th>
+                                <th>HSN Code</th>
+                                <th>Rate</th>
+                                <th>MRP</th>
+                                <th>GST</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <!-- No Data -->
+                            <tr>
+                                <td colspan="14" *ngIf="partsStockData.length === 0" class="text-center">
+                                    No data available
+                                </td>
+                            </tr>
+
+                            <!-- Data Rows -->
+                            <tr *ngFor="let item of partsStockData">
+                                <td>{{ item.srNo }}</td>
+                                <td>{{ item.vendorCode }}</td>
+                                <td>{{ item.dealerLocation }}</td>
+                                <td>{{ item.locname }}</td>
+                                <td>{{ item.itemcode }}</td>
+                                <td>{{ item.itemdesc }}</td>
+                                <td>{{ item.groupType }}</td>
+                                <td>{{ item.purchaseCount }}</td>
+                                <td>{{ item.saleCount }}</td>
+                                <td class="text-end">{{ item.batchClosingQty }}</td>
+                                <td>{{ item.hsncode }}</td>
+                                <td class="text-end">{{ item.dlrprice | number:'1.2-2' }}</td>
+                                <td class="text-end">{{ item.mrp | number:'1.2-2' }}</td>
+                                <td class="text-end">{{ item.gst }}%</td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="table-secondary">
+                            <tr>
+                                <td class="text-end" colspan="11"><strong>Total</strong></td>
+                                <td class="text-end"><strong>{{getTotalRate() | number:'1.2-2'}}</strong></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

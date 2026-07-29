@@ -3,39 +3,33 @@
     <div class="card-body">
 
         <!-- Search Section -->
-        <div class="row">
+        <div class="row g-2 align-items-end">
 
             <div class="col-md-3">
-
-                <label>Rate Type</label>
-
+                <label class="form-label">Rate Type</label>
                 <select class="form-select form-select-sm" [(ngModel)]="rateType">
-
-                    <option value="">
-                        --Select--
-                    </option>
-
-                    <option value="Modelwise Labour Rate">
-                        Modelwise Labour Rate
-                    </option>
-
-                    <option value="Partwise Labour Rate">
-                        Partwise Labour Rate
-                    </option>
-
+                    <option value="">--Select--</option>
+                    <option value="Modelwise Labour Rate">Modelwise Labour Rate</option>
+                    <option value="Partwise Labour Rate">Partwise Labour Rate</option>
                 </select>
-
+            </div>
+            <div class="col-md-3">
+                <label>Search any value</label>
+                <input type="text" class="form-control form-control-sm" name="search" [(ngModel)]="searchText">
             </div>
 
-            <div class="col-md-3 align-self-end">
-                <button class="btn btn-primary btn-sm" (click)="onSearch()">
+            <div class="col-auto d-flex gap-2">
+                <button type="button" class="btn btn-primary btn-sm" (click)="onSearch()">
                     <i class="ri-search-line"></i>
                 </button>
+
+                <button type="button" class="btn btn-success btn-sm" (click)="downloadExcel()" [disabled]="!rateType"
+                    title="Select a Rate Type to export">
+                    <i class="ri-file-excel-2-line align-bottom"></i> Export to Excel
+                </button>
             </div>
-
-        </div>
-
-        <!-- ===================================== -->
+        </div> 
+         <!-- ===================================== -->
         <!-- MODELWISE GRID -->
         <!-- ===================================== -->
 
@@ -49,19 +43,21 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Sr No.</th>
-                                <th>Labour Code</th>
-                                <th>Labour Description</th>
-                                <th>Labour Rate</th>
-                                <th>OemModel Name</th>
+                                <th class="sort" (click)="sort('labourCode')">Labour Code</th>
+                                <th class="sort" (click)="sort('labourDescription')">Labour Description</th>
+                                <th class="sort" (click)="sort('labourRate')">Labour Rate</th>
+                                <th class="sort" (click)="sort('oemModelName')">OemModel Name</th>
                                 <th>City Tier</th>
                                 <th>SGST</th>
                                 <th>CGST</th>
                                 <th>IGST</th>
-                                <th>HSN Code</th>
+                                <th class="sort" (click)="sort('hsnCode')">HSN Code</th>
                                 <th>Job Type</th>
                                 <th>Service Head</th>
                                 <th>Service Type</th>
-                                <th>Status</th>
+                                <th class="sort" (click)="sort('createdDate')">Created Date</th>
+                                <th class="sort" (click)="sort('effectiveDate')">Effective Date</th>
+                                <th class="sort" (click)="sort('isLabourRateActive')">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -80,6 +76,8 @@
                                 <td>{{item.jobTypeName}}</td>
                                 <td>{{item.serviceHeadName}}</td>
                                 <td>{{item.servicetypeName}}</td>
+                                <td>{{item.createdDate | date:'dd-MM-yyyy hh:mm a'}}</td>
+                                <td>{{item.effectiveDate | date:'dd-MM-yyyy hh:mm a'}}</td>
                                 <td>
                                     <span class="badge bg-success" *ngIf="item.isLabourRateActive">Active </span>
                                     <span class="badge bg-danger" *ngIf="!item.isLabourRateActive">Inactive </span>
@@ -120,23 +118,25 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Sr No.</th>
-                                <th>Labour Code</th>
-                                <th>Labour Name</th>
-                                <th>Part Code</th>
-                                <th>Part Description</th>
-                                <th>Model Name</th>
+                                <th class="sort" (click)="sort('labourCode')">Labour Code</th>
+                                <th class="sort" (click)="sort('labourName')">Labour Name</th>
+                                <th class="sort" (click)="sort('partCode')">Part Code</th>
+                                <th class="sort" (click)="sort('partDescription')">Part Description</th>
+                                <th class="sort" (click)="sort('oemModelName')">Model Name</th>
                                 <th>City Tier</th>
-                                <th>Labour Rate</th>
-                                <th>Labour Hrs</th>
+                                <th class="sort" (click)="sort('labourRate')">Labour Rate</th>
+                                <th class="sort" (click)="sort('labourHrs')">Labour Hrs</th>
                                 <th>CGST</th>
                                 <th>SGST</th>
                                 <th>IGST</th>
                                 <th>Job Type</th>
                                 <th>Service Head</th>
                                 <th>Service Type</th>
-                                <th>Dealer Code</th>
-                                <th>HSN Code</th>
-                                <th>Status</th>
+                                <th class="sort" (click)="sort('createdDate')">Created Date</th>
+                                <th class="sort" (click)="sort('effectiveDate')">Effective Date</th>
+                                <th class="sort" (click)="sort('dealerCode')">Dealer Code</th>
+                                <th class="sort" (click)="sort('hsnCode')">HSN Code</th>
+                                <th class="sort" (click)="sort('isActive')">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -157,6 +157,8 @@
                                 <td>{{item.jobTypeName}}</td>
                                 <td>{{item.serviceHeadName}}</td>
                                 <td>{{item.servicetypeName}}</td>
+                                <td>{{item.createdDate | date:'dd-MM-yyyy hh:mm a'}}</td>
+                                <td>{{item.effectiveDate | date:'dd-MM-yyyy hh:mm a'}}</td>
                                 <td>{{item.dealerCode}}</td>
                                 <td>{{item.hsnCode}}</td>
                                 <td>
@@ -222,6 +224,10 @@
                             [value]="selectedLabour.effectiveDate | date:'yyyy-MM-dd'">
                     </div>
                     <div class="col-md-4">
+                        <label>HSNCODE</label>
+                        <input type="number" class="form-control form-control-sm" [value]="selectedLabour.hsnCode">
+                    </div>
+                    <div class="col-md-4">
                         <label>OemModelName</label>
                         <select class="form-select form-select-sm" [(ngModel)]="selectedLabour.oemModelName">
                             <option value=""> -- Select Oemmodel name -- </option>
@@ -241,7 +247,7 @@
                                 Select Job Type
                             </option>
 
-                            <option *ngFor="let job of jobTypeList" [ngValue]="job.id">
+                            <option *ngFor="let job of jobTypeList" [ngValue]="job.jobTypeId">
 
                                 {{ job.jobtypeName }}
 
@@ -262,7 +268,7 @@
                                     Select Service Head
                                 </option>
 
-                                <option *ngFor="let sh of serviceHeadList" [ngValue]="sh.id">
+                                <option *ngFor="let sh of serviceHeadList" [ngValue]="sh.serviceHeadId">
 
                                     {{ sh.serviceHeadName }}
 
@@ -286,7 +292,7 @@
                                     Select Service Type
                                 </option>
 
-                                <option *ngFor="let st of serviceTypeList" [ngValue]="st.id">
+                                <option *ngFor="let st of serviceTypeList" [ngValue]="st.serviceTypeId">
 
                                     {{ st.serviceTypeName }}
 

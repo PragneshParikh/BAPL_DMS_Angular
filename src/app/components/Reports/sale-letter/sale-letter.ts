@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DealerMasterViewModel } from '../../../ViewModels/Dealer/DealerMasterViewModel';
 import { CommonModule } from '@angular/common';
 import { DealerService } from '../../../core/services/dealer-service';
@@ -33,11 +33,12 @@ export class SaleLetter implements OnInit {
     private dealerService: DealerService,
     private storageService: StorageService,
     private ledgerService: LedgerMasterService,
-    private vehicleSaleBillService: VehicleSaleBillService
+    private vehicleSaleBillService: VehicleSaleBillService,
+    private router:Router
   ) { }
 
   ngOnInit(): void {
-    this.getDealerDetails();
+    //this.getDealerDetails();
 
     this.saleBillId = this.route.snapshot.paramMap.get('saleBillNo') || '';
     if (this.saleBillId) {
@@ -45,11 +46,11 @@ export class SaleLetter implements OnInit {
     }
 
   }
-  getDealerDetails() {
-    const dealerCode = this.storageService.getDealerCode();
+  getDealerDetails(dealerCode:string) {
+ //   const dealerCode = this.storageService.getDealerCode();
 
-    this.dealerService.getDealers(dealerCode).subscribe((res: any) => {
-      this.dealer = res?.data?.[0] || null;
+    this.dealerService.getByDealerCode(dealerCode).subscribe((res: any) => {
+      this.dealer = res?.data|| null;
     });
 
   }
@@ -57,6 +58,7 @@ export class SaleLetter implements OnInit {
     this.vehicleSaleBillService.getVehicleSaleBillById(id).subscribe({
       next: (res) => {
         this.saleBill = res;
+        this.getDealerDetails(res.dealerCode);
         if (this.saleBill.erpStatus == "Invoiced") {
           this.isInvoiced = true;
         }
@@ -76,6 +78,12 @@ export class SaleLetter implements OnInit {
 
 
   }
+goBack(): void {
+  this.router.navigate(['/vehicle-sale-bill/edit', this.saleBillId]);
+}
 
+printInvoice(): void {
+  window.print();
+}
 
 }

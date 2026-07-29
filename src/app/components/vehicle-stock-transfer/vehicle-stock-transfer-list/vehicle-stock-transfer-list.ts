@@ -29,10 +29,12 @@ export class VehicleStockTransferList implements OnInit {
     fromDate: '',
     toDate: '',
     receivingLocation: '',
-    issuingLocation: ''
+    issuingLocation: '',
+    dealerCode: ''
   };
   selectedTransfer: any;
   expandedTransfer: any;
+  isSuperAdmin: boolean;
 
   constructor(
     private vehicleStockTransferService: VehicleStockTransferService,
@@ -44,13 +46,21 @@ export class VehicleStockTransferList implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    if (!this.isSuperAdmin) {
+      this.filter.dealerCode = this.storageService.getDealerCode();
+    }
     this.getLocations();
     this.loadTransfers();
   }
 
   getLocations() {
-
-    const dealerCode = this.storageService.getDealerCode();
+let dealerCode = '';
+    if (!this.isSuperAdmin) {
+      dealerCode = this.storageService.getDealerCode();
+    } else {
+      dealerCode = this.filter.dealerCode || '';
+    }
 
     this.locationMasterService.getLocationList(dealerCode)
       .subscribe({

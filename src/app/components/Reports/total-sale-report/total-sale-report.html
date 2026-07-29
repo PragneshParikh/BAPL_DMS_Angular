@@ -1,0 +1,194 @@
+<style>
+  .pivot-table thead th {
+    padding: 5px 10px !important;
+    font-size: 11px !important;
+    font-weight: 600;
+    vertical-align: middle;
+    text-align: center !important;
+  }
+  .pivot-table tbody td,
+  .pivot-table tfoot td {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    vertical-align: middle;
+    text-align: center !important;
+  }
+</style>
+
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">Total Sale Report (Dealer-wise Mapping)</h4>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+
+    <!-- FILTERS -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Filters</h5>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="filterForm">
+          <div class="row g-2 align-items-end">
+
+            <div class="col-xl-3 col-md-4" *ngIf="!isDealerUser">
+              <label class="form-label">Dealer</label>
+              <select formControlName="dealerCode" class="form-select form-select-sm">
+                <option value="">-- All Dealers --</option>
+                <option *ngFor="let d of dealerList" [value]="d.dealerCode">{{ d.dealerName }}</option>
+              </select>
+            </div>
+
+            <div class="col-xl-3 col-md-4">
+              <label class="form-label">From Date</label>
+              <input type="date" formControlName="fromDate" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-xl-3 col-md-4">
+              <label class="form-label">To Date</label>
+              <input type="date" formControlName="toDate" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-xl-3 col-md-4 d-flex gap-2">
+              <button type="button" class="btn btn-primary btn-sm" (click)="onSearch()">
+                <i class="ri-search-line me-1"></i>Search
+              </button>
+              <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">Reset</button>
+              <button type="button" class="btn btn-success btn-sm"
+                (click)="exportToCSV()" [disabled]="!rows.length" title="Export CSV">
+                <i class="ri-file-excel-2-line"></i>
+              </button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TOTALS CARDS -->
+    <div *ngIf="!isLoading && grandTotal" class="row g-2 mb-2">
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">Dealers</p>
+          <h6 class="mb-0 fw-semibold">{{ rows.length }}</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">Total Units</p>
+          <h6 class="mb-0">{{ grandTotal.totalUnitsSold }}</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">Cash / Credit</p>
+          <h6 class="mb-0">{{ grandTotal.cashCount }} / {{ grandTotal.creditCount }}</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">Taxable</p>
+          <h6 class="mb-0">₹{{ grandTotal.totalTaxableAmount | number:'1.0-0' }}</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">Final Amount</p>
+          <h6 class="mb-0 text-primary">₹{{ grandTotal.totalFinalAmount | number:'1.0-0' }}</h6>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card">
+      <div class="card-body p-0">
+
+        <div *ngIf="isLoading" class="text-center p-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="text-muted mt-2">Loading total sale report (dealer-wise)...</p>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading">
+          <table class="table table-bordered table-hover table-striped align-middle text-nowrap mb-0 pivot-table">
+            <thead class="table-dark">
+              <tr>
+                <th>Dealer Code</th>
+                <th>Dealer Name</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Total Units</th>
+                <th>Cash</th>
+                <th>Credit</th>
+                <th>Item Rate</th>
+                <th>Pre-GST Disc</th>
+                <th>Taxable</th>
+                <th>SGST</th>
+                <th>CGST</th>
+                <th>IGST</th>
+                <th>FAME II</th>
+                <th>Reg Amt</th>
+                <th>Insurance</th>
+                <th>Post-GST Disc</th>
+                <th>Final Amount</th>
+                <th>Total Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="rows.length === 0">
+                <td colspan="19" class="text-center text-muted py-4">
+                  No records found. Adjust filters and search again.
+                </td>
+              </tr>
+
+              <tr *ngFor="let row of rows">
+                <td>{{ row.dealerCode }}</td>
+                <td>{{ row.dealerName }}</td>
+                <td>{{ row.dealerCity }}</td>
+                <td>{{ row.dealerState }}</td>
+                <td>{{ row.totalUnitsSold }}</td>
+                <td>{{ row.cashCount }}</td>
+                <td>{{ row.creditCount }}</td>
+                <td>{{ row.totalItemRate | number:'1.2-2' }}</td>
+                <td>{{ row.totalPreGstDiscount | number:'1.2-2' }}</td>
+                <td>{{ row.totalTaxableAmount | number:'1.2-2' }}</td>
+                <td>{{ row.totalSgstAmount | number:'1.2-2' }}</td>
+                <td>{{ row.totalCgstAmount | number:'1.2-2' }}</td>
+                <td>{{ row.totalIgstAmount | number:'1.2-2' }}</td>
+                <td>{{ row.totalFameIIDiscount | number:'1.2-2' }}</td>
+                <td>{{ row.totalRegAmount | number:'1.2-2' }}</td>
+                <td>{{ row.totalInsuranceAmount | number:'1.2-2' }}</td>
+                <td>{{ row.totalPostGstDiscount | number:'1.2-2' }}</td>
+                <td class="fw-semibold">{{ row.totalFinalAmount | number:'1.2-2' }}</td>
+                <td>{{ row.totalAmount | number:'1.2-2' }}</td>
+              </tr>
+            </tbody>
+            <tfoot *ngIf="grandTotal">
+              <tr class="fw-semibold">
+                <td colspan="4">Grand Total</td>
+                <td>{{ grandTotal.totalUnitsSold }}</td>
+                <td>{{ grandTotal.cashCount }}</td>
+                <td>{{ grandTotal.creditCount }}</td>
+                <td>{{ grandTotal.totalItemRate | number:'1.2-2' }}</td>
+                <td>{{ grandTotal.totalPreGstDiscount | number:'1.2-2' }}</td>
+                <td>{{ grandTotal.totalTaxableAmount | number:'1.2-2' }}</td>
+                <td>{{ grandTotal.totalSgstAmount | number:'1.2-2' }}</td>
+                <td>{{ grandTotal.totalCgstAmount | number:'1.2-2' }}</td>
+                <td>{{ grandTotal.totalIgstAmount | number:'1.2-2' }}</td>
+                <td>{{ grandTotal.totalFameIIDiscount | number:'1.2-2' }}</td>
+                <td>{{ grandTotal.totalRegAmount | number:'1.2-2' }}</td>
+                <td>{{ grandTotal.totalInsuranceAmount | number:'1.2-2' }}</td>
+                <td>{{ grandTotal.totalPostGstDiscount | number:'1.2-2' }}</td>
+                <td>{{ grandTotal.totalFinalAmount | number:'1.2-2' }}</td>
+                <td>{{ grandTotal.totalAmount | number:'1.2-2' }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

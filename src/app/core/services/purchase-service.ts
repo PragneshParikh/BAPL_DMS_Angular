@@ -12,11 +12,27 @@ export class PurchaseService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getPOList(orderType: string, dealerCode?: string): Observable<any[]> {
+  getPOList(orderType: string, dealerCode?: string, pageIndex?: number, pageSize?: number, poFilterForm?: any): Observable<any[]> {
     let params = new HttpParams();
+
     if (dealerCode) {
       params = params.set('dealerCode', dealerCode);
     }
+
+    if (poFilterForm.dateFrom) {
+      params = params.set('dateFrom', poFilterForm.dateFrom);
+      params = params.set('dateTo', poFilterForm.dateTo);
+    }
+
+    if (poFilterForm.purchaseNo) {
+      params = params.set('purchaseNo', poFilterForm.purchaseNo);
+    }
+    if (poFilterForm.isSubmitted) {
+      params = params.set('isSubmitted', poFilterForm.isSubmitted);
+    }
+
+    params = params.set('pageIndex', pageIndex);
+    params = params.set('pageSize', pageSize);
     params = params.set('orderType', orderType);
 
     return this.httpClient.get<any[]>(`${this.baseUrl}/PurchaseOrder/Polist`, { params });
@@ -34,9 +50,10 @@ export class PurchaseService {
   }
 
   sendToERP(poModel: any): Observable<any> {
-    return this.httpClient.post<any>(`${this.erpBaseUrl}/BAPLSOHeader`, JSON.stringify(poModel), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    // return this.httpClient.post<any>(`${this.erpBaseUrl}/BAPLSOHeader`, JSON.stringify(poModel), {
+    //   headers: { 'Content-Type': 'application/json' },
+    // });
+    return this.httpClient.post(`${this.baseUrl}/PurchaseOrder/SendToERP`, poModel);
   }
 
   getPOByNumber(poNumber: string): Observable<any> {
@@ -64,7 +81,14 @@ export class PurchaseService {
   //   return this.httpClient.post<any>(`${this.baseUrl}/PurchaseOrder/parts/create`, poModel);
   // }
 
-  getPartsPOList(): Observable<any> {
-    return this.httpClient.get<any>(`${this.baseUrl}/PurchaseOrder/parts/Polist`);
+  // getPartsPOList(): Observable<any> {
+  //   return this.httpClient.get<any>(`${this.baseUrl}/PurchaseOrder/parts/Polist`);
+  // }
+  getItemDetailsByItemCode(itemCode: string, dealerCode: string): Observable<any> {
+    const params = new HttpParams()
+      .set('itemCode', itemCode)
+      .set('dealerCode', dealerCode);
+
+    return this.httpClient.get<any>(`${this.baseUrl}/PurchaseOrder/GetItemDetailsByItemCode`, { params });
   }
 }

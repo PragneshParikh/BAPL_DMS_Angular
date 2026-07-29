@@ -5,8 +5,9 @@ export interface VehicleSaleListChasisResponse {
   itemCode: string;
   itemName: string;
   itemColor: string;
-
+  isD2D?: boolean;
   mfgYear?: number;
+  repairBillStatus:string;
 
   //  Battery & Components
   batteryNo?: string;
@@ -55,7 +56,7 @@ export interface VehicleSaleListChasisResponse {
   convertorNo?: string;
   chargerNoFull?: string;
   controllerNoFull?: string;
-
+motorNo?:string;
   key?: string;
   book?: string;
 
@@ -68,4 +69,5 @@ export interface VehicleSaleListChasisResponse {
   fameIIAmnt?: number;
   postGstDisc?: number;
   proformaCreated?: string;
+  locationCode?:string;
 }

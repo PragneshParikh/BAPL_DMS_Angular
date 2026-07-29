@@ -1,0 +1,55 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">{{ isEditMode ? 'Edit Department' : 'Add Department' }}</h4>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card">
+      <div class="card-body">
+        <form #deptForm="ngForm" (ngSubmit)="onSubmit(deptForm)">
+          <div class="row mb-3">
+
+            <!-- Department Name -->
+            <div class="col-md-4">
+              <label>Department Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control form-control-sm"
+                [(ngModel)]="formData.departmentName" name="departmentName"
+                (input)="checkDuplicateDepartment()" required>
+              <div *ngIf="departmentExists" class="text-danger mt-1">
+                Department already exists
+              </div>
+            </div>
+
+            <!-- Abbreviation -->
+            <div class="col-md-4">
+              <label>Abbreviation</label>
+              <input type="text" class="form-control form-control-sm"
+                [(ngModel)]="formData.abbreviation" name="abbreviation">
+            </div>
+
+            <!-- Active -->
+            <div class="col-md-4">
+              <label>Active</label><br>
+              <div class="form-check form-switch mt-1">
+                <input class="form-check-input" type="checkbox"
+                  [(ngModel)]="formData.isActive" name="isActive">
+                <label class="form-check-label">
+                  {{ formData.isActive ? 'Active' : 'Inactive' }}
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-md-12 d-flex justify-content-end gap-2">
+              <button type="submit" class="btn btn-primary btn-sm"
+                [disabled]="deptForm.invalid || departmentExists">Save</button>
+              <button type="button" class="btn btn-light btn-sm" (click)="onCancel()">Close</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

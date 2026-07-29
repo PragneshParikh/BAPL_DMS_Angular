@@ -1,0 +1,153 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">
+        Parts Inward Details
+    </h4>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <!-- FILTER CARD -->
+        <div class="card">
+
+            <div class="card-header">
+                <h5 class="card-title mb-0">Filters</h5>
+            </div>
+
+            <div class="card-body">
+
+                <form #partInwardfilterForm="ngForm">
+
+                    <div class="row g-3">
+
+                        <!-- Dealer -->
+                        <div class="col-xl-3 col-lg-3 col-md-6">
+                            <label class="form-label">Dealer</label>
+                            <select class="form-select form-select-sm" #dealerCode="ngModel" name="dealerCode"
+                                [(ngModel)]="filterFormData.selectedDealerCode" required>
+                                <option value="">-- Select --</option>
+                                <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
+                                    {{ dealer.dealerName }}
+                                </option>
+                            </select>
+                            @if (dealerCode.invalid && dealerCode.touched) {
+                            <small class="text-danger">
+                                Dealer is required
+                            </small>
+                            }
+                        </div>
+
+                        <!-- From Date -->
+                        <div class="col-xl-2 col-lg-2 col-md-6">
+                            <label class="form-label">From Date</label>
+                            <input type="date" class="form-control form-control-sm" #fromDate="ngModel" name="fromDate"
+                                [(ngModel)]="filterFormData.fromDate" required>
+                            @if (fromDate.invalid && fromDate.touched) {
+                            <small class="text-danger">
+                                Date is required
+                            </small>
+                            }
+                        </div>
+
+                        <!-- To Date -->
+                        <div class="col-xl-2 col-lg-2 col-md-6">
+                            <label class="form-label">To Date</label>
+                            <input type="date" class="form-control form-control-sm" #toDate="ngModel" name="toDate"
+                                [(ngModel)]="filterFormData.toDate" required>
+                            @if (toDate.invalid && toDate.touched) {
+                            <small class="text-danger">
+                                Date is required
+                            </small>
+                            }
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-xl-2 col-lg-2 col-md-12 align-items-end">
+                            <label class="form-label d-block">&nbsp;</label>
+                            <div class="d-flex gap-2 justify-content-start">
+                                <button type="button" class="btn btn-primary btn-sm" (click)="onFilterRecords()">
+                                    Search
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm " (click)="resetForm()">
+                                    Reset
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm" [ngbTooltip]="'Export To Excel'"
+                                    (click)="downloadExcel()">
+                                    <i class="ri-file-excel-2-line"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+        <!-- REPORT TABLE CARD -->
+        <div class="card">
+            <div class="card-body">
+                <!-- Table -->
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-sm table-striped align-middle text-nowrap mb-0">
+
+                        <thead class="table-light sticky-top" style="z-index: 1;">
+                            <tr>
+                                <th>Sr No</th>
+                                <th>Invoice No</th>
+                                <th>Invoice Date</th>
+                                <th>Dealer Code</th>
+                                <th>Location Code</th>
+                                <th>Location Name</th>
+                                <th>Accepted</th>
+                                <th>Party Name</th>
+                                <th>Total Amount</th>
+                                <th>Total Qty</th>
+                                <th>GST</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <!-- No Data -->
+                            <tr>
+                                <td colspan="14" *ngIf="partsInwardData.length === 0" class="text-center">
+                                    No data available
+                                </td>
+                            </tr>
+
+                            <!-- Data Rows -->
+                            <tr *ngFor="let item of partsInwardData" (dblclick)="goToInvoice(item)"
+                                style="cursor: pointer;">
+                                <td>{{ item.srNo }}</td>
+                                <td>{{ item.invoiceNo }}</td>
+                                <td>{{ item.invoiceDate | date:'dd-MM-yyyy'}}</td>
+                                <td>{{ item.dealerCode }}</td>
+                                <td>{{ item.locationCode }}</td>
+                                <td>{{ item.locationName }}</td>
+                                <td>{{ item.isAccepted }}</td>
+                                <td>{{ item.partyName }}</td>
+                                <td class="text-end">{{ item.totalAmount }}</td>
+                                <td class="text-end">{{ item.totalQty }}</td>
+                                <td class="text-end">{{ item.gst }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="col-sm-12 col-md-12 mt-2">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+                        <ngb-pagination [collectionSize]="partsInwardData.length" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="onPageChange($event)" [boundaryLinks]="true" [maxSize]="10">
+                        </ngb-pagination>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

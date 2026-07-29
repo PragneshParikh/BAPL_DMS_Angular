@@ -6,24 +6,28 @@
     <!-- SEARCH CARD -->
     <div class="card">
         <div class="card-body">
-            <form #poFilterForm="ngForm" (ngSubmit)="onSearch()">
+            <form #poFilterForm="ngForm" (ngSubmit)="loadPOList()">
                 <div class="row g-2 align-items-end">
                     <div class="col-md-2">
                         <label class="form-label">Purchase No</label>
                         <input type="text" class="form-control form-control-sm" placeholder="Enter No."
-                            [(ngModel)]="purchaseNo" name="purchaseNo">
+                            [(ngModel)]="poFilterData.purchaseNo" name="purchaseNo">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Date from</label>
-                        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateFrom" name="dateFrom">
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="poFilterData.dateFrom"
+                            name="dateFrom">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Date to</label>
-                        <input type="date" class="form-control form-control-sm " [(ngModel)]="dateTo" name="dateTo">
+                        <input type="date" class="form-control form-control-sm " [(ngModel)]="poFilterData.dateTo"
+                            name="dateTo">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Submitted To Erp</label>
-                        <select class="form-select form-select-sm" [(ngModel)]="isSubmitted" name="isSubmitted">
+                        <select class="form-select form-select-sm" [(ngModel)]="poFilterData.isSubmitted"
+                            name="isSubmitted">
+                            <option value=""> --Select-- </option>
                             <option *ngFor="let status of poStatuses" [value]="status.value">
                                 {{status.name}}
                             </option>
@@ -52,24 +56,24 @@
         <div class="card mt-4">
             <div class="card-body">
                 <div class="table-responsive border rounded">
-                    <table
-                        class="table table-bordered table-hover table-striped align-middle table-nowrap mb-0 table-sm">
+                    <table class="table table-sm table-bordered text-nowrap mb-0" style="min-width: 1180px;">
                         <thead>
-                            <tr style="background-color:#747CA0 !important;color:white; cursor: pointer;">
-                                <th> S.No </th>
-                                <th class="sort" (click)="sort('purchaseNo')"> Purchase No </th>
-                                <th class="sort" (click)="sort('date')"> Date </th>
-                                <th class="sort" (click)="sort('transactionType')"> Trans Type </th>
-                                <th class="sort" (click)="sort('partyName')"> Party Name </th>
-                                <th> Location </th>
-                                <th> Order Amount </th>
-                                <th class="sort" (click)="sort('isSubmitted')"> IsSubmittedToErp </th>
+                            <tr style="cursor: pointer;">
+                                <th style="width:60px"> S.No </th>
+                                <th class="sort" (click)="sort('purchaseNo')" style="width:80px"> Purchase No </th>
+                                <th class="sort" (click)="sort('date')" style="width:80px"> Date </th>
+                                <th class="sort" (click)="sort('transactionType')" style="width:120px"> Trans Type </th>
+                                <th class="sort" (click)="sort('partyName')" style="width:150px"> Party Name </th>
+                                <th style="width:120px"> Location </th>
+                                <th style="width:120px"> Order Amount </th>
+                                <th class="sort" (click)="sort('isSubmitted')" style="width:120px"> IsSubmittedToErp
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr *ngFor="let po of pagedPurchaseOrders; let i=index" (dblclick)="editPO(po)"
                                 style="cursor: pointer;" class="hover-row">
-                                <td>{{ (page - 1) * pageSize + i + 1 }}.</td>
+                                <td>{{ (page - 1) * pageSize + i + 1 }}</td>
                                 <td>{{po.poNumber}}</td>
                                 <td>{{po.poDate | date : 'dd-MM-yyyy'}}</td>
                                 <td>{{po.transactionType}}</td>
@@ -83,8 +87,8 @@
                                     </span>
                                 </td>
                             </tr>
-                            <tr *ngIf="pagedPurchaseOrders.length == 0">
-                                <td colspan="13" class="text-center p-3">No Records Found</td>
+                            <tr *ngIf="totalRecords == 0">
+                                <td colspan="13" class="text-center p-2">No Records Found</td>
                             </tr>
                         </tbody>
                     </table>
@@ -93,8 +97,8 @@
                 <!-- Pagination -->
                 <div class="col-sm-12 col-md-12 mt-2">
                     <div class="text-md-right float-md-end gridjs-pagination">
-                        <ngb-pagination [collectionSize]="purchaseOrders.length" [(page)]="page" [pageSize]="pageSize"
-                            (pageChange)="refreshPage()" [maxSize]="5" [boundaryLinks]="true">
+                        <ngb-pagination [collectionSize]="totalRecords" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="pageChange($event)" [maxSize]="5" [boundaryLinks]="true">
                         </ngb-pagination>
                     </div>
                 </div>

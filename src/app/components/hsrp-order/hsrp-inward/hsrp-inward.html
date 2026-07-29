@@ -153,6 +153,8 @@
                                         [term]="searchTerm"></ngb-highlight></td>
 
                                 <td><ngb-highlight [result]="item.customerName || '-'"
+                                        [term]="searchTerm"></ngb-highlight><br>
+                                    <ngb-highlight [result]="item.customerNumber || '-'"
                                         [term]="searchTerm"></ngb-highlight></td>
 
                                 <td><ngb-highlight [result]="item.chassisNo || '-'"
@@ -218,9 +220,9 @@
 
                                     <select class="form-select form-select-sm" [(ngModel)]="item.inwardStatus">
 
-                                        <option value=null>Pending</option>
+                                        <option value=null disabled>Pending</option>
                                         <option value="Received">Received</option>
-
+                                        <option value="Failed" disabled>Failed</option>
                                     </select>
 
                                 </td>

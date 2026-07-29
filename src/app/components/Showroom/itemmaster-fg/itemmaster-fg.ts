@@ -3,24 +3,111 @@ import { CommonModule } from '@angular/common';
 import { ItemMasterService } from '../../../core/services/item-master-service';
 import { NgbHighlight, NgbModal, NgbPaginationModule, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { LoaderService } from '../../../core/services/loader';
-import { error } from 'console';
-import { BatteryType, BatteryVoltage } from '../../../constant';
-import { NewDesignPrototype } from '../../../dialogs/new-design-prototype/new-design-prototype';
+import { BatteryType, BatteryVoltage, DurationTypes } from '../../../constant';
+import { ToastService } from '../../../shared/toaster/toast-service';
+import { StorageService } from '../../../core/services/storage';
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-itemmaster-fg',
   standalone: true,
-  imports: [CommonModule, NgbHighlight, NgbPaginationModule, NgbTooltipModule],
+  imports: [CommonModule, FormsModule, NgbPaginationModule, NgbTooltipModule],
   templateUrl: './itemmaster-fg.html',
   styleUrl: './itemmaster-fg.scss',
 })
 export class ItemmasterFG implements OnInit {
+  durationTypes = DurationTypes;
+  isSuperAdmin: boolean;
+  // ===============================
+  // Empty Object
+  // ===============================
+
+  getEmptyItem() {
+
+    return {
+
+      id: 0,
+
+      itemtype: 2,
+
+      itemname: '',
+      itemdesc: '',
+      itemcode: '',
+
+      iselectric: false,
+
+      oemPartNo: '',
+      oemPartDescription: '',
+
+      grpidno: 1,
+      oemModelId: null,
+
+      uom: '',
+
+      hsncode: '',
+      fame2amount:0,
+
+      taxPercent: 0,
+
+      cgst: 0,
+      sgst: 0,
+      igst: 0,
+      ugst: 0,
+
+      gstCess: 0,
+      tcs: 0,
+
+      itemCategory: 'Parts',
+
+      hrsTat: 0,
+
+      dlrprice: 0,
+      itemMrp: 0,
+      oemMrp: 0,
+
+      ipurrate: 0,
+      custprice: 0,
+
+      margin: 0,
+      partLabour: 0,
+
+      reOrderQty: 0,
+
+      minBillQty: 0,
+      minOrderQty: 0,
+
+      warrantyPeriod: 0,
+      warrantyDurationType: 1,
+      warrantyKms: 0,
+
+      isWarrantyApproval: false,
+
+      vorRate: 0,
+      isVOR: false,
+
+      remarks: '',
+
+      isExempted: false,
+      isToolkitFirstAid: false,
+      isStockRequired: false,
+      isHelmet: false,
+      isInventory: false,
+      isInEligibleInput: false,
+      dealerCode: '',
+      status: false,
+      supplierId: 0
+
+    };
+
+  }
+
   griddata: any[] = [];
   filteredData: any[] = [];    // sorted data
   pagedData: any[] = [];
   selectedItem: any;      // data for current page
   searchTerm: string = '';
+  itemObj: any = this.getEmptyItem();
 
   // pagination
   page = 1;
@@ -33,12 +120,15 @@ export class ItemmasterFG implements OnInit {
   // RxJS subject for auto-search
   private searchSubject: Subject<string> = new Subject();
   constructor(private itemService: ItemMasterService,
+    private storageService: StorageService,
+    private toaster: ToastService,
     private loader: LoaderService,
     private modalService: NgbModal
   ) { }
 
 
   ngOnInit() {
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     this.loadItems();
   }
 
@@ -142,22 +232,31 @@ export class ItemmasterFG implements OnInit {
   }
 
   openDetails(modal: any, item: any) {
-    // this.selectedItem = item;   // ✅ IMPORTANT
-    // this.modalService.open(modal, { size: 'xl' });
+    this.selectedItem = item;   // ✅ IMPORTANT
+    this.modalService.open(modal, { size: 'xl' });
+  }
 
-    const modalRef = this.modalService.open(NewDesignPrototype, {
-      size: 'xl',
-      backdrop: 'static',
-      keyboard: false
-    });
-
-    modalRef.result.then(
-      (result) => {
-        alert('Result ok');
+  updateItem() {
+    this.loader.show();
+    this.selectedItem.dealerCode = this.storageService.getDealerCode();
+    this.selectedItem.uom = this.itemObj.uom;
+    this.selectedItem.warrantyDurationType = this.itemObj.warrantyDurationType;
+    this.selectedItem.fame2amount = this.itemObj.fame2amount;
+    this.itemObj.status = this.selectedItem.status
+    this.selectedItem.updatedBy = this.storageService.getUserId();
+    this.selectedItem.updatedDate = new Date();
+    this.itemService.updateItem(this.selectedItem).subscribe({
+      next: (res) => {
+        this.loader.hide();
+        this.loadItems();
+        this.modalService.dismissAll();
+        this.toaster.show('Item updated successfully', { classname: 'bg-success text-light', delay: 5000 });
       },
-      (reason) => {
-        console.log('Modal dismissed:', reason);
+      error: (err) => {
+        console.error(err);
+        this.loader.hide();
+        this.toaster.show('something went wrong', { classname: 'bg-danger text-light', delay: 5000 });
       }
-    );
+    });
   }
 }

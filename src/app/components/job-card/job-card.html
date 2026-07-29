@@ -3,10 +3,12 @@
     <h5 class="mb-0">Job Card List</h5>
 </div>
 <!--End-->
+
 <!-- Filter Card -->
 <div class="card">
     <div class="card-body">
         <div class="row g-3 align-items-end">
+
             <!-- Date From -->
             <div class="col-md-3">
                 <label class="form-label">Date From</label>
@@ -20,6 +22,8 @@
                 <input type="date" class="form-control form-control-sm" [(ngModel)]="searchModel.toDate"
                     (change)="search()">
             </div>
+
+            <!-- Service Location -->
             <div class="col-md-3">
                 <label class="form-label">Service Location</label>
                 <select class="form-select form-select-sm text-truncate" [(ngModel)]="searchModel.serviceLocation"
@@ -30,100 +34,65 @@
                     </option>
                 </select>
             </div>
+
+            <!-- Job No -->
             <div class="col-md-3">
                 <label class="form-label">Job No.</label>
                 <input type="text" class="form-control form-control-sm" [(ngModel)]="searchModel.jobNo"
                     (ngModelChange)="onSearchChange()" placeholder="Enter Job No." />
             </div>
-            <!-- <div class="col-md-3">
-                <label class="form-lael">Service Type</label>
-                <div *ngIf="serviceTypeList.length > 1; else singleType">
-                    <select class="form-select form-select-sm" [(ngModel)]="selectedServiceType">
 
-                        <option value="">Select Service Type</option>
-                        <option *ngFor="let st of serviceTypeList" [ngValue]="st.serviceTypeId">
-                            {{ st.serviceTypeName }}
-                        </option>
-                    </select>
-                </div>
-            </div> -->
+            <!-- Customer Name -->
             <div class="col-md-3">
                 <label class="form-label">Customer Name</label>
                 <input type="text" class="form-control form-control-sm" [(ngModel)]="searchModel.customerName"
                     (ngModelChange)="onSearchChange()" placeholder="Enter Customer Name" />
             </div>
-            <!-- <div class="col-md-2">
-                            <label class="form-label">Mobile No.</label>
-                            <input type="text" class="form-control form-control-sm" value=""
-                                placeholder="Enter Mobile No." />
-                        </div> -->
-            <!-- <div class="col-md-2">
-                            <label class="form-lael">Job Source</label>
-                            <select class="form-select form-select-sm text-truncate" (change)="onJobSource($event)">
-                                <option value="">Select Job Source</option>
-                               <option *ngFor="let jobsource of JobSource" [value]="jobsource.value">
-                                    {{ jobsource.name }}
-                                </option>
-                            </select>
-                        </div> -->
-            <div class="col-md-3">
+
+            <!-- Chassis No -->
+            <div class="col-md-3 position-relative">
                 <label class="form-label">Chassis No.</label>
-                <select class="form-select form-select-sm" (change)="search()" [(ngModel)]="searchModel.chassisNo">
-                    <option value="">Select Chassis</option>
-                    <option *ngFor="let item of chassisList" [value]="item.chassisNumber">
-                        {{ item.chassisNumber }}
-                    </option>
-                </select>
+                <input type="text" class="form-control form-control-sm" placeholder="Enter Chassis No."
+                    [(ngModel)]="searchModel.chassisNo" (input)="filterChassis()" (blur)="filteredChassisList=[]"
+                    (focus)="filterChassis()" (blur)="hideDropdown()">
+               
+
+                <div class="dropdown-menu show w-100" *ngIf="filteredChassisList.length > 0">
+                    <button type="button" class="dropdown-item" *ngFor="let item of filteredChassisList"
+                        (mousedown)="selectChassis(item)">
+                        {{ item }}
+                    </button>
+                </div>
             </div>
-            <!-- <div class="col-md-2">
-                            <label class="form-label">Regn. No.</label>
-                            <input type="text" class="form-control form-control-sm" value=""
-                                placeholder="Enter Regn. No." />
-                        </div> -->
-            <!-- <div class="col-md-2">
-                            <label class="form-lael"> Complaints</label>
-                            <select class="form-select form-select-sm text-truncate" (change)="onComplaints($event)">
-                                <option value="">Select Complaint Type</option>
-                                <option value="Only Complaints">Only Complaints</option>
-                                <option value="Complaints with Repeated Job">Complaints with Repeated Job</option>
-                            </select>
-                        </div> -->
-            <!-- <div class="col-md-2">
-                            <label class="form-lael">View Jobs</label>
-                            <select class="form-select form-select-sm text-truncate" (change)="onViewJobs($event)">
-                                <option value="">Select View Jobs</option>
-                                <option value="All">All</option>
-                            </select>
-                        </div> -->
-            <!-- <div class="col-md-2">
-                            <label class="form-label">Manual job No.</label>
-                            <input type="text" class="form-control form-control-sm" value="" />
-                        </div> -->
-            <!-- Search Button -->
-            <div class="col-md-1 d-grid">
+
+             <!-- Register No -->
+            <div class="col-md-3">
+                <label class="form-label">Register No.</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="searchModel.registerNo"
+                    (ngModelChange)="onSearchChange()" placeholder="Enter Register No." />
+            </div>
+
+
+            <!-- Action Buttons -->
+            <div class="col-md-12 d-flex justify-content-end gap-2 mt-2">
                 <button class="btn btn-sm btn-primary" (click)="search()">
                     Search
                 </button>
-            </div>
-            <!--End search button-->
-            <!-- Download Excel Button (click)="downloadItemMasterExcel()" -->
-            <div class="col-md-1 d-grid">
+
                 <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'">
-                    <i class="ri-file-excel-2-line"></i>
+                    <i class="ri-file-excel-2-line"></i> Excel
                 </button>
-            </div>
-            <!--End Excel button-->
-            <!-- Add Button-->
-            <div class="col-md-1 d-grid">
+
                 <button class="btn btn-primary btn-sm" (click)="onNavigate()">
                     Add
                 </button>
             </div>
-            <!--End add button-->
+            <!--End action buttons-->
+
         </div>
     </div>
 </div>
-<!--End-->
+<!--End Filter Card-->
 
 <!--Table Card-->
 <div class="card">
@@ -146,22 +115,30 @@
                         <th>VehicleName</th>
                         <th>ServiceHead / Type</th>
                         <th>CustomerName / MobileNo</th>
+                        <th>Created Date</th>
+                        <th>Updated Date</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    <tr *ngFor="let item of jobCardList; let i = index">
+                    <tr *ngFor="let item of pagedData; let i = index" (dblclick)="onEdit(item)">
 
                         <!-- SR NO -->
                         <td>{{ i + 1 }}</td>
 
                         <!-- ACTION -->
                         <td>
-                            <button class="btn btn-sm btn-soft-primary" (click)="onEdit(item)"><i
-                                    class="ri-pencil-fill fs-12"></i></button>
-                            <button class="btn btn-sm btn-soft-danger" [disabled]="currentUserRole !== 'SuperAdmin'"
-                                title="Only SuperAdmin can delete" (click)="deleteJobCard(item.id)">
+                            <button class="btn btn-sm btn-soft-primary" (click)="onEdit(item)">
+                                <i class="ri-pencil-fill fs-12"></i>
+                            </button>
+                            <button class="btn btn-sm btn-soft-danger" 
+                                title="Only SuperAdmin can delete" (click)="deleteJobCard(item.jobCardHeader.id)" [disabled]="!this.isSuperAdmin">
                                 <i class="ri-delete-bin-fill fs-12"></i>
+                                <!-- [disabled]="currentUserRole !== 'SuperAdmin'" -->
+                            </button>
+                            <button class="btn btn-sm btn-soft-success" title="Print Invoice"
+                                (click)="printJobCard(item)">
+                                <i class="ri-printer-line fs-12"></i>
                             </button>
                         </td>
 
@@ -172,10 +149,9 @@
                         </td>
 
                         <!-- Job Status -->
-                        <td>{{ item.jobStatus }} <br>
-                            {{ item.jobCardHeader.invoiceNo }}
+                        <td>{{ item.jobCardHeader.jobStatus }}<br>
+                            <!-- {{ item.jobCardHeader.invoiceNo }} -->
                         </td>
-
 
                         <!-- Manual Job No -->
                         <td>{{ item.jobCardHeader.manualjobNo }}</td>
@@ -201,8 +177,8 @@
                             <b>C:</b> {{ item.jobCardCustomer?.chassisNo || '-' }}
                         </td>
 
-                        <!-- Vehicle Type -->
-                        <td>{{ item.jobCardCustomer?.modelName || '-'  }}</td>
+                        <!-- Vehicle Name -->
+                        <td>{{ item.jobCardCustomer?.modelName || '-' }}</td>
 
                         <!-- Service Head / Type -->
                         <td>
@@ -215,11 +191,13 @@
                             {{ item.jobCardCustomer?.customerName || '-' }} <br>
                             {{ item.jobCardCustomer?.customerMobile || '-' }}
                         </td>
+                        <td>{{item.jobCardHeader.createdDate | date:'dd-MM-yyyy hh:mm a'}}</td>
+                        <td>{{item.jobCardHeader.updatedDate | date:'dd-MM-yyyy hh:mm a'}}</td>
 
                     </tr>
 
                     <!-- No Data -->
-                    <tr *ngIf="jobCardList.length === 0">
+                    <tr *ngIf="pagedData.length === 0">
                         <td colspan="13" class="text-center text-muted py-3">
                             No Data Available
                         </td>
@@ -227,6 +205,7 @@
                 </tbody>
             </table>
         </div>
+
         <!-- PAGINATION -->
         <div class="d-flex justify-content-end p-2">
             <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
@@ -236,5 +215,6 @@
         <!--End Pagination-->
     </div>
 </div>
-<!--End-->
+<!--End Table Card-->
+
 <router-outlet></router-outlet>

@@ -15,3 +15,50 @@
         top: 0px;
     }
 }
+.position-relative {
+  position: relative;
+}
+
+.dropdown-menu {
+  max-height: 250px;
+  overflow-y: auto;
+  display: block;
+  position: absolute;
+  width: 100%;
+  z-index: 1000;
+}
+
+.dropdown-item {
+  cursor: pointer;
+}
+
+.chassis-popup {
+    position: absolute;
+    top: 100%;          /* show below button */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+
+    min-width: 450px;
+    max-width: 550px;
+    padding: 6px;
+}
+
+.chassis-popup table {
+    margin-bottom: 0;
+    font-size: 12px;
+}
+
+.chassis-popup th,
+.chassis-popup td {
+    padding: 4px 8px !important;
+}
+
+.fixed-table {
+    overflow: visible !important;
+}

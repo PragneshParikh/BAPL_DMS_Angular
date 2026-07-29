@@ -12,17 +12,31 @@
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
 
-                            <div class="text-muted">
-                                Total Record(s): {{ collectionSize }}
+
+                            <div *ngIf="isSuperAdmin" class="col-md-2 mb-0">
+                                <label class="form-label form-label-sm">Select Dealer Code</label>
+
+                                <ng-select class="ng-select-sm" style="width:180px;" [items]="dealers"
+                                    bindLabel="dealerName" bindValue="dealerCode" [(ngModel)]="selectedDealerCode"
+                                    [searchable]="true" [clearable]="false" placeholder="Select Dealer Code"
+                                    [searchFn]="customSearchFn" (change)="onDealerChange()">
+
+                                    <ng-template ng-option-tmp let-item="item">
+                                        {{ item.dealerCode }} - {{ item.dealerName }}
+                                    </ng-template>
+
+                                </ng-select>
                             </div>
 
-                            <div class="d-flex align-items-center gap-2">
+
+                            <div class="d-flex align-items-end justify-content-end gap-2 w-100">
 
                                 <button class="btn btn-sm btn-primary" (click)="newLedger()">
                                     Add
                                 </button>
 
-                                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'">
+                                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                                    (click)="downloadExcel()">
                                     <i class="ri-file-excel-2-line"></i>
                                 </button>
 
@@ -40,33 +54,51 @@
 
                         <div class="table-responsive">
 
-                            <table class="table table-hover table-bordered mb-0 table-sm">
+                            <table class="table table-hover  table-bordered mb-0 table-sm" style="font-size: 12px;">
                                 <thead class="table-light">
                                     <tr>
+                                        <th>Sl No.</th>
                                         <th class="sort" (click)="onSort('ledgerType')">
                                             Ledger Type</th>
                                         <th class="sort" (click)="onSort('ledgerName')">
                                             Ledger
                                             Name</th>
+                                        <ng-container *ngIf="isSuperAdmin">
+                                            <th class="sort" (click)="onSort('dealerCode')">
+                                                Dealer Code
+                                            </th>
+
+                                            <th class="sort" (click)="onSort('dealerName')">
+                                                Dealer Name
+                                            </th>
+                                        </ng-container>
                                         <th class="sort" (click)="onSort('mobileNumber')">
                                             Mobile No.</th>
                                         <th class="sort" (click)="onSort('email')">Email
                                         </th>
                                         <th class="sort" (click)="onSort('city')">City</th>
                                         <th class="sort" (click)="onSort('state')">State
+                                        <th class="sort" (click)="onSort('createdDate')">Created Date
+                                        <th class="sort" (click)="onSort('updatedDate')">Updated Date
                                         </th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
-                                    <tr *ngFor="let customer of dataSource; trackBy: trackByCustomer" class="table-row"
-                                        (dblclick)="onCustomerClick(customer)">
+                                    <tr *ngFor="let customer of dataSource; let i = index; trackBy: trackByCustomer"
+                                        class="table-row" (dblclick)="onCustomerClick(customer)">
+                                        <td>{{ (page - 1) * pageSize + i + 1 }}</td>
                                         <td>{{ customer?.ledgerType }}</td>
                                         <td>{{ customer?.ledgerName }}</td>
+
+                                        <td *ngIf="isSuperAdmin">{{ customer?.dealerCode }}</td>
+                                        <td *ngIf="isSuperAdmin">{{ customer?.dealerName }}</td>
                                         <td>{{ customer?.mobileNumber }}</td>
                                         <td>{{ customer?.eMail }}</td>
                                         <td>{{ customer?.cityName }}</td>
                                         <td>{{ customer?.stateName }}</td>
+                                        <td>{{ customer?.createdDate | date }}</td>
+                                        <td>{{ customer?.updatedDate | date }}</td>
                                     </tr>
 
                                     <!-- No Data -->

@@ -1,0 +1,306 @@
+<div class="card shadow-sm">
+
+    <!-- Header -->
+    <div class="card-header bg-primary text-white py-2">
+        <div class="d-flex justify-content-between align-items-center">
+
+            <div>
+                <i class="bi bi-truck"></i>
+                <strong>Vehicle Opening Stock</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        <!-- Model -->
+        <div class="border rounded p-3 mb-3">
+
+            <div class="row">
+                <div class="row g-2">
+
+                    <div class="col-md-2">
+                        <label class="form-label">From Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="fromDate" name="fromDate">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">To Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control form-control-sm" [(ngModel)]="toDate" [min]="fromDate"
+                            name="toDate">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Model No</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="itemObj.modelId" name="modelId"
+                            (change)="onModelChange()">
+                            <option [ngValue]="null">-- Select Model Name --</option>
+                            <option *ngFor="let model of modelList" [ngValue]="model.id">
+                                {{ model.itemname }}
+                            </option>
+
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Model Description</label>
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="itemObj.itemdesc"
+                            name="itemdesc" readonly>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+
+        <!-- Vehicle Details -->
+        <fieldset class="border rounded p-3">
+
+            <legend class="float-none w-auto px-2 fs-6">
+                Add Vehicle Details
+            </legend>
+
+            <!-- Row 1 -->
+
+            <div class="row g-2">
+
+                <div class="col-md-3">
+                    <label>Chassis No</label>
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.chassisNo">
+                </div>
+
+                <div class="col-md-3">
+                    <label>Motor No</label>
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.motorNo">
+                </div>
+                <div class="col-md-2">
+                    <label>Fame2 Amount</label>
+                    <input class="form-control form-control-sm" [(ngModel)]="itemObj.fame2amount" name="fame2amount">
+                </div>
+                <div class="col-md-2">
+                    <label>Colour</label>
+                    <input class="form-control form-control-sm" [(ngModel)]="itemObj.colorName" name="colorName">
+                </div>
+
+                <div class="col-md-2">
+                    <label>Location</label>
+                    <select class="form-select form-select-sm text-truncate" [(ngModel)]="itemObj.locationName"
+                        (change)="onLocationChange($event)" #locationName="ngModel" name="locationName">
+                        <option value="">Select Location</option>
+                        <option *ngFor="let loc of locations" [value]="loc.locname">
+                            {{ loc.locname }}
+                        </option>
+
+                    </select>
+                    <div class="text-danger" *ngIf="locationName.invalid && locationName.touched">
+                        Please Select Location Name
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <label>Year</label>
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.mfgYear">
+                </div>
+
+                <div class="col-md-2">
+                    <label>Rate</label>
+                    <input class="form-control form-control-sm text-end" [(ngModel)]="vehicleObj.rate"
+                        (input)="calculateTotalStock()">
+                </div>
+                <div class="col-md-2">
+                    <label>Serv.Book No</label>
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.serviceBookNo">
+                </div>
+
+
+
+                <div class="col-md-2">
+                    <label>Battery Make</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="vehicleObj.batteryMake">
+                        <option [value]="">--Select Make--</option>
+
+                        <option *ngFor="let item of purposeofbatterymake" [value]="item.value">
+                            {{ item.value }}
+                        </option>
+                    </select>
+                    <!-- <select class="form-select form-select-sm"  [(ngModel)]="vehicleObj.batteryMake">
+                        <option>--Select Make--</option>
+                        <option></option>
+                    </select> -->
+                </div>
+
+                <div class="col-md-2">
+                    <label>Battery</label>
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.batteryNo">
+                </div>
+
+                <div class="col-md-2">
+                    <label>Converter No.</label>
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.converterNo">
+                </div>
+
+                <div class="col-md-2">
+                    <label>Charger No.</label>
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.chargerNo">
+                </div>
+
+                <div class="col-md-2">
+                    <label>Controller No.</label>
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.controllerNo">
+                </div>
+
+                <div class="col-md-2">
+                    <label>Battery Chemical</label>
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.batteryChemical">
+                </div>
+
+                <div class="col-md-2">
+                    <label>Battery Capacity</label>
+                    <input class="form-control form-control-sm" [(ngModel)]="vehicleObj.batteryCapacity">
+                </div>
+
+                <div class="col-md-1">
+                    <label>SGST%</label>
+                    <input class="form-control form-control-sm text-end bg-light text-muted" [(ngModel)]="itemObj.sgst"
+                        readonly>
+                </div>
+
+                <div class="col-md-1">
+                    <label>CGST%</label>
+                    <input class="form-control form-control-sm text-end bg-light text-muted" [(ngModel)]="itemObj.cgst"
+                        readonly>
+                </div>
+
+                <div class="col-md-1">
+                    <label>IGST%</label>
+                    <input class="form-control form-control-sm text-end bg-light text-muted" [(ngModel)]="itemObj.igst"
+                        readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label>Total Op. Stock</label>
+                    <input class="form-control form-control-sm text-end" [(ngModel)]="vehicleObj.totalOpStock">
+                </div>
+
+            </div>
+
+            <!-- Row 4 -->
+
+            <div class="row g-2 mt-1 align-items-end">
+
+
+
+                <div class="col text-end">
+
+                    <button type="button" class="btn btn-primary btn-sm me-2" (click)="addVehicle()">
+
+                        <i class="bi" [ngClass]="isEditMode ? 'bi-check-lg' : 'bi-plus'"></i>
+                        {{ isEditMode ? 'Update' : 'Add' }}
+                    </button>
+
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+
+                </div>
+
+            </div>
+
+        </fieldset>
+
+        <!-- Grid -->
+        <div class="table-responsive mt-3">
+
+            <table class="table table-bordered table-hover table-sm align-middle">
+
+                <thead class="table-primary">
+
+                    <tr>
+                        <th>Action</th>
+                        <th>Chassis No</th>
+                        <th>Motor No</th>
+                        <th>Colour</th>
+                        <th>Location</th>
+                        <th>Year</th>
+                        <th>Rate</th>
+                        <th>Serv.Book No.</th>
+                        <th>Battery Make</th>
+                        <th>Battery No.</th>
+                        <th>Converter No.</th>
+                        <th>Charger No.</th>
+                        <th>Controller No.</th>
+                        <th>Battery Chemical</th>
+                        <th>Battery Capacity</th>
+                        <th>SGST %</th>
+                        <th>CGST %</th>
+                        <th>IGST %</th>
+                        <th>Total Op. Stock</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr *ngIf="vehicleList.length == 0">
+                        <td colspan="22" class="text-center text-muted">
+                            Record(s) not found.
+                        </td>
+                    </tr>
+
+                    <tr *ngFor="let item of vehicleList; let i=index">
+
+                        <td class="text-center">
+                            <div class="d-flex align-items-center">
+                                <button class="btn btn-primary btn-sm me-2" (click)="editVehicle(i)">
+                                    <i class="ri-edit-line"></i>
+                                </button>
+
+                                <button class="btn btn-danger btn-sm">
+                                    <!-- (click)="deleteVehicle(i)" -->
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </td>
+
+                        <td>{{item.chassisNo}}</td>
+                        <td>{{item.motorNo}}</td>
+                        <td>{{item.colorName}}</td>
+                        <td>{{item.locationName}}</td>
+                        <td>{{item.mfgYear}}</td>
+                        <td class="text-end">{{item.rate | number:'1.2-2'}}</td>
+                        <td>{{item.serviceBookNo}}</td>
+                        <td>{{item.batteryMake}}</td>
+                        <td>{{item.batteryNo}}</td>
+                        <td>{{item.converterNo}}</td>
+                        <td>{{item.chargerNo}}</td>
+                        <td>{{item.controllerNo}}</td>
+                        <td>{{item.batteryChemical}}</td>
+                        <td>{{item.batteryCapacity}}</td>
+                        <td class="text-end">{{item.sgst}}</td>
+                        <td class="text-end">{{item.cgst}}</td>
+                        <td class="text-end">{{item.igst}}</td>
+                        <td class="text-end">{{item.totalOpStock | number:'1.2-2'}}</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- Footer Buttons -->
+
+        <div class="text-end">
+
+            <button class="btn btn-primary btn-sm me-2">
+                Save
+            </button>
+
+            <button class="btn btn-light btn-sm">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>

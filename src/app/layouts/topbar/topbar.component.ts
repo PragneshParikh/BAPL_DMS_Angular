@@ -22,6 +22,8 @@ import { LotInspectionService } from '../../core/services/lotinspectionservice';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { VehicleInwardService } from '../../core/services/vehicle-inwardservice';
 import { PartsInwardService } from '../../core/services/partsinwardservice';
+import { PartInward } from '../../components/part-inward/part-inward';
+import { NotificationService } from '../../core/services/notification-service';
 @Component({
   selector: 'app-topbar',
   templateUrl: './topbar.component.html',
@@ -33,8 +35,7 @@ import { PartsInwardService } from '../../core/services/partsinwardservice';
     ReactiveFormsModule,
     SimplebarAngularModule,
     NgbDropdownModule,
-    RouterLink,
-    NgbAccordionItem
+    RouterLink
   ],
   standalone: true
 })
@@ -82,7 +83,8 @@ export class TopbarComponent implements OnInit {
     private storageService: StorageService,
     private lotInspectionService: LotInspectionService,
     private toastService: ToastService,
-    private partInwardService: PartsInwardService
+    private partInwardService: PartsInwardService,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -120,9 +122,14 @@ export class TopbarComponent implements OnInit {
 
     this.getVehicleDispatchNotification();
     this.getPartsInwardNotification();
+    this.getD2DVehicleNotification();
 
     // Fetch Data
     this.saleInvoice = saleInvoice;
+
+    this.notificationService.refreshPartsNotification.subscribe(() => {
+      this.getPartsInwardNotification();
+    });
   }
 
   /**
@@ -303,7 +310,7 @@ export class TopbarComponent implements OnInit {
         this.vehicleInward = result;
 
         // Group by invoice number
-        const groupedInvoices = this.vehicleInward.reduce((acc: any, item: any) => {
+        const groupedInvoices = this.vehicleInward.filter((p: any) => !p.isD2d).reduce((acc: any, item: any) => {
           const invoiceNo = item.invoiceNo;
           if (!acc[invoiceNo]) {
             acc[invoiceNo] = {
@@ -329,11 +336,43 @@ export class TopbarComponent implements OnInit {
     });
   }
 
+  getD2DVehicleNotification() {
+    this.loader.show();
+    this.vehicleInwardService.getByVehicleStatus(false, this.dealerCode).subscribe({
+      next: (result) => {
+          this.vehicleInward = result;
+
+        // Group by invoice number
+        const groupedInvoices = this.vehicleInward.filter((p: any) => p.isD2d).reduce((acc: any, item: any) => {
+          const invoiceNo = item.invoiceNo;
+          if (!acc[invoiceNo]) {
+            acc[invoiceNo] = {
+              invoiceNumber: invoiceNo,
+              invoiceDate: item.invoiceDate,
+              numberOfItems: 0,
+              issuedFrom: item.issuedDealerName,
+              issuedDealerCode: item.issuedDealerCode,
+              status: 'Received' // You can adjust this based on your logic
+            };
+          }
+          acc[invoiceNo].numberOfItems += 1;
+          return acc;
+        }, {});
+
+        // Convert grouped object to array
+        this.d2dNotificationList = Object.values(groupedInvoices);
+        this.loader.hide();
+      },
+      error: (err) => {
+        console.error(err);
+        this.loader.hide();
+      }
+    });
+  }
   getPartsInwardNotification() {
     this.partInwardService.getPendingNotificationByDealer(this.dealerCode).subscribe({
       next: (res: any) => {
         this.partsInward = res;
-
         // Group by invoice number
         const groupedInvoices = this.partsInward.reduce((acc: any, item: any) => {
           const invoiceNo = item.invoiceNo;
@@ -358,7 +397,7 @@ export class TopbarComponent implements OnInit {
           classname: 'bg-danger text-white',
           delay: 5000
         });
-        console.log(err);
+        console.error(err);
       }
     });
   }
@@ -393,7 +432,6 @@ export class TopbarComponent implements OnInit {
         }
       },
       (reason) => {
-        console.log('Modal dismissed:', reason);
       }
     );
   }
@@ -414,7 +452,7 @@ export class TopbarComponent implements OnInit {
           classname: 'bg-warning text-white',
           delay: 5000
         });
-        console.log(err);
+        console.error(err);
       }
     })
   }
@@ -437,46 +475,49 @@ export class TopbarComponent implements OnInit {
   }
 
   onClickPartNumber(item: any) {
+    const invoiceNo = item?.invoiceNumber || '0';
+    const value = Date.now() + '|' + invoiceNo;
+    const encClaim = btoa(value);
+    this.router.navigate(['parts-inward', encClaim])
 
-    const modalRef = this.modalService.open(InvoiceDetail, {
-      size: 'xl',      // modal size: 'sm', 'lg', 'xl'
-      backdrop: 'static', // prevent closing by clicking outside
-      keyboard: false    // prevent closing with ESC
-    });
+    // const modalRef = this.modalService.open(PartInward, {
+    //   size: 'xl',      // modal size: 'sm', 'lg', 'xl'
+    //   backdrop: 'static', // prevent closing by clicking outside
+    //   keyboard: false    // prevent closing with ESC
+    // });
 
-    const invoiceDetails = this.partsInward.filter(x => x.invoiceNo === item.invoiceNumber);
-    modalRef.componentInstance.invoiceDetails = invoiceDetails;
-    modalRef.componentInstance.sourceType = 'parts';
+    // const invoiceDetails = this.partsInward.filter(x => x.invoiceNo === item.invoiceNumber);
+    // modalRef.componentInstance.invoiceDetails = invoiceDetails;
+    // modalRef.componentInstance.sourceType = 'parts';
 
-    modalRef.result.then(
-      (result) => {
-        if (result && result.isAccepted) {
-          this.loader.show();
-          this.updatePartInwardStatusByInvoice(item.invoiceNumber);
-          this.loader.hide();
-        }
-      },
-      (reason) => {
-        console.log('Modal dismissed:', reason);
-      }
-    );
+    // modalRef.result.then(
+    //   (result) => {
+    //     if (result && result.isAccepted) {
+    //       this.loader.show();
+    //       this.updatePartInwardStatusByInvoice(item.invoiceNumber);
+    //       this.loader.hide();
+    //     }
+    //   },
+    //   (reason) => {
+    //   }
+    // );
 
   }
 
-  updatePartInwardStatusByInvoice(invoiceNumber: string) {
-    this.partInwardService.update(invoiceNumber).subscribe({
-      next: (res) => {
-        this.toastService.show('Record updated sucessfully', {
-          classname: 'bg-success text-white',
-          delay: 5000
-        });
-      }, error: (err) => {
-        this.toastService.show('Something went wrong', {
-          classname: 'bg-danger text-white',
-          delay: 5000
-        });
-        console.error(err);
-      }
-    });
-  }
+  // updatePartInwardStatusByInvoice(invoiceNumber: string) {
+  //   this.partInwardService.update(invoiceNumber).subscribe({
+  //     next: (res) => {
+  //       this.toastService.show('Record updated sucessfully', {
+  //         classname: 'bg-success text-white',
+  //         delay: 5000
+  //       });
+  //     }, error: (err) => {
+  //       this.toastService.show('Something went wrong', {
+  //         classname: 'bg-danger text-white',
+  //         delay: 5000
+  //       });
+  //       console.error(err);
+  //     }
+  //   });
+  // }
 }

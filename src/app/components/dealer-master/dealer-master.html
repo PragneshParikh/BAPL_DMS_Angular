@@ -69,59 +69,64 @@
                         </thead>
 
                         <tbody>
-                            @if (paginatedDealerList.length === 0) {
-                            <tr>
-                                <td colspan="17" class="text-center">No data available</td>
-                            </tr>
-                            }
-                            @for (dealer of paginatedDealerList; track $index) {
+
+                            @for (dealer of dealerList; track $index) {
                             <tr (dblclick)="openDealerModal(dealer)" style="cursor: pointer">
                                 <td>{{ (page - 1) * pageSize + $index + 1 }}</td>
-                                <td><ngb-highlight [result]="dealer.compname" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.dealercode" [term]="searchTerm"></ngb-highlight>
-                                </td>
-                                <td><ngb-highlight [result]="dealer.city" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.state" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.mobile" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.email" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.compcode" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.adress1" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.adress2" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.pin" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.pan" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.contactperson" [term]="searchTerm"></ngb-highlight>
-                                </td>
-                                <td><ngb-highlight [result]="dealer.phoneOff" [term]="searchTerm"></ngb-highlight></td>
-                                <td><ngb-highlight [result]="dealer.compgstinNo" [term]="searchTerm"></ngb-highlight>
-                                </td>
-                                <td><ngb-highlight [result]="dealer.tradCert" [term]="searchTerm"></ngb-highlight></td>
+                                <td>{{ dealer.compname }}</td>
+                                <td>{{ dealer.dealercode }} </td>
+                                <td>{{ dealer.city }}</td>
+                                <td>{{ dealer.state }}</td>
+                                <td>{{ dealer.mobile }}</td>
+                                <td>{{ dealer.email }}</td>
+                                <td>{{ dealer.compcode }}</td>
+                                <td>{{ dealer.adress1 }}</td>
+                                <td>{{ dealer.adress2 }}</td>
+                                <td>{{ dealer.pin }}</td>
+                                <td>{{ dealer.pan }}</td>
+                                <td>{{ dealer.contactperson }}</td>
+                                <td>{{ dealer.phoneOff }}</td>
+                                <td>{{ dealer.compgstinNo }} </td>
+                                <td>{{ dealer.tradCert }}</td>
                                 <td>
                                     <span class="badge" [ngClass]="dealer.b2b ? 'bg-success' : 'bg-danger'">
                                         {{ dealer.b2b ? 'Yes' : 'No' }}
                                     </span>
                                 </td>
-                                <td><ngb-highlight [result]="dealer.regDate" [term]="searchTerm"></ngb-highlight></td>
+                                <td>{{ dealer.regDate }}</td>
                             </tr>
-
                             }
+                            <!-- No Data Row -->
+                            <tr *ngIf="dealerList.length === 0">
+                                <td colspan="6" class="text-center">No Data Available</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Pagination -->
 
-                <div class="row mt-3">
+                <!-- <div class="row mt-3">
                     <div class="col-sm-12 col-md-20">
                         <div class="text-md-right float-md-end gridjs-pagination">
 
-                            <ngb-pagination [collectionSize]="dealerList.length" [(page)]="page" [pageSize]="pageSize"
+                            <ngb-pagination [collectionSize]="" [(page)]="page" [pageSize]="pageSize"
                                 (pageChange)="refreshPage()" [boundaryLinks]="true">
-
                             </ngb-pagination>
 
                         </div>
                     </div>
+                </div> -->
+
+                <!-- Pagination -->
+                <div class="col-sm-12 col-md-12">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+                        <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="onPageChange($event)" [maxSize]="5" [boundaryLinks]="true">
+                        </ngb-pagination>
+                    </div>
                 </div>
+                <!-- End Pagination -->
 
             </div> <!-- card-body -->
 
@@ -154,22 +159,22 @@
 
             <div class="col-md-3">
                 <label class="form-label">Company Name</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.compname" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.compname" [disabled]="true">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Company Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.compcode" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.compcode" [disabled]="true">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Dealer Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.dealercode" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.dealercode" [disabled]="true">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Credit Limit</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.ceditLimit" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.ceditLimit" [disabled]="true">
             </div>
 
         </div>
@@ -178,12 +183,14 @@
 
             <div class="col-md-6">
                 <label class="form-label">Address 1</label>
-                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress1" readonly></textarea>
+                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress1"
+                    [disabled]="true"></textarea>
             </div>
 
             <div class="col-md-6">
                 <label class="form-label">Address 2</label>
-                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress2" readonly></textarea>
+                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress2"
+                    [disabled]="true"></textarea>
             </div>
 
         </div>
@@ -192,22 +199,34 @@
 
             <div class="col-md-3">
                 <label class="form-label">City</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.city" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.city" [disabled]="true">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">State</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.state" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.state" [disabled]="true">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Pin Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.pin" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.pin" [disabled]="true">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Mobile</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.mobile" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.mobile" [disabled]="true">
+            </div>
+
+        </div>
+
+        <div class="row mt-3">
+
+            <div class="col-md-3">
+                <label class="form-label">Active</label>
+                <select class="form-select form-select-sm" [value]="selectedDealer?.isActive" [disabled]="true">
+                    <option value="true"> Yes </option>
+                    <option value="false"> No </option>
+                </select>
             </div>
 
         </div>
@@ -222,17 +241,17 @@
 
             <div class="col-md-4">
                 <label class="form-label">Email</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.email" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.email" [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Contact Person</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.contactperson" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.contactperson" [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Phone Office</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.phoneOff" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.phoneOff" [disabled]="true">
             </div>
 
         </div>
@@ -247,17 +266,17 @@
 
             <div class="col-md-4">
                 <label class="form-label">Brand Name</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.brandName" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.brandName" [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">GSTIN</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.compgstinNo" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.compgstinNo" [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">PAN</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.pan" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.pan" [disabled]="true">
             </div>
 
         </div>
@@ -266,7 +285,7 @@
 
             <div class="col-md-4">
                 <label class="form-label">CIN No</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.cinNo" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.cinNo" [disabled]="true">
             </div>
 
             <div class="col-md-4">
@@ -276,7 +295,7 @@
 
             <div class="col-md-4">
                 <label class="form-label">Area Office Id</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.areaofficeid" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.areaofficeid" [disabled]="true">
             </div>
 
         </div>
@@ -285,17 +304,18 @@
 
             <div class="col-md-4">
                 <label class="form-label">VAT No</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.vatNo" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.vatNo" [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Is TCS</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.isTcs ? 'Yes' : 'No'" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.isTcs ? 'Yes' : 'No'"
+                    [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">TCS Percent</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.tcsPercent" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.tcsPercent" [disabled]="true">
             </div>
 
         </div>
@@ -304,17 +324,18 @@
 
             <div class="col-md-4">
                 <label class="form-label">FameII Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.fameiiCode" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.fameiiCode" [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">B2B</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.b2b ? 'Yes' : 'No'" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.b2b ? 'Yes' : 'No'"
+                    [disabled]="true">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Registration Date</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.regDate" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.regDate" [disabled]="true">
             </div>
 
         </div>
@@ -323,7 +344,7 @@
 
             <div class="col-md-12">
                 <label class="form-label">Registration Address</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.regAddress" readonly>
+                <input class="form-control form-control-sm" [value]="selectedDealer?.regAddress" [disabled]="true">
             </div>
 
         </div>
@@ -334,7 +355,7 @@
         <button class="btn btn-primary btn-sm" (click)="updateTradeCertificate()">
             Save
         </button>
-        <button class="btn btn-light btn-sm" (click)="modal.close()">Close</button>
+        <button class="btn btn-danger btn-sm" (click)="modal.close()">Close</button>
     </div>
 
 </ng-template>

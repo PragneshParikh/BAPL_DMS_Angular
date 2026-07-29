@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { StorageService } from '../../core/services/storage';
 import { LocationName } from '../../ViewModels/ReceiptEntryModel';
@@ -11,14 +11,16 @@ import { FFIRService } from '../../core/services/ffirservice';
 import { FFIRIssueType, FFIRPresentVehicleStatus, FFIRPurposeofCIR, FFIRTypeRoadSurface } from '../../constant';
 import { number } from 'echarts';
 import { LocationMasterService } from '../../core/services/location-master-service';
+import { PrefixService } from '../../core/services/prefix';
 
 @Component({
   selector: 'app-ffir',
+  standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './ffir.html',
   styleUrl: './ffir.scss',
 })
-export class FFIR {
+export class FFIR implements OnInit {
 
   locations: LocationName[];
   ffirData: any = {};
@@ -50,6 +52,7 @@ export class FFIR {
 
     ffirPrefix: '',
     dealerCode: '',
+    cirNo: 0,
     cirDate: '',
 
     jobCardCustomerId: 0,
@@ -72,7 +75,7 @@ export class FFIR {
 
     ffirRemarks: '',
 
-    createdBy: 'Admin',
+    //createdBy: 'Admin',
 
     mainParts: [],
 
@@ -91,6 +94,7 @@ export class FFIR {
   constructor(private storageService: StorageService,
     private locationService: LocationMasterService,
     private router: Router,
+    private prefixService: PrefixService,
     private ffirService: FFIRService,
     private route: ActivatedRoute,
     private loader: LoaderService,
@@ -99,13 +103,13 @@ export class FFIR {
 
   // fetch jobcard related data
   ngOnInit(): void {
-    //debugger;
     this.jobCardId = Number(this.route.snapshot.paramMap.get('id'));
-    //console.log("Received JobCardId:", this.jobCardId);
-
+    this.ffirObj.cirDate = new Date().toISOString().split('T')[0];
+    this.loadPrefix();
     this.fetchJobNoBasedData();
+
     this.loadParts();
-    this.loadFailureComplaints();
+    //this.loadFailureComplaints();
 
     this.route.queryParams.subscribe(params => {
       if (params['id']) {
@@ -116,6 +120,23 @@ export class FFIR {
     });
 
 
+  }
+
+  loadPrefix(): void {
+    this.loader.show();
+    const dealerCode = this.storageService.getDealerCode();
+    const module = 'ffir_prefix';
+    this.prefixService.getPrefixByDealerByModule(dealerCode, module).subscribe({
+      next: (res: string) => {
+        this.loader.hide();
+        this.ffirObj.ffirPrefix = res;
+        this.ffirObj.cirNo = Number(res.split('/').pop());
+      }, error: (err) => {
+        this.loader.hide();
+        console.error(err);
+
+      }
+    })
   }
   getFFIRById(id: number) {
 
@@ -137,43 +158,51 @@ export class FFIR {
 
         this.selectedMainParts = res.mainParts || [];
         this.jobCardId = this.ffirObj.jobCardHeaderId
+
         this.fetchJobNoBasedData();
         this.loadParts();
-        this.loadFailureComplaints();
+        //this.loadFailureComplaints();
       },
       error: (err) => {
-        console.log(err);
+        console.error(err);
       }
     });
   }
 
   fetchJobNoBasedData(): void {
-   // debugger;
-    if (!this.jobCardId) return;   // safety check
+    if (!this.jobCardId) return;
+
     this.loader.show();
+
     this.jobCardService.getCIRJobCardDetails(this.jobCardId).subscribe({
       next: (res: any) => {
+
         this.loader.hide();
-        //console.log("FFIR API Response", res);
+
         this.ffirData = res;
-        //console.log("FFIR API Response", this.ffirData);
+
         this.chassisNo = this.ffirData.chassisNo;
+
         if (this.chassisNo) {
           this.loadJobcardHistory(this.chassisNo);
         }
-        //const ffirData = res
-        this.complaintList = [{
-          id: this.ffirData.id,
-          customerVoice: this.ffirData.customerVoice,
-          complaintCode: this.ffirData.complaintCode,
-          complaint: this.ffirData.complaint,
+
+        this.complaintList = (this.ffirData.complaints || []).map((item: any) => ({
+          id: item.id,
+          customerVoice: item.customerVoice,
+          complaintCode: item.complaintCode,
+          complaint: item.complaint,
           observation: this.ffirData.observation,
           actionTaken: this.ffirData.actionTaken
-        }];
+        }));
+
       },
+
       error: (err) => {
         console.error("FFIR API Error", err);
+
         this.loader.hide();
+
         Swal.fire({
           icon: 'error',
           text: 'Failed to load FFIR data',
@@ -185,54 +214,53 @@ export class FFIR {
 
 
   //Fetech Dealer Location
- fetchLocations(): void {
+  fetchLocations(): void {
 
-  const dealerCode =
-    this.storageService.getDealerCode();
+    const dealerCode =
+      this.storageService.getDealerCode();
 
-  this.locationService
-    .getLocationList(dealerCode)
-    .subscribe({
+    this.locationService
+      .getLocationList(dealerCode)
+      .subscribe({
 
-      next: (data: any[]) => {
+        next: (data: any[]) => {
 
-        // only Workshop
-        this.locations = data.filter(
-          x => x.locareadidNo === 2
-        );
-
-        // EDIT MODE
-        if (this.isEditMode && this.chassiseditData) {
-
-          const serviceLocCode =
-            this.chassiseditData
-              .jobCardHeader
-              .serviceloc;
-
-          // MATCH
-          const match = this.locations.find(
-            x => x.locCode === serviceLocCode
+          // only Workshop
+          this.locations = data.filter(
+            x => x.locareadidNo === 2
           );
-          if (match) {
-            this.selectedLocation =
-              match.locname;
-              console.log("LocationName:",this.selectedLocation)
+
+          // EDIT MODE
+          if (this.isEditMode && this.chassiseditData) {
+
+            const serviceLocCode =
+              this.chassiseditData
+                .jobCardHeader
+                .serviceloc;
+
+            // MATCH
+            const match = this.locations.find(
+              x => x.locCode === serviceLocCode
+            );
+            if (match) {
+              this.selectedLocation =
+                match.locname;
+            }
           }
+        },
+
+        error: (err) => {
+
+          console.error(
+            'Error fetching locations',
+            err
+          );
+
         }
-      },
 
-      error: (err) => {
+      });
 
-        console.error(
-          'Error fetching locations',
-          err
-        );
-
-      }
-
-    });
-
-}
+  }
   onFileSelected(event: any, index: number) {
     const file = event.target.files[0];
     if (!file) return;
@@ -247,7 +275,6 @@ export class FFIR {
     const target = event.target as HTMLSelectElement;
     this.selectedLocation = target.value;
 
-    console.log('Selected Location:', this.selectedLocation);
   }
   loadParts() {
 
@@ -292,8 +319,6 @@ export class FFIR {
 
     });
 
-    console.log(this.selectedMainParts);
-
     this.searchpartText = '';
     this.showDropdown = false;
   }
@@ -309,7 +334,7 @@ export class FFIR {
     this.selectedMainParts.splice(index, 1);
   }
   loadFailureComplaints() {
-    
+
     this.ffirService.getComplaintCodeList().subscribe(res => {
       this.failurcomplaintList = res;
     });
@@ -339,7 +364,6 @@ export class FFIR {
   }
 
   saveFFIR() {
-   // debugger;
     const dealerCode = this.storageService.getDealerCode();
     this.ffirObj.dealerCode = dealerCode;
     this.ffirObj.mainParts = this.selectedMainParts.map((item: any) => {
@@ -377,7 +401,7 @@ export class FFIR {
     });
     this.ffirObj.ffirChassisNo = this.chassisNo;
     this.ffirObj.jobCardHeaderId = this.jobCardId;
-    this.ffirObj.jobCardCustomerId = this.failurcomplaintList[0].id;
+    this.ffirObj.jobCardCustomerId = this.ffirData.jobCardCustomerId
     // EDIT
     if (this.isEditMode) {
       this.ffirService
@@ -393,7 +417,7 @@ export class FFIR {
             });
           },
           error: (err) => {
-            console.log(err);
+            console.error(err);
           }
         });
     }
@@ -414,6 +438,10 @@ export class FFIR {
         }
       });
     }
+  }
+
+  onNavigate() {
+    this.router.navigate(['/ffirlisting']);
   }
 
 }

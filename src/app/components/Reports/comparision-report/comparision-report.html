@@ -1,0 +1,231 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">Performa vs Sale Bill Comparison Report</h4>
+</div>
+
+<div class="row g-3">
+
+
+
+  <!-- ── Filters ────────────────────────────────────────────────────── -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Filters</h5>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="filterForm">
+          <div class="row g-2">
+
+            <div class="col-xl-3 col-md-6" *ngIf="!isDealer">
+              <label class="form-label">Dealer Name</label>
+              <select formControlName="dealerCode" class="form-select form-select-sm">
+                <option value="">-- All Dealers --</option>
+                <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
+                  {{ dealer.dealerName }}
+                </option>
+              </select>
+            </div>
+
+            <div class="col-xl-3 col-md-6" *ngIf="isDealer">
+              <label class="form-label">Dealer</label>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light">
+                  <i class="fas fa-store text-muted"></i>
+                </span>
+                <input type="text" class="form-control form-control-sm bg-light fw-semibold"
+                  [value]="loggedInDealerCode" readonly>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">From Date</label>
+              <input type="date" formControlName="fromDate" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">To Date</label>
+              <input type="date" formControlName="toDate" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Chassis No.</label>
+              <input type="text" formControlName="chassisNo"
+                class="form-control form-control-sm" placeholder="Enter chassis number">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Customer Name</label>
+              <input type="text" formControlName="customerName"
+                class="form-control form-control-sm" placeholder="Enter customer name">
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Performa Status</label>
+              <select formControlName="performaStatus" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option value="yes">Performa Created</option>
+                <option value="no">Performa Not Created</option>
+              </select>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <label class="form-label">Search</label>
+              <input type="text" formControlName="search"
+                class="form-control form-control-sm" placeholder="Chassis / Dealer / Customer">
+            </div>
+
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" class="btn btn-primary btn-sm" (click)="onSearch()">
+              <i class="fas fa-search me-1"></i>Search
+            </button>
+            <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">
+              <i class="fas fa-redo me-1"></i>Reset
+            </button>
+            <button type="button" class="btn btn-success btn-sm"
+              (click)="exportToExcel()" [disabled]="exporting || isLoading" aria-label="Export to Excel">
+              <span *ngIf="exporting" class="spinner-border spinner-border-sm"></span>
+              <i *ngIf="!exporting" class="ri-file-excel-2-line align-bottom"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12" *ngIf="errorMessage">
+    <div class="alert alert-danger">{{ errorMessage }}</div>
+  </div>
+  
+  <!-- ── Summary Stats Cards ─────────────────────────────────────────── -->
+  <div class="col-12" *ngIf="!isLoading && reportData.length > 0">
+    <div class="row g-3">
+      <div class="col-xl-4 col-md-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-muted text-uppercase fw-semibold mb-1">Total Records</p>
+            <h5 class="mb-0">{{ totalRecords }}</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-4 col-md-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-muted text-uppercase fw-semibold mb-1">With Performa</p>
+            <h5 class="mb-0 text-success">{{ totalWithPerforma }}</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-4 col-md-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-muted text-uppercase fw-semibold mb-1">Sale Bill Created</p>
+            <h5 class="mb-0 text-primary">{{ totalSaleBillCreated }}</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ── Loading ────────────────────────────────────────────────────── -->
+  <div class="col-12" *ngIf="isLoading">
+    <div class="card">
+      <div class="card-body text-center py-5">
+        <div class="spinner-border text-primary mb-3" role="status" aria-hidden="true"></div>
+        <p class="text-muted fw-semibold mb-0">Loading report data...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Table View ─────────────────────────────────────────────────── -->
+  <div class="col-12" *ngIf="!isLoading">
+    <div class="card">
+      <div class="card-body">
+
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped table-sm">
+            <thead class="table-light">
+              <tr>
+                <th>Sr No</th>
+                <th>Dealer Code</th>
+                <th>Dealer Name</th>
+                <th>Dealer Location</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Customer Name</th>
+                <th>Customer Mobile</th>
+                <th>Chassis No</th>
+                <th>Performa Created</th>
+                <th>Performa Date</th>
+                <th>Sale Bill Created</th>
+                <th>Sale Bill Date</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngIf="reportData.length === 0">
+                <td colspan="13" class="text-center text-muted py-4">
+                  No records found. Please adjust your filters and try again.
+                </td>
+              </tr>
+
+              <tr *ngFor="let item of reportData">
+                <td>{{ item.srNo }}</td>
+                <td>{{ item.dealerCode }}</td>
+                <td>{{ item.dealerName }}</td>
+                <td>{{ item.dealerLocation }}</td>
+                <td>{{ item.city }}</td>
+                <td>{{ item.state }}</td>
+                <td>{{ item.customerName }}</td>
+                <td>{{ item.customerMobile }}</td>
+                <td>{{ item.chassisNo }}</td>
+                <td>
+                  <span class="badge" [ngClass]="item.isPerformaCreated ? 'bg-success' : 'bg-danger'">
+                    {{ item.isPerformaCreated ? 'Yes' : 'No' }}
+                  </span>
+                </td>
+                <td class="text-nowrap">{{ formatDate(item.performaCreatedDate) }}</td>
+                <td>
+                  <span class="badge" [ngClass]="item.isSaleBillCreated ? 'bg-success' : 'bg-danger'">
+                    {{ item.isSaleBillCreated ? 'Yes' : 'No' }}
+                  </span>
+                </td>
+                <td class="text-nowrap">{{ formatDate(item.saleBillCreatedDate) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="row mt-3" *ngIf="reportData.length > 0">
+          <div class="col-md-6 d-flex align-items-center mb-2 mb-md-0">
+            <p class="text-muted mb-0">
+              Showing {{ (pageIndex - 1) * pageSize + 1 }} to
+              {{ Math.min(pageIndex * pageSize, totalRecords) }} of
+              {{ totalRecords }} records
+            </p>
+          </div>
+          <div class="col-md-6 d-flex justify-content-md-end">
+            <div class="d-flex align-items-center flex-wrap gap-2">
+              <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex === 1" (click)="firstPage()">
+                <i class="fas fa-chevron-left me-1"></i>First
+              </button>
+              <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex === 1" (click)="previousPage()">
+                <i class="fas fa-chevron-left me-1"></i>Previous
+              </button>
+              <span class="badge bg-light text-dark border px-3 py-2">Page {{ pageIndex }} of {{ totalPages }}</span>
+              <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex >= totalPages" (click)="nextPage()">
+                Next<i class="fas fa-chevron-right ms-1"></i>
+              </button>
+              <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex >= totalPages" (click)="lastPage()">
+                Last<i class="fas fa-chevron-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

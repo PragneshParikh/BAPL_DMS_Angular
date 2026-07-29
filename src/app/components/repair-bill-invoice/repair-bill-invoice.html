@@ -1,0 +1,484 @@
+<!-- Toolbar -->
+<div class="inv-toolbar d-print-none">
+
+  <button class="btn btn-primary btn-sm me-2"
+          (click)="printPage()">
+    <i class="ri-printer-line"></i>
+    Print
+  </button>
+
+  <button class="btn btn-secondary btn-sm"
+          (click)="goBack()">
+    <i class="ri-arrow-left-line"></i>
+    Back
+  </button>
+
+</div>
+
+<!-- Loading -->
+<div *ngIf="loading"
+     class="text-center mt-5">
+
+  <div class="spinner-border text-primary"></div>
+
+</div>
+
+<!-- Error -->
+<div *ngIf="errorMsg"
+     class="alert alert-danger">
+
+  {{ errorMsg }}
+
+</div>
+
+<!-- Invoice -->
+<div *ngIf="!loading && data"
+     class="inv-page">
+
+  <!-- Header -->
+
+  <div class="row mb-3">
+
+    <div class="col-8">
+
+      <h3 class="mb-1">
+        {{ data.dealerName }}
+      </h3>
+
+      <div>{{ data.dealerAddress }}</div>
+
+      <div>
+        {{ data.dealerCity }}
+        {{ data.dealerState }}
+        {{ data.dealerPinNo }}
+      </div>
+
+      <div>
+        Phone :
+        {{ data.dealerPhoneNo }}
+      </div>
+
+      <div>
+        Email :
+        {{ data.dealerEmail }}
+      </div>
+
+      <div>
+        GSTIN :
+        {{ data.dealergstNo }}
+      </div>
+
+    </div>
+
+    <div class="col-4 text-end">
+
+      <img src="assets/images/logo.png"
+           width="120"
+           alt="logo"
+           onerror="this.style.display='none'">
+
+    </div>
+
+  </div>
+
+  <h4 class="text-center mb-3">
+    GST TAX INVOICE
+  </h4>
+
+  <!-- Customer Details -->
+
+ <!-- Insurance + Customer + Vehicle Details -->
+
+<div class="row mb-3">
+
+  <!-- Insurance Details -->
+  <div class="col-md-6"
+       *ngIf="data.isAccidental">
+
+    <h5 class="bg-light p-2 border">
+      Insurance Details
+    </h5>
+
+    <table class="table table-bordered table-sm">
+
+      <tr>
+        <th width="35%">Insurance Company</th>
+        <td>{{ data.insuranceName }}</td>
+      </tr>
+
+      <tr>
+        <th>GSTIN</th>
+        <td>{{ data.insGSTINNo }}</td>
+      </tr>
+
+      <tr>
+        <th>Address</th>
+        <td>{{ data.insAddress }}</td>
+      </tr>
+
+      <tr>
+        <th>State</th>
+        <td>{{ data.insState }}</td>
+      </tr>
+
+      <tr>
+        <th>City</th>
+        <td>{{ data.insCity }}</td>
+      </tr>
+
+      <tr>
+        <th>Pincode</th>
+        <td>{{ data.insPinNo }}</td>
+      </tr>
+
+    </table>
+
+  </div>
+
+  <!-- Customer Details -->
+  <div class="col-md-6"
+       [class.col-md-12]="!data.isAccidental">
+
+    <h5 class="bg-light p-2 border">
+      Customer Details
+    </h5>
+
+    <table class="table table-bordered table-sm">
+
+      <tr>
+        <th width="35%">Customer Name</th>
+        <td>{{ data.customerName }}</td>
+      </tr>
+
+      <tr>
+        <th>Phone</th>
+        <td>{{ data.customerPhoneNo }}</td>
+      </tr>
+
+      <tr>
+        <th>Address</th>
+        <td>{{ data.customerAddress }}</td>
+      </tr>
+
+      <tr>
+        <th>State</th>
+        <td>{{ data.customerState }}</td>
+      </tr>
+
+      <tr>
+        <th>City</th>
+        <td>{{ data.customerCity }}</td>
+      </tr>
+
+      <tr>
+        <th>GSTIN</th>
+        <td>{{ data.customerGSTINNo }}</td>
+      </tr>
+
+    </table>
+
+  </div>
+
+</div>
+
+<!-- Vehicle Details -->
+
+<div class="row mb-3">
+
+  <div class="col-md-12">
+
+    <h5 class="bg-light p-2 border">
+      Vehicle Details
+    </h5>
+
+    <table class="table table-bordered table-sm">
+
+      <tr>
+
+        <th width="15%">Job No</th>
+        <td>{{ data.jobNo }}</td>
+
+        <th width="15%">Invoice No</th>
+        <td>{{ data.invoiceNo }}</td>
+
+      </tr>
+
+      <tr>
+
+        <th>Chassis No</th>
+        <td>{{ data.chassisNo }}</td>
+
+        <th>Registration No</th>
+        <td>{{ data.registerationNo }}</td>
+
+      </tr>
+
+      <tr>
+
+        <th>Motor No</th>
+        <td>{{ data.motorNo }}</td>
+
+        <th>Model</th>
+        <td>{{ data.modelName }}</td>
+
+      </tr>
+
+      <tr>
+
+        <th>Color</th>
+        <td>{{ data.color }}</td>
+
+        <th>Job Type</th>
+        <td>{{ data.jobTypeName }}</td>
+
+      </tr>
+
+      <tr>
+
+        <th>Job Source</th>
+        <td>{{ data.jobSourceName }}</td>
+
+        <th>Technician</th>
+        <td>{{ data.technicianName }}</td>
+
+      </tr>
+
+    </table>
+
+  </div>
+
+</div>
+
+  <!-- Item Table -->
+
+  <table class="table table-bordered table-sm">
+
+    <thead>
+
+      <tr>
+
+        <th>Sr</th>
+
+        <th>Code</th>
+
+        <th>Description</th>
+
+        <th>HSN</th>
+
+        <th class="text-end">Qty</th>
+
+        <th class="text-end">Rate</th>
+
+        <th class="text-end">Discount</th>
+
+        <th class="text-end">Taxable</th>
+
+        <th class="text-end">IGST</th>
+
+        <th class="text-end">Net Amount</th>
+
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let item of details; let i=index">
+
+        <td>{{ i + 1 }}</td>
+
+        <td>{{ getCode(item) }}</td>
+
+        <td>{{ getDesc(item) }}</td>
+
+        <td>{{ getHsn(item) }}</td>
+
+        <td class="text-end">
+          {{ getQty(item) }}
+        </td>
+
+        <td class="text-end">
+          {{ getRate(item) | number:'1.2-2' }}
+        </td>
+
+        <td class="text-end">
+          {{ getDiscount(item) | number:'1.2-2' }}
+        </td>
+
+        <td class="text-end">
+          {{ getTaxable(item) | number:'1.2-2' }}
+        </td>
+
+        <td class="text-end">
+          {{ item.igstAmount | number:'1.2-2' }}
+        </td>
+
+        <td class="text-end">
+          {{ getNet(item) | number:'1.2-2' }}
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+  <!-- Totals -->
+
+  <div class="row mt-3">
+
+    <div class="col-md-7">
+
+      <strong>
+        Amount In Words :
+      </strong>
+
+      {{ amountInWords(subTotal) }}
+
+    </div>
+
+    <div class="col-md-5">
+
+      <table class="table table-bordered table-sm">
+
+        <tr>
+
+          <th>Part Total</th>
+
+          <td class="text-end">
+            {{ data.totalPartNetAmount | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        <tr>
+
+          <th>Labour Total</th>
+
+          <td class="text-end">
+            {{ data.totalLabourNetAmount | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        <tr>
+
+          <th>Invoice Total</th>
+
+          <td class="text-end fw-bold">
+            {{ subTotal | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+      </table>
+
+    </div>
+
+  </div>
+
+  <!-- HSN Summary -->
+
+  <h5 class="mt-4">
+    HSN Summary
+  </h5>
+
+  <table class="table table-bordered table-sm">
+
+    <thead>
+
+      <tr>
+
+        <th>HSN</th>
+
+        <th>Taxable Value</th>
+
+        <th>SGST Rate</th>
+
+        <th>SGST Amt</th>
+
+        <th>CGST Rate</th>
+
+        <th>CGST Amt</th>
+
+        <th>IGST Rate</th>
+
+        <th>IGST Amt</th>
+
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let row of taxSummary">
+
+        <td>{{ row.hsnCode }}</td>
+
+        <td>
+          {{ row.taxableValue | number:'1.2-2' }}
+        </td>
+
+        <td>{{ row.sgstRate }}</td>
+
+        <td>
+          {{ row.sgstAmount | number:'1.2-2' }}
+        </td>
+
+        <td>{{ row.cgstRate }}</td>
+
+        <td>
+          {{ row.cgstAmount | number:'1.2-2' }}
+        </td>
+
+        <td>{{ row.igstRate }}</td>
+
+        <td>
+          {{ row.igstAmount | number:'1.2-2' }}
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+  <!-- Remarks -->
+
+  <div class="mt-4">
+
+    <strong>
+      Remarks :
+    </strong>
+
+    {{ data.remarks }}
+
+  </div>
+
+  <!-- Signature -->
+
+  <div class="row mt-5">
+
+    <div class="col-6 text-center">
+
+      ______________________
+
+      <br>
+
+      Customer Signature
+
+    </div>
+
+    <div class="col-6 text-center">
+
+      ______________________
+
+      <br>
+
+      Authorized Signatory
+
+    </div>
+
+  </div>
+
+</div>

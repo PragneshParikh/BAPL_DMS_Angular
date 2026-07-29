@@ -35,4 +35,8 @@ export class PrefixService {
   getPrefixByDealerByModule(dealerCode: string, module: string): Observable<string> {
     return this.httpClient.get(`${this.baseUrl}/prefix/${dealerCode}/modules/${module}`, { responseType: 'text' });
   }
+
+  downloadExcel(): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/prefix/downloadExcel`, { responseType: 'blob' });
+  }
 }

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { LedgerMaster } from '../../ViewModels/LedgerMasterViewModel';
 
 @Injectable({
   providedIn: 'root',
@@ -19,8 +20,18 @@ export class LedgerMasterService {
     return this.httpClient.get(`${this.baseUrl}/ledger-master/companies`)
   }
 
-  getLedgerByPaged(searchTerm: string = null, pageIndex: number, pageSize: number): Observable<any> {
-    return this.httpClient.get(`${this.baseUrl}/ledger-master/paged?searchTerm=${searchTerm}&pageIndex=${pageIndex}&pageSize=${pageSize}`);
+  getLedgerByPaged(searchTerm: string | null = null, pageIndex: number, pageSize: number, dealerCode: string | null = null, filter: string | null = null): Observable<any> {
+    let params = new HttpParams().set('pageIndex', pageIndex).set('pageSize', pageSize);
+    if (searchTerm) {
+      params = params.set('searchTerm', searchTerm);
+    }
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
+    }
+    if (filter) {
+      params = params.set('filter', filter);
+    }
+    return this.httpClient.get(`${this.baseUrl}/ledger-master/paged`, { params });
   }
 
   getLedgerById(id: number): Observable<any> {
@@ -42,5 +53,75 @@ export class LedgerMasterService {
     return this.httpClient.get(`${this.baseUrl}/ledger-master/ledgerByType?ledgerType=${ledgerType}`);
   }
 
+  getD2DProvision(dealerCode: string): Observable<boolean> {
+    return this.httpClient.get<boolean>(`${this.baseUrl}/ledger-master/getD2DProvision`, { params: { dealerCode } });
+  }
 
+  getNextLedId(dealerCode: string): Observable<string> {
+    return this.httpClient.get<string>(
+      `${this.baseUrl}/ledger-master/getNextLed`,
+      {
+        params: { dealerCode },
+        responseType: 'text' as 'json'
+      }
+    );
+  }
+
+  getLedgerMobileList(dealerCode: string): Observable<string[]> {
+    return this.httpClient.get<string[]>(`${this.baseUrl}/ledger-master/getLedgerMobileList`, {
+      params: {
+        dealerCode: dealerCode
+      }
+    }
+    );
+  }
+
+  downloadExcel(dealerCode: string | null = null) {
+    let params = new HttpParams();
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
+    }
+    return this.httpClient.get(
+      `${this.baseUrl}/ledger-master/download`,
+      {
+        params,
+        responseType: 'blob'
+      }
+    );
+  }
+
+  getLedgerForSale(dealerCode?: string, isSuperAdmin: boolean = false): Observable<LedgerMaster[]> {
+    let params = new HttpParams().set('isSuperAdmin', isSuperAdmin);
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
+    }
+    return this.httpClient.get<LedgerMaster[]>(`${this.baseUrl}/ledger-master/getLedgerForSale`, { params });
+  }
+
+  getLotRelatedLedgers(invoiceNo: string | null, IsD2D: boolean | null): Observable<any> {
+   
+    let params = new HttpParams()
+      .set('invoiceNo', invoiceNo ?? null)
+      .set('IsD2D', (IsD2D ?? false));
+
+    return this.httpClient.get<LedgerMaster[]>(
+      `${this.baseUrl}/ledger-master/GetLotRelatedLedgers`,
+      { params }
+    );
+  }
+
+  getSupplierLedgers(dealerCode: string | null): Observable<any> {
+    let params = new HttpParams()
+      .set('dealerCode', dealerCode ?? null)
+    return this.httpClient.get<LedgerMaster[]>(
+      `${this.baseUrl}/ledger-master/GetSupplierLedgers`,
+      { params }
+    );
+  }
+
+  getLedgersByLedgerTypes(ledgerTypes: string[]): Observable<any> {
+    const params = new HttpParams().set('ledgerTypes', ledgerTypes.join(','));
+
+    return this.httpClient.get(`${this.baseUrl}/ledger-master/GetLedgerByLedgerTypes`, { params });
+  }
 }

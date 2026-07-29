@@ -1,0 +1,135 @@
+<div class="card shadow-sm">
+
+    <div class="card-header bg-white">
+        <div class="row align-items-center g-2">
+            <div class="col-md-3">
+                <h5 class="mb-0">Vehicle Quotation List</h5>
+            </div>
+
+            <div class="col-md-3" *ngIf="isSuperAdmin">
+                <select class="form-select form-select-sm" [(ngModel)]="selectedDealerCode"
+                    (change)="onDealerFilterChange()">
+                    <option value="">-- All Dealers --</option>
+                    <option *ngFor="let d of dealers" [value]="d.dealerCode">
+                        {{ d.dealerName }}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-3" *ngIf="!isSuperAdmin"></div>
+
+            <div class="col-md-4">
+                <input
+                    class="form-control"
+                    placeholder="Search..."
+                    [(ngModel)]="searchText"
+                    (input)="search()">
+            </div>
+
+            <div class="col-md-2 text-end">
+                <button type="button" class="btn btn-primary" (click)="addNew()">
+                    <i class="ri-add-line"></i>
+                    New Quotation
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+
+        <table class="table table-bordered table-hover table-striped mb-0">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Quotation No</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Mobile</th>
+                    <th>Dealer</th>
+                    <th>Model</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th width="150" class="text-center">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr *ngIf="loading">
+                    <td colspan="10" class="text-center">Loading...</td>
+                </tr>
+
+                <tr *ngIf="!loading && filteredData.length==0">
+                    <td colspan="10" class="text-center">No Records Found</td>
+                </tr>
+
+                <tr *ngFor="let row of filteredData; let i=index">
+
+                    <td>{{i+1}}</td>
+                    <td>{{row.quotationNo}}</td>
+                    <td>{{row.quotationDate | date:'dd/MM/yyyy'}}</td>
+                    <td>{{row.customerName}}</td>
+                    <td>{{row.mobileNo}}</td>
+                    <td>{{row.dealerName}}</td>
+                    <td>{{row.modelName}}</td>
+                    <td>{{row.totalAmount | number:'1.2-2'}}</td>
+
+                    <td>
+                        <span class="badge" [ngClass]="{
+                            'bg-success': row.status === 'Approved',
+                            'bg-warning text-dark': row.status === 'Sent' || row.status === 'Draft' || !row.status,
+                            'bg-danger': row.status === 'Rejected',
+                            'bg-primary': row.status === 'Converted'
+                          }">
+                          {{ row.status || 'Draft' }}
+                        </span>
+                    </td>
+
+                    <td class="text-center">
+                        <button
+                            class="btn btn-sm btn-primary me-1"
+                            (click)="edit(row.vehicleQuotationId)"
+                            title="Edit">
+                            <i class="ri-edit-line"></i>
+                        </button>
+
+                        <button
+                            class="btn btn-sm btn-outline-secondary me-1"
+                            (click)="printQuotation(row.vehicleQuotationId)"
+                            [disabled]="printingId === row.vehicleQuotationId"
+                            title="Print / Download PDF">
+                            <i class="ri-printer-line" *ngIf="printingId !== row.vehicleQuotationId"></i>
+                            <span *ngIf="printingId === row.vehicleQuotationId" class="spinner-border spinner-border-sm"></span>
+                        </button>
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<!-- Edit modal: form component is reused with isModal=true -->
+<div class="modal fade show" tabindex="-1" *ngIf="showEditModal"
+     style="display:block; background:rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Quotation</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <app-vehicle-quotation
+          [isModal]="true"
+          [quotationId]="selectedQuotationId"
+          (closed)="closeModal()"
+          (saved)="onSaved()">
+        </app-vehicle-quotation>
+      </div>
+    </div>
+  </div>
+</div>

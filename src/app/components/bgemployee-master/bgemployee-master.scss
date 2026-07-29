@@ -1,0 +1,154 @@
+// ---- Section card (Login / Zone) --------------------
+
+.section-card {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 13px;
+  font-weight: 600;
+  color: #212529;
+  i { font-size: 15px; }
+}
+
+.section-body {
+  padding: 12px;
+  background: #fff;
+}
+
+// ---- Employee search dropdown -----------------------
+
+.position-relative {
+  position: relative;
+}
+
+.employee-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #fff;
+  border: 1px solid #ced4da;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+.employee-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f3f5;
+
+  &:last-child { border-bottom: none; }
+
+  &:hover { background: #f0f4ff; }
+
+  .emp-opt-name { color: #212529; font-weight: 500; }
+  .emp-opt-code { color: #6c757d; font-size: 11px; font-family: monospace; }
+}
+
+// ---- Employee chips ---------------------------------
+
+.emp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #e7f1ff;
+  color: #0d6efd;
+  border: 1px solid #b6d4fe;
+  border-radius: 20px;
+  padding: 3px 10px 3px 10px;
+  font-size: 12px;
+  font-weight: 500;
+
+  .emp-chip-code {
+    font-family: monospace;
+    font-size: 11px;
+    color: #0856c4;
+    opacity: 0.8;
+  }
+
+  .emp-chip-remove {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-left: 2px;
+    cursor: pointer;
+    color: #0d6efd;
+    font-size: 13px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+
+    &:hover { color: #b02a37; }
+  }
+}
+
+// ---- Zone inline form -------------------------------
+
+.zone-form-wrap {
+  background: #f8f9fa;
+  border: 1px dashed #ced4da;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+// ---- Table tweaks -----------------------------------
+
+.table th,
+.table td {
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+// ---- Misc -------------------------------------------
+
+small.text-danger { font-size: 11px; }
+span.text-danger  { font-weight: 600; }
+
+.dealer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dealer-grid-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 14px;
+  font-size: 13px;
+  border-bottom: 0.5px solid var(--border, #dcdcdc);
+}
+
+.dealer-grid-item.border-end {
+  border-right: 0.5px solid var(--border, #dcdcdc);
+}
+
+.dealer-grid-item .form-check-input {
+  margin-top: 2px;
+}
+
+// Collapse to single column on narrow screens
+@media (max-width: 576px) {
+  .dealer-grid {
+    grid-template-columns: 1fr;
+  }
+  .dealer-grid-item.border-end {
+    border-right: none;
+  }
+}

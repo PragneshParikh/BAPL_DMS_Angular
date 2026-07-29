@@ -4,189 +4,334 @@
 
 <div class="row">
   <div class="col-lg-12">
+
+    <!-- FILTERS -->
     <div class="card">
       <div class="card-header">
         <h5 class="card-title mb-0">Filters</h5>
       </div>
-
       <div class="card-body">
         <form [formGroup]="filterForm">
           <div class="row g-2 align-items-end">
-            <div class="col-md-3">
+
+            <div class="col-xl-2 col-md-4">
               <label class="form-label">Dealer</label>
               <select formControlName="dealerCode" class="form-select form-select-sm">
                 <option value="">-- All Dealers --</option>
-                <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
-                  {{ dealer.dealerName }}
-                </option>
+                <option *ngFor="let d of dealerList" [value]="d.dealerCode">{{ d.dealerName }}</option>
               </select>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-xl-2 col-md-4">
               <label class="form-label">From Date</label>
               <input type="date" formControlName="fromDate" class="form-control form-control-sm">
             </div>
 
-            <div class="col-md-3">
+            <div class="col-xl-2 col-md-4">
               <label class="form-label">To Date</label>
               <input type="date" formControlName="toDate" class="form-control form-control-sm">
             </div>
 
-            <div class="col-md-auto ms-auto d-flex align-items-end gap-2">
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Financier</label>
+              <select formControlName="financier" class="form-select form-select-sm">
+                <option value="">-- All Financiers --</option>
+                <option *ngFor="let f of financierList" [value]="f.ledgerName">{{ f.ledgerName }}</option>
+              </select>
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Sale Type</label>
+              <select formControlName="saleType" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option *ngFor="let s of saleTypeList" [value]="s">{{ s }}</option>
+              </select>
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Customer Type</label>
+              <select formControlName="customerType" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option *ngFor="let c of customerTypeList" [value]="c">{{ c }}</option>
+              </select>
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Bill Type</label>
+              <select formControlName="billType" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option *ngFor="let b of billTypeList" [value]="b.id">{{ b.name }}</option>
+              </select>
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Status</label>
+              <select formControlName="status" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option *ngFor="let s of statusList" [value]="s">{{ s }}</option>
+              </select>
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Sale Bill No</label>
+              <input type="text" formControlName="saleBillNo"
+                class="form-control form-control-sm" placeholder="Bill No">
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Search</label>
+              <input type="text" formControlName="search"
+                class="form-control form-control-sm" placeholder="Name, chassis, model...">
+            </div>
+
+            <div class="col-xl-2 col-md-4 d-flex gap-2 mt-1 align-items-end">
               <button type="button" class="btn btn-primary btn-sm" (click)="onSearch()">
-                Search
+                <i class="ri-search-line me-1"></i>Search
               </button>
-
-              <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">
-                Reset
-              </button>
-
-              <button
-                type="button"
-                class="btn btn-success btn-sm"
-                (click)="exportToCSV()"
-                
-                aria-label="Export to Excel">
+              <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">Reset</button>
+              <button type="button" class="btn btn-success btn-sm"
+                (click)="exportToCSV()" [disabled]="!reportData.length" title="Export CSV">
                 <i class="ri-file-excel-2-line"></i>
               </button>
             </div>
+
           </div>
         </form>
       </div>
     </div>
 
+    <!-- TOTALS CARDS -->
+    <div *ngIf="!isLoading && totals && reportData.length > 0" class="row g-2 mb-2">
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">Records</p>
+          <h6 class="mb-0 fw-semibold">{{ totals.totalRecords }}</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">Grand Total</p>
+          <h6 class="mb-0 text-primary">₹{{ totals.grandTotal | number:'1.0-0' }}</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">Taxable</p>
+          <h6 class="mb-0">₹{{ totals.totalTaxable | number:'1.0-0' }}</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">SGST + CGST</p>
+          <h6 class="mb-0">₹{{ (totals.totalSgst + totals.totalCgst) | number:'1.0-0' }}</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">IGST</p>
+          <h6 class="mb-0">₹{{ totals.totalIgst | number:'1.0-0' }}</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">FAME II</p>
+          <h6 class="mb-0">₹{{ totals.totalFameII | number:'1.0-0' }}</h6>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
     <div class="card">
-      <div class="card-body">
-        <div *ngIf="isLoading" class="text-center p-4">
-          Loading...
+      <div class="card-body p-0">
+
+        <div *ngIf="isLoading" class="text-center p-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="text-muted mt-2">Loading report data...</p>
         </div>
 
         <div class="table-responsive" *ngIf="!isLoading">
-          <table class="table table-bordered table-sm table-striped text-nowrap mb-0" style="font-size: 12px;">
-            <thead class="table-light">
+          <table class="table table-bordered table-hover table-striped align-middle text-nowrap mb-0"
+            style="font-size:11px">
+            <thead class="table-dark">
               <tr>
-                  <th>Sr. No</th>
-                  <th>Model Code</th>
-                  <th>Model Description</th>
-                  <th>OEM Model Name</th>
-                  <th>Vehicle Group</th>
-                  <th>Color Code</th>
-                  <th>Chasis No</th>
-                  <th>Reg No</th>
+                <th>Sr</th>
+                <th>Sale Bill No</th>
+                <th>Invoice No</th>
+                <th>Sale Date</th>
+                <th>Status</th>
 
-                  <th>Dealer Code</th>
-                  <th>Dealer Name</th>
-                  <th>Dealer City</th>
-                  <th>Dealer State</th>
+                <th>Dealer Code</th>
+                <th>Dealer Name</th>
+                <th>Dealer City</th>
+                <th>Dealer State</th>
+                <th>Location</th>
+                <th>Location City</th>
 
-                  <th>Location</th>
-                  <th>Loc. Code</th>
-                  <th>Loc. City</th>
+                <th>Customer Name</th>
+                <th>Billing Name</th>
+                <th>Cust. Type</th>
+                <th>Mobile</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Address</th>
+                <th>Gender</th>
+                <th>DOB</th>
+                <th>Account Type</th>
+                <th>Party Email</th>
+                <th>Occupation</th>
 
-                  <th>Name</th>
-                  <th>Address 1</th>
-                  <th>Address 2</th>
+                <th>Sale Type</th>
+                <th>Bill Type</th>
+                <th>Financier</th>
+                <th>Executive</th>
+                <th>Booking ID</th>
 
-                  <th>Customer State</th>
-                  <th>Customer City</th>
+                <th>Chassis No</th>
+                <th>Motor No</th>
+                <th>Item Code</th>
+                <th>Model</th>
+                <th>Model Desc</th>
+                <th>OEM Model</th>
+                <th>Colour</th>
+                <th>HSN</th>
+                <th>Mfg Year</th>
+                <th>Reg No</th>
+                <th>Ins No</th>
+                <th>Dispatch Date</th>
 
-                  <th>Pin</th>
-                  <th>Email</th>
-                  <th>Mobile No</th>
+                <th>Battery No</th>
+                <th>Battery No 2</th>
+                <th>Battery No 3</th>
+                <th>Battery No 4</th>
+                <th>Battery No 5</th>
+                <th>Battery Capacity</th>
+                <th>Charger No</th>
+                <th>Controller No</th>
+                <th>VCU</th>
 
-                  <th>Type</th>
-
-                  <th>Booking ID</th>
-
-                  <th>Dispatch Date</th>
-                  <th>Sale Date</th>
-
-                  <th>Invoice No</th>
-
-                  <th>Bill Type</th>
-
-                  <th>Finance By</th>
-
-                  <th>Financer Code</th>
-
-                  <th>Financer Category</th>
-
-                  <th>Executive Name</th>
-
-                  <th>Prospect Name</th>
-
-                  <th>Prospect Mob. No</th>
-
-                  <th>Motor Number</th>
-
-                  <th>Battery No</th>
-                  <th>Battery No 2</th>
-                  <th>Battery No 3</th>
-
-                  <th>Battery Capacity</th>
-
-                  <th>Subsidy Amount</th>
-
-                  <th>Fame II Required</th>
-
-                  <th>Total Amount</th>
+                <th class="text-end">Item Rate</th>
+                <th class="text-end">Pre-GST</th>
+                <th class="text-end">Taxable</th>
+                <th class="text-end">SGST%</th>
+                <th class="text-end">SGST</th>
+                <th class="text-end">CGST%</th>
+                <th class="text-end">CGST</th>
+                <th class="text-end">IGST%</th>
+                <th class="text-end">IGST</th>
+                <th class="text-end">FAME II</th>
+                <th class="text-end">Reg Amt</th>
+                <th class="text-end">Insurance</th>
+                <th class="text-end">Post-GST</th>
+                <th class="text-end">Final Amt</th>
+                <th class="text-end">Total Amt</th>
+                <th class="text-end">Subsidy</th>
+                <th>FAME II Req.</th>
               </tr>
             </thead>
-
             <tbody>
               <tr *ngIf="reportData.length === 0">
-                <td colspan="43" class="text-center">No data available</td>
+                <td colspan="65" class="text-center text-muted py-4">
+                  No records found. Adjust filters and search again.
+                </td>
               </tr>
 
               <tr *ngFor="let item of reportData">
                 <td>{{ item.srNo }}</td>
-                <td>{{ item.modelCode }}</td>
-                <td>{{ item.modelDescription }}</td>
-                <td>{{ item.oemModelName }}</td>
-                <td>{{ item.vehicleGroup }}</td>
-                <td>{{ item.colorCode }}</td>
-                <td>{{ item.chasisNo }}</td>
-                <td>{{ item.regNo }}</td>
+                <td>{{ item.saleBillNo || '-' }}</td>
+                <td>{{ item.invoiceNo || '-' }}</td>
+                <td>{{ formatDate(item.saleDate) }}</td>
+                <td>
+                  <span class="badge"
+                    [ngClass]="{
+                      'bg-success':          item.status === 'Invoiced',
+                      'bg-warning text-dark': item.status === 'PerformaCreated',
+                      'bg-secondary':        item.status === 'Pending',
+                      'bg-danger':           item.status === 'Invalid'
+                    }" *ngIf="item.status; else dash">{{ item.status }}</span>
+                  <ng-template #dash>-</ng-template>
+                </td>
+
                 <td>{{ item.dealerCode }}</td>
                 <td>{{ item.dealerName }}</td>
                 <td>{{ item.dealerCity }}</td>
                 <td>{{ item.dealerState }}</td>
                 <td>{{ item.location }}</td>
-                <td>{{ item.locCode }}</td>
                 <td>{{ item.locCity }}</td>
-                <td>{{ item.name }}</td>
-                <td>{{ item.address1 }}</td>
-                <td>{{ item.address2 }}</td>
-                <td>{{ item.customerState }}</td>
+
+                <td>{{ item.customerName }}</td>
+                <td>{{ item.billingName }}</td>
+                <td>{{ item.customerType }}</td>
+                <td>{{ item.customerMobile }}</td>
                 <td>{{ item.customerCity }}</td>
-                <td>{{ item.pin }}</td>
-                <td>{{ item.email }}</td>
-                <td>{{ item.mobileNo }}</td>
-                <td>{{ item.type }}</td>
+                <td>{{ item.customerState }}</td>
+                <td>{{ item.address1 }}</td>
+                <td>{{ item.gender }}</td>
+                <td>{{ formatDate(item.dob) }}</td>
+                <td>{{ item.accountType }}</td>
+                <td>{{ item.partyEmail }}</td>
+                <td>{{ item.occupation }}</td>
+
+                <td>{{ item.saleType }}</td>
+                <td>{{ getBillTypeName(item.billType) }}</td>
+                <td>{{ item.financier || item.financeBy }}</td>
+                <td>{{ item.salesExecutive || item.executiveName }}</td>
                 <td>{{ item.bookingId }}</td>
+
+                <td>{{ item.chassisNo || item.chasisNo }}</td>
+                <td>{{ item.motorNo || item.motorNumber }}</td>
+                <td>{{ item.itemCode || item.modelCode }}</td>
+                <td>{{ item.modelName }}</td>
+                <td>{{ item.modelDescription }}</td>
+                <td>{{ item.oemModelName }}</td>
+                <td>{{ item.colour || item.colorCode }}</td>
+                <td>{{ item.hsn }}</td>
+                <td>{{ item.mfgYear }}</td>
+                <td>{{ item.regNo }}</td>
+                <td>{{ item.insNo }}</td>
                 <td>{{ formatDate(item.dispatchDate) }}</td>
-                <td>{{ formatDate(item.saleDate) }}</td>
-                <td>{{ item.invoiceNo }}</td>
-                <td>{{ item.billType }}</td>
-                <td>{{ item.financeBy }}</td>
-                <td>{{ item.financerCode }}</td>
-                <td>{{ item.financerCategory }}</td>
-                <td>{{ item.executiveName }}</td>
-                <td>{{ item.prospectName }}</td>
-                <td>{{ item.prospectMobNo }}</td>
-                <td>{{ item.motorNumber }}</td>
+
                 <td>{{ item.batteryNo }}</td>
                 <td>{{ item.batteryNo2 }}</td>
                 <td>{{ item.batteryNo3 }}</td>
+                <td>{{ item.batteryNo4 }}</td>
+                <td>{{ item.batteryNo5 }}</td>
                 <td>{{ item.batteryCapacity }}</td>
-                <td>{{ item.subsidyAmount }}</td>
-                <td>{{ item.fameIIRequired ? 'YES' : 'NO' }}</td>
-                <td>{{ item.totalAmount }}</td>
+                <td>{{ item.chargerNo }}</td>
+                <td>{{ item.controllerNo }}</td>
+                <td>{{ item.vcu }}</td>
+
+                <td class="text-end">{{ (item.itemRate || 0) | number:'1.2-2' }}</td>
+                <td class="text-end">{{ (item.preGstDiscount || 0) | number:'1.2-2' }}</td>
+                <td class="text-end">{{ (item.taxableAmount || 0) | number:'1.2-2' }}</td>
+                <td class="text-end">{{ item.sgstPer ? item.sgstPer + '%' : '-' }}</td>
+                <td class="text-end">{{ (item.sgstAmount || 0) | number:'1.2-2' }}</td>
+                <td class="text-end">{{ item.cgstPer ? item.cgstPer + '%' : '-' }}</td>
+                <td class="text-end">{{ (item.cgstAmount || 0) | number:'1.2-2' }}</td>
+                <td class="text-end">{{ item.igstPer ? item.igstPer + '%' : '-' }}</td>
+                <td class="text-end">{{ (item.igstAmount || 0) | number:'1.2-2' }}</td>
+                <td class="text-end">{{ (item.fameIIDiscount || 0) | number:'1.2-2' }}</td>
+                <td class="text-end">{{ (item.regAmount || 0) | number:'1.2-2' }}</td>
+                <td class="text-end">{{ (item.insuranceAmount || 0) | number:'1.2-2' }}</td>
+                <td class="text-end">{{ (item.postGstDiscount || 0) | number:'1.2-2' }}</td>
+                <td class="text-end fw-semibold">{{ (item.finalAmount || 0) | number:'1.2-2' }}</td>
+                <td class="text-end">{{ (item.totalAmount || 0) | number:'1.2-2' }}</td>
+                <td class="text-end">{{ (item.subsidyAmount || 0) | number:'1.2-2' }}</td>
+                <td class="text-center">
+                  <span *ngIf="item.fameIIRequired !== undefined"
+                    class="badge" [ngClass]="item.fameIIRequired ? 'bg-success' : 'bg-light text-dark'">
+                    {{ item.fameIIRequired ? 'YES' : 'NO' }}
+                  </span>
+                  <span *ngIf="item.fameIIRequired === undefined">-</span>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
+
       </div>
     </div>
+
   </div>
 </div>

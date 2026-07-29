@@ -19,10 +19,11 @@ import { RepairBillService } from '../../core/services/repair-bill-service';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { Console } from 'console';
+import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
 
 @Component({
   selector: 'app-repair-bill',
-  imports: [FormsModule, CommonModule,NgbDropdownModule],
+  imports: [FormsModule, CommonModule, NgbDropdownModule],
   templateUrl: './repair-bill.html',
   styleUrl: './repair-bill.scss',
 })
@@ -38,7 +39,10 @@ export class RepairBill implements OnInit {
   partCodeList: any[] = [];
   materialedJobCarDList: any[] = [];
   insurancelist: any[] = [];
-  selectedJobCard: any = {};
+  selectedJobCard: any = {
+    jobCardHeader: {},
+    jobCardCustomer: {}
+  };
   itemdesc: any;
   showJobDetails = false;
   selectedLocationCode: any;
@@ -77,7 +81,9 @@ export class RepairBill implements OnInit {
   isLabourSelected = false;
   isAccessorySelected = false;
   showValidation = false;
-  repairBillStatus = ''
+  repairBillStatus = '';
+  issuetypeId = 0;
+  issuetypeName = '';
 
   repairBillId: number = 0;
   isEditMode = false;
@@ -88,6 +94,7 @@ export class RepairBill implements OnInit {
   discount = 0;
 
   discountType = 'Value';
+  discountPartType = 'Value';
 
   cgst = 0;
   sgst = 0;
@@ -136,10 +143,29 @@ export class RepairBill implements OnInit {
   showInsuranceDropdown = false;
   selectedInsuranceId: any;
   totalTax: any;
+  totalTaxPer: number = 0;
   remarks: string;
   labourId: any;
   partwiseLabourId: any;
   customerLedgerId: any;
+  searchModel: JobCardSearchModel = {
+    dealerCode: '',
+    fromDate: '',
+    toDate: '',
+    serviceLocation: '',
+    jobNo: null,
+    customerName: '',
+    chassisNo: ''
+  };
+  labourHsnCode: string;
+  dealerCode: string;
+  isPartEditMode: boolean;
+  editPartIndex: number;
+  selectedPartQty: number;
+  selectedPartIssueType: number;
+  partdiscount: number;
+  dealerState: string;
+  discountValue: number;
 
 
 
@@ -160,7 +186,17 @@ export class RepairBill implements OnInit {
 
   }
   ngOnInit(): void {
-    debugger
+    const today = new Date();
+
+    // Current month first date
+    const firstDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    );
+
+    this.searchModel.fromDate = this.formatDate(firstDayOfMonth);
+    this.searchModel.toDate = this.formatDate(today);
     this.loadPrefix();
     this.fetchLocations();
     this.loadPartNo();
@@ -171,14 +207,21 @@ export class RepairBill implements OnInit {
       if (params['id']) {
         this.repairBillId = +params['id'];
         this.isEditMode = true;
-
+        this.showJobDetails = true;
         this.getRepairBillById(this.repairBillId);
       }
     });
 
   }
 
+  saveOrUpdateRepairBill() {
 
+    if (this.selectedJobCard?.jobCardHeader?.jobtype != 1) {
+      this.updateRepairBill();
+    } else {
+      this.saveRepairBill();
+    }
+  }
   loadPrefix(): void {
     this.loader.show();
     const dealerCode = this.storageService.getDealerCode();
@@ -190,7 +233,7 @@ export class RepairBill implements OnInit {
         this.billNo = Number(res.split('/').pop());
       }, error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
 
       }
     })
@@ -212,10 +255,8 @@ export class RepairBill implements OnInit {
       },
 
       error: (err) => {
-
         this.loader.hide();
-
-        console.log(err);
+        console.error(err);
       }
     });
   }
@@ -251,7 +292,6 @@ export class RepairBill implements OnInit {
 
     this.showInsuranceDropdown = false;
 
-    console.log(item);
   }
 
   loadPartNo(): void {
@@ -262,11 +302,10 @@ export class RepairBill implements OnInit {
       next: (data: any[]) => {
         this.loader.hide();
         this.partCodeList = data;
-        //console.log("PArcodeList", this.partCodeList);
       },
       error: (err) => {
         this.loader.hide();
-        console.log(err);
+        console.error(err);
 
       }
     })
@@ -275,8 +314,14 @@ export class RepairBill implements OnInit {
 
   fetchLocations(): void {
     this.loader.show();
-    const dealerCode = this.storageService.getDealerCode();
-    this.locationService.getLocationList(dealerCode).subscribe({
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
+    this.locationService.getLocationList(this.dealerCode).subscribe({
       next: (data: any[]) => {
         // only Workshop
         this.loader.hide();
@@ -303,31 +348,23 @@ export class RepairBill implements OnInit {
     this.showPopup = false;
   }
   loadJobCardList(): void {
-    debugger
+    debugger;
     let dealerCode = '';
     if (!this.isSuperAdmin) {
       dealerCode = this.storageService.getDealerCode();
     }
     this.loader.show();
 
-    this.jobCardService.getJobCardList(dealerCode,
-      this.dateFrom,
-      this.dateTo,
-      this.jobNo,
-      this.registerNo,
-      this.chassisNo
+    this.jobCardService.getJobCardListRepairBill(this.searchModel
     ).subscribe({
       next: (res) => {
         this.loader.hide();
         this.jobCardList = res;
-        console.log("listing : ", this.jobCardList);
 
-        // this.loading = false;
       },
       error: (err) => {
         this.loader.hide();
         console.error('Error fetching job cards', err);
-        // this.loading = false;
       }
     });
   }
@@ -343,7 +380,6 @@ export class RepairBill implements OnInit {
   }
 
   onSelect(item: any) {
-    debugger;
     if (item.isMaterialTransfer === false || item.isMaterialTransfer === "null") {
       this.toaster.show('Material Transfer is not completed for this Job Card', {
         classname: 'bg-warning text-dark',
@@ -352,17 +388,14 @@ export class RepairBill implements OnInit {
 
     }
     this.selectedJobCard = item;
-
     this.chassisNo = this.selectedJobCard.jobCardHeader.chassisno;
     this.insValidTill = this.selectedJobCard.jobCardCustomer.insuranceExpDate;
-    console.log("testvalidtill", this.insValidTill)
     this.vehicleSaleBillService.getPolicyNo(this.chassisNo).subscribe({
       next: (res) => {
         this.policyNo = res;
-        console.log(this.policyNo)
       },
       error: (err) => {
-        console.log(err);
+        console.error(err);
       }
     })
     this.showPopup = false;
@@ -380,84 +413,121 @@ export class RepairBill implements OnInit {
     this.loader.show();
 
     const jobId = this.selectedJobCard?.jobCardHeader?.id;
+    const dealerCode = this.storageService.getDealerCode();
 
     this.isPartSelected = true;
     this.isLabourSelected = true;
 
-    this.jobCardService.getMaterialedJobCardList(jobId).subscribe({
+    this.jobCardService.getMaterialedJobCardList(jobId, dealerCode).subscribe({
 
       next: (res) => {
 
         this.loader.hide();
 
         this.materialedJobCarDList = res;
-        //console.log("11111", this.materialedJobCarDList)
-
         // Part Grid
-        this.partItems = [...res];
-        console.log("11111", this.partItems)
+        this.materialedJobCarDList = res.map((x: any) => ({
+          ...x,
+          issuetypeName: this.IssueType.find(i => i.id === Number(x.issueType))?.name || '',
+          issuetypeId: this.IssueType.find(i => i.id == Number(x.issueType))?.id || 0
+        }));
+
+        this.materialedJobCarDList.forEach(item => {
+
+          item.discount = Number(item.discount || 0);
+
+          // Taxable Amount
+          item.taxableAmount =
+            (item.issuetypeName === 'U/W' || item.issuetypeName === 'FSC') ? 0 :
+              (Number(item.partQty) * Number(item.partRate)) - item.discount;
+
+          // Net Amount
+          item.netAmount =
+            (item.issuetypeName === 'U/W' || item.issuetypeName === 'FSC')
+              ? 0
+              : item.taxableAmount +
+              Number(item.cgstAmount || 0) +
+              Number(item.sgstAmount || 0) +
+              Number(item.igstAmount || 0);
+          item.discountValue = item.discountValue || 0;
+          // item.netAmount =
+          //   item.taxableAmount +
+          //   Number(item.cgstAmount || 0) +
+          //   Number(item.sgstAmount || 0) +
+          //   Number(item.igstAmount || 0);
+        });
+
+        this.partItems = [...this.materialedJobCarDList];
+
+        this.calculateTotals();
 
         // Labour Grid
-        this.labourItems = [];
+
+        // For Add Mode only
+        if (!this.isEditMode) {
+          this.labourItems = [];
+        }
 
         res.forEach((part: any) => {
 
-          if (
-            part.labourCodeDetailslist &&
-            part.labourCodeDetailslist.length > 0
-          ) {
+          if (part.labourCodeDetailslist?.length > 0) {
 
             part.labourCodeDetailslist.forEach((labour: any) => {
 
-              this.labourItems.push({
-                partWiseLabourId: labour.partwiseLabourId,
-                labourId: 0,
-                labourCode: labour.labourCode,
-                description: labour.labourName,
+              const exists = this.labourItems.some(x =>
+                x.partWiseLabourId === labour.partwiseLabourId
+              );
 
-                qty: 1,
-                rate: labour.labourRate ?? 0,
-                waveRate: this.waveRate ?? 0,
+              if (!exists) {
 
-                discount: 0,
-                discountType: this.discountType,
+                this.labourItems.push({
+                  partWiseLabourId: labour.partwiseLabourId,
+                  labourId: 0,
+                  labourCode: labour.labourCode,
+                  description: labour.labourName,
 
-                igst: labour.igst ?? 0,
-                igstAmount: 0,
+                  qty: 1,
+                  rate: labour.labourRate ?? 0,
+                  waveRate: this.waveRate ?? 0,
+                  labourHsnCode: labour.labourHsnCode ?? '',
+                  discountValue: 0,
+                  discount: 0,
+                  discountType: this.discountType,
 
-                cgst: labour.cgst ?? 0,
-                cgstAmount: 0,
+                  igst: labour.igst ?? 0,
+                  igstAmount: 0,
 
-                sgst: labour.sgst ?? 0,
-                sgstAmount: 0,
+                  cgst: labour.cgst ?? 0,
+                  cgstAmount: 0,
 
-                taxableAmount: this.totalTaxableAmount ?? 0,
-                taxAmount: this.totalTax ?? 0,
+                  sgst: labour.sgst ?? 0,
+                  sgstAmount: 0,
 
-                netAmount: labour.labourRate ?? 0,
+                  taxableAmount: 0,
+                  taxAmount: 0,
+                  totalTaxPer: 0,
 
-                issuetypeId: part.issueType,
-                issuetypeName: '',
+                  netAmount: labour.labourRate ?? 0,
 
-                isAutoGenerated: true,
-                partCode: part.partCode
+                  issuetypeId: part.issueType,
+                  issuetypeName: '',
 
-              });
+                  isAutoGenerated: true,
+                  partCode: part.partCode
+                });
+
+              }
 
             });
 
           }
 
         });
-        console.log('materialload timeLabour Items', this.labourItems);
-
       },
 
       error: (err) => {
-
         this.loader.hide();
-        console.log(err);
-
+        console.error(err);
       }
 
     });
@@ -467,13 +537,12 @@ export class RepairBill implements OnInit {
   loadLabourCodelist(): void {
     this.loader.show();
     this.oemmodelName = this.selectedJobCard?.jobCardCustomer?.modelName
-    //console.log("test",this.oemmodelName);
-    this.labourMasterService.getLabourRateDropDown(this.oemmodelName).subscribe({
+    this.customerLedgerId = this.selectedJobCard?.jobCardCustomer?.customerLedgerId
+    const dealerCode = this.storageService.getDealerCode();
+    this.labourMasterService.getLabourRateDropDown(this.oemmodelName, this.customerLedgerId, dealerCode).subscribe({
       next: (res) => {
         this.loader.hide();
         this.labourCodeList = res;
-        //console.log("^^^", this.labourCodeList)
-
       },
       error: (err) => {
         this.loader.hide();
@@ -515,7 +584,6 @@ export class RepairBill implements OnInit {
   }
 
   selectLabour(item: any): void {
-
     this.selectedLabour = item;
     this.labourId = item.labourId;
     this.labourCode = item.labourCode;
@@ -526,7 +594,6 @@ export class RepairBill implements OnInit {
   }
 
   selectPart(item: any): void {
-
     this.selectedPart = item;
     this.itemcode = item.itemcode;
     this.selectedPartDescription = item.itemdesc;
@@ -537,13 +604,16 @@ export class RepairBill implements OnInit {
   }
 
   addLabour(): void {
-
+    const isSameState =
+      (this.selectedLabour?.dealerState || '').trim().toUpperCase() ===
+      (this.selectedLabour?.custState).trim().toUpperCase();
     const grossAmount = this.qty * this.selectedRate;
 
     const selectedIssue = this.IssueType.find(
       x => x.id == this.selectedIssueType
     );
 
+    this.discountValue = this.discount || 0;
     let discountAmount = this.discount || 0;
 
     if (this.discountType === '%') {
@@ -552,25 +622,73 @@ export class RepairBill implements OnInit {
         grossAmount * discountAmount / 100;
     }
 
-    const taxableAmount =
+    let taxableAmount =
       grossAmount - discountAmount;
 
-    const cgstAmount =
-      taxableAmount * (this.selectedLabour?.cgst || 0) / 100;
+    let cgstAmount = 0;
+    let sgstAmount = 0;
+    let igstAmount = 0;
 
-    const sgstAmount =
-      taxableAmount * (this.selectedLabour?.sgst || 0) / 100;
+    if (selectedIssue?.name === 'U/W' || selectedIssue?.name === 'FSC') { cgstAmount = 0; sgstAmount = 0; igstAmount = 0; taxableAmount = 0; this.totalTaxPer = 0; }
+    else {
+      if (isSameState) {
 
-    const igstAmount =
-      taxableAmount * (this.selectedLabour?.igst || 0) / 100;
+        // Intrastate
+        cgstAmount = taxableAmount * (this.selectedLabour?.cgst || 0) / 100;
+        sgstAmount = taxableAmount * (this.selectedLabour?.sgst || 0) / 100;
+        igstAmount = 0;
+        this.totalTaxPer = this.selectedLabour?.cgst + this.selectedLabour?.sgst
+
+
+      } else {
+
+        // Interstate
+        cgstAmount = 0;
+        sgstAmount = 0;
+        igstAmount = taxableAmount * (this.selectedLabour?.igst || 0) / 100;
+        this.totalTaxPer = this.selectedLabour?.igst || 0
+      }
+    }
+
+    // const cgstAmount =
+    //   taxableAmount * (this.selectedLabour?.cgst || 0) / 100;
+
+    // const sgstAmount =
+    //   taxableAmount * (this.selectedLabour?.sgst || 0) / 100;
+
+    // const igstAmount =
+    //   taxableAmount * (this.selectedLabour?.igst || 0) / 100;
 
     this.totalTax =
       cgstAmount +
       sgstAmount +
       igstAmount;
 
+
     const netAmount =
       taxableAmount + this.totalTax;
+
+
+    const alreadyExists = this.labourItems.some(x =>
+      this.editIndex === null &&
+      (
+        x.labourId === this.labourId ||
+        x.labourCode?.trim().toLowerCase() ===
+        this.labourCode?.trim().toLowerCase()
+      )
+    );
+
+    if (alreadyExists) {
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Duplicate Labour',
+        text: 'This labour is already added.'
+      });
+
+      return;
+    }
+
 
     const labourItem: LabourItem = {
 
@@ -585,7 +703,9 @@ export class RepairBill implements OnInit {
 
       rate: this.selectedRate,
       waveRate: this.waveRate,
+      labourHsnCode: this.labourHsnCode,
 
+      discountValue: this.discount,
       discount: discountAmount,
 
       discountType: this.discountType,
@@ -599,14 +719,16 @@ export class RepairBill implements OnInit {
       taxableAmount: taxableAmount,
 
       taxAmount: this.totalTax,
+      totalTaxPer: this.totalTaxPer,
 
-      igstAmount: igstAmount,
       cgstAmount: cgstAmount,
       sgstAmount: sgstAmount,
+      igstAmount: igstAmount,
+
 
       netAmount: netAmount,
 
-      issuetypeId: this.selectedIssueType[0].issuetypeId,
+      issuetypeId: this.selectedIssueType,
       issuetypeName: selectedIssue?.name || '',
       // NEW
       isAutoGenerated: false,
@@ -629,10 +751,10 @@ export class RepairBill implements OnInit {
     this.calculateTotals();
 
     this.clearLabourForm();
+
   }
 
   calculateTotals(): void {
-
     const labourDiscount =
       this.labourItems.reduce(
         (sum, x) => sum + (x.discount || 0),
@@ -640,7 +762,7 @@ export class RepairBill implements OnInit {
       );
 
     const partDiscount =
-      this.partItems.reduce(
+      this.materialedJobCarDList.reduce(
         (sum, x) => sum + (x.discount || 0),
         0
       );
@@ -653,9 +775,8 @@ export class RepairBill implements OnInit {
         (sum, x) => sum + (x.taxableAmount || 0),
         0
       );
-
     const partTaxable =
-      this.partItems.reduce(
+      this.materialedJobCarDList.reduce(
         (sum, x) => sum + (x.taxableAmount || 0),
         0
       );
@@ -670,35 +791,146 @@ export class RepairBill implements OnInit {
       );
 
     const partNet =
-      this.partItems.reduce(
+      this.materialedJobCarDList.reduce(
         (sum, x) => sum + (x.netAmount || 0),
         0
       );
 
     this.totalNetAmount =
       labourNet + partNet;
-
+    // this.discountValue = partDiscount + labourDiscount;
     this.amountReceived =
       this.totalNetAmount;
   }
   editLabour(index: number): void {
-
     const item = this.labourItems[index];
 
     this.editIndex = index;
-
     this.labourCode = item.labourCode;
     this.selectedDescription = item.description;
+    this.selectedLabour = this.labourCodeList.find(
+      x => x.labourCode === item.labourCode
+    );
+
+
+    this.labourId = item.labourId;
+    this.partwiseLabourId = item.partWiseLabourId;
+
+    //this.selectedCashAccount = 
 
     this.qty = item.qty;
     this.selectedRate = item.rate;
-
+    this.labourHsnCode = item.labourHsnCode;
     this.discount = item.discount;
     this.discountType = item.discountType;
-
+    this.issuetypeId = item.issuetypeId;
+    this.issuetypeName = item.issuetypeName;
     this.selectedIssueType = item.issuetypeId;
 
+  }
+  editPart(index: number) {
+    const item = this.partItems[index];
 
+    // const item = this.materialedJobCarDList[index];
+
+    item.custState = this.selectedJobCard?.partyState;
+    item.dealerState = this.dealerState;
+
+    this.isPartEditMode = true;
+    this.editPartIndex = index;
+
+    // Only editable fields
+
+    this.partdiscount = item.discount;
+    this.discountPartType = item.discountType;
+    this.discountValue = this.partDiscount;
+
+    // Display only (read-only)
+    this.itemcode = item.partCode;
+    this.selectedPartDescription = item.partDesc;
+    this.selectedPartQty = item.partQty;
+    this.selectedPartRate = item.partRate;
+    this.issuetypeId = item.issuetypeId;
+    this.issuetypeName = item.issuetypeName;
+    this.selectedPartIssueType = item.issuetypeId;
+  }
+  updatePart(): void {
+
+    const item = this.partItems[this.editPartIndex];
+
+    //item.discountValue = Number(this.discountValue||0);
+    item.discount = Number(this.partdiscount || 0);
+    item.discountType = this.discountPartType;
+    item.discountValue = Number(this.partdiscount || 0);
+
+    item.issuetypeId = this.selectedPartIssueType;
+
+    const issue = this.IssueType.find(
+      x => x.id === this.selectedPartIssueType
+    );
+
+    item.issuetypeName = issue?.name || '';
+
+
+    this.calculatePart(item);
+
+    this.isPartEditMode = false;
+    this.editPartIndex = -1;
+  }
+  calculatePart(item: PartItem): void {
+    const grossAmount = Number(item.partQty || 0) * Number(item.partRate || 0);
+
+    let discountAmount = Number(item.discount || 0);
+    let discountValue = Number(item.discount || 0);
+
+    if (item.discountType === '%') {
+      discountAmount = grossAmount * discountAmount / 100;
+    }
+
+    const taxableAmount = grossAmount - discountAmount;
+
+    const isSameState =
+      (item.dealerState || '').trim().toUpperCase() ===
+      (item.custState || '').trim().toUpperCase();
+
+    let cgstAmount = 0;
+    let sgstAmount = 0;
+    let igstAmount = 0;
+
+    if (isSameState) {
+
+      cgstAmount = taxableAmount * (item.cgst || 0) / 100;
+      sgstAmount = taxableAmount * (item.sgst || 0) / 100;
+
+    } else {
+
+      igstAmount = taxableAmount * (item.igst || 0) / 100;
+
+    }
+
+    item.discountValue = discountValue;
+    item.discount = discountAmount;
+    item.taxableAmount = taxableAmount;
+
+    item.cgstAmount = cgstAmount;
+    item.sgstAmount = sgstAmount;
+    item.igstAmount = igstAmount;
+
+    item.taxAmount =
+      cgstAmount +
+      sgstAmount +
+      igstAmount;
+
+    item.netAmount =
+      taxableAmount +
+      item.taxAmount;
+
+    item.totalTaxPer = isSameState
+      ? (item.cgst || 0) + (item.sgst || 0)
+      : (item.igst || 0);
+
+    this.calculateTotals();
+    this.clearPartForm();
   }
   deleteLabour(index: number): void {
 
@@ -772,8 +1004,11 @@ export class RepairBill implements OnInit {
   }
 
   applyLabourDiscount(): void {
-    // debugger
     this.labourItems.forEach(item => {
+      this.selectedIssueType = item.issuetypeId;
+      const isSameState =
+        (item.dealerState || '').trim().toUpperCase() ===
+        (item.custState || '').trim().toUpperCase();
 
       const grossAmount =
         item.qty * item.rate;
@@ -797,20 +1032,38 @@ export class RepairBill implements OnInit {
         grossAmount -
         discountAmount;
 
-      const cgstAmount =
-        taxableAmount *
-        item.cgst /
-        100;
+      let cgstAmount = 0;
+      let sgstAmount = 0;
+      let igstAmount = 0;
 
-      const sgstAmount =
-        taxableAmount *
-        item.sgst /
-        100;
+      if (isSameState) {
 
-      const igstAmount =
-        taxableAmount *
-        item.igst /
-        100;
+        // Intrastate
+        cgstAmount = taxableAmount * (item.cgst || 0) / 100;
+        sgstAmount = taxableAmount * (item.sgst || 0) / 100;
+        igstAmount = 0;
+        // this.totalTaxPer = this.selectedLabour?.cgst + this.selectedLabour?.sgst
+
+        this.totalTaxPer =
+          (item.cgst || 0) +
+          (item.sgst || 0);
+
+
+
+
+
+      } else {
+
+        // Interstate
+        cgstAmount = 0;
+        sgstAmount = 0;
+        igstAmount = taxableAmount * (item.igst || 0) / 100;
+        //this.totalTaxPer = this.selectedLabour?.igst
+
+        this.totalTaxPer =
+          (item.igst || 0);
+
+      }
 
       const totalTax =
         cgstAmount +
@@ -823,11 +1076,13 @@ export class RepairBill implements OnInit {
       item.taxableAmount =
         taxableAmount;
 
+
       item.taxAmount =
         totalTax;
 
-      item.igstAmount =
-        igstAmount;
+      item.cgstAmount = cgstAmount;
+      item.sgstAmount = sgstAmount;
+      item.igstAmount = igstAmount;
 
       item.netAmount =
         taxableAmount +
@@ -835,8 +1090,11 @@ export class RepairBill implements OnInit {
     });
   }
   applyPartDiscount(): void {
-    debugger
     this.partItems.forEach(item => {
+
+      const isSameState =
+        (item.dealerState || '').trim().toUpperCase() ===
+        (item.custState || '').trim().toUpperCase();
 
       const grossAmount =
         item.partQty * item.partRate;
@@ -855,7 +1113,6 @@ export class RepairBill implements OnInit {
       const taxableAmount = grossAmount - discountAmount;
 
       const igstAmount = taxableAmount * item.igst / 100;
-
       item.discount = discountAmount;
       item.discountType = this.partDiscountType;
       item.taxableAmount = taxableAmount;
@@ -880,20 +1137,26 @@ export class RepairBill implements OnInit {
     this.selectedIssueType = null;
 
   }
+  clearPartForm(): void {
+
+    this.itemcode = '';
+
+    this.selectedPartDescription = '';
+
+    this.selectedPartQty = 1;
+
+    this.selectedPartRate = 0;
+
+    this.partdiscount = 0;
+
+    this.discountPartType = 'Value';
+
+    //this.selectedIssueType = null;
+
+  }
 
   //insurance popup
   saveInsurance(): void {
-
-    console.log({
-      insuranceParty: this.insuranceParty,
-      insuranceDescription: this.insuranceDescription,
-      surveyorName: this.surveyorName,
-      contactNumber: this.contactNumber,
-      policyNo: this.policyNo,
-      insValidTill: this.insValidTill,
-      zeroDep: this.zeroDep
-    });
-
     this.showInsurancePopup = false;
   }
 
@@ -901,13 +1164,23 @@ export class RepairBill implements OnInit {
     this.router.navigate(['/repair-bill-list']);
   }
 
+  isSaveClicked = false;
   saveRepairBill(): void {
-    debugger;
+    this.isSaveClicked = true;
     const dealerCode = this.storageService.getDealerCode();
-    //console.log("beforemaping labouritems", ...this.labourItems)
+    if (this.selectedCashAccount == null || this.selectedCashAccount == 0) {
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation',
+        text: 'Please select a Cash Account.'
+      });
+      return;
+    }
+
+
     const payload = {
       repairBillheader: {
-
         id: 0,
         locationCode: this.selectedLocation,
         dealerCode: dealerCode,
@@ -917,9 +1190,11 @@ export class RepairBill implements OnInit {
         billType: this.billType,
         cashAccount: this.selectedCashAccount || 0,
 
-        customerLedgerId: this.selectedJobCard?.jobCardCustomer?.customerLedgerId || 0,
+        customerLedgerId:
+          this.selectedJobCard?.jobCardCustomer?.customerLedgerId || 0,
 
-        jobId: this.selectedJobCard?.jobCardHeader?.id || 0,
+        jobId:
+          this.selectedJobCard?.jobCardHeader?.id || 0,
 
         remarks: this.remarks || '',
 
@@ -931,8 +1206,10 @@ export class RepairBill implements OnInit {
         insDescription: this.insuranceDescription || '',
         surveyorName: this.surveyorName || '',
         contactNumber: this.contactNumber || 0,
-        //policyNo: this.policyNo || '',
-        policyNo: Array.isArray(this.policyNo) ? this.policyNo[0] : this.policyNo,
+
+        policyNo: Array.isArray(this.policyNo)
+          ? this.policyNo[0]
+          : this.policyNo,
 
         insValidTill: this.insValidTill || null,
 
@@ -941,28 +1218,32 @@ export class RepairBill implements OnInit {
         totalTaxableAmount: this.totalTaxableAmount || 0,
         totalNetAmount: this.totalNetAmount || 0,
 
+
         amountRecived: this.amountReceived || 0,
 
         isActive: true,
         isSavedPerforma: true,
         isSavedInvoice: false,
-        RepairBillStatus: "Performa created"
+        repairBillStatus:
+          this.selectedJobCard?.jobCardHeader?.jobtype == 1
+            ? 'Billed'
+            : 'Performa created'
       },
 
       repairBillDetail: [
-
-        // PART ITEMS
-
+        // Your Existing Part Mapping
         ...this.partItems.map((item: any) => ({
           id: 0,
           itemType: 'Part',
-          partwiseLabourId: item.labourCodeDetailslist.partwiseLabourId || 0,
+          partwiseLabourId: item.labourCodeDetailslist?.partwiseLabourId || 0,
           materialId: item.materialTransferId || 0,
           partItemId: item.itemId || 0,
 
           qty: 0,
           rate: 0,
+          partHsnCode: item.partHsnCode || '',
 
+          discountValue: item.discountValue || 0,
           discount: item.discount || 0,
           discountType: item.discountType || 'Value',
 
@@ -982,13 +1263,13 @@ export class RepairBill implements OnInit {
           fscRate: item.fscRate || 0,
 
           partDiscount: item.discount || 0,
-
           partTaxbleAmount: item.taxableAmount || 0,
+          partNetAmount: item.netAmount || 0,
+          totalTaxPer: item.igst || 0
 
-          partNetAmount: item.netAmount || 0
         })),
 
-        // LABOUR ITEMS
+        // Your Existing Labour Mapping
         ...this.labourItems.map((item: any) => ({
           id: 0,
           itemType: 'Labour',
@@ -1002,7 +1283,8 @@ export class RepairBill implements OnInit {
 
           qty: item.qty || 0,
           rate: item.rate || 0,
-
+          labourHsnCode: item.labourHsnCode || '',
+          discountValue: item.discountValue || 0,
           discount: item.discount || 0,
           discountType: item.discountType || 'Value',
 
@@ -1013,7 +1295,7 @@ export class RepairBill implements OnInit {
           taxableAmount: item.taxableAmount || 0,
           netAmount: item.netAmount || 0,
 
-          issueType: Number(item.issueType) || 0,
+          issueType: item.issuetypeId || 0,
 
           isAutoGenerated: item.isAutoGenerated || false,
 
@@ -1027,47 +1309,62 @@ export class RepairBill implements OnInit {
         }))
       ]
     };
-    //console.log("Savetime partitems", ...this.partItems)
-    //console.log("Savetime labouritems", ...this.labourItems)
-    console.log(payload);
 
     this.loader.show();
 
-    this.repairBillService.insertRepairBill(payload)
+    this.repairBillService
+      .insertRepairBill(payload)
       .subscribe({
 
-        next: (res) => {
+        next: (res: any) => {
 
           this.loader.hide();
 
-          this.toaster.show('Repair Bill Saved Successfully', {
-            classname: 'bg-success text-dark',
-            icons: 'Sucess',
-            delay: 5000
-          });
-          console.log(res);
-          this.router.navigate(['/repair-bill-list']);
+          this.toaster.show(
+            this.selectedJobCard?.jobCardHeader?.jobtype == 1
+              ? 'Repair Bill Saved Successfully '
+              : 'Proforma Saved Successfully',
+            {
+              classname: 'bg-success text-dark',
+              delay: 3000
+            }
+          );
+
+          // Open Invoice in New Tab
+          if (res?.repairBillId) {
+
+            window.open(
+              `/repair-bill-invoice/${res.repairBillId}`,
+              '_blank'
+            );
+          }
+
+          // Navigate Back To List
+          this.router.navigate([
+            '/repair-bill-list'
+          ]);
         },
 
         error: (err) => {
 
           this.loader.hide();
 
-          console.log(err);
+          console.error(err);
 
-          this.toaster.show('Failed to Save Repair Bill', {
-            classname: 'bg-danger text-dark',
-            icons: 'error',
-            delay: 5000
-          });
+          this.toaster.show(
+            'Failed to Save Repair Bill',
+            {
+              classname: 'bg-danger text-dark',
+              delay: 5000
+            }
+          );
         }
       });
   }
 
   getRepairBillById(id: number): void {
-
     this.loader.show();
-    console.log("testcustomerdetail", this.selectedJobCard.customerLedgerId);
+
     this.repairBillService.getRepairBillById(id).subscribe({
 
       next: (res: any) => {
@@ -1085,11 +1382,20 @@ export class RepairBill implements OnInit {
         this.RepairBillprefix = header.prefix;
         this.billNo = header.billNo;
         this.billType = header.billType;
-        this.customerLedgerId = header.customerLedgerId;
+        this.selectedJobCard.jobCardCustomer.customerLedgerId = header.customerLedgerId;
         this.selectedCashAccount = header.cashAccount;
         this.selectedJobCard.partyName = header.partyName;
         this.selectedJobCard.partyMobileNo = header.mobileNumber;
         this.selectedJobCard.partyState = header.partyState;
+        this.selectedJobCard.jobCardHeader.id = header.jobId;
+        this.selectedJobCard.jobCardHeader.jobinDate = header.jobInDate;
+        this.selectedJobCard.jobCardHeader.jobNo = header.jobNo;
+        this.selectedJobCard.jobCardCustomer.registerNo = header.registerNo;
+        this.selectedJobCard.jobCardCustomer.modelName = header.modelName;
+        this.selectedJobCard.jobCardHeader.vehiclekms = header.vehicleKms;
+        this.selectedJobCard.jobCardCustomer.chassisNo = header.chassisNo;
+        this.selectedJobCard.jobCardHeader.technician = header.technician;
+        this.dealerState = header.dealerState;
         this.repairBillStatus = header.repairBillStatus;
         this.remarks = header.remarks;
 
@@ -1121,41 +1427,53 @@ export class RepairBill implements OnInit {
         res.repairBillDetail
           .filter((x: any) => x.itemType === 'Part')
           .forEach((d: any) => {
-
             const partItem: PartItem = {
 
               id: d.id,
-              materialId: d.materialId,
-              partItemId: d.partItemId,
+              materialId: d.materialId || d.materialTransferId,
+              partItemId: d.partItemId || d.itemId,
               partCode: d.partCode || '',
               partDesc: d.partDesc || '',
 
               partQty: Number(d.partQty || 0),
               partRate: Number(d.partRate || 0),
+              partMRP: Number(d.partMRP || 0),
+              fscRate: (d.issuetypeName === 'U/W'
+                ? d.partRate
+                : d.issuetypeName === 'FSC'
+                  ? d.fscRate
+                  : 0),
+              partHsnCode: d.partHsnCode || '',
 
-              discount: Number(d.partDiscount || 0),
+              discountValue: Number(d.discountValue),
+              discount: Number(d.partDiscount || d.discount),
               discountType: d.discountType || 'Value',
 
               taxableAmount: Number(d.partTaxbleAmount || 0),
+              taxAmount: Number(d.taxAmount || 0),
               netAmount: Number(d.partNetAmount || 0),
+              totalTaxPer: Number(d.totalTaxPer || 0),
 
-              issueType: String(d.issueType || ''),
+              issuetypeId: Number(d.issueType || 0),
               issuetypeName:
                 this.IssueType.find(
                   x => x.id == Number(d.issueType)
                 )?.name || '',
 
-              cgst: Number(d.cgst || 0),
-              sgst: Number(d.sgst || 0),
-              igst: Number(d.igst || 0),
-
-              igstAmount: Number(d.igstAmount || 0)
+              cgst: Number(d.cgst || d.totalTaxPer / 2 || 0),
+              sgst: Number(d.sgst || d.totalTaxPer / 2 || 0),
+              igst: Number(d.igst || d.totalTaxPer || 0),
+              cgstAmount: Number(d.cgstAmount || 0),
+              sgstAmount: Number(d.sgstAmount || 0),
+              igstAmount: Number(d.igstAmount || 0),
+              dealerState: header.dealerState,
+              custState: header.partyState
             };
 
             this.partItems.push(partItem);
+
             this.materialedJobCarDList = [...this.partItems];
           });
-        // console.log('Mapped Part Items', this.partItems);
 
         // =====================
         // LABOUR DETAILS
@@ -1164,7 +1482,6 @@ export class RepairBill implements OnInit {
         res.repairBillDetail
           .filter((x: any) => x.itemType === 'Labour')
           .forEach((d: any) => {
-
             this.labourItems.push({
 
               labourId: d.labourId || 0,
@@ -1177,13 +1494,15 @@ export class RepairBill implements OnInit {
               rate: d.rate || 0,
 
               waveRate: d.fscRate || 0,
+              labourHsnCode: d.labourHsnCode || 0,
 
+              discountValue: d.discountValue || 0,
               discount: d.discount || 0,
               discountType: d.discountType || 'Value',
 
-              cgst: d.cgst || 0,
-              sgst: d.sgst || 0,
-              igst: d.igst || 0,
+              cgst: Number(d.cgst) || 0,
+              sgst: Number(d.sgst) || 0,
+              igst: Number(d.igst) || 0,
 
               taxableAmount: d.taxableAmount || 0,
 
@@ -1193,6 +1512,7 @@ export class RepairBill implements OnInit {
                 (d.igstAmount || 0),
 
               netAmount: d.netAmount || 0,
+              totalTaxPer: this.totalTaxPer ?? 0,
 
               issuetypeId: Number(d.issueType) || 0,
 
@@ -1207,18 +1527,25 @@ export class RepairBill implements OnInit {
 
               isAutoGenerated: d.isAutoGenerated || false,
 
-              partCode: d.partCode || ''
+              partCode: d.partCode || '',
+              dealerState: d.dealerState
 
             });
 
           });
-        //console.log('Mapped Part Items', this.partItems);
         this.isPartSelected = this.partItems.length > 0;
         this.isLabourSelected = this.labourItems.length > 0;
 
-        console.log(this.repairBillStatus)
-        this.applyLabourDiscount();
-        this.calculateTotals();
+        // if (this.repairBillStatus !== "Billed") {
+        //   this.loadMaterialedJobCardList();
+        // }
+
+        this.loadLabourCodelist();
+
+        if (!this.isEditMode) {
+          this.applyLabourDiscount();
+          this.calculateTotals();
+        }
 
         this.loader.hide();
 
@@ -1236,9 +1563,7 @@ export class RepairBill implements OnInit {
   }
 
   updateRepairBill(): void {
-    debugger;
     let dealerCode = this.storageService.getDealerCode();
-    //console.log("testcustomerdetail",this.selectedJobCard);
 
     // if (!this.isSuperAdmin) {
 
@@ -1250,7 +1575,6 @@ export class RepairBill implements OnInit {
 
     //   return;
     // }
-
     const payload = {
 
       repairBillheader: {
@@ -1298,12 +1622,13 @@ export class RepairBill implements OnInit {
       repairBillDetail: [
 
         // PART ITEMS
-        ...this.partItems.map((item: any) => ({
+
+        ...this.materialedJobCarDList.map((item: any) => ({
           id: item.id,
           itemType: 'Part',
 
-          materialId: item.materialId || 0,
-          partItemId: item.partItemId || 0,
+          materialId: item.materialTransferId || item.materialId || 0,
+          partItemId: item.itemId || item.partItemId || 0,
 
           labourId: item.labourId || 0,
           partWiseLabourId: item.partWiseLabourId || 0,
@@ -1312,7 +1637,8 @@ export class RepairBill implements OnInit {
 
           qty: 0,
           rate: 0,
-
+          partHsnCode: item.partHsnCode || '',
+          discountValue: item.discountValue || 0,
           discount: item.discount || 0,
           discountType: item.discountType || 'Value',
 
@@ -1323,18 +1649,25 @@ export class RepairBill implements OnInit {
           taxableAmount: 0,
           netAmount: 0,
 
+
           issueType: Number(item.issueType) || 0,
 
           isAutoGenerated: false,
 
           partQty: item.partQty || 0,
-          fscRate: item.fscRate || 0,
+          partRate: item.partRate || 0,
+          fscRate: item.issuetypeName === 'U/W'
+            ? item.partRate
+            : item.issuetypeName === 'FSC'
+              ? item.fscRate
+              : 0,
 
           partDiscount: item.discount || 0,
 
           partTaxbleAmount: item.taxableAmount || 0,
 
-          partNetAmount: item.netAmount || 0
+          partNetAmount: item.netAmount || 0,
+          totalTaxPer: item.igst
         })),
 
         // LABOUR ITEMS
@@ -1350,7 +1683,9 @@ export class RepairBill implements OnInit {
 
           qty: item.qty || 0,
           rate: item.rate || 0,
+          labourHsnCode: item.labourHsnCode || '',
 
+          discountValue: item.discountValue || 0,
           discount: item.discount || 0,
           discountType: item.discountType || 'Value',
 
@@ -1374,16 +1709,15 @@ export class RepairBill implements OnInit {
         }))
       ]
     };
-    console.log(payload)
-    this.loader.show();
 
+    this.loader.show();
     this.repairBillService.updateRepairBill(payload)
       .subscribe({
         next: (res) => {
 
           this.loader.hide();
 
-          this.toaster.show('Repair Bill Updated Successfully', {
+          this.toaster.show('Repair Bill Saved Successfully', {
             classname: 'bg-success text-dark',
             icons: 'Sucess',
             delay: 5000
@@ -1408,15 +1742,36 @@ export class RepairBill implements OnInit {
   }
 
   printPerforma() {
+
     this.router.navigate(
-      ['/repair-bill-performa']
+      ['/repair-bill-performa', this.repairBillId]
     )
   }
 
-  printInvoice() {
-    this.router.navigate(
-      ['/repair-bill-invoice', this.repairBillId]
+  printInvoice(): void {
+
+    if (!this.repairBillId) {
+
+      Swal.fire(
+        'Warning',
+        'Please save bill first',
+        'warning'
+      );
+
+      return;
+    }
+
+    window.open(
+      `/repair-bill-invoice/${this.repairBillId}`,
+      '_blank'
     );
+  }
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   }
 
 }

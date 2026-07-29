@@ -2,10 +2,6 @@ export interface JobReportViewModel {
 
   srNo: number;
 
-  invoiceNo: number;
-
-  invoiceDate: Date | string;
-
   jobNo: number;
 
   partyName: string;
@@ -15,26 +11,6 @@ export interface JobReportViewModel {
   regNo: string;
 
   mechanicName: string;
-
-  invoiceType: string;
-
-  invoiceMode: string;
-
-  sparesAmount: number;
-
-  acsrAmount: number;
-
-  oilAmount: number;
-
-  labourAmount: number;
-
-  outsideWorkAmount: number;
-
-  taxableAmount: number;
-
-  sgstAmount: number;
-
-  cgstAmount: number;
 
   chassisNo: string;
 
@@ -51,6 +27,39 @@ export interface JobReportViewModel {
   jobInDate: Date | null;
 
   estimatedDeliveryDate: Date | null;
+
+  dealerName: string;
+
+  dealerLocation: string;
+
+  city: string;
+
+  state: string;
+
+  kms: number | null;
+
+  motorNo: string;
+
+  batteryNo: string;
+
+  chargerNo: string;
+
+  customerVoice: string;
+
+  customerCode: string;
+
+  observation: string;
+
+  supervisorComment: string;
+
+  jobStatus: string;
+  closedDate?: string;   
+
+  saleDate: Date | string | null;
+
+  supervisorName: string;
+
+  jobCreationSource: string;
 }
 
 export interface JobReportPagedResponse {
@@ -62,24 +71,6 @@ export interface JobReportPagedResponse {
   pageIndex: number;
 
   pageSize: number;
-
-  totalSpares: number;
-
-  totalAcsr: number;
-
-  totalOil: number;
-
-  totalLabour: number;
-
-  totalOutsideWork: number;
-
-  totalTaxable: number;
-
-  totalSGST: number;
-
-  totalCGST: number;
-
-  grandTotal: number;
 }
 
 export interface JobReportFilterModel {
@@ -112,18 +103,6 @@ export interface DealerWiseJobReportSummary {
   dealerName: string;
 
   totalJobs: number;
-
-  totalSpares: number;
-
-  totalLabour: number;
-
-  totalTaxable: number;
-
-  totalSGST: number;
-
-  totalCGST: number;
-
-  grandTotal: number;
 
   jobDetails: JobReportViewModel[];
 }

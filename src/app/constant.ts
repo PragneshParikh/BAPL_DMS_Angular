@@ -60,14 +60,15 @@ export const locationAreaMaster = [
 ];
 
 export const LedgerTypes = [
-    { name: 'Company', value: 'Company' },
-    { name: 'Dealer', value: 'Dealer' },
-    { name: 'Financier', value: 'Financier' },
-    { name: 'Institutional', value: 'Institutional' },
-    { name: 'Insurance', value: 'Insurance' },
-    { name: 'Party', value: 'Party' },
-    { name: 'Supplier', value: 'Supplier' }
-]
+    { name: 'Company', value: 'Company', isAdmin: true },
+    { name: 'Dealer', value: 'Dealer', isAdmin: true },
+    { name: 'Financier', value: 'Financier', isAdmin: false },
+    { name: 'Institutional', value: 'Institutional', isAdmin: false },
+    { name: 'Insurance', value: 'Insurance', isAdmin: false },
+    { name: 'Party', value: 'Party', isAdmin: false },
+    { name: 'Supplier', value: 'Supplier', isAdmin: false },
+    { name: 'Receipt Party', value: 'Receipt', isAdmin: true }
+];
 
 export const PrefixTypes = [
     { name: 'Invoice', value: 'Invoice' },
@@ -145,18 +146,23 @@ export const ModuleTypes = [
     { name: 'free_service_claim_invoice', moduleName: 'Free Service Claim Invoice' },
     { name: 'warranty_claim_invoice', moduleName: 'Warranty Claim Invoice' },
     { name: 'free_service_claim', moduleName: 'Free Service Claim' },
-    { name: 'CIR_investigation', moduleName: 'CIR Investigation' },
+    { name: 'ffir_prefix', moduleName: 'FFIR' },
     { name: 'purchase_order', moduleName: 'Purchase Order' },
     { name: 'Repair_bill', moduleName: 'Repair Bill' },
     { name: 'hsrp_order', moduleName: 'HSRP Order' },
     { name: 'sale_bill', moduleName: 'Vehicle Sale Bill' },
     { name: 'receipt_entry', moduleName: 'Receipt Entry' },
-    {name:'vehicle_transfer', moduleName:'Vehicle Stock Transfer' },
+    { name: 'vehicle_transfer', moduleName: 'Vehicle Stock Transfer' },
+    { name: 'job_card', moduleName: 'Job Card' },
+    { name: 'wclaim_prefix', moduleName: 'Warranty Claim Prefix' },
+    { name: 'material_transfer', moduleName: 'Material Transfer' },
+    { name: 'counter-bill', moduleName: 'Counter Bill' },
+    { name: 'part_inward', moduleName: 'Parts Inward' }
 ]
 
 export const EmployeeDesignations = [
     { id: 1, value: 'SalesExecutive' },
-    
+
 ]
 export const FFIRPresentVehicleStatus = [
     { id: 1, value: 'Complaint Resolved' },
@@ -222,5 +228,22 @@ export const zonesData = [
     { id: 61, name: 'North' },
     { id: 62, name: 'South' },
     { id: 59, name: 'Central' }
+];
+
+export const conditionModule = [
+    { Id: 1, ConditionName: 'Job Card' },
+    { Id: 2, ConditionName: 'Repair Bill' },
+    { Id: 3, ConditionName: 'Receipt Entry' },
+    { Id: 4, ConditionName: 'FFIR' },
+    { Id: 5, ConditionName: 'Warranty Claim' },
+    { Id: 6, ConditionName: 'Vehicle Sale Bill' },
+    { Id: 7, ConditionName: 'Counter Bill' },
+    { Id: 8, ConditionName: 'EBW Invoice Creation' },
+    { Id: 9, ConditionName: 'Form 22' }       // <-- NEW
+];
+
+export const batteryMake = [
+    { Id: 1, value:'Trontek Electronics ltd' },
+    { Id: 2, value:'Trontek Electronics Pvt ltd' }
 ];
 
