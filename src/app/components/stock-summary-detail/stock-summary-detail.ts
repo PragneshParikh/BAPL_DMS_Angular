@@ -81,8 +81,8 @@ export class StockSummaryDetail implements OnInit {
 
   getDealerDropDown() {
     this.loader.show();
-    const request$ = this.isSuperAdmin ? this.dealerMasterService.getDealers()
-      : this.dealerMasterService.getByDealerId(this.dealerCode);
+    const request$ = this.isSuperAdmin ? this.dealerMasterService.getDealerDropdown(null)
+      : this.dealerMasterService.getByDealerCode(this.dealerCode);
 
     request$.subscribe({
       next: (res) => {
