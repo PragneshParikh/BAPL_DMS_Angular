@@ -78,7 +78,7 @@
                         <div class="float-end">
 
                             <ngb-pagination [collectionSize]="totalRecords" [(page)]="page" [pageSize]="pageSize"
-                                (pageChange)="refreshPage()" [boundaryLinks]="true">
+                                (pageChange)="refreshPage()" [maxSize]="5" [boundaryLinks]="true">
 
                             </ngb-pagination>
 

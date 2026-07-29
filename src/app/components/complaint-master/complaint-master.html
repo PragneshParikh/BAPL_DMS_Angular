@@ -133,7 +133,7 @@
                     <!-- Pagination -->
                     <div class="col-sm-12 col-md-5">
                         <div class="text-md-right float-md-end gridjs-pagination">
-                            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize" [maxSize]="5" [boundaryLinks]="true"
                                 (pageChange)="pageChange($event)">
                             </ngb-pagination>
                         </div>

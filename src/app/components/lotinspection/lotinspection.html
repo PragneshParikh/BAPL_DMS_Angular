@@ -100,7 +100,7 @@
         <!-- PAGINATION -->
         <div class="d-flex justify-content-end p-2">
             <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
-                (pageChange)="pageChange($event)" [boundaryLinks]="true">
+                (pageChange)="pageChange($event)" [maxSize]="5" [boundaryLinks]="true">
             </ngb-pagination>
         </div>
     </div>
