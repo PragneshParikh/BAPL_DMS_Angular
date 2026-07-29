@@ -183,7 +183,8 @@
                                 [collectionSize]="collectionSize"
                                 [(page)]="page"
                                 [pageSize]="pageSize"
-                                (pageChange)="pageChange($event)">
+                                (pageChange)="pageChange($event)"
+                                [maxSize]="5" [boundaryLinks]="true">
                             </ngb-pagination>
 
                         </div>
