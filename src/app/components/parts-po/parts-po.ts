@@ -914,11 +914,15 @@ export class PartsPo implements OnInit {
       Items: this.partsPOData.isKit
         ? this.purchaseDetails.map((item: any) => ({
           ItemCode: item.itemCode,
-          Qty: item.qty
+          Qty: item.qty,
+          MRP: Number(item.mrp),
+
         }))
         : this.pagedPurchaseDetails.map((item: any) => ({
           ItemCode: item.itemCode,
-          Qty: item.qty
+          Qty: item.qty,
+          MRP: Number(item.mrp),
+
         }))
     };
 
@@ -1017,16 +1021,13 @@ export class PartsPo implements OnInit {
 
   calculateGST(finalPrice: number, totalGST: number = 0) {
 
-    const ratio = (100 + totalGST) / 100;
-
-    const basePrice = finalPrice / ratio;
-
-    const gstAmount = finalPrice - basePrice;
+    const gstAmount = (finalPrice * totalGST) / 100;
+    const mrp = finalPrice + gstAmount;
 
     return {
-      basePrice: basePrice.toFixed(2),
+      basePrice: finalPrice.toFixed(2),
       gstAmount: gstAmount.toFixed(2),
-      finalPrice: finalPrice.toFixed(2),
+      finalPrice: mrp.toFixed(2),
       totalGST: totalGST.toFixed(2)
     };
   }
@@ -1100,7 +1101,8 @@ export class PartsPo implements OnInit {
             itemDescription: item.itemDescription,
             qty: item.qty,
             rate: gstPrice.basePrice,
-            mrp: item.rate,
+               mrp: (item.mrp ? Number(item.mrp) : Number(gstPrice.finalPrice)* item.qty),
+
             amount: Number(gstPrice.basePrice) * Number(item.qty),
             sgstAmt: gstData.sgst * item.qty,
             cgstAmt: gstData.cgst * item.qty,
