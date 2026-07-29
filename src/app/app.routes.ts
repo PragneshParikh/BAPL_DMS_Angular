@@ -207,7 +207,7 @@ export const routes: Routes = [
       { path: 'vehicle-stock-transfer', component: VehicleStockTransferList, data: [57] },
       { path: 'vehicle-stock-transfer/edit/:id', component: AddVehicleStockTransfer, data: [57] },
 
-      { path: 'stock-summary-detail', data: [58], loadComponent: () => import('./components/stock-summary-detail/stock-summary-detail').then(m => m.StockSummaryDetail) }
+      { path: 'stock-summary-detail', data: [58], loadComponent: () => import('./components/stock-summary-detail/stock-summary-detail').then(m => m.StockSummaryDetail) },
       { path: 'group-master', component: GroupMaster, data: [59] },
       { path: 'term-condition-master', component: TermConditionMaster, data: [60] },
       { path: 'vehicle-sale-d2d-report', data: [61], loadComponent: () => import('./components/Reports/vehicle-sale-d2d-report/vehicle-sale-d2d-report').then(m => m.VehicleSaleD2dReport) },
@@ -229,8 +229,6 @@ export const routes: Routes = [
       { path: 'bg-role-master/add', component: BgRoleMaster, data: [100] },
       { path: 'bg-role-master/edit/:id', component: BgRoleMaster, data: [100] },
       { path: 'dealer-creation-manager', component: DealerCreationManagerList, data: [101] },
-
-
 
       { path: 'free-service-claim', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim-list/free-service-claim-list').then(m => m.FreeServiceClaimList) },
       { path: 'free-service-claim/:id', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim').then(m => m.FreeServiceClaim) },
