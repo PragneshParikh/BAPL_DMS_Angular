@@ -11,7 +11,7 @@
                 <!-- Table Card -->
                 <div class="card">
                     <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex justify-content-end align-items-center">
 
                             <div class="d-flex align-items-center gap-2">
 
@@ -41,15 +41,13 @@
                             <table class="table table-hover table-bordered mb-0 table-sm">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="sort" (click)="onSort('')">
+                                        <th class="sort" (click)="onSort('sequenceName')">
                                             Module</th>
-                                        <th class="sort" (click)="onSort('')">
+                                        <th class="sort" (click)="onSort('sequenceCode')">
                                             Prefix</th>
-                                        <th class="sort" (click)="onSort('')">
-                                            Next No</th>
-                                        <th class="sort" (click)="onSort('')">
-                                            Dealer</th>
-                                        <th class="sort" (click)="onSort('')">Format</th>
+                                        <th> Next No</th>
+                                        <th> Dealer Code</th>
+                                        <!-- <th class="sort" (click)="onSort('')">Format</th> -->
                                     </tr>
                                 </thead>
 
@@ -60,7 +58,7 @@
                                         <td>{{ sequence?.sequenceCode }}</td>
                                         <td>{{ sequence?.nextNo }}</td>
                                         <td>{{ sequence?.dealerCode }}</td>
-                                        <td>{{ sequence?.format }}</td>
+                                        <!-- <td>{{ sequence?.format }}</td> -->
                                     </tr>
 
                                     <!-- No Data -->

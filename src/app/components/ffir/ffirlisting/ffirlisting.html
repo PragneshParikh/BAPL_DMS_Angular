@@ -139,8 +139,8 @@
         </div>
         <!-- PAGINATION -->
         <div class="d-flex justify-content-end p-2">
-            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
-                (pageChange)="pageChange($event)">
+            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize" [maxSize]="5"
+                (pageChange)="pageChange($event)" [boundaryLinks]="true">
             </ngb-pagination>
         </div>
         <!--End Pagination-->

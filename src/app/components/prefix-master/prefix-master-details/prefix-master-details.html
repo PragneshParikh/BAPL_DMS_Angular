@@ -21,6 +21,7 @@
                     <!-- <input type="text" class="form-control form-control-sm" [(ngModel)]="sequence.moduleName" readonly> -->
                     <select class="form-select form-select-sm" [(ngModel)]="sequence.moduleName" name="moduleName"
                         #moduleName="ngModel" (change)="checkDuplicate()" required>
+                        <option value=""> -- Select -- </option>
                         <option *ngFor="let module of lstModules" [value]="module.name">
                             {{ module.moduleName }}
                         </option>
@@ -83,21 +84,21 @@
                 <!-- Padding -->
                 <div class="col-md-3">
                     <label class="form-label">Number Length (Padding)</label>
-                    <input type="number" class="form-control form-control-sm" [(ngModel)]="sequence.padding"
+                    <input type="number" class="form-control form-control-sm bg-light" [(ngModel)]="sequence.padding"
                         name="numberLength" #numberLength="ngModel" readonly>
                 </div>
 
                 <!-- Next Number -->
                 <div class="col-md-3">
                     <label class="form-label">Next Number</label>
-                    <input type="number" class="form-control form-control-sm" [(ngModel)]="sequence.nextNo"
+                    <input type="number" class="form-control form-control-sm bg-light" [(ngModel)]="sequence.nextNo"
                         name="nextNo" #nextNo="ngModel" readonly>
                 </div>
 
                 <!-- Separator -->
                 <div class="col-md-3">
                     <label class="form-label">Separator</label>
-                    <input type="text" class="form-control form-control-sm" [(ngModel)]="sequence.separator"
+                    <input type="text" class="form-control form-control-sm bg-light" [(ngModel)]="sequence.separator"
                         name="separator" #separator="ngModel" readonly>
                 </div>
 
@@ -119,7 +120,8 @@
                 <div class="col-md-3">
                     <label class="form-label">Preview</label>
                     <div class="input-group input-group-sm">
-                        <input type="text" class="form-control form-control-sm" [value]="generatePreview()" readonly>
+                        <input type="text" class="form-control form-control-sm bg-light" [value]="generatePreview()"
+                            readonly>
                         <span class="input-group-text bg-primary text-white info-wrapper">
                             <i class="ri-information-line"></i>
                             <div class="info-card shadow">

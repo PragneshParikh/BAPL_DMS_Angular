@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
@@ -38,5 +38,22 @@ export class PrefixService {
 
   downloadExcel(): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/prefix/downloadExcel`, { responseType: 'blob' });
+  }
+
+  getPrefixByPagedByDealer(searchTerm: string = null, pageIndex: number, pageSize: number, dealerCode: string | null): Observable<any> {
+    let params = new HttpParams();
+
+    params = params.set('pageIndex', pageIndex);
+    params = params.set('pageSize', pageSize);
+
+    if (searchTerm) {
+      params = params.set('searchTerm', searchTerm);
+    }
+
+    if (dealerCode) {
+      params = params.set("dealerCode", dealerCode)
+    }
+
+    return this.httpClient.get(`${this.baseUrl}/prefix/GetPrefixByPagedByDealer`, { params });
   }
 }

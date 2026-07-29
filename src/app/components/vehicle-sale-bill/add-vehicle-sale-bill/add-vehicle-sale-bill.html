@@ -8,9 +8,10 @@
 <div class="card">
     <div class="card-header d-flex justify-content-end align-items-center">
 
-        <button *ngIf="(billId && isSuperAdmin) ||(billId && !isInvoiced)"  type="button" class="btn btn-danger btn-sm gap-2 me-3" (click)="deleteVehicleSaleBill()">
-                <i class="ri-delete-bin-line"></i>Delete
-            </button>
+        <button *ngIf="(billId && isSuperAdmin) ||(billId && !isInvoiced)" type="button"
+            class="btn btn-danger btn-sm gap-2 me-3" (click)="deleteVehicleSaleBill()">
+            <i class="ri-delete-bin-line"></i>Delete
+        </button>
         <!-- PRINT DROPDOWN -->
         <div *ngIf="billId" class="btn-group gap-2 me-3" ngbDropdown>
             <button id="button-basic" ngbDropdownToggle type="button"
@@ -71,7 +72,7 @@
 
 
         <div class="d-flex justify-content-end gap-1 me-3">
-            
+
             <button *ngIf="!billId" class="btn btn-sm btn-primary" [disabled]="!canSave() || isErpLocked"
                 (click)="billId ? updateVehicleSaleBill() : saveVehicleDetailsOnly()">
                 Save As{{!this.model.isD2D ? ' Proforma' :' Invoice'}}
@@ -418,22 +419,25 @@
                                     autocomplete="off" required #chassisNo="ngModel">
 
                                 <!-- DROPDOWN -->
-                                <div *ngIf="showDropdown" class="dropdown-menu show w-100"
-                                    style="max-height: 200px; overflow-y: auto;">
+                                <ul *ngIf="showDropdown"
+                                    class="list-group position-absolute w-100 shadow-sm small-dropdown"
+                                    style="top:100%;z-index:1000;max-height:200px;overflow-y:auto;">
 
-                                    <!-- LIST -->
-                                    <button type="button" class="dropdown-item" *ngFor="let c of filteredChassis"
-                                        [disabled]="isChassisUsed(c.chassisNo)" (click)="selectChassis(c)">
+                                    <li class="list-group-item list-group-item-action py-1 px-2 small text-dark"
+                                        *ngFor="let c of filteredChassis" [class.disabled]="isChassisUsed(c.chassisNo)"
+                                        (mousedown)="!isChassisUsed(c.chassisNo) && selectChassis(c)">
 
                                         {{ c.chassisNo }} - {{ c.itemName }} - {{ c.mfgYear }}
-                                    </button>
 
-                                    <!-- NOT FOUND -->
-                                    <span *ngIf="showNotFound" class="dropdown-item text-danger">
+                                    </li>
+
+                                    <li *ngIf="showNotFound" class="list-group-item text-danger">
+
                                         Chassis not found
-                                    </span>
 
-                                </div>
+                                    </li>
+
+                                </ul>
 
                                 <!-- VALIDATION -->
                                 <small *ngIf="chassisNo.invalid && (chassisNo.touched || vehicleSaleForm.submitted)"
