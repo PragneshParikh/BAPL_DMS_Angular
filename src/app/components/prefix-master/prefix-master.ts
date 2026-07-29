@@ -32,7 +32,7 @@ export class PrefixMaster implements OnInit {
   public searchTerm: string = '';
   sequenceList: any[] = [];
 
-  sortColumn = '';
+  sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
   // #region pagination variables
@@ -40,15 +40,22 @@ export class PrefixMaster implements OnInit {
   pageSize = 10;
   collectionSize = 0;
 
-  dealerCode: string = '';
+  isSuperAdmin: boolean = false;
+  dealerCode: string | null = null;
 
   constructor(
     private router: Router,
     private prefixService: PrefixService,
-    private storageServie: StorageService,
+    private storageService: StorageService,
     private loader: LoaderService,
     private toast: ToastService
-  ) { }
+  ) {
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    }
+  }
 
   ngOnInit() {
     this.lstModule = [...ModuleTypes].sort((a, b) =>
@@ -68,11 +75,47 @@ export class PrefixMaster implements OnInit {
 
   onSort(column: string) {
 
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+
+    this.sequenceList.sort((a: any, b: any) => {
+
+      let valueA: any;
+      let valueB: any;
+
+      if (column === 'sequenceName') {
+        valueA = this.getModuleName(a.sequenceName).toLowerCase();
+        valueB = this.getModuleName(b.sequenceName).toLowerCase();
+      } else {
+        valueA = a[column] ?? '';
+        valueB = b[column] ?? '';
+
+        if (typeof valueA === 'string') valueA = valueA.toLowerCase();
+        if (typeof valueB === 'string') valueB = valueB.toLowerCase();
+      }
+
+      if (valueA < valueB) {
+        return this.sortDirection === 'asc' ? -1 : 1;
+      }
+
+      if (valueA > valueB) {
+        return this.sortDirection === 'asc' ? 1 : -1;
+      }
+
+      return 0;
+    });
   }
 
-  onSequenceClick(row: any) {
-
+  getModuleName(id: any): string {
+    const module = this.lstModule.find(x => x.name === id); // adjust property names
+    return module ? module.name : '';
   }
+
+  onSequenceClick(row: any) { }
 
   onPageChange(page: number) {
     this.page = page;
@@ -81,13 +124,14 @@ export class PrefixMaster implements OnInit {
 
   loadSequences() {
     this.loader.show();
-    this.prefixService.getPrefixByPaged(this.searchTerm, this.page - 1, this.pageSize).subscribe({
+    this.prefixService.getPrefixByPagedByDealer(this.searchTerm, this.page, this.pageSize, this.dealerCode).subscribe({
       next: (response: any) => {
         this.loader.hide();
 
         this.sequenceList = response.data || [];
         this.collectionSize = response.totalRecords || 0;
 
+        this.onSort('sequenceName');
       },
       error: (error) => {
         this.loader.hide();
