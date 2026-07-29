@@ -142,22 +142,22 @@ export const OemmodelServiceFrom = [
 ]
 
 export const ModuleTypes = [
-    { name: 'counter_bill', moduleName: 'Counter Bill' },
-    { name: 'free_service_claim_invoice', moduleName: 'Free Service Claim Invoice' },
-    { name: 'warranty_claim_invoice', moduleName: 'Warranty Claim Invoice' },
-    { name: 'free_service_claim', moduleName: 'Free Service Claim' },
-    { name: 'ffir_prefix', moduleName: 'FFIR' },
-    { name: 'purchase_order', moduleName: 'Purchase Order' },
-    { name: 'Repair_bill', moduleName: 'Repair Bill' },
-    { name: 'hsrp_order', moduleName: 'HSRP Order' },
-    { name: 'sale_bill', moduleName: 'Vehicle Sale Bill' },
-    { name: 'receipt_entry', moduleName: 'Receipt Entry' },
-    { name: 'vehicle_transfer', moduleName: 'Vehicle Stock Transfer' },
-    { name: 'job_card', moduleName: 'Job Card' },
-    { name: 'wclaim_prefix', moduleName: 'Warranty Claim Prefix' },
-    { name: 'material_transfer', moduleName: 'Material Transfer' },
-    { name: 'counter-bill', moduleName: 'Counter Bill' },
-    { name: 'part_inward', moduleName: 'Parts Inward' }
+    { name: 'counter_bill', moduleName: 'Counter Bill', isAdmin: false },
+    { name: 'free_service_claim_invoice', moduleName: 'Free Service Claim Invoice', isAdmin: true },
+    { name: 'warranty_claim_invoice', moduleName: 'Warranty Claim Invoice', isAdmin: true },
+    { name: 'free_service_claim', moduleName: 'Free Service Claim', isAdmin: true },
+    { name: 'ffir_prefix', moduleName: 'FFIR', isAdmin: true },
+    { name: 'purchase_order', moduleName: 'Purchase Order', isAdmin: false },
+    { name: 'Repair_bill', moduleName: 'Repair Bill', isAdmin: false },
+    { name: 'hsrp_order', moduleName: 'HSRP Order', isAdmin: false },
+    { name: 'sale_bill', moduleName: 'Vehicle Sale Bill', isAdmin: false },
+    { name: 'receipt_entry', moduleName: 'Receipt Entry', isAdmin: false },
+    { name: 'vehicle_transfer', moduleName: 'Vehicle Stock Transfer', isAdmin: false },
+    { name: 'job_card', moduleName: 'Job Card', isAdmin: false },
+    { name: 'wclaim_prefix', moduleName: 'Warranty Claim Prefix', isAdmin: false },
+    { name: 'material_transfer', moduleName: 'Material Transfer', isAdmin: false },
+    { name: 'part_inward', moduleName: 'Parts Inward', isAdmin: false },
+    { name: 'test', moduleName: 'Test', isAdmin: false }
 ]
 
 export const EmployeeDesignations = [
@@ -243,7 +243,7 @@ export const conditionModule = [
 ];
 
 export const batteryMake = [
-    { Id: 1, value:'Trontek Electronics ltd' },
-    { Id: 2, value:'Trontek Electronics Pvt ltd' }
+    { Id: 1, value: 'Trontek Electronics ltd' },
+    { Id: 2, value: 'Trontek Electronics Pvt ltd' }
 ];
 
