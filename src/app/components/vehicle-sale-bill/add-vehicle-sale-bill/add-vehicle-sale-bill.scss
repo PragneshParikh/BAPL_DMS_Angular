@@ -82,3 +82,7 @@
 .dropdown-item:hover {
   background-color: #f1f5f9;
 }
+.small-dropdown {
+    position: absolute;
+    z-index: 999999 !important;
+}
