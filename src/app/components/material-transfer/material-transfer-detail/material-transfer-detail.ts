@@ -160,7 +160,7 @@ export class MaterialTransferDetail implements OnInit {
     // if (this.jobId === 0) {
     //   this.getMaterialIssueId();
     // }
-    this.getItemList();
+    // this.getItemList();
     this.getLocationList(this.dealerCode, 2);
     this.getMaterialTransferList(this.jobId, null);
   }
@@ -176,9 +176,10 @@ export class MaterialTransferDetail implements OnInit {
   //   });
   // }
 
-  getItemList() {
+  getItemList(jobDetails: any) {
     this.loader.show();
-    this.itemmasterService.fetchItemsByHsnTaxAndGroupId(1).subscribe({
+
+    this.itemmasterService.fetchItemsByHsnTaxAndGroupId(1, jobDetails.dealerCode).subscribe({
       next: (res) => {
         this.loader.hide();
         this.itemList = res;
@@ -474,6 +475,7 @@ export class MaterialTransferDetail implements OnInit {
           this.getJobCardById(this.jobId);
           this.getLocationList(result.jobDetail.dealerCode, 2);
           this.getJobCardStatus(this.jobId);
+          this.getItemList(result.jobDetail);
         }
       },
       (reason) => {
@@ -494,6 +496,8 @@ export class MaterialTransferDetail implements OnInit {
           location: res.serviceloc,
           isSameLocation: res.isSameState
         }
+
+        this.getItemList(res);
       },
       error: (err) => {
         this.loader.hide();
@@ -592,7 +596,7 @@ export class MaterialTransferDetail implements OnInit {
       // const sgstPercent = res.find((x: any) => x.taxCode.startsWith('SGST'))?.taxRate || 0;
       // const igstPercent = res.find((x: any) => x.taxCode.startsWith('IGST'))?.taxRate || 0;
 
-      
+
       const totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage) //+ Number(this.newItem.igst);
       const taxDetails = this.calculateGST(selectedItem.custprice, totalGST);
 
