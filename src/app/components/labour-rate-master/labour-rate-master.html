@@ -28,8 +28,8 @@
                     <i class="ri-file-excel-2-line align-bottom"></i> Export to Excel
                 </button>
             </div>
-        </div> 
-         <!-- ===================================== -->
+        </div>
+        <!-- ===================================== -->
         <!-- MODELWISE GRID -->
         <!-- ===================================== -->
 
@@ -334,7 +334,7 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-primary" (click)="updateLabour()"> Update </button>
+                <button class="btn btn-primary" [disabled]="!isSuperAdmin" (click)="updateLabour()"> Update </button>
             </div>
         </div>
     </div>
@@ -522,7 +522,8 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-primary" (click)="updatePartwiseLabour()"> Update </button>
+                <button class="btn btn-primary" [disabled]="!isSuperAdmin" (click)="updatePartwiseLabour()"> Update
+                </button>
             </div>
         </div>
     </div>
