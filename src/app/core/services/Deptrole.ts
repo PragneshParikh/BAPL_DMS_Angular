@@ -13,12 +13,10 @@ export class RoleService {
 
   constructor(private http: HttpClient) { }
 
-  // GET all roles from dbo.AspNetRoles
   getRoles(): Observable<RoleModel[]> {
     return this.http.get<RoleModel[]>(this.baseUrl);
   }
 
-  // GET only the named roles (e.g. ['Sales', 'Service'])
   getRolesByNames(names: string[]): Observable<RoleModel[]> {
     const params = new HttpParams().set('names', names.join(','));
     return this.http.get<RoleModel[]>(this.baseUrl, { params });
@@ -40,25 +38,39 @@ export class RoleService {
     return this.http.delete(`${this.baseUrl}/${id}`);
   }
 
-  // ===== Role <-> Category mapping =====
-
-  // create a role in AspNetRoles + map it to a category
   createWithCategory(payload: { name: string; category: string }) {
     return this.http.post(`${this.baseUrl}/with-category`, payload);
   }
 
-  // all role->category mappings (Role Master list)
   getMappings(): Observable<RoleMappingModel[]> {
     return this.http.get<RoleMappingModel[]>(`${this.baseUrl}/mappings`);
   }
 
-  // delete a mapping row by its id
   deleteMapping(id: number) {
     return this.http.delete(`${this.baseUrl}/mappings/${id}`);
   }
 
-  // roles for a given category (used by the employee form on category check)
+  updateMapping(id: number, name: string, category: string) {
+    return this.http.put(`${this.baseUrl}/mappings/${id}`, { name, category });
+  }
+
   getByCategory(category: string): Observable<RoleModel[]> {
     return this.http.get<RoleModel[]>(`${this.baseUrl}/by-category/${encodeURIComponent(category)}`);
+  }
+
+  getMenuAccess(roleId: string) {
+    return this.http.get<any>(`${this.baseUrl}/${roleId}/menu-access`);
+  }
+
+  updateMenuAccess(roleId: string, grantedSubMenuIds: number[]) {
+    return this.http.put(`${this.baseUrl}/${roleId}/menu-access`, { grantedSubMenuIds });
+  }
+
+  getMenuTemplate() {
+    return this.http.get<any>(`${this.baseUrl}/menu-template`);
+  }
+
+  resolveRoleForItems(category: string, subMenuIds: number[]) {
+    return this.http.post<any>(`${this.baseUrl}/resolve-for-items`, { category, subMenuIds });
   }
 }

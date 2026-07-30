@@ -120,8 +120,6 @@
                    [style.overflow-y]="dealerLocations.length > 3 ? 'auto' : 'visible'"
                    [class.scrollable]="dealerLocations.length > 3">
 
-                   
-
                 <!-- SELECT ALL -->
                 <div class="form-check border-bottom pb-1 mb-1" *ngIf="dealerLocations.length">
                   <input class="form-check-input" type="checkbox" id="loc_all"
@@ -145,8 +143,9 @@
                 <small *ngIf="!dealerLocations.length" class="text-muted">No locations found.</small>
               </div>
               <small *ngIf="errors.location" class="text-danger">{{ errors.location }}</small>
-            </div>          
+            </div>
           </div>
+
           <!-- ROW 3 -->
           <div class="row mb-2">
             <div class="col-md-3">
@@ -257,11 +256,11 @@
             </div>
           </div>
 
-          <!-- Email / Password / Department + Roles — shown only when "Create Login Account" is checked -->
+          <!-- Email / Password / Department + per-category menu access — shown only when "Create Login Account" is checked -->
           <div class="row mb-2 p-2 mx-0 bg-light rounded" *ngIf="employeeData.createLogin">
 
             <div class="col-md-3">
-              <label class="form-label mb-1">Email ID <span class="text-danger"></span></label>
+              <label class="form-label mb-1">Email ID</label>
               <input type="email" class="form-control form-control-sm py-1"
                 [class.is-invalid]="errors.emailId"
                 [(ngModel)]="employeeData.emailId" name="emailId" autocomplete="off">
@@ -269,7 +268,7 @@
             </div>
 
             <div class="col-md-3">
-              <label class="form-label mb-1">Password <span class="text-danger"></span></label>
+              <label class="form-label mb-1">Password</label>
               <input type="password" class="form-control form-control-sm py-1"
                 [class.is-invalid]="errors.password"
                 [(ngModel)]="employeeData.password" name="password" autocomplete="new-password">
@@ -278,7 +277,7 @@
 
             <!-- DEPARTMENT CHECKBOXES (from DepartmentMaster) -->
             <div class="col-md-6">
-              <label class="form-label mb-1 d-block">Category <span class="text-danger"></span></label>
+              <label class="form-label mb-1 d-block">Category</label>
               <div class="d-flex flex-wrap gap-3 pt-1">
                 <div class="form-check" *ngFor="let dept of departmentOptions">
                   <input class="form-check-input" type="checkbox"
@@ -293,28 +292,92 @@
               <small *ngIf="errors.category" class="text-danger">{{ errors.category }}</small>
             </div>
 
-            <!-- ROLES revealed per checked department (from AspNetRoles) -->
+            <!-- PER-CATEGORY MENU ACCESS — only granted items show by default,
+                 as removable checkboxes. New items are added via the separate
+                 "+ Add Menu Item" section, which only lists what's not yet granted. -->
             <div class="col-12 mt-2" *ngIf="selectedDepartments.length">
-              <div *ngFor="let dept of selectedDepartments" class="mb-2 ps-2 border-start">
-                <label class="form-label mb-1 d-block fw-semibold">{{ dept }} Roles</label>
+              <div *ngFor="let dept of selectedDepartments" class="mb-3">
+                <label class="form-label mb-2 d-block fw-semibold">{{ dept }} — Menu Access</label>
 
-                <div class="d-flex flex-wrap gap-3"
-                  *ngIf="rolesByDepartment[dept]?.length; else noRoles">
-                  <div class="form-check" *ngFor="let role of rolesByDepartment[dept]">
-                    <input class="form-check-input" type="checkbox"
-                      [id]="'role_' + role.name"
-                      [checked]="isRoleSelected(role.name)"
-                      (change)="toggleRole(role.name, $event)">
-                    <label class="form-check-label" [for]="'role_' + role.name">
-                      {{ role.name }}
-                    </label>
+                <!-- GRANTED — always visible, checkbox unchecks to remove -->
+                <div class="card mb-2">
+                  <div class="row g-0">
+                    <div class="col-md-6 border-end">
+                      <div class="card-header fw-bold py-2">Process</div>
+                      <div class="card-body py-2">
+                        <div class="form-check" *ngFor="let item of getGrantedProcessItems(dept)">
+                          <input class="form-check-input" type="checkbox" [id]="dept + '-granted-' + item.subMenuId"
+                            [(ngModel)]="item.isGranted" [name]="dept + '-granted-' + item.subMenuId">
+                          <label class="form-check-label" [for]="dept + '-granted-' + item.subMenuId">
+                            {{ item.menuName }}
+                          </label>
+                        </div>
+                        <div class="text-muted small" *ngIf="getGrantedProcessItems(dept).length === 0">
+                          None assigned yet.
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="card-header fw-bold py-2">Reports</div>
+                      <div class="card-body py-2">
+                        <div class="form-check" *ngFor="let item of getGrantedReportsItems(dept)">
+                          <input class="form-check-input" type="checkbox" [id]="dept + '-granted-' + item.subMenuId"
+                            [(ngModel)]="item.isGranted" [name]="dept + '-granted-' + item.subMenuId">
+                          <label class="form-check-label" [for]="dept + '-granted-' + item.subMenuId">
+                            {{ item.menuName }}
+                          </label>
+                        </div>
+                        <div class="text-muted small" *ngIf="getGrantedReportsItems(dept).length === 0">
+                          None assigned yet.
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <ng-template #noRoles>
-                  <small class="text-muted">No roles found for {{ dept }}.</small>
-                </ng-template>
+                <!-- ADD MORE — collapsed by default, only lists what's not yet granted -->
+                <button type="button" class="btn btn-sm btn-outline-primary mb-2"
+                  (click)="toggleAddMenu(dept)">
+                  <i class="ri-add-line"></i> {{ isAddMenuExpanded(dept) ? 'Hide' : 'Add Menu Item' }}
+                </button>
+
+                <div class="card mb-2" *ngIf="isAddMenuExpanded(dept)">
+                  <div class="row g-0">
+                    <div class="col-md-6 border-end">
+                      <div class="card-header fw-bold py-2">Process</div>
+                      <div class="card-body py-2">
+                        <div class="form-check" *ngFor="let item of getAvailableProcessItems(dept)">
+                          <input class="form-check-input" type="checkbox" [id]="dept + '-avail-' + item.subMenuId"
+                            [(ngModel)]="item.isGranted" [name]="dept + '-avail-' + item.subMenuId">
+                          <label class="form-check-label" [for]="dept + '-avail-' + item.subMenuId">
+                            {{ item.menuName }}
+                          </label>
+                        </div>
+                        <div class="text-muted small" *ngIf="getAvailableProcessItems(dept).length === 0">
+                          All Process items already assigned.
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="card-header fw-bold py-2">Reports</div>
+                      <div class="card-body py-2">
+                        <div class="form-check" *ngFor="let item of getAvailableReportsItems(dept)">
+                          <input class="form-check-input" type="checkbox" [id]="dept + '-avail-' + item.subMenuId"
+                            [(ngModel)]="item.isGranted" [name]="dept + '-avail-' + item.subMenuId">
+                          <label class="form-check-label" [for]="dept + '-avail-' + item.subMenuId">
+                            {{ item.menuName }}
+                          </label>
+                        </div>
+                        <div class="text-muted small" *ngIf="getAvailableReportsItems(dept).length === 0">
+                          All Reports items already assigned.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
+
               <small *ngIf="errors.role" class="text-danger d-block">{{ errors.role }}</small>
             </div>
 
@@ -323,12 +386,12 @@
 
           <!-- BUTTONS -->
           <div class="text-end mt-2">
-         <button type="button" class="btn btn-secondary btn-sm px-2 py-1 me-2" (click)="backToList()">
-          Cancel
-        </button>
+            <button type="button" class="btn btn-secondary btn-sm px-2 py-1 me-2" (click)="backToList()">
+              Cancel
+            </button>
             <button type="submit" class="btn btn-primary btn-sm px-2 py-1"
-              [disabled]="!isFormValid">
-              {{ isEditMode ? 'Update' : 'Save' }}
+              [disabled]="!isFormValid || resolvingRoles">
+              {{ resolvingRoles ? 'Saving...' : (isEditMode ? 'Update' : 'Save') }}
             </button>
           </div>
 

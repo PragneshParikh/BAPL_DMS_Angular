@@ -48,17 +48,49 @@ implements OnInit {
 
   toDate = '';
 
+  // NEW — SuperAdmins can browse this report across every dealer, so they
+  // keep the "Dealer Name" picker. Everyone else is always restricted
+  // server-side to their own dealer's data now (see
+  // ReportController.GetPartDispatchKitReport), so the picker can't
+  // actually change what comes back — hide it and skip the dealer-list API
+  // call entirely rather than show a control that does nothing.
+  isSuperAdmin = false;
+
   constructor(
     private reportService: ReportService
   ) { }
 
   ngOnInit(): void {
 
-    this.loadDealers();
+    this.isSuperAdmin = this.checkIsSuperAdmin();
+
+    if (this.isSuperAdmin) {
+      this.loadDealers();
+    }
 
     this.loadPOType();
 
     this.getReport();
+  }
+
+  /**
+   * ASSUMPTION — I don't have this project's actual auth/token service, so
+   * this reads the role the same flat way the Login API's JSON response
+   * shape suggests it might be stored (`role` in localStorage). If this app
+   * already keeps auth state in a shared AuthService/TokenService instead,
+   * replace the body of this one method with a call into that
+   * (e.g. `return this.authService.hasRole('SuperAdmin');`) — nothing else
+   * in this component needs to change, since everything else here just
+   * depends on `isSuperAdmin` being set correctly.
+   *
+   * NOTE — this is now duplicated in the D2D report, Vehicle Sale Report,
+   * and Vehicle Stock Report components too. Worth pulling into one shared
+   * service/helper once the real auth check is wired in, so it only needs
+   * fixing in one place.
+   */
+  private checkIsSuperAdmin(): boolean {
+    const role = localStorage.getItem('role');
+    return role === 'SuperAdmin';
   }
 
   // =========================================
