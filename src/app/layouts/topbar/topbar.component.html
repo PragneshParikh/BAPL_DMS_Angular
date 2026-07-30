@@ -30,9 +30,9 @@
                             autocomplete="off" id="search-options" value="" (keyup)="Search()">
                         <span class="mdi mdi-magnify search-widget-icon"></span>
                         <span class="mdi mdi-close-circle search-widget-icon search-widget-icon-close d-none"
-                            id="search-close-options" (click)="closeBtn()"></span>
+                            id="search-close-options" (click)="closeBtn(null)"></span>
                         <span class="mdi mdi-close-circle search-widget-icon search-widget-icon-close d-none"
-                            id="search-close-options" (click)="closeBtn()"></span>
+                            id="search-close-options" (click)="closeBtn(null)"></span>
                     </div>
 
                     <div class="dropdown-menu dropdown-menu-lg" id="search-dropdown">
@@ -44,7 +44,7 @@
                             </div>
                             <div *ngFor="let search of searchResults">
                                 <!-- item-->
-                                <a [routerLink]="search.link" class="dropdown-item notify-item" (click)="closeBtn()">
+                                <a class="dropdown-item notify-item" (click)="closeBtn(search)">
                                     <i class="ri-bubble-chart-line align-middle fs-18 text-muted me-2"></i>
                                     <span>{{ search.label }}</span>
                                 </a>
@@ -94,7 +94,7 @@
                         (click)="onSelectionChange('WorkShop')">
                         WorkShop
                     </button>
-                
+
                     <button type="button" class="btn btn-sm rounded-pill"
                         [ngClass]="selectedOption === 'Account' ? 'btn-primary' : 'btn-outline-primary'"
                         (click)="onSelectionChange('Account')">
