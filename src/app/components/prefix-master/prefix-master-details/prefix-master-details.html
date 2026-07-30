@@ -137,8 +137,9 @@
                 </div>
             </div>
             <div class="card-footer text-end mt-2">
-                <button type="submit" class="btn btn-primary btn-sm"
-                    [disabled]="prefixMasterForm.invalid || isDuplicate">Save</button>
+                <!-- <button type="submit" class="btn btn-primary btn-sm"
+                    [disabled]="prefixMasterForm.invalid || isDuplicate || isAdminModule()">Save</button> -->
+                <button type="submit" class="btn btn-primary btn-sm" [disabled]="isAdminModule()">Save</button>
                 <button type="button" class="btn btn-danger btn-sm ms-2" (click)="backToList()">Cancel</button>
             </div>
         </form>

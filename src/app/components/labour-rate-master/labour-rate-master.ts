@@ -52,8 +52,12 @@ export class LabourRateMaster implements OnInit {
   selectedServiceType: string;
   searchText: string = '';
 
+  isSuperAdmin: boolean = false;
 
   ngOnInit(): void {
+
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
     this.loadOemModels();
     this.onSearch();
     this.loadJobTypes();

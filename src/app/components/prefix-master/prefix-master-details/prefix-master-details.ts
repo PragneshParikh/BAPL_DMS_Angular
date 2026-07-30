@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, model, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
@@ -15,8 +15,8 @@ import { ModuleTypes } from '../../../constant';
   styleUrl: './prefix-master-details.scss',
 })
 export class PrefixMasterDetails implements OnInit {
-  // lstModules = ModuleTypes;
-  lstModules: any[] = [];
+  lstModules = ModuleTypes;
+  // lstModules: any[] = [];
   lstFinancialYears: string[] = [];
   sequence = {
     moduleName: '',
@@ -44,12 +44,14 @@ export class PrefixMasterDetails implements OnInit {
   ) {
     this.isSuperAdmin = storageService.getRole().toLowerCase() === 'superadmin'
 
-    if (!this.isSuperAdmin) {
-      this.dealerCode = storageService.getDealerCode();
-      this.lstModules = ModuleTypes.filter(x => x.isAdmin === false);
-    } else {
-      this.lstModules = ModuleTypes.filter(x => x.isAdmin === true);
-    }
+    this.dealerCode = storageService.getDealerCode();
+
+    // if (!this.isSuperAdmin) {
+    //   this.lstModules = ModuleTypes.filter(x => x.isAdmin === false);
+    // }
+    // else {
+    //   this.lstModules = ModuleTypes.filter(x => x.isAdmin === true);
+    // }
   }
 
   ngOnInit() {
@@ -162,6 +164,10 @@ export class PrefixMasterDetails implements OnInit {
 
   onSubmit(form: any) {
 
+    const module = this.lstModules.filter(x => x.name === this.sequence.moduleName);
+
+    if (module && module[0].isAdmin) return;
+
     if (form.invalid) return;
 
     const length = this.sequence.padding || 4;
@@ -248,10 +254,21 @@ export class PrefixMasterDetails implements OnInit {
 
     const exists = this.sequenceList.some(x =>
       x.sequenceName === this.sequence.moduleName &&
-      x.year === this.sequence.financialYear
+      x.year === this.sequence.financialYear &&
+      x.dealerCode === this.dealerCode
     );
 
     this.isDuplicate = exists;
+  }
+
+  isAdminModule() {
+    const module = this.lstModules.filter(x => x.name === this.sequence.moduleName);
+
+    if (module && module.length > 0 && module[0].isAdmin) {
+      return true;
+    }
+
+    return false;
   }
 
 }

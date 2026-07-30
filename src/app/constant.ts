@@ -1,3 +1,5 @@
+import { values } from "lodash";
+
 export enum AccessRoles {
     NoAccess = 1,
     ViewOnly = 2,
@@ -154,10 +156,8 @@ export const ModuleTypes = [
     { name: 'receipt_entry', moduleName: 'Receipt Entry', isAdmin: false },
     { name: 'vehicle_transfer', moduleName: 'Vehicle Stock Transfer', isAdmin: false },
     { name: 'job_card', moduleName: 'Job Card', isAdmin: false },
-    { name: 'wclaim_prefix', moduleName: 'Warranty Claim Prefix', isAdmin: false },
     { name: 'material_transfer', moduleName: 'Material Transfer', isAdmin: false },
     { name: 'part_inward', moduleName: 'Parts Inward', isAdmin: false },
-    { name: 'test', moduleName: 'Test', isAdmin: false }
 ]
 
 export const EmployeeDesignations = [
@@ -195,11 +195,14 @@ export const APIUniqueList = [
     { value: 'dealermaster', name: 'Dealer' },
     { value: 'hsncodemaster', name: 'HSNCodeMaster' },
     { value: 'vehicleinward', name: 'Vehicle Inward' },
+    { value: 'PartInward', name: 'Part Inward' },
     { value: 'purchaseorder', name: 'Purchase Order' },
     { value: 'locationmaster', name: 'Location Master' },
     { value: 'dealermaster', name: 'Dealer Master' },
-    { value: 'itemmaster', name: 'Item Master' }
-]
+    { value: 'itemmaster', name: 'Item Master' },
+    { value: 'HSRP', name: 'HSRP' },
+    { value: 'LMSLeadMaster', name: 'LMS Lead Master' }
+].sort((a, b) => a.name.localeCompare(b.name));
 
 export const PO_STATUSES = [
     { name: 'Submitted To ERP', value: 'Submited To ERP' },

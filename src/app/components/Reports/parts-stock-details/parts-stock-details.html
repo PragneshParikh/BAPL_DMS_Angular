@@ -98,6 +98,7 @@
                                 <th>Bal.Qty</th>
                                 <th>HSN Code</th>
                                 <th>Rate</th>
+                                <th>NDP</th>
                                 <th>MRP</th>
                                 <th>GST</th>
                             </tr>
@@ -127,6 +128,7 @@
                                 <td>{{ item.hsncode }}</td>
                                 <td class="text-end">{{ item.dlrprice | number:'1.2-2' }}</td>
                                 <td class="text-end">{{ item.mrp | number:'1.2-2' }}</td>
+                                <td class="text-end">{{ item.custprice | number:'1.2-2' }}</td>
                                 <td class="text-end">{{ item.gst }}%</td>
                             </tr>
                         </tbody>
