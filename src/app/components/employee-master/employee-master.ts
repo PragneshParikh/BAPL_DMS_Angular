@@ -58,6 +58,17 @@ export class EmployeeMasterComponent implements OnInit {
   expandedAddForDept: { [dept: string]: boolean } = {};
   resolvingRoles: boolean = false;
 
+  // NEW — the employee's currently-saved roleId per category, kept alive for
+  // the whole edit session (not just during ngOnInit). This is what lets
+  // unchecking-then-rechecking a category restore its original grants
+  // instead of wiping them — nothing is actually removed from the database
+  // until the form is submitted with that category left unchecked.
+  private roleIdByCategory: { [category: string]: string } = {};
+
+  // NEW — existing Role Master roles per category, for the prefill dropdown
+  existingRolesByDepartment: { [dept: string]: { roleId: string; roleName: string }[] } = {};
+  selectedExistingRoleByDepartment: { [dept: string]: string } = {};
+
   errors: {
     firstName?: string;
     lastName?: string;
@@ -119,16 +130,19 @@ export class EmployeeMasterComponent implements OnInit {
         ? [...this.popupData.selectedDepartments] : [];
 
       // FIX: category -> roleId, taken directly from EmployeeRoleMapping.RoleId
-      // (returned by GetEmployeeById as popupData.roleMappings). No name
-      // matching against RoleCategoryMapping at all — immune to renamed or
-      // deleted mapping rows, which is what caused "None assigned yet."
-      const roleIdByCategory: { [category: string]: string } = {};
+      // (returned by GetEmployeeById as popupData.roleMappings). Stored on
+      // the component (not a local var) so onDepartmentToggle can reuse it
+      // later when a category is re-checked mid-session — that's what lets
+      // uncheck-then-recheck restore the original grants instead of wiping
+      // them out, without touching anything in the database until Save.
+      this.roleIdByCategory = {};
       (this.popupData.roleMappings ?? []).forEach((rm: any) => {
-        if (rm.category && rm.roleId) roleIdByCategory[rm.category] = rm.roleId;
+        if (rm.category && rm.roleId) this.roleIdByCategory[rm.category] = rm.roleId;
       });
 
       this.selectedDepartments.forEach(dept => {
-        this.loadCategoryChecklist(dept, roleIdByCategory[dept]);
+        this.loadCategoryChecklist(dept, this.roleIdByCategory[dept]);
+        this.loadExistingRolesForCategory(dept);
       });
 
       if (this.popupData.dealerCode) {
@@ -246,11 +260,25 @@ export class EmployeeMasterComponent implements OnInit {
   onDepartmentToggle(dept: string, event: any): void {
     if (event.target.checked) {
       if (!this.selectedDepartments.includes(dept)) this.selectedDepartments.push(dept);
-      this.loadCategoryChecklist(dept);
+      // FIX: restore from this employee's previously saved role for this
+      // category if one exists — same prefill the initial page load does.
+      // Falls back to blank automatically if this category never had a
+      // saved role (roleIdByCategory[dept] is undefined).
+      this.loadCategoryChecklist(dept, this.roleIdByCategory[dept]);
+      this.loadExistingRolesForCategory(dept);
     } else {
       this.selectedDepartments = this.selectedDepartments.filter(d => d !== dept);
       delete this.menuGroupsByDepartment[dept];
       delete this.expandedAddForDept[dept];
+      delete this.existingRolesByDepartment[dept];
+      delete this.selectedExistingRoleByDepartment[dept];
+      // NOTE: roleIdByCategory[dept] is deliberately left alone here.
+      // Deleting it here would make an uncheck permanent even before Save;
+      // keeping it is what lets a re-check bring the original grants back.
+      // It only stops mattering once the form is actually submitted with
+      // this category left unchecked — at that point the backend's
+      // RemoveRange + re-Add in SaveEmployeeRoleMappings drops the row for
+      // real, and the next GetEmployeeById simply won't return it anymore.
     }
   }
 
@@ -287,6 +315,60 @@ export class EmployeeMasterComponent implements OnInit {
     });
   }
 
+  // NEW — populates the "prefill from existing role" dropdown for a category.
+  // Calls RoleService.getByCategory — NOT getRolesByCategory, which doesn't
+  // exist (an earlier, broken version of this method was removed from
+  // Deptrole.ts after it was found to double up the /role/ path segment).
+  private loadExistingRolesForCategory(dept: string): void {
+    this.roleService.getByCategory(dept).subscribe({
+      next: (res: any[]) => { this.existingRolesByDepartment[dept] = res ?? []; },
+      error: () => { this.existingRolesByDepartment[dept] = []; }
+    });
+  }
+
+  // NEW — handles the existing-role checkbox list. Checkboxes behave like a
+  // radio group: checking one calls onExistingRoleSelected to prefill from
+  // it, which updates selectedExistingRoleByDepartment[dept] — since every
+  // checkbox's [checked] is bound to "is this the tracked role", the
+  // previously-checked box automatically shows unchecked once that state
+  // changes, with no need to manually loop and uncheck the others.
+  // Unchecking a box does NOT clear the menu checkboxes below — this is
+  // still just a one-time starting point, exactly like the old dropdown's
+  // "-- Select --" option never reset anything either.
+  onExistingRoleCheckboxToggle(dept: string, roleId: string, event: any): void {
+    if (event.target.checked) {
+      this.onExistingRoleSelected(dept, roleId);
+    } else if (this.selectedExistingRoleByDepartment[dept] === roleId) {
+      this.selectedExistingRoleByDepartment[dept] = '';
+    }
+  }
+
+  // Shared prefill logic — called by onExistingRoleCheckboxToggle above.
+  // Overwrites the current checkbox state with that role's granted items;
+  // still fully editable afterward — this is a one-time prefill, not a
+  // lock. Nothing is saved until the form is submitted.
+  onExistingRoleSelected(dept: string, roleId: string): void {
+    this.selectedExistingRoleByDepartment[dept] = roleId;
+    if (!roleId) return;
+
+    this.roleService.getMenuAccess(roleId).subscribe({
+      next: (accessRes: any) => {
+        const grantedIds = new Set<number>(
+          (accessRes.groups ?? [])
+            .flatMap((g: any) => g.items)
+            .filter((i: any) => i.isGranted)
+            .map((i: any) => i.subMenuId)
+        );
+        const groups = this.menuGroupsByDepartment[dept] ?? [];
+        this.menuGroupsByDepartment[dept] = groups.map(g => ({
+          ...g,
+          items: g.items.map(i => ({ ...i, isGranted: grantedIds.has(i.subMenuId) }))
+        }));
+      },
+      error: () => { /* leave current checkbox state untouched on failure */ }
+    });
+  }
+
   getProcessGroup(dept: string): MenuAccessGroup | undefined {
     return (this.menuGroupsByDepartment[dept] ?? []).find(g => g.topMenuName === 'Process');
   }
@@ -319,6 +401,31 @@ export class EmployeeMasterComponent implements OnInit {
   }
   getAvailableReportsItems(dept: string): MenuAccessItem[] {
     return (this.getReportsGroup(dept)?.items ?? []).filter(i => !i.isGranted);
+  }
+
+  // ===== SELECT ALL — MENU ACCESS (Process / Reports, per category) =====
+  // One generic pair reused across all four columns (Granted-Process,
+  // Granted-Reports, Add-Process, Add-Reports). In "Granted", unchecking
+  // bulk-revokes that column's items; in "Add Menu Item", checking
+  // bulk-grants them. Mutating item.isGranted here is safe — the arrays
+  // passed in are filtered views over the same underlying objects held in
+  // menuGroupsByDepartment, so the change is picked up everywhere else
+  // that reads them (hasAnyCheckedItem, onSubmit, etc.).
+  isAllMenuItemsSelected(items: MenuAccessItem[]): boolean {
+    return items.length > 0 && items.every(i => i.isGranted);
+  }
+
+  toggleAllMenuItems(items: MenuAccessItem[], event: any): void {
+    const checked = event.target.checked;
+    items.forEach(i => i.isGranted = checked);
+  }
+
+  // NEW — surfaces the same rule isFormValid enforces, so the Update button
+  // being disabled doesn't look unexplained. Lists every currently-checked
+  // category that has zero granted menu items.
+  get categoriesMissingMenuItems(): string[] {
+    if (!this.employeeData.createLogin) return [];
+    return this.selectedDepartments.filter(dept => !this.hasAnyCheckedItem(dept));
   }
 
   onlyDigits(event: any, field: 'mobile' | 'pincode', maxLen: number): void {

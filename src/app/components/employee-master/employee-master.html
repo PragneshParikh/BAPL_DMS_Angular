@@ -299,11 +299,42 @@
               <div *ngFor="let dept of selectedDepartments" class="mb-3">
                 <label class="form-label mb-2 d-block fw-semibold">{{ dept }} — Menu Access</label>
 
+                <!-- PREFILL FROM EXISTING ROLE — populates the checkboxes below
+                     from a role already created in Role Master for this category.
+                     Purely a starting point: checking one overwrites the current
+                     checkbox state, but every item stays fully editable afterward,
+                     and nothing is saved until the form is submitted. Behaves like
+                     a radio group — checking one automatically unchecks any other,
+                     since [checked] is bound to whether this role is the one
+                     currently tracked in selectedExistingRoleByDepartment. -->
+                <div class="mb-2" *ngIf="existingRolesByDepartment[dept]?.length">
+                  <label class="form-label mb-1 small text-muted d-block">Prefill from existing role:</label>
+                  <div class="d-flex flex-wrap gap-3">
+                    <div class="form-check" *ngFor="let r of existingRolesByDepartment[dept]">
+                      <input class="form-check-input" type="checkbox"
+                        [id]="dept + '-existing-role-' + r.roleId"
+                        [checked]="selectedExistingRoleByDepartment[dept] === r.roleId"
+                        (change)="onExistingRoleCheckboxToggle(dept, r.roleId, $event)">
+                      <label class="form-check-label small" [for]="dept + '-existing-role-' + r.roleId">
+                        {{ r.roleName }}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- GRANTED — always visible, checkbox unchecks to remove -->
                 <div class="card mb-2">
                   <div class="row g-0">
                     <div class="col-md-6 border-end">
-                      <div class="card-header fw-bold py-2">Process</div>
+                      <div class="card-header fw-bold py-2 d-flex justify-content-between align-items-center">
+                        <span>Process</span>
+                        <div class="form-check mb-0" *ngIf="getGrantedProcessItems(dept).length > 1">
+                          <input class="form-check-input" type="checkbox" [id]="dept + '-granted-process-all'"
+                            [checked]="isAllMenuItemsSelected(getGrantedProcessItems(dept))"
+                            (change)="toggleAllMenuItems(getGrantedProcessItems(dept), $event)">
+                          <label class="form-check-label small fw-normal" [for]="dept + '-granted-process-all'">Select All</label>
+                        </div>
+                      </div>
                       <div class="card-body py-2">
                         <div class="form-check" *ngFor="let item of getGrantedProcessItems(dept)">
                           <input class="form-check-input" type="checkbox" [id]="dept + '-granted-' + item.subMenuId"
@@ -318,7 +349,15 @@
                       </div>
                     </div>
                     <div class="col-md-6">
-                      <div class="card-header fw-bold py-2">Reports</div>
+                      <div class="card-header fw-bold py-2 d-flex justify-content-between align-items-center">
+                        <span>Reports</span>
+                        <div class="form-check mb-0" *ngIf="getGrantedReportsItems(dept).length > 1">
+                          <input class="form-check-input" type="checkbox" [id]="dept + '-granted-reports-all'"
+                            [checked]="isAllMenuItemsSelected(getGrantedReportsItems(dept))"
+                            (change)="toggleAllMenuItems(getGrantedReportsItems(dept), $event)">
+                          <label class="form-check-label small fw-normal" [for]="dept + '-granted-reports-all'">Select All</label>
+                        </div>
+                      </div>
                       <div class="card-body py-2">
                         <div class="form-check" *ngFor="let item of getGrantedReportsItems(dept)">
                           <input class="form-check-input" type="checkbox" [id]="dept + '-granted-' + item.subMenuId"
@@ -334,7 +373,6 @@
                     </div>
                   </div>
                 </div>
-
                 <!-- ADD MORE — collapsed by default, only lists what's not yet granted -->
                 <button type="button" class="btn btn-sm btn-outline-primary mb-2"
                   (click)="toggleAddMenu(dept)">
@@ -344,7 +382,15 @@
                 <div class="card mb-2" *ngIf="isAddMenuExpanded(dept)">
                   <div class="row g-0">
                     <div class="col-md-6 border-end">
-                      <div class="card-header fw-bold py-2">Process</div>
+                      <div class="card-header fw-bold py-2 d-flex justify-content-between align-items-center">
+                        <span>Process</span>
+                        <div class="form-check mb-0" *ngIf="getAvailableProcessItems(dept).length > 1">
+                          <input class="form-check-input" type="checkbox" [id]="dept + '-avail-process-all'"
+                            [checked]="isAllMenuItemsSelected(getAvailableProcessItems(dept))"
+                            (change)="toggleAllMenuItems(getAvailableProcessItems(dept), $event)">
+                          <label class="form-check-label small fw-normal" [for]="dept + '-avail-process-all'">Select All</label>
+                        </div>
+                      </div>
                       <div class="card-body py-2">
                         <div class="form-check" *ngFor="let item of getAvailableProcessItems(dept)">
                           <input class="form-check-input" type="checkbox" [id]="dept + '-avail-' + item.subMenuId"
@@ -359,7 +405,15 @@
                       </div>
                     </div>
                     <div class="col-md-6">
-                      <div class="card-header fw-bold py-2">Reports</div>
+                      <div class="card-header fw-bold py-2 d-flex justify-content-between align-items-center">
+                        <span>Reports</span>
+                        <div class="form-check mb-0" *ngIf="getAvailableReportsItems(dept).length > 1">
+                          <input class="form-check-input" type="checkbox" [id]="dept + '-avail-reports-all'"
+                            [checked]="isAllMenuItemsSelected(getAvailableReportsItems(dept))"
+                            (change)="toggleAllMenuItems(getAvailableReportsItems(dept), $event)">
+                          <label class="form-check-label small fw-normal" [for]="dept + '-avail-reports-all'">Select All</label>
+                        </div>
+                      </div>
                       <div class="card-body py-2">
                         <div class="form-check" *ngFor="let item of getAvailableReportsItems(dept)">
                           <input class="form-check-input" type="checkbox" [id]="dept + '-avail-' + item.subMenuId"
@@ -383,6 +437,11 @@
 
           </div>
           <!-- End login access -->
+
+          <!-- NEW — explains why Update may be disabled, instead of a silent disabled button -->
+          <div class="text-danger small mb-2 text-end" *ngIf="categoriesMissingMenuItems.length">
+            Select at least one menu item for: {{ categoriesMissingMenuItems.join(', ') }}
+          </div>
 
           <!-- BUTTONS -->
           <div class="text-end mt-2">

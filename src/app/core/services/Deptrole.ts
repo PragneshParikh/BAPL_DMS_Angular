@@ -54,6 +54,9 @@ export class RoleService {
     return this.http.put(`${this.baseUrl}/mappings/${id}`, { name, category });
   }
 
+  // NOTE: this is the one method Employee Master's "prefill from existing
+  // role" dropdown should call — it hits GET /role/by-category/{category}
+  // correctly (baseUrl already ends in /role, so no segment is duplicated).
   getByCategory(category: string): Observable<RoleModel[]> {
     return this.http.get<RoleModel[]>(`${this.baseUrl}/by-category/${encodeURIComponent(category)}`);
   }
