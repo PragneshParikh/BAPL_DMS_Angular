@@ -46,12 +46,12 @@ export class EmployeeMasterList
   roles: { title: string; value: string }[] = [];
   selectedRoles: string[] = ['Employee'];
 
-  // ── DEALER FILTER — SuperAdmin only. Everyone else's list is already
-  // scoped server-side to their own DealerCode (EmployeeController.Get()),
-  // so the dropdown would be redundant/misleading for them. ──
   dealerList: any[] = [];
   selectedDealerCode: string = '';   // '' = All Dealers
   isSuperAdmin: boolean = false;
+  expandedEmployeeId: number | null = null;
+
+  dealerLocationsMap: { [dealerCode: string]: { locCode: string; locName: string }[] } = {};
 
   // =====================================
   // CONSTRUCTOR
@@ -80,9 +80,6 @@ export class EmployeeMasterList
     this.loadDepartments();
     this.loadDesignations();
     this.loadRoles();
-
-    // Non-SuperAdmins never see cross-dealer data (server enforces this
-    // regardless), so there's no reason to even load the dealer dropdown.
     if (this.isSuperAdmin) {
       this.loadDealers();
     }
@@ -183,12 +180,6 @@ export class EmployeeMasterList
 
           this.employeeList = response;
           this.applyDealerFilter();
-
-          // FIX: Location Name wasn't showing for most employees — see
-          // loadLocationsForCurrentEmployees() below for the reason. This
-          // re-runs on every list refresh, including right after an
-          // edit/save (closePopup() calls getEmployees()), so a newly
-          // saved employee's location resolves immediately too.
           this.loadLocationsForCurrentEmployees();
         },
 
@@ -202,47 +193,39 @@ export class EmployeeMasterList
       });
   }
 
-  // =====================================
-  // LOAD LOCATIONS
-  // FIX: this used to be loadLocations(), which only fetched locations for
-  // the CURRENTLY LOGGED-IN user's own dealerCode (read from localStorage).
-  // That's why Location Name only ever resolved for that one dealer's
-  // employees and stayed permanently blank for every other dealer's
-  // employees — editing/saving changed nothing because locationMap never
-  // contained THAT dealer's codes to begin with, regardless of what was
-  // saved.
-  //
-  // Now we look at whichever employees are actually loaded, collect every
-  // distinct DealerCode among them, and fetch + merge each dealer's
-  // locations into locationMap. Works whether this list is scoped to one
-  // dealer or showing SuperAdmin's "All Dealers" view.
-  // =====================================
-  loadLocationsForCurrentEmployees(): void {
-    const dealerCodes = Array.from(
-      new Set(
-        (this.employeeList ?? [])
-          .map(e => (e.dealerCode ?? '').trim())
-          .filter(code => !!code)
-      )
-    );
+  
+loadLocationsForCurrentEmployees(): void {
+  const dealerCodes = Array.from(
+    new Set(
+      (this.employeeList ?? [])
+        .map(e => (e.dealerCode ?? '').trim())
+        .filter(code => !!code)
+    )
+  );
 
-    if (dealerCodes.length === 0) return;
+  if (dealerCodes.length === 0) return;
 
-    dealerCodes.forEach(dealerCode => {
-      this.locationService.getLocationByDealerCode(dealerCode).subscribe({
-        next: (response: any[]) => {
-          (response ?? []).forEach(l => {
-            const code = l.locCode ?? l.loccode ?? l.Loccode;
-            const name = l.locName ?? l.locname ?? l.Locname;
-            if (code != null) {
-              this.locationMap[String(code).trim()] = name;
-            }
-          });
-        },
-        error: (error) => console.error(`Location load error for dealer ${dealerCode}`, error)
-      });
+  dealerCodes.forEach(dealerCode => {
+    this.locationService.getAllLocationByDealerCode(dealerCode).subscribe({
+      next: (response: any[]) => {
+        const locs = (response ?? []).map(l => ({
+          locCode: String(l.locCode ?? l.loccode ?? l.Loccode ?? '').trim(),
+          locName: l.locName ?? l.locname ?? l.Locname ?? ''
+        }));
+
+        // flat code→name map — still used by getLocationName() for the
+        // Location Name column
+        locs.forEach(l => {
+          if (l.locCode) this.locationMap[l.locCode] = l.locName;
+        });
+
+        // NEW — full list per dealer, used by the expand panel below
+        this.dealerLocationsMap[dealerCode] = locs;
+      },
+      error: (error) => console.error(`Location load error for dealer ${dealerCode}`, error)
     });
-  }
+  });
+}
 
   // Handles a single location code or a comma-separated list of codes
   // (an employee can be assigned to more than one dealer location).
@@ -362,4 +345,6 @@ export class EmployeeMasterList
         }
       });
   }
+
+  
 }

@@ -14,7 +14,7 @@
         <form [formGroup]="filterForm">
           <div class="row g-2 align-items-end">
 
-            <div class="col-xl-2 col-md-4">
+            <div class="col-xl-2 col-md-4" *ngIf="isSuperAdmin">
               <label class="form-label">Dealer</label>
               <select formControlName="dealerCode" class="form-select form-select-sm">
                 <option value="">-- All Dealers --</option>

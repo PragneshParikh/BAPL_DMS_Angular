@@ -40,16 +40,40 @@ implements OnInit {
 
   toDate = '';
 
+  // NEW — SuperAdmins can browse this report across every dealer, so they
+  // keep the "Dealer Code" picker. Everyone else is always restricted
+  // server-side to their own dealer's data now (see
+  // ReportController.GetPartsDispatchReport), so the picker can't actually
+  // change what comes back — hide it and skip the dealer-list API call
+  // entirely rather than show a control that does nothing.
+  isSuperAdmin = false;
+
   constructor(
     private reportService: ReportService
   ) { }
 
   ngOnInit(): void {
 
-    this.loadDealers();
+    this.isSuperAdmin = this.checkIsSuperAdmin();
+
+    if (this.isSuperAdmin) {
+      this.loadDealers();
+    }
 
     this.getReport();
 
+  }
+
+  /**
+   * ASSUMPTION — I don't have this project's actual auth/token service, so
+   * this reads the role the same flat way the Login API's JSON response
+   * shape suggests it might be stored (`role` in localStorage). If this app
+   * already keeps auth state in a shared AuthService/TokenService instead,
+   * swap the body of this one method for a call into that.
+   */
+  private checkIsSuperAdmin(): boolean {
+    const role = localStorage.getItem('role');
+    return role === 'SuperAdmin';
   }
 
   // =========================================
