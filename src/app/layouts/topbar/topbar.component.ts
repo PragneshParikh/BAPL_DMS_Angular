@@ -2,7 +2,7 @@ import { Component, OnInit, EventEmitter, Output, Inject, ViewChild, TemplateRef
 
 //Logout
 import { AuthenticationService } from '../../core/services/auth.service';
-import { Router, RouterLink } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 
 // Language
 import { CookieService } from 'ngx-cookie-service';
@@ -14,7 +14,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SimplebarAngularModule } from 'simplebar-angular';
 import { MenuService } from '../../core/services/menu-service';
 import { saleInvoice } from './data';
-import { map, Observable, of } from 'rxjs';
+import { filter, map, Observable, of } from 'rxjs';
 import { LoaderService } from '../../core/services/loader';
 import { InvoiceDetail } from '../../dialogs/invoice-detail/invoice-detail';
 import { StorageService } from '../../core/services/storage';
@@ -130,7 +130,9 @@ export class TopbarComponent implements OnInit {
     this.notificationService.refreshPartsNotification.subscribe(() => {
       this.getPartsInwardNotification();
     });
+
   }
+
 
   /**
    * Toggle the menu bar when having mobile screen
@@ -260,7 +262,7 @@ export class TopbarComponent implements OnInit {
     let results: any[] = [];
 
     const matches =
-      item.label?.toLowerCase().includes(search) && item.link != null;
+      item.label?.toLowerCase().includes(search) && item.link != null && item.module.toLowerCase() === this.selectedOption.toLowerCase();
 
     // Include item ONLY if it has link and matches
     if (matches) {
@@ -282,13 +284,17 @@ export class TopbarComponent implements OnInit {
   /**
    * Search Close Btn
    */
-  closeBtn() {
+  closeBtn(selectedForm: any | null) {
     var searchOptions = document.getElementById("search-close-options") as HTMLAreaElement;
     var dropdown = document.getElementById("search-dropdown") as HTMLAreaElement;
     var searchInputReponsive = document.getElementById("search-options") as HTMLInputElement;
     dropdown.classList.remove("show");
     searchOptions.classList.add("d-none");
     searchInputReponsive.value = "";
+
+    if (selectedForm) {
+      this.router.navigate([selectedForm.link]);
+    }
   }
 
   // Remove Notification
@@ -340,7 +346,7 @@ export class TopbarComponent implements OnInit {
     this.loader.show();
     this.vehicleInwardService.getByVehicleStatus(false, this.dealerCode).subscribe({
       next: (result) => {
-          this.vehicleInward = result;
+        this.vehicleInward = result;
 
         // Group by invoice number
         const groupedInvoices = this.vehicleInward.filter((p: any) => p.isD2d).reduce((acc: any, item: any) => {

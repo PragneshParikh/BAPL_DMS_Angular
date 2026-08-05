@@ -133,7 +133,7 @@ export class PartsPo implements OnInit {
 
   async ngOnInit() {
     this.loadShowroomLocations();
-    this.getItemList();
+    // this.getItemList();
     this.loadKitList();
     this.loadJobCards();
     await this.getPartyName();
@@ -307,7 +307,11 @@ export class PartsPo implements OnInit {
   // }
   getItemList() {
     this.loader.show();
-    this.itemmasterService.fetchItemsByHsnTaxAndGroupId(1).subscribe({
+
+    const matchedLocation = this.locationList.find(x => x.loccode === this.partsPOData.selectedLocation);
+    const dealerCode = matchedLocation?.dealercode;
+
+    this.itemmasterService.fetchItemsByHsnTaxAndGroupId(1, dealerCode).subscribe({
       next: (res) => {
         this.loader.hide();
         this.itemList = res;
@@ -1101,7 +1105,7 @@ export class PartsPo implements OnInit {
             itemDescription: item.itemDescription,
             qty: item.qty,
             rate: gstPrice.basePrice,
-               mrp: (item.mrp ? Number(item.mrp) : Number(gstPrice.finalPrice)* item.qty),
+            mrp: (item.mrp ? Number(item.mrp) : Number(gstPrice.finalPrice) * item.qty),
 
             amount: Number(gstPrice.basePrice) * Number(item.qty),
             sgstAmt: gstData.sgst * item.qty,
@@ -1174,6 +1178,7 @@ export class PartsPo implements OnInit {
     if (event) {
       const dealerCode = this.locationList.filter(x => x.loccode === event.target.value)[0].dealercode;
       this.generateNewOrderNo(dealerCode);
+      this.getItemList();
     }
     // Refresh calculations for the current item if a model is already selected
     // if (this.currentItem.modelNo) {

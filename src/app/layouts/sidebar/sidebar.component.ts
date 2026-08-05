@@ -1,5 +1,5 @@
 import { Component, OnInit, EventEmitter, Output, ViewChild, ElementRef } from '@angular/core';
-import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { NavigationEnd, Route, Router, RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { MENU } from './menu';
@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
 import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { SimplebarAngularModule } from 'simplebar-angular';
 import { MenuService } from '../../core/services/menu-service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, filter } from 'rxjs';
 import { RolewiseMenuService } from '../../core/services/rolewisemenu-service';
 import { LoaderService } from '../../core/services/loader';
 import { StorageService } from '../../core/services/storage';
@@ -34,7 +34,8 @@ export class SidebarComponent implements OnInit {
     private menuService: MenuService,
     private roleWiseMenuService: RolewiseMenuService,
     private loader: LoaderService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private router: Router
   ) {
     translate.setDefaultLang('en');
   }
@@ -52,6 +53,24 @@ export class SidebarComponent implements OnInit {
     this.loadRoleWiseMenuRights();
     // Subscribe to active module for filtering
     this.menuService.activeModule$.subscribe(module => this.filterMenuByModule(module));
+
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd)
+      )
+      .subscribe(() => {
+        this.activateMenuByRoute();
+      });
+
+    // Initial page load
+    this.activateMenuByRoute();
+  }
+
+
+  activateMenuByRoute(): void {
+    setTimeout(() => {
+      this.initActiveMenu();
+    });
   }
 
   /***
