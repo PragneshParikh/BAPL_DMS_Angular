@@ -259,7 +259,8 @@ export const routes: Routes = [
       { path: 'estimate', component: EstimateList, data: [98] },
       { path: 'estimate/add', component: Estimate, data: [98] },
       { path: 'estimate/edit/:id', component: Estimate, data: [98] },
-
+      { path: 'ebw-invoice', data: [106], loadComponent: () => import('./components/ebw-invoice/ebw-invoice').then(m => m.EBWInvoice) },
+      { path: 'ebw-report', data: [111], loadComponent: () => import('./components/ebw-reports/ebw-reports').then(m => m.EBWReports) }
     ]
   },
   { path: '**', component: WorkInProgress }

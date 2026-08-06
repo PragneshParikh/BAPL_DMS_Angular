@@ -105,4 +105,10 @@ export class EmployeeMasterService {
       responseType: 'blob'
     });
   }
+
+  getMenuPreview(roleNames: string[]) {
+    return this.http.get<any>(`${this.apiUrl}/Employee/menu-preview`, {
+      params: { roleNames: roleNames.join(',') }
+    });
+  }
 }

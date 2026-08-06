@@ -41,8 +41,6 @@ export class VehicleQuotation implements OnInit, OnChanges {
   filteredCities: any[] = [];
   financeCompanies: any[] = [];
 
-  statusOptions: string[] = ['Draft', 'Sent', 'Approved', 'Rejected', 'Converted'];
-
   colorLocked: boolean = false;
   private lastFetchedItem: any = null;
 
@@ -52,7 +50,6 @@ export class VehicleQuotation implements OnInit, OnChanges {
     quotationDate?: string;
     validTillDate?: string;
     dealerId?: string;
-    status?: string;
     customerName?: string;
     mobileNo?: string;
     emailId?: string;
@@ -142,7 +139,6 @@ export class VehicleQuotation implements OnInit, OnChanges {
   private setDefaultsForNewQuotation(): void {
     this.quotationData = {};
     this.quotationData.quotationDate = this.formatDate(new Date());
-    this.quotationData.status = 'Draft';
     this.quotationData.dealerId = '';
     this.quotationData.hypothecationAmount = 0;
     this.quotationData.plateAmount = 0;
@@ -492,9 +488,9 @@ export class VehicleQuotation implements OnInit, OnChanges {
 
   // =====================================
   // VALIDATION
-  // Finance section is now fully optional with no cross-field enforcement —
-  // the block that previously required Finance Company / Loan Amount /
-  // Down Payment once any one of them was touched has been removed entirely.
+  // Finance section is fully optional with no cross-field enforcement.
+  // Status field has been removed entirely — no default, no validation,
+  // no submission payload.
   // =====================================
   validateForm(): boolean {
     this.errors = {};
@@ -513,11 +509,6 @@ export class VehicleQuotation implements OnInit, OnChanges {
 
     if (!d.dealerId) {
       this.errors.dealerId = 'Dealer is required.';
-      valid = false;
-    }
-
-    if (!d.status) {
-      this.errors.status = 'Status is required.';
       valid = false;
     }
 
@@ -667,7 +658,6 @@ export class VehicleQuotation implements OnInit, OnChanges {
       loanAmount: Number(this.quotationData.loanAmount) || 0,
       downPayment: Number(this.quotationData.downPayment) || 0,
 
-      status: this.quotationData.status,
       remarks: this.quotationData.remarks,
 
       hypothecationAmount: Number(this.quotationData.hypothecationAmount) || 0,

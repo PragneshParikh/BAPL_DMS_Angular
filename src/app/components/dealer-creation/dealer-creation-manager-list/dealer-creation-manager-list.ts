@@ -436,6 +436,31 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     return rows;
   }
 
+  // ═══════════════════════════════════════════════════════════════════
+  // SELECT ALL — MENU ACCESS (Process / Reports)
+  // Generic over any { topMenuName, items }[] group array — shared by both
+  // the dealer-level Menu Access modal (menuAccessData) and the Location
+  // Edit modal's own menu access (locationMenuAccessData), since both use
+  // the identical shape and the same DealerMenuAccessItem type.
+  // ═══════════════════════════════════════════════════════════════════
+
+  getProcessItems(groups?: { topMenuName: string; items: DealerMenuAccessItem[] }[] | null): DealerMenuAccessItem[] {
+    return groups?.find(g => g.topMenuName === 'Process')?.items ?? [];
+  }
+
+  getReportItems(groups?: { topMenuName: string; items: DealerMenuAccessItem[] }[] | null): DealerMenuAccessItem[] {
+    return groups?.find(g => g.topMenuName === 'Reports')?.items ?? [];
+  }
+
+  isAllGranted(items: DealerMenuAccessItem[]): boolean {
+    return items.length > 0 && items.every(i => i.isGranted);
+  }
+
+  toggleAllGranted(items: DealerMenuAccessItem[], event: any): void {
+    const checked = event.target.checked;
+    items.forEach(i => i.isGranted = checked);
+  }
+
   toggleMenuItem(item: DealerMenuAccessItem): void {
     item.isGranted = !item.isGranted;
   }
