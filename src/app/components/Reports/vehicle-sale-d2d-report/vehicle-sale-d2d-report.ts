@@ -17,6 +17,14 @@ export class VehicleSaleD2dReport implements OnInit {
   filteredChassisList: string[] = [];
   showChassisDropdown = false;
 
+  // NEW — SuperAdmins can browse D2D transfers across every dealer, so they
+  // keep the "Dealer" picker. Everyone else is always restricted server-side
+  // to their own dealer's data now (see ReportController.GetD2DReport /
+  // ExportD2DReport), so the picker has nothing to do for them — hide it and
+  // skip the dealer-list API call entirely rather than show a control that
+  // can't actually change what comes back.
+  isSuperAdmin = false;
+
   filter: D2DReportFilter = {
     dealerCode: null,
     fromDealerCode: null,
@@ -43,9 +51,29 @@ export class VehicleSaleD2dReport implements OnInit {
   constructor(private reportService: ReportService) { }
 
   ngOnInit(): void {
-    this.loadDealers();
+    this.isSuperAdmin = this.checkIsSuperAdmin();
+
+    if (this.isSuperAdmin) {
+      this.loadDealers();
+    }
+
     this.loadChassisList();
     this.loadReport();
+  }
+
+  /**
+   * ASSUMPTION — I don't have this project's actual auth/token service, so
+   * this reads the role the same flat way the Login API's JSON response
+   * shape suggests it might be stored (`role` in localStorage). If this app
+   * already keeps auth state in a shared AuthService/TokenService instead,
+   * replace the body of this one method with a call into that
+   * (e.g. `return this.authService.hasRole('SuperAdmin');`) — nothing else
+   * in this component needs to change, since everything else here just
+   * depends on `isSuperAdmin` being set correctly.
+   */
+  private checkIsSuperAdmin(): boolean {
+    const role = localStorage.getItem('role');
+    return role === 'SuperAdmin';
   }
 
   loadDealers(): void {

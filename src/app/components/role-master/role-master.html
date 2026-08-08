@@ -1,5 +1,5 @@
 <div class="d-flex justify-content-between align-items-center mb-2">
-  <h5 class="mb-0">Add Role</h5>
+  <h5 class="mb-0">{{ isEditMode ? 'Edit Role' : 'Add Role' }}</h5>
   <button class="btn btn-secondary btn-sm" (click)="backToList()">
     <i class="ri-arrow-left-line"></i> Back
   </button>
@@ -7,6 +7,7 @@
 
 <div class="card shadow-sm">
   <div class="card-body">
+
     <div class="row">
       <div class="col-md-4">
         <label class="form-label mb-1">Role Name</label>
@@ -23,9 +24,13 @@
       </div>
     </div>
 
+    <div class="text-muted small mt-2">
+      Process/Reports menu access is assigned per employee in Employee Master, not here.
+    </div>
+
     <div class="text-end mt-3">
       <button class="btn btn-secondary btn-sm me-2" (click)="backToList()">Cancel</button>
-      <button class="btn btn-primary btn-sm" (click)="save()">Save</button>
+      <button class="btn btn-primary btn-sm" (click)="save()" [disabled]="saving">Save</button>
     </div>
   </div>
 </div>
