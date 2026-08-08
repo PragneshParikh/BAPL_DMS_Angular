@@ -1,0 +1,185 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-primary bg-gradient text-white py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-white">
+                <i class="ri-file-list-3-line me-1"></i>
+                Warranty Order List
+            </h6>
+
+            <button class="btn btn-sm btn-light" (click)="back()">
+                <i class="ri-arrow-left-line me-1"></i>
+                Back
+            </button>
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        <!-- Filters -->
+        <div class="row g-2 mb-3">
+
+            <div class="col-md-2">
+                <label class="form-label">Date From</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.dateFrom">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Date To</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.dateTo">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Batch No</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.batchNo">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Order No</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.orderNo">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Location</label>
+                <select class="form-select form-select-sm" [(ngModel)]="filter.location">
+                    <option [ngValue]="null">--All--</option>
+                    <option *ngFor="let location of locationList" [ngValue]="location.loccode">
+                        {{ location.locname }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Supplier</label>
+                <select class="form-select form-select-sm" [(ngModel)]="filter.supplierId">
+                    <option [ngValue]="null">--All--</option>
+                    <option *ngFor="let supplier of supplierList" [ngValue]="supplier.id">
+                        {{ supplier.ledgerName }}
+                    </option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-primary btn-sm me-2" (click)="search()">
+                <i class="ri-search-line me-1"></i>
+                Search
+            </button>
+            <button class="btn btn-light btn-sm" (click)="resetFilter()">
+                <i class="ri-refresh-line me-1"></i>
+                Reset
+            </button>
+        </div>
+
+        <div class="text-muted small mb-2">Total Record(s): {{ totalCount }}</div>
+
+        <!-- Results grid -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:30px"></th>
+                        <th>Batch No</th>
+                        <th>Batch Date</th>
+                        <th>Order No</th>
+                        <th>Order Date</th>
+                        <th>Location</th>
+                        <th>Claim Type</th>
+                        <th class="text-center">Total Claims</th>
+                        <th class="text-center">Approved</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <ng-container *ngFor="let order of orders">
+                        <tr (dblclick)="view(order.id)" style="cursor: pointer;" title="Double-click to open this order">
+                            <td class="text-center" (click)="toggleExpand(order.id); $event.stopPropagation()" style="cursor: pointer;">
+                                <i class="ri-arrow-down-s-line" *ngIf="expandedOrderId === order.id"></i>
+                                <i class="ri-arrow-right-s-line" *ngIf="expandedOrderId !== order.id"></i>
+                            </td>
+                            <td>{{ order.batchNo }}</td>
+                            <td>{{ order.batchDate | date:'dd-MM-yyyy' }}</td>
+                            <td>{{ order.orderNo }}</td>
+                            <td>{{ order.orderDate | date:'dd-MM-yyyy' }}</td>
+                            <td>{{ order.location }}</td>
+                            <td>{{ order.claimType }}</td>
+                            <td class="text-center">{{ order.totalClaims }}</td>
+                            <td class="text-center">
+                                <span class="badge" [ngClass]="order.isApproved ? 'bg-success' : 'bg-secondary'">
+                                    {{ order.isApproved ? 'Yes' : 'No' }}
+                                </span>
+                            </td>
+                        </tr>
+
+                        <!-- Expanded claim details for this order -->
+                        <tr *ngIf="expandedOrderId === order.id">
+                            <td colspan="10" class="bg-light p-2">
+
+                                <div *ngIf="loadingDetailsForOrderId === order.id" class="text-muted small">
+                                    Loading claim details...
+                                </div>
+
+                                <div *ngIf="loadingDetailsForOrderId !== order.id">
+                                    <div *ngFor="let claim of claimsByOrderId[order.id]" class="mb-3">
+                                        <div class="fw-bold small mb-1">
+                                            Claim {{ claim.claimPrefix }}{{ claim.claimNo }}
+                                            ({{ claim.claimDate | date:'dd-MM-yyyy' }}) -
+                                            Chassis {{ claim.chassisNo }} - {{ claim.locationName }}
+                                        </div>
+
+                                        <table class="table table-sm table-bordered mb-0">
+                                            <thead class="table-secondary">
+                                                <tr>
+                                                    <th>Type</th>
+                                                    <th>Part/Labour Code</th>
+                                                    <th>Description</th>
+                                                    <th class="text-center">Qty</th>
+                                                    <th class="text-end">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let line of claim.details">
+                                                    <td>{{ line.itemType }}</td>
+                                                    <td>{{ line.partCode || line.labourCode }}</td>
+                                                    <td>{{ line.partName || line.labourDescription }}</td>
+                                                    <td class="text-center">{{ line.quantity }}</td>
+                                                    <td class="text-end">{{ line.totalAmount | number:'1.2-2' }}</td>
+                                                </tr>
+                                                <tr *ngIf="!claim.details || claim.details.length === 0">
+                                                    <td colspan="5" class="text-center text-muted">No line items</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div *ngIf="!claimsByOrderId[order.id] || claimsByOrderId[order.id].length === 0" class="text-muted small">
+                                        No claims linked to this order.
+                                    </div>
+                                </div>
+
+                            </td>
+                        </tr>
+                    </ng-container>
+
+                    <tr *ngIf="orders.length === 0">
+                        <td colspan="10" class="text-center text-muted">No Warranty Orders Found</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-2" *ngIf="totalPages > 1">
+            <span class="text-muted small">Page {{ filter.pageNumber }} of {{ totalPages }}</span>
+            <div>
+                <button class="btn btn-sm btn-light me-1" [disabled]="filter.pageNumber === 1" (click)="goToPage(filter.pageNumber - 1)">
+                    Previous
+                </button>
+                <button class="btn btn-sm btn-light" [disabled]="filter.pageNumber === totalPages" (click)="goToPage(filter.pageNumber + 1)">
+                    Next
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
