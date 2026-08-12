@@ -41,6 +41,8 @@ export class ExtendedBatteryWarranty implements OnInit {
     discountAmount: 0,
     gstPercentage: 0,
     purchaseValidity: 0,
+    batteryPartCode: '',
+    partCode: '', 
     fromDate: "",
     toDate: null,
     isActive: true,
@@ -88,6 +90,8 @@ export class ExtendedBatteryWarranty implements OnInit {
             discountAmount: res.discountAmount,
             gstPercentage: res.gstpercentage,
             purchaseValidity: res.purchaseValidity,
+            batteryPartCode: res.batteryPartCode,
+            partCode: res.partCode, 
             fromDate: new Date(res.fromDate).toISOString().split('T')[0],
             toDate: res.toDate,
             isActive: res.isActive,
@@ -149,6 +153,7 @@ export class ExtendedBatteryWarranty implements OnInit {
   }
 
   onSubmit(form: any) {
+    console.log('Form valid?', form.valid, form.value);
     if (!form.valid) return;
 
     const isNew = this.schemeId <= 0;

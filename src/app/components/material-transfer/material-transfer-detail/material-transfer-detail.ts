@@ -182,7 +182,10 @@ export class MaterialTransferDetail implements OnInit {
     this.itemmasterService.fetchItemsByHsnTaxAndGroupId(1, jobDetails.dealerCode).subscribe({
       next: (res) => {
         this.loader.hide();
-        this.itemList = res;
+        // Exclude EW (EBW) parts — they belong to the EBW Invoice flow, not Material Transfer
+        this.itemList = (res || []).filter((item: any) =>
+          !(item.itemcode || '').toUpperCase().includes('EW')
+        );
       },
       error: (err) => {
         this.loader.hide();
@@ -346,12 +349,12 @@ export class MaterialTransferDetail implements OnInit {
       ...this.newItem,
       location: this.formData.location,
       dealerCode: this.lstLocation.filter(x => x.loccode === this.formData.location)[0].dealerCode,
+      dealerLocation: this.lstLocation.filter(x => x.loccode === this.formData.location)[0].locname, // ADD THIS LINE
       materialPrefix: this.formData.prefix,
       materialissueNumber: this.formData.issueNumber,
       updatedBy: this.storageService.getUserId(),
       updatedDate: new Date()
-    };
-
+    };    
 
     // this.newItem.cgstAmount = totalGST > 0 ? ((Number(this.items[index].cgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
     // this.newItem.sgstAmount = totalGST > 0 ? ((Number(this.items[index].sgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';

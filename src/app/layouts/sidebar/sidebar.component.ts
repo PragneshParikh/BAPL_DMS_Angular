@@ -1,3 +1,4 @@
+//BAPL_DMS_Angular\src\app\layouts\sidebar\sidebar.component.ts
 import { Component, OnInit, EventEmitter, Output, ViewChild, ElementRef } from '@angular/core';
 import { NavigationEnd, Route, Router, RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -258,7 +259,7 @@ export class SidebarComponent implements OnInit {
     if (!this.menuItems) return;
 
     const filteredMenu = JSON.parse(JSON.stringify(this.menuItems)) // deep copy
-
+    
       .map((menu: any) => {
         if (menu.subItems) {
           menu.subItems = menu.subItems.filter((sub: any) => {
@@ -266,6 +267,19 @@ export class SidebarComponent implements OnInit {
           });
         }
         return menu;
+      })
+      .filter((menu: any) => {
+        // Always keep section titles
+        if (menu.isTitle) {
+          return true;
+        }
+        // If this item originally had a subItems array (i.e. it's a dropdown parent),
+        // only keep it if at least one child survived the filter
+        if (Array.isArray(menu.subItems)) {
+          return menu.subItems.length > 0;
+        }
+        // Plain leaf items (no subItems at all) stay as-is
+        return true;
       });
 
     this.filteredMenuItems = filteredMenu;

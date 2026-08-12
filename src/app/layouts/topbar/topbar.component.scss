@@ -11,6 +11,18 @@
         line-height: 30px;
     }
 
+    .notification-item { border-left: 3px solid #f7931e; padding-left: 10px; }
+
+    .dropdown-tabs {
+        flex-wrap: nowrap !important;
+
+        .nav-link {
+            white-space: nowrap;
+            padding: 0.5rem 0.6rem;
+            font-size: 11px;
+        }
+    }
+
     @media (min-width: 600px) {
         .dropdown-menu-lg {
              width: 395px ;

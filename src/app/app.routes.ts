@@ -1,3 +1,4 @@
+//BAPL_DMS_Angular\src\app\app.routes.ts
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layouts/layout.component';
 import { DealerMaster } from './components/dealer-master/dealer-master';
@@ -259,7 +260,10 @@ export const routes: Routes = [
       { path: 'estimate', component: EstimateList, data: [98] },
       { path: 'estimate/add', component: Estimate, data: [98] },
       { path: 'estimate/edit/:id', component: Estimate, data: [98] },
-
+      { path: 'ebw-invoice', data: [106], loadComponent: () => import('./components/ebw-invoice/ebw-invoice').then(m => m.EBWInvoice) },
+      { path: 'ebw-report', data: [111], loadComponent: () => import('./components/ebw-reports/ebw-reports').then(m => m.EBWReports) },
+      { path: 'ebw-invoice-list', data: [111], loadComponent: () => import('./components/ebw-invoice-list/ebw-invoice-list').then(m => m.EbwInvoiceList) },
+      { path: 'ebw-invoice/:id', data: [106], loadComponent: () => import('./components/ebw-invoice/ebw-invoice').then(m => m.EBWInvoice) },
     ]
   },
   { path: '**', component: WorkInProgress }

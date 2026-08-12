@@ -1,0 +1,327 @@
+<!--BAPL_DMS_Angular\src\app\components\ebw-invoice\ebw-invoice.html-->
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">
+    <i class="ri-car-line me-2"></i>
+    Extended Warranty Invoice
+  </h4>
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goToList()" title="View List">
+    <i class="ri-list-check-2"></i>
+  </button>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form #infoForm="ngForm">
+
+      <!-- Header Section -->
+      <div class="card card-body mb-2">
+        <div class="row g-1">
+          <div class="col-md-2">
+            <label class="form-label mb-1">Date</label>
+            <input type="text" class="form-control form-control-sm bg-light"
+                   [value]="formData.date | date:'dd-MM-yyyy'" disabled>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label mb-1">Prefix/Bill No.</label>
+            <div class="input-group input-group-sm">
+              <input type="text" class="form-control" name="prefixNo" [(ngModel)]="formData.prefixNo" placeholder="Prefix No.">
+              <input type="text" class="form-control bg-light text-end" [value]="formData.billNo" disabled style="max-width:60px;">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label mb-1">Location<span class="text-danger">*</span></label>
+            <select class="form-select form-select-sm" name="locationCode" [(ngModel)]="formData.locationCode" required>
+              <option value="">-- Select --</option>
+              <option *ngFor="let loc of locationList" [value]="loc.loccode">{{ loc.locname }}</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label mb-1 d-block">Bill Type</label>
+            <div class="d-flex gap-1">
+              <button type="button" class="btn btn-sm" [ngClass]="formData.billType === 'Cash' ? 'btn-success' : 'btn-outline-secondary'" (click)="setBillType('Cash')">
+                <i class="ri-checkbox-circle-fill me-1" *ngIf="formData.billType === 'Cash'"></i> Cash
+              </button>
+              <button type="button" class="btn btn-sm" [ngClass]="formData.billType === 'Credit' ? 'btn-success' : 'btn-outline-secondary'" (click)="setBillType('Credit')">
+                <i class="ri-checkbox-circle-fill me-1" *ngIf="formData.billType === 'Credit'"></i> Credit
+              </button>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label mb-1">Cash Acc.</label>
+            <select class="form-select form-select-sm" name="cashAccountId" [(ngModel)]="formData.cashAccountId">
+              <option *ngFor="let acc of cashAccounts" [value]="acc.id">{{ acc.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row g-1 mt-1">
+          <div class="col-md-3">
+            <label class="form-label mb-1">Scheme<span class="text-danger">*</span></label>
+            <select class="form-select form-select-sm" name="schemeId" [(ngModel)]="formData.schemeId" (change)="onSchemeChange()">
+              <option [ngValue]="null">-- Select --</option>
+              <option *ngFor="let scheme of schemeList" [ngValue]="scheme.id">{{ scheme.schemeName }}</option>
+            </select>
+          </div>
+
+          <div class="col-md-2 position-relative" *ngIf="formData.schemeId">
+            <label class="form-label mb-1">Chassis No<span class="text-danger">*</span></label>
+            <div class="input-group input-group-sm">
+              <input type="text" class="form-control" [(ngModel)]="chassisSearchTerm" name="chassisSearch"
+                     (focus)="onChassisInputFocus()" placeholder="Search chassis...">
+              <button type="button" class="input-group-text bg-primary text-white" (click)="openGlobalChassisSearch()">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+            <ul *ngIf="showChassisDropdown && filteredChassisList.length" class="list-group position-absolute w-100 mt-1" style="z-index:1000; max-height:200px; overflow-y:auto;">
+              <li class="list-group-item list-group-item-action" *ngFor="let chassis of filteredChassisList" (click)="selectChassis(chassis)">
+                {{ chassis }}
+              </li>
+            </ul>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label mb-1">Party</label>
+            <input type="text" class="form-control form-control-sm bg-light" [value]="formData.party" disabled>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label mb-1">Party State</label>
+            <input type="text" class="form-control form-control-sm bg-light" [value]="formData.partyState || '--'" disabled>
+          </div>
+
+          <div class="col-md-2 position-relative" *ngIf="formData.chassisNo && !isChassisExpired">
+            <label class="form-label mb-1">Serial No<span class="text-danger">*</span></label>
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="formData.serialNo" name="serialNo"
+                   (input)="onSerialInputChange()" (focus)="onSerialInputFocus()" (blur)="onSerialInputBlur()" placeholder="Enter or search serial no...">
+            <ul *ngIf="showSerialDropdown && filteredSerialList.length" class="list-group position-absolute w-100 mt-1" style="z-index:1000; max-height:200px; overflow-y:auto;">
+              <li class="list-group-item list-group-item-action" *ngFor="let serial of filteredSerialList" (click)="selectSerial(serial)">
+                {{ serial }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Global chassis search popup -->
+        <div class="row mt-2" *ngIf="showGlobalSearchPopup">
+          <div class="col-12">
+            <div class="border rounded p-2 bg-light">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Search Chassis Across All Dealers</h6>
+                <button type="button" class="btn-close" (click)="closeGlobalSearchPopup()"></button>
+              </div>
+              <div class="row g-1 align-items-end">
+                <div class="col-md-4">
+                  <label class="form-label mb-0 small">Chassis No</label>
+                  <input type="text" class="form-control form-control-sm" [(ngModel)]="globalChassisSearchTerm" name="globalChassisSearchTerm" placeholder="Enter chassis no...">
+                </div>
+                <div class="col-md-2">
+                  <button type="button" class="btn btn-primary btn-sm w-100" (click)="searchGlobalChassis()">Search</button>
+                </div>
+              </div>
+              <div class="mt-2" *ngIf="globalSaleData">
+                <div class="row g-1">
+                  <div class="col-md-3"><label class="form-label mb-0 small">Customer Name</label><input type="text" class="form-control form-control-sm bg-white" [value]="globalSaleData.customerName" readonly></div>
+                  <div class="col-md-3"><label class="form-label mb-0 small">Mobile No.</label><input type="text" class="form-control form-control-sm bg-white" [value]="globalSaleData.mobileNo" readonly></div>
+                  <div class="col-md-3"><label class="form-label mb-0 small">State</label><input type="text" class="form-control form-control-sm bg-white" [value]="globalSaleData.stateName" readonly></div>
+                  <div class="col-md-3"><label class="form-label mb-0 small">City</label><input type="text" class="form-control form-control-sm bg-white" [value]="globalSaleData.cityName" readonly></div>
+                </div>
+                <div class="row g-1 mt-1">
+                  <div class="col-md-6"><label class="form-label mb-0 small">Address</label><input type="text" class="form-control form-control-sm bg-white" [value]="globalSaleData.address" readonly></div>
+                  <div class="col-md-2"><label class="form-label mb-0 small">Pincode</label><input type="text" class="form-control form-control-sm bg-white" [value]="globalSaleData.pincode" readonly></div>
+                  <div class="col-md-2"><label class="form-label mb-0 small">Sale Date</label><input type="text" class="form-control form-control-sm bg-white" [value]="globalSaleData.saleDate | date:'dd-MM-yyyy'" readonly></div>
+                  <div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-success btn-sm w-100" (click)="applyGlobalChassisResult()">Add</button></div>
+                </div>
+              </div>
+              <div class="mt-2" *ngIf="globalSearchNotFound">
+                <span class="text-danger small">No sale record found for this chassis in any dealership.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-2" *ngIf="chassisSaleDate">
+          <div class="col-12">
+            <div class="alert py-2 px-3 mb-0" [ngClass]="isChassisExpired ? 'alert-danger' : 'alert-success'">
+              <strong>Sale Date:</strong> {{ chassisSaleDate | date:'dd-MM-yyyy' }}
+              &nbsp;|&nbsp; <strong>Validity Expires:</strong> {{ validityExpiryDate | date:'dd-MM-yyyy' }}
+              <ng-container *ngIf="!isChassisExpired">&nbsp;|&nbsp; <strong>{{ daysRemaining }}</strong> day(s) remaining</ng-container>
+              <ng-container *ngIf="isChassisExpired">&nbsp;|&nbsp; <strong>Expired</strong> — this chassis is no longer eligible for this scheme.</ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ ITEM DETAILS — mirrors add-counter-bill.html's structure exactly ============ -->
+      <h3 class="fs-14 text-primary mb-0" *ngIf="formData.serialNo">Item Details</h3>
+      <fieldset class="border rounded p-2 mb-2" *ngIf="formData.serialNo">
+        <div class="row g-1">
+          <div class="col-md-3">
+            <label class="form-label mb-1">Part Name</label>
+            <input type="text" class="form-control form-control-sm bg-light" [(ngModel)]="itemObj.itemName" name="itemName" readonly>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label mb-1">Description</label>
+            <input type="text" class="form-control form-control-sm bg-light" [(ngModel)]="itemObj.itemDesc" name="itemDesc" readonly>
+          </div>
+          <div class="col-md-1">
+            <label class="form-label mb-1">Qty</label>
+            <input type="number" class="form-control form-control-sm bg-light" [(ngModel)]="itemObj.qty" name="qty" readonly>
+          </div>
+          <div class="col-md-1">
+            <label class="form-label mb-1">Item Rate</label>
+            <input type="number" class="form-control form-control-sm bg-light" [value]="itemObj.itemRate | number:'1.3-3'" readonly>
+          </div>
+          <div class="col-md-1">
+            <label class="form-label mb-1">MRP</label>
+            <input type="number" class="form-control form-control-sm bg-light" [value]="itemObj.itemMrp | number:'1.2-2'" readonly>
+          </div>
+          <div class="col-md-1">
+            <label class="form-label mb-1 discount-type-select">Disc Type</label>
+            <select class="form-select form-select-sm" [(ngModel)]="itemObj.discountType" name="discountType" (ngModelChange)="calculateAmounts()">
+              <option value="Value">Value</option>
+              <option value="%">%</option>
+            </select>
+          </div>
+          <div class="col-md-1">
+            <label class="form-label mb-1">Discount</label>
+            <input type="number" class="form-control form-control-sm" [(ngModel)]="itemObj.itemDiscount" name="itemDiscount" (ngModelChange)="calculateAmounts()">
+          </div>
+          <div class="col-md-1">
+            <label class="form-label mb-1">Amount</label>
+            <input type="number" class="form-control form-control-sm bg-light" [value]="itemObj.itemTotalAmount | number:'1.2-2'" readonly>
+          </div>
+        </div>
+
+        <div class="row g-1 mt-2">
+          <div class="col-md-2" *ngIf="itemObj.igstPer > 0">
+            <label class="form-label mb-1">IGST ({{ itemObj.igstPer }}%)</label>
+            <input type="text" class="form-control form-control-sm" [value]="itemObj.igstAmount | number:'1.3-3'" readonly>
+          </div>
+          <div class="col-md-2" *ngIf="itemObj.cgstPer > 0">
+            <label class="form-label mb-1">CGST ({{ itemObj.cgstPer }}%)</label>
+            <input type="text" class="form-control form-control-sm" [value]="itemObj.cgstAmount | number:'1.3-3'" readonly>
+          </div>
+          <div class="col-md-2" *ngIf="itemObj.sgstPer > 0">
+            <label class="form-label mb-1">SGST ({{ itemObj.sgstPer }}%)</label>
+            <input type="text" class="form-control form-control-sm" [value]="itemObj.sgstAmount | number:'1.3-3'" readonly>
+          </div>
+        </div>
+
+        <div class="row g-1 mt-1">
+          <div class="col-md-auto ms-auto d-flex align-items-end">
+            <button type="button" class="btn btn-primary btn-sm" (click)="addItem()">
+              {{ editIndex >= 0 ? 'Update' : 'Add' }}
+            </button>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- ============ ITEM TABLE ============ -->
+      <div *ngIf="itemsList.length > 0" class="table-responsive mb-2">
+        <table class="table table-bordered table-sm" style="font-size:12px;">
+          <thead>
+            <tr>
+              <th width="70">Action</th>
+              <th>Item Name / Description</th>
+              <th>Qty</th>
+              <th>MRP</th>
+              <th>Item Rate</th>
+              <th>GST%/Amnt</th>
+              <th>Dis. Type</th>
+              <th>Discount</th>
+              <th>Amount</th>
+              <th>MRP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of itemsList; let i = index">
+              <td>
+                <button type="button" class="btn btn-sm btn-soft-info py-0 px-1 me-1" (click)="editItem(i)"><i class="ri-pencil-line"></i></button>
+                <button type="button" class="btn btn-danger btn-sm py-0 px-1" (click)="removeItem(i)"><i class="ri-delete-bin-line"></i></button>
+              </td>
+              <td><strong>{{ item.itemCode }}</strong><br>{{ item.itemDesc }}</td>
+              <td>{{ item.qty }}</td>
+              <td>{{ item.itemMrp | number:'1.2-2' }}</td>
+              <td>{{ item.originalItemRate | number:'1.3-3' }}</td>
+              <td>
+                <div *ngIf="item.igstPer > 0">IGST: {{ item.igstPer }}% ({{ item.igstAmount | number:'1.3-3' }})</div>
+                <div *ngIf="item.cgstPer > 0">CGST: {{ item.cgstPer }}% ({{ item.cgstAmount | number:'1.3-3' }})</div>
+                <div *ngIf="item.sgstPer > 0">SGST: {{ item.sgstPer }}% ({{ item.sgstAmount | number:'1.3-3' }})</div>
+              </td>
+              <td>{{ item.discountType }}</td>
+              <td>{{ item.discount }}<span *ngIf="item.discountType === '%'">%</span></td>
+              <td><strong>{{ item.amount | number:'1.2-2' }}</strong></td>
+              <td>{{ item.itemMrp | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Amount Summary — matches add-counter-bill.html exactly -->
+      <div class="card card-body mb-2" *ngIf="itemsList.length > 0">
+        <div class="row g-1">
+          <div class="col-md-2">
+            <label class="form-label mb-1">Parts Amount</label>
+            <input type="number" class="form-control form-control-sm bg-light" [value]="partsAmount | number:'1.2-2'" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label mb-1">Net Amount</label>
+            <div class="d-flex gap-1">
+              <input type="number" class="form-control form-control-sm bg-light" [value]="netAmount | number:'1.2-2'" readonly>
+              <button type="button" class="btn btn-primary btn-sm" (click)="openDiscountPopup()">+Discount</button>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-md-12">
+            <label class="form-label mb-1">Remarks</label>
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="formData.remarks" name="remarks">
+          </div>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="card-footer bg-white border-top py-2">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <button *ngIf="isEditMode" type="button" class="btn btn-danger btn-sm" (click)="deleteInvoice()">
+          <i class="ri-delete-bin-line"></i> Delete
+        </button>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary btn-sm" (click)="onSave()" [disabled]="isChassisExpired">
+          {{ isEditMode ? 'Update' : 'Save' }}
+        </button>
+        <button class="btn btn-light btn-sm" (click)="backToList()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Global Discount Popup — matches add-counter-bill.html's popup exactly -->
+<div *ngIf="showDiscountPopup" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.4);">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title text-white">Discount</h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeDiscountPopup()"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Parts Discount</label>
+        <div class="input-group">
+          <select class="form-select" [(ngModel)]="discountModel.partsDiscountType" name="partsDiscountType">
+            <option value="Value">Value</option>
+            <option value="%">%</option>
+          </select>
+          <input type="number" class="form-control" [(ngModel)]="discountModel.partsDiscount" name="partsDiscount">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="submitDiscount()">Submit</button>
+        <button type="button" class="btn btn-light" (click)="closeDiscountPopup()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

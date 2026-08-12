@@ -119,9 +119,9 @@
                             </tr>
 
                             <!-- Data Rows -->
-                            <tr *ngFor="let item of partsInwardData" (dblclick)="goToInvoice(item)"
+                            <tr *ngFor="let item of partsInwardData; let i = index" (dblclick)="goToInvoice(item)"
                                 style="cursor: pointer;">
-                                <td>{{ item.srNo }}</td>
+                                <td>{{ i + 1 }}</td>
                                 <td>{{ item.invoiceNo }}</td>
                                 <td>{{ item.invoiceDate | date:'dd-MM-yyyy'}}</td>
                                 <td>{{ item.dealerCode }}</td>
@@ -138,7 +138,20 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="col-sm-12 col-md-12 mt-2">
+                <div class="col-sm-12 col-md-12 mt-2 d-flex justify-content-end align-items-center gap-3">
+                    <!-- ADDED: page size selector -->
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="form-label mb-0 small">Page Size</label>
+                        <select class="form-select form-select-sm" style="width: auto;"
+                                [(ngModel)]="pageSize" [ngModelOptions]="{standalone: true}"
+                                (change)="onPageSizeChange()">
+                            <option [ngValue]="10">10</option>
+                            <option [ngValue]="100">100</option>
+                            <option [ngValue]="1000">1000</option>
+                            <option [ngValue]="10000">10000</option>
+                        </select>
+                    </div>
+
                     <div class="text-md-right float-md-end gridjs-pagination">
                         <ngb-pagination [collectionSize]="partsInwardData.length" [(page)]="page" [pageSize]="pageSize"
                             (pageChange)="onPageChange($event)" [boundaryLinks]="true" [maxSize]="10">

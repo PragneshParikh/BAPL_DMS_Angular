@@ -1,3 +1,4 @@
+//BAPL_DMS_Angular\src\app\layouts\topbar\topbar.component.ts
 import { Component, OnInit, EventEmitter, Output, Inject, ViewChild, TemplateRef, DOCUMENT } from '@angular/core';
 
 //Logout
@@ -45,6 +46,7 @@ export class TopbarComponent implements OnInit {
   d2dNotificationList: any[] = [];
   invoiceNotifications: any[] = [];
   partsNotifications: any[] = [];
+  ebwNotifications: any[] = [];
   saleInvoice: any[] = [];
   element: any;
   mode: string | undefined;
@@ -123,12 +125,14 @@ export class TopbarComponent implements OnInit {
     this.getVehicleDispatchNotification();
     this.getPartsInwardNotification();
     this.getD2DVehicleNotification();
+    this.getEbwNotifications();
 
     // Fetch Data
     this.saleInvoice = saleInvoice;
 
     this.notificationService.refreshPartsNotification.subscribe(() => {
       this.getPartsInwardNotification();
+      this.getEbwNotifications();
     });
 
   }
@@ -323,7 +327,7 @@ export class TopbarComponent implements OnInit {
               invoiceNumber: invoiceNo,
               invoiceDate: item.invoiceDate,
               numberOfItems: 0,
-              status: 'Received' // You can adjust this based on your logic
+              status: 'Received'
             };
           }
           acc[invoiceNo].numberOfItems += 1;
@@ -348,7 +352,6 @@ export class TopbarComponent implements OnInit {
       next: (result) => {
         this.vehicleInward = result;
 
-        // Group by invoice number
         const groupedInvoices = this.vehicleInward.filter((p: any) => p.isD2d).reduce((acc: any, item: any) => {
           const invoiceNo = item.invoiceNo;
           if (!acc[invoiceNo]) {
@@ -358,7 +361,7 @@ export class TopbarComponent implements OnInit {
               numberOfItems: 0,
               issuedFrom: item.issuedDealerName,
               issuedDealerCode: item.issuedDealerCode,
-              status: 'Received' // You can adjust this based on your logic
+              status: 'Received'
             };
           }
           acc[invoiceNo].numberOfItems += 1;
@@ -387,7 +390,7 @@ export class TopbarComponent implements OnInit {
               invoiceNumber: invoiceNo,
               invoiceDate: item.invoiceDate,
               numberOfItems: 0,
-              status: 'Received' // You can adjust this based on your logic
+              status: 'Received'
             };
           }
           acc[invoiceNo].numberOfItems += 1;
@@ -408,12 +411,36 @@ export class TopbarComponent implements OnInit {
     });
   }
 
-  onClickInvoiceNumber(invoiceData) {
+  getEbwNotifications() {
+    this.partInwardService.getPendingEbwNotificationByDealer(this.dealerCode).subscribe({
+      next: (res: any) => {
+        const groupedEbwInvoices = res.reduce((acc: any, item: any) => {
+          const invoiceNo = item.invoiceNo;
+          if (!acc[invoiceNo]) {
+            acc[invoiceNo] = {
+              invoiceNumber: invoiceNo,
+              invoiceDate: item.invoiceDate,
+              numberOfItems: 0,
+              status: 'Received'
+            };
+          }
+          acc[invoiceNo].numberOfItems += 1;
+          return acc;
+        }, {});
 
+        this.ebwNotifications = Object.values(groupedEbwInvoices);
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
+
+  onClickInvoiceNumber(invoiceData) {
     const modalRef = this.modalService.open(InvoiceDetail, {
-      size: 'xl',      // modal size: 'sm', 'lg', 'xl'
-      backdrop: 'static', // prevent closing by clicking outside
-      keyboard: false    // prevent closing with ESC
+      size: 'xl',
+      backdrop: 'static',
+      keyboard: false
     });
 
     const invoiceDetails = this.vehicleInward.filter(x => x.invoiceNo === invoiceData.invoiceNumber);
@@ -481,49 +508,24 @@ export class TopbarComponent implements OnInit {
   }
 
   onClickPartNumber(item: any) {
+    this.partsNotifications = this.partsNotifications.filter(
+      (x) => x.invoiceNumber !== item.invoiceNumber
+    );
+
     const invoiceNo = item?.invoiceNumber || '0';
     const value = Date.now() + '|' + invoiceNo;
     const encClaim = btoa(value);
-    this.router.navigate(['parts-inward', encClaim])
-
-    // const modalRef = this.modalService.open(PartInward, {
-    //   size: 'xl',      // modal size: 'sm', 'lg', 'xl'
-    //   backdrop: 'static', // prevent closing by clicking outside
-    //   keyboard: false    // prevent closing with ESC
-    // });
-
-    // const invoiceDetails = this.partsInward.filter(x => x.invoiceNo === item.invoiceNumber);
-    // modalRef.componentInstance.invoiceDetails = invoiceDetails;
-    // modalRef.componentInstance.sourceType = 'parts';
-
-    // modalRef.result.then(
-    //   (result) => {
-    //     if (result && result.isAccepted) {
-    //       this.loader.show();
-    //       this.updatePartInwardStatusByInvoice(item.invoiceNumber);
-    //       this.loader.hide();
-    //     }
-    //   },
-    //   (reason) => {
-    //   }
-    // );
-
+    this.router.navigate(['parts-inward', encClaim]);
   }
 
-  // updatePartInwardStatusByInvoice(invoiceNumber: string) {
-  //   this.partInwardService.update(invoiceNumber).subscribe({
-  //     next: (res) => {
-  //       this.toastService.show('Record updated sucessfully', {
-  //         classname: 'bg-success text-white',
-  //         delay: 5000
-  //       });
-  //     }, error: (err) => {
-  //       this.toastService.show('Something went wrong', {
-  //         classname: 'bg-danger text-white',
-  //         delay: 5000
-  //       });
-  //       console.error(err);
-  //     }
-  //   });
-  // }
+  onClickEbwItem(item: any) {
+    this.ebwNotifications = this.ebwNotifications.filter(
+      (x) => x.invoiceNumber !== item.invoiceNumber
+    );
+
+    const invoiceNo = item?.invoiceNumber || '0';
+    const value = Date.now() + '|' + invoiceNo;
+    const encClaim = btoa(value);
+    this.router.navigate(['parts-inward', encClaim]);
+  }
 }
