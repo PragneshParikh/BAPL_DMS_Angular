@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "dev": "ng serve --configuration=development",
     "start": "ng serve --configuration=development",
     "start:prod": "ng serve --configuration=production",
     "build": "ng build",
@@ -110,6 +111,7 @@
     "slick-carousel": "^1.8.1",
     "sweetalert2": "^11.12.0",
     "tslib": "^2.6.3",
+    "xlsx": "^0.18.5",
     "zone.js": "^0.15.1"
   },
   "devDependencies": {

@@ -51,6 +51,10 @@ export class ChassisSearchService {
     );
   }
 
+  getGlobalChassisDetails(chassisNo: string) {
+    return this.httpClient.get<any>(`${this.baseUrl}/chassis/global/${chassisNo}`);
+  }
+
   getChassisDetailsByLocationCode(locationCode: string) {
     return this.httpClient.get<any[]>(`${this.baseUrl}/chassis-details/chassisList?locationCode=${locationCode}`);
   }

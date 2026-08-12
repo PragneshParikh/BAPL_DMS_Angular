@@ -34,4 +34,8 @@ export class TermConditionService {
     });
   }
 
+  getTermConditionsByModule(conditionModule: number): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/TermCondition/GetTermConditionsByModule/${conditionModule}`);
+  }
+
 }

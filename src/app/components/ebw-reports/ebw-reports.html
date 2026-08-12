@@ -1,1 +1,155 @@
-<p>ebw-reports works!</p>
+<!--BAPL_DMS_Angular\src\app\components\ebw-reports\ebw-reports.html-->
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">EBW Report</h4>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+
+    <div class="alert alert-info py-2 px-3 mb-2" *ngIf="focusedInvoiceNo">
+      Showing EBW parts for Invoice No: <strong>{{ focusedInvoiceNo }}</strong>
+      <button class="btn btn-link btn-sm p-0 ms-2" (click)="clearFocusedInvoice()">
+        Clear filter
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Filters</h5>
+      </div>
+
+      <div class="card-body">
+        <form #ebwFilterForm="ngForm">
+          <div class="row g-3">
+
+            <div class="col-xl-3 col-lg-3 col-md-6">
+              <label class="form-label">Dealer</label>
+              <select class="form-select form-select-sm" #dealerCode="ngModel" name="dealerCode"
+                      [(ngModel)]="filterFormData.selectedDealerCode" required
+                      [disabled]="!isSuperAdmin">
+                <option value="">-- Select --</option>
+                <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
+                  {{ dealer.dealerName }}
+                </option>
+              </select>
+              @if (dealerCode.invalid && dealerCode.touched) {
+              <small class="text-danger">Dealer is required</small>
+              }
+            </div>
+
+            <div class="col-xl-2 col-lg-2 col-md-6">
+              <label class="form-label">From Date</label>
+              <input type="date" class="form-control form-control-sm" #fromDate="ngModel" name="fromDate"
+                     [(ngModel)]="filterFormData.fromDate" required>
+              @if (fromDate.invalid && fromDate.touched) {
+              <small class="text-danger">Date is required</small>
+              }
+            </div>
+
+            <div class="col-xl-2 col-lg-2 col-md-6">
+              <label class="form-label">To Date</label>
+              <input type="date" class="form-control form-control-sm" #toDate="ngModel" name="toDate"
+                     [(ngModel)]="filterFormData.toDate" required>
+              @if (toDate.invalid && toDate.touched) {
+              <small class="text-danger">Date is required</small>
+              }
+            </div>
+
+            <div class="col-xl-2 col-lg-2 col-md-12 align-items-end">
+              <label class="form-label d-block">&nbsp;</label>
+              <div class="d-flex gap-2 justify-content-start">
+                <button type="button" class="btn btn-primary btn-sm" (click)="onFilterRecords()">
+                  Search
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" (click)="resetForm()">
+                  Reset
+                </button>
+                <button type="button" class="btn btn-success btn-sm" [ngbTooltip]="'Export To Excel'"
+                        (click)="downloadExcel()">
+                  <i class="ri-file-excel-2-line"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="mb-2 text-muted">Total Record(s): {{ gridData.length }}</div>
+
+        <div class="table-responsive">
+          <table class="table table-bordered table-sm table-striped align-middle text-nowrap mb-0">
+            <thead class="table-light sticky-top" style="z-index: 1;">
+              <tr>
+                <th>Sr No.</th>
+                <th>Dealer Code</th>
+                <th>Location Code</th>
+                <th>Location Name</th>
+                <th>Invoice No</th>
+                <th>Invoice Date</th>
+                <th>Received Date</th>
+                <th>Model Name</th>
+                <th>Chasis No</th>
+                <th>Part Code</th>
+                <th>Part Description</th>
+                <th>Serial No</th>
+                <th>RBill No</th>
+                <th>RBill Date</th>
+                <th>Party Name</th>
+                <th>Party State</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of gridData; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ row.dealerCode }}</td>
+                <td>{{ row.locationCode }}</td>
+                <td>{{ row.locationName }}</td>
+                <td>{{ row.invoiceNo }}</td>
+                <td>{{ row.invoiceDate | date: 'dd-MM-yyyy' }}</td>
+                <td>{{ row.receivedDate | date: 'dd-MM-yyyy' }}</td>
+                <td>{{ row.modelName }}</td>
+                <td>{{ row.chassisNo }}</td>
+                <td>{{ row.partNo }}</td>
+                <td>{{ row.itemdesc }}</td>
+                <td>{{ row.serialNo }}</td>
+                <td>{{ row.rBillNo }}</td>
+                <td>{{ row.rBillDate | date: 'dd-MM-yyyy' }}</td>
+                <td>{{ row.partyName }}</td>
+                <td>{{ row.partyState }}</td>
+              </tr>
+              <tr *ngIf="gridData.length === 0">
+                <td colspan="16" class="text-center p-3">No Records Found</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="col-sm-12 col-md-12 mt-2 d-flex justify-content-end align-items-center gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0 small">Page Size</label>
+            <select class="form-select form-select-sm" style="width: auto;"
+                    [(ngModel)]="pageSize" [ngModelOptions]="{standalone: true}"
+                    (change)="onPageSizeChange()">
+              <option [ngValue]="10">10</option>
+              <option [ngValue]="100">100</option>
+              <option [ngValue]="1000">1000</option>
+              <option [ngValue]="10000">10000</option>
+            </select>
+          </div>
+
+          <div class="text-md-right float-md-end gridjs-pagination">
+            <ngb-pagination [collectionSize]="gridData.length" [(page)]="page" [pageSize]="pageSize"
+                            (pageChange)="onPageChange($event)" [boundaryLinks]="true" [maxSize]="10">
+            </ngb-pagination>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

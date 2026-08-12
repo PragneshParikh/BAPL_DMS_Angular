@@ -64,7 +64,13 @@
                                             <hr class="m-0 w-75">
                                             End User Price
                                         </th>
-                                        <th class="sort" (click)="onSort('active')">
+                                        <th class="sort" (click)="onSort('batteryPartCode')">
+                                            Product Code
+                                        </th>
+                                        <th class="sort" (click)="onSort('partCode')">
+                                            Part Code
+                                        </th>
+                                        <th class="sort" (click)="onSort('isActive')">
                                             Active
                                         </th>
                                         <th class="sort" (click)="onSort('rateType')">
@@ -94,13 +100,19 @@
                                             {{ scheme?.dealerPrice }} <br>
                                             {{ scheme?.customerPrice }}
                                         </td>
-                                        <td> {{ scheme?.active }} </td>
+                                        <td>{{ scheme?.batteryPartCode }}</td>
+                                        <td>{{ scheme?.partCode }}</td>
+                                        <td>
+                                            <span class="badge" [ngClass]="scheme?.isActive ? 'bg-success' : 'bg-danger'">
+                                                {{ scheme?.isActive ? 'Yes' : 'No' }}
+                                            </span>
+                                        </td>
                                         <td> {{ scheme?.rateType | getRateType: rateTypes}} </td>
                                     </tr>
 
                                     <!-- No Data -->
                                     <tr *ngIf="!dataSource || dataSource.length === 0">
-                                        <td colspan="9" class="text-center text-muted py-3">
+                                        <td colspan="11" class="text-center text-muted py-3">
                                             No Data Available
                                         </td>
                                     </tr>

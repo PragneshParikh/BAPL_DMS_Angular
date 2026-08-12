@@ -56,6 +56,11 @@ export class PartsPoList implements OnInit {
     this.loadPOList();
   }
 
+  onPageSizeChange() {
+    this.page = 1;
+    this.loadPOList();
+  }
+
   initDefaultDates() {
     const to = new Date();
     const from = new Date();
@@ -72,11 +77,10 @@ export class PartsPoList implements OnInit {
     this.purchaseService.getPOList('Spares', this.dealerCode, this.page, this.pageSize, this.poFilterData).subscribe({
       next: (res: any) => {
         this.loader.hide();
-        // const flattened = this.flattenPOList(res);
-        // this.originalPurchaseOrders = flattened;
-        // this.originalPurchaseOrders = res;
-        // this.onSearch();
-        this.pagedPurchaseOrders = res.data;
+        // ADDED: ensure descending order by date, newest first
+        this.pagedPurchaseOrders = (res.data || []).sort(
+          (a: any, b: any) => new Date(b.poDate).getTime() - new Date(a.poDate).getTime()
+        );
         this.totalRecords = res.totalRecords;
       },
       error: (err) => {
