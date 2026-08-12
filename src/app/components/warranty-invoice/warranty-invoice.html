@@ -1,0 +1,248 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-primary bg-gradient text-white py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-white">
+                <i class="ri-file-list-3-line me-1"></i>
+                Warranty Invoice
+            </h6>
+
+            <button class="btn btn-sm btn-light" (click)="goToInvoiceList()" title="View Warranty Invoice List">
+                <i class="ri-menu-line"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        <!-- Row 1 -->
+        <div class="row g-2">
+
+            <div class="col-md-2">
+                <label class="form-label">Date From</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="dateFrom">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Date To</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="dateTo">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Batch No</label>
+                <input type="text" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="batchNo" readonly>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Batch Date</label>
+                <input type="date" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="batchDate" readonly>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Invoice No</label>
+                <input type="text" class="form-control form-control-sm bg-light text-muted"
+                    [value]="repairBillNo || ''" readonly>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Invoice Date</label>
+                <input type="date" class="form-control form-control-sm bg-light text-muted"
+                    [value]="repairBillDate || ''" readonly>
+            </div>
+
+        </div>
+
+        <!-- Row 1b - the genuinely new Invoice Prefix, separate from the
+             repair-bill-derived "Invoice No" field above and separate from
+             this invoice's own auto-generated sequential invoiceNo. -->
+        <div class="row g-2 mt-1">
+
+            <div class="col-md-2">
+                <label class="form-label">Warranty Invoice Prefix</label>
+                <input type="text" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="invoicePrefix" readonly>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Warranty Invoice No</label>
+                <input type="text" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="invoiceNo" readonly>
+            </div>
+
+        </div>
+
+        <!-- Row 2 -->
+        <div class="row g-2 mt-1">
+
+            <div class="col-md-4">
+                <label class="form-label">Location</label>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedLocation">
+                    <option [ngValue]="null">--Select--</option>
+                    <option *ngFor="let location of locationList" [ngValue]="location.loccode">
+                        {{ location.locname }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Claim Type</label>
+                <select class="form-select form-select-sm" [(ngModel)]="claimType" [disabled]="invoiceId > 0 && !isEditMode">
+                    <option value="Warranty">Warranty</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Supplier</label>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedSupplierId" disabled>
+                    <option [ngValue]="null">--Select--</option>
+                    <option *ngFor="let supplier of supplierList" [ngValue]="supplier.id">
+                        {{ supplier.ledgerName }}
+                    </option>
+                </select>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <!-- Linked orders - flattened one row per claim/line-item, same
+             structure as warranty-order.html's own grid (Sr.No through
+             Total Amount are identical columns/data), one hierarchy level
+             deeper (order -> claim -> line). No checkbox column - removed
+             from this page by earlier explicit request. -->
+        <div class="row g-3 mt-1">
+            <h6>
+                Warranty Invoices ({{ invoiceLineRows.length }})
+            </h6>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center" style="min-width:50px">
+                                <input type="checkbox" class="form-check-input"
+                                    [checked]="allOrdersApproved"
+                                    (change)="toggleSelectAllApproved($any($event.target).checked)"
+                                    title="Select / Deselect all">
+                            </th>
+                            <th style="min-width:45px">Sr.No</th>
+                            <!-- <th style="min-width:130px">Warranty Invoice No</th> -->
+                            <th style="min-width:115px">Claim No / Date</th>
+                            <th style="min-width:130px">JobCard No / Date</th>
+                            <th style="min-width:125px">Invoice No / Date</th>
+                            <th style="min-width:115px">Service Head / KMS</th>
+                            <th style="min-width:130px">Location Name</th>
+                            <th style="min-width:150px">Chassis No</th>
+                            <th style="min-width:115px">Motor No</th>
+                            <th style="min-width:160px">Party</th>
+                            <th style="min-width:110px">Part Name</th>
+                            <th style="min-width:130px">Part Description</th>
+                            <th style="min-width:90px">Part Code</th>
+                            <th style="min-width:100px">Labor Code</th>
+                            <th style="min-width:140px">Labor Description</th>
+                            <th class="text-center" style="min-width:55px">Qty</th>
+                            <th class="text-end" style="min-width:90px">MRP</th>
+                            <th class="text-end" style="min-width:70px">CGST</th>
+                            <th class="text-end" style="min-width:70px">SGST</th>
+                            <th class="text-end" style="min-width:70px">IGST</th>
+                            <th class="text-end" style="min-width:100px">Total Amount</th>
+                            <!-- <th style="min-width:110px">Action</th> -->
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let row of invoiceLineRows">
+                            <td class="text-center">
+                                <input *ngIf="row.isFirstLineOfClaim" type="checkbox"
+                                    class="form-check-input"
+                                    [checked]="row.isApproved"
+                                    (change)="toggleOrderApproval(row.orderId, $any($event.target).checked, row.isHistorical ? row.orderId : undefined)">
+                            </td>
+                            <td>{{ row.srNo }}</td>
+                            <!-- <td>
+                                {{ row.warrantyInvoicePrefix }}{{ row.warrantyInvoiceNo }}<br>
+                                <small class="text-muted">Batch: {{ row.warrantyInvoiceBatchNo }}</small>
+                            </td> -->
+                            <td>
+                                {{ row.claimNo }}<br>
+                                <small class="text-muted">{{ row.claimDate | date:'dd-MM-yyyy' }}</small>
+                            </td>
+                            <td>
+                                {{ row.jobCardNo }}<br>
+                                <small class="text-muted">{{ row.jobCardDate | date:'dd-MM-yyyy' }}</small>
+                            </td>
+                            <td>
+                                {{ row.invoiceNo }}<br>
+                                <small class="text-muted">{{ row.invoiceDate | date:'dd-MM-yyyy' }}</small>
+                            </td>
+                            <td>
+                                {{ row.serviceHead }}<br>
+                                <small class="text-muted">{{ row.kms }} km</small>
+                            </td>
+                            <td>{{ row.locationName }}</td>
+                            <td>{{ row.chassisNo }}</td>
+                            <td>{{ row.motorNo }}</td>
+                            <td>{{ row.partyName }}</td>
+                            <td>{{ row.partName }}</td>
+                            <td>{{ row.partDescription }}</td>
+                            <td>{{ row.partCode }}</td>
+                            <td>{{ row.labourCode }}</td>
+                            <td>{{ row.labourDescription }}</td>
+                            <td class="text-center">{{ row.quantity }}</td>
+                            <td class="text-end">{{ row.mrp | number:'1.2-2' }}</td>
+                            <td class="text-end">
+                                {{ row.cgstPercent }}%<br>
+                                <small class="text-muted">{{ row.cgstAmount | number:'1.2-2' }}</small>
+                            </td>
+                            <td class="text-end">
+                                {{ row.sgstPercent }}%<br>
+                                <small class="text-muted">{{ row.sgstAmount | number:'1.2-2' }}</small>
+                            </td>
+                            <td class="text-end">
+                                {{ row.igstPercent }}%<br>
+                                <small class="text-muted">{{ row.igstAmount | number:'1.2-2' }}</small>
+                            </td>
+                            <td class="text-end">{{ row.totalAmount | number:'1.2-2' }}</td>
+                            
+                            <td class="text-center">
+                                <ng-container *ngIf="row.isFirstLineOfClaim && !row.isHistorical">
+                                    <!-- <button *ngIf="!isEditMode" class="btn btn-outline-primary btn-sm me-1"
+                                        (click)="enableEdit()" [disabled]="!(invoiceId > 0)" title="Edit Invoice">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+                                    <button *ngIf="isEditMode" class="btn btn-outline-danger btn-sm me-1"
+                                        (click)="removeOrder(row.orderId)" title="Remove this order and all its lines">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm"
+                                        (click)="deleteInvoice()" [disabled]="!(invoiceId > 0)" title="Delete Invoice">
+                                        <i class="ri-delete-bin-2-line"></i>
+                                    </button> -->
+                                </ng-container>
+                            </td>
+                        </tr>
+
+                        <tr *ngIf="invoiceLineRows.length === 0">
+                            <td colspan="23" class="text-center text-muted">
+                                No order linked to this invoice.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div>
+                <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyInvoice()"
+                    [disabled]="saving || (!wasApprovedOnLoad && !hasAnyCheckedOrder)"
+                    [title]="(!wasApprovedOnLoad && !hasAnyCheckedOrder) ? 'Check at least one order to enable Save' : ''">
+                    <i class="ri-save-line me-1"></i>
+                    {{ saving ? 'Saving...' : 'Save' }}
+                </button>
+                <!-- <button *ngIf="isEditMode" class="btn btn-light btn-sm" (click)="cancelEdit()">
+                    <i class="ri-close-line me-1"></i>
+                    Cancel Edit
+                </button> -->
+            </div>
+        </div>
+
+    </div>
+</div>

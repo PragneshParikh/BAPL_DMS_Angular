@@ -1,0 +1,130 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-primary bg-gradient text-white py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-white">
+                <button class="btn btn-sm btn-link text-white p-0 me-2" (click)="printList()" [disabled]="printing" title="Print">
+                    <i class="ri-printer-line"></i>
+                </button>
+                <i class="ri-file-list-3-line me-1"></i>
+                Warranty Claim List
+            </h6>
+
+            <button class="btn btn-sm btn-light" (click)="back()">
+                <i class="ri-arrow-left-line me-1"></i>
+                Back
+            </button>
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        <!-- Filters -->
+        <div class="row g-2 mb-3">
+
+            <div class="col-md-2">
+                <label class="form-label">Date From</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.dateFrom">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Date To</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.dateTo">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Claim No</label>
+                <input type="number" class="form-control form-control-sm" [(ngModel)]="filter.claimNo">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Chassis No</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.chassisNo">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Per Page</label>
+                <select class="form-select form-select-sm" [(ngModel)]="filter.pageSize">
+                    <option [ngValue]="10">10</option>
+                    <option [ngValue]="25">25</option>
+                    <option [ngValue]="50">50</option>
+                    <option [ngValue]="100">100</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-primary btn-sm me-2" (click)="search()">
+                <i class="ri-search-line me-1"></i>
+                Search
+            </button>
+            <button class="btn btn-light btn-sm" (click)="resetFilter()">
+                <i class="ri-refresh-line me-1"></i>
+                Reset
+            </button>
+        </div>
+
+        <div class="text-muted small mb-2">Total Record(s): {{ totalCount }}</div>
+
+        <!-- Results grid -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sr.No</th>
+                        <th>Claim No / Date</th>
+                        <th>JobCard No</th>
+                        <th>Chassis No</th>
+                        <th>Supplier</th>
+                        <th class="text-end">Total Amount</th>
+                        <th width="100" class="text-center">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr *ngFor="let item of claims; let i = index"
+                        (dblclick)="viewClaim(item.id)" style="cursor: pointer;"
+                        title="Double-click to view this claim">
+                        <td>{{ (filter.pageNumber - 1) * filter.pageSize + i + 1 }}</td>
+                        <td>
+                            {{ item.claimPrefix }}{{ item.claimNo }}<br>
+                            <small class="text-muted">{{ item.claimDate | date:'dd-MM-yyyy' }}</small>
+                        </td>
+                        <td>{{ item.jobCardNo }}</td>
+                        <td>{{ item.chassisNo }}</td>
+                        <td>{{ item.supplierName }}</td>
+                        <td class="text-end">{{ item.totalAmount | number:'1.2-2' }}</td>
+                        <td class="text-center" (click)="$event.stopPropagation()">
+                            <button class="btn btn-outline-secondary btn-sm me-1" (click)="printClaim(item.id)"
+                                [disabled]="printingClaimId === item.id" title="Print this claim">
+                                <i class="ri-printer-line"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" (click)="deleteClaim(item.id)"
+                                [disabled]="deletingClaimId === item.id" title="Delete this claim">
+                                <i class="ri-delete-bin-2-line"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr *ngIf="claims.length === 0">
+                        <td colspan="7" class="text-center text-muted">No Records Found</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-2" *ngIf="totalPages > 1">
+            <span class="text-muted small">Page {{ filter.pageNumber }} of {{ totalPages }}</span>
+            <div>
+                <button class="btn btn-sm btn-light me-1" [disabled]="filter.pageNumber === 1" (click)="goToPage(filter.pageNumber - 1)">
+                    Previous
+                </button>
+                <button class="btn btn-sm btn-light" [disabled]="filter.pageNumber === totalPages" (click)="goToPage(filter.pageNumber + 1)">
+                    Next
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>

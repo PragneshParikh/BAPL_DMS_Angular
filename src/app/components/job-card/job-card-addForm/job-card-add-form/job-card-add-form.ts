@@ -809,11 +809,11 @@ export class JobCardAddForm {
       });
       return;
     }
-    if (this.vehicleKms < this.vehiclePrevkms) {
-      this.kmsError =
-        `Vehicle KM cannot be less than Previous KM (${this.vehiclePrevkms})`;
-      return;
-    }
+    if (!this.isSuperAdmin && this.vehicleKms < this.vehiclePrevkms) {
+        this.kmsError =
+          `Vehicle KM cannot be less than Previous KM (${this.vehiclePrevkms})`;
+        return;
+      }
 
     const jobIn = new Date(`${this.jobInDate}T${this.jobInTime}`);
     const estDel = new Date(`${this.estDelDate}T${this.estDelTime}`);
@@ -1137,17 +1137,15 @@ export class JobCardAddForm {
     }, 300);
   }
 
+validateWarranty(): boolean {
 
-  validateWarranty(): boolean {
-
-    if (this.vehicleKms && this.vehiclePrevkms &&
+    if (!this.isSuperAdmin && this.vehicleKms && this.vehiclePrevkms &&
       this.vehicleKms < this.vehiclePrevkms) {
 
       this.kmsError = `Vehicle KM cannot be less than Previous KM (${this.vehiclePrevkms})`;
     } else {
       this.kmsError = '';
     }
-
 
     if (!this.selectedJobtype || !this.vehicleKms || !this.odoReading) {
       return true; // skip validation (no error)

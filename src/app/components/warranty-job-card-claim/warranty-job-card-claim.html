@@ -6,7 +6,7 @@
                 Warranty Claim (Through Job Card)
             </h6>
 
-            <button class="btn btn-sm btn-light">
+            <button class="btn btn-sm btn-light" (click)="goToClaimList()" title="View Warranty Claim List">
                 <i class="ri-menu-line"></i>
             </button>
         </div>
@@ -174,6 +174,7 @@
                             <th>Outward Serial</th>
                             <th class="text-center">Qty</th>
                             <th class="text-end">Rate</th>
+                            <th class="text-end">MRP</th>
                             <th class="text-end">IGST Amnt</th>
                             <th class="text-end">Amount</th>
                             <th>Dealer Observation</th>
@@ -203,6 +204,10 @@
 
                             <td class="text-end">
                                 {{item.partItemRate | number:'1.2-2'}}
+                            </td>
+
+                            <td class="text-end">
+                                {{item.mrp | number:'1.2-2'}}
                             </td>
 
                             <td class="text-end">
@@ -236,6 +241,7 @@
                             <td colspan="4">Total</td>
                             <td>{{ totalPartsQty }}</td>
                             <td>{{ totalPartsRate | number:'1.2-2' }}</td>
+                            <td></td>
                             <td>{{ totalPartsIgst | number:'1.2-2' }}</td>
                             <td>{{ totalPartsAmount | number:'1.2-2' }}</td>
                             <td colspan="3"></td>
@@ -247,17 +253,16 @@
         </div>
 
         <div class="row g-4 mt-1">
-            <h6>Labour and Part Rate Details</h6>
+            <h6>Labour Details</h6>
             <div class="table-responsive">
                 <table class="table table-bordered table-sm align-middle warranty-table">
                     <thead>
                         <tr>
                             <th>Labour Code</th>
                             <th>Description</th>
-                            <!-- <th>Inward Serial</th>
-                            <th>Outward Serial</th> -->
                             <th class="text-center">Qty</th>
                             <th class="text-end">Rate</th>
+                            <th class="text-end">MRP</th>
                             <th class="text-end">IGST Amnt</th>
                             <th class="text-end">Amount</th>
                             <th>Dealer Observation</th>
@@ -272,22 +277,16 @@
 
                             <td>{{item.labourDesc}}</td>
 
-                            <!-- <td>
-                                <input type="text" class="form-control form-control-sm" 
-                                    [(ngModel)]="item.inwardSerial">
-                            </td> -->
-
-                            <!-- <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="item.outwardSerial">
-                            </td> -->
-
                             <td class="text-center">
                                 {{item.labourQty}}
                             </td>
 
                             <td class="text-end">
                                 {{item.labourRate | number:'1.2-2'}}
+                            </td>
+
+                            <td class="text-end">
+                                {{item.mrp | number:'1.2-2'}}
                             </td>
 
                             <td class="text-end">
@@ -315,11 +314,12 @@
                     </tbody>
                     <tfoot *ngIf="labourDetails && labourDetails.length > 0">
                         <tr class="fw-bold bg-light">
-                            <td colspan="4">Total</td>
-                            <td>{{ totalLabourQty }}</td>
-                            <td>{{ totalLabourRate | number:'1.2-2' }}</td>
-                            <td>{{ totalLabourIgst | number:'1.2-2' }}</td>
-                            <td>{{ totalLabourAmount | number:'1.2-2' }}</td>
+                            <td colspan="2">Total</td>
+                            <td class="text-center">{{ totalLabourQty }}</td>
+                            <td class="text-end">{{ totalLabourRate | number:'1.2-2' }}</td>
+                            <td class="text-end"></td>
+                            <td class="text-end">{{ totalLabourIgst | number:'1.2-2' }}</td>
+                            <td class="text-end">{{ totalLabourAmount | number:'1.2-2' }}</td>
                             <td colspan="3"></td>
                         </tr>
                     </tfoot>
@@ -336,7 +336,7 @@
                     Save
                 </button>
 
-                <button class="btn btn-light btn-sm">
+                <button class="btn btn-light btn-sm" (click)="cancel()">
                     <i class="ri-close-line me-1"></i>
                     Cancel
                 </button>

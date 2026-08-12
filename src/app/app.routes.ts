@@ -86,7 +86,14 @@ import { BgRoleMasterList } from './components/bg-role-master/bg-role-master-lis
 import { BgRoleMaster } from './components/bg-role-master/bg-role-master';
 import { DealerCreationManagerList } from './components/dealer-creation/dealer-creation-manager-list/dealer-creation-manager-list';
 import { WhoAmI } from './components/who-am-i/who-am-i';
+import { WarrantyOrder } from './components/warranty-order/warranty-order';
+import { WarrantyClaimList } from './components/warranty-job-card-claim/warranty-claim-list/warranty-claim-list';
+import { WarrantyOrderList } from './components/warranty-order/warranty-order-list/warranty-order-list'
 ;
+import { WarrantyInvoice } from './components/warranty-invoice/warranty-invoice';
+import { WarrantyInvoiceList } from './components/warranty-invoice/warranty-invoice-list/warranty-invoice-list';
+
+import { UwLineItem } from './components/uw-line-items/uw-line-items';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
@@ -241,6 +248,7 @@ export const routes: Routes = [
       { path: 'service-type-master', component: ServiceTypeMaster, data: [70] },
       { path: 'job-source-master', component: JobSourceMaster, data: [71] },
       { path: 'warranty-job-card-claim', component: WarrantyJobCardClaim, data: [74] },
+      { path: 'warranty-claim-list', component: WarrantyClaimList, data: [74] },
       { path: 'vehicle-info', component: VehicleInfoUpdate, data: [73] },
 
       { path: 'counter-bill', component: CounterBill, data: [77] },
@@ -260,7 +268,13 @@ export const routes: Routes = [
       { path: 'estimate/add', component: Estimate, data: [98] },
       { path: 'estimate/edit/:id', component: Estimate, data: [98] },
       { path: 'ebw-invoice', data: [106], loadComponent: () => import('./components/ebw-invoice/ebw-invoice').then(m => m.EBWInvoice) },
-      { path: 'ebw-report', data: [111], loadComponent: () => import('./components/ebw-reports/ebw-reports').then(m => m.EBWReports) }
+      { path: 'ebw-report', data: [111], loadComponent: () => import('./components/ebw-reports/ebw-reports').then(m => m.EBWReports) },
+      { path: 'warranty-order', component: WarrantyOrder, data: [112] },
+      { path: 'warranty-order-list', component: WarrantyOrderList, data: [112] },
+      { path: 'warranty-invoice', component: WarrantyInvoice, data: [113] },
+      { path: 'warranty-invoice-list', component: WarrantyInvoiceList, data: [113] },
+      { path: 'uw-line-item', component: UwLineItem, data: [115] }
+
     ]
   },
   { path: '**', component: WorkInProgress }
