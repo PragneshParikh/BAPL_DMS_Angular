@@ -1,0 +1,166 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-primary bg-gradient text-white py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-white">
+                <i class="ri-file-list-3-line me-1"></i>
+                Warranty Invoice List
+            </h6>
+
+            <div>
+                <button class="btn btn-sm btn-light me-1" (click)="goToCreate()" title="New Warranty Invoice">
+                    <i class="ri-add-line"></i>
+                </button>
+                <button class="btn btn-sm btn-light" (click)="back()" title="Back to Warranty Invoice">
+                    <i class="ri-arrow-left-line me-1"></i>
+                    Back
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        <!-- Filters -->
+        <div class="row g-2 mb-3">
+
+            <div class="col-md-2">
+                <label class="form-label">Date From</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.dateFrom">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Date To</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.dateTo">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Claim Invoice No</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.invoiceNo">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Claim Type</label>
+                <select class="form-select form-select-sm" [(ngModel)]="filter.claimType">
+                    <option value="">--All--</option>
+                    <option value="Warranty">Warranty</option>
+                </select>
+            </div>
+
+
+            <div class="col-md-2">
+                <label class="form-label">Location</label>
+                <select class="form-select form-select-sm" [(ngModel)]="filter.location">
+                    <option [ngValue]="null">--All--</option>
+                    <option *ngFor="let location of locationList" [ngValue]="location.loccode">
+                        {{ location.locname }}
+                    </option>
+                </select>
+            </div>
+
+             <div class="col-md-2">
+                <label class="form-label">Supplier</label>
+                <select class="form-select form-select-sm" [(ngModel)]="filter.supplierId">
+                    <option [ngValue]="null">--All--</option>
+                    <option *ngFor="let supplier of supplierList" [ngValue]="supplier.id">
+                        {{ supplier.ledgerName }}
+                    </option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-primary btn-sm me-2" (click)="search()">
+                <i class="ri-search-line me-1"></i>
+                Search
+            </button>
+            <button class="btn btn-light btn-sm" (click)="resetFilter()">
+                <i class="ri-refresh-line me-1"></i>
+                Reset
+            </button>
+        </div>
+
+        <div class="text-muted small mb-2">Total Record(s): {{ totalCount }}</div>
+
+        <!-- Results grid - matches the reference layout's column structure -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:45px">S.No.</th>
+                        <th>Claim Type | Invoice Ref.No</th>
+                        <th>Claim Invoice No | Date</th>
+                        <th>Batch No | Date</th>
+                        <th>Claim Date From | Date To</th>
+                        <th>Location</th>
+                        <th>ERP Invoice No</th>
+                        <th style="width:90px">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr *ngFor="let invoice of invoices; let i = index"
+                        (dblclick)="view(invoice.id)" style="cursor: pointer;"
+                        title="Double-click to open this invoice">
+
+                        <td>{{ (filter.pageNumber - 1) * filter.pageSize + i + 1 }}</td>
+
+                        <td>
+                            {{ invoice.claimSubType || invoice.claimType }}<br>
+                            <small class="text-muted">{{ invoice.id }}</small>
+                        </td>
+
+                        <td>
+                            {{ invoice.invoicePrefix }}{{ invoice.invoiceNo }}<br>
+                            <small class="text-muted">{{ invoice.invoiceDate | date:'dd-MM-yyyy' }}</small>
+                        </td>
+
+                        <td>
+                            {{ invoice.batchNo }}<br>
+                            <small class="text-muted">{{ invoice.batchDate | date:'dd-MM-yyyy' }}</small>
+                        </td>
+
+                        <td>
+                            {{ invoice.dateFrom | date:'dd-MM-yyyy' }}<br>
+                            <small class="text-muted">{{ invoice.dateTo | date:'dd-MM-yyyy' }}</small>
+                        </td>
+
+                        <td>{{ invoice.locationName || '-' }}</td>
+
+                        <!-- ERP Invoice No - placeholder, pending confirmed
+                             property name on WarrantyInvoice. -->
+                        <td>{{ invoice.erpInvoiceNo || '-' }}</td>
+
+                        <td class="text-center" (click)="$event.stopPropagation()">
+                            <button class="btn btn-outline-primary btn-sm me-1" (click)="view(invoice.id)" title="View this invoice">
+                                <i class="ri-eye-line"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" (click)="deleteInvoice(invoice.id, $event)" title="Delete this invoice">
+                                <i class="ri-delete-bin-2-line"></i>
+                            </button>
+                        </td>
+
+                    </tr>
+
+                    <tr *ngIf="invoices.length === 0">
+                        <td colspan="9" class="text-center text-muted">No Warranty Invoices Found</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-2" *ngIf="totalPages > 1">
+            <span class="text-muted small">Page {{ filter.pageNumber }} of {{ totalPages }}</span>
+            <div>
+                <button class="btn btn-sm btn-light me-1" [disabled]="filter.pageNumber === 1" (click)="goToPage(filter.pageNumber - 1)">
+                    Previous
+                </button>
+                <button class="btn btn-sm btn-light" [disabled]="filter.pageNumber === totalPages" (click)="goToPage(filter.pageNumber + 1)">
+                    Next
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>

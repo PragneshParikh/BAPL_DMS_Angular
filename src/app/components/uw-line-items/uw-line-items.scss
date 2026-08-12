@@ -1,0 +1,167 @@
+/* ===== Color tokens pulled from the reference screenshot ===== */
+.uw-grid-wrapper {
+    --uw-header-bg: #7C81A6;
+    --uw-header-text: #FFFFFF;
+    --uw-border: #D7DAE2;
+    --uw-row-alt: #FAFBFC;
+    --uw-row-hover: #F2F4F9;
+    --uw-text-primary: #1F2A44;
+    --uw-text-link: #3D74C9;
+    --uw-text-sub: #8A93A6;
+    --uw-scroll-track: #F1F2F5;
+    --uw-scroll-thumb: #B9BEC9;
+
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--uw-border);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.uw-grid {
+    /* Changed from "fixed" to "auto" - fixed forces every column to its
+       exact specified width regardless of content length, which is the
+       opposite of "don't wrap, let content stay on one line" - auto lets
+       columns grow past their base width when content needs more room. */
+    table-layout: auto;
+    font-size: 0.72rem;
+    line-height: 1.25;
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 0;
+}
+
+/* ===== Header ===== */
+.uw-grid thead th {
+    background-color: var(--uw-header-bg);
+    color: var(--uw-header-text);
+    font-weight: 500;
+    font-size: 0.7rem;
+    text-transform: none;
+    letter-spacing: normal;
+    border: 1px solid var(--uw-header-bg);
+    padding: 0.4rem 0.45rem;
+    text-align: left;
+    vertical-align: top;
+    /* Changed from "normal" to "nowrap" - normal allows wrapping, which
+       is what was causing header labels to wrap onto multiple lines. */
+    white-space: nowrap;
+    line-height: 1.2;
+}
+
+.uw-grid thead th.text-center {
+    text-align: center;
+}
+
+/* ===== Body cells ===== */
+.uw-grid tbody td {
+    border: 1px solid var(--uw-border);
+    padding: 0.4rem 0.45rem;
+    text-align: left;
+    vertical-align: top;
+    color: var(--uw-text-primary);
+    font-weight: 500;
+    /* word-break: break-word removed - it actively breaks long values
+       onto multiple lines, which is exactly what shouldn't happen here.
+       white-space: nowrap added instead, so values stay on one line and
+       the column (now auto-width, see .uw-grid above) grows to fit. */
+    white-space: nowrap;
+}
+
+.uw-grid tbody td.text-center {
+    text-align: center;
+}
+
+.uw-grid tbody tr:nth-child(even) {
+    background-color: var(--uw-row-alt);
+}
+
+.uw-grid tbody tr:hover {
+    background-color: var(--uw-row-hover);
+}
+
+/* Reference numbers / codes (Job No, Claim No, Chassis No, Invoice No, etc.) */
+.uw-grid .uw-link {
+    color: var(--uw-text-primary);
+    font-weight: 400;
+}
+
+.uw-grid .uw-sub {
+    display: block;
+    color: var(--uw-text-sub);
+    font-size: 0.66rem;
+    font-weight: 400;
+    line-height: 1.2;
+    margin-top: 0.1rem;
+}
+
+/* ===== Status ===== */
+.uw-grid .uw-status {
+    font-weight: 400;
+    font-size: 0.7rem;
+}
+
+.uw-grid .uw-status-pending { color: var(--uw-text-primary); }
+.uw-grid .uw-status-approved { color: var(--uw-text-primary); }
+.uw-grid .uw-status-rejected { color: var(--uw-text-primary); }
+
+/* ===== Reason input ===== */
+.uw-grid .uw-reason-input {
+    font-size: 0.68rem;
+    padding: 0.2rem 0.35rem;
+    height: auto;
+    width: 100%;
+    min-width: 260px;
+}
+
+/* ===== Accept / Reject icon buttons ===== */
+.uw-grid .uw-action-stack {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.uw-grid .uw-icon-btn {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 auto;
+    padding: 0;
+    margin: 0;
+    font-size: 0.72rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+}
+
+/* ===== Styled horizontal scrollbar ===== */
+.table-responsive {
+    padding-bottom: 0.35rem;
+    scrollbar-width: thin;
+    scrollbar-color: #B9BEC9 #F1F2F5;
+}
+
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #F1F2F5;
+    border-radius: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #B9BEC9;
+    border-radius: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #A3A9B7;
+}
