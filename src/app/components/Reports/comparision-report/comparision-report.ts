@@ -59,8 +59,58 @@ export class ComparisonReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadDealers();
+    // NEW — this is the piece that was missing: isDealer/loggedInDealerCode
+    // were declared but never actually set, so the template's *ngIf
+    // branches always fell through to "show the full dealer dropdown" for
+    // every user, admin or not. This report is now restricted server-side
+    // to a non-admin's own dealer regardless (see
+    // ReportController.GetComparisonReport), so the dropdown couldn't
+    // change what came back either way — but it's still misleading UI to
+    // show it, hence the same treatment as the other report screens.
+    this.isDealer = this.checkIsDealer();
+    this.loggedInDealerCode = this.getLoggedInDealerCode();
+
+    if (this.isDealer) {
+      // Keep the filter's dealerCode in sync with the read-only box shown
+      // in the template, so the payload sent to the API (and the CSV
+      // export) explicitly reflects the same dealer being displayed —
+      // defense in depth on top of the backend's own enforcement.
+      this.filterForm.patchValue({ dealerCode: this.loggedInDealerCode });
+    } else {
+      this.loadDealers();
+    }
+
     this.loadReport();
+  }
+
+  /**
+   * ASSUMPTION — I don't have this project's actual auth/token service, so
+   * this reads the role the same flat way the Login API's JSON response
+   * shape suggests it might be stored (`role` in localStorage). If this app
+   * already keeps auth state in a shared AuthService/TokenService instead,
+   * swap the body of this one method for a call into that.
+   */
+  private checkIsDealer(): boolean {
+    const role = localStorage.getItem('role');
+    return role !== 'SuperAdmin';
+  }
+
+  /**
+   * ASSUMPTION — same caveat as checkIsDealer() above. AuthenticationService
+   * stores the full Login API response (which includes `dealerCode`) under
+   * a `currentUser` key (inferred from its logout() method explicitly
+   * clearing that key). If this app's real storage shape differs, this is
+   * the one method to adjust.
+   */
+  private getLoggedInDealerCode(): string {
+    try {
+      const stored = localStorage.getItem('currentUser');
+      if (!stored) return '';
+      const user = JSON.parse(stored);
+      return user?.dealerCode ?? '';
+    } catch {
+      return '';
+    }
   }
 
   loadDealers(): void {
@@ -117,7 +167,7 @@ export class ComparisonReportComponent implements OnInit {
 
   onReset(): void {
     this.filterForm.reset({
-      dealerCode: '',
+      dealerCode: this.isDealer ? this.loggedInDealerCode : '',
       fromDate: '',
       toDate: '',
       chassisNo: '',

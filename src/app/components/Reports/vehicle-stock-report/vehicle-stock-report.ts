@@ -50,6 +50,14 @@ export class VehicleStockReportComponent
 
     chassisList: string[] = [];
 
+    // NEW — SuperAdmins can browse this report across every dealer, so they
+    // keep the "Dealer Name" picker. Everyone else is always restricted
+    // server-side to their own dealer's data now (see
+    // ReportController.GetCurrentStockReport), so the picker can't actually
+    // change what comes back — hide it and skip the dealer-list API call
+    // entirely rather than show a control that does nothing.
+    isSuperAdmin = false;
+
     // =====================================================
     // CHASSIS SEARCH SUGGESTIONS
     // Replaces the native <datalist> popup (unstyled, browser-rendered,
@@ -125,9 +133,30 @@ get pageNumbers(): number[] {
 
     ngOnInit(): void {
 
+        this.isSuperAdmin = this.checkIsSuperAdmin();
+
         this.loadDropdowns();
 
         this.loadReport();
+    }
+
+    /**
+     * ASSUMPTION — I don't have this project's actual auth/token service, so
+     * this reads the role the same flat way the Login API's JSON response
+     * shape suggests it might be stored (`role` in localStorage). If this
+     * app already keeps auth state in a shared AuthService/TokenService
+     * instead, replace the body of this one method with a call into that
+     * (e.g. `return this.authService.hasRole('SuperAdmin');`) — nothing else
+     * in this component needs to change, since everything else here just
+     * depends on `isSuperAdmin` being set correctly.
+     *
+     * NOTE — this is now duplicated in the D2D report and Vehicle Sale
+     * Report components too. Worth pulling into one shared service/helper
+     * once the real auth check is wired in, so it only needs fixing once.
+     */
+    private checkIsSuperAdmin(): boolean {
+        const role = localStorage.getItem('role');
+        return role === 'SuperAdmin';
     }
 
     // =====================================================
@@ -137,31 +166,33 @@ get pageNumbers(): number[] {
     loadDropdowns(): void {
 
     // ============================================
-    // DEALER LIST
+    // DEALER LIST — SuperAdmin only (see isSuperAdmin above)
     // ============================================
 
-    this.reportService
-        .getDealerList()
-        .subscribe({
+    if (this.isSuperAdmin) {
+        this.reportService
+            .getDealerList()
+            .subscribe({
 
-            next: (response: any[]) => {
+                next: (response: any[]) => {
 
-                this.dealerList =
-                    response.map(x => ({
+                    this.dealerList =
+                        response.map(x => ({
 
-                        dealerCode:
-                            x.dealerCode,
+                            dealerCode:
+                                x.dealerCode,
 
-                        dealerName:
-                            x.dealerName
-                    }));
-            },
+                            dealerName:
+                                x.dealerName
+                        }));
+                },
 
-            error: (error) => {
+                error: (error) => {
 
-                console.error(error);
-            }
-        });
+                    console.error(error);
+                }
+            });
+    }
 
     // ============================================
     // MODEL LIST

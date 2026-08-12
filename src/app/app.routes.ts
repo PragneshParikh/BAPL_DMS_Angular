@@ -264,6 +264,11 @@ export const routes: Routes = [
       { path: 'ebw-report', data: [111], loadComponent: () => import('./components/ebw-reports/ebw-reports').then(m => m.EBWReports) },
       { path: 'ebw-invoice-list', data: [111], loadComponent: () => import('./components/ebw-invoice-list/ebw-invoice-list').then(m => m.EbwInvoiceList) },
       { path: 'ebw-invoice/:id', data: [106], loadComponent: () => import('./components/ebw-invoice/ebw-invoice').then(m => m.EBWInvoice) },
+      { path: 'warranty-order', component: WarrantyOrder, data: [112] },
+      { path: 'warranty-order-list', component: WarrantyOrderList, data: [112] },
+      { path: 'warranty-invoice', component: WarrantyInvoice, data: [113] },
+      { path: 'warranty-invoice-list', component: WarrantyInvoiceList, data: [113] },
+      { path: 'uw-line-item', component: UwLineItem, data: [115] }
     ]
   },
   { path: '**', component: WorkInProgress }

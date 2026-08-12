@@ -20,7 +20,7 @@
 
       <!-- Dealer Code -->
 
-            <div class="col-md-2">
+            <div class="col-md-2" *ngIf="isSuperAdmin">
 
           <label class="form-label mb-1">
               Dealer Name
@@ -245,7 +245,7 @@
             <th>Invoice No</th>
             <th>Dispatch Date</th>
             <th>Receive Date</th>
-            <th>Stock Status</th>
+            <!-- <th>Stock Status</th> -->
             <th>Vehicle Status</th>
             <th>Location</th>
 
@@ -282,7 +282,7 @@
             <td>{{ item.invoiceNo }}</td>
             <td>{{ formatDate(item.dispatchDate) }}</td>
             <td>{{ formatDate(item.receiveDate) }}</td>
-            <td>{{ item.stockStatus }}</td>
+            <!-- <td>{{ item.stockStatus }}</td> -->
             <td>
               <span
                 class="badge"

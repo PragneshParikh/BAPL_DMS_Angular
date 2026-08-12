@@ -343,9 +343,23 @@
       <table class="table table-sm table-bordered mb-0" *ngIf="!menuAccessLoading && menuAccessSelectedRoleId">
         <thead class="table-light">
           <tr>
-            <th style="width: 50px;" class="text-center">Access</th>
+            <th style="width: 50px;" class="text-center">
+              <!-- SELECT ALL — Process. Unchecking bulk-revokes every Process
+                   item; checking bulk-grants them. Only rendered when there's
+                   more than one item to act on. -->
+              <input type="checkbox" *ngIf="getProcessItems(menuAccessData?.groups).length > 1"
+                [checked]="isAllGranted(getProcessItems(menuAccessData?.groups))"
+                (change)="toggleAllGranted(getProcessItems(menuAccessData?.groups), $event)"
+                title="Select all Process">
+            </th>
             <th>Process</th>
-            <th style="width: 50px;" class="text-center">Access</th>
+            <th style="width: 50px;" class="text-center">
+              <!-- SELECT ALL — Reports -->
+              <input type="checkbox" *ngIf="getReportItems(menuAccessData?.groups).length > 1"
+                [checked]="isAllGranted(getReportItems(menuAccessData?.groups))"
+                (change)="toggleAllGranted(getReportItems(menuAccessData?.groups), $event)"
+                title="Select all Reports">
+            </th>
             <th>Reports</th>
           </tr>
         </thead>
@@ -456,9 +470,21 @@
         <table class="table table-sm table-bordered mb-0" *ngIf="!locationMenuAccessLoading && locationEditForm.value.roleId">
           <thead class="table-light">
             <tr>
-              <th style="width: 50px;" class="text-center">Access</th>
+              <th style="width: 50px;" class="text-center">
+                <!-- SELECT ALL — Process -->
+                <input type="checkbox" *ngIf="getProcessItems(locationMenuAccessData?.groups).length > 1"
+                  [checked]="isAllGranted(getProcessItems(locationMenuAccessData?.groups))"
+                  (change)="toggleAllGranted(getProcessItems(locationMenuAccessData?.groups), $event)"
+                  title="Select all Process">
+              </th>
               <th>Process</th>
-              <th style="width: 50px;" class="text-center">Access</th>
+              <th style="width: 50px;" class="text-center">
+                <!-- SELECT ALL — Reports -->
+                <input type="checkbox" *ngIf="getReportItems(locationMenuAccessData?.groups).length > 1"
+                  [checked]="isAllGranted(getReportItems(locationMenuAccessData?.groups))"
+                  (change)="toggleAllGranted(getReportItems(locationMenuAccessData?.groups), $event)"
+                  title="Select all Reports">
+              </th>
               <th>Reports</th>
             </tr>
           </thead>

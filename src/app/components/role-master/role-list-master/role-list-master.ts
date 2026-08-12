@@ -59,6 +59,10 @@ export class RoleMasterList {
     this.router.navigate(['/role-master/add']);
   }
 
+    onEdit(role: RoleMappingModel) {
+    this.router.navigate(['/role-master/edit', role.id]);
+  }
+
   onDelete(role: RoleMappingModel) {
     if (!confirm(`Remove role "${role.roleName}" from category "${role.category}"?`)) return;
 
