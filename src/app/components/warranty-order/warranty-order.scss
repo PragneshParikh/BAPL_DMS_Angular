@@ -1,0 +1,14 @@
+// Warranty Order - component-specific styles go here.
+
+// The claims grid has 18 columns - compact font/padding and let cell content
+// wrap instead of forcing the table wider than the viewport.
+.table-responsive table {
+  font-size: 0.75rem;
+}
+
+.table-responsive th,
+.table-responsive td {
+  white-space: normal;
+  padding: 0.35rem 0.4rem;
+  vertical-align: middle;
+}

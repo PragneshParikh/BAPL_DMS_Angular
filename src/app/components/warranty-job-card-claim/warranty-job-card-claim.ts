@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { LoaderService } from '../../core/services/loader';
 import { StorageService } from '../../core/services/storage';
@@ -40,7 +41,6 @@ export class WarrantyJobCardClaim implements OnInit {
   totalLabourIgst: number = 0;
   totalLabourAmount: number = 0;
 
-
   jobSearch: any = {
     jobNo: 0,
     rBillfromDate: '',
@@ -62,7 +62,8 @@ export class WarrantyJobCardClaim implements OnInit {
     private jobcardService: JobCardService,
     private prefixService: PrefixService,
     private toaster: ToastService,
-    private warrantyJCClaimService: WarrantyJCClaimService
+    private warrantyJCClaimService: WarrantyJCClaimService,
+    private router: Router
   ) { }
   ngOnInit(): void {
 
@@ -166,13 +167,22 @@ export class WarrantyJobCardClaim implements OnInit {
     this.jobcardService.getIssueTypebasedJobDetails(dealerCode, jobNo, serviceloc, fromDate, toDate).subscribe({
       next: (res: any) => {
         this.loader.hide();
-        this.jobCardList = res;
-        const allDetails = this.jobCardList[0].repairBillDetails || [];
+        this.jobCardList = res || [];
 
+        if (this.jobCardList.length === 0) {
+          this.toaster.show('No job cards found for the given search.', {
+            classname: 'bg-warning text-white',
+            delay: 3000
+          });
+          this.partsGridData = [];
+          this.labourGridData = [];
+          return;
+        }
+
+        const allDetails = this.jobCardList[0]?.repairBillDetails || [];
 
         this.partsGridData = allDetails.filter((x: any) => x.itemType === 'Part');
         this.calculatePartsTotal();
-
 
         this.labourGridData = allDetails.filter((x: any) => x.itemType === 'Labour');
         this.calculateLabourTotal();
@@ -194,6 +204,12 @@ export class WarrantyJobCardClaim implements OnInit {
       scrollable: true
     });
 
+  }
+
+  // Navigates to the full-page Warranty Claim List (replaces the earlier
+  // modal-popup approach).
+  goToClaimList(): void {
+    this.router.navigate(['/warranty-claim-list']);
   }
 
   calculatePartsTotal() {
@@ -231,144 +247,92 @@ export class WarrantyJobCardClaim implements OnInit {
   saveWarrantyClaim() {
 
     if (!this.selectedSupplierId) {
-      this.toaster.show('Please Select Supplier !', {
-        classname: 'bg-warning text-white',
-        delay: 3000
-      });
+      this.toaster.show('Please Select Supplier !', { classname: 'bg-warning text-white', delay: 3000 });
       return;
     }
 
     if (this.selectedJob?.repairBillDetails?.length == 0) {
-      this.toaster.show('No Claim details Found !', {
-        classname: 'bg-warning text-white',
-        delay: 3000
-      });
+      this.toaster.show('No Claim details Found !', { classname: 'bg-warning text-white', delay: 3000 });
+      return;
     }
 
-    const invalidPartDealer = this.partDetails.findIndex(x =>
-      !x.dealerObservation || x.dealerObservation.trim() === ''
-    );
-
+    const invalidPartDealer = this.partDetails.findIndex(x => !x.dealerObservation || x.dealerObservation.trim() === '');
     if (invalidPartDealer !== -1) {
-      this.toaster.show(
-        `Please enter Dealer Observation for Part row ${invalidPartDealer + 1}.`,
-        {
-          classname: 'bg-warning text-white',
-          delay: 3000
-        }
-      );
+      this.toaster.show(`Please enter Dealer Observation for Part row ${invalidPartDealer + 1}.`, { classname: 'bg-warning text-white', delay: 3000 });
       return;
     }
-    const invalidLabourDealer = this.labourDetails.findIndex(x =>
-      !x.dealerObservation || x.dealerObservation.trim() === ''
-    );
 
+    const invalidLabourDealer = this.labourDetails.findIndex(x => !x.dealerObservation || x.dealerObservation.trim() === '');
     if (invalidLabourDealer !== -1) {
-      this.toaster.show(
-        `Please enter Dealer Observation for Labour row ${invalidLabourDealer + 1}.`,
-        {
-          classname: 'bg-warning text-white',
-          delay: 3000
-        }
-      );
+      this.toaster.show(`Please enter Dealer Observation for Labour row ${invalidLabourDealer + 1}.`, { classname: 'bg-warning text-white', delay: 3000 });
       return;
     }
-    const invalidPartRoot = this.partDetails.findIndex(x =>
-      !x.rootCauseAnalysis || x.rootCauseAnalysis.trim() === ''
-    );
 
+    const invalidPartRoot = this.partDetails.findIndex(x => !x.rootCauseAnalysis || x.rootCauseAnalysis.trim() === '');
     if (invalidPartRoot !== -1) {
-      this.toaster.show(
-        `Please enter Root Cause Analysis for Part row ${invalidPartRoot + 1}.`,
-        {
-          classname: 'bg-warning text-white',
-          delay: 3000
-        }
-      );
+      this.toaster.show(`Please enter Root Cause Analysis for Part row ${invalidPartRoot + 1}.`, { classname: 'bg-warning text-white', delay: 3000 });
       return;
     }
-    const invalidLabourRoot = this.labourDetails.findIndex(x =>
-      !x.rootCauseAnalysis || x.rootCauseAnalysis.trim() === ''
-    );
 
+    const invalidLabourRoot = this.labourDetails.findIndex(x => !x.rootCauseAnalysis || x.rootCauseAnalysis.trim() === '');
     if (invalidLabourRoot !== -1) {
-      this.toaster.show(
-        `Please enter Root Cause Analysis for Labour row ${invalidLabourRoot + 1}.`,
-        {
-          classname: 'bg-warning text-white',
-          delay: 3000
-        }
-      );
+      this.toaster.show(`Please enter Root Cause Analysis for Labour row ${invalidLabourRoot + 1}.`, { classname: 'bg-warning text-white', delay: 3000 });
       return;
     }
+
     const dealerCode = this.storageService.getDealerCode();
     const model = {
-
       dealerCode: dealerCode,
       claimPrefix: this.WjobClaimprefix,
       claimNo: this.claimNo,
       claimDate: this.toDate,
-
       chassisNo: this.selectedJob?.chassisNo,
 
       supplierId: this.selectedSupplierId,
-
       jobCardHeaderId: this.selectedJob?.jobcardId,
-
       customerLedgerId: this.selectedJob?.customerLedgerId,
-
       repairBillHeaderId: this.selectedJob?.repairBillHeaderId,
-
       ffirId: this.selectedJob?.ffirId,
-
       claimAccount: this.claimAccount,
       CreatedBy: '',
-
       repairBillDetails: this.selectedJob?.repairBillDetails
     };
 
     this.loader.show();
 
-    this.warrantyJCClaimService
-      .insertWarrantyJCClaim(model)
-      .subscribe({
+    this.warrantyJCClaimService.insertWarrantyJCClaim(model).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
 
-        next: (res: any) => {
+        if (res?.claimId > 0) {
+          this.toaster.show('Warranty Claim Saved Successfully.', { classname: 'bg-success text-white', delay: 3000 });
 
-          this.loader.hide();
+          const claimId = res.claimId;
+          const chassisNo = this.selectedJob?.chassisNo;
 
-          if (res > 0) {
-            this.toaster.show('Warranty Claim Saved Successfully.', {
-              classname: 'bg-sucess text-white',
-              delay: 300
-            });
+          // sessionStorage (NOT router state or query params) - this is the
+          // exact key warranty-order.ts's ngOnInit reads to pick up a new
+          // claim. Query params were tried earlier and dropped since they
+          // don't survive re-navigating to this same route or refreshing -
+          // if this key isn't set, the Warranty Order page has no way to
+          // know a new claim exists and silently falls back to showing
+          // whatever was last saved instead.
+          sessionStorage.setItem('pendingWarrantyOrderClaim', JSON.stringify({ claimId, chassisNo }));
 
+          this.resetForm();
 
-            this.resetForm();
-
-          }
-          else {
-
-            this.toaster.show('Failed to save Warranty Claim.', {
-              classname: 'bg-danger text-white',
-              delay: 300
-            });
-
-          }
-
-        },
-
-        error: (err) => {
-          this.loader.hide();
-          console.error(err);
-          this.toaster.show('Something went wrong.', {
-            classname: 'bg-danger text-white',
-            delay: 3000
-          });
-
+          this.router.navigate(['/warranty-order']);
+        } else {
+          this.toaster.show('Failed to save Warranty Claim.', { classname: 'bg-danger text-white', delay: 3000 });
         }
-
-      });
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error('Validation errors:', err?.error);
+        const serverMsg = err?.error?.title || 'Something went wrong. Check console for details.';
+        this.toaster.show(serverMsg, { classname: 'bg-danger text-white', delay: 3000 });
+      }
+    });
 
   }
   resetForm() {
