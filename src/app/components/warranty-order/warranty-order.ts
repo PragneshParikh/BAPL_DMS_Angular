@@ -2,13 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { LoaderService } from '../../core/services/loader';
 import { StorageService } from '../../core/services/storage';
 import { LedgerMasterService } from '../../core/services/ledger-master';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { WarrantyOrderService } from '../../core/services/warranty-order-service';
+import { WarrantyInvoiceService } from '../../core/services/warranty-invoice-service';
 
 @Component({
   selector: 'app-warranty-order',
@@ -30,46 +31,18 @@ export class WarrantyOrder implements OnInit {
   selectedLocation: string | null = null;
   claimType: string = 'Warranty';
   selectedSupplierId: number | null = null;
-
   locationList: any[] = [];
   supplierList: any[] = [];
-
-  // Claims linked to this order - populated only via the ?claimId= redirect
-  // from Warranty JobCard Claim (create) or from the saved order (edit).
   selectedClaims: any[] = [];
-
-  // Claims from OTHER (previously saved) orders, shown stacked above the
-  // current order's own claims so a user can see everything on one screen.
-  // Strictly read-only - checkbox/remove actions never touch these, since
-  // they'd otherwise try to save under the wrong orderId and corrupt data.
   historicalClaims: any[] = [];
   private readonly maxHistoricalOrders = 10; // avoid unbounded growth
   saving = false;
-
-  // Auto-save fires once both of these are true (new pending claim only -
-  // never when just viewing an already-saved order).
   isEditMode = false;
-
-  // TODO: replace with however this app actually determines Super Admin
-  // status. I don't have visibility into StorageService's full API beyond
-  // the confirmed getDealerCode() - only a bool isSuperAdmin parameter seen
-  // once in a different module's backend method signature. Hardcoded false
-  // for now, which means the Location field is hidden for everyone until
-  // this is wired to the real check.
+  wasApprovedOnLoad = false;
   isSuperAdmin = false;
-
-  // See toggleClaimApproval - true once the user has interacted with any
-  // current-order checkbox this page load, keeping Save enabled afterward
-  // regardless of whether the box ends up checked or unchecked.
-  hasToggledApproval = false;
-
-  // Auto-save fires once both of these are true (new pending claim only).
-  // Safe to do silently now that the List page only shows approved orders -
-  // an auto-saved, unapproved order stays invisible there until the
-  // checkbox is checked and Save is explicitly clicked.
-  private autoSaveArmed = false;
-  private numbersLoaded = false;
-  private claimLoaded = false;
+  // private autoSaveArmed = false;
+  // private numbersLoaded = false;
+  // private claimLoaded = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -78,7 +51,8 @@ export class WarrantyOrder implements OnInit {
     private storageService: StorageService,
     private ledgerService: LedgerMasterService,
     private toaster: ToastService,
-    private warrantyOrderService: WarrantyOrderService
+    private warrantyOrderService: WarrantyOrderService,
+    private warrantyInvoiceService: WarrantyInvoiceService
   ) { }
 
   ngOnInit(): void {
@@ -120,7 +94,7 @@ export class WarrantyOrder implements OnInit {
       // its WarrantyOrderGridDetail rows exist in the DB right away. Safe
       // since it stays unapproved and invisible in the List page until the
       // checkbox is checked and Save is clicked.
-      this.autoSaveArmed = true;
+      //this.autoSaveArmed = true;
       this.loadNextOrderNumbers();
       this.preloadClaimFromQueryParam(Number(pending.claimId));
     } else {
@@ -132,6 +106,15 @@ export class WarrantyOrder implements OnInit {
   }
 
   loadLatestSavedOrder(): void {
+    // includeInactive is deliberately omitted (defaults to false) here -
+    // this is the "nothing specific pending, just show something" fallback
+    // for a fresh visit. If it included a just-deleted order, the user
+    // would land on an order they can no longer Save (UpdateWarrantyOrder
+    // requires IsActive=true), blocking them from starting a new batch.
+    // Viewing a specific deleted order on purpose (double-click from the
+    // List) still works fine via viewOrderId + GetWarrantyOrderById, which
+    // has no IsActive filter - only this default landing view is scoped
+    // back to active orders.
     this.warrantyOrderService.searchWarrantyOrders({ pageNumber: 1, pageSize: 1 }).subscribe({
       next: (res: any) => {
         const items = res?.items || [];
@@ -139,8 +122,12 @@ export class WarrantyOrder implements OnInit {
           this.orderId = items[0].id;
           this.loadExistingOrder(this.orderId);
         } else {
-          // No orders saved yet at all.
+          // No active orders exist right now - still load historical
+          // claims (id 0 = nothing to exclude) so any deleted order's
+          // claim remains visible here for reference/re-batching, even
+          // though the main form itself is starting blank.
           this.loadNextOrderNumbers();
+          this.loadHistoricalClaims(0);
         }
       },
       error: (err) => {
@@ -216,25 +203,22 @@ export class WarrantyOrder implements OnInit {
       error: (err) => console.error(err)
     });
   }
-
-  loadNextOrderNumbers(): void {
-    const dealerCode = this.storageService.getDealerCode();
-    this.warrantyOrderService.getNextOrderNumbers(dealerCode).subscribe({
-      next: (res: any) => {
-        this.batchNo = res.batchNo;
-        this.orderNo = res.orderNo;
-        this.numbersLoaded = true;
-        this.tryAutoSave();
-      },
-      error: (err) => {
-        console.error(err);
-        this.toaster.show('Could not auto-generate Batch No / Order No. Please refresh and try again.', {
-          classname: 'bg-warning text-white',
-          delay: 3000
-        });
-      }
-    });
-  }
+    loadNextOrderNumbers(): void {
+      const dealerCode = this.storageService.getDealerCode();
+      this.warrantyOrderService.getNextOrderNumbers(dealerCode).subscribe({
+        next: (res: any) => {
+          this.batchNo = res.batchNo;
+          this.orderNo = res.orderNo;
+        },
+        error: (err) => {
+          console.error(err);
+          this.toaster.show('Could not auto-generate Batch No / Order No. Please refresh and try again.', {
+            classname: 'bg-warning text-white',
+            delay: 3000
+          });
+        }
+      });
+    }
 
   loadExistingOrder(id: number): void {
     this.loader.show();
@@ -272,7 +256,11 @@ export class WarrantyOrder implements OnInit {
         // calls, and no live joins on the read path at all.
         this.selectedClaims = res.claims || [];
         this.isEditMode = false;
-        this.hasToggledApproval = false;
+
+        // Captured BEFORE any checkbox interaction this page load - this
+        // is the order's saved approval state from the DB, not affected
+        // by anything the user does after this point.
+        this.wasApprovedOnLoad = !!res.isApproved;
 
         // Also load recent OTHER orders' claims for read-only display
         // stacked above this one, so multiple orders show on one screen.
@@ -292,72 +280,100 @@ export class WarrantyOrder implements OnInit {
   // row here belongs to a different orderId than the one this page would
   // actually save to.
   loadHistoricalClaims(currentOrderId: number): void {
+    // includeInactive: true - deleted orders' claims should still show here
+    // for reference, tagged so a checked one routes to "create a new
+    // order" (see saveWarrantyOrder) instead of trying to update an order
+    // that's been deleted and can no longer be saved to directly.
     this.warrantyOrderService.searchWarrantyOrders({
       pageNumber: 1,
-      pageSize: this.maxHistoricalOrders + 1 // +1 in case currentOrderId is in this page
+      pageSize: this.maxHistoricalOrders + 1, // +1 in case currentOrderId is in this page
+      includeInactive: true
     }).subscribe({
       next: (res: any) => {
-        const otherOrderIds: number[] = (res?.items || [])
-          .map((o: any) => o.id)
-          .filter((id: number) => id !== currentOrderId)
+        const otherOrders: any[] = (res?.items || [])
+          .filter((o: any) => o.id !== currentOrderId)
           .slice(0, this.maxHistoricalOrders);
 
-        if (otherOrderIds.length === 0) {
+        if (otherOrders.length === 0) {
           this.historicalClaims = [];
           return;
         }
 
         // Oldest first, so the current order's claims render last/below,
         // matching "add new entry below the previous entry".
-        const orderedIds = [...otherOrderIds].reverse();
+        const orderedOrders = [...otherOrders].reverse();
 
-        const requests = orderedIds.map(id => this.warrantyOrderService.getWarrantyOrderById(id));
+        const requests = orderedOrders.map(o => this.warrantyOrderService.getWarrantyOrderById(o.id));
         forkJoin(requests).subscribe({
           next: (orders: any[]) => {
-            this.historicalClaims = orders.flatMap(order =>
-              (order?.claims || []).map((claim: any) => ({
-                ...claim,
-                _orderId: order.id,
-                _orderNo: order.orderNo,
-                _batchNo: order.batchNo
-              }))
-            );
+            // Dedup by claim id - the SAME underlying claim can legitimately
+            // appear in more than one order if it's been re-batched
+            // multiple times (each re-batch creates a genuinely separate
+            // order/snapshot). Without this, every prior order it ever
+            // belonged to - including older, now-deleted ones - would show
+            // up as a separate-looking duplicate row here. orders is
+            // oldest-first (see orderedOrders above), so iterating in this
+            // order and overwriting by claim.id in a Map naturally keeps
+            // only each claim's most recent order.
+            const dedupedByClaimId = new Map<number, any>();
+            orders.forEach(order => {
+              (order?.claims || []).forEach((claim: any) => {
+                dedupedByClaimId.set(claim.id, {
+                  ...claim,
+                  _orderId: order.id,
+                  _orderNo: order.orderNo,
+                  _batchNo: order.batchNo,
+                  // GetWarrantyOrderById's own IsActive tells us definitively
+                  // whether this order was deleted - more reliable than
+                  // relying on the earlier list response for this.
+                  _isOrderDeleted: order.isActive === false
+                });
+              });
+            });
+            this.historicalClaims = Array.from(dedupedByClaimId.values());
           },
-          error: (err) => console.error('Failed to load historical claims:', err)
+          error: (err) => {
+            // Surfaced instead of console-only - a silent failure here
+            // looks identical to "genuinely no other orders exist", which
+            // is misleading when other orders actually do exist in the DB.
+            console.error('Failed to load historical claims:', err);
+            const serverMsg = err?.error?.title || err?.error || err?.message || 'Unknown error';
+            this.toaster.show(`Could not load historical claims (status ${err?.status}): ${serverMsg}`, {
+              classname: 'bg-danger text-white',
+              delay: 5000
+            });
+          }
         });
       },
-      error: (err) => console.error('Failed to load order list for history:', err)
+      error: (err) => {
+        console.error('Failed to load order list for history:', err);
+        const serverMsg = err?.error?.title || err?.error || err?.message || 'Unknown error';
+        this.toaster.show(`Could not search for historical orders (status ${err?.status}): ${serverMsg}`, {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+      }
     });
   }
 
-  preloadClaimFromQueryParam(claimId: number): void {
+    preloadClaimFromQueryParam(claimId: number): void {
     this.loader.show();
-    // No orderId of its own yet - pass 0 so nothing gets excluded, showing
-    // every existing order's claims as history above this new pending one.
+    this.wasApprovedOnLoad = false;
     this.loadHistoricalClaims(0);
     this.warrantyOrderService.getWarrantyJCClaimById(claimId).subscribe({
       next: (res: any) => {
         this.loader.hide();
         this.selectedClaims.push(res);
 
-        // Inherit Supplier / Location straight from the claim - same
-        // reimbursement supplier and service location, no user input needed.
         if (res.supplierId) this.selectedSupplierId = res.supplierId;
 
-        // Show only this claim's own location as the sole dropdown option -
-        // same simplification as loadExistingOrder, no dealer-scoped list
-        // or matching involved.
         if (res.serviceLocation) {
           this.locationList = [{ loccode: res.serviceLocation, locname: res.locationName || res.serviceLocation }];
           this.selectedLocation = res.serviceLocation;
         }
 
-        // Auto-saves once numbers are also loaded (see tryAutoSave) - this
-        // creates the order and its WarrantyOrderGridDetail rows right away,
-        // without navigating away. Stays unapproved/invisible in the List
-        // until the user checks the box here and clicks Save.
-        this.claimLoaded = true;
-        this.tryAutoSave();
+        // Claim is now visible in the grid, unchecked. Nothing is saved to
+        // the DB until the user checks its box and clicks Save.
       },
       error: (err) => {
         this.loader.hide();
@@ -368,15 +384,6 @@ export class WarrantyOrder implements OnInit {
         });
       }
     });
-  }
-
-  private tryAutoSave(): void {
-    if (this.autoSaveArmed && this.numbersLoaded && this.claimLoaded && !this.saving) {
-      // false = don't navigate to the list after this particular save -
-      // this creates the order silently; the list stays filtered to
-      // approved-only, so this unapproved order won't show up there yet.
-      this.saveWarrantyOrder(false);
-    }
   }
 
   // Removes a claim and persists immediately (no separate Save click needed) -
@@ -419,18 +426,15 @@ export class WarrantyOrder implements OnInit {
       if (claim) {
         claim.isApproved = checked;
       }
-      this.hasToggledApproval = true;
       return;
     }
 
     const currentClaim = this.selectedClaims.find(c => c.id === claimId);
     if (currentClaim) {
       currentClaim.isApproved = checked;
-      // Once touched (checking OR unchecking), Save stays enabled from here
-      // on for this page load - otherwise unchecking would instantly
-      // re-disable Save (since it reacts live to isApproved), making it
-      // impossible to ever save an uncheck.
-      this.hasToggledApproval = true;
+      // Save's disabled state reacts live to isApproved (see the template) -
+      // by explicit request, unchecking the only approved claim disables
+      // Save immediately, before it can be clicked to save that uncheck.
     }
   }
 
@@ -472,6 +476,105 @@ export class WarrantyOrder implements OnInit {
     );
   }
 
+  // For a historical claim whose original order was deleted: generates
+  // fresh Batch No / Order No and inserts a brand-new order containing
+  // just this one claim, already approved (checking it is what triggered
+  // this in the first place). Never updates the deleted order itself -
+  // UpdateWarrantyOrder would reject that (requires IsActive=true).
+  private createNewOrderForClaim(claim: any): Observable<any> {
+    const dealerCode = this.storageService.getDealerCode();
+
+    // The historical claim object comes from GetWarrantyOrderById, which
+    // reconstructs claims from the WarrantyOrderGridDetail snapshot - that
+    // snapshot only ever stored LocationName (display text), never the
+    // raw location code, so claim.serviceLocation is always undefined
+    // here. Re-fetching the claim directly gets the real code via the same
+    // resolution GetWarrantyJCClaimById already uses correctly for new claims.
+    return this.warrantyOrderService.getWarrantyJCClaimById(claim.id).pipe(
+      switchMap((freshClaim: any) =>
+        this.warrantyOrderService.getNextOrderNumbers(dealerCode).pipe(
+          switchMap((numbers: any) => {
+            const model = {
+              id: 0,
+              dealerCode: dealerCode,
+              dateFrom: this.dateFrom,
+              dateTo: this.dateTo,
+              batchNo: numbers.batchNo,
+              batchDate: this.formatDate(new Date()),
+              orderNo: numbers.orderNo,
+              orderDate: this.formatDate(new Date()),
+              location: freshClaim.serviceLocation || this.selectedLocation,
+              claimType: this.claimType,
+              supplierId: freshClaim.supplierId || this.selectedSupplierId,
+              isApproved: true,
+              warrantyClaimIds: [claim.id],
+              claimApprovals: [{ claimId: claim.id, isApproved: true }]
+            };
+
+            return this.warrantyOrderService.insertWarrantyOrder(model);
+          })
+        )
+      )
+    );
+  }
+
+  // Fires once, right after a new claim's order auto-saves for the first
+  // time. Creates a brand-new, UNAPPROVED invoice batching just this one
+  // order - by explicit request, the order stays unapproved too (this
+  // does not change the order's own approval state at all, only adds a
+  // matching invoice record). Fire-and-forget: errors are logged but don't
+  // interrupt the order's own save flow, since the order itself already
+  // saved successfully by the time this runs.
+  //
+  // batchNo is now REUSED directly from the order that was just saved
+  // (this.batchNo), rather than generated independently via
+  // getNextInvoiceNumbers - per explicit request, the Invoice's Batch No
+  // should match its Order's Batch No exactly. Orders and Invoices aren't
+  // created in perfect 1:1 lockstep, so their own independent counters
+  // (GetNextOrderNumbers vs GetNextInvoiceNumbers) naturally drift apart
+  // over time - that mismatch was the actual root cause (Order showed
+  // "18/BT/26-27", Invoice showed "21/BT/26-27" for the same batch).
+  // invoicePrefix/invoiceNo are untouched - those remain the Invoice's own
+  // genuinely separate sequential identifiers.
+  private autoCreateInvoiceForOrder(orderId: number): void {
+    const dealerCode = this.storageService.getDealerCode();
+
+    this.warrantyInvoiceService.getNextInvoiceNumbers(dealerCode).subscribe({
+      next: (numbers: any) => {
+        const model = {
+          id: 0,
+          dealerCode: dealerCode,
+          dateFrom: this.dateFrom,
+          dateTo: this.dateTo,
+          batchNo: this.batchNo, // reused from the order, not numbers.batchNo
+          batchDate: this.formatDate(new Date()),
+          invoicePrefix: numbers.invoicePrefix,
+          invoiceNo: numbers.invoiceNo,
+          invoiceDate: this.formatDate(new Date()),
+          claimType: this.claimType,
+          supplierId: this.selectedSupplierId,
+          isApproved: false, // not fully approved, by explicit request
+          warrantyOrderIds: [orderId],
+          orderApprovals: [{ orderId, isApproved: false }]
+        };
+
+        this.warrantyInvoiceService.insertWarrantyInvoice(model).subscribe({
+          next: () => {
+            // Silent on success - this is a background side effect of
+            // saving the claim/order, not something that needs its own
+            // toast on top of the order's own "saved successfully" one.
+          },
+          error: (err) => {
+            console.error('Failed to auto-create invoice for order:', err);
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Failed to get next invoice numbers for auto-create:', err);
+      }
+    });
+  }
+
   // Header "select all" checkbox - checked only when every linked claim is
   // approved (current AND historical), and there's at least one claim.
   get allClaimsApproved(): boolean {
@@ -483,16 +586,23 @@ export class WarrantyOrder implements OnInit {
     // Purely local for both groups now - Save pushes everything at once.
     this.selectedClaims.forEach(c => c.isApproved = checked);
     this.historicalClaims.forEach(c => c.isApproved = checked);
-
-    if (this.selectedClaims.length > 0 || this.historicalClaims.length > 0) {
-      this.hasToggledApproval = true;
-    }
   }
 
   // Order-level approval is now derived, not manually set - the order is
   // considered approved as soon as at least one linked claim is approved.
   get isApproved(): boolean {
     return this.selectedClaims.some(c => !!c.isApproved);
+  }
+
+  // Separate from isApproved above (which stays scoped to selectedClaims
+  // only, since it's used directly in the order's own save payload).
+  // This one also considers historicalClaims, so checking an individual
+  // historical claim (e.g. to re-batch a deleted order's claim) enables
+  // Save even when the current order itself has zero claims of its own -
+  // saveWarrantyOrder() already handles that case correctly; this just
+  // lets the button actually be clicked to reach it.
+  get hasAnyCheckedClaim(): boolean {
+    return this.isApproved || this.historicalClaims.some(c => !!c.isApproved);
   }
 
   get totalClaims(): number {
@@ -519,6 +629,7 @@ export class WarrantyOrder implements OnInit {
           isApproved: !!claim.isApproved,
           isHistorical,
           orderId: claim._orderId ?? this.orderId,
+          isOrderDeleted: !!claim._isOrderDeleted,
           orderNo: claim._orderNo ?? this.orderNo,
           batchNo: claim._batchNo ?? this.batchNo,
 
@@ -552,7 +663,8 @@ export class WarrantyOrder implements OnInit {
           sgstAmount: line?.sgstAmount ?? 0,
           igstPercent: line?.igstPercent ?? 0,
           igstAmount: line?.igstAmount ?? 0,
-          totalAmount: line?.totalAmount ?? 0
+          totalAmount: line?.totalAmount ?? 0,
+          mrp: line?.mrp ?? 0
         });
       });
     });
@@ -573,98 +685,157 @@ export class WarrantyOrder implements OnInit {
 
     if (this.saving) return;
 
-    if (!this.dateFrom || !this.dateTo) {
-      this.toaster.show('Please select Date From and Date To.', { classname: 'bg-warning text-white', delay: 3000 });
-      return;
-    }
-    if (!this.batchNo || !this.batchDate) {
-      this.toaster.show('Batch No / Batch Date missing - please refresh the page.', { classname: 'bg-warning text-white', delay: 3000 });
-      return;
-    }
-    if (!this.orderNo || !this.orderDate) {
-      this.toaster.show('Order No / Order Date missing - please refresh the page.', { classname: 'bg-warning text-white', delay: 3000 });
-      return;
-    }
-    if (!this.selectedLocation) {
-      this.toaster.show('Please select a Location.', { classname: 'bg-warning text-white', delay: 3000 });
-      return;
-    }
-    if (!this.claimType) {
-      this.toaster.show('Please select a Claim Type.', { classname: 'bg-warning text-white', delay: 3000 });
-      return;
-    }
-    if (!this.selectedSupplierId) {
-      this.toaster.show('Please select a Supplier.', { classname: 'bg-warning text-white', delay: 3000 });
-      return;
-    }
-    if (this.selectedClaims.length === 0) {
+    // Computed up front, before validation - a checked historical claim
+    // from a deleted order (re-batch) or an approval change on a still-
+    // active historical order can be valid to save even when the CURRENT
+    // order has zero claims of its own (e.g. landed on a blank form
+    // specifically to re-batch something). The validations below only
+    // apply to the main/current order when it actually has something to save.
+    const updatesByOrderId = new Map<number, { claimId: number; isApproved: boolean }[]>();
+    const deletedOrderClaimsToRebatch: any[] = [];
+
+    this.historicalClaims.forEach(c => {
+      const histOrderId = c._orderId;
+      if (!histOrderId) return;
+
+      if (c._isOrderDeleted) {
+        if (c.isApproved) {
+          deletedOrderClaimsToRebatch.push(c);
+        }
+        return;
+      }
+
+      if (!updatesByOrderId.has(histOrderId)) updatesByOrderId.set(histOrderId, []);
+      updatesByOrderId.get(histOrderId)!.push({ claimId: c.id, isApproved: !!c.isApproved });
+    });
+
+    const hasHistoricalWork = updatesByOrderId.size > 0 || deletedOrderClaimsToRebatch.length > 0;
+    const savingMainOrder = this.selectedClaims.length > 0;
+    const isNewOrderInsert = savingMainOrder && this.orderId === 0;
+
+    if (!savingMainOrder && !hasHistoricalWork) {
       this.toaster.show('No Warranty Claim is linked to this order.', { classname: 'bg-warning text-white', delay: 3000 });
       return;
     }
 
+    // The main order's own field validations only matter if we're actually
+    // going to insert/update it - skipped entirely when only historical
+    // work (re-batch/approval updates) is being saved.
+    if (savingMainOrder) {
+      if (!this.dateFrom || !this.dateTo) {
+        this.toaster.show('Please select Date From and Date To.', { classname: 'bg-warning text-white', delay: 3000 });
+        return;
+      }
+      if (!this.batchNo || !this.batchDate) {
+        this.toaster.show('Batch No / Batch Date missing - please refresh the page.', { classname: 'bg-warning text-white', delay: 3000 });
+        return;
+      }
+      if (!this.orderNo || !this.orderDate) {
+        this.toaster.show('Order No / Order Date missing - please refresh the page.', { classname: 'bg-warning text-white', delay: 3000 });
+        return;
+      }
+      if (!this.selectedLocation) {
+        this.toaster.show('Please select a Location.', { classname: 'bg-warning text-white', delay: 3000 });
+        return;
+      }
+      if (!this.claimType) {
+        this.toaster.show('Please select a Claim Type.', { classname: 'bg-warning text-white', delay: 3000 });
+        return;
+      }
+      if (!this.selectedSupplierId) {
+        this.toaster.show('Please select a Supplier.', { classname: 'bg-warning text-white', delay: 3000 });
+        return;
+      }
+    }
+
     const dealerCode = this.storageService.getDealerCode();
-    const model = {
-      id: this.orderId,
-      dealerCode: dealerCode,
-      dateFrom: this.dateFrom,
-      dateTo: this.dateTo,
-      batchNo: this.batchNo,
-      batchDate: this.batchDate,
-      orderNo: this.orderNo,
-      orderDate: this.orderDate,
-      location: this.selectedLocation,
-      claimType: this.claimType,
-      supplierId: this.selectedSupplierId,
-      isApproved: this.isApproved,
-      warrantyClaimIds: this.selectedClaims.map(c => c.id),
-      claimApprovals: this.selectedClaims.map(c => ({ claimId: c.id, isApproved: !!c.isApproved }))
-    };
 
     this.saving = true;
     this.loader.show();
 
-    const request$ = this.orderId > 0
-      ? this.warrantyOrderService.updateWarrantyOrder(model)
-      : this.warrantyOrderService.insertWarrantyOrder(model);
+    // Only insert/update the main order when it actually has claims of its
+    // own - an empty order isn't meaningful to save, and the backend's own
+    // validation would reject it anyway.
+    const request$: Observable<any> = savingMainOrder
+      ? (this.orderId > 0
+          ? this.warrantyOrderService.updateWarrantyOrder({
+              id: this.orderId,
+              dealerCode: dealerCode,
+              dateFrom: this.dateFrom,
+              dateTo: this.dateTo,
+              batchNo: this.batchNo,
+              batchDate: this.batchDate,
+              orderNo: this.orderNo,
+              orderDate: this.orderDate,
+              location: this.selectedLocation,
+              claimType: this.claimType,
+              supplierId: this.selectedSupplierId,
+              isApproved: this.isApproved,
+              warrantyClaimIds: this.selectedClaims.map(c => c.id),
+              claimApprovals: this.selectedClaims.map(c => ({ claimId: c.id, isApproved: !!c.isApproved }))
+            })
+          : this.warrantyOrderService.insertWarrantyOrder({
+              id: this.orderId,
+              dealerCode: dealerCode,
+              dateFrom: this.dateFrom,
+              dateTo: this.dateTo,
+              batchNo: this.batchNo,
+              batchDate: this.batchDate,
+              orderNo: this.orderNo,
+              orderDate: this.orderDate,
+              location: this.selectedLocation,
+              claimType: this.claimType,
+              supplierId: this.selectedSupplierId,
+              isApproved: this.isApproved,
+              warrantyClaimIds: this.selectedClaims.map(c => c.id),
+              claimApprovals: this.selectedClaims.map(c => ({ claimId: c.id, isApproved: !!c.isApproved }))
+            }))
+      : of(null); // nothing to save for the main order this time
 
-    // Any historical claims the user checked/unchecked get pushed to their
-    // own orders too, batched one request per distinct order - all part of
-    // this same explicit Save click, not fired earlier from the checkboxes.
-    const updatesByOrderId = new Map<number, { claimId: number; isApproved: boolean }[]>();
-    this.historicalClaims.forEach(c => {
-      const histOrderId = c._orderId;
-      if (!histOrderId) return;
-      if (!updatesByOrderId.has(histOrderId)) updatesByOrderId.set(histOrderId, []);
-      updatesByOrderId.get(histOrderId)!.push({ claimId: c.id, isApproved: !!c.isApproved });
-    });
-    const historicalRequests$ = Array.from(updatesByOrderId.entries())
+    // Historical claims split two ways:
+    // 1. From a still-active order -> update that order in place, same as
+    //    before, batched one request per distinct order.
+    // 2. From a DELETED order, and now checked -> that order can't be
+    //    updated (UpdateWarrantyOrder requires IsActive=true), so instead
+    //    a brand-new order is created for just that one claim. Unchecked
+    //    deleted-order claims are skipped entirely - nothing to do for them.
+    const historicalUpdateRequests$ = Array.from(updatesByOrderId.entries())
       .map(([histOrderId, updates]) => this.saveHistoricalOrderApprovals(histOrderId, updates));
 
-    forkJoin([request$, ...historicalRequests$]).subscribe({
+    const rebatchRequests$ = deletedOrderClaimsToRebatch
+      .map(claim => this.createNewOrderForClaim(claim));
+
+    forkJoin([request$, ...historicalUpdateRequests$, ...rebatchRequests$]).subscribe({
       next: ([res]: any[]) => {
         this.saving = false;
         this.loader.hide();
         this.toaster.show(
-          this.orderId > 0 ? 'Warranty Order updated successfully.' : 'Warranty Order saved successfully.',
+          savingMainOrder
+            ? (this.orderId > 0 ? 'Warranty Order updated successfully.' : 'Warranty Order saved successfully.')
+            : 'Changes saved successfully.',
           { classname: 'bg-success text-white', delay: 3000 }
         );
 
-        // The claim that was pending is now part of a saved order - clear it
-        // so it doesn't re-trigger the create flow on a later visit here.
         sessionStorage.removeItem('pendingWarrantyOrderClaim');
 
+        // Only fires when this Save click just created a brand-new order (i.e.
+        // the user checked a claim's box and clicked Save for the first time) -
+        // fire-and-forget, doesn't block navigation either way.
+        if (isNewOrderInsert) {
+          const newOrderId = res?.orderId ?? this.orderId;
+          if (newOrderId) {
+            this.autoCreateInvoiceForOrder(Number(newOrderId));
+          }
+        }
+
         if (navigateAfter) {
-          // Explicit Save - navigate to the list, confirming this order is
-          // now visible there.
           this.router.navigate(['/warranty-order-list']);
         } else {
-          // Auto-save on claim load - stay here. Capture the new orderId so
-          // any further action (checkbox, manual Save) correctly updates
-          // this same order instead of inserting a duplicate.
           const savedId = res?.orderId ?? this.orderId;
           if (savedId) {
             this.orderId = Number(savedId);
           }
+          this.loadHistoricalClaims(this.orderId);
         }
       },
       error: (err) => {

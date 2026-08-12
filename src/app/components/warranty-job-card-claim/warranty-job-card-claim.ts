@@ -11,6 +11,7 @@ import { LocationMasterService } from '../../core/services/location-master-servi
 import { JobCardService } from '../../core/services/job-card-service';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { WarrantyJCClaimService } from '../../core/services/warranty-jcclaim-service';
+import { WarrantyOrderService } from '../../core/services/warranty-order-service';
 
 @Component({
   selector: 'app-warranty-job-card-claim',
@@ -40,6 +41,8 @@ export class WarrantyJobCardClaim implements OnInit {
   totalLabourRate: number = 0;
   totalLabourIgst: number = 0;
   totalLabourAmount: number = 0;
+  viewClaimId: number | null = null;
+  isViewMode: boolean = false;
 
   jobSearch: any = {
     jobNo: 0,
@@ -63,6 +66,7 @@ export class WarrantyJobCardClaim implements OnInit {
     private prefixService: PrefixService,
     private toaster: ToastService,
     private warrantyJCClaimService: WarrantyJCClaimService,
+    private warrantyOrderService: WarrantyOrderService,
     private router: Router
   ) { }
   ngOnInit(): void {
@@ -91,8 +95,84 @@ export class WarrantyJobCardClaim implements OnInit {
     this.loadSuplier();
     this.loadlocation();
     // this.loadJobCarDetails();
+    const viewClaimIdRaw = sessionStorage.getItem('viewWarrantyJCClaimId');
+    if (viewClaimIdRaw) {
+      sessionStorage.removeItem('viewWarrantyJCClaimId');
+      this.viewClaimId = Number(viewClaimIdRaw);
+      this.loadClaimForView(this.viewClaimId);
+    }
 
+  }
+  loadClaimForView(id: number): void {
+    this.loader.show();
+    this.warrantyOrderService.getWarrantyJCClaimById(id).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        this.isViewMode = true;
 
+        this.WjobClaimprefix = res.claimPrefix ?? this.WjobClaimprefix;
+        this.claimNo = res.claimNo ?? this.claimNo;
+        this.toDate = res.claimDate?.substring(0, 10) ?? this.toDate;
+        this.selectedSupplierId = res.supplierId ?? this.selectedSupplierId;
+        this.selectedLocationId = res.serviceLocation ?? this.selectedLocationId;
+
+        this.selectedJob = {
+          serviceHead: res.serviceHead,
+          serviceType: undefined, // not in backend response
+          jobNo: res.jobCardNo,
+          chassisNo: res.chassisNo,
+          motorNo: res.motorNo,
+          repairBillNo: res.invoiceNo,
+          repairBillDate: res.invoiceDate,
+          vehiclekms: res.kms,
+          customerName: undefined,
+          registrationNo: undefined, 
+          saleDate: undefined, 
+          failureDate: undefined, 
+  
+          repairBillDetails: (res.details || []).map((d: any) => ({
+            detailId: d.id, // WarrantyJcclaimDetail's own Id - needed to save updates back correctly
+            itemType: d.itemType,
+
+            partitemName: d.partName,
+            partitemDesc: d.partDescription,
+            partItemQty: d.quantity,
+            partItemRate: d.rate ?? 0,
+
+            labourName: d.labourCode,
+            labourDesc: d.labourDescription,
+            labourQty: d.quantity,
+            labourRate: d.rate ?? 0,
+
+            igstAmount: d.igstAmount,
+            mrp: d.mrp,
+            amount: d.totalAmount,       // Part Item Details table's "Amount" column
+            totalWithTax: d.totalAmount, // Labour Details table's "Amount" column
+
+            inwardSerial: '',
+            outwardSerial: '',
+
+            dealerObservation: d.dealerObservation ?? '',
+            rootCauseAnalysis: d.rootCauseAnalysis ?? '',
+            claimType: 'Warranty Claim'
+          }))
+        };
+
+        const allDetails = this.selectedJob.repairBillDetails;
+        this.partsGridData = allDetails.filter((x: any) => x.itemType === 'Part');
+        this.calculatePartsTotal();
+        this.labourGridData = allDetails.filter((x: any) => x.itemType === 'Labour');
+        this.calculateLabourTotal();
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toaster.show('Failed to load the claim.', {
+          classname: 'bg-danger text-white',
+          delay: 3000
+        });
+      }
+    });
   }
 
   formatDate(date: Date): string {
@@ -110,8 +190,19 @@ export class WarrantyJobCardClaim implements OnInit {
     this.prefixService.getPrefixByDealerByModule(dealerCode, module).subscribe({
       next: (res: string) => {
         this.loader.hide();
-        this.WjobClaimprefix = res;
-        this.claimNo = Number(res.split('/').pop());
+
+        // res is the FULL next-claim string, e.g. "wjc/435/26-27/079" -
+        // WjobClaimprefix must be only the prefix portion WITHOUT the
+        // trailing sequence number, otherwise displaying prefix+claimNo
+        // together elsewhere (as this app does everywhere else, e.g.
+        // {{claim.claimPrefix}}{{claim.claimNo}}) duplicates the number:
+        // "wjc/435/26-27/079" + "79" = "wjc/435/26-27/07979". Splitting
+        // off the last segment and keeping the trailing "/" gives
+        // "wjc/435/26-27/" + "79" = "wjc/435/26-27/79" - no repetition.
+        const parts = res.split('/');
+        const lastSegment = parts.pop() ?? '';
+        this.WjobClaimprefix = parts.join('/') + '/';
+        this.claimNo = Number(lastSegment);
       }, error: (err) => {
         this.loader.hide();
         console.error(err);
@@ -206,8 +297,6 @@ export class WarrantyJobCardClaim implements OnInit {
 
   }
 
-  // Navigates to the full-page Warranty Claim List (replaces the earlier
-  // modal-popup approach).
   goToClaimList(): void {
     this.router.navigate(['/warranty-claim-list']);
   }
@@ -219,18 +308,24 @@ export class WarrantyJobCardClaim implements OnInit {
     this.totalPartsAmount = this.partsGridData.reduce((sum, item) => sum + (item.rowSubTotal || 0), 0);
   }
 
-  calculateLabourTotal() {
-    this.totalLabourQty = this.labourGridData.reduce((sum, item) => sum + (item.labourQty || 0), 0);
-    this.totalLabourRate = this.labourGridData.reduce((sum, item) => sum + (item.labourRate || 0), 0);
-    this.totalLabourIgst = this.labourGridData.reduce((sum, item) => sum + (item.igstAmount || 0), 0);
-    this.totalLabourAmount = this.labourGridData.reduce((sum, item) => sum + (item.totalWithTax || 0), 0);
-  }
+ calculateLabourTotal() {
+  this.totalLabourQty = this.labourGridData.reduce((sum, item) => sum + (item.labourQty || 0), 0);
+  this.totalLabourRate = this.labourGridData.reduce((sum, item) => sum + (item.labourRate || 0), 0);
+  this.totalLabourIgst = this.labourGridData.reduce((sum, item) => sum + (item.igstAmount || 0), 0);
+  this.totalLabourAmount = this.labourGridData.reduce((sum, item) => {
+    const base = (item.labourQty || 0) * (item.labourRate || 0);
+    const gst = item.igstAmount || 0;
+    return sum + (item.totalWithTax ?? (base + gst));
+  }, 0);
+}
   selectJob(item: any, modal: any) {
-
     this.selectedJob = { ...item };
     this.selectedJob.repairBillDetails?.forEach((x: any) => {
       x.dealerObservation = '';
       x.rootCauseAnalysis = '';
+      if (x.itemType === 'Labour' && !x.mrp) {
+        x.mrp = x.labourRate ?? 0;
+      }
     });
 
     modal.close();
@@ -245,6 +340,11 @@ export class WarrantyJobCardClaim implements OnInit {
   }
 
   saveWarrantyClaim() {
+
+    if (this.isViewMode) {
+      this.updateExistingClaim();
+      return;
+    }
 
     if (!this.selectedSupplierId) {
       this.toaster.show('Please Select Supplier !', { classname: 'bg-warning text-white', delay: 3000 });
@@ -307,21 +407,9 @@ export class WarrantyJobCardClaim implements OnInit {
         if (res?.claimId > 0) {
           this.toaster.show('Warranty Claim Saved Successfully.', { classname: 'bg-success text-white', delay: 3000 });
 
-          const claimId = res.claimId;
-          const chassisNo = this.selectedJob?.chassisNo;
-
-          // sessionStorage (NOT router state or query params) - this is the
-          // exact key warranty-order.ts's ngOnInit reads to pick up a new
-          // claim. Query params were tried earlier and dropped since they
-          // don't survive re-navigating to this same route or refreshing -
-          // if this key isn't set, the Warranty Order page has no way to
-          // know a new claim exists and silently falls back to showing
-          // whatever was last saved instead.
-          sessionStorage.setItem('pendingWarrantyOrderClaim', JSON.stringify({ claimId, chassisNo }));
-
           this.resetForm();
 
-          this.router.navigate(['/warranty-order']);
+          this.router.navigate(['/uw-line-item']);
         } else {
           this.toaster.show('Failed to save Warranty Claim.', { classname: 'bg-danger text-white', delay: 3000 });
         }
@@ -335,6 +423,42 @@ export class WarrantyJobCardClaim implements OnInit {
     });
 
   }
+
+  updateExistingClaim(): void {
+    const lines = (this.selectedJob?.repairBillDetails || [])
+      .filter((d: any) => d.detailId) // skip any line without a real id
+      .map((d: any) => ({
+        detailId: d.detailId,
+        dealerObservation: d.dealerObservation || '',
+        rootCauseAnalysis: d.rootCauseAnalysis || ''
+      }));
+
+    if (lines.length === 0) {
+      this.toaster.show('Nothing to update.', { classname: 'bg-warning text-white', delay: 3000 });
+      return;
+    }
+
+    this.loader.show();
+    this.warrantyJCClaimService.updateWarrantyJCClaim({
+      claimId: this.viewClaimId!,
+      lines
+    }).subscribe({
+      next: () => {
+        this.loader.hide();
+        this.toaster.show('Warranty Claim updated successfully.', {
+          classname: 'bg-success text-white',
+          delay: 3000
+        });
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error('Validation errors:', err?.error);
+        const serverMsg = err?.error?.title || err?.error || 'Something went wrong. Check console for details.';
+        this.toaster.show(serverMsg, { classname: 'bg-danger text-white', delay: 3000 });
+      }
+    });
+  }
+
   resetForm() {
 
     this.selectedSupplierId = null;
@@ -344,5 +468,18 @@ export class WarrantyJobCardClaim implements OnInit {
     this.selectedJob = {};
 
   }
+
+    cancel(): void {
+    if (this.isViewMode) {
+      this.router.navigate(['/warranty-claim-list']);
+      return;
+    }
+    this.resetForm();
+    this.isViewMode = false;
+    this.viewClaimId = null;
+    this.partsGridData = [];
+    this.labourGridData = [];
+  }
+
 
 }
