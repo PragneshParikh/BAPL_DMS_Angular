@@ -92,6 +92,7 @@ import { WarrantyOrderList } from './components/warranty-order/warranty-order-li
 import { WarrantyInvoice } from './components/warranty-invoice/warranty-invoice';
 import { WarrantyInvoiceList } from './components/warranty-invoice/warranty-invoice-list/warranty-invoice-list';
 import { UwLineItem } from './components/uw-line-items/uw-line-items';
+import { WarrantyClaimList } from './components/warranty-job-card-claim/warranty-claim-list/warranty-claim-list';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
@@ -246,6 +247,7 @@ export const routes: Routes = [
       { path: 'service-type-master', component: ServiceTypeMaster, data: [70] },
       { path: 'job-source-master', component: JobSourceMaster, data: [71] },
       { path: 'warranty-job-card-claim', component: WarrantyJobCardClaim, data: [74] },
+      { path: 'warranty-claim-list', component: WarrantyClaimList, data: [74] },
       { path: 'vehicle-info', component: VehicleInfoUpdate, data: [73] },
 
       { path: 'counter-bill', component: CounterBill, data: [77] },
