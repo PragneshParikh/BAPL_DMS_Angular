@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { NgbPagination, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { StorageService } from '../../core/services/storage';
@@ -40,9 +40,10 @@ export class EBWReports implements OnInit {
   constructor(
     private loader: LoaderService,
     private dealerMasterService: DealerService,
-    private ebwInvoiceService: EbwInvoiceService,   // FIXED — now injected
+    private ebwInvoiceService: EbwInvoiceService,
     private toast: ToastService,
     private storageService: StorageService,
+    private router: Router,
     private route: ActivatedRoute
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
@@ -53,6 +54,22 @@ export class EBWReports implements OnInit {
     }
 
     this.initDefaultDates();
+  }
+
+  /**
+   * Navigates to the real EBW Invoice edit page for this row's header.
+   * FIXED — row.id was previously undefined because the backend report
+   * projection never included the header's Id. Now it does (HeaderId → id).
+   */
+  openInvoice(row: any) {
+    if (!row.id) {
+      this.toast.show('Unable to open this invoice — missing reference.', {
+        classname: 'bg-warning text-white',
+        delay: 5000,
+      });
+      return;
+    }
+    this.router.navigate(['/ebw-invoice', row.id]);
   }
 
   ngOnInit(): void {
@@ -94,8 +111,9 @@ export class EBWReports implements OnInit {
   }
 
   /**
-   * Now reads directly from EbwInvoiceHeader/Detail via a real backend
-   * report endpoint — no more PartsInward-based derivation.
+   * Reads directly from EbwInvoiceHeader/Detail via the backend report
+   * endpoint. FIXED — now includes `id` (from the backend's HeaderId) so
+   * openInvoice() can navigate to the correct invoice.
    */
   getEbwReportDetails() {
     this.loader.show();
@@ -111,6 +129,7 @@ export class EBWReports implements OnInit {
           : rows;
 
         this.gridData = filtered.map((r) => ({
+          id: r.headerId,   // FIXED — now populated from backend's HeaderId
           dealerCode: r.dealerCode,
           locationCode: r.locationCode,
           locationName: r.locationName || '—',

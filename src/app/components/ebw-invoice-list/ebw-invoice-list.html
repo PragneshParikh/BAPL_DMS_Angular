@@ -1,6 +1,6 @@
 <!--ebw-invoice-list.html-->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-  <h4 class="mb-sm-0">Extended Warranty Invoice List</h4>
+  <h4 class="mb-sm-0">EBW Invoice List</h4>
 </div>
 
 <div class="row">
@@ -8,53 +8,46 @@
     <div class="card">
 
       <div class="card-header">
-        <div class="row g-2 align-items-end">
-          <div class="col-auto">
+        <div class="filter-row">
+          <div class="filter-field">
             <label class="form-label mb-0 small">Date From</label>
-            <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.fromDate">
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.fromDate" (ngModelChange)="onFilterChange()">
           </div>
-          <div class="col-auto">
+          <div class="filter-field">
             <label class="form-label mb-0 small">Date To</label>
-            <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.toDate">
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.toDate" (ngModelChange)="onFilterChange()">
           </div>
-          <div class="col-auto">
+          <div class="filter-field">
             <label class="form-label mb-0 small">Bill No.</label>
-            <input type="text" class="form-control form-control-sm" placeholder="Enter Bill No." [(ngModel)]="filter.billNo" style="width:160px;">
+            <input type="text" class="form-control form-control-sm" placeholder="Enter Bill No."
+                   [(ngModel)]="filter.billNo" (ngModelChange)="onFilterChange()">
           </div>
-          <div class="col-auto">
+          <div class="filter-field">
             <label class="form-label mb-0 small">Bill Type</label>
-            <select class="form-select form-select-sm" [(ngModel)]="filter.billType" style="width:130px;">
+            <select class="form-select form-select-sm" [(ngModel)]="filter.billType" (ngModelChange)="onFilterChange()">
               <option value="All">All</option>
               <option value="Cash">Cash</option>
               <option value="Credit">Credit</option>
             </select>
           </div>
-          <div class="col-auto">
+          <div class="filter-field">
             <label class="form-label mb-0 small">Location</label>
-            <select class="form-select form-select-sm" [(ngModel)]="filter.locationCode" style="width:180px;">
+            <select class="form-select form-select-sm" [(ngModel)]="filter.locationCode" (ngModelChange)="onFilterChange()">
               <option value="">--Select--</option>
               <option *ngFor="let loc of locationList" [value]="loc.loccode">{{ loc.locname }}</option>
             </select>
           </div>
-          <!-- <div class="col-auto">
-            <button class="btn btn-primary btn-sm" (click)="loadList()">
-              <i class="ri-search-line me-1"></i> Search
-            </button>
-          </div> -->
 
-          <div class="col-auto ms-auto">
-            <input type="text" class="form-control form-control-sm" placeholder="Search..." [(ngModel)]="searchTerm" style="width:200px;">
-          </div>
-          <div class="col-auto">
-            <button class="btn btn-success btn-sm" title="Download Excel" (click)="exportToExcel()">
-              <i class="ri-file-excel-2-line"></i>
-            </button>
-          </div>
-          <div class="col-auto">
-            <button class="btn btn-primary btn-sm" (click)="addNew()">
-              <i class="ri-add-line"></i>
-            </button>
-          </div>
+          <!-- <div class="filter-field filter-search">
+            <input type="text" class="form-control form-control-sm" placeholder="Search..."
+                   [(ngModel)]="searchTerm" (ngModelChange)="onFilterChange()">
+          </div> -->
+          <button class="btn btn-success btn-sm filter-icon-btn" title="Download Excel" (click)="exportToExcel()">
+            <i class="ri-file-excel-2-line"></i>
+          </button>
+          <button class="btn btn-primary btn-sm filter-icon-btn" title="Add New" (click)="addNew()">
+            <i class="ri-add-line"></i>
+          </button>
         </div>
       </div>
 
@@ -77,8 +70,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let row of filteredGrid; let i = index" (dblclick)="openInvoice(row)" style="cursor:pointer;">
-              <td>{{ i + 1 }}</td>
+            <tr *ngFor="let row of pagedGrid; let i = index" (dblclick)="openInvoice(row)" style="cursor:pointer;">
+              <td>{{ (page - 1) * pageSize + i + 1 }}</td>
               <td>{{ row.billNo }}</td>
               <td>{{ row.invoiceDate | date:'dd-MMM-yyyy' }}</td>
               <td>{{ row.chassisNo }}</td>
@@ -101,40 +94,54 @@
                 </button>
               </td>
             </tr>
-            <tr *ngIf="filteredGrid.length === 0">
+            <tr *ngIf="pagedGrid.length === 0">
               <td [attr.colspan]="canManageInvoices ? 11 : 10" class="text-center p-3">No Records Found</td>
             </tr>
           </tbody>
         </table>
+
+        <div class="d-flex justify-content-end align-items-center gap-3 mt-2" *ngIf="filteredGrid.length > 0">
+          <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0 small">Page Size</label>
+            <select class="form-select form-select-sm" style="width: auto;"
+                    [(ngModel)]="pageSize" [ngModelOptions]="{standalone: true}"
+                    (change)="onPageSizeChange()">
+              <option [ngValue]="10">10</option>
+              <option [ngValue]="25">25</option>
+              <option [ngValue]="50">50</option>
+              <option [ngValue]="100">100</option>
+            </select>
+          </div>
+
+          <ngb-pagination [collectionSize]="filteredGrid.length" [(page)]="page" [pageSize]="pageSize"
+                          (pageChange)="onPageChange($event)" [boundaryLinks]="true" [maxSize]="10">
+          </ngb-pagination>
+        </div>
+
       </div>
     </div>
   </div>
 </div>
 
-<!-- Print options popup -->
-<div class="modal d-block" tabindex="-1" *ngIf="showPrintPopup" style="background: rgba(0,0,0,0.5);">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Extended Warranty Invoice</h5>
-        <button type="button" class="btn-close" (click)="closePrintPopup()"></button>
+<!-- Print confirmation popup -->
+<div class="print-modal-backdrop" *ngIf="showPrintPopup">
+  <div class="print-modal">
+    <div class="print-modal-header">
+      <div class="print-modal-icon">
+        <i class="ri-printer-line"></i>
       </div>
-      <div class="modal-body">
-        <div class="d-flex gap-4 mb-3">
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="hideDiscount" [(ngModel)]="printOptions.hideDiscount">
-            <label class="form-check-label" for="hideDiscount">Hide Discount</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="printDate" [(ngModel)]="printOptions.printDate">
-            <label class="form-check-label" for="printDate">Print Date</label>
-          </div>
-        </div>
-        <div class="d-flex gap-2">
-          <button class="btn btn-primary flex-fill" (click)="printInvoice(true)">With GatePass</button>
-          <button class="btn btn-primary flex-fill" (click)="printInvoice(false)">Without GatePass</button>
-        </div>
+      <div>
+        <h5 class="mb-0">Print Invoice</h5>
+        <small class="text-muted">Bill No. {{ printRow?.billNo }} — {{ printRow?.partyName }}</small>
       </div>
+      <button type="button" class="btn-close ms-auto" (click)="closePrintPopup()"></button>
+    </div>
+
+    <div class="print-modal-body">
+      <p class="text-muted mb-4">This will generate the invoice with Gate Pass included, ready to print.</p>
+      <button class="btn btn-primary btn-lg w-100" (click)="printInvoice()">
+        <i class="ri-printer-line me-2"></i> Print With GatePass
+      </button>
     </div>
   </div>
 </div>
