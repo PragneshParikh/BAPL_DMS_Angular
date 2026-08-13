@@ -92,7 +92,6 @@ import { WarrantyOrderList } from './components/warranty-order/warranty-order-li
 import { WarrantyInvoice } from './components/warranty-invoice/warranty-invoice';
 import { WarrantyInvoiceList } from './components/warranty-invoice/warranty-invoice-list/warranty-invoice-list';
 import { UwLineItem } from './components/uw-line-items/uw-line-items';
-;
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
@@ -271,7 +270,7 @@ export const routes: Routes = [
       { path: 'ebw-invoice/:id', data: [106], loadComponent: () => import('./components/ebw-invoice/ebw-invoice').then(m => m.EBWInvoice) },
       { path: 'warranty-order', component: WarrantyOrder, data: [112] },
       { path: 'warranty-order-list', component: WarrantyOrderList, data: [112] },
-      { path: 'warranty-invoice', component: WarrantyInvoice, data: [113] },
+      { path: 'warranty-invoice', component: WarrantyInvoice, data: [113] }, 
       { path: 'warranty-invoice-list', component: WarrantyInvoiceList, data: [113] },
       { path: 'uw-line-item', component: UwLineItem, data: [115] }
     ]
