@@ -11,11 +11,12 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { TermConditionService } from '../../core/services/term-condition-service';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import * as XLSX from 'xlsx';
+import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-ebw-invoice-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NgbPagination], // ADD NgbPagination HERE
   templateUrl: './ebw-invoice-list.html',
   styleUrl: './ebw-invoice-list.scss',
 })
@@ -29,6 +30,10 @@ export class EbwInvoiceList implements OnInit {
 
   locationList: any[] = [];
 
+  // ===== Pagination =====
+  page: number = 1;
+  pageSize: number = 10;
+
   filter = {
     fromDate: '',
     toDate: '',
@@ -39,7 +44,6 @@ export class EbwInvoiceList implements OnInit {
 
   // ===== Print popup =====
   showPrintPopup: boolean = false;
-  printOptions = { hideDiscount: false, printDate: false };
   printRow: any = null;
 
   constructor(
@@ -82,6 +86,7 @@ export class EbwInvoiceList implements OnInit {
     this.ebwInvoiceService.getAll(undefined, this.filter.fromDate, this.filter.toDate).subscribe({
       next: (res: any) => {
         this.gridData = res.data || [];
+        this.page = 1; // reset to first page on every new load/search
         this.loader.hide();
       },
       error: (err) => {
@@ -116,6 +121,24 @@ export class EbwInvoiceList implements OnInit {
     return result;
   }
 
+  // ADDED — slices filteredGrid down to the current page for the table to render
+  get pagedGrid() {
+    const start = (this.page - 1) * this.pageSize;
+    return this.filteredGrid.slice(start, start + this.pageSize);
+  }
+
+  onPageChange(page: number) {
+    this.page = page;
+  }
+
+  onPageSizeChange() {
+    this.page = 1;
+  }
+
+  onFilterChange() {
+    this.page = 1;
+  }
+
   openInvoice(row: any) {
     this.router.navigate(['/ebw-invoice', row.id]);
   }
@@ -147,10 +170,9 @@ export class EbwInvoiceList implements OnInit {
     this.router.navigate(['/ebw-invoice']);
   }
 
-  // ===== Print flow =====
+  // ===== Print flow — With GatePass only =====
   openPrintPopup(row: any) {
     this.printRow = row;
-    this.printOptions = { hideDiscount: false, printDate: false };
     this.showPrintPopup = true;
   }
 
@@ -159,7 +181,7 @@ export class EbwInvoiceList implements OnInit {
     this.printRow = null;
   }
 
-  printInvoice(withGatePass: boolean) {
+  printInvoice() {
     if (!this.printRow) return;
 
     const printWindow = window.open('', '_blank', 'width=900,height=1000');
@@ -179,10 +201,10 @@ export class EbwInvoiceList implements OnInit {
         const dealerCode = invoiceData?.dealerCode || this.storageService.getDealerCode();
 
         this.ebwInvoiceService.getDealerInfo(dealerCode).subscribe({
-          next: (dealerData: any) => this.loadTermsAndFinishPrint(printWindow, invoiceData, dealerData, withGatePass),
+          next: (dealerData: any) => this.loadTermsAndFinishPrint(printWindow, invoiceData, dealerData),
           error: (err) => {
             console.error(err);
-            this.loadTermsAndFinishPrint(printWindow, invoiceData, {}, withGatePass);
+            this.loadTermsAndFinishPrint(printWindow, invoiceData, {});
           },
         });
       },
@@ -195,23 +217,21 @@ export class EbwInvoiceList implements OnInit {
     });
   }
 
-  private loadTermsAndFinishPrint(printWindow: Window, invoiceData: any, dealerData: any, withGatePass: boolean) {
+  private loadTermsAndFinishPrint(printWindow: Window, invoiceData: any, dealerData: any) {
     this.termConditionService.getTermConditionsByModule(this.EBW_INVOICE_MODULE_ID).subscribe({
       next: (res: any) => {
         const terms = res.data || [];
-        this.finishPrint(printWindow, invoiceData, dealerData, withGatePass, terms);
+        this.finishPrint(printWindow, invoiceData, dealerData, terms);
       },
       error: (err) => {
         console.error(err);
-        this.finishPrint(printWindow, invoiceData, dealerData, withGatePass, []);
+        this.finishPrint(printWindow, invoiceData, dealerData, []);
       },
     });
   }
 
-  private finishPrint(printWindow: Window, invoiceData: any, dealerData: any, withGatePass: boolean, terms: any[]) {
-    const templateUrl = withGatePass
-      ? 'assets/print-templates/EBW_Invoice_With_GatePass.html'
-      : 'assets/print-templates/EBW_Invoice_Without_GatePass.html';
+  private finishPrint(printWindow: Window, invoiceData: any, dealerData: any, terms: any[]) {
+    const templateUrl = 'assets/print-templates/EBW_Invoice_With_GatePass.html';
 
     this.http.get(templateUrl, { responseType: 'text' }).subscribe({
       next: (templateHtml: string) => {
@@ -249,7 +269,7 @@ export class EbwInvoiceList implements OnInit {
         <td>${item.hsnCode || ''}</td>
         <td>${item.qty || 0}</td>
         <td class="num">${fmt3(item.baseItemRate)}</td>
-        <td class="num" data-hide-discount="true">${fmt2(item.discount)}</td>
+        <td class="num">${fmt2(item.discount)}</td>
         <td class="num">${fmt3((item.baseItemRate || 0) * (item.qty || 0))}</td>
         <td>(${item.sgstPer || 0})<br>${fmt3(item.sgstAmount)}</td>
         <td>(${item.cgstPer || 0})<br>${fmt3(item.cgstAmount)}</td>
@@ -370,14 +390,6 @@ export class EbwInvoiceList implements OnInit {
       const regex = new RegExp(`{{${key}}}`, 'g');
       html = html.replace(regex, String(tokens[key]));
     });
-
-    if (this.printOptions.hideDiscount) {
-      html = html.replace(/<[^>]+data-hide-discount="true"[^>]*>[\s\S]*?<\/[^>]+>/g, '');
-    }
-
-    if (!this.printOptions.printDate) {
-      html = html.replace(/<div class="print-date"[\s\S]*?<\/div>/, '');
-    }
 
     return html;
   }

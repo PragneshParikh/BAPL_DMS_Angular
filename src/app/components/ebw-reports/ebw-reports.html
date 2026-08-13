@@ -103,7 +103,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let row of gridData; let i = index">
+              <tr *ngFor="let row of gridData; let i = index" (dblclick)="openInvoice(row)" style="cursor: pointer;">
                 <td>{{ i + 1 }}</td>
                 <td>{{ row.dealerCode }}</td>
                 <td>{{ row.locationCode }}</td>

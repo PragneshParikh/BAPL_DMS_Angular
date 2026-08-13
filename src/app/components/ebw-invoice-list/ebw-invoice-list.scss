@@ -1,5 +1,119 @@
-//BAPL_DMS_Angular\src\app\components\ebw-invoice-list\ebw-invoice-list.scss
-.col-md-1-5 {
-    flex: 0 0 12.5%;
-    max-width: 12.5%;
+//ebw-invoice-list.scss
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 130px;
+
+  label {
+    margin-bottom: 2px;
+  }
+}
+
+.filter-search {
+  min-width: 200px;
+  flex: 1 1 200px;
+}
+
+.filter-icon-btn {
+  height: 31px;
+  width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.print-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.print-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: slideUp 0.2s ease-out;
+}
+
+.print-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid #eef0f3;
+
+  h5 {
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  small {
+    font-size: 0.8rem;
+  }
+
+  .btn-close {
+    font-size: 0.75rem;
+  }
+}
+
+.print-modal-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #4f46e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.print-modal-body {
+  padding: 20px;
+
+  p {
+    font-size: 0.9rem;
+  }
+
+  .btn-primary {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.65rem 1rem;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
