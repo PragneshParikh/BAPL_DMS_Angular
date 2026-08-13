@@ -87,6 +87,11 @@ import { BgRoleMasterList } from './components/bg-role-master/bg-role-master-lis
 import { BgRoleMaster } from './components/bg-role-master/bg-role-master';
 import { DealerCreationManagerList } from './components/dealer-creation/dealer-creation-manager-list/dealer-creation-manager-list';
 import { WhoAmI } from './components/who-am-i/who-am-i';
+import { WarrantyOrder } from './components/warranty-order/warranty-order';
+import { WarrantyOrderList } from './components/warranty-order/warranty-order-list/warranty-order-list';
+import { WarrantyInvoice } from './components/warranty-invoice/warranty-invoice';
+import { WarrantyInvoiceList } from './components/warranty-invoice/warranty-invoice-list/warranty-invoice-list';
+import { UwLineItem } from './components/uw-line-items/uw-line-items';
 ;
 
 export const routes: Routes = [
