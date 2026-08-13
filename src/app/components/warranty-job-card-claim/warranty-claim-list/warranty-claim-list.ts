@@ -128,6 +128,17 @@ export class WarrantyClaimList implements OnInit {
     this.router.navigate(['/warranty-job-card-claim']);
   }
 
+  // Double-click a row - navigates to the main Warranty JobCard Claim page
+  // showing this specific claim's details. Same sessionStorage handoff
+  // pattern already used by the Warranty Order List's own "View" action -
+  // no dedicated /warranty-job-card-claim/:id route exists (single flat
+  // route by design), so the id is passed via sessionStorage instead of a
+  // route param.
+  viewClaim(id: number): void {
+    sessionStorage.setItem('viewWarrantyJCClaimId', String(id));
+    this.router.navigate(['/warranty-job-card-claim']);
+  }
+
   // Prints a single claim (grid's per-row Action button).
   printingClaimId: number | null = null;
 
@@ -151,6 +162,45 @@ export class WarrantyClaimList implements OnInit {
         this.toaster.show('Failed to generate the claim PDF.', {
           classname: 'bg-danger text-white',
           delay: 3000
+        });
+      }
+    });
+  }
+
+  // Deletes a single claim (grid's per-row Action button). No longer
+  // blocked by an existing order link - the backend removes that link
+  // row itself now rather than rejecting the delete.
+  deletingClaimId: number | null = null;
+
+  deleteClaim(id: number): void {
+    if (this.deletingClaimId) return;
+
+    if (!confirm('Are you sure you want to delete this Warranty Claim? This cannot be undone.')) {
+      return;
+    }
+
+    this.deletingClaimId = id;
+    this.loader.show();
+    this.warrantyJCClaimService.deleteWarrantyJCClaim(id).subscribe({
+      next: () => {
+        this.loader.hide();
+        this.deletingClaimId = null;
+        this.toaster.show('Warranty Claim deleted successfully.', {
+          classname: 'bg-success text-white',
+          delay: 3000
+        });
+        // Remove locally for immediate feedback instead of a full re-search.
+        this.claims = this.claims.filter(c => c.id !== id);
+        this.totalCount = Math.max(0, this.totalCount - 1);
+      },
+      error: (err) => {
+        this.loader.hide();
+        this.deletingClaimId = null;
+        console.error(err);
+        const serverMsg = typeof err?.error === 'string' ? err.error : 'Failed to delete the Warranty Claim.';
+        this.toaster.show(serverMsg, {
+          classname: 'bg-danger text-white',
+          delay: 5000
         });
       }
     });

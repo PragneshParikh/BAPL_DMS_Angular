@@ -6,10 +6,10 @@
                 Warranty Order List
             </h6>
 
-            <button class="btn btn-sm btn-light" (click)="back()">
-                <i class="ri-arrow-left-line me-1"></i>
-                Back
-            </button>
+    <button class="btn btn-sm btn-light" (click)="back()" title="Back to Warranty Order">
+        <i class="ri-arrow-left-line me-1"></i>
+        Back
+    </button>
         </div>
     </div>
 
@@ -87,6 +87,7 @@
                         <th>Claim Type</th>
                         <th class="text-center">Total Claims</th>
                         <th class="text-center">Approved</th>
+                        <th class="text-center" style="width:60px">Action</th>
                     </tr>
                 </thead>
 
@@ -108,6 +109,11 @@
                                 <span class="badge" [ngClass]="order.isApproved ? 'bg-success' : 'bg-secondary'">
                                     {{ order.isApproved ? 'Yes' : 'No' }}
                                 </span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-outline-danger btn-sm" (click)="deleteOrder(order.id, $event)" title="Delete this order">
+                                    <i class="ri-delete-bin-2-line"></i>
+                                </button>
                             </td>
                         </tr>
 
