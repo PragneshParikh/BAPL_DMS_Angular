@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Extended Warranty Invoice</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: #000;
+    margin: 0;
+    padding: 24px;
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #000;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+  .header .company-block {
+    text-align: center;
+    flex: 1;
+  }
+  .header .company-block h2 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+  }
+  .header .company-block div {
+    line-height: 1.4;
+  }
+  .header .logo-block {
+    width: 120px;
+    text-align: right;
+  }
+  .header .logo-block img {
+    max-width: 100px;
+  }
+  .bill-type {
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+    margin: 6px 0;
+  }
+  .invoice-meta {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
+    padding: 4px 0;
+    margin-bottom: 10px;
+  }
+  .section-title {
+    text-decoration: underline;
+    font-weight: bold;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+  .billing-details div {
+    margin-bottom: 2px;
+  }
+  .billing-details .label {
+    display: inline-block;
+    width: 90px;
+  }
+  table.items {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  table.items th, table.items td {
+    border: 1px solid #333;
+    padding: 5px 6px;
+    font-size: 11px;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.items th {
+    background: #f2f2f2;
+    text-align: center;
+  }
+  table.items td.num, table.items th.num {
+    text-align: right;
+  }
+  table.items tfoot td {
+    font-weight: bold;
+  }
+  .totals-block {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  .totals-block table {
+    border-collapse: collapse;
+    min-width: 260px;
+  }
+  .totals-block td {
+    padding: 3px 8px;
+  }
+  .totals-block .grand-total td {
+    font-weight: bold;
+    border-top: 1px solid #000;
+  }
+  .amount-words {
+    text-align: right;
+    margin-top: 4px;
+    font-style: italic;
+  }
+  .tax-summary {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+  }
+  .tax-summary caption {
+    text-align: left;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  .tax-summary th, .tax-summary td {
+    border: 1px solid #333;
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+  .tax-summary th {
+    background: #f2f2f2;
+  }
+  .lot-details {
+    margin-top: 18px;
+  }
+  .lot-details .row {
+    display: flex;
+  }
+  .lot-details .label {
+    width: 130px;
+    display: inline-block;
+  }
+  .remarks {
+    margin-top: 16px;
+    line-height: 1.6;
+  }
+  .remarks .section-title {
+    margin-bottom: 2px;
+  }
+  .print-date {
+    text-align: right;
+    margin-top: 20px;
+    font-size: 10px;
+    color: #444;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div style="width:120px;"></div>
+    <div class="company-block">
+      <h2>{{dealerShopName}}</h2>
+      <div>{{dealerAddressLine1}}</div>
+      <div>{{dealerCity}} {{dealerState}} {{dealerPincode}}</div>
+      <div>Phone No. {{dealerPhone}}</div>
+      <div>GSTIN No. :{{dealerGstin}}</div>
+      <div>PAN NO:- {{dealerPan}}</div>
+    </div>
+    <div class="logo-block">
+      <!-- Company logo image, if available -->
+      <!-- <img src="{{logoUrl}}" alt="logo"> -->
+      <div><b>{{logoText}}</b></div>
+    </div>
+  </div>
+
+  <div class="bill-type">{{billType}}</div>
+
+  <div class="invoice-meta">
+    <div>Invoice No. : {{invoiceNo}}</div>
+    <div>Invoice Date : {{invoiceDate}}</div>
+  </div>
+
+  <!-- ===== BILLING DETAILS ===== -->
+  <div class="billing-details">
+    <div class="section-title">Billing Details</div>
+      <div><span class="label">Name</span>: {{partyName}}</div>
+      <div><span class="label">Address</span>: {{partyAddress}}</div>
+      <div><span class="label">City</span>: {{partyCity}}</div>
+      <div><span class="label">Pincode</span>: {{partyPincode}}</div>
+      <div><span class="label">Mobile No.</span>: {{partyMobile}}</div>
+      <div><span class="label">GST No.</span>: {{partyGstNo}}</div>
+      <div><span class="label">State</span>: {{partyState}}</div>
+  </div>
+  <!-- ===== ITEM TABLE ===== -->
+  <table class="items">
+    <thead>
+      <tr>
+        <th>S.No.</th>
+        <th>Part Description</th>
+        <th>HSN/SAC Code</th>
+        <th>Qty</th>
+        <th class="num">Rate</th>
+        <th class="num" data-hide-discount="true">Disc.</th>
+        <th class="num">Taxable Value</th>
+        <th>SGST(%)/Rate</th>
+        <th>CGST(%)/Rate</th>
+        <th class="num">Net Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Repeat this row block per item -->
+      <tr>
+        <td>{{srNo}}</td>
+        <td>{{itemCode}} {{itemDescription}}</td>
+        <td>{{hsnCode}}</td>
+        <td>{{qty}}</td>
+        <td class="num">{{rate}}</td>
+        <td class="num" data-hide-discount="true">{{discount}}</td>
+        <td class="num">{{taxableValue}}</td>
+        <td>({{sgstPercent}})<br>{{sgstAmount}}</td>
+        <td>({{cgstPercent}})<br>{{cgstAmount}}</td>
+        <td class="num">{{netLineAmount}}</td>
+      </tr>
+      <!-- End repeat -->
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3">Total</td>
+        <td>{{totalQty}}</td>
+        <td></td>
+        <td data-hide-discount="true">{{totalDiscount}}</td>
+        <td class="num">{{totalTaxableValue}}</td>
+        <td>{{totalSgstAmount}}</td>
+        <td>{{totalCgstAmount}}</td>
+        <td class="num">{{totalNetAmount}}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- ===== TOTALS ===== -->
+  <div class="totals-block">
+    <table>
+      <tr data-hide-discount="true">
+        <td>Discount</td>
+        <td class="num">{{invoiceDiscount}}</td>
+      </tr>
+      <tr>
+        <td>(Rounded off)</td>
+        <td class="num">{{roundedOff}}</td>
+      </tr>
+      <tr class="grand-total">
+        <td>Invoice Total</td>
+        <td class="num">{{invoiceTotal}}</td>
+      </tr>
+    </table>
+  </div>
+  <div class="amount-words">Amount in words : {{amountInWords}}</div>
+
+  <!-- ===== TAX SUMMARY HSN/SAC WISE ===== -->
+  <table class="tax-summary">
+    <caption>Tax Summary HSN/SAC Wise</caption>
+    <thead>
+      <tr>
+        <th>Sr. No.</th>
+        <th>HSN/SAC Code</th>
+        <th>Taxable Value</th>
+        <th>SGST(%)/Rate</th>
+        <th>CGST(%)/Rate</th>
+        <th>IGST(%)/Rate</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Repeat per distinct HSN code -->
+      <tr>
+        <td>{{hsnSrNo}}</td>
+        <td>{{hsnCodeSummary}}</td>
+        <td>{{hsnTaxableValue}}</td>
+        <td>({{hsnSgstPercent}})<br>{{hsnSgstAmount}}</td>
+        <td>({{hsnCgstPercent}})<br>{{hsnCgstAmount}}</td>
+        <td>({{hsnIgstPercent}})<br>{{hsnIgstAmount}}</td>
+      </tr>
+      <!-- End repeat -->
+      <tr>
+        <td colspan="2">Total:</td>
+        <td>{{hsnTotalTaxableValue}}</td>
+        <td>{{hsnTotalSgst}}</td>
+        <td>{{hsnTotalCgst}}</td>
+        <td>{{hsnTotalIgst}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ===== TAX SUMMARY GST WISE ===== -->
+  <table class="tax-summary">
+    <caption>Tax Summary GST Wise</caption>
+    <thead>
+      <tr>
+        <th>Sr. No.</th>
+        <th></th>
+        <th>Taxable Value</th>
+        <th>SGST(%)/Rate</th>
+        <th>CGST(%)/Rate</th>
+        <th>IGST(%)/Rate</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{gstSrNo}}</td>
+        <td></td>
+        <td>{{gstTaxableValue}}</td>
+        <td>({{gstSgstPercent}})<br>{{gstSgstAmount}}</td>
+        <td>({{gstCgstPercent}})<br>{{gstCgstAmount}}</td>
+        <td>({{gstIgstPercent}})<br>{{gstIgstAmount}}</td>
+      </tr>
+      <tr>
+        <td colspan="2">Total:</td>
+        <td>{{gstTotalTaxableValue}}</td>
+        <td>{{gstTotalSgst}}</td>
+        <td>{{gstTotalCgst}}</td>
+        <td>{{gstTotalIgst}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ===== LOT DETAILS (blank fields, no gate pass block below) ===== -->
+  <div class="lot-details">
+    <div class="section-title">Lot Details</div>
+    <div class="row"><span class="label">Lorry Number</span>: {{lorryNumber}}</div>
+    <div class="row"><span class="label">Lot No.</span>: {{lotNo}}</div>
+    <div class="row"><span class="label">Lot Date</span>: {{lotDate}}</div>
+    <div class="row"><span class="label">Driver Name</span>: {{driverName}}</div>
+    <div class="row"><span class="label">Mobile No.</span>: {{driverMobile}}</div>
+  </div>
+
+  <!-- ===== REMARKS ===== -->
+  <div class="remarks">
+    <div class="section-title">Remarks</div>
+      <div>
+        Scheme-{{schemeName}} (Ext),Chassis-{{chassisNo}},Serial No.-{{serialNo}}<br>
+        Sale Date : {{saleDate}}<br>
+        Battery Number : {{batteryNumber}}<br>
+        Ext.Warrnty Purchase Date : {{ewPurchaseDate}}<br>
+        Ext.Warrnty End Date : {{ewEndDate}}
+      </div>
+  </div>
+
+  <!-- Shown only when "Print Date" option is checked -->
+  <div class="print-date" data-print-date="true">
+    Printed on: {{currentPrintDate}}
+  </div>
+
+  <!-- ===== TERMS & CONDITIONS — now real, dealer-configured, sr.no. wise ===== -->
+  <div class="remarks" style="margin-top:24px; font-size:10px;">
+    <div class="section-title">Terms &amp; conditions</div>
+    <div>
+      {{termsAndConditionsList}}
+    </div>
+  </div>
+
+</body>
+</html>

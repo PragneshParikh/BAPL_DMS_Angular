@@ -91,7 +91,10 @@ export class PartInwardList implements OnInit {
     this.partsInwardService.getInwardDetailsByDealer(this.page, this.pageSize, fromDate, toDate, dealerCode).subscribe({
       next: (res) => {
         this.loader.hide();
-        this.partsInwardData = res;
+        // ADDED: ensure descending order by invoice date, newest first
+        this.partsInwardData = (res || []).sort(
+          (a: any, b: any) => new Date(b.invoiceDate).getTime() - new Date(a.invoiceDate).getTime()
+        );
       },
       error: (err) => {
         this.loader.hide();
@@ -103,6 +106,11 @@ export class PartInwardList implements OnInit {
 
   onPageChange(page: number) {
     this.page = page;
+    this.getPartsInwardDetails();
+  }
+
+  onPageSizeChange() {
+    this.page = 1;
     this.getPartsInwardDetails();
   }
 

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Extended Warranty Invoice</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: #000;
+    margin: 0;
+    padding: 24px;
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #000;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+  .header .company-block {
+    text-align: center;
+    flex: 1;
+  }
+  .header .company-block h2 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+  }
+  .header .company-block div {
+    line-height: 1.4;
+  }
+  .header .logo-block {
+    width: 120px;
+    text-align: right;
+  }
+  .header .logo-block img {
+    max-width: 100px;
+  }
+  .bill-type {
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+    margin: 6px 0;
+  }
+  .invoice-meta {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
+    padding: 4px 0;
+    margin-bottom: 10px;
+  }
+  .section-title {
+    text-decoration: underline;
+    font-weight: bold;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+  .billing-details div {
+    margin-bottom: 2px;
+  }
+  .billing-details .label {
+    display: inline-block;
+    width: 90px;
+  }
+  table.items {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  table.items th, table.items td {
+    border: 1px solid #333;
+    padding: 5px 6px;
+    font-size: 11px;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.items th {
+    background: #f2f2f2;
+    text-align: center;
+  }
+  table.items td.num, table.items th.num {
+    text-align: right;
+  }
+  table.items tfoot td {
+    font-weight: bold;
+  }
+  .totals-block {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  .totals-block table {
+    border-collapse: collapse;
+    min-width: 260px;
+  }
+  .totals-block td {
+    padding: 3px 8px;
+  }
+  .totals-block .grand-total td {
+    font-weight: bold;
+    border-top: 1px solid #000;
+  }
+  .amount-words {
+    text-align: right;
+    margin-top: 4px;
+    font-style: italic;
+  }
+  .tax-summary {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+  }
+  .tax-summary caption {
+    text-align: left;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  .tax-summary th, .tax-summary td {
+    border: 1px solid #333;
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+  .tax-summary th {
+    background: #f2f2f2;
+  }
+  .tax-summary {
+    page-break-inside: avoid;
+  }
+  .lot-details {
+    margin-top: 18px;
+    page-break-inside: avoid;
+  }
+  .lot-details .row {
+    display: flex;
+  }
+  .lot-details .label {
+    width: 130px;
+    display: inline-block;
+  }
+  .remarks {
+    margin-top: 16px;
+    line-height: 1.6;
+  }
+  .remarks .section-title {
+    margin-bottom: 2px;
+  }
+  .print-date {
+    text-align: right;
+    margin-top: 20px;
+    font-size: 10px;
+    color: #444;
+  }
+  .terms {
+    margin-top: 24px;
+    font-size: 9px;
+    line-height: 1.4;
+    page-break-inside: avoid;   /* keep terms block from splitting across pages */
+    page-break-after: avoid;    /* don't force a break right after terms either */
+  }
+
+  /* ===== GATE PASS SECTION — flows naturally after Terms, no forced break ===== */
+  .gatepass-page {
+    margin-top: 20px;
+    padding-top: 4px;
+  }
+  .obligation-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+  .obligation-body {
+    font-size: 9px;
+    line-height: 1.35;
+  }
+  .for-line {
+    text-align: right;
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 11px;
+  }
+  .signature-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+    font-size: 10px;
+  }
+  .thanks-line {
+    text-align: center;
+    margin: 10px 0;
+    font-style: italic;
+    color: #555;
+    font-size: 10px;
+  }
+  .gatepass-divider {
+    border-top: 1px dashed #000;
+    margin: 8px 0;
+  }
+  .gatepass-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+  .gatepass-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+  .gatepass-details .left, .gatepass-details .right {
+    width: 48%;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== PAGE 1: INVOICE ===== -->
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div style="width:120px;"></div>
+    <div class="company-block">
+      <h2>{{dealerShopName}}</h2>
+      <div>{{dealerAddressLine1}}</div>
+      <div>{{dealerCity}} {{dealerState}} {{dealerPincode}}</div>
+      <div>Phone No. {{dealerPhone}}</div>
+      <div>GSTIN No. :{{dealerGstin}}</div>
+      <div>PAN NO:- {{dealerPan}}</div>
+    </div>
+    <div class="logo-block">
+      <!-- Company logo image, if available -->
+      <!-- <img src="{{logoUrl}}" alt="logo"> -->
+      <div><b>{{logoText}}</b></div>
+    </div>
+  </div>
+
+  <div class="bill-type">{{billType}}</div>
+
+  <div class="invoice-meta">
+    <div>Invoice No. : {{invoiceNo}}</div>
+    <div>Invoice Date : {{invoiceDate}}</div>
+  </div>
+
+  <!-- ===== BILLING DETAILS ===== -->
+  <div class="billing-details">
+    <div class="section-title">Billing Details</div>
+    <div><span class="label">Name</span>: {{partyName}}</div>
+    <div><span class="label">Address</span>: {{partyAddress}}</div>
+    <div><span class="label">City</span>: {{partyCity}}</div>
+    <div><span class="label">Pincode</span>: {{partyPincode}}</div>
+    <div><span class="label">Mobile No.</span>: {{partyMobile}}</div>
+    <div><span class="label">GST No.</span>: {{partyGstNo}}</div>
+    <div><span class="label">State</span>: {{partyState}}</div>
+  </div>
+
+  <!-- ===== ITEM TABLE ===== -->
+  <table class="items">
+    <thead>
+      <tr>
+        <th>S.No.</th>
+        <th>Part Description</th>
+        <th>HSN/SAC Code</th>
+        <th>Qty</th>
+        <th class="num">Rate</th>
+        <th class="num" data-hide-discount="true">Disc.</th>
+        <th class="num">Taxable Value</th>
+        <th>SGST(%)/Rate</th>
+        <th>CGST(%)/Rate</th>
+        <th class="num">Net Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Repeat this row block per item -->
+      <tr>
+        <td>{{srNo}}</td>
+        <td>{{itemCode}} {{itemDescription}}</td>
+        <td>{{hsnCode}}</td>
+        <td>{{qty}}</td>
+        <td class="num">{{rate}}</td>
+        <td class="num" data-hide-discount="true">{{discount}}</td>
+        <td class="num">{{taxableValue}}</td>
+        <td>({{sgstPercent}})<br>{{sgstAmount}}</td>
+        <td>({{cgstPercent}})<br>{{cgstAmount}}</td>
+        <td class="num">{{netLineAmount}}</td>
+      </tr>
+      <!-- End repeat -->
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3">Total</td>
+        <td>{{totalQty}}</td>
+        <td></td>
+        <td data-hide-discount="true">{{totalDiscount}}</td>
+        <td class="num">{{totalTaxableValue}}</td>
+        <td>{{totalSgstAmount}}</td>
+        <td>{{totalCgstAmount}}</td>
+        <td class="num">{{totalNetAmount}}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- ===== TOTALS ===== -->
+  <div class="totals-block">
+    <table>
+      <tr data-hide-discount="true">
+        <td>Discount</td>
+        <td class="num">{{invoiceDiscount}}</td>
+      </tr>
+      <tr>
+        <td>(Rounded off)</td>
+        <td class="num">{{roundedOff}}</td>
+      </tr>
+      <tr class="grand-total">
+        <td>Invoice Total</td>
+        <td class="num">{{invoiceTotal}}</td>
+      </tr>
+    </table>
+  </div>
+  <div class="amount-words">Amount in words : {{amountInWords}}</div>
+
+  <!-- ===== TAX SUMMARY HSN/SAC WISE ===== -->
+  <table class="tax-summary">
+    <caption>Tax Summary HSN/SAC Wise</caption>
+    <thead>
+      <tr>
+        <th>Sr. No.</th>
+        <th>HSN/SAC Code</th>
+        <th>Taxable Value</th>
+        <th>SGST(%)/Rate</th>
+        <th>CGST(%)/Rate</th>
+        <th>IGST(%)/Rate</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Repeat per distinct HSN code -->
+      <tr>
+        <td>{{hsnSrNo}}</td>
+        <td>{{hsnCodeSummary}}</td>
+        <td>{{hsnTaxableValue}}</td>
+        <td>({{hsnSgstPercent}})<br>{{hsnSgstAmount}}</td>
+        <td>({{hsnCgstPercent}})<br>{{hsnCgstAmount}}</td>
+        <td>({{hsnIgstPercent}})<br>{{hsnIgstAmount}}</td>
+      </tr>
+      <!-- End repeat -->
+      <tr>
+        <td colspan="2">Total:</td>
+        <td>{{hsnTotalTaxableValue}}</td>
+        <td>{{hsnTotalSgst}}</td>
+        <td>{{hsnTotalCgst}}</td>
+        <td>{{hsnTotalIgst}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ===== TAX SUMMARY GST WISE ===== -->
+  <table class="tax-summary">
+    <caption>Tax Summary GST Wise</caption>
+    <thead>
+      <tr>
+        <th>Sr. No.</th>
+        <th></th>
+        <th>Taxable Value</th>
+        <th>SGST(%)/Rate</th>
+        <th>CGST(%)/Rate</th>
+        <th>IGST(%)/Rate</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{gstSrNo}}</td>
+        <td></td>
+        <td>{{gstTaxableValue}}</td>
+        <td>({{gstSgstPercent}})<br>{{gstSgstAmount}}</td>
+        <td>({{gstCgstPercent}})<br>{{gstCgstAmount}}</td>
+        <td>({{gstIgstPercent}})<br>{{gstIgstAmount}}</td>
+      </tr>
+      <tr>
+        <td colspan="2">Total:</td>
+        <td>{{gstTotalTaxableValue}}</td>
+        <td>{{gstTotalSgst}}</td>
+        <td>{{gstTotalCgst}}</td>
+        <td>{{gstTotalIgst}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ===== LOT DETAILS ===== -->
+  <div class="lot-details">
+    <div class="section-title">Lot Details</div>
+    <div class="row"><span class="label">Lorry Number</span>: {{lorryNumber}}</div>
+    <div class="row"><span class="label">Lot No.</span>: {{lotNo}}</div>
+    <div class="row"><span class="label">Lot Date</span>: {{lotDate}}</div>
+    <div class="row"><span class="label">Driver Name</span>: {{driverName}}</div>
+    <div class="row"><span class="label">Mobile No.</span>: {{driverMobile}}</div>
+  </div>
+
+  <!-- ===== REMARKS ===== -->
+  <div class="remarks">
+    <div class="section-title">Remarks</div>
+    <div>
+      Scheme-{{schemeName}} (Ext),Chassis-{{chassisNo}},Serial No.-{{serialNo}}<br>
+      Sale Date : {{saleDate}}<br>
+      Battery Number : {{batteryNumber}}<br>
+      Ext.Warrnty Purchase Date : {{ewPurchaseDate}}<br>
+      Ext.Warrnty End Date : {{ewEndDate}}
+    </div>
+  </div>
+
+  <!-- Shown only when "Print Date" option is checked -->
+  <div class="print-date" data-print-date="true">
+    Printed on: {{currentPrintDate}}
+  </div>
+
+  <!-- ===== TERMS & CONDITIONS — now real, dealer-configured, sr.no. wise ===== -->
+  <div class="terms">
+    <div class="section-title">Terms &amp; conditions</div>
+    <div>
+      {{termsAndConditionsList}}
+    </div>
+  </div>
+
+  <!-- ===== PAGE 2: BGAUSS OBLIGATION + GATE PASS — baked into the template, no JS string injection ===== -->
+  <div class="gatepass-page">
+
+    <div class="obligation-title">BGAUSS OBLIGATION:</div>
+    <div class="obligation-body">
+      If any defect or defects should be found in your Battery within the terms stipulated above, dealer will be obligated to repair or replace at his sole
+      discretion any part shown to be defected with a new part or the equivalent at no cost to the owner for parts and labour, when its is acknowledged that
+      such a defect is attributable to the breakdown as defined.<br>
+      Breakdown: Failure of part (other than excluded under terms and conditions) for a reason other than WEAR &amp; TEAR, normal degeneration or
+      negligence, causing a sudden stoppage of its function<br><br>
+
+      <b>SERVICE REQUIREMENT:</b><br>
+      The eScooter should have been maintained as per the recommended service schedule.<br>
+      In order to maintain the validity of Extended Warranty, the eScooter must be serviced by Bgauss authorized dealer/ service center in accordance with
+      the recommendations.<br>
+      Note: For your protection, Customer should retain Service documents like Stamped Counter foil of Service in the Coupon Manual and Detailed Service
+      Invoice for inspection in the event of a claim.<br>
+      The customer shall effect at his cost, all modifications and repairs necessary to avoid a claim, if claim is likely to occur in the absence of the
+      above.<br><br>
+
+      <b>CUSTOMER RESPONSIBILITIES</b><br>
+      1. Invoice of EBW Purchase<br>
+      2. Take the eScooter to your nearest BGAUSS authorized dealer service center and give the confirmation that the service is up-to-date.<br>
+      3. The eScooter should have been maintained as per the recommended service schedule.<br>
+      4. The authority to Remove/Repair must be given by the customer to BGAUSS Dealer for the repair.<br>
+      Please feel free to contact with the BGauss customer care team.<br><br>
+
+      E. &amp; O. E.
+    </div>
+
+    <div class="for-line">For :{{dealerShopName}}</div>
+
+    <div class="signature-row">
+      <div>Customer Signature</div>
+      <div>Authorized Signatory</div>
+    </div>
+
+    <div class="thanks-line">THANKS VISIT AGAIN</div>
+
+    <div class="gatepass-divider"></div>
+    <div class="gatepass-title">Gate Pass</div>
+
+    <div class="gatepass-details">
+      <div class="left">
+        Invoice No. &nbsp;: {{invoiceNo}}<br>
+        Sale Type &nbsp;&nbsp;&nbsp;&nbsp;: {{billType}}<br>
+        Invoice Date : {{invoiceDate}}
+      </div>
+      <div class="right">
+        Customer Name &nbsp;&nbsp;: {{partyName}}<br>
+        Customer Address : {{partyAddress}}
+      </div>
+    </div>
+
+    <div class="signature-row">
+      <div>Customer Signature</div>
+      <div>Authorized Signatory</div>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -9,9 +9,9 @@
 
                 <form #warrantySchemeForm="ngForm" (ngSubmit)="onSubmit(warrantySchemeForm)">
                     <div>
-                        <!-- First Row -->
+                        <!-- First Row — 4 fields -->
                         <div class="row mb-2">
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <label class="form-label">Scheme Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control form-control-sm" name="schemeName"
                                     #schemeName="ngModel" [(ngModel)]="formData.schemeName" required>
@@ -44,11 +44,7 @@
                                 </small>
                                 }
                             </div>
-                        </div>
-
-                        <!-- Second Row -->
-                        <div class="row mb-2">
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label class="form-label">Duration <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control form-control-sm" name="duration"
                                     #duration="ngModel" [(ngModel)]="formData.duration" required>
@@ -58,6 +54,10 @@
                                 </small>
                                 }
                             </div>
+                        </div>
+
+                        <!-- Second Row — 6 fields -->
+                        <div class="row mb-2">
                             <div class="col-md-2">
                                 <label class="form-label">Duration Type <span class="text-danger">*</span></label>
                                 <select class="form-select form-select-sm" name="durationType"
@@ -107,15 +107,15 @@
                                 <input type="text" class="form-control form-control-sm" name="discountAmount"
                                     [(ngModel)]="formData.discountAmount" #discountAmount="ngModel">
                             </div>
-                        </div>
-
-                        <!-- Third Row -->
-                        <div class="row mb-2">
                             <div class="col-md-2">
                                 <label class="form-label"> GST % </label>
                                 <input type="text" class="form-control form-control-sm" name="gstPercentage"
                                     [(ngModel)]="formData.gstPercentage" #gstPercentage="ngModel" />
                             </div>
+                        </div>
+
+                        <!-- Third Row — 6 fields -->
+                        <div class="row mb-2">
                             <div class="col-md-2">
                                 <label class="form-label">Purchase Validity</label>
                                 <input type="text" class="form-control form-control-sm" name="purchaseValidity"
@@ -137,6 +137,16 @@
                                     [(ngModel)]="formData.toDate">
                             </div>
                             <div class="col-md-2">
+                                <label class="form-label">Product Code</label>
+                                <input type="text" class="form-control form-control-sm" name="batteryPartCode"
+                                    [(ngModel)]="formData.batteryPartCode" #batteryPartCode="ngModel">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Part Code</label>
+                                <input type="text" class="form-control form-control-sm" name="partCode"
+                                    [(ngModel)]="formData.partCode" #partCode="ngModel">
+                            </div>
+                            <div class="col-md-2">
                                 <label>Active</label><br>
                                 <div class="form-check form-switch mt-1">
                                     <input class="form-check-input" type="checkbox" [(ngModel)]="formData.isActive"
@@ -144,7 +154,6 @@
                                 </div>
                             </div>
                         </div>
-
 
                     </div>
 
@@ -165,6 +174,8 @@
                                                     <th> Model Name </th>
                                                     <th> Product Name </th>
                                                     <th> Warranty Scheme Name </th>
+                                                    <th> Product Code</th>
+                                                    <th> Part Code </th>
                                                 </tr>
                                             </thead>
 
@@ -174,11 +185,13 @@
                                                     <td> {{ item?.itemname }} </td>
                                                     <td> {{ item?.itemcode }}</td>
                                                     <td> {{ formData.schemeName }} </td>
+                                                    <td> {{ formData.batteryPartCode }} </td>
+                                                    <td> {{ formData.partCode }} </td>
                                                 </tr>
 
                                                 <!-- No Data -->
                                                 <tr *ngIf="!items || items.length === 0">
-                                                    <td colspan="4" class="text-center text-muted py-3">
+                                                    <td colspan="6" class="text-center text-muted py-3">
                                                         No Data Available
                                                     </td>
                                                 </tr>

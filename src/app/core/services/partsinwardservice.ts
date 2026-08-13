@@ -15,6 +15,14 @@ export class PartsInwardService {
     return this.httpClient.get(`${this.baseUrl}/parts-inward/notificationsbydealer/${dealerCode}`);
   }
 
+  getPendingEbwNotificationByDealer(dealerCode: string) {
+    return this.httpClient.get(`${this.baseUrl}/parts-inward/notificationsbydealerebw/${dealerCode}`);
+  }
+
+  getLatestByPartNo(partNo: string): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/parts-inward/latest-by-partno/${partNo}`);
+  }
+
   updatePartInwardDetailByInvoiceNo(data: any) {
     return this.httpClient.put(`${this.baseUrl}/parts-inward/updatebyinvoice`, JSON.stringify(data), {
       headers: {
