@@ -14,102 +14,118 @@
 
     <div class="card-body">
 
-        <!-- Row 1 -->
+        <!-- Row 1: Who -->
         <div class="row g-2">
 
-            <div class="col-md-2">
+            <div class="col-md-3">
+                <label class="form-label">Dealer</label>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedDealerCode" (change)="onDealerChange()">
+                    <option [ngValue]="null">--Select--</option>
+                    <option *ngFor="let dealer of dealerList" [ngValue]="dealer.dealerCode">
+                        {{ dealer.dealerName }} ({{ dealer.dealerCode }})
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Supplier</label>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedSupplierId">
+                    <option [ngValue]="null">--Select--</option>
+                    <option *ngFor="let supplier of supplierList" [ngValue]="supplier.id">
+                        {{ supplier.ledgerName }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
                 <label class="form-label">Claim Type</label>
                 <select class="form-select form-select-sm">
                     <option value="Warranty">Warranty</option>
                 </select>
             </div>
 
-            <!-- Date From -->
+            <div class="col-md-3">
+                <label class="form-label">Claim Account</label>
+                <select class="form-select form-select-sm" [(ngModel)]="claimAccount">
+                    <option value="Warranty Claim">Warranty Claim</option>
+                </select>
+            </div>
+
+        </div>
+
+        <!-- Row 2: Claim numbering & date range -->
+        <div class="row g-2 mt-1">
+
             <div class="col-md-2">
                 <label class="form-label">Date From</label>
                 <input type="date" class="form-control form-control-sm" [(ngModel)]="fromDate">
             </div>
 
-            <!-- Date To -->
             <div class="col-md-2">
                 <label class="form-label">Date To</label>
                 <input type="date" class="form-control form-control-sm" [(ngModel)]="toDate">
             </div>
-            <div class="col-md-2">
+
+            <div class="col-md-3">
                 <label class="form-label">Claim Prefix</label>
                 <input type="text" class="form-control form-control-sm" [(ngModel)]="WjobClaimprefix" readonly>
             </div>
 
-            <div class="col-md-1">
+            <div class="col-md-2">
                 <label class="form-label">Claim No</label>
                 <input type="text" class="form-control form-control-sm" [(ngModel)]="claimNo" readonly>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">Date</label>
-                <input type="date" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="toDate"
-                    readonly>
+                <input type="date" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="toDate" readonly>
             </div>
 
         </div>
 
-        <!-- Row 2 -->
+        <!-- Row 3: Job / Service info -->
         <div class="row g-2 mt-1">
-
-            <div class="col-md-3">
-                <label class="form-label">Supplier</label>
-                <select class="form-select form-select-sm" [(ngModel)]="selectedSupplierId">
-
-                    <option [ngValue]="null">--Select--</option>
-
-                    <option *ngFor="let supplier of supplierList" [ngValue]="supplier.id">
-
-                        {{ supplier.ledgerName }}
-
-                    </option>
-
-                </select>
-            </div>
 
             <div class="col-md-3">
                 <label class="form-label">Service Head</label>
                 <input type="text" class="form-control form-control-sm bg-light text-muted"
                     [value]="selectedJob?.serviceHead || ''" readonly>
             </div>
+
             <div class="col-md-3">
                 <label class="form-label">Service Type</label>
                 <input type="text" class="form-control form-control-sm bg-light text-muted"
                     [value]="selectedJob?.serviceType || ''" readonly>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label class="form-label">Job No</label>
-
                 <div class="input-group input-group-sm">
                     <input type="text" class="form-control form-control-sm bg-light text-muted"
                         [value]="selectedJob?.jobNo || ''" readonly>
-
                     <button class="btn btn-primary" (click)="openJobSearch(jobSearchPopup)">
                         <i class="ri-add-line"></i>
                     </button>
                 </div>
             </div>
+
         </div>
 
-        <!-- Row 3 -->
+        <!-- Row 4: Vehicle & Invoice -->
         <div class="row g-2 mt-1">
+
             <div class="col-md-3">
                 <label class="form-label">Chassis No</label>
                 <input type="text" class="form-control form-control-sm bg-light text-muted"
                     [value]="selectedJob?.chassisNo || ''" readonly>
             </div>
 
-
             <div class="col-md-3">
                 <label class="form-label">Motor No</label>
                 <input type="text" class="form-control form-control-sm bg-light text-muted"
                     [value]="selectedJob?.motorNo || ''" readonly>
             </div>
+
             <div class="col-md-2">
                 <label class="form-label">Invoice No</label>
                 <input type="text" class="form-control form-control-sm bg-light text-muted"
@@ -121,19 +137,25 @@
                 <input type="date" class="form-control form-control-sm bg-light text-muted"
                     [value]="selectedJob?.repairBillDate | date:'yyyy-MM-dd'" readonly>
             </div>
+
             <div class="col-md-2">
                 <label class="form-label">KMs</label>
                 <input type="text" class="form-control form-control-sm bg-light text-muted"
                     [value]="selectedJob?.vehiclekms || '0'" readonly>
             </div>
 
-            <div class="col-md-3">
+        </div>
+
+        <!-- Row 5: Customer & Failure -->
+        <div class="row g-2 mt-1">
+
+            <div class="col-md-4">
                 <label class="form-label">Customer Name</label>
                 <input type="text" class="form-control form-control-sm bg-light text-muted"
                     [value]="selectedJob?.customerName || ''" readonly>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">Registration No.</label>
                 <input type="text" class="form-control form-control-sm bg-light text-muted"
                     [value]="selectedJob?.registrationNo || ''" readonly>
@@ -145,17 +167,10 @@
                     [value]="selectedJob?.saleDate | date:'yyyy-MM-dd'" readonly>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">Failure Date</label>
                 <input type="date" class="form-control form-control-sm"
                     [value]="selectedJob?.failureDate | date:'yyyy-MM-dd'">
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label">Claim Account</label>
-                <select class="form-select form-select-sm" [(ngModel)]="claimAccount">
-                    <option value="Warranty Claim">Warranty Claim</option>
-                </select>
             </div>
 
         </div>

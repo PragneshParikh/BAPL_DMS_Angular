@@ -12,6 +12,9 @@ import { JobCardService } from '../../core/services/job-card-service';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { WarrantyJCClaimService } from '../../core/services/warranty-jcclaim-service';
 import { WarrantyOrderService } from '../../core/services/warranty-order-service';
+// ASSUMPTION: adjust the import path/class name if your Dealer service
+// lives elsewhere - this matches the DealerService file you shared.
+import { DealerService } from '../../core/services/dealer-service';
 
 @Component({
   selector: 'app-warranty-job-card-claim',
@@ -31,6 +34,13 @@ export class WarrantyJobCardClaim implements OnInit {
   claimAccount: string = 'Warranty Claim';
   partsGridData: any[] = [];
   labourGridData: any[] = [];
+
+  // Dealer dropdown - lets this claim be filed against ANY dealer, not
+  // just the currently logged-in one (e.g. OEM/support staff filing on a
+  // dealer's behalf). Everything below that used to read
+  // storageService.getDealerCode() directly now reads this instead.
+  dealerList: any[] = [];
+  selectedDealerCode: string | null = null;
 
   totalPartsQty: number = 0;
   totalPartsRate: number = 0;
@@ -67,6 +77,7 @@ export class WarrantyJobCardClaim implements OnInit {
     private toaster: ToastService,
     private warrantyJCClaimService: WarrantyJCClaimService,
     private warrantyOrderService: WarrantyOrderService,
+    private dealerService: DealerService,
     private router: Router
   ) { }
   ngOnInit(): void {
@@ -91,9 +102,12 @@ export class WarrantyJobCardClaim implements OnInit {
     this.jobSearch.rBillfromDate = this.formatDate(firstDayOfMonth);
     this.jobSearch.rBilltoDate = this.formatDate(today);
 
-    this.loadPrefix();
+    // loadPrefix()/loadlocation() are no longer called directly here -
+    // loadDealers() picks a default dealer and then triggers both via
+    // onDealerChange(), so they always run scoped to whichever dealer
+    // ends up selected.
+    this.loadDealers();
     this.loadSuplier();
-    this.loadlocation();
     // this.loadJobCarDetails();
     const viewClaimIdRaw = sessionStorage.getItem('viewWarrantyJCClaimId');
     if (viewClaimIdRaw) {
@@ -103,12 +117,68 @@ export class WarrantyJobCardClaim implements OnInit {
     }
 
   }
+
+  // Populates the Dealer dropdown, then defaults the selection to the
+  // logged-in user's own dealer - the dropdown lets them override it.
+  loadDealers(): void {
+    this.loader.show();
+    this.dealerService.getDealerDropdown(null).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        // GetDealerDropdown wraps the array in { success, data } - unwrap
+        // it here, rather than assuming res itself is the list (this was
+        // the actual cause of the dropdown appearing empty earlier).
+        this.dealerList = res?.data || [];
+
+        const currentDealerCode = this.storageService.getDealerCode();
+        if (currentDealerCode && this.dealerList.some((d: any) => d.dealerCode === currentDealerCode)) {
+          this.selectedDealerCode = currentDealerCode;
+        }
+
+        this.onDealerChange();
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toaster.show('Failed to load dealer list.', { classname: 'bg-danger text-white', delay: 3000 });
+      }
+    });
+  }
+
+  // Re-runs everything that's scoped to a single dealer whenever the
+  // selection changes - Claim Prefix and Location list. Skips clearing
+  // the selected job while in view mode, so this doesn't race with
+  // loadClaimForView() wiping out the claim that was just loaded for
+  // viewing (both fire from ngOnInit around the same time).
+  onDealerChange(): void {
+    if (!this.isViewMode) {
+      this.selectedJob = {};
+      this.partsGridData = [];
+      this.labourGridData = [];
+      this.calculatePartsTotal();
+      this.calculateLabourTotal();
+    }
+
+    if (!this.selectedDealerCode) {
+      this.locationList = [];
+      return;
+    }
+
+    this.loadPrefix();
+    this.loadlocation();
+  }
+
   loadClaimForView(id: number): void {
     this.loader.show();
     this.warrantyOrderService.getWarrantyJCClaimById(id).subscribe({
       next: (res: any) => {
         this.loader.hide();
         this.isViewMode = true;
+
+        // ASSUMPTION: GetWarrantyJCClaimById's response includes
+        // dealerCode - if it doesn't yet, this line is a no-op and the
+        // dropdown just keeps whatever loadDealers() defaulted it to.
+        this.selectedDealerCode = res.dealerCode ?? this.selectedDealerCode;
 
         this.WjobClaimprefix = res.claimPrefix ?? this.WjobClaimprefix;
         this.claimNo = res.claimNo ?? this.claimNo;
@@ -184,8 +254,10 @@ export class WarrantyJobCardClaim implements OnInit {
   }
 
   loadPrefix(): void {
+    if (!this.selectedDealerCode) return;
+
     this.loader.show();
-    const dealerCode = this.storageService.getDealerCode();
+    const dealerCode = this.selectedDealerCode;
     const module = 'wclaim_prefix';
     this.prefixService.getPrefixByDealerByModule(dealerCode, module).subscribe({
       next: (res: string) => {
@@ -230,8 +302,10 @@ export class WarrantyJobCardClaim implements OnInit {
   }
 
   loadlocation(): void {
+    if (!this.selectedDealerCode) return;
+
     this.loader.show();
-    const dealerCode = this.storageService.getDealerCode();
+    const dealerCode = this.selectedDealerCode;
 
     this.locationService.getLocationDropdownByDealerCode(dealerCode,).subscribe({
       next: (res: any) => {
@@ -247,8 +321,13 @@ export class WarrantyJobCardClaim implements OnInit {
 
 
   loadJobCarDetails(): void {
+    if (!this.selectedDealerCode) {
+      this.toaster.show('Please select a Dealer first.', { classname: 'bg-warning text-white', delay: 3000 });
+      return;
+    }
+
     this.loader.show();
-    const dealerCode = this.storageService.getDealerCode();
+    const dealerCode = this.selectedDealerCode;
     let jobNo = this.jobSearch.jobNo;
     let fromDate = this.jobSearch.rBillfromDate;
     let toDate = this.jobSearch.rBilltoDate;
@@ -286,6 +365,11 @@ export class WarrantyJobCardClaim implements OnInit {
   }
 
   openJobSearch(content: any) {
+    if (!this.selectedDealerCode) {
+      this.toaster.show('Please select a Dealer first.', { classname: 'bg-warning text-white', delay: 3000 });
+      return;
+    }
+
     this.loadlocation();
     this.loadJobCarDetails();
     this.modalService.open(content, {
@@ -346,6 +430,11 @@ export class WarrantyJobCardClaim implements OnInit {
       return;
     }
 
+    if (!this.selectedDealerCode) {
+      this.toaster.show('Please Select Dealer !', { classname: 'bg-warning text-white', delay: 3000 });
+      return;
+    }
+
     if (!this.selectedSupplierId) {
       this.toaster.show('Please Select Supplier !', { classname: 'bg-warning text-white', delay: 3000 });
       return;
@@ -380,9 +469,8 @@ export class WarrantyJobCardClaim implements OnInit {
       return;
     }
 
-    const dealerCode = this.storageService.getDealerCode();
     const model = {
-      dealerCode: dealerCode,
+      dealerCode: this.selectedDealerCode,
       claimPrefix: this.WjobClaimprefix,
       claimNo: this.claimNo,
       claimDate: this.toDate,

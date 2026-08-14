@@ -1,0 +1,208 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-primary bg-gradient text-white py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-white">
+                <i class="ri-box-3-line me-1"></i>
+                Generate Packing Slip
+            </h6>
+            <button class="btn btn-sm btn-light" (click)="goToPackingList()" title="View Packing Slip List">
+                <i class="ri-menu-line"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="row g-2">
+
+            <div class="col-md-2">
+                <label class="form-label">Dealer</label>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedDealerCode" (change)="onDealerChange()">
+                    <option [ngValue]="null">--Select--</option>
+                    <option *ngFor="let dealer of dealerList" [ngValue]="dealer.dealerCode">
+                        {{ dealer.dealerName }} ({{ dealer.dealerCode }})
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Invoice No</label>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedInvoiceId" (change)="onInvoiceChange()">
+                    <option [ngValue]="null">--Select--</option>
+                    <option *ngFor="let invoice of invoiceList" [ngValue]="invoice.id">
+                        {{ invoice.invoicePrefix }}{{ invoice.invoiceNo }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Invoice Date</label>
+                <input type="text" class="form-control form-control-sm bg-light text-muted"
+                    [value]="invoiceDate ? (invoiceDate | date:'dd-MM-yyyy') : ''" readonly>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Financial Year</label>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedFinancialYear" (change)="onFinancialYearChange()">
+                    <option *ngFor="let fy of financialYears" [value]="fy.label">{{ fy.label }}</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Slip Prefix</label>
+                <input type="text" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="slipPrefix" readonly>
+            </div>
+
+            <div class="col-md-1">
+                <label class="form-label">Slip No</label>
+                <input type="text" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="slipNo" readonly>
+            </div>
+
+            <div class="col-md-1">
+                <label class="form-label">Slip Date</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="slipDate">
+            </div>
+
+        </div>
+        <hr>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:36px">
+                            <input type="checkbox" [(ngModel)]="selectAll" (change)="toggleSelectAll()">
+                        </th>
+                        <th>Claim No</th>
+                        <th style="width:80px">Type</th>
+                        <th>Parts Desc</th>
+                        <th>Part No</th>
+                        <th style="width:110px">Qty</th>
+                        <th style="width:90px">Net Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let line of packableLines" [class.table-secondary]="line.locked">
+                        <td>
+                            <input type="checkbox" [(ngModel)]="line.selected" (change)="onLineSelectToggle(line)" [disabled]="line.locked">
+                        </td>
+                        <td>{{ line.claimNo }}</td>
+                        <td>
+                            <span class="badge" [ngClass]="line.itemType === 'Labour' ? 'bg-info' : 'bg-secondary'">
+                                {{ line.itemType }}
+                            </span>
+                        </td>
+                        <td>{{ line.partDescription }}</td>
+                        <td>{{ line.partCode }}</td>
+                        <td>
+                            <input *ngIf="!line.locked" type="number" class="form-control form-control-sm"
+                                [(ngModel)]="line.invQty" [max]="line.maxQty" min="1" [disabled]="!line.selected">
+                            <span *ngIf="line.locked" class="text-muted small">Fully packed</span>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm bg-light text-muted"
+                                [value]="line.selected ? line.invQty : line.qty" readonly disabled>
+                        </td>
+                    </tr>
+                    <tr *ngIf="packableLines.length === 0">
+                        <td colspan="7" class="text-center text-muted">
+                            {{ selectedInvoiceId ? 'Everything on this invoice has already been packed.' : 'Select an Invoice No to load its lines.' }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <hr>
+
+        <!-- Box entry -->
+       <div class="row g-2">
+            <div class="col-md-4">
+                <label class="form-label">Box Number</label>
+                <select class="form-select form-select-sm" [(ngModel)]="boxNumber">
+                    <option [ngValue]="null">--Select--</option>
+                    <option *ngFor="let n of boxNumberOptions" [ngValue]="n">{{ n }}</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Box Type</label>
+                <select class="form-select form-select-sm" [(ngModel)]="boxType">
+                    <option [ngValue]="null">--Select--</option>
+                    <option value="Close">Close</option>
+                    <option value="Open">Open</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Box Dimension (in cms)</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="boxDimension" placeholder="2*3">
+            </div>
+
+
+            <div class="d-flex justify-content-end mt-2">
+                <button class="btn btn-outline-primary btn-sm" (click)="addBox()">
+                    <i class="ri-add-line me-1"></i>
+                    Add
+                </button>
+            </div>
+        <!-- Accumulated box lines -->
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered table-sm align-middle">
+                <thead class="table-light">
+                    <tr>
+                        
+                        <th>Sr.No</th>
+                        <th>Slip No</th>
+                        <th>Slip Date</th>
+                        <th>Box Number</th>
+                        <th>Box Type</th>
+                        <th style="width:80px">Type</th>
+                        <th>Parts No</th>
+                        <th>Parts Desc</th>
+                        <th class="text-center">Qty</th>
+                        <th>Dimension</th>
+                        <th style="width:50px">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let row of boxLines">
+                       
+                        <td>{{ row.srNo }}</td>
+                        <td>{{ row.slipNo }}</td>
+                        <td>{{ row.slipDate | date:'dd-MM-yyyy' }}</td>
+                        <td>{{ row.boxNumber }}</td>
+                        <td>{{ row.boxType }}</td>
+                        <td>
+                            <span class="badge" [ngClass]="row.itemType === 'Labour' ? 'bg-info' : 'bg-secondary'">
+                                {{ row.itemType }}
+                            </span>
+                        </td>
+                        <td>{{ row.partCode }}</td>
+                        <td>{{ row.partDescription }}</td>
+                        <td class="text-center">{{ row.qty }}</td>
+                        <td>{{ row.dimension }}</td>
+
+                         <td class="text-center">
+                            <button class="btn btn-outline-danger btn-sm" (click)="removeBoxLine(row)">
+                                <i class="ri-delete-bin-2-line"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr *ngIf="boxLines.length === 0">
+                        <td colspan="11" class="text-center text-muted">No boxes added yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-end mt-2">
+            <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyPackingSlip()">
+                <i class="ri-save-line me-1"></i>
+                Save
+            </button>
+            <button class="btn btn-light btn-sm" (click)="cancel()">
+                <i class="ri-close-line me-1"></i>
+                Cancel
+            </button>
+        </div>
+
+    </div>
+</div>

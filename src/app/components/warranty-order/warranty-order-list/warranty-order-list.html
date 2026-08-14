@@ -28,14 +28,34 @@
                 <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.dateTo">
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-2" style="position:relative">
                 <label class="form-label">Batch No</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.batchNo">
+                <input type="text" class="form-control form-control-sm"
+                    [(ngModel)]="filter.batchNo"
+                    (input)="onBatchNoInput()"
+                    (blur)="onBatchNoBlur()">
+                <ul *ngIf="showBatchNoSuggestions && batchNoSuggestions.length > 0"
+                    class="list-group position-absolute w-100" style="z-index:20; max-height:200px; overflow-y:auto;">
+                    <li *ngFor="let b of batchNoSuggestions" class="list-group-item list-group-item-action"
+                        style="cursor:pointer" (click)="selectBatchNo(b)">
+                        {{ b }}
+                    </li>
+                </ul>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-2" style="position:relative">
                 <label class="form-label">Order No</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.orderNo">
+                <input type="text" class="form-control form-control-sm"
+                    [(ngModel)]="filter.orderNo"
+                    (input)="onOrderNoInput()"
+                    (blur)="onOrderNoBlur()">
+                <ul *ngIf="showOrderNoSuggestions && orderNoSuggestions.length > 0"
+                    class="list-group position-absolute w-100" style="z-index:20; max-height:200px; overflow-y:auto;">
+                    <li *ngFor="let o of orderNoSuggestions" class="list-group-item list-group-item-action"
+                        style="cursor:pointer" (click)="selectOrderNo(o)">
+                        {{ o }}
+                    </li>
+                </ul>
             </div>
 
             <div class="col-md-2">

@@ -33,9 +33,49 @@
                 <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.dateTo">
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-2" style="position:relative">
+                <label class="form-label">Batch No</label>
+                <input type="text" class="form-control form-control-sm"
+                    [(ngModel)]="filter.batchNo"
+                    (input)="onBatchNoInput()"
+                    (blur)="onBatchNoBlur()">
+                <ul *ngIf="showBatchNoSuggestions && batchNoSuggestions.length > 0"
+                    class="list-group position-absolute w-100" style="z-index:20; max-height:200px; overflow-y:auto;">
+                    <li *ngFor="let b of batchNoSuggestions" class="list-group-item list-group-item-action"
+                        style="cursor:pointer" (click)="selectBatchNo(b)">
+                        {{ b }}
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-md-2" style="position:relative">
+                <label class="form-label">Invoice No</label>
+                <input type="text" class="form-control form-control-sm"
+                    [(ngModel)]="filter.invoiceNo"
+                    (input)="onInvoiceNoInput()"
+                    (blur)="onInvoiceNoBlur()">
+                <ul *ngIf="showInvoiceNoSuggestions && invoiceNoSuggestions.length > 0"
+                    class="list-group position-absolute w-100" style="z-index:20; max-height:200px; overflow-y:auto;">
+                    <li *ngFor="let o of invoiceNoSuggestions" class="list-group-item list-group-item-action"
+                        style="cursor:pointer" (click)="selectInvoiceNo(o)">
+                        {{ o }}
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-md-2" style="position:relative">
                 <label class="form-label">Claim Invoice No</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.invoiceNo">
+                <input type="text" class="form-control form-control-sm"
+                    [(ngModel)]="filter.claimInvoiceNo"
+                    (input)="onClaimInvoiceNoInput()"
+                    (blur)="onClaimInvoiceNoBlur()">
+                <ul *ngIf="showClaimInvoiceNoSuggestions && claimInvoiceNoSuggestions.length > 0"
+                    class="list-group position-absolute w-100" style="z-index:20; max-height:200px; overflow-y:auto;">
+                    <li *ngFor="let c of claimInvoiceNoSuggestions" class="list-group-item list-group-item-action"
+                        style="cursor:pointer" (click)="selectClaimInvoiceNo(c)">
+                        {{ c }}
+                    </li>
+                </ul>
             </div>
 
             <div class="col-md-2">
@@ -89,12 +129,12 @@
                     <tr>
                         <th style="width:45px">S.No.</th>
                         <th>Claim Type | Invoice Ref.No</th>
-                        <th>Claim Invoice No | Date</th>
+                        <th>Invoice No | Date</th>
                         <th>Batch No | Date</th>
                         <th>Claim Date From | Date To</th>
                         <th>Location</th>
                         <th>ERP Invoice No</th>
-                        <th style="width:90px">Action</th>
+                        <th style="width:150px">Action</th>
                     </tr>
                 </thead>
 
@@ -131,10 +171,16 @@
                              property name on WarrantyInvoice. -->
                         <td>{{ invoice.erpInvoiceNo || '-' }}</td>
 
-                        <td class="text-center" (click)="$event.stopPropagation()">
+                        <td class="text-center" style="position:relative" (click)="$event.stopPropagation()">
                             <button class="btn btn-outline-primary btn-sm me-1" (click)="view(invoice.id)" title="View this invoice">
                                 <i class="ri-eye-line"></i>
                             </button>
+
+                            <button class="btn btn-outline-secondary btn-sm me-1" [disabled]="printingId === invoice.id"
+                                (click)="openPrintModal(invoice.id, $event)" title="Print">
+                                <i class="ri-printer-line"></i>
+                            </button>
+
                             <button class="btn btn-outline-danger btn-sm" (click)="deleteInvoice(invoice.id, $event)" title="Delete this invoice">
                                 <i class="ri-delete-bin-2-line"></i>
                             </button>
@@ -143,7 +189,7 @@
                     </tr>
 
                     <tr *ngIf="invoices.length === 0">
-                        <td colspan="9" class="text-center text-muted">No Warranty Invoices Found</td>
+                        <td colspan="8" class="text-center text-muted">No Warranty Invoices Found</td>
                     </tr>
                 </tbody>
             </table>
@@ -162,5 +208,37 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<!-- PRINT MODAL -->
+<div *ngIf="printModalInvoiceId !== null" class="modal d-block" style="background:rgba(0,0,0,0.5)" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">Print Warranty Invoice</h6>
+                <button type="button" class="btn-close" (click)="closePrintModal()"></button>
+            </div>
+            <div class="modal-body d-flex flex-column gap-2">
+                <button class="btn btn-outline-primary" [disabled]="printingId === printModalInvoiceId"
+                    (click)="printPart(printModalInvoiceId!, $event)">
+                    <i class="ri-printer-line me-1"></i>
+                    Print Part Invoice
+                </button>
+                <button class="btn btn-outline-primary" [disabled]="printingId === printModalInvoiceId"
+                    (click)="printLabour(printModalInvoiceId!, $event)">
+                    <i class="ri-printer-line me-1"></i>
+                    Print Labour Invoice
+                </button>
+                <button class="btn btn-outline-primary" [disabled]="printingId === printModalInvoiceId"
+                    (click)="printTag(printModalInvoiceId!, $event)">
+                    <i class="ri-printer-line me-1"></i>
+                    Print Warranty Tag
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light btn-sm" (click)="closePrintModal()">Close</button>
+            </div>
+        </div>
     </div>
 </div>
