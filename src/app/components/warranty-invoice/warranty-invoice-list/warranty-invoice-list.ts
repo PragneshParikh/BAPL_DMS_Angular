@@ -6,7 +6,6 @@ import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { WarrantyInvoiceService } from '../../../core/services/warranty-invoice-service';
 import { LedgerMasterService } from '../../../core/services/ledger-master';
-import { LocationMasterService } from '../../../core/services/location-master-service';
 import { StorageService } from '../../../core/services/storage';
 
 @Component({
@@ -25,10 +24,46 @@ export class WarrantyInvoiceList implements OnInit {
   totalCount: number = 0;
   totalPages: number = 0;
 
+  // Tracks which row's Print dropdown is currently open - only one at a
+  // time, matching the same single-menu-open convention already used
+  // elsewhere in this app (e.g. UW Line Item's editingId).
+  // Which invoice's Print modal is currently open, if any. Switched from
+  // a dropdown to a modal - the dropdown's position:absolute was clipped
+  // by .table-responsive's overflow-x:auto, which implicitly forces
+  // overflow-y away from "visible" too (a CSS quirk: setting either
+  // overflow axis to non-visible forces the other axis non-visible as
+  // well) - a modal sits outside that scrollable container entirely, so
+  // it isn't affected by this at all.
+  printModalInvoiceId: number | null = null;
+
+  // Disables the Print button on a row while its own PDF request is in
+  // flight, so a second click can't fire a duplicate request.
+  printingId: number | null = null;
+
+  // Batch No / Invoice No typeahead suggestions, per explicit request -
+  // mirrors the same pattern already applied on warranty-order-list.ts.
+  batchNoSuggestions: string[] = [];
+  showBatchNoSuggestions: boolean = false;
+  private batchNoDebounceHandle: any = null;
+
+  invoiceNoSuggestions: string[] = [];
+  showInvoiceNoSuggestions: boolean = false;
+  private invoiceNoDebounceHandle: any = null;
+
+  // Claim Invoice No typeahead - searches the invoice number recorded on
+  // the claim itself (WarrantyOrderGridDetail.InvoiceNo, the original
+  // service/repair invoice captured against the claim), NOT this batch
+  // invoice's own InvoiceNo above (that one is filter.invoiceNo).
+  claimInvoiceNoSuggestions: string[] = [];
+  showClaimInvoiceNoSuggestions: boolean = false;
+  private claimInvoiceNoDebounceHandle: any = null;
+
   filter: any = {
     dateFrom: '',
     dateTo: '',
+    batchNo: '',
     invoiceNo: '',
+    claimInvoiceNo: '',
     location: null,
     claimType: '',
     supplierId: null,
@@ -43,7 +78,6 @@ export class WarrantyInvoiceList implements OnInit {
     private toaster: ToastService,
     private storageService: StorageService,
     private ledgerService: LedgerMasterService,
-    private locationService: LocationMasterService,
     private warrantyInvoiceService: WarrantyInvoiceService
   ) { }
 
@@ -60,24 +94,120 @@ export class WarrantyInvoiceList implements OnInit {
     });
   }
 
+  // Now loads only the locations actually used in this dealer's saved
+  // invoices (via WarrantyInvoiceGridDetail), per explicit request -
+  // replaces the earlier dealer-wide getLocationDropdownByDealerCode
+  // lookup, same fix already applied on warranty-order-list.ts.
   loadLocations(): void {
     const dealerCode = this.storageService.getDealerCode();
-    this.locationService.getLocationDropdownByDealerCode(dealerCode).subscribe({
-      next: (res: any) => this.locationList = res,
+    this.warrantyInvoiceService.getDistinctInvoiceLocations(dealerCode).subscribe({
+      next: (res: any) => this.locationList = res || [],
       error: (err) => console.error(err)
     });
   }
 
+  // --- Batch No typeahead --------------------------------------------
+  onBatchNoInput(): void {
+    if (this.batchNoDebounceHandle) clearTimeout(this.batchNoDebounceHandle);
+
+    const text = (this.filter.batchNo || '').trim();
+    if (!text) {
+      this.batchNoSuggestions = [];
+      this.showBatchNoSuggestions = false;
+      return;
+    }
+
+    this.batchNoDebounceHandle = setTimeout(() => {
+      const dealerCode = this.storageService.getDealerCode();
+      this.warrantyInvoiceService.searchInvoiceBatchNos(dealerCode, text).subscribe({
+        next: (res: string[]) => {
+          this.batchNoSuggestions = res || [];
+          this.showBatchNoSuggestions = true;
+        },
+        error: (err) => console.error('Batch No search failed:', err)
+      });
+    }, 300);
+  }
+
+  selectBatchNo(value: string): void {
+    this.filter.batchNo = value;
+    this.showBatchNoSuggestions = false;
+    this.batchNoSuggestions = [];
+  }
+
+  onBatchNoBlur(): void {
+    setTimeout(() => { this.showBatchNoSuggestions = false; }, 150);
+  }
+
+  // --- Invoice No typeahead (this batch invoice's own number) -----------
+  onInvoiceNoInput(): void {
+    if (this.invoiceNoDebounceHandle) clearTimeout(this.invoiceNoDebounceHandle);
+
+    const text = (this.filter.invoiceNo || '').trim();
+    if (!text) {
+      this.invoiceNoSuggestions = [];
+      this.showInvoiceNoSuggestions = false;
+      return;
+    }
+
+    this.invoiceNoDebounceHandle = setTimeout(() => {
+      const dealerCode = this.storageService.getDealerCode();
+      this.warrantyInvoiceService.searchInvoiceNos(dealerCode, text).subscribe({
+        next: (res: string[]) => {
+          this.invoiceNoSuggestions = res || [];
+          this.showInvoiceNoSuggestions = true;
+        },
+        error: (err) => console.error('Invoice No search failed:', err)
+      });
+    }, 300);
+  }
+
+  selectInvoiceNo(value: string): void {
+    this.filter.invoiceNo = value;
+    this.showInvoiceNoSuggestions = false;
+    this.invoiceNoSuggestions = [];
+  }
+
+  onInvoiceNoBlur(): void {
+    setTimeout(() => { this.showInvoiceNoSuggestions = false; }, 150);
+  }
+
+  // --- Claim Invoice No typeahead (the claim's own service invoice) -----
+  onClaimInvoiceNoInput(): void {
+    if (this.claimInvoiceNoDebounceHandle) clearTimeout(this.claimInvoiceNoDebounceHandle);
+
+    const text = (this.filter.claimInvoiceNo || '').trim();
+    if (!text) {
+      this.claimInvoiceNoSuggestions = [];
+      this.showClaimInvoiceNoSuggestions = false;
+      return;
+    }
+
+    this.claimInvoiceNoDebounceHandle = setTimeout(() => {
+      const dealerCode = this.storageService.getDealerCode();
+      this.warrantyInvoiceService.searchClaimInvoiceNos(dealerCode, text).subscribe({
+        next: (res: string[]) => {
+          this.claimInvoiceNoSuggestions = res || [];
+          this.showClaimInvoiceNoSuggestions = true;
+        },
+        error: (err) => console.error('Claim Invoice No search failed:', err)
+      });
+    }, 300);
+  }
+
+  selectClaimInvoiceNo(value: string): void {
+    this.filter.claimInvoiceNo = value;
+    this.showClaimInvoiceNoSuggestions = false;
+    this.claimInvoiceNoSuggestions = [];
+  }
+
+  onClaimInvoiceNoBlur(): void {
+    setTimeout(() => { this.showClaimInvoiceNoSuggestions = false; }, 150);
+  }
+
   search(): void {
     this.loader.show();
-    // isApproved: true is always enforced regardless of the dropdown -
-    // this page only ever shows confirmed/approved invoices. An
-    // auto-created invoice that hasn't been explicitly approved yet stays
-    // correctly invisible here. Same reasoning as warranty-order-list.ts's
-    // own search().
-    // dateFrom/dateTo must be null (not '') when empty - an empty string
-    // fails to deserialize as DateTime? on the backend and takes down the
-    // whole request body, not just that one field.
+
     const payload = {
       ...this.filter,
       dateFrom: this.filter.dateFrom || null,
@@ -102,10 +232,16 @@ export class WarrantyInvoiceList implements OnInit {
 
   resetFilter(): void {
     this.filter = {
-      dateFrom: '', dateTo: '', invoiceNo: '',
+      dateFrom: '', dateTo: '', batchNo: '', invoiceNo: '', claimInvoiceNo: '',
       location: null, claimType: '', supplierId: null,
       isApproved: true, pageNumber: 1, pageSize: 25
     };
+    this.batchNoSuggestions = [];
+    this.showBatchNoSuggestions = false;
+    this.invoiceNoSuggestions = [];
+    this.showInvoiceNoSuggestions = false;
+    this.claimInvoiceNoSuggestions = [];
+    this.showClaimInvoiceNoSuggestions = false;
     this.search();
   }
 
@@ -116,9 +252,7 @@ export class WarrantyInvoiceList implements OnInit {
   }
 
   view(id: number): void {
-    // No /warranty-invoice/edit/:id route exists (single flat route by
-    // design) - same sessionStorage handoff pattern already used for the
-    // order/claim redirects.
+
     sessionStorage.setItem('viewWarrantyInvoiceId', String(id));
     this.router.navigate(['/warranty-invoice']);
   }
@@ -126,6 +260,104 @@ export class WarrantyInvoiceList implements OnInit {
   goToCreate(): void {
     sessionStorage.removeItem('viewWarrantyInvoiceId');
     this.router.navigate(['/warranty-invoice']);
+  }
+
+  // --- Print -------------------------------------------------------------
+
+  openPrintModal(invoiceId: number, event: Event): void {
+    event.stopPropagation();
+    this.printModalInvoiceId = invoiceId;
+  }
+
+  closePrintModal(): void {
+    this.printModalInvoiceId = null;
+  }
+
+
+  private openPdfBlob(blob: Blob): void {
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    // Deliberately not revoking the object URL immediately - the new tab
+    // still needs it to load. The browser cleans this up when the tab/
+    // blob URL's lifetime ends naturally.
+  }
+
+  printPart(id: number, event: Event): void {
+    event.stopPropagation();
+    if (this.printingId) return;
+
+    this.printingId = id;
+    this.printModalInvoiceId = null;
+    this.loader.show();
+
+    this.warrantyInvoiceService.printWarrantyInvoicePart(id).subscribe({
+      next: (blob: Blob) => {
+        this.loader.hide();
+        this.printingId = null;
+        this.openPdfBlob(blob);
+      },
+      error: (err) => {
+        this.loader.hide();
+        this.printingId = null;
+        console.error(err);
+        this.toaster.show('This invoice has no part lines to print, or the PDF could not be generated.', {
+          classname: 'bg-danger text-white',
+          delay: 4000
+        });
+      }
+    });
+  }
+
+  printLabour(id: number, event: Event): void {
+    event.stopPropagation();
+    if (this.printingId) return;
+
+    this.printingId = id;
+    this.printModalInvoiceId = null;
+    this.loader.show();
+
+    this.warrantyInvoiceService.printWarrantyInvoiceLabour(id).subscribe({
+      next: (blob: Blob) => {
+        this.loader.hide();
+        this.printingId = null;
+        this.openPdfBlob(blob);
+      },
+      error: (err) => {
+        this.loader.hide();
+        this.printingId = null;
+        console.error(err);
+        this.toaster.show('This invoice has no labour lines to print, or the PDF could not be generated.', {
+          classname: 'bg-danger text-white',
+          delay: 4000
+        });
+      }
+    });
+  }
+
+  printTag(id: number, event: Event): void {
+    event.stopPropagation();
+    if (this.printingId) return;
+
+    this.printingId = id;
+    this.printModalInvoiceId = null;
+    this.loader.show();
+
+    this.warrantyInvoiceService.printWarrantyClaimTag(id).subscribe({
+      next: (blob: Blob) => {
+        this.loader.hide();
+        this.printingId = null;
+        this.openPdfBlob(blob);
+      },
+      error: (err) => {
+        this.loader.hide();
+        this.printingId = null;
+        console.error(err);
+        this.toaster.show('This invoice has no part lines to generate a Warranty Tag for, or the PDF could not be generated.', {
+          classname: 'bg-danger text-white',
+          delay: 4000
+        });
+      }
+    });
   }
 
   deleteInvoice(id: number, event: Event): void {

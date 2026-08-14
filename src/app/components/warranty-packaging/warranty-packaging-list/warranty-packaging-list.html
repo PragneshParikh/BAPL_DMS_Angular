@@ -1,0 +1,255 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-primary bg-gradient text-white py-2">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h6 class="mb-0 text-white">
+                <i class="ri-box-3-line me-1"></i>
+                Packing Slip List
+            </h6>
+
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-light" (click)="goToCreate()" title="New Packing Slip">
+                    <i class="ri-add-line"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        <!-- Filters -->
+        <div class="row g-2 mb-3">
+
+            <div class="col-md-2">
+                <label class="form-label">Dealer</label>
+                <select class="form-select form-select-sm" [(ngModel)]="filter.dealerCode">
+                    <option [ngValue]="null">--All--</option>
+                    <option *ngFor="let dealer of dealerList" [ngValue]="dealer.dealerCode">
+                        {{ dealer.dealerName }} ({{ dealer.dealerCode }})
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Date From</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.dateFrom">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Date To</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.dateTo">
+            </div>
+
+        <div class="col-md-2" style="position:relative">
+            <label class="form-label">Invoice No</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.invoiceNo"
+                    placeholder="e.g. WR/26-27/1"
+                    (input)="onInvoiceNoInput()"
+                    (blur)="onInvoiceNoBlur()">
+                <ul *ngIf="showInvoiceNoSuggestions && invoiceNoSuggestions.length > 0"
+                    class="list-group position-absolute w-100" style="z-index:20; max-height:200px; overflow-y:auto;">
+                    <li *ngFor="let o of invoiceNoSuggestions" class="list-group-item list-group-item-action"
+                        style="cursor:pointer" (click)="selectInvoiceNo(o)">
+                        {{ o }}
+                    </li>
+                </ul>
+        </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Invoice Date From</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.invoiceDateFrom">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Invoice Date To</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.invoiceDateTo">
+            </div>
+
+        <div class="col-md-2" style="position:relative">
+            <label class="form-label">Slip No</label>
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.slipNo"
+                placeholder="e.g. CUS0435/12"
+                (input)="onSlipNoInput()"
+                (blur)="onSlipNoBlur()">
+            <ul *ngIf="showSlipNoSuggestions && slipNoSuggestions.length > 0"
+                class="list-group position-absolute w-100" style="z-index:20; max-height:200px; overflow-y:auto;">
+                <li *ngFor="let s of slipNoSuggestions" class="list-group-item list-group-item-action"
+                    style="cursor:pointer" (click)="selectSlipNo(s)">
+                    {{ s }}
+                </li>
+            </ul>
+        </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-primary btn-sm me-2" (click)="search()">
+                <i class="ri-search-line me-1"></i>
+                Search
+            </button>
+            <button class="btn btn-light btn-sm" (click)="resetFilter()">
+                <i class="ri-refresh-line me-1"></i>
+                Reset
+            </button>
+        </div>
+
+        <div class="text-muted small mb-2">Total Record(s): {{ totalCount }}</div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm table-hover align-middle mb-0" style="table-layout: fixed; min-width: 1400px;">
+               <colgroup>
+                    <col style="width:50px">   <!-- Sr.No -->
+                    <col style="width:130px">  <!-- Claim No -->
+                    <col style="width:110px">  <!-- Slip No -->
+                    <col style="width:100px">  <!-- Slip Date -->
+                    <col style="width:110px">  <!-- Invoice No -->
+                    <col style="width:100px">  <!-- Invoice Date -->
+                    <col style="width:90px">   <!-- Box Number -->
+                    <col style="width:80px">   <!-- Box Type -->
+                    <col style="width:80px">   <!-- Type -->
+                    <col>                       <!-- Parts Number -->
+                    <col style="width:60px">   <!-- Qty -->
+                    <col style="width:90px">   <!-- Dimension -->
+                    <col style="width:140px">  <!-- Action -->
+                </colgroup>
+                                <thead class="table-light">
+                    <tr>
+                        <th class="text-nowrap">Sr.No</th>
+                        
+                        <th class="text-nowrap">Claim No</th>
+                        <th class="text-nowrap">Slip No</th>
+                        <th class="text-nowrap">Slip Date</th>
+                        <th class="text-nowrap">Invoice No</th>
+                        <th class="text-nowrap">Invoice Date</th>
+                        <th class="text-nowrap">Box Number</th>
+                        <th class="text-nowrap">Box Type</th>
+                        <th class="text-nowrap">Type</th>
+                        <th class="text-nowrap">Parts Number</th>
+                        <th class="text-nowrap text-center">Qty</th>
+                        <th class="text-nowrap">Dimension</th>
+                        <th class="text-nowrap">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr *ngFor="let line of lines; let i = index">
+
+                        <td>{{ (filter.pageNumber - 1) * filter.pageSize + i + 1 }}</td>
+
+                      
+                        <td class="text-nowrap">{{ line.claimNo }}</td>
+                        <td class="text-nowrap">{{ line.slipPrefix }}{{ line.slipNo }}</td>
+                        <td class="text-nowrap">{{ line.slipDate | date:'dd-MM-yyyy' }}</td>
+                        <td class="text-nowrap">{{ line.invoicePrefix }}{{ line.invoiceNo }}</td>
+                        <td class="text-nowrap">{{ line.invoiceDate | date:'dd-MM-yyyy' }}</td>
+                        <td class="text-nowrap">{{ line.boxNumber }}</td>
+                        <td class="text-nowrap">{{ line.boxType }}</td>
+                        <td>
+                            <span class="badge" [ngClass]="line.itemType === 'Labour' ? 'bg-info' : 'bg-secondary'">
+                                {{ line.itemType }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="d-inline-block text-truncate" style="max-width: 100%;"
+                                [title]="line.partsNumber + ' - ' + line.partsDescription">
+                                {{ line.partsNumber }} - {{ line.partsDescription }}
+                            </span>
+                        </td>
+                        <td class="text-center">{{ line.qty }}</td>
+                        <td class="text-nowrap">{{ line.dimension || '-' }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-outline-primary btn-sm me-1" (click)="viewSlip(line.warrantyPackingSlipHeaderId)" title="View this slip">
+                                <i class="ri-eye-line"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm me-1" [disabled]="printingId === line.warrantyPackingSlipHeaderId"
+                                (click)="printSlip(line.warrantyPackingSlipHeaderId, $event)" title="Print this slip">
+                                <i class="ri-printer-line"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" (click)="deleteSlip(line.warrantyPackingSlipHeaderId, $event)" title="Delete this slip">
+                                <i class="ri-delete-bin-2-line"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr *ngIf="lines.length === 0">
+                        <td colspan="13" class="text-center text-muted">No Warranty Packing Slip lines found</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-2" *ngIf="totalPages > 1">
+            <span class="text-muted small">Page {{ filter.pageNumber }} of {{ totalPages }}</span>
+            <div>
+                <button class="btn btn-sm btn-light me-1" [disabled]="filter.pageNumber === 1" (click)="goToPage(filter.pageNumber - 1)">
+                    Previous
+                </button>
+                <button class="btn btn-sm btn-light" [disabled]="filter.pageNumber === totalPages" (click)="goToPage(filter.pageNumber + 1)">
+                    Next
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- VIEW MODAL - read-only, box-grouped detail of one slip -->
+<div *ngIf="viewSlipData" class="modal d-block" style="background:rgba(0,0,0,0.5)" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">
+                    Packing Slip {{ viewSlipData.slipPrefix }}{{ viewSlipData.slipNo }}
+                </h6>
+                <button type="button" class="btn-close" (click)="closeView()"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <strong>Invoice No:</strong> {{ viewSlipData.invoicePrefix }}{{ viewSlipData.invoiceNo }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Invoice Date:</strong> {{ viewSlipData.invoiceDate | date:'dd-MM-yyyy' }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Slip Date:</strong> {{ viewSlipData.slipDate | date:'dd-MM-yyyy' }}
+                    </div>
+                </div>
+
+                <div *ngFor="let box of viewSlipData.boxes" class="mb-3">
+                    <div class="fw-bold small text-muted mb-1">
+                        Box {{ box.boxNumber }} ({{ box.boxType }}) - Dimension: {{ box.length || '-' }}
+                    </div>
+                    <table class="table table-bordered table-sm align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Claim No</th>
+                                <th style="width:80px">Type</th>
+                                <th>Part No</th>
+                                <th>Description</th>
+                                <th class="text-center">Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let line of box.lines">
+                                <td>{{ line.claimNo }}</td>
+                                <td>
+                                    <span class="badge" [ngClass]="line.itemType === 'Labour' ? 'bg-info' : 'bg-secondary'">
+                                        {{ line.itemType }}
+                                    </span>
+                                </td>
+                                <td>{{ line.partCode }}</td>
+                                <td>{{ line.partDescription }}</td>
+                                <td class="text-center">{{ line.qty }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light btn-sm" (click)="closeView()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

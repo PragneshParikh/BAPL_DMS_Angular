@@ -43,4 +43,22 @@ export class WarrantyOrderService {
   printWarrantyOrder(id: number): Observable<Blob> {
     return this.httpClient.get(`${this.baseUrl}/WarrantyOrder/PrintWarrantyOrder/${id}`, { responseType: 'blob' });
   }
+
+  searchBatchNos(dealerCode: string, searchText: string): Observable<string[]> {
+    return this.httpClient.get<string[]>(`${this.baseUrl}/WarrantyOrder/SearchBatchNos`, {
+      params: { dealerCode, searchText }
+    });
+  }
+
+  searchOrderNos(dealerCode: string, searchText: string): Observable<string[]> {
+    return this.httpClient.get<string[]>(`${this.baseUrl}/WarrantyOrder/SearchOrderNos`, {
+      params: { dealerCode, searchText }
+    });
+  }
+
+  getDistinctOrderLocations(dealerCode: string): Observable<any[]> {
+    return this.httpClient.get<any[]>(`${this.baseUrl}/WarrantyOrder/GetDistinctOrderLocations`, {
+      params: { dealerCode }
+    });
+  }
 }

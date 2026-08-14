@@ -44,4 +44,46 @@ export class WarrantyInvoiceService {
   getWarrantyOrderById(id: number): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/WarrantyOrder/GetWarrantyOrderById/${id}`);
   }
+
+    printWarrantyInvoicePart(id: number): Observable<Blob> {
+    return this.httpClient.get(`${this.baseUrl}/WarrantyInvoice/GenerateWarrantyInvoicePartPdf/${id}`, {
+      responseType: 'blob'
+    });
+  }
+  
+  printWarrantyInvoiceLabour(id: number): Observable<Blob> {
+    return this.httpClient.get(`${this.baseUrl}/WarrantyInvoice/GenerateWarrantyInvoiceLabourPdf/${id}`, {
+      responseType: 'blob'
+    });
+  }
+  
+  printWarrantyClaimTag(id: number): Observable<Blob> {
+    return this.httpClient.get(`${this.baseUrl}/WarrantyInvoice/GenerateWarrantyClaimTagPdf/${id}`, {
+      responseType: 'blob'
+    });
+  }
+
+    searchInvoiceBatchNos(dealerCode: string, searchText: string): Observable<string[]> {
+    return this.httpClient.get<string[]>(`${this.baseUrl}/WarrantyInvoice/SearchInvoiceBatchNos`, {
+      params: { dealerCode, searchText }
+    });
+  }
+  
+  searchInvoiceNos(dealerCode: string, searchText: string): Observable<string[]> {
+    return this.httpClient.get<string[]>(`${this.baseUrl}/WarrantyInvoice/SearchInvoiceNos`, {
+      params: { dealerCode, searchText }
+    });
+  }
+  
+  getDistinctInvoiceLocations(dealerCode: string): Observable<any[]> {
+    return this.httpClient.get<any[]>(`${this.baseUrl}/WarrantyInvoice/GetDistinctInvoiceLocations`, {
+      params: { dealerCode }
+    });
+  }
+
+  searchClaimInvoiceNos(dealerCode: string, searchText: string): Observable<string[]> {
+    return this.httpClient.get<string[]>(`${this.baseUrl}/WarrantyInvoice/SearchClaimInvoiceNos`, {
+      params: { dealerCode, searchText }
+    });
+}
 }

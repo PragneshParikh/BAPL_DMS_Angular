@@ -93,6 +93,8 @@ import { WarrantyInvoice } from './components/warranty-invoice/warranty-invoice'
 import { WarrantyInvoiceList } from './components/warranty-invoice/warranty-invoice-list/warranty-invoice-list';
 import { UwLineItem } from './components/uw-line-items/uw-line-items';
 import { WarrantyClaimList } from './components/warranty-job-card-claim/warranty-claim-list/warranty-claim-list';
+import { WarrantyPackaging } from './components/warranty-packaging/warranty-packaging';
+import { WarrantyPackagingList } from './components/warranty-packaging/warranty-packaging-list/warranty-packaging-list';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
@@ -274,7 +276,10 @@ export const routes: Routes = [
       { path: 'warranty-order-list', component: WarrantyOrderList, data: [112] },
       { path: 'warranty-invoice', component: WarrantyInvoice, data: [113] }, 
       { path: 'warranty-invoice-list', component: WarrantyInvoiceList, data: [113] },
-      { path: 'uw-line-item', component: UwLineItem, data: [115] }
+      { path: 'uw-line-item', component: UwLineItem, data: [115] },
+      { path: 'warranty-packaging', component: WarrantyPackaging, data: [116] },
+       {path : 'warranty-packaging-list', component: WarrantyPackagingList, data: [116]}
+
     ]
   },
   { path: '**', component: WorkInProgress }

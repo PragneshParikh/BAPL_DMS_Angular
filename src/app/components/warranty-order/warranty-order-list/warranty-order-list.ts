@@ -6,7 +6,6 @@ import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { WarrantyOrderService } from '../../../core/services/warranty-order-service';
 import { LedgerMasterService } from '../../../core/services/ledger-master';
-import { LocationMasterService } from '../../../core/services/location-master-service';
 import { StorageService } from '../../../core/services/storage';
 
 @Component({
@@ -33,6 +32,17 @@ export class WarrantyOrderList implements OnInit {
   claimsByOrderId: { [orderId: number]: any[] } = {};
   loadingDetailsForOrderId: number | null = null;
 
+  // Batch No / Order No typeahead suggestions, per explicit request.
+  // Separate state for each field since both can be open independently
+  // (though in practice a user would only focus one at a time).
+  batchNoSuggestions: string[] = [];
+  showBatchNoSuggestions: boolean = false;
+  private batchNoDebounceHandle: any = null;
+
+  orderNoSuggestions: string[] = [];
+  showOrderNoSuggestions: boolean = false;
+  private orderNoDebounceHandle: any = null;
+
   filter: any = {
     dateFrom: '',
     dateTo: '',
@@ -52,7 +62,6 @@ export class WarrantyOrderList implements OnInit {
     private toaster: ToastService,
     private storageService: StorageService,
     private ledgerService: LedgerMasterService,
-    private locationService: LocationMasterService,
     private warrantyOrderService: WarrantyOrderService
   ) { }
 
@@ -69,12 +78,84 @@ export class WarrantyOrderList implements OnInit {
     });
   }
 
+  // Now loads only the locations actually used in this dealer's saved
+  // orders, per explicit request - replaces the earlier dealer-wide
+  // getLocationDropdownByDealerCode lookup, matching the same reasoning
+  // already applied on warranty-order.ts's own form (avoiding the
+  // confirmed bug where a valid location was excluded just because it
+  // wasn't tagged locareaidno=2 in the dealer-wide list).
   loadLocations(): void {
     const dealerCode = this.storageService.getDealerCode();
-    this.locationService.getLocationDropdownByDealerCode(dealerCode).subscribe({
-      next: (res: any) => this.locationList = res,
+    this.warrantyOrderService.getDistinctOrderLocations(dealerCode).subscribe({
+      next: (res: any) => this.locationList = res || [],
       error: (err) => console.error(err)
     });
+  }
+
+  // --- Batch No typeahead --------------------------------------------
+  onBatchNoInput(): void {
+    if (this.batchNoDebounceHandle) clearTimeout(this.batchNoDebounceHandle);
+
+    const text = (this.filter.batchNo || '').trim();
+    if (!text) {
+      this.batchNoSuggestions = [];
+      this.showBatchNoSuggestions = false;
+      return;
+    }
+
+    this.batchNoDebounceHandle = setTimeout(() => {
+      const dealerCode = this.storageService.getDealerCode();
+      this.warrantyOrderService.searchBatchNos(dealerCode, text).subscribe({
+        next: (res: string[]) => {
+          this.batchNoSuggestions = res || [];
+          this.showBatchNoSuggestions = true;
+        },
+        error: (err) => console.error('Batch No search failed:', err)
+      });
+    }, 300);
+  }
+
+  selectBatchNo(value: string): void {
+    this.filter.batchNo = value;
+    this.showBatchNoSuggestions = false;
+    this.batchNoSuggestions = [];
+  }
+
+  onBatchNoBlur(): void {
+    setTimeout(() => { this.showBatchNoSuggestions = false; }, 150);
+  }
+
+  // --- Order No typeahead ---------------------------------------------
+  onOrderNoInput(): void {
+    if (this.orderNoDebounceHandle) clearTimeout(this.orderNoDebounceHandle);
+
+    const text = (this.filter.orderNo || '').trim();
+    if (!text) {
+      this.orderNoSuggestions = [];
+      this.showOrderNoSuggestions = false;
+      return;
+    }
+
+    this.orderNoDebounceHandle = setTimeout(() => {
+      const dealerCode = this.storageService.getDealerCode();
+      this.warrantyOrderService.searchOrderNos(dealerCode, text).subscribe({
+        next: (res: string[]) => {
+          this.orderNoSuggestions = res || [];
+          this.showOrderNoSuggestions = true;
+        },
+        error: (err) => console.error('Order No search failed:', err)
+      });
+    }, 300);
+  }
+
+  selectOrderNo(value: string): void {
+    this.filter.orderNo = value;
+    this.showOrderNoSuggestions = false;
+    this.orderNoSuggestions = [];
+  }
+
+  onOrderNoBlur(): void {
+    setTimeout(() => { this.showOrderNoSuggestions = false; }, 150);
   }
 
   search(): void {
@@ -114,6 +195,10 @@ export class WarrantyOrderList implements OnInit {
       location: null, claimType: '', supplierId: null,
       isApproved: true, pageNumber: 1, pageSize: 25
     };
+    this.batchNoSuggestions = [];
+    this.showBatchNoSuggestions = false;
+    this.orderNoSuggestions = [];
+    this.showOrderNoSuggestions = false;
     this.search();
   }
 
