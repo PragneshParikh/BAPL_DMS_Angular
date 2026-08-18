@@ -374,43 +374,36 @@
     <div class="modal-body">
 
         <!-- Search Filters -->
-        <div class="row g-2 mb-3">
+        <div class="row g-2 mb-3 align-items-end">
 
             <div class="col-md-2">
-                <label>Job No</label>
-                <input type="text" class="form-control form-control-sm">
+                <label class="form-label">Job No</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="jobSearch.jobNo">
             </div>
 
             <div class="col-md-2">
-                <label>RBill Date From</label>
+                <label class="form-label">RBill Date From</label>
                 <input type="date" class="form-control form-control-sm" [(ngModel)]="jobSearch.rBillfromDate">
             </div>
 
             <div class="col-md-2">
-                <label>RBill Date To</label>
+                <label class="form-label">RBill Date To</label>
                 <input type="date" class="form-control form-control-sm" [(ngModel)]="jobSearch.rBilltoDate">
             </div>
 
-            <div class="col-md-2">
-                <label>Location</label>
-                <select class="form-select form-select-sm" [(ngModel)]="selectedLocationId">
-
-                    <option [ngValue]="null">--Select--</option>
-
-                    <option *ngFor="let location of locationList" [ngValue]="location.loccode">
-
-                        {{ location.locname }}
-
-                    </option>
-
-                </select>
+            <div class="col-md-4">
+                <label class="form-label">Location</label>
+            <select class="form-select form-select-sm" [(ngModel)]="selectedLocationId">
+                <option [ngValue]="null">--Select--</option>
+                <option *ngFor="let location of locationList" [ngValue]="location.loccode">
+                    {{ location.locname }}{{ location.loccode ? ' (' + location.loccode + ')' : '' }}{{ location.areaName ? ' [' + location.areaName + ']' : '' }}
+                </option>
+            </select>
             </div>
 
-            <div class="col-md-2 d-flex align-items-end">
-                <button class="btn btn-primary btn-sm" (click)="loadJobCarDetails()">
-
-                    <i class="ri-search-line me-1"></i>
-
+            <div class="col-md-2">
+                <button class="btn btn-primary btn-sm w-100" (click)="loadJobCarDetails()">
+                    <i class="ri-search-line me-1"></i>Search
                 </button>
             </div>
 

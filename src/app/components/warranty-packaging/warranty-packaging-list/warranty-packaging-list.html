@@ -131,8 +131,8 @@
                 </thead>
 
                 <tbody>
-                    <tr *ngFor="let line of lines; let i = index">
-
+                   <tr *ngFor="let line of lines; let i = index" (dblclick)="view(line.warrantyPackingSlipHeaderId)" style="cursor:pointer"
+                        title="Double-click to open this slip">
                         <td>{{ (filter.pageNumber - 1) * filter.pageSize + i + 1 }}</td>
 
                       

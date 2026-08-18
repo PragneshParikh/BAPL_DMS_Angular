@@ -222,22 +222,30 @@ export class RepairBill implements OnInit {
       this.saveRepairBill();
     }
   }
-  loadPrefix(): void {
-    this.loader.show();
-    const dealerCode = this.storageService.getDealerCode();
-    const module = 'Repair_bill';
-    this.prefixService.getPrefixByDealerByModule(dealerCode, module).subscribe({
-      next: (res: string) => {
-        this.loader.hide();
-        this.RepairBillprefix = res;
-        this.billNo = Number(res.split('/').pop());
-      }, error: (err) => {
-        this.loader.hide();
-        console.error(err);
+    loadPrefix(): void {
+      this.loader.show();
 
-      }
-    })
-  }
+      const dealerCode = this.storageService.getDealerCode();
+      const module = 'Repair_bill';
+
+      this.prefixService.getPrefixByDealerByModule(dealerCode, module).subscribe({
+        next: (res: string) => {
+          this.loader.hide();
+
+          const parts = res.split('/');
+
+          // Last part is the bill number
+          this.billNo = Number(parts.pop());
+
+          // Remaining part is the actual prefix
+          this.RepairBillprefix = parts.join('/') + '/';
+        },
+        error: (err) => {
+          this.loader.hide();
+          console.error(err);
+        }
+      });
+    }
 
   loadInsuranceName(): void {
 
@@ -1379,7 +1387,8 @@ export class RepairBill implements OnInit {
 
         // Header Details
         this.selectedLocation = header.locationCode;
-        this.RepairBillprefix = header.prefix;
+        this.RepairBillprefix =this.normalizeRepairBillPrefix(header.prefix);
+        this.billNo = header.billNo;
         this.billNo = header.billNo;
         this.billType = header.billType;
         this.selectedJobCard.jobCardCustomer.customerLedgerId = header.customerLedgerId;
@@ -1772,6 +1781,14 @@ export class RepairBill implements OnInit {
     const day = String(date.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
+  }
+
+    private normalizeRepairBillPrefix(prefix: string): string {
+    if (!prefix) {
+      return prefix;
+    }
+
+    return prefix.replace(/\d+$/, '');
   }
 
 }

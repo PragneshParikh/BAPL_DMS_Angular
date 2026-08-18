@@ -9,12 +9,18 @@ export class WarrantyPackingSlipService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getPackableLines(warrantyInvoiceHeaderId: number): Observable<any> {
-    return this.httpClient.get(`${this.baseUrl}/WarrantyPacking/GetPackableLines/${warrantyInvoiceHeaderId}`);
+  getPackableLines(warrantyInvoiceHeaderId: number, excludePackingSlipId?: number): Observable<any> {
+    let url = `${this.baseUrl}/WarrantyPacking/GetPackableLines/${warrantyInvoiceHeaderId}`;
+    if (excludePackingSlipId) url += `?excludePackingSlipId=${excludePackingSlipId}`;
+    return this.httpClient.get(url);
   }
 
   insertWarrantyPackingSlip(model: any): Observable<any> {
     return this.httpClient.post(`${this.baseUrl}/WarrantyPacking/InsertWarrantyPackingSlip`, model);
+  }
+
+  updateWarrantyPackingSlip(model: any): Observable<any> {
+    return this.httpClient.put(`${this.baseUrl}/WarrantyPacking/UpdateWarrantyPackingSlip`, model);
   }
 
   searchWarrantyPackingSlips(filter: any): Observable<any> {
@@ -29,25 +35,25 @@ export class WarrantyPackingSlipService {
     return this.httpClient.delete(`${this.baseUrl}/WarrantyPacking/DeleteWarrantyPackingSlip/${id}`);
   }
 
-    searchWarrantyPackingSlipLines(filter: any): Observable<any> {
-      return this.httpClient.post(`${this.baseUrl}/WarrantyPacking/SearchWarrantyPackingSlipLines`, filter)   
+  searchWarrantyPackingSlipLines(filter: any): Observable<any> {
+    return this.httpClient.post(`${this.baseUrl}/WarrantyPacking/SearchWarrantyPackingSlipLines`, filter);
   }
 
-    searchPackingSlipNos(dealerCode: string | null, searchText: string): Observable<string[]> {
-      return this.httpClient.get<string[]>(`${this.baseUrl}/WarrantyPacking/SearchPackingSlipNos`, {
-        params: dealerCode ? { dealerCode, searchText } : { searchText }
-      });
+  searchPackingSlipNos(dealerCode: string | null, searchText: string): Observable<string[]> {
+    return this.httpClient.get<string[]>(`${this.baseUrl}/WarrantyPacking/SearchPackingSlipNos`, {
+      params: dealerCode ? { dealerCode, searchText } : { searchText }
+    });
   }
 
   searchPackingInvoiceNos(dealerCode: string | null, searchText: string): Observable<string[]> {
-      return this.httpClient.get<string[]>(`${this.baseUrl}/WarrantyPacking/SearchPackingInvoiceNos`, {
-        params: dealerCode ? { dealerCode, searchText } : { searchText }
-      });
+    return this.httpClient.get<string[]>(`${this.baseUrl}/WarrantyPacking/SearchPackingInvoiceNos`, {
+      params: dealerCode ? { dealerCode, searchText } : { searchText }
+    });
   }
 
-    printWarrantyPackingSlip(id: number): Observable<Blob> {
-      return this.httpClient.get(`${this.baseUrl}/WarrantyPacking/GenerateWarrantyPackingSlipPdf/${id}`, {
-        responseType: 'blob'
-      });
+  printWarrantyPackingSlip(id: number): Observable<Blob> {
+    return this.httpClient.get(`${this.baseUrl}/WarrantyPacking/GenerateWarrantyPackingSlipPdf/${id}`, {
+      responseType: 'blob'
+    });
   }
 }

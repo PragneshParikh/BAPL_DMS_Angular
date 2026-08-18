@@ -95,6 +95,7 @@ import { UwLineItem } from './components/uw-line-items/uw-line-items';
 import { WarrantyClaimList } from './components/warranty-job-card-claim/warranty-claim-list/warranty-claim-list';
 import { WarrantyPackaging } from './components/warranty-packaging/warranty-packaging';
 import { WarrantyPackagingList } from './components/warranty-packaging/warranty-packaging-list/warranty-packaging-list';
+import { DispatchMaster } from './components/dispatch-master/dispatch-master';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
@@ -278,7 +279,8 @@ export const routes: Routes = [
       { path: 'warranty-invoice-list', component: WarrantyInvoiceList, data: [113] },
       { path: 'uw-line-item', component: UwLineItem, data: [115] },
       { path: 'warranty-packaging', component: WarrantyPackaging, data: [116] },
-       {path : 'warranty-packaging-list', component: WarrantyPackagingList, data: [116]}
+      { path: 'warranty-packaging-list', component: WarrantyPackagingList, data: [116]},
+      { path: 'dispatch-master', component : DispatchMaster, data: [117]}
 
     ]
   },

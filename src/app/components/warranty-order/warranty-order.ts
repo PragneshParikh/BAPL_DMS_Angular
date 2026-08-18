@@ -821,12 +821,19 @@ export class WarrantyOrder implements OnInit {
         // Only fires when this Save click just created a brand-new order (i.e.
         // the user checked a claim's box and clicked Save for the first time) -
         // fire-and-forget, doesn't block navigation either way.
-        if (isNewOrderInsert) {
-          const newOrderId = res?.orderId ?? this.orderId;
-          if (newOrderId) {
-            this.autoCreateInvoiceForOrder(Number(newOrderId));
+        const orderJustBecameApproved = savingMainOrder && !this.wasApprovedOnLoad && this.isApproved;
+
+        if (orderJustBecameApproved) {
+          const savedOrderId = res?.orderId ?? this.orderId;
+          if (savedOrderId) {
+            this.autoCreateInvoiceForOrder(Number(savedOrderId));
           }
         }
+
+// Prevent re-firing invoice creation on a second Save within the same
+// session (e.g. navigateAfter=false keeps the component alive without a
+// fresh GET) - the unapproved -> approved transition only happens once.
+this.wasApprovedOnLoad = this.isApproved;
 
         if (navigateAfter) {
           this.router.navigate(['/warranty-order-list']);

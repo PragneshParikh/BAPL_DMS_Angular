@@ -1,0 +1,154 @@
+<!-- misc-master/dispatch-master.html -->
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">Misc. Master</h4>
+</div>
+
+<div class="row" id="dispatchMaster">
+    <div class="col-lg-12">
+        <div class="card">
+
+            <div class="card-header">
+                <div class="d-flex justify-content-end align-items-center">
+                    <button class="btn btn-success btn-sm me-2" [ngbTooltip]="'Export to Excel'"
+                        (click)="downloadExcel()">
+                        <i class="ri-download-2-line"></i>
+                    </button>
+                    <button class="btn btn-primary btn-sm" [ngbTooltip]="'Add New'" (click)="openAddModal()">
+                        <i class="ri-add-line"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Select Master Type</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="selectedMasterType">
+                            <option *ngFor="let type of masterTypeList" [value]="type">{{ type }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Name</label>
+                        <input class="form-control form-control-sm" [(ngModel)]="searchName"
+                            (keyup.enter)="onSearch()" placeholder="Search by name" />
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Per Page Records</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="perPageRecords">
+                            <option [value]="10">10</option>
+                            <option [value]="25">25</option>
+                            <option [value]="50">50</option>
+                            <option [value]="100">100</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-primary btn-sm w-100" (click)="onSearch()">
+                            <i class="ri-search-line me-1"></i> Search
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-sm dispatch-table" style="font-size: 13px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">Sr.No</th>
+                                <th>Master Type</th>
+                                <th>Name</th>
+                                <th style="width: 90px;" [ngbTooltip]="'Click to toggle status'">Active</th>
+                                <th style="width: 110px;">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @for (item of dispatchList; track item.id) {
+                            <tr (dblclick)="openEditModal(item)">
+                                <td>{{ item.srNo }}</td>
+                                <td>{{ item.masterType }}</td>
+                                <td>{{ item.masterName }}</td>
+                                <td class="text-center">
+                                    <i class="ri-checkbox-circle-fill text-success toggle-icon"
+                                        *ngIf="item.isActive"
+                                        [ngbTooltip]="'Click to deactivate'"
+                                        (click)="toggleActive(item, $event)"></i>
+                                    <i class="ri-close-circle-fill text-danger toggle-icon"
+                                        *ngIf="!item.isActive"
+                                        [ngbTooltip]="'Click to activate'"
+                                        (click)="toggleActive(item, $event)"></i>
+                                </td>
+                                <td>
+                                    <button class="btn btn-outline-primary btn-sm me-1" [ngbTooltip]="'Edit'"
+                                        (click)="openEditModal(item); $event.stopPropagation()">
+                                        <i class="ri-pencil-line"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" [ngbTooltip]="'Delete'"
+                                        (click)="deleteRecord(item, $event)">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            }
+                            <tr *ngIf="dispatchList.length === 0">
+                                <td colspan="5" class="text-center">No Data Available</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col-sm-12 col-md-12">
+                    <div class="text-md-right float-md-end gridjs-pagination">
+                        <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="perPageRecords"
+                            (pageChange)="onPageChange($event)" [maxSize]="5" [boundaryLinks]="true">
+                        </ngb-pagination>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add / Edit Modal -->
+<ng-template #dispatchModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title">
+            <i class="ri-truck-line me-1"></i>
+            {{ isEditMode ? 'Edit' : 'Add' }} Dispatch Master
+        </h5>
+        <button class="btn-close btn-sm" (click)="modal.dismiss()"></button>
+    </div>
+
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label class="form-label">Master Type</label>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedRecord.masterType">
+                    <option *ngFor="let type of masterTypeList" [value]="type">{{ type }}</option>
+                </select>
+            </div>
+
+            <div class="col-md-12 mb-3">
+                <label class="form-label">Name</label>
+                <input class="form-control form-control-sm" [(ngModel)]="selectedRecord.masterName"
+                    placeholder="Enter name" />
+            </div>
+
+            <div class="col-md-12">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch"
+                        [(ngModel)]="selectedRecord.isActive" id="activeSwitch">
+                    <label class="form-check-label" for="activeSwitch">Active</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary btn-sm" (click)="saveRecord()">Save</button>
+        <button class="btn btn-danger btn-sm" (click)="modal.close()">Close</button>
+    </div>
+</ng-template>

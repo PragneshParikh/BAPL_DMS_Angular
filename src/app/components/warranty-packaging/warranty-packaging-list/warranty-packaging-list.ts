@@ -42,7 +42,7 @@ export class WarrantyPackagingList implements OnInit {
 
   filter: any = {
     dealerCode: null,
-    dateFrom: '',       // Slip Date range
+    dateFrom: '',
     dateTo: '',
     invoiceNo: '',
     invoiceDateFrom: '',
@@ -176,7 +176,17 @@ export class WarrantyPackagingList implements OnInit {
     this.search();
   }
 
+  // Same handoff pattern as WarrantyInvoiceList's own view()/goToCreate():
+  // view() sets the id and hands off to the main window's edit form;
+  // goToCreate() clears any leftover key so a stale id can't leak into a
+  // fresh "new slip" session.
+  view(id: number): void {
+    sessionStorage.setItem('viewWarrantyPackingSlipId', String(id));
+    this.router.navigate(['/warranty-packaging']);
+  }
+
   goToCreate(): void {
+    sessionStorage.removeItem('viewWarrantyPackingSlipId');
     this.router.navigate(['/warranty-packaging']);
   }
 
@@ -202,10 +212,6 @@ export class WarrantyPackagingList implements OnInit {
     this.viewingId = null;
   }
 
-  // Deletes the WHOLE slip (a slip can span many rows in this flattened
-  // view), then re-runs search() rather than locally removing rows -
-  // simpler and correct given pagination/totals span multiple rows per
-  // slip here.
   deleteSlip(warrantyPackingSlipHeaderId: number, event: Event): void {
     event.stopPropagation();
 
@@ -233,94 +239,93 @@ export class WarrantyPackagingList implements OnInit {
       }
     });
   }
-  // --- Invoice No typeahead ------------------------------------------
-    onInvoiceNoInput(): void {
-        if (this.invoiceNoDebounceHandle) clearTimeout(this.invoiceNoDebounceHandle);
 
-        const text = (this.filter.invoiceNo || '').trim();
-        if (!text) {
-          this.invoiceNoSuggestions = [];
-          this.showInvoiceNoSuggestions = false;
-          return;
-        }
+  onInvoiceNoInput(): void {
+    if (this.invoiceNoDebounceHandle) clearTimeout(this.invoiceNoDebounceHandle);
 
-        this.invoiceNoDebounceHandle = setTimeout(() => {
-          this.warrantyPackingService.searchPackingInvoiceNos(this.filter.dealerCode, text).subscribe({
-            next: (res: string[]) => {
-              this.invoiceNoSuggestions = res || [];
-              this.showInvoiceNoSuggestions = true;
-            },
-            error: (err) => console.error('Invoice No search failed:', err)
-          });
-        }, 300);
+    const text = (this.filter.invoiceNo || '').trim();
+    if (!text) {
+      this.invoiceNoSuggestions = [];
+      this.showInvoiceNoSuggestions = false;
+      return;
     }
 
-    selectInvoiceNo(value: string): void {
-        this.filter.invoiceNo = value;
-        this.showInvoiceNoSuggestions = false;
-        this.invoiceNoSuggestions = [];
+    this.invoiceNoDebounceHandle = setTimeout(() => {
+      this.warrantyPackingService.searchPackingInvoiceNos(this.filter.dealerCode, text).subscribe({
+        next: (res: string[]) => {
+          this.invoiceNoSuggestions = res || [];
+          this.showInvoiceNoSuggestions = true;
+        },
+        error: (err) => console.error('Invoice No search failed:', err)
+      });
+    }, 300);
+  }
+
+  selectInvoiceNo(value: string): void {
+    this.filter.invoiceNo = value;
+    this.showInvoiceNoSuggestions = false;
+    this.invoiceNoSuggestions = [];
+  }
+
+  onInvoiceNoBlur(): void {
+    setTimeout(() => { this.showInvoiceNoSuggestions = false; }, 150);
+  }
+
+  onSlipNoInput(): void {
+    if (this.slipNoDebounceHandle) clearTimeout(this.slipNoDebounceHandle);
+
+    const text = (this.filter.slipNo || '').trim();
+    if (!text) {
+      this.slipNoSuggestions = [];
+      this.showSlipNoSuggestions = false;
+      return;
     }
 
-    onInvoiceNoBlur(): void {
-        setTimeout(() => { this.showInvoiceNoSuggestions = false; }, 150);
-    }
+    this.slipNoDebounceHandle = setTimeout(() => {
+      this.warrantyPackingService.searchPackingSlipNos(this.filter.dealerCode, text).subscribe({
+        next: (res: string[]) => {
+          this.slipNoSuggestions = res || [];
+          this.showSlipNoSuggestions = true;
+        },
+        error: (err) => console.error('Slip No search failed:', err)
+      });
+    }, 300);
+  }
 
-    // --- Slip No typeahead -----------------------------------------------
-    onSlipNoInput(): void {
-        if (this.slipNoDebounceHandle) clearTimeout(this.slipNoDebounceHandle);
+  selectSlipNo(value: string): void {
+    this.filter.slipNo = value;
+    this.showSlipNoSuggestions = false;
+    this.slipNoSuggestions = [];
+  }
 
-        const text = (this.filter.slipNo || '').trim();
-        if (!text) {
-          this.slipNoSuggestions = [];
-          this.showSlipNoSuggestions = false;
-          return;
-        }
+  onSlipNoBlur(): void {
+    setTimeout(() => { this.showSlipNoSuggestions = false; }, 150);
+  }
 
-        this.slipNoDebounceHandle = setTimeout(() => {
-          this.warrantyPackingService.searchPackingSlipNos(this.filter.dealerCode, text).subscribe({
-            next: (res: string[]) => {
-              this.slipNoSuggestions = res || [];
-              this.showSlipNoSuggestions = true;
-            },
-            error: (err) => console.error('Slip No search failed:', err)
-          });
-        }, 300);
-    }
-    
-    private openPdfBlob(blob: Blob): void {
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-    }
+  private openPdfBlob(blob: Blob): void {
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  }
 
-    printSlip(warrantyPackingSlipHeaderId: number, event: Event): void {
-        event.stopPropagation();
-        if (this.printingId) return;
+  printSlip(warrantyPackingSlipHeaderId: number, event: Event): void {
+    event.stopPropagation();
+    if (this.printingId) return;
 
-        this.printingId = warrantyPackingSlipHeaderId;
-        this.loader.show();
+    this.printingId = warrantyPackingSlipHeaderId;
+    this.loader.show();
 
-        this.warrantyPackingService.printWarrantyPackingSlip(warrantyPackingSlipHeaderId).subscribe({
-          next: (blob: Blob) => {
-            this.loader.hide();
-            this.printingId = null;
-            this.openPdfBlob(blob);
-          },
-          error: (err) => {
-            this.loader.hide();
-            this.printingId = null;
-            console.error(err);
-            this.toaster.show('Failed to generate the Packing Slip PDF.', { classname: 'bg-danger text-white', delay: 3000 });
-          }
-        });
-    }
-
-    selectSlipNo(value: string): void {
-        this.filter.slipNo = value;
-        this.showSlipNoSuggestions = false;
-        this.slipNoSuggestions = [];
-    }
-
-    onSlipNoBlur(): void {
-        setTimeout(() => { this.showSlipNoSuggestions = false; }, 150);
-    }
+    this.warrantyPackingService.printWarrantyPackingSlip(warrantyPackingSlipHeaderId).subscribe({
+      next: (blob: Blob) => {
+        this.loader.hide();
+        this.printingId = null;
+        this.openPdfBlob(blob);
+      },
+      error: (err) => {
+        this.loader.hide();
+        this.printingId = null;
+        console.error(err);
+        this.toaster.show('Failed to generate the Packing Slip PDF.', { classname: 'bg-danger text-white', delay: 3000 });
+      }
+    });
+  }
 }

@@ -12,9 +12,8 @@ import { JobCardService } from '../../core/services/job-card-service';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { WarrantyJCClaimService } from '../../core/services/warranty-jcclaim-service';
 import { WarrantyOrderService } from '../../core/services/warranty-order-service';
-// ASSUMPTION: adjust the import path/class name if your Dealer service
-// lives elsewhere - this matches the DealerService file you shared.
 import { DealerService } from '../../core/services/dealer-service';
+import { locationAreaMaster } from '../../constant';
 
 @Component({
   selector: 'app-warranty-job-card-claim',
@@ -34,11 +33,9 @@ export class WarrantyJobCardClaim implements OnInit {
   claimAccount: string = 'Warranty Claim';
   partsGridData: any[] = [];
   labourGridData: any[] = [];
-
-  // Dealer dropdown - lets this claim be filed against ANY dealer, not
-  // just the currently logged-in one (e.g. OEM/support staff filing on a
-  // dealer's behalf). Everything below that used to read
-  // storageService.getDealerCode() directly now reads this instead.
+  claimLocationName: string | null = null;
+  claimLocationCode: string | null = null;
+  claimLocationArea: string | null = null;
   dealerList: any[] = [];
   selectedDealerCode: string | null = null;
 
@@ -55,7 +52,7 @@ export class WarrantyJobCardClaim implements OnInit {
   isViewMode: boolean = false;
 
   jobSearch: any = {
-    jobNo: 0,
+    jobNo: null,
     rBillfromDate: '',
     rBilltoDate: '',
     locationId: ''
@@ -63,9 +60,13 @@ export class WarrantyJobCardClaim implements OnInit {
   claimNo: number = 0;
   fromDate: string;
   toDate: string;
-  locationList: any[] = [];
+locationList: { locname: string; loccode: string | null; areaName: string | null }[] = [];
+  private allLocations: any[] = [];
+  private lastRawJobCards: any[] = [];
+
   dealerObservation: string;
   rootCauseAnalysis: string;
+
   constructor(
     private loader: LoaderService,
     private modalService: NgbModal,
@@ -80,11 +81,11 @@ export class WarrantyJobCardClaim implements OnInit {
     private dealerService: DealerService,
     private router: Router
   ) { }
+
   ngOnInit(): void {
 
     const today = new Date();
 
-    // Current month first date
     const firstDayOfMonth = new Date(
       today.getFullYear(),
       today.getMonth(),
@@ -101,23 +102,26 @@ export class WarrantyJobCardClaim implements OnInit {
 
     this.jobSearch.rBillfromDate = this.formatDate(firstDayOfMonth);
     this.jobSearch.rBilltoDate = this.formatDate(today);
-
-    // loadPrefix()/loadlocation() are no longer called directly here -
-    // loadDealers() picks a default dealer and then triggers both via
-    // onDealerChange(), so they always run scoped to whichever dealer
-    // ends up selected.
-    this.loadDealers();
-    this.loadSuplier();
-    // this.loadJobCarDetails();
     const viewClaimIdRaw = sessionStorage.getItem('viewWarrantyJCClaimId');
     if (viewClaimIdRaw) {
       sessionStorage.removeItem('viewWarrantyJCClaimId');
+      this.isViewMode = true;
       this.viewClaimId = Number(viewClaimIdRaw);
       this.loadClaimForView(this.viewClaimId);
     }
 
+    this.loadDealers();
+    this.loadSuplier();
+    // this.loadJobCarDetails();
+
   }
 
+    private get workshopAreaId(): number | null {
+      const match = locationAreaMaster.find(
+        (a: any) => (a.name || '').toString().trim().toLowerCase() === 'workshop'
+      );
+      return match ? match.id : null;
+  }
   // Populates the Dealer dropdown, then defaults the selection to the
   // logged-in user's own dealer - the dropdown lets them override it.
   loadDealers(): void {
@@ -125,17 +129,16 @@ export class WarrantyJobCardClaim implements OnInit {
     this.dealerService.getDealerDropdown(null).subscribe({
       next: (res: any) => {
         this.loader.hide();
-        // GetDealerDropdown wraps the array in { success, data } - unwrap
-        // it here, rather than assuming res itself is the list (this was
-        // the actual cause of the dropdown appearing empty earlier).
         this.dealerList = res?.data || [];
 
-        const currentDealerCode = this.storageService.getDealerCode();
-        if (currentDealerCode && this.dealerList.some((d: any) => d.dealerCode === currentDealerCode)) {
-          this.selectedDealerCode = currentDealerCode;
+        // FIX: while viewing an existing claim, loadClaimForView() owns
+        // selectedDealerCode - defaulting it here would overwrite the
+        // correct values the moment this response lands.
+        if (this.isViewMode) {
+          return;
         }
 
-        this.onDealerChange();
+        this.applyDefaultDealerSelection();
       },
       error: (err) => {
         this.loader.hide();
@@ -145,11 +148,18 @@ export class WarrantyJobCardClaim implements OnInit {
     });
   }
 
-  // Re-runs everything that's scoped to a single dealer whenever the
-  // selection changes - Claim Prefix and Location list. Skips clearing
-  // the selected job while in view mode, so this doesn't race with
-  // loadClaimForView() wiping out the claim that was just loaded for
-  // viewing (both fire from ngOnInit around the same time).
+  private applyDefaultDealerSelection(): void {
+    const currentDealerCode = this.storageService.getDealerCode();
+    if (currentDealerCode && this.dealerList.some((d: any) => d.dealerCode === currentDealerCode)) {
+      this.selectedDealerCode = currentDealerCode;
+    }
+
+    this.onDealerChange();
+  }
+
+  // Re-runs everything scoped to a single dealer whenever the selection
+  // changes - Claim Prefix and the location lookup catalog. Skips
+  // clearing the selected job while in view mode.
   onDealerChange(): void {
     if (!this.isViewMode) {
       this.selectedJob = {};
@@ -157,15 +167,20 @@ export class WarrantyJobCardClaim implements OnInit {
       this.labourGridData = [];
       this.calculatePartsTotal();
       this.calculateLabourTotal();
+      this.claimLocationName = null;
+      this.claimLocationCode = null;
+      this.claimLocationArea = null; 
+      this.locationList = [];
+      this.lastRawJobCards = [];
     }
 
     if (!this.selectedDealerCode) {
-      this.locationList = [];
+      this.allLocations = [];
       return;
     }
 
     this.loadPrefix();
-    this.loadlocation();
+    this.loadAllLocations();
   }
 
   loadClaimForView(id: number): void {
@@ -175,20 +190,21 @@ export class WarrantyJobCardClaim implements OnInit {
         this.loader.hide();
         this.isViewMode = true;
 
-        // ASSUMPTION: GetWarrantyJCClaimById's response includes
-        // dealerCode - if it doesn't yet, this line is a no-op and the
-        // dropdown just keeps whatever loadDealers() defaulted it to.
         this.selectedDealerCode = res.dealerCode ?? this.selectedDealerCode;
-
         this.WjobClaimprefix = res.claimPrefix ?? this.WjobClaimprefix;
         this.claimNo = res.claimNo ?? this.claimNo;
         this.toDate = res.claimDate?.substring(0, 10) ?? this.toDate;
         this.selectedSupplierId = res.supplierId ?? this.selectedSupplierId;
         this.selectedLocationId = res.serviceLocation ?? this.selectedLocationId;
 
+        // Location was already resolved (Workshop-scoped) and persisted
+        // at InsertWarrantyJCClaim time - read it straight back.
+        this.claimLocationName = res.locationName ?? this.claimLocationName;
+        this.claimLocationCode = res.locationCode ?? this.claimLocationCode;
+
         this.selectedJob = {
           serviceHead: res.serviceHead,
-          serviceType: undefined, // not in backend response
+          serviceType: undefined,
           jobNo: res.jobCardNo,
           chassisNo: res.chassisNo,
           motorNo: res.motorNo,
@@ -196,12 +212,12 @@ export class WarrantyJobCardClaim implements OnInit {
           repairBillDate: res.invoiceDate,
           vehiclekms: res.kms,
           customerName: undefined,
-          registrationNo: undefined, 
-          saleDate: undefined, 
-          failureDate: undefined, 
-  
+          registrationNo: undefined,
+          saleDate: undefined,
+          failureDate: undefined,
+
           repairBillDetails: (res.details || []).map((d: any) => ({
-            detailId: d.id, // WarrantyJcclaimDetail's own Id - needed to save updates back correctly
+            detailId: d.id,
             itemType: d.itemType,
 
             partitemName: d.partName,
@@ -216,8 +232,8 @@ export class WarrantyJobCardClaim implements OnInit {
 
             igstAmount: d.igstAmount,
             mrp: d.mrp,
-            amount: d.totalAmount,       // Part Item Details table's "Amount" column
-            totalWithTax: d.totalAmount, // Labour Details table's "Amount" column
+            amount: d.totalAmount,
+            totalWithTax: d.totalAmount,
 
             inwardSerial: '',
             outwardSerial: '',
@@ -241,6 +257,12 @@ export class WarrantyJobCardClaim implements OnInit {
           classname: 'bg-danger text-white',
           delay: 3000
         });
+
+        this.isViewMode = false;
+        this.viewClaimId = null;
+        if (this.dealerList.length > 0) {
+          this.applyDefaultDealerSelection();
+        }
       }
     });
   }
@@ -263,14 +285,6 @@ export class WarrantyJobCardClaim implements OnInit {
       next: (res: string) => {
         this.loader.hide();
 
-        // res is the FULL next-claim string, e.g. "wjc/435/26-27/079" -
-        // WjobClaimprefix must be only the prefix portion WITHOUT the
-        // trailing sequence number, otherwise displaying prefix+claimNo
-        // together elsewhere (as this app does everywhere else, e.g.
-        // {{claim.claimPrefix}}{{claim.claimNo}}) duplicates the number:
-        // "wjc/435/26-27/079" + "79" = "wjc/435/26-27/07979". Splitting
-        // off the last segment and keeping the trailing "/" gives
-        // "wjc/435/26-27/" + "79" = "wjc/435/26-27/79" - no repetition.
         const parts = res.split('/');
         const lastSegment = parts.pop() ?? '';
         this.WjobClaimprefix = parts.join('/') + '/';
@@ -278,7 +292,6 @@ export class WarrantyJobCardClaim implements OnInit {
       }, error: (err) => {
         this.loader.hide();
         console.error(err);
-
       }
     })
   }
@@ -290,7 +303,8 @@ export class WarrantyJobCardClaim implements OnInit {
       next: (res: any) => {
         this.loader.hide();
         this.supplierList = res;
-        if (this.supplierList.length === 1) {
+
+        if (!this.isViewMode && this.supplierList.length === 1) {
           this.selectedSupplierId = this.supplierList[0].id;
         }
       }, error: (err) => {
@@ -301,25 +315,112 @@ export class WarrantyJobCardClaim implements OnInit {
 
   }
 
-  loadlocation(): void {
-    if (!this.selectedDealerCode) return;
-
-    this.loader.show();
-    const dealerCode = this.selectedDealerCode;
-
-    this.locationService.getLocationDropdownByDealerCode(dealerCode,).subscribe({
+  private getAreaName(locareaidno: number): string {
+      const match = locationAreaMaster.find((a: any) => a.id === locareaidno);
+      return match?.name || '';
+  }
+  private loadAllLocations(): void {
+    this.locationService.getAllLocationMaster().subscribe({
       next: (res: any) => {
-        this.loader.hide();
-        this.locationList = res;
-        this.locationList = res.filter((x: any) => x.locareaidno === 2);
-      }, error: (err) => {
-        this.loader.hide();
-        console.error(err);
+        this.allLocations = res?.data || res || [];
+
+        // Rebuild the popup's dropdown labels now that codes may be
+        // available, in case job cards were already searched before
+        // this lookup finished loading.
+        if (this.lastRawJobCards.length > 0) {
+          this.locationList = this.buildLocationOptionsFromJobCards(this.lastRawJobCards);
+        }
+
+        if (this.selectedJob?.jobLocation) {
+          this.resolveWorkshopLocation(this.selectedJob.jobLocation);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load location catalog:', err);
+        this.allLocations = [];
       }
-    })
+    });
   }
 
+  // The Locareaidno that represents "Workshop" specifically, resolved by
+  // name from locationAreaMaster rather than a hardcoded id.
+  private resolveLocationByCode(loccode: string | null | undefined): { locname: string | null; areaName: string | null; dealerCode: string | null } {
+      if (!loccode) return { locname: null, areaName: null, dealerCode: null };
 
+      const match = this.allLocations.find((loc: any) => loc.loccode === loccode);
+      if (!match) {
+        console.warn(`No LocationMaster row found for Loccode "${loccode}" - this job card's Serviceloc may be stale or invalid.`);
+        return { locname: null, areaName: null, dealerCode: null };
+      }
+
+      return {
+        locname: match.locname,
+        areaName: this.getAreaName(match.locareaidno),
+        dealerCode: match.dealercode
+      };
+  }
+    
+  // Builds the popup's Location dropdown options directly from the
+  // CURRENT job card search results only - each distinct jobLocation
+  // name becomes exactly one option, with its Workshop code resolved
+  // (if found). This is the only source the dropdown ever shows - it
+  // can never display a location unrelated to an actual job card.
+private buildLocationOptionsFromJobCards(jobCards: any[]): { locname: string; loccode: string | null; areaName: string | null }[] {
+    const seen = new Set<string>();
+    const options: { locname: string; loccode: string | null; areaName: string | null }[] = [];
+
+    for (const item of jobCards) {
+      const key = item.jobLocationCode || (item.jobLocation || '').toUpperCase();
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+
+      const resolved = this.resolveLocationByCode(item.jobLocationCode);
+      options.push({
+        locname: resolved.locname || item.jobLocation || '',
+        loccode: item.jobLocationCode || null,
+        areaName: resolved.areaName
+      });
+    }
+
+    return options;
+}
+
+  // Called once a job card is selected - resolves and retains its
+  // Workshop location (name always exact from the job card; code
+private resolveWorkshopLocation(jobLocationName: string | null | undefined): void {
+    const name = (jobLocationName || '').toString().trim();
+    this.claimLocationName = name || null;
+
+    if (!name) {
+      this.claimLocationCode = null;
+      this.claimLocationArea = null;
+      return;
+    }
+
+    const resolved = this.resolveLocationByCode(name);
+    //this.claimLocationCode = resolved.loccode;
+    this.claimLocationArea = resolved.areaName;
+}
+
+  // e.g. "RR Test, Karvenagar (CUS0487W1) [Workshop]"
+  getJobCardLocationLabel(item: any): string {
+      const resolved = this.resolveLocationByCode(item.jobLocationCode);
+      const name = resolved.locname || item.jobLocation || '';
+      if (!item.jobLocationCode) return name;
+      let label = `${name} (${item.jobLocationCode})`;
+      if (resolved.areaName) label += ` [${resolved.areaName}]`;
+      return label;
+  }
+
+  // e.g. "RR TEST (CUS0487)" - lets a superadmin see which dealer each
+  // returned job card actually belongs to, derived from its own location
+  // code rather than a guessed job-card field.
+  getJobCardDealerLabel(item: any): string {
+      const code = this.resolveLocationByCode(item.jobLocationCode).dealerCode;
+      if (!code) return '';
+      const name = this.dealerList.find((d: any) => d.dealerCode === code)?.dealerName;
+      return name ? `${name} (${code})` : code;
+  }
   loadJobCarDetails(): void {
     if (!this.selectedDealerCode) {
       this.toaster.show('Please select a Dealer first.', { classname: 'bg-warning text-white', delay: 3000 });
@@ -328,16 +429,40 @@ export class WarrantyJobCardClaim implements OnInit {
 
     this.loader.show();
     const dealerCode = this.selectedDealerCode;
+
     let jobNo = this.jobSearch.jobNo;
+    if (jobNo === null || jobNo === undefined || jobNo === '') {
+      jobNo = 0;
+    } else {
+      jobNo = Number(jobNo);
+      if (isNaN(jobNo)) jobNo = 0;
+    }
+
     let fromDate = this.jobSearch.rBillfromDate;
     let toDate = this.jobSearch.rBilltoDate;
-    let serviceloc = this.selectedLocationId;
 
-
-    this.jobcardService.getIssueTypebasedJobDetails(dealerCode, jobNo, serviceloc, fromDate, toDate).subscribe({
+    // Always fetch WITHOUT a server-side location filter, then build the
+    // dropdown from these exact results and narrow client-side if the
+    // user picked one - guarantees the dropdown can never disagree with
+    // what's actually on a job card (see buildLocationOptionsFromJobCards).
+    this.jobcardService.getIssueTypebasedJobDetails(dealerCode, jobNo, null, fromDate, toDate).subscribe({
       next: (res: any) => {
         this.loader.hide();
-        this.jobCardList = res || [];
+        const rawResults = res || [];
+        this.lastRawJobCards = rawResults;
+
+        this.locationList = this.buildLocationOptionsFromJobCards(rawResults);
+
+        let results = rawResults;
+
+        if (this.selectedLocationId) {
+          const selectedLocName = this.selectedLocationId.toString().trim().toUpperCase();
+          results = rawResults.filter((item: any) =>
+            (item.jobLocation || '').toString().trim().toUpperCase() === selectedLocName
+          );
+        }
+
+        this.jobCardList = results;
 
         if (this.jobCardList.length === 0) {
           this.toaster.show('No job cards found for the given search.', {
@@ -370,7 +495,9 @@ export class WarrantyJobCardClaim implements OnInit {
       return;
     }
 
-    this.loadlocation();
+    // Reset any previous filter so the first load shows every job card
+    // (and therefore every real location) for this dealer.
+    this.selectedLocationId = null;
     this.loadJobCarDetails();
     this.modalService.open(content, {
       size: 'xl',
@@ -412,8 +539,13 @@ export class WarrantyJobCardClaim implements OnInit {
       }
     });
 
+    const resolved = this.resolveLocationByCode(item.jobLocationCode);
+    this.claimLocationName = resolved.locname || item.jobLocation || null;
+    this.claimLocationCode = item.jobLocationCode || null;
+    this.claimLocationArea = resolved.areaName;
+
     modal.close();
-  }
+}
 
   get partDetails() {
     return this.selectedJob?.repairBillDetails?.filter(x => x.itemType === 'Part') || [];
@@ -482,6 +614,10 @@ export class WarrantyJobCardClaim implements OnInit {
       repairBillHeaderId: this.selectedJob?.repairBillHeaderId,
       ffirId: this.selectedJob?.ffirId,
       claimAccount: this.claimAccount,
+
+      locationName: this.claimLocationName,
+      locationCode: this.claimLocationCode,
+
       CreatedBy: '',
       repairBillDetails: this.selectedJob?.repairBillDetails
     };
@@ -514,7 +650,7 @@ export class WarrantyJobCardClaim implements OnInit {
 
   updateExistingClaim(): void {
     const lines = (this.selectedJob?.repairBillDetails || [])
-      .filter((d: any) => d.detailId) // skip any line without a real id
+      .filter((d: any) => d.detailId)
       .map((d: any) => ({
         detailId: d.detailId,
         dealerObservation: d.dealerObservation || '',
@@ -555,6 +691,10 @@ export class WarrantyJobCardClaim implements OnInit {
 
     this.selectedJob = {};
 
+    this.claimLocationName = null;
+    this.claimLocationCode = null;
+    this.claimLocationArea = null;  
+
   }
 
     cancel(): void {
@@ -568,6 +708,5 @@ export class WarrantyJobCardClaim implements OnInit {
     this.partsGridData = [];
     this.labourGridData = [];
   }
-
 
 }

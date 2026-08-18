@@ -214,25 +214,35 @@ export class MaterialTransferDetail implements OnInit {
     this.materialTransferService.getMaterialTransferByJobId(jobId).subscribe({
       next: (res: any) => {
         this.items = [];
-        if (res && res.length > 0) {
-          this.formData.prefix = res[0].materialPrefix;
-          this.formData.issueNumber = res[0].materialIssueNumber;
+  if (res && res.length > 0) {
 
-          this.items = res.map((item: any) => {
-            item.mrp = (Number(item.custprice) * (item.quantity || 0)).toFixed(2);
-            return item;
-          });
+    const materialPrefix = res[0].materialPrefix ?? '';
+    const materialIssueNumber = res[0].materialIssueNumber;
 
-          // if (this.items.length > 0) {
-          //   this.cgstPercent = this.items[0].cgstPercent;
-          //   this.sgstPercent = this.items[0].sgstPercent;
-          //   this.igstPercent = this.items[0].igstPercent;
-          // }
-        } else {
-          if (dealerCode && dealerCode != '') {
-            this.getMaterialPrefix(dealerCode);
-          }
-        }
+      this.formData.prefix = this.normalizeMaterialPrefix(
+        materialPrefix,
+        materialIssueNumber
+      );
+
+      this.formData.issueNumber =
+        materialIssueNumber != null
+          ? String(Number(materialIssueNumber))
+          : '';
+
+      this.items = res.map((item: any) => {
+        item.mrp = (
+          Number(item.custprice) *
+          (item.quantity || 0)
+        ).toFixed(2);
+
+        return item;
+      });
+
+    } else {
+      if (dealerCode && dealerCode !== '') {
+        this.getMaterialPrefix(dealerCode);
+      }
+    }
 
         this.loader.hide();
       },
@@ -775,21 +785,68 @@ export class MaterialTransferDetail implements OnInit {
     );
   }
 
-  getMaterialPrefix(dealerCode: string) {
-    this.loader.show();
-    this.prefixMasterService.getPrefixByDealerByModule(dealerCode, 'material_transfer').subscribe({
-      next: (res) => {
-        this.formData.prefix = res;
-        this.formData.issueNumber = res.split('/').pop();
+getMaterialPrefix(dealerCode: string): void {
+  this.loader.show();
+
+  this.prefixMasterService
+    .getPrefixByDealerByModule(dealerCode, 'material_transfer')
+    .subscribe({
+      next: (res: string) => {
         this.loader.hide();
+
+        if (!res) {
+          this.formData.prefix = '';
+          this.formData.issueNumber = '';
+          return;
+        }
+
+        const prefixValue = String(res).trim();
+
+        const lastSlashIndex = prefixValue.lastIndexOf('/');
+
+        if (lastSlashIndex === -1) {
+          // No "/" found, so treat the complete response as prefix
+          this.formData.prefix = prefixValue;
+          this.formData.issueNumber = '';
+          return;
+        }
+
+        // Get the last part of the prefix response
+        const lastPart = prefixValue.substring(lastSlashIndex + 1);
+
+        // If the last part is numeric, remove it from the prefix
+        // and use it as the issue number without leading zeros.
+        if (/^\d+$/.test(lastPart)) {
+          this.formData.prefix =
+            prefixValue.substring(0, lastSlashIndex + 1);
+
+          this.formData.issueNumber =
+            String(Number(lastPart));
+        } else {
+          // No numeric suffix
+          this.formData.prefix = prefixValue;
+          this.formData.issueNumber = '';
+        }
       },
+
       error: (err) => {
-        console.error(err);
         this.loader.hide();
-        this.toast.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+
+        console.error(err);
+
+        this.formData.prefix = '';
+        this.formData.issueNumber = '';
+
+        this.toast.show(
+          'Something went wrong.',
+          {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          }
+        );
       }
     });
-  }
+}
 
 
   getJobCardStatus(jobId: Number) {
@@ -813,7 +870,37 @@ export class MaterialTransferDetail implements OnInit {
       .findIndex(item => item === this.items[index]) + 1;
   }
 
+    private normalizeMaterialPrefix(
+    prefix: string,
+    issueNumber: number | string | null | undefined
+  ): string {
+
+    if (!prefix) {
+      return '';
+    }
+
+    if (issueNumber == null || issueNumber === '') {
+      return prefix;
+    }
+
+    const number = String(issueNumber);
+
+    // Remove only the exact issue number, including
+    // any zero-padding, from the end of the prefix.
+    const escapedNumber = number.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    const regex = new RegExp(`0*${escapedNumber}$`);
+
+    const normalized = prefix.replace(regex, '');
+
+    return normalized.endsWith('/')
+      ? normalized
+      : `${normalized}/`;
+  }
+
 }
+
+
 
 export const TechnicianList = [
   { id: 1, name: 'Technician Rajesh' },

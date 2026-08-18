@@ -82,6 +82,8 @@
               <th style="width:320px">Reason:</th>
               <th class="text-center" style="width:150px">Accept:<br>Reject:</th>
               <th style="width:220px">Company name:<br>Location:</th>
+              <th style="width:180px">Dealer Name:</th>
+              <th style="width:180px">Dealer Location:</th>
               <th style="width:130px">Job no:<br>Date:</th>
               <th style="width:130px">Claim no:<br>Date:</th>
               <th style="width:90px">Hsn:</th>
@@ -163,7 +165,19 @@
                 </div>
               </td>
 
-              <td>{{ item.dealerCompanyName }} <span class="uw-sub">{{ item.locationName }}</span></td>
+              <!-- <td>
+                {{ item.dealerCompanyName }}
+                <span class="uw-sub">
+                  {{ item.locationName }}<span *ngIf="item.locationCode"> ({{ item.locationCode }})</span>
+                </span>
+              </td> -->
+
+              <td>
+                {{ item.dealerCompanyName }}
+                <span class="uw-sub">
+                  {{ item.locationName }}<span *ngIf="item.locationCode"> ({{ item.locationCode }})</span>
+                </span>
+              </td>
 
               <td><span class="uw-link">{{ item.jobCardNo }}</span> <span class="uw-sub">{{ item.jobCardDate | date:'dd-MM-yyyy' }}</span></td>
 
