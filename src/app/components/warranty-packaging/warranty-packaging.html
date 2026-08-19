@@ -12,9 +12,9 @@
     </div>
 
     <div class="card-body">
-        <div class="row g-2">
+        <div class="row g-2 align-items-end">
 
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">Dealer</label>
                 <select class="form-select form-select-sm" [(ngModel)]="selectedDealerCode" (change)="onDealerChange()" [disabled]="packingSlipId > 0">
                     <option [ngValue]="null">--Select--</option>
@@ -24,7 +24,7 @@
                 </select>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">Invoice No</label>
                 <select class="form-select form-select-sm" [(ngModel)]="selectedInvoiceId" (change)="onInvoiceChange()" [disabled]="packingSlipId > 0">
                     <option [ngValue]="null">--Select--</option>
@@ -34,35 +34,33 @@
                 </select>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">Invoice Date</label>
                 <input type="text" class="form-control form-control-sm bg-light text-muted"
                     [value]="invoiceDate ? (invoiceDate | date:'dd-MM-yyyy') : ''" readonly>
             </div>
 
-            <div class="col-md-2">
-                <label class="form-label">Financial Year</label>
-                <select class="form-select form-select-sm" [(ngModel)]="selectedFinancialYear" (change)="onFinancialYearChange()" [disabled]="packingSlipId > 0">
-                    <option *ngFor="let fy of financialYears" [value]="fy.label">{{ fy.label }}</option>
-                </select>
-            </div>
+        </div>
 
-            <div class="col-md-2">
-                <label class="form-label">Slip Prefix</label>
+        <div class="row g-2 align-items-end mt-1">
+
+            <div class="col-md-4">
+                <label class="form-label">Packing Slip Prefix</label>
                 <input type="text" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="slipPrefix" readonly>
             </div>
 
-            <div class="col-md-1">
-                <label class="form-label">Slip No</label>
+            <div class="col-md-4">
+                <label class="form-label">Packing Slip No</label>
                 <input type="text" class="form-control form-control-sm bg-light text-muted" [(ngModel)]="slipNo" readonly>
             </div>
 
-            <div class="col-md-1">
+            <div class="col-md-4">
                 <label class="form-label">Slip Date</label>
                 <input type="date" class="form-control form-control-sm" [(ngModel)]="slipDate">
             </div>
 
         </div>
+
         <hr>
 
         <div class="table-responsive">

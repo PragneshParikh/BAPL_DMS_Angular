@@ -81,9 +81,13 @@ export class WarrantyInvoiceService {
     });
   }
 
-  searchClaimInvoiceNos(dealerCode: string, searchText: string): Observable<string[]> {
-    return this.httpClient.get<string[]>(`${this.baseUrl}/WarrantyInvoice/SearchClaimInvoiceNos`, {
-      params: { dealerCode, searchText }
-    });
-}
+    searchClaimInvoiceNos(dealerCode: string, searchText: string): Observable<string[]> {
+      return this.httpClient.get<string[]>(`${this.baseUrl}/WarrantyInvoice/SearchClaimInvoiceNos`, {
+        params: { dealerCode, searchText }
+      });
+  }
+
+    sendWarrantyInvoiceToErp(id: number): Observable<any> {
+    return this.httpClient.post(`${this.baseUrl}/WarrantyInvoice/SendWarrantyInvoiceToErp/${id}`, {});
+  }
 }

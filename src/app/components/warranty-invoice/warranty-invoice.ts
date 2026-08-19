@@ -70,6 +70,12 @@ export class WarrantyInvoice implements OnInit {
   // enabled even after unchecking an already-approved invoice.
   wasApprovedOnLoad = false;
 
+  // True while the post-save ERP submission is in flight. Kept entirely
+  // separate from `saving` (the DB save) - a failure here never blocks or
+  // rolls back the DB save, which has already completed successfully by
+  // the time this runs.
+  sendingToErp = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -510,6 +516,40 @@ export class WarrantyInvoice implements OnInit {
     return [...historicalRows, ...currentRows];
   }
 
+  // Fire-and-report ERP submission for a single, just-saved invoice.
+  // Deliberately isolated from the DB save's own success/failure state -
+  // `saving`/`sendingToErp` are two independent flags, so a failure here
+  // never appears to roll back or invalidate the DB save that already
+  // completed successfully by the time this runs.
+  private sendInvoiceToErp(invoiceId: number): void {
+    this.sendingToErp = true;
+    this.warrantyInvoiceService.sendWarrantyInvoiceToErp(invoiceId).subscribe({
+      next: (res: any) => {
+        this.sendingToErp = false;
+        if (res?.success) {
+          this.toaster.show(`Sent to ERP successfully (${res.linesSent} line(s)).`, {
+            classname: 'bg-success text-white',
+            delay: 3000
+          });
+        } else {
+          this.toaster.show(`ERP submission failed: ${res?.message || 'Unknown error'}`, {
+            classname: 'bg-danger text-white',
+            delay: 6000
+          });
+        }
+      },
+      error: (err) => {
+        this.sendingToErp = false;
+        console.error('ERP submission failed:', err);
+        const serverMsg = err?.error?.message || err?.error || 'Could not reach the ERP integration.';
+        this.toaster.show(`ERP submission failed: ${serverMsg}`, {
+          classname: 'bg-danger text-white',
+          delay: 6000
+        });
+      }
+    });
+  }
+
   saveWarrantyInvoice(navigateAfter: boolean = true): void {
     if (this.saving) return;
 
@@ -621,6 +661,19 @@ export class WarrantyInvoice implements OnInit {
         );
 
         sessionStorage.removeItem('pendingWarrantyInvoiceOrder');
+
+        // Push to ERP only when the main invoice itself was actually
+        // inserted/updated this Save - not for pure historical-approval-
+        // only saves, which don't touch this invoice's own header/lines.
+        // Runs as an independent follow-up step: its own success/failure
+        // is reported separately and never affects the DB save above,
+        // which has already completed by this point.
+        if (savingMainInvoice) {
+          const savedInvoiceId = res?.invoiceId ?? this.invoiceId;
+          if (savedInvoiceId) {
+            this.sendInvoiceToErp(Number(savedInvoiceId));
+          }
+        }
 
         if (navigateAfter) {
           this.router.navigate(['/warranty-invoice-list']);

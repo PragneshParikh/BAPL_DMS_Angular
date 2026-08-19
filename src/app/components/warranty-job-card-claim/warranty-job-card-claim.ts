@@ -50,6 +50,7 @@ export class WarrantyJobCardClaim implements OnInit {
   totalLabourAmount: number = 0;
   viewClaimId: number | null = null;
   isViewMode: boolean = false;
+  isDealerUser: boolean = false;
 
   jobSearch: any = {
     jobNo: null,
@@ -124,37 +125,67 @@ locationList: { locname: string; loccode: string | null; areaName: string | null
   }
   // Populates the Dealer dropdown, then defaults the selection to the
   // logged-in user's own dealer - the dropdown lets them override it.
-  loadDealers(): void {
-    this.loader.show();
-    this.dealerService.getDealerDropdown(null).subscribe({
-      next: (res: any) => {
-        this.loader.hide();
-        this.dealerList = res?.data || [];
+    loadDealers(): void {
+      this.loader.show();
+      this.dealerService.getDealerDropdown(null).subscribe({
+        next: (res: any) => {
+          this.loader.hide();
+          this.dealerList = res?.data || [];
 
-        // FIX: while viewing an existing claim, loadClaimForView() owns
-        // selectedDealerCode - defaulting it here would overwrite the
-        // correct values the moment this response lands.
-        if (this.isViewMode) {
-          return;
+          // ASSUMPTION: role matched case-insensitively via .includes('admin')
+          // so both "Admin" and "SuperAdmin"/"Super Admin" are covered -
+          // adjust if your app uses a different exact role string.
+          const role = (this.storageService.getRole() || '').toLowerCase().replace(/\s+/g, '');
+          const isAdminRole = role.includes('admin');
+          this.isDealerUser = !isAdminRole;
+
+          if (this.isDealerUser) {
+            const currentDealerCode = this.storageService.getDealerCode();
+            if (currentDealerCode) {
+              // A dealer-logged-in user only ever files as themselves - use
+              // their own code regardless of whether this particular
+              // dropdown list happens to include it.
+              this.selectedDealerCode = currentDealerCode;
+            }
+          }
+
+          // FIX: while viewing an existing claim, loadClaimForView() owns
+          // selectedDealerCode - defaulting/overriding it here would
+          // overwrite the correct values the moment this response lands.
+          if (this.isViewMode) {
+            return;
+          }
+
+          this.applyDefaultDealerSelection();
+        },
+        error: (err) => {
+          this.loader.hide();
+          console.error(err);
+          this.toaster.show('Failed to load dealer list.', { classname: 'bg-danger text-white', delay: 3000 });
         }
-
-        this.applyDefaultDealerSelection();
-      },
-      error: (err) => {
-        this.loader.hide();
-        console.error(err);
-        this.toaster.show('Failed to load dealer list.', { classname: 'bg-danger text-white', delay: 3000 });
-      }
-    });
+      });
   }
 
   private applyDefaultDealerSelection(): void {
-    const currentDealerCode = this.storageService.getDealerCode();
-    if (currentDealerCode && this.dealerList.some((d: any) => d.dealerCode === currentDealerCode)) {
-      this.selectedDealerCode = currentDealerCode;
-    }
+      // Only defaults from storage for admin logins - a dealer login's
+      // selectedDealerCode was already set (to their own code) above in
+      // loadDealers(), and shouldn't be re-derived or overridden here.
+      if (!this.isDealerUser) {
+        const currentDealerCode = this.storageService.getDealerCode();
+        if (currentDealerCode && this.dealerList.some((d: any) => d.dealerCode === currentDealerCode)) {
+          this.selectedDealerCode = currentDealerCode;
+        }
+      }
 
-    this.onDealerChange();
+      this.onDealerChange();
+  }
+
+// Display text for the fixed Dealer field when isDealerUser is true -
+// falls back to the raw code if this dealer isn't in dealerList for
+// some reason (e.g. the dropdown endpoint scopes differently).
+  get loggedInDealerDisplay(): string {
+      const match = this.dealerList.find((d: any) => d.dealerCode === this.selectedDealerCode);
+      return match ? `${match.dealerName} (${match.dealerCode})` : (this.selectedDealerCode || '');
   }
 
   // Re-runs everything scoped to a single dealer whenever the selection
