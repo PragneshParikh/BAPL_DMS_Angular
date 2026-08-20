@@ -40,6 +40,24 @@ export class PrefixService {
     return this.httpClient.get(`${this.baseUrl}/prefix/downloadExcel`, { responseType: 'blob' });
   }
 
+  getById(id: number): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/prefix/byId/${id}`);
+  }
+
+  updatePrefix(id: number, model: any): Observable<any> {
+    return this.httpClient.put(`${this.baseUrl}/prefix/${id}`, model);
+  }
+
+  deletePrefix(id: number): Observable<any> {
+    return this.httpClient.delete(`${this.baseUrl}/prefix/${id}`);
+  }
+
+  checkDuplicate(dealerCode: string, moduleName: string, year: string, prefix: string, excludeId?: number): Observable<boolean> {
+    let params: any = { dealerCode, moduleName, year, prefix };
+    if (excludeId) params.excludeId = excludeId;
+    return this.httpClient.get<boolean>(`${this.baseUrl}/prefix/checkDuplicate`, { params });
+  }
+
   getPrefixByPagedByDealer(searchTerm: string = null, pageIndex: number, pageSize: number, dealerCode: string | null): Observable<any> {
     let params = new HttpParams();
 

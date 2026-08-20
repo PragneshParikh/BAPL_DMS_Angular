@@ -1,3 +1,4 @@
+//src\app\core\services\job-card-service.ts
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';

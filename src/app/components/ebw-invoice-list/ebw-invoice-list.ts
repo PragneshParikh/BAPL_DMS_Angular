@@ -367,9 +367,10 @@ export class EbwInvoiceList implements OnInit {
       chassisNo: inv.chassisNo || '',
       serialNo: inv.serialNo || '',
       saleDate: fmtDate(inv.chassisSaleDate),
-      batteryNumber: '',
+      batteryNumber: inv.batteryNumber || inv.batterySerialNo || '',
       ewPurchaseDate: fmtDate(inv.invoiceDate),
-      ewEndDate: fmtDate(inv.validityExpiryDate),
+      //ewEndDate: fmtDate(inv.validityExpiryDate),
+      ewEndDate: fmtDate(inv.warrantyEndDate),
       currentPrintDate: new Date().toLocaleDateString('en-GB'),
       termsAndConditionsList: termsHtml,
     };

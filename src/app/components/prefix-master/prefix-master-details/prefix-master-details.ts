@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, model, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { PrefixService } from '../../../core/services/prefix';
 import { StorageService } from '../../../core/services/storage';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ModuleTypes } from '../../../constant';
 
 @Component({
@@ -34,16 +34,18 @@ export class PrefixMasterDetails implements OnInit {
 
   isSuperAdmin: boolean = false;
   dealerCode: string = '';
+  isEditMode = false;
+  editId: number = 0;
 
   constructor(
     private toast: ToastService,
     private prefixService: PrefixService,
     private storageService: StorageService,
     private router: Router,
+    private route: ActivatedRoute,
     private loader: LoaderService
   ) {
-    this.isSuperAdmin = storageService.getRole().toLowerCase() === 'superadmin'
-
+    this.isSuperAdmin = storageService.getRole().toLowerCase() === 'superadmin';
     this.dealerCode = storageService.getDealerCode();
 
     // if (!this.isSuperAdmin) {
@@ -58,6 +60,42 @@ export class PrefixMasterDetails implements OnInit {
     this.getSequenceList();
     this.lstFinancialYears = this.generateFinancialYears();
     this.sequence.financialYear = this.getCurrentFinancialYear();
+
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam && Number(idParam) > 0) {
+      this.isEditMode = true;
+      this.editId = Number(idParam);
+      this.loadForEdit(this.editId);
+    }
+  }
+
+  loadForEdit(id: number) {
+    this.loader.show();
+    this.prefixService.getById(id).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+
+        // Extract prefix text back out of the stored sequenceCode
+        // (format: PREFIX/DEALER/YEAR/#####)
+        const parts = (res.sequenceCode || '').split(this.sequence.separator);
+
+        this.sequence = {
+          moduleName: res.sequenceName,
+          separator: this.sequence.separator,
+          financialYear: res.year,
+          prefix: parts[0] || '',
+          padding: (res.sequenceCode.match(/#/g) || []).length || 3,
+          nextNo: res.nextNo,
+          increment: res.increment,
+          isActive: res.isActive
+        };
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toast.show('Failed to load sequence for editing.', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
   }
 
   getSequenceList() {
@@ -103,10 +141,7 @@ export class PrefixMasterDetails implements OnInit {
     for (let i = -5; i <= 5; i++) {
       const startYear = currentYear + i;
       const endYear = startYear + 1;
-
-      years.push(
-        `${startYear.toString().slice(-2)}-${endYear.toString().slice(-2)}`
-      );
+      years.push(`${startYear.toString().slice(-2)}-${endYear.toString().slice(-2)}`);
     }
 
     return years;
@@ -169,11 +204,12 @@ export class PrefixMasterDetails implements OnInit {
     if (module && module[0].isAdmin) return;
 
     if (form.invalid) return;
+    if (this.isDuplicate) return;   // guard even if Save wasn't disabled for some reason
 
     const length = this.sequence.padding || 4;
     const masked = '#'.repeat(length);
     const numberSequence: any = {
-      id: 0,
+      id: this.isEditMode ? this.editId : 0,
       sequenceCode: `${this.sequence.prefix || ''}${this.sequence.separator || ''}${'DealerCode'}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${this.sequence.separator || ''}${masked}`,
       sequenceName: this.sequence.moduleName,
       format: `${this.sequence.prefix || ''}${this.sequence.separator || ''}${'DealerCode'}${this.sequence.separator || ''}${this.sequence.financialYear || ''}${this.sequence.separator || ''}${masked}`,
@@ -188,29 +224,42 @@ export class PrefixMasterDetails implements OnInit {
 
     this.loader.show();
 
-    if (this.isSuperAdmin) {
-      this.prefixService.saveSequenceForDealers(numberSequence).subscribe({
-        next: (response) => {
-          this.backToList();
+    if (this.isEditMode) {
+      this.prefixService.updatePrefix(this.editId, numberSequence).subscribe({
+        next: () => {
           this.loader.hide();
-          this.toast.show('Sequence saved successfully.', { classname: 'bg-success text-light', delay: 3000 });
+          this.toast.show('Sequence updated successfully.', { classname: 'bg-success text-light', delay: 3000 });
+          this.backToList();
         },
         error: (error) => {
           this.loader.hide();
-          console.error('Error saving sequence:', error);
+          console.error(error);
+          this.toast.show('Failed to update sequence.', { classname: 'bg-danger text-light', delay: 5000 });
+        }
+      });
+    } else if (this.isSuperAdmin) {
+      this.prefixService.saveSequenceForDealers(numberSequence).subscribe({
+        next: () => {
+          this.loader.hide();
+          this.toast.show('Sequence saved successfully.', { classname: 'bg-success text-light', delay: 3000 });
+          this.backToList();
+        },
+        error: (error) => {
+          this.loader.hide();
+          console.error(error);
           this.toast.show('Failed to save sequence.', { classname: 'bg-danger text-light', delay: 5000 });
         }
       });
     } else {
       this.prefixService.saveSequence(numberSequence).subscribe({
-        next: (response) => {
-          this.backToList();
+        next: () => {
           this.loader.hide();
           this.toast.show('Sequence saved successfully.', { classname: 'bg-success text-light', delay: 3000 });
+          this.backToList();
         },
         error: (error) => {
           this.loader.hide();
-          console.error('Error saving sequence:', error);
+          console.error(error);
           this.toast.show('Failed to save sequence.', { classname: 'bg-danger text-light', delay: 5000 });
         }
       });
@@ -224,8 +273,7 @@ export class PrefixMasterDetails implements OnInit {
   getCurrentFinancialYear(): string {
     const today = new Date();
     const year = today.getFullYear();
-    const month = today.getMonth() + 1; // Jan = 0
-
+    const month = today.getMonth() + 1;
     let startYear = month >= 4 ? year : year - 1;
     let endYear = startYear + 1;
 
@@ -246,19 +294,41 @@ export class PrefixMasterDetails implements OnInit {
         </p>`;
   }
 
+  /**
+   * FIXED — now includes Prefix text in the duplicate check (was only
+   * checking Module + Financial Year before), and calls the real backend
+   * check via CheckDuplicate() rather than relying only on the client-side
+   * sequenceList snapshot, so Save reliably disables the moment a genuine
+   * duplicate (same Module + Year + Prefix, still active) exists.
+   */
   checkDuplicate() {
-    if (!this.sequence.moduleName || !this.sequence.financialYear) {
+    if (!this.sequence.moduleName || !this.sequence.financialYear || !this.sequence.prefix) {
       this.isDuplicate = false;
       return;
     }
 
-    const exists = this.sequenceList.some(x =>
-      x.sequenceName === this.sequence.moduleName &&
-      x.year === this.sequence.financialYear &&
-      x.dealerCode === this.dealerCode
-    );
-
-    this.isDuplicate = exists;
+    this.prefixService.checkDuplicate(
+      this.dealerCode,
+      this.sequence.moduleName,
+      this.sequence.financialYear,
+      this.sequence.prefix,
+      this.isEditMode ? this.editId : undefined
+    ).subscribe({
+      next: (isDup: boolean) => {
+        this.isDuplicate = isDup;
+      },
+      error: (err) => {
+        console.error(err);
+        // fall back to client-side snapshot check if the API call fails
+        this.isDuplicate = this.sequenceList.some((x: any) =>
+          x.sequenceName === this.sequence.moduleName &&
+          x.year === this.sequence.financialYear &&
+          x.dealerCode === this.dealerCode &&
+          x.sequenceCode?.includes(this.sequence.prefix) &&
+          (!this.isEditMode || x.id !== this.editId)
+        );
+      }
+    });
   }
 
   isAdminModule() {

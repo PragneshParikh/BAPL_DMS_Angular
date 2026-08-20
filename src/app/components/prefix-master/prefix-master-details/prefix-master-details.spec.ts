@@ -1,3 +1,4 @@
+//src\app\components\prefix-master\prefix-master-details\prefix-master-details.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PrefixMasterDetails } from './prefix-master-details';

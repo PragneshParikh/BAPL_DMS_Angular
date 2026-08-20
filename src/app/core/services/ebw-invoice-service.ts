@@ -45,6 +45,10 @@ export class EbwInvoiceService {
     return this.httpClient.get<any>(`${this.baseUrl}/ebw-invoice/dealer-info/${dealerCode}`);
   }
 
+  getByChassisNo(chassisNo: string) {
+    return this.httpClient.get(`${this.baseUrl}/ebw-invoice/by-chassis/${chassisNo}`);
+  }
+
   getReportData(dealerCode?: string, fromDate?: string, toDate?: string): Observable<any> {
     let params = new HttpParams();
     if (dealerCode) params = params.set('dealerCode', dealerCode);

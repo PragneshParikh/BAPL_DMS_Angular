@@ -1,3 +1,4 @@
+//src\app\components\prefix-master\prefix-master.ts
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -115,7 +116,7 @@ export class PrefixMaster implements OnInit {
     return module ? module.name : '';
   }
 
-  onSequenceClick(row: any) { }
+  // onSequenceClick(row: any) { }
 
   onPageChange(page: number) {
     this.page = page;
@@ -140,6 +141,31 @@ export class PrefixMaster implements OnInit {
       }
     });
 
+  }
+
+  onSequenceClick(row: any) {
+    this.router.navigate(['/prefix', row.id]);
+  }
+
+  deleteSequence(row: any) {
+    if (!this.isSuperAdmin) return;
+
+    const confirmed = window.confirm(`Delete this prefix sequence for ${row.sequenceName}? This cannot be undone.`);
+    if (!confirmed) return;
+
+    this.loader.show();
+    this.prefixService.deletePrefix(row.id).subscribe({
+      next: () => {
+        this.loader.hide();
+        this.toast.show('Deleted successfully.', { classname: 'bg-success text-white', delay: 5000 });
+        this.loadSequences();
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toast.show('Failed to delete.', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
   }
 
   onDownloadExcel() {

@@ -1,3 +1,4 @@
+//src\app\components\job-card\job-card.ts
 import { Component } from '@angular/core';
 import { publicDecrypt } from 'crypto';
 import { StorageService } from '../../core/services/storage';

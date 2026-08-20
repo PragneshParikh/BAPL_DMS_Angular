@@ -1,3 +1,4 @@
+//src\app\components\job-card\job-card.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { JobCard } from './job-card';

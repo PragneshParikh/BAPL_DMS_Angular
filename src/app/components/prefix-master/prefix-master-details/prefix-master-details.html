@@ -1,3 +1,4 @@
+<!--src\app\components\prefix-master\prefix-master-details\prefix-master-details.html-->
 <div class="card">
     <div class="card-header bg-primary text-white">
         Number Sequence Configuration
@@ -40,7 +41,8 @@
                 <div class="col-md-3">
                     <label class="form-label">Prefix</label>
                     <input type="text" class="form-control form-control-sm" [(ngModel)]="sequence.prefix"
-                        placeholder="e.g. INV" name="prefixText" #prefixText="ngModel" required>
+                        placeholder="e.g. INV" name="prefixText" #prefixText="ngModel" required
+                        (ngModelChange)="checkDuplicate()">
                     @if (prefixText.invalid && prefixText.touched ) {
                     <small class="text-danger">
                         Prefix is required
@@ -139,7 +141,11 @@
             <div class="card-footer text-end mt-2">
                 <!-- <button type="submit" class="btn btn-primary btn-sm"
                     [disabled]="prefixMasterForm.invalid || isDuplicate || isAdminModule()">Save</button> -->
-                <button type="submit" class="btn btn-primary btn-sm" [disabled]="isAdminModule()">Save</button>
+                <!-- Save button — CHANGED to also disable on isDuplicate -->
+                <button type="submit" class="btn btn-primary btn-sm"
+                    [disabled]="prefixMasterForm.invalid || isDuplicate || isAdminModule()">
+                {{ isEditMode ? 'Update' : 'Save' }}
+                </button>
                 <button type="button" class="btn btn-danger btn-sm ms-2" (click)="backToList()">Cancel</button>
             </div>
         </form>

@@ -1,3 +1,4 @@
+<!-- src\app\components\prefix-master\prefix-master.html -->
 <!-- Start Breadcrumbs -->
 <app-breadcrumbs title="Prefix Master"></app-breadcrumbs>
 <!-- End Breadcrumbs -->
@@ -41,34 +42,35 @@
                             <table class="table table-hover table-bordered mb-0 table-sm">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="sort" (click)="onSort('sequenceName')">
-                                            Module</th>
-                                        <th class="sort" (click)="onSort('sequenceCode')">
-                                            Prefix</th>
+                                        <th class="sort" (click)="onSort('sequenceName')">Module</th>
+                                        <th class="sort" (click)="onSort('sequenceCode')">Prefix</th>
                                         <th> Next No</th>
                                         <th> Dealer Code</th>
-                                        <!-- <th class="sort" (click)="onSort('')">Format</th> -->
+                                        <th>Manage</th>
                                     </tr>
-                                </thead>
+                                    </thead>
 
-                                <tbody>
-                                    <tr *ngFor="let sequence of sequenceList;" class="table-row"
-                                        (dblclick)="onSequenceClick(sequence)">
+                                    <tbody>
+                                    <tr *ngFor="let sequence of sequenceList;" class="table-row" (dblclick)="onSequenceClick(sequence)">
                                         <td>{{ sequence?.sequenceName | getPrefixModuleName: lstModule }}</td>
                                         <td>{{ sequence?.sequenceCode }}</td>
                                         <td>{{ sequence?.nextNo }}</td>
                                         <td>{{ sequence?.dealerCode }}</td>
-                                        <!-- <td>{{ sequence?.format }}</td> -->
-                                    </tr>
-
-                                    <!-- No Data -->
-                                    <tr *ngIf="!sequenceList || sequenceList.length === 0">
-                                        <td colspan="6" class="text-center text-muted py-3">
-                                            No Data Available
+                                        <td>
+                                        <button class="btn btn-sm btn-soft-info py-0 px-1 me-1" (click)="onSequenceClick(sequence)" title="Edit">
+                                            <i class="ri-pencil-line"></i>
+                                        </button>
+                                        <button *ngIf="isSuperAdmin" class="btn btn-sm btn-soft-danger py-0 px-1" (click)="deleteSequence(sequence)" title="Delete">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
                                         </td>
                                     </tr>
-                                </tbody>
-                            </table>
+
+                                    <tr *ngIf="!sequenceList || sequenceList.length === 0">
+                                        <td colspan="5" class="text-center text-muted py-3">No Data Available</td>
+                                    </tr>
+                                    </tbody>
+                                                                </table>
 
                         </div>
                         <!-- PAGINATION -->

@@ -95,3 +95,31 @@ color: white;
     white-space: nowrap;
     font-size: 12px;
 }
+
+.ebw-highlight {
+  background-color: #d1f7e0;
+  color: #14532d;
+  border: 1px solid #28a745;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  i {
+    font-size: 1rem;
+  }
+
+  a {
+    color: #0a6b32;
+    text-decoration: underline;
+    margin-left: 4px;
+    font-weight: 600;
+  }
+
+  a:hover {
+    color: #06421e;
+  }
+}

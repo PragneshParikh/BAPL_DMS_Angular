@@ -1,3 +1,4 @@
+//src\app\components\job-card\job-card-addForm\job-card-add-form\job-card-add-form.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +17,7 @@ import { Route, Router } from '@angular/router';
 import { ToastService } from '../../../../shared/toaster/toast-service';
 import { delay } from 'lodash';
 import { LoaderService } from '../../../../core/services/loader';
+import { EbwInvoiceService } from '../../../../core/services/ebw-invoice-service';
 import { LocationMasterService } from '../../../../core/services/location-master-service';
 import { ComplaintmasterService } from '../../../../core/services/complaintmaster-service';
 import { PrefixService } from '../../../../core/services/prefix';
@@ -43,7 +45,11 @@ export class JobCardAddForm {
   serviceHistoryList: any[] = []
   filteredChassisList: any[] = [];
   jobTypeId: number = 0
-
+  hasEbw = false;
+  ebwSchemeName: string = '';
+  ebwExpiryDate: string = '';
+  ebwInvoiceId: number | null = null;   // NEW
+  ebwBillNo: any = null;                // NEW
   selectedJobtype: any;
   selectedJobSources: any;
   selectedServiceHead: any;
@@ -154,6 +160,7 @@ export class JobCardAddForm {
     public toastr: ToastService,
     private modalService: NgbModal,
     private loader: LoaderService,
+    private ebwInvoiceService: EbwInvoiceService, 
     private toaster: ToastService) { }
 
   ngOnInit(): void {
@@ -574,7 +581,7 @@ export class JobCardAddForm {
   }
 
   onChassisChange() {
-    debugger;
+    //debugger;
     if (!this.selectedChassis) return;
     this.loadServiceHistory(this.selectedChassis);
 
@@ -596,12 +603,10 @@ export class JobCardAddForm {
     this.customerObj.nextServiceDueDate = selected.nextserviceDueDate?.split('T')[0];
     this.customerObj.insuranceExpDate = selected.insuranceExpDate?.split('T')[0];
 
-    // Model + Colour combined
     this.modelName = selected.modelName
       + (selected.colourName ? ' (' + selected.colourName + ')' : '');
 
     this.registerNo = selected.registerNo;
-
     this.batteryCapacity = selected.batteryCapacity;
     this.batteryMake = selected.batteryMake;
     this.batteryChemestry = selected.batteryChemestry;
@@ -619,6 +624,43 @@ export class JobCardAddForm {
     if (this.oemModelId) {
       this.loadPdiData(this.oemModelId);
     }
+
+    this.loadEbwInfo(this.selectedChassis); // NEW
+  }
+
+  private loadEbwInfo(chassisNo: string): void {
+    this.ebwExpiryDate = '';
+    this.hasEbw = false;
+    this.ebwInvoiceId = null;
+    this.ebwBillNo = null;
+
+    this.ebwInvoiceService.getByChassisNo(chassisNo).subscribe({
+      next: (res: any) => {
+        if (!res) return; // no EBW purchased — nothing to show, this is normal
+
+        this.hasEbw = true;
+        this.ebwExpiryDate = res.warrantyEndDate || '';
+        this.ebwSchemeName = res.schemeName || '';
+        this.ebwInvoiceId = res.id || null;
+        this.ebwBillNo = res.billNo || null;
+
+        // Only fill battery number if the inspected-lot list didn't already have one
+        if (!this.batteryNumber && res.batteryNumber) {
+          this.batteryNumber = res.batteryNumber;
+        }
+      },
+      error: () => {
+        // best-effort — don't block job card creation if this lookup fails
+      }
+    });
+  }
+
+  openEbwInvoice(): void {
+    if (!this.ebwInvoiceId) return;
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/ebw-invoice', this.ebwInvoiceId])
+    );
+    window.open(url, '_blank');
   }
   // PDiChecklist popup
   openPdiModal(content: any) {
@@ -1231,6 +1273,13 @@ validateWarranty(): boolean {
       rsaRenewalDate: "",
       remarks: ''
     };
+
+    // EBW
+    this.hasEbw = false;
+    this.ebwSchemeName = '';
+    this.ebwExpiryDate = '';
+    this.ebwInvoiceId = null;
+    this.ebwBillNo = null;
 
     // COMPLAINT
     this.complaintList = [];

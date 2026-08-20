@@ -1,3 +1,4 @@
+<!--src\app\components\job-card\job-card-addForm\job-card-add-form\job-card-add-form.html-->
 <div class="card">
   <!-- HEADER -->
   <div class="card-header d-flex justify-content-between align-items-center">
@@ -112,6 +113,18 @@
         <div *ngIf="selectedJobtype != 1">
           In Warranty Expired on {{ expireWarrentyDate || '' }}
         </div>
+
+        <!-- NEW: EBW highlight -->
+        <div *ngIf="hasEbw" class="ebw-highlight" (click)="$event.stopPropagation()">
+          <i class="ri-shield-check-line"></i>
+          Extended Battery Warranty
+          <strong>{{ ebwSchemeName }}</strong>
+          valid till <strong>{{ ebwExpiryDate | date:'dd/MM/yyyy' }}</strong>
+          <a *ngIf="ebwInvoiceId" href="javascript:void(0)" (click)="openEbwInvoice()">
+            (Bill No. {{ ebwBillNo }})
+          </a>
+        </div>
+
         <i [class]="isOpen.job ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
       </div>
       <div class="section-body" *ngIf="isOpen.job">
