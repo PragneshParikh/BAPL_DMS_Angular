@@ -405,7 +405,7 @@
                     </div>
                 </div>
 
-                <div class="dropdown ms-sm-3 header-item topbar-user" ngbDropdown>
+                <div class="dropdown ms-sm-3 header-item topbar-user" ngbDropdown *ngIf="userData">
                     <button type="button" class="btn material-shadow-none" id="page-header-user-dropdown"
                         data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ngbDropdownToggle>
                         <span class="d-flex align-items-center">
@@ -414,18 +414,18 @@
                             <span
                                 class="rounded-circle header-profile-user d-flex justify-content-center align-items-center bg-primary text-white"
                                 style="width: 32px; height: 32px;">
-                                {{ userData.compName?.charAt(0) | uppercase }}
+                                {{ userData?.compName?.charAt(0) | uppercase }}
                             </span>
                             <span class="text-start ms-xl-2">
                                 <span
-                                    class="d-none d-xl-block ms-1 fs-12 text-muted user-name-sub-text">{{userData.dealerCode}}</span>
+                                    class="d-none d-xl-block ms-1 fs-12 text-muted user-name-sub-text">{{userData?.dealerCode}}</span>
                             </span>
                         </span>
                     </button>
                     <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
                         <!-- item-->
-                        <h6 class="dropdown-header text-dark">{{userData.compName}}</h6>
-                        <h6 class="dropdown-header">{{userData.userName}}</h6>
+                        <h6 class="dropdown-header text-dark">{{userData?.compName}}</h6>
+                        <h6 class="dropdown-header">{{userData?.userName}}</h6>
                         <h6 class="dropdown-header text-dark">Last Login : {{ lastLoginDate$ | async }}</h6>
                         <a class="dropdown-item" href="javascript: void(0);" (click)="logout()">
                             <i class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i>

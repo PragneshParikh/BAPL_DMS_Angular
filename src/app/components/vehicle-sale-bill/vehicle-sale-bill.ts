@@ -1,3 +1,4 @@
+//src\app\components\vehicle-sale-bill\vehicle-sale-bill.ts
 import { Component, HostListener, NgModule } from '@angular/core';
 import { VehicleSaleBillService } from '../../core/services/vehicle-sale-bill-service';
 import { VehicleSaleBillResponseViewModel } from '../../ViewModels/VehicleSaleBill';
@@ -6,7 +7,6 @@ import { CommonModule } from '@angular/common';
 import { NgbHighlight, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
 import { Router, RouterOutlet } from '@angular/router';
-import { log } from 'console';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { debounceTime, Subject } from 'rxjs';
@@ -64,12 +64,14 @@ export class VehicleSaleBill {
   filteredDealers: any[];
   selectedDealer: string = 'All Dealers';
   showDropdown: boolean;
-expandedBillId: number | null = null;
+  expandedBillId: number | null = null;
   expandedBill: null;
-@HostListener('document:click')
-closePopup(): void {
-  this.expandedBill = null;
-}
+
+  @HostListener('document:click')
+  closePopup(): void {
+    this.expandedBill = null;
+  }
+
   constructor(private service: VehicleSaleBillService,
     private router: Router, private dealerService: DealerService,
     private loader: LoaderService,
@@ -143,34 +145,41 @@ closePopup(): void {
     this.service.getAllVehicleSaleBills(this.dealerCode, this.searchText, from, to, Status)
       .subscribe({
         next: (res) => {
-          console.log(res);
-
           this.vehicleBills = res;
           this.filteredBills = [...this.vehicleBills];
+
+          // CHANGED — now sorts by the real CreatedDate (record entry
+          // timestamp), not SaleDate, so the list always opens with whatever
+          // was most recently created at the top.
+          this.applyDefaultSort();
+
           this.updatePagination();
           this.loader.hide();
         },
         error: (err) => {
           this.loader.hide();
-
           this.toaster.show('Failed to fetch list', {
             classname: 'bg-danger text-white',
             delay: 5000
           });
-
           console.error(err);
         }
       });
   }
-  // SEARCH
+
+  private applyDefaultSort() {
+    this.filteredBills.sort((a: any, b: any) =>
+      new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
+    );
+  }
+
   onSearchChange() {
     this.searchChanged.next(this.searchText);
   }
 
   // FILTER BUTTON
   onSearch() {
-    this.loadData(); // call API with date filters
-
+    this.loadData();
   }
 
   // PAGINATION
@@ -201,8 +210,11 @@ closePopup(): void {
       if (field === 'totalItems') {
         valA = a.details?.length || 0;
         valB = b.details?.length || 0;
-      }
-      else {
+      } else if (field === 'createdDate' || field === 'saleDate') {
+        valA = a[field] ? new Date(a[field]).getTime() : 0;
+        valB = b[field] ? new Date(b[field]).getTime() : 0;
+        return (valA - valB) * dir;
+      } else {
         valA = a[field];
         valB = b[field];
       }
@@ -225,6 +237,7 @@ closePopup(): void {
   navigateToAdd() {
     this.router.navigate(['/vehicle-sale-bill/add']);
   }
+
   viewDetails(item: any) {
     this.router.navigate(['/vehicle-sale-bill/edit/' + item.id], {
       state: { bill: item }
@@ -250,9 +263,11 @@ closePopup(): void {
       }
     });
   }
+
   getLocationName(locCode: string): string {
     return this.locations.find(x => x.loccode === locCode)?.locname || locCode;
   }
+
   downloadDealerExcel(): void {
     this.loader.show();
 
@@ -271,12 +286,10 @@ closePopup(): void {
         link.click();
         window.URL.revokeObjectURL(url);
         this.loader.hide();
-        this.toaster.show('Excel downloaded successfully',
-          {
-            classname: 'bg-success text-light',
-            delay: 3000
-          }
-        );
+        this.toaster.show('Excel downloaded successfully', {
+          classname: 'bg-success text-light',
+          delay: 3000
+        });
       },
       error: () => {
         this.loader.hide();

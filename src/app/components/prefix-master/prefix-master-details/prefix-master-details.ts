@@ -6,7 +6,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { PrefixService } from '../../../core/services/prefix';
 import { StorageService } from '../../../core/services/storage';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ModuleTypes } from '../../../constant';
+import { ModuleTypes, BillingTypeOptions } from '../../../constant';
 
 @Component({
   selector: 'app-prefix-master-details',
@@ -16,8 +16,9 @@ import { ModuleTypes } from '../../../constant';
 })
 export class PrefixMasterDetails implements OnInit {
   lstModules = ModuleTypes;
-  // lstModules: any[] = [];
+  lstBillingTypes = BillingTypeOptions;   // ADDED — reuse existing constant instead of hardcoding
   lstFinancialYears: string[] = [];
+
   sequence = {
     moduleName: '',
     separator: '/',
@@ -26,7 +27,8 @@ export class PrefixMasterDetails implements OnInit {
     padding: 3,
     nextNo: 1,
     increment: 1,
-    isActive: true
+    isActive: true,
+    billingType: null as number | null
   };
 
   isDuplicate = false;
@@ -36,6 +38,13 @@ export class PrefixMasterDetails implements OnInit {
   dealerCode: string = '';
   isEditMode = false;
   editId: number = 0;
+
+  // FIXED — correct name value confirmed from constant.ts's ModuleTypes array
+  readonly VEHICLE_SALE_BILL_MODULE = 'sale_bill';
+
+  get isVehicleSaleBillModule(): boolean {
+    return this.sequence.moduleName === this.VEHICLE_SALE_BILL_MODULE;
+  }
 
   constructor(
     private toast: ToastService,
@@ -87,7 +96,8 @@ export class PrefixMasterDetails implements OnInit {
           padding: (res.sequenceCode.match(/#/g) || []).length || 3,
           nextNo: res.nextNo,
           increment: res.increment,
-          isActive: res.isActive
+          isActive: res.isActive,
+          billingType: res.billingType ?? null
         };
       },
       error: (err) => {
@@ -204,7 +214,12 @@ export class PrefixMasterDetails implements OnInit {
     if (module && module[0].isAdmin) return;
 
     if (form.invalid) return;
-    if (this.isDuplicate) return;   // guard even if Save wasn't disabled for some reason
+    if (this.isDuplicate) return;
+
+    if (this.isVehicleSaleBillModule && !this.sequence.billingType) {
+      this.toast.show('Please select a Billing Type.', { classname: 'bg-warning text-white', delay: 4000 });
+      return;
+    }
 
     const length = this.sequence.padding || 4;
     const masked = '#'.repeat(length);
@@ -218,6 +233,7 @@ export class PrefixMasterDetails implements OnInit {
       dealerCode: this.dealerCode,
       year: this.sequence.financialYear,
       isActive: this.sequence.isActive,
+      billingType: this.isVehicleSaleBillModule ? this.sequence.billingType : null,
       createdBy: this.storageService.getUserId() || 0,
       createdDate: new Date()
     }
@@ -307,11 +323,17 @@ export class PrefixMasterDetails implements OnInit {
       return;
     }
 
+    if (this.isVehicleSaleBillModule && !this.sequence.billingType) {
+      this.isDuplicate = false;
+      return;
+    }
+
     this.prefixService.checkDuplicate(
       this.dealerCode,
       this.sequence.moduleName,
       this.sequence.financialYear,
       this.sequence.prefix,
+      this.isVehicleSaleBillModule ? this.sequence.billingType! : undefined,
       this.isEditMode ? this.editId : undefined
     ).subscribe({
       next: (isDup: boolean) => {
@@ -325,6 +347,7 @@ export class PrefixMasterDetails implements OnInit {
           x.year === this.sequence.financialYear &&
           x.dealerCode === this.dealerCode &&
           x.sequenceCode?.includes(this.sequence.prefix) &&
+          (this.isVehicleSaleBillModule ? x.billingType === this.sequence.billingType : true) &&
           (!this.isEditMode || x.id !== this.editId)
         );
       }

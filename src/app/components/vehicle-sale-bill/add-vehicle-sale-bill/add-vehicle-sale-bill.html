@@ -1,3 +1,4 @@
+<!-- src\app\components\vehicle-sale-bill\add-vehicle-sale-bill\add-vehicle-sale-bill.html -->
 <!-- Page Title -->
 
 <!--NB: The commented parts were designed based on old DMS, but as per requiremnet they are commented and will take into consideration with requirement-->
@@ -115,23 +116,35 @@
 
                 <div class="collapse show" id="saleInfo">
                     <div class="card card-body">
-                        <div class="row g-1">
 
-                            <!-- ================= ROW 1 ================= -->
+                        <!-- ROW 1 — 6 fields -->
+                        <div class="sale-info-grid sale-info-grid-6">
 
-                            <div class="col-md-2">
+                            <div class="field-group">
                                 <label>Sale Date</label>
                                 <input type="date" class="form-control form-control-sm" [(ngModel)]="model.saleDate"
                                     name="saleDate" readonly>
                             </div>
 
-                            <div class="col-md-2">
+                            <div class="field-group billing-type-field">
+                                <label class="form-label form-label-sm" for="billingType">Billing Type</label>
+                                <select class="form-select form-select-sm" name="billingType"
+                                    [(ngModel)]="model.billingType" (change)="onBillingTypeChange()" [disabled]="!!billId">
+                                    <option value="">Select Billing Type</option>
+                                    <option *ngFor="let option of billingTypeOptions" [ngValue]="option.id"
+                                        [disabled]="model.customerType === 'B2B' && option.id !== 1">
+                                        {{ option.value }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="field-group">
                                 <label class="form-label form-label-sm">Sale Bill No</label>
                                 <input type="text" class="form-control form-control-sm" [(ngModel)]="model.saleBillNo"
                                     name="saleBillNo" readonly>
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="field-group">
                                 <label>
                                     Location <span class="text-danger">*</span>
                                 </label>
@@ -148,202 +161,148 @@
                                 </small>
                             </div>
 
-                            <!-- B2B -->
-                            <div class="col-md-2">
-                                <label class="form-label d-block mb-1 ">Customer Type</label>
-                                <div class="btn-group w-auto" role="group">
+                            <div class="field-group">
+                                <label class="form-label d-block mb-1">Customer Type</label>
+                                <div class="btn-group w-100" role="group">
                                     <input type="radio" class="btn-check" name="saleTypeSwitch" id="b2c" checked
                                         [(ngModel)]="model.customerType" value="B2C" (change)="onCustomerTypeChange()">
-                                    <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2c">B2C</label>
+                                    <label class="btn btn-outline-primary btn-sm" for="b2c">B2C</label>
 
                                     <input type="radio" class="btn-check" name="saleTypeSwitch" id="b2b"
                                         [(ngModel)]="model.customerType" value="B2B" (change)="onCustomerTypeChange()">
-                                    <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2b">B2B</label>
+                                    <label class="btn btn-outline-primary btn-sm" for="b2b">B2B</label>
                                 </div>
                             </div>
 
-                            <!-- D2D -->
-                            <div class="col-md-2">
+                            <div class="field-group">
                                 <label class="form-label d-block mb-1">D2D</label>
-
-                                <div class="btn-group w-auto" role="group">
-
-                                    <!-- Disable -->
+                                <div class="btn-group w-100" role="group">
                                     <input type="radio" class="btn-check" name="d2dSwitch" id="d2dOff" [value]="false"
                                         [(ngModel)]="model.isD2D" (change)="onD2DChange()"
-                                        [disabled]="!showD2D && !isSuperAdmin    ">
+                                        [disabled]="!showD2D && !isSuperAdmin">
+                                    <label class="btn btn-outline-primary btn-sm" for="d2dOff">No</label>
 
-                                    <label class="btn btn-outline-primary btn-sm px-2 py-1" for="d2dOff">
-                                        No
-                                    </label>
-
-                                    <!-- Enable -->
                                     <input type="radio" class="btn-check" name="d2dSwitch" id="d2dOn" [value]="true"
                                         [(ngModel)]="model.isD2D" (change)="onD2DChange()">
-
-                                    <label class="btn btn-outline-primary btn-sm px-2 py-1" for="d2dOn">
-                                        Yes
-                                    </label>
-
+                                    <label class="btn btn-outline-primary btn-sm" for="d2dOn">Yes</label>
                                 </div>
                             </div>
 
-                            <!-- ================= ROW 2 ================= -->
+                        </div>
 
-                            <div class="col-md-3">
+                        <!-- ROW 2 — 4 fields -->
+                        <div class="sale-info-grid sale-info-grid-4">
+
+                            <div class="field-group">
                                 <label class="form-label form-label-sm">Sale Type</label>
                                 <select class="form-select form-select-sm" #saleType="ngModel"
                                     [(ngModel)]="model.saleType" name="saleType" (change)="onSaleTypeChange()" required>
-
-
                                     <option *ngFor="let item of saleTypeOptions" [value]="item.value">
                                         {{ item.name }}
                                     </option>
-
                                 </select>
                                 <small *ngIf="saleType.touched && saleType.invalid" class="text-danger mt-1">
                                     Sale Type is required.
                                 </small>
                             </div>
 
-
-                            <div class="col-md-3">
-                                <label>Financier<span *ngIf="model.saleType === 'Credit'" class="text-danger">*</span>
-                                </label>
-                                <div class="d-flex align-items-center">
-                                    <!-- Select -->
+                            <div class="field-group">
+                                <label>Financier<span *ngIf="model.saleType === 'Credit'" class="text-danger">*</span></label>
+                                <div class="d-flex align-items-center gap-1">
                                     <select class="form-select form-select-sm scrollable-dropdown"
                                         [(ngModel)]="model.financier" name="financier" #financier="ngModel"
                                         [disabled]="model.saleType !== 'Credit'"
                                         [required]="model.saleType === 'Credit'">
-                                        <button type="button" class="btn btn-sm btn-warning"
-                                            (click)="openCustomerLedgerAdd(selectedCustomerId)"
-                                            [ngbTooltip]="'Edit Party'">
-                                            <i class="ri-edit-line"></i>
-                                        </button>
-                                        <option class="dropdown-list" value="">Select Financier</option>
-
-                                        <option *ngFor="let f of financiers" [value]="f.id" class="dropdown-list">
-
+                                        <option value="">Select Financier</option>
+                                        <option *ngFor="let f of financiers" [value]="f.id">
                                             {{ f.ledgerName }}
-
                                         </option>
-
-
                                     </select>
-
-
+                                    <button type="button" class="btn btn-sm btn-warning flex-shrink-0"
+                                        (click)="openCustomerLedgerAdd(selectedCustomerId)" [ngbTooltip]="'Edit Party'">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
                                 </div>
                                 <small *ngIf="financier.invalid && (financier.touched || vehicleSaleForm.submitted)"
                                     class="text-danger">
                                     Financier is required.
                                 </small>
-
                             </div>
-                            <!-- CASH FIELD -->
-                            <div class="col-md-3">
+
+                            <div class="field-group">
                                 <label class="form-label form-label-sm" for="cashAccount">Cash A/C<span
-                                        *ngIf="model.saleType === 'Cash'" class="text-danger">*</span>
-                                </label>
+                                        *ngIf="model.saleType === 'Cash'" class="text-danger">*</span></label>
                                 <select class="form-select form-select-sm" name="cashAccount"
                                     [(ngModel)]="model.cashAccount" #cashAccount="ngModel"
-                                    [required]="model.saleType === 'Cash'" [disabled]="model.saleType !== 'Cash'"
-                                    [required]="model.saleType === 'Cash'">
+                                    [required]="model.saleType === 'Cash'" [disabled]="model.saleType !== 'Cash'">
                                     <option value="">Select Cash A/C</option>
                                     <option *ngFor="let option of CashTypeOptions" [value]="option.value">
                                         {{ option.name }}
                                     </option>
-
                                 </select>
                                 <small *ngIf="cashAccount.invalid && (cashAccount.touched || vehicleSaleForm.submitted)"
                                     class="text-danger">
                                     Cash A/C is required.
                                 </small>
-
                             </div>
 
-                            <!-- ================= Billing ================= -->
-                            <div class="col-md-3">
-                                <label class="form-label form-label-sm" for="billingType">Billing Type</label>
-
-                                <select class="form-select form-select-sm" name="billingType"
-                                    [(ngModel)]="model.billingType">
-
-                                    <option value="">Select Billing Type</option>
-
-                                    <option *ngFor="let option of billingTypeOptions" [ngValue]="option.id"
-                                        [disabled]="model.customerType === 'B2B' && option.id !== 1">
-                                        {{ option.value }}
-                                    </option>
-
-                                </select>
-                            </div>
-
-
-                            <div class="col-md-3">
+                            <div class="field-group">
                                 <label class="form-label form-label-sm">Bill From</label>
-                                <input type="text" class="form-control form-control-sm" [value]="'Direct Billing'"
-                                    [disabled]="true">
+                                <input type="text" class="form-control form-control-sm" [value]="'Direct Billing'" [disabled]="true">
                             </div>
 
+                        </div>
 
-                            <div class="col-md-3">
+                        <!-- ROW 3 — 4 fields -->
+                        <div class="sale-info-grid sale-info-grid-4">
+
+                            <div class="field-group position-relative">
                                 <label class="form-label form-label-sm">
                                     Customer Name <span class="text-danger">*</span>
                                 </label>
-
-                                <!-- INPUT + BUTTON + DROPDOWN -->
                                 <div class="d-flex position-relative">
-
                                     <input type="text" class="form-control form-control-sm" name="customerName"
                                         [(ngModel)]="model.customerName" required #customerName="ngModel"
                                         (input)="filterParties()"
                                         [class.is-invalid]="customerName.invalid && (customerName.touched || vehicleSaleForm.submitted)" />
 
-                                    <button *ngIf="billId" type="button" class="btn btn-sm btn-primary"
+                                    <button *ngIf="billId" type="button" class="btn btn-sm btn-primary flex-shrink-0"
                                         (click)="openCustomerLedgerAdd()" [ngbTooltip]="'Edit Party Details'">
                                         +
                                     </button>
 
-                                    <!-- AUTOCOMPLETE DROPDOWN -->
                                     <ul *ngIf="filteredParties.length > 0"
                                         class="list-group position-absolute w-100 shadow-sm small-dropdown"
-                                        style="top:100%; z-index:1000; max-height:200px; overflow-y:auto;">
-
+                                        style="top:100%; z-index:1050; max-height:200px; overflow-y:auto;">
                                         <li class="list-group-item list-group-item-action py-1 px-2 small text-dark"
                                             *ngFor="let party of filteredParties" (click)="selectParty(party)">
                                             <b>{{ party.ledgerName }}</b><br>({{party.ledgerCode}})
                                         </li>
-
                                     </ul>
                                 </div>
 
-                                <!--   VALIDATION (OUTSIDE) -->
                                 <small class="invalid-feedback d-block"
                                     *ngIf="customerName.invalid && (customerName.touched || vehicleSaleForm.submitted)">
                                     Customer Name is required.
                                 </small>
-
-                                <!-- VALIDATION IF NOT IN LIST-->
                                 <div class="text-danger small"
                                     *ngIf="model.customerName && !isCustomerValid() && (customerName.touched || vehicleSaleForm.submitted)">
                                     Party not found. Please click + to add new party.
                                 </div>
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="field-group">
                                 <label class="form-label form-label-sm" for="billingName">Billing Name<span
                                         class="text-danger">*</span></label>
                                 <input type="text" class="form-control form-control-sm" name="billingName"
                                     [(ngModel)]="model.billingName" required #billingName="ngModel">
-                                <div><small
-                                        *ngIf="billingName.invalid && (billingName.touched || vehicleSaleForm.submitted)"
-                                        class="text-danger text-small mt-1">
-                                        Billing Name is required.</small>
-                                </div>
+                                <small *ngIf="billingName.invalid && (billingName.touched || vehicleSaleForm.submitted)"
+                                    class="text-danger mt-1">
+                                    Billing Name is required.
+                                </small>
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="field-group">
                                 <label class="form-label form-label-sm" for="salesExecutive">Sales Executive</label>
                                 <select class="form-select form-select-sm" name="salesExecutive"
                                     [(ngModel)]="model.salesExecutive">
@@ -354,7 +313,7 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="field-group">
                                 <label class="form-label form-label-sm">Temporary Registration Required</label>
                                 <select class="form-select form-select-sm" name="tempRegRequired"
                                     [(ngModel)]="model.tempRegRequired">
@@ -364,22 +323,17 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-3 d-none" id="tempRegNoField">
-                                <label class="form-label form-label-sm" for="tempRegNo">Temporary Registration
-                                    No</label>
+                        </div>
+
+                        <!-- ROW 4 — conditional, only when Temp Reg is required -->
+                        <div class="sale-info-grid sale-info-grid-4" *ngIf="model.tempRegRequired === 'yes'">
+                            <div class="field-group">
+                                <label class="form-label form-label-sm" for="tempRegNo">Temporary Registration No</label>
                                 <input type="text" class="form-control form-control-sm" id="tempRegNo" name="tempRegNo"
                                     [(ngModel)]="model.tempRegNo">
                             </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label form-label-sm" for="tempRegNo">Temporary Registration
-                                    No</label>
-                                <input type="text" class="form-control form-control-sm" id="tempRegNo" name="tempRegNo"
-                                    [(ngModel)]="model.tempRegNo" [disabled]="model.tempRegRequired !== 'yes'">
-                            </div>
-
-
                         </div>
+
                     </div>
                 </div>
 

@@ -52,10 +52,19 @@ export class PrefixService {
     return this.httpClient.delete(`${this.baseUrl}/prefix/${id}`);
   }
 
-  checkDuplicate(dealerCode: string, moduleName: string, year: string, prefix: string, excludeId?: number): Observable<boolean> {
+  checkDuplicate(dealerCode: string, moduleName: string, year: string, prefix: string, billingType?: number, excludeId?: number): Observable<boolean> {
     let params: any = { dealerCode, moduleName, year, prefix };
+    if (billingType != null) params.billingType = billingType;
     if (excludeId) params.excludeId = excludeId;
     return this.httpClient.get<boolean>(`${this.baseUrl}/prefix/checkDuplicate`, { params });
+  }
+
+  getPrefixByDealerModuleBillingType(dealerCode: string, module: string, billingType: number): Observable<string> {
+    return this.httpClient.get(`${this.baseUrl}/prefix/${dealerCode}/modules/${module}/billingType/${billingType}`, { responseType: 'text' });
+  }
+
+  updateNextNumberByDealerModuleBillingType(dealerCode: string, module: string, billingType: number): Observable<any> {
+    return this.httpClient.put(`${this.baseUrl}/prefix/${dealerCode}/modules/${module}/billingType/${billingType}`, null);
   }
 
   getPrefixByPagedByDealer(searchTerm: string = null, pageIndex: number, pageSize: number, dealerCode: string | null): Observable<any> {

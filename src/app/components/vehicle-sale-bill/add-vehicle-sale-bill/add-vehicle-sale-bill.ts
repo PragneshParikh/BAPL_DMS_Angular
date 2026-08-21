@@ -1,3 +1,4 @@
+//src\app\components\vehicle-sale-bill\add-vehicle-sale-bill\add-vehicle-sale-bill.ts
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormGroup, FormsModule, NgForm } from '@angular/forms';
 import { StorageService } from '../../../core/services/storage';
@@ -445,17 +446,60 @@ export class AddVehicleSaleBill implements OnInit {
     }
   }
 
+  // getNextSaleBillNo() {
+  //   const dealerCode = this.storageService.getDealerCode();
+  //   this.prefixService.getPrefixByDealerByModule(dealerCode, 'sale_bill')
+  //     .subscribe({
+  //       next: (res: string) => {
+  //         this.model.saleBillNo = res;
+  //       },
+  //       error: (err) => {
+  //         console.error('Error fetching prefix:', err);
+  //       }
+  //     });
+  // }
   getNextSaleBillNo() {
     const dealerCode = this.storageService.getDealerCode();
-    this.prefixService.getPrefixByDealerByModule(dealerCode, 'sale_bill')
-      .subscribe({
-        next: (res: string) => {
-          this.model.saleBillNo = res;
-        },
-        error: (err) => {
-          console.error('Error fetching prefix:', err);
-        }
-      });
+
+    // CHANGED — for Vehicle Sale Bill, the prefix sequence is now scoped by
+    // Billing Type, not just Module. Falls back to the old module-only lookup
+    // if no billing type is selected yet (shouldn't normally happen since it
+    // defaults via onCustomerTypeChange(), but kept as a safety net).
+    if (this.model.billingType) {
+      this.prefixService.getPrefixByDealerModuleBillingType(dealerCode, 'sale_bill', this.model.billingType)
+        .subscribe({
+          next: (res: string) => {
+            this.model.saleBillNo = res;
+          },
+          error: (err) => {
+            console.error('Error fetching billing-type-scoped prefix:', err);
+            this.toaster.show('No prefix configured for this Billing Type. Please configure it in Prefix Master.', {
+              classname: 'bg-warning text-dark',
+              delay: 6000
+            });
+          }
+        });
+    } else {
+      this.prefixService.getPrefixByDealerByModule(dealerCode, 'sale_bill')
+        .subscribe({
+          next: (res: string) => {
+            this.model.saleBillNo = res;
+          },
+          error: (err) => {
+            console.error('Error fetching prefix:', err);
+          }
+        });
+    }
+  }
+
+  // ADDED — re-fetch the next Sale Bill No whenever Billing Type changes,
+  // since each Billing Type has its own independent numbering sequence.
+  // Only applies when creating a NEW bill — editing an existing bill must
+  // never regenerate its already-assigned Sale Bill No.
+  onBillingTypeChange() {
+    if (!this.billId) {
+      this.getNextSaleBillNo();
+    }
   }
 
   selectReceipt(item: ReceiptEntryModel) {
@@ -676,6 +720,7 @@ export class AddVehicleSaleBill implements OnInit {
     if (this.model.customerType === 'B2C') {
       this.model.billingType = 2;
     }
+    this.onBillingTypeChange();   // ADDED — refresh prefix whenever type auto-changes billingType
   }
 
   updateVehicleSaleBill(string?: string) {

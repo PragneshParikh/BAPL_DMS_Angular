@@ -1,20 +1,98 @@
-.sort
-    {
-        padding-right: 35px; // extra space for icons
-    }
-    .td{
-      font-size:12px;
-    }
-    
-    #saleTable {
- .table .sort::before {
-        top: 6px;
-    }
+//src\app\components\vehicle-sale-bill\vehicle-sale-bill.scss
 
-    .table .sort::after {
-        top: 0px;
-    }
+// ===== FIXED — page title being hidden under the table's sticky header.
+// The sticky thead's z-index was climbing above the page-title-box.
+// Give the page title a higher stacking context and let the sticky
+// header only apply *within* its own scroll container, not globally. =====
+.page-title-box {
+  position: relative;
+  z-index: 20;
+  background: #fff;
 }
+
+// ===== Sortable column headers =====
+.sort {
+  position: relative;
+  padding-right: 30px !important;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background-color: #f1f3f5;
+  }
+}
+
+// ===== Table scroll container =====
+#saleTable {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  position: relative;
+  z-index: 1; // FIXED — was implicitly climbing via sticky thead; scope it locally
+
+  table {
+    width: max-content;
+    min-width: 100%;
+    margin-bottom: 0;
+  }
+
+  .table .sort::before,
+  .table .sort::after {
+    position: absolute;
+    right: 10px;
+    font-family: 'remixicon';
+    font-size: 10px;
+    color: #adb5bd;
+  }
+
+  .table .sort::before {
+    content: '\ea78'; // up arrow
+    top: 6px;
+  }
+
+  .table .sort::after {
+    content: '\ea6f'; // down arrow
+    top: 14px;
+  }
+
+  th,
+  td {
+    font-size: 12px;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  // FIXED — sticky header stays contained to this table's own scroll box
+  // (z-index 2, not 5) so it can never sit above the page title or navbar.
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8f9fa;
+    color: #495057; // ensure header text is always dark, never inherits white
+  }
+
+  // FIXED — Form 22 / Ex-Showroom checkbox column headers were showing
+  // white/invisible text against the light thead background. Force dark
+  // text on every header cell, including these two.
+  thead th,
+  thead th small,
+  thead th .d-flex {
+    color: #f8f9fa !important;
+  }
+}
+
+// ===== Created Date column =====
+.created-date-col {
+  min-width: 140px;
+  white-space: nowrap;
+}
+
+// ===== Dealer search dropdown (SuperAdmin filter) =====
 .position-relative {
   position: relative;
 }
@@ -24,41 +102,136 @@
   overflow-y: auto;
   display: block;
   position: absolute;
+  top: 100%;
+  left: 0;
   width: 100%;
-  z-index: 1000;
+  z-index: 1050;
+  margin-top: 2px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+
+  .dropdown-item {
+    cursor: pointer;
+    font-size: 12px;
+    padding: 6px 12px;
+
+    &:hover {
+      background-color: #eef2ff;
+    }
+  }
 }
 
-.dropdown-item {
-  cursor: pointer;
-}
-
+// ===== Chassis info popup (per-row expand) =====
 .chassis-popup {
-    position: absolute;
-    top: 100%;          /* show below button */
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1060;
 
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 
-    min-width: 450px;
-    max-width: 550px;
-    padding: 6px;
-}
+  min-width: 450px;
+  max-width: 550px;
+  padding: 8px;
 
-.chassis-popup table {
+  table {
     margin-bottom: 0;
     font-size: 12px;
-}
 
-.chassis-popup th,
-.chassis-popup td {
-    padding: 4px 8px !important;
+    th,
+    td {
+      padding: 5px 8px !important;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      font-size: 11px;
+      color: #212529;
+    }
+  }
 }
 
 .fixed-table {
-    overflow: visible !important;
+  overflow: visible;
+  position: relative;
+}
+
+// ===== Filter card =====
+.card-body {
+  .form-label.small {
+    font-size: 11px;
+    font-weight: 500;
+    color: #6c757d;
+  }
+}
+
+// ===== Search box =====
+.search-box {
+  position: relative;
+  min-width: 200px;
+
+  .search {
+    padding-right: 32px;
+    font-size: 13px;
+    height: 32px;
+  }
+
+  .search-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #adb5bd;
+    pointer-events: none;
+  }
+}
+
+// ===== Checkbox columns (Form 22 / Ex-Showroom selection) — FIXED text color =====
+.table th .d-flex.align-items-center.gap-1 {
+  small {
+    font-size: 10px;
+    color: #495057 !important; // was likely white/invisible; now matches other header text
+    white-space: nowrap;
+    font-weight: 600;
+  }
+}
+
+// ===== Badges in details modal =====
+.badge.bg-success,
+.badge.bg-warning {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+// ===== Pagination alignment =====
+.gridjs-pagination {
+  display: flex;
+  justify-content: flex-end;
+}
+
+// ===== Table density overall =====
+.table-bordered {
+  th,
+  td {
+    vertical-align: middle;
+  }
+}
+
+// ===== Responsive =====
+@media (max-width: 992px) {
+  .row.g-2.align-items-end {
+    > div {
+      margin-bottom: 8px;
+    }
+  }
+
+  .search-box {
+    min-width: 150px;
+  }
 }

@@ -37,6 +37,21 @@
                     </div>
                 </div>
 
+                <!-- Billing Type — only visible when Module = Vehicle Sale Bill (name: 'sale_bill') -->
+                <div class="col-md-3" *ngIf="isVehicleSaleBillModule">
+                    <label class="form-label">Billing Type</label>
+                    <select class="form-select form-select-sm" name="billingType" #billingType="ngModel"
+                        [(ngModel)]="sequence.billingType" (change)="checkDuplicate()" required>
+                        <option [ngValue]="null">Select Billing Type</option>
+                        <option *ngFor="let bt of lstBillingTypes" [ngValue]="bt.id">{{ bt.value }}</option>
+                    </select>
+                    @if (billingType.invalid && billingType.touched) {
+                    <small class="text-danger">
+                        Billing Type is required
+                    </small>
+                    }
+                </div>
+
                 <!-- Prefix -->
                 <div class="col-md-3">
                     <label class="form-label">Prefix</label>

@@ -70,6 +70,7 @@ export interface VehicleSaleBillResponseViewModel {
   totalAmount: number;
   location: string;
   saleDate: string;
+  createdDate: string;   // ADDED — matches backend's CreatedDate
   saleType: string;
   billingName: string;
   referralName: string;
