@@ -68,14 +68,29 @@ getDetail(id: number): Observable<LocationDetailModel> {
     return this.httpClient.put(`${this.baseUrl}/bg-role/location/${id}`, model);
   }
 
-  getMenuAccess(id: number, roleId?: string): Observable<LocationMenuAccessResponse> {
+  // FIX: locationSelectedModule/locationSelectedArea were accepted as
+  // parameters but never actually added to `params` — only roleId was sent.
+  // That meant every call silently ignored which Module/Area was picked on
+  // the Edit Location page, regardless of what the dropdowns showed.
+  getMenuAccess(id: number, roleId?: string, locationSelectedModule?: string, locationSelectedArea?: string): Observable<LocationMenuAccessResponse> {
     let params = new HttpParams();
     if (roleId) params = params.set('roleId', roleId);
+    if (locationSelectedModule) params = params.set('module', locationSelectedModule);
+    if (locationSelectedArea) params = params.set('area', locationSelectedArea);
     return this.httpClient.get<LocationMenuAccessResponse>(`${this.baseUrl}/bg-role/location/${id}/menu-access`, { params });
   }
 
-  updateMenuAccess(id: number, roleId: string, grantedSubMenuIds: number[]): Observable<any> {
-    return this.httpClient.put(`${this.baseUrl}/bg-role/location/${id}/menu-access`, { roleId, grantedSubMenuIds });
+  // FIX: same bug as above but for the PUT body — module/area were accepted
+  // as parameters but never included in the request body, so the backend's
+  // UpdateDealerMenuAccessViewModel.Module always arrived as null, which
+  // fails its required-field validation ("The Module field is required.").
+  updateMenuAccess(id: number, roleId: string, grantedSubMenuIds: number[], locationSelectedModule: string, locationSelectedArea: string): Observable<any> {
+    return this.httpClient.put(`${this.baseUrl}/bg-role/location/${id}/menu-access`, {
+      roleId,
+      grantedSubMenuIds,
+      module: locationSelectedModule,
+      area: locationSelectedArea
+    });
   }
 
 }

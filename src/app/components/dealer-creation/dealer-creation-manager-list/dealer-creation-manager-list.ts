@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { DealerCreationManagerService } from '../../../core/services/dealer-creation-manager';
 import { DealerListModel } from '../../../ViewModels/models/DealerListModel';
@@ -10,10 +11,7 @@ import { ReportService } from '../../../core/services/report.service';
 import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model';
 import { BgRoleService } from '../../../core/services/bg-role';
 import { BgRoleMappingModel } from '../../../ViewModels/models/BgRoleMappingModel';
-import { DealerMenuAccessResponse, DealerMenuAccessItem, DealerLocationModel } from '../../../ViewModels/models/DealerMenuAccessModel';
-import { LocationDetailModel } from '../../../ViewModels/models/LocationDetailModel';
-import { LocationMenuAccessResponse } from '../../../ViewModels/models/LocationMenuAccessModel';
-import { LocationMasterService } from '../../../core/services/location-master-service';
+import { DealerLocationModel } from '../../../ViewModels/models/DealerMenuAccessModel';
 
 @Component({
   selector: 'app-dealer-creation-manager-list',
@@ -50,12 +48,7 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   filteredRoles: BgRoleMappingModel[] = [];
   showRoleDropdown = false;
 
-  // ── Menu Access modal (dealer-level) ──
-  showMenuAccessModal = false;
-  menuAccessTarget: DealerListModel | null = null;
-  menuAccessData: DealerMenuAccessResponse | null = null;
-  menuAccessLoading = false;
-  menuAccessSelectedRoleId = '';
+  // Dealer-level "Menu Access" (separate dedicated page) - onMenuAccess() below.
 
   // ── Dealer Locations — inline expandable row (accordion: one open at a time) ──
   expandedDealerId: number | null = null;
@@ -66,19 +59,11 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   selectedLocationIds: Set<number> = new Set();
   bulkActionLoading = false;
 
-  // ── Location Edit modal — Name, Code, its OWN Role, its OWN Menu Access ──
-  showLocationEditModal = false;
-  locationEditTarget: DealerLocationModel | null = null;
-  locationEditDetail: LocationDetailModel | null = null;
-  locationEditForm!: FormGroup;
-  locationEditLoading = false;
-
-  locationRoleSearchText = '';
-  filteredLocationRoles: BgRoleMappingModel[] = [];
-  showLocationRoleDropdown = false;
-
-  locationMenuAccessData: LocationMenuAccessResponse | null = null;
-  locationMenuAccessLoading = false;
+  // NOTE: the "Edit Location" popup has been removed entirely. Opening a
+  // location (onOpenLocation below) now navigates to a dedicated
+  // LocationEditPage in a new browser tab - same pattern as the
+  // dealer-level Menu Access page - which handles Code/Name/Role AND
+  // Access Menu together. No modal state is needed here anymore.
 
   private destroy$ = new Subject<void>();
   private static readonly AUTO_SEARCH_DEBOUNCE_MS = 400;
@@ -88,9 +73,9 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     private dealerService: DealerCreationManagerService,
     private reportService: ReportService,
     private bgRoleService: BgRoleService,
-    private locationManagerService: LocationMasterService,
     private loader: LoaderService,
-    private toaster: ToastService
+    private toaster: ToastService,
+    private router: Router
   ) {
     this.filterForm = this.fb.group({
       dealerCode: [''],
@@ -102,12 +87,6 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
       compname: [''],
       email: [''],
       isActive: [true],
-      roleId: ['']
-    });
-
-    this.locationEditForm = this.fb.group({
-      locCode: [''],
-      locName: [''],
       roleId: ['']
     });
   }
@@ -221,12 +200,25 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
       isActive: raw.isActive
     }).subscribe({
       next: () => {
-        if (raw.roleId) {
-          this.dealerService.assignRole(this.editTarget!.id, raw.roleId).subscribe({
+        const previousRoleId = this.editTarget?.roleId || '';
+        const newRoleId = raw.roleId || '';
+
+        if (newRoleId && newRoleId !== previousRoleId) {
+          this.dealerService.assignRole(this.editTarget!.id, newRoleId).subscribe({
             next: () => this.finishSave(),
             error: (err) => {
               this.loader.hide();
               this.toaster.show(err?.error?.message || 'Dealer saved, but role assignment failed.', { classname: 'bg-warning text-white', delay: 6000 });
+              this.closeEditModal();
+              this.loadDealers();
+            }
+          });
+        } else if (!newRoleId && previousRoleId) {
+          this.dealerService.unassignRole(this.editTarget!.id).subscribe({
+            next: () => this.finishSave(),
+            error: (err) => {
+              this.loader.hide();
+              this.toaster.show(err?.error?.message || 'Dealer saved, but role removal failed.', { classname: 'bg-warning text-white', delay: 6000 });
               this.closeEditModal();
               this.loadDealers();
             }
@@ -374,124 +366,15 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // MENU ACCESS (dealer-level)
+  // MENU ACCESS (dealer-level) — opens a dedicated page in a new tab.
+  // Unchanged - this is the 3rd icon on each dealer row.
   // ═══════════════════════════════════════════════════════════════════
 
   onMenuAccess(dealer: DealerListModel): void {
-    this.menuAccessTarget = dealer;
-    this.menuAccessData = null;
-    this.menuAccessSelectedRoleId = '';
-    this.menuAccessLoading = true;
-    this.showMenuAccessModal = true;
-
-    this.dealerService.getMenuAccess(dealer.id).subscribe({
-      next: (res) => {
-        this.menuAccessData = res;
-        this.menuAccessSelectedRoleId = res.roleId || '';
-        this.menuAccessLoading = false;
-      },
-      error: (err) => {
-        this.menuAccessLoading = false;
-        this.toaster.show(err?.error?.message || 'Failed to load menu access.', { classname: 'bg-warning text-white', delay: 5000 });
-        this.closeMenuAccessModal();
-      }
-    });
-  }
-
-  onMenuAccessRoleChange(): void {
-    if (!this.menuAccessTarget || !this.menuAccessSelectedRoleId) return;
-
-    this.menuAccessLoading = true;
-    this.dealerService.getMenuAccess(this.menuAccessTarget.id, this.menuAccessSelectedRoleId).subscribe({
-      next: (res) => {
-        this.menuAccessData = res;
-        this.menuAccessLoading = false;
-      },
-      error: (err) => {
-        this.menuAccessLoading = false;
-        this.toaster.show(err?.error?.message || 'Failed to load menu access.', { classname: 'bg-warning text-white', delay: 5000 });
-      }
-    });
-  }
-
-  get pairedMenuRows(): { process: DealerMenuAccessItem | null; report: DealerMenuAccessItem | null }[] {
-    if (!this.menuAccessData) return [];
-    return this.buildPairedRows(this.menuAccessData.groups);
-  }
-
-  private buildPairedRows(groups: { topMenuName: string; items: DealerMenuAccessItem[] }[]) {
-    const processItems = groups.find(g => g.topMenuName === 'Process')?.items ?? [];
-    const reportItems = groups.find(g => g.topMenuName === 'Reports')?.items ?? [];
-
-    const maxLen = Math.max(processItems.length, reportItems.length);
-    const rows: { process: DealerMenuAccessItem | null; report: DealerMenuAccessItem | null }[] = [];
-
-    for (let i = 0; i < maxLen; i++) {
-      rows.push({
-        process: processItems[i] ?? null,
-        report: reportItems[i] ?? null
-      });
-    }
-
-    return rows;
-  }
-
-  // ═══════════════════════════════════════════════════════════════════
-  // SELECT ALL — MENU ACCESS (Process / Reports)
-  // Generic over any { topMenuName, items }[] group array — shared by both
-  // the dealer-level Menu Access modal (menuAccessData) and the Location
-  // Edit modal's own menu access (locationMenuAccessData), since both use
-  // the identical shape and the same DealerMenuAccessItem type.
-  // ═══════════════════════════════════════════════════════════════════
-
-  getProcessItems(groups?: { topMenuName: string; items: DealerMenuAccessItem[] }[] | null): DealerMenuAccessItem[] {
-    return groups?.find(g => g.topMenuName === 'Process')?.items ?? [];
-  }
-
-  getReportItems(groups?: { topMenuName: string; items: DealerMenuAccessItem[] }[] | null): DealerMenuAccessItem[] {
-    return groups?.find(g => g.topMenuName === 'Reports')?.items ?? [];
-  }
-
-  isAllGranted(items: DealerMenuAccessItem[]): boolean {
-    return items.length > 0 && items.every(i => i.isGranted);
-  }
-
-  toggleAllGranted(items: DealerMenuAccessItem[], event: any): void {
-    const checked = event.target.checked;
-    items.forEach(i => i.isGranted = checked);
-  }
-
-  toggleMenuItem(item: DealerMenuAccessItem): void {
-    item.isGranted = !item.isGranted;
-  }
-
-  saveMenuAccess(): void {
-    if (!this.menuAccessTarget || !this.menuAccessData || !this.menuAccessSelectedRoleId) return;
-
-    const grantedSubMenuIds = this.menuAccessData.groups
-      .flatMap(g => g.items)
-      .filter(i => i.isGranted)
-      .map(i => i.subMenuId);
-
-    this.loader.show();
-    this.dealerService.updateMenuAccess(this.menuAccessTarget.id, this.menuAccessSelectedRoleId, grantedSubMenuIds).subscribe({
-      next: () => {
-        this.loader.hide();
-        this.toaster.show('Menu access updated', { classname: 'bg-success text-white', delay: 5000 });
-        this.closeMenuAccessModal();
-      },
-      error: (err) => {
-        this.loader.hide();
-        this.toaster.show(err?.error?.message || 'Failed to update menu access.', { classname: 'bg-warning text-white', delay: 5000 });
-      }
-    });
-  }
-
-  closeMenuAccessModal(): void {
-    this.showMenuAccessModal = false;
-    this.menuAccessTarget = null;
-    this.menuAccessData = null;
-    this.menuAccessSelectedRoleId = '';
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/dealer-menu-access', dealer.id])
+    );
+    window.open(url, '_blank');
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -592,153 +475,13 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // LOCATION EDIT modal — Name, Code, its OWN Role, its OWN Menu Access
+  // LOCATION — opens a dedicated page in a new tab (no more popup).
   // ═══════════════════════════════════════════════════════════════════
 
-  onEditLocation(loc: DealerLocationModel): void {
-    this.locationEditTarget = loc;
-    this.locationEditDetail = null;
-    this.locationMenuAccessData = null;
-    this.locationRoleSearchText = '';
-    this.locationEditLoading = true;
-    this.showLocationEditModal = true;
-
-    this.locationManagerService.getDetail(loc.id).subscribe({
-      next: (detail) => {
-        this.locationEditDetail = detail;
-        this.locationEditForm.patchValue({
-          locCode: detail.locCode,
-          locName: detail.locName,
-          roleId: detail.roleId || ''
-        });
-        this.locationRoleSearchText = detail.roleName || '';
-        this.locationEditLoading = false;
-
-        this.loadLocationMenuAccess(loc.id, detail.roleId);
-      },
-      error: (err) => {
-        this.locationEditLoading = false;
-        this.toaster.show(err?.error?.message || 'Failed to load location.', { classname: 'bg-warning text-white', delay: 5000 });
-        this.closeLocationEditModal();
-      }
-    });
-  }
-
-  private loadLocationMenuAccess(locationId: number, roleId?: string): void {
-    this.locationMenuAccessLoading = true;
-    this.locationManagerService.getMenuAccess(locationId, roleId).subscribe({
-      next: (res) => {
-        this.locationMenuAccessData = res;
-        this.locationMenuAccessLoading = false;
-      },
-      error: (err) => {
-        this.locationMenuAccessLoading = false;
-        this.toaster.show(err?.error?.message || 'Failed to load menu access.', { classname: 'bg-warning text-white', delay: 5000 });
-      }
-    });
-  }
-
-  onLocationRoleSearchInput(): void {
-    this.updateLocationRoleSuggestions();
-    this.locationEditForm.patchValue({ roleId: '' });
-  }
-
-  onLocationRoleSearchFocus(): void {
-    this.updateLocationRoleSuggestions();
-  }
-
-  onLocationRoleSearchBlur(): void {
-    setTimeout(() => { this.showLocationRoleDropdown = false; }, 150);
-  }
-
-  selectLocationRoleSuggestion(role: BgRoleMappingModel): void {
-    this.locationRoleSearchText = role.roleName;
-    this.locationEditForm.patchValue({ roleId: role.roleId });
-    this.showLocationRoleDropdown = false;
-
-    if (this.locationEditTarget) {
-      this.loadLocationMenuAccess(this.locationEditTarget.id, role.roleId);
-    }
-  }
-
-  clearLocationRoleSearch(): void {
-    this.locationRoleSearchText = '';
-    this.locationEditForm.patchValue({ roleId: '' });
-    this.showLocationRoleDropdown = false;
-    this.locationMenuAccessData = null;
-  }
-
-  private updateLocationRoleSuggestions(): void {
-    const text = this.locationRoleSearchText.trim().toLowerCase();
-    this.filteredLocationRoles = text
-      ? this.allRoles.filter(r => r.roleName?.toLowerCase().includes(text))
-      : [...this.allRoles];
-    this.showLocationRoleDropdown = true;
-  }
-
-  get pairedLocationMenuRows(): { process: DealerMenuAccessItem | null; report: DealerMenuAccessItem | null }[] {
-    if (!this.locationMenuAccessData) return [];
-    return this.buildPairedRows(this.locationMenuAccessData.groups);
-  }
-
-  toggleLocationMenuItem(item: DealerMenuAccessItem): void {
-    item.isGranted = !item.isGranted;
-  }
-
-  saveLocationEdit(): void {
-    if (!this.locationEditTarget) return;
-
-    const raw = this.locationEditForm.value;
-    if (!raw.locCode?.trim() || !raw.locName?.trim()) {
-      this.toaster.show('Location Code and Location Name are required.', { classname: 'bg-warning text-white', delay: 4000 });
-      return;
-    }
-
-    this.loader.show();
-    this.locationManagerService.updateDetail(this.locationEditTarget.id, {
-      locCode: raw.locCode,
-      locName: raw.locName,
-      roleId: raw.roleId || undefined
-    }).subscribe({
-      next: () => {
-        if (raw.roleId && this.locationMenuAccessData) {
-          const grantedSubMenuIds = this.locationMenuAccessData.groups
-            .flatMap(g => g.items)
-            .filter(i => i.isGranted)
-            .map(i => i.subMenuId);
-
-          this.locationManagerService.updateMenuAccess(this.locationEditTarget!.id, raw.roleId, grantedSubMenuIds).subscribe({
-            next: () => this.finishLocationEditSave(),
-            error: (err) => {
-              this.loader.hide();
-              this.toaster.show(err?.error?.message || 'Location saved, but menu access update failed.', { classname: 'bg-warning text-white', delay: 6000 });
-              this.closeLocationEditModal();
-              this.reloadExpandedLocations();
-            }
-          });
-        } else {
-          this.finishLocationEditSave();
-        }
-      },
-      error: (err) => {
-        this.loader.hide();
-        this.toaster.show(err?.error?.message || 'Failed to update location.', { classname: 'bg-warning text-white', delay: 5000 });
-      }
-    });
-  }
-
-  private finishLocationEditSave(): void {
-    this.loader.hide();
-    this.toaster.show('Location updated', { classname: 'bg-success text-white', delay: 5000 });
-    this.closeLocationEditModal();
-    this.reloadExpandedLocations();
-  }
-
-  closeLocationEditModal(): void {
-    this.showLocationEditModal = false;
-    this.locationEditTarget = null;
-    this.locationEditDetail = null;
-    this.locationMenuAccessData = null;
-    this.showLocationRoleDropdown = false;
+  onOpenLocation(loc: DealerLocationModel): void {
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/location-edit', loc.id])
+    );
+    window.open(url, '_blank');
   }
 }

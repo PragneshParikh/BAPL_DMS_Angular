@@ -3,6 +3,7 @@ export interface DealerMenuAccessItem {
   menuName: string;
   pathName?: string;
   isGranted: boolean;
+  moduleName?: string;
 }
 
 export interface DealerMenuAccessGroup {

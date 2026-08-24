@@ -1,0 +1,103 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">
+    Menu Access
+    <ng-container *ngIf="dealer">
+      — {{ dealer.dealercode }}
+      <span class="text-muted fs-6" *ngIf="dealer.compname">({{ dealer.compname }})</span>
+    </ng-container>
+  </h4>
+  <button class="btn btn-light btn-sm border" (click)="goBack()">
+    <i class="ri-close-line me-1"></i> Close
+  </button>
+</div>
+
+<div class="card">
+  <div class="card-body">
+
+    <div *ngIf="dealerLoading" class="text-center py-4">
+      <div class="spinner-border text-primary"></div>
+    </div>
+
+    <ng-container *ngIf="!dealerLoading">
+
+      <!-- Step 1: Role -> Step 2: Area -> Step 3: Area-wise Module -->
+      <div class="row g-2 mb-3">
+        <div class="col-md-4">
+          <label class="form-label mb-1">Role</label>
+          <select class="form-select form-select-sm" [(ngModel)]="selectedRoleId" (change)="onRoleChange()">
+            <option value="">-- Select Role --</option>
+            <option *ngFor="let r of allRoles" [value]="r.roleId">{{ r.roleName }}</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label mb-1">Area</label>
+          <select class="form-select form-select-sm" [(ngModel)]="selectedArea" (change)="onAreaChange()">
+            <option value="">-- Select Area --</option>
+            <option *ngFor="let a of availableAreas" [value]="a">{{ a }}</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label mb-1">Module</label>
+          <select class="form-select form-select-sm" [(ngModel)]="selectedModule" (change)="onModuleChange()"
+            [disabled]="!selectedArea || modulesLoading">
+            <option value="">{{ modulesLoading ? 'Loading...' : '-- Select Module --' }}</option>
+            <option *ngFor="let m of availableModules" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+      </div>
+
+      <small class="text-muted d-block mb-3" *ngIf="!selectedArea">
+        Select a Role, then an Area — the Module list will show only modules that have forms under that Area.
+      </small>
+      <small class="text-muted d-block mb-3" *ngIf="selectedArea && !modulesLoading && availableModules.length === 0">
+        No modules have any forms under the "{{ selectedArea }}" area.
+      </small>
+      <small class="text-muted d-block mb-3" *ngIf="selectedArea && availableModules.length > 0 && !selectedModule">
+        Select a Module to view or edit its forms for this area.
+      </small>
+
+      <div *ngIf="itemsLoading" class="text-center py-4">
+        <div class="spinner-border text-primary"></div>
+      </div>
+
+      <div class="table-responsive" *ngIf="!itemsLoading && selectedRoleId && selectedArea && selectedModule && menuAccessData">
+        <table class="table table-sm table-bordered mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 50px;" class="text-center">
+                <input type="checkbox" *ngIf="allItems.length > 1"
+                  [checked]="allGranted"
+                  (change)="toggleAll($event)"
+                  title="Select all">
+              </th>
+              <th>Form</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let group of menuAccessData!.groups">
+              <tr *ngIf="menuAccessData!.groups.length > 1" class="table-secondary">
+                <td colspan="2" class="fw-semibold">{{ group.topMenuName }}</td>
+              </tr>
+              <tr *ngFor="let item of group.items">
+                <td class="text-center">
+                  <input type="checkbox" [checked]="item.isGranted" (change)="toggleItem(item)">
+                </td>
+                <td>{{ item.menuName }}</td>
+              </tr>
+            </ng-container>
+            <tr *ngIf="allItems.length === 0">
+              <td colspan="2" class="text-center text-muted py-3">No forms found for this Area / Module combination.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="text-end mt-3" *ngIf="selectedRoleId && selectedArea && selectedModule">
+        <button class="btn btn-secondary btn-sm me-2" (click)="goBack()">Cancel</button>
+        <button class="btn btn-primary btn-sm" [disabled]="saving || itemsLoading" (click)="save()">Save</button>
+      </div>
+
+    </ng-container>
+
+  </div>
+</div>

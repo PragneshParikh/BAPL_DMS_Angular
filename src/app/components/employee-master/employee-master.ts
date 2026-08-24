@@ -58,11 +58,19 @@ export class EmployeeMasterComponent implements OnInit {
   expandedAddForDept: { [dept: string]: boolean } = {};
   resolvingRoles: boolean = false;
 
+  // NEW — the location the *currently logged-in* user signed in from (via
+  // Location Login — see AuthController.LocationLogin / login.ts on the
+  // frontend). Purely informational here: unrelated to selectedLocations
+  // below, which is which location(s) the *employee being edited* is
+  // assigned to. Read unconditionally in ngOnInit so it's available in both
+  // Add and Edit mode, not just when editing.
+  locationCode: string | null = null;
+
   // NEW — the employee's currently-saved roleId per category, kept alive for
   // the whole edit session (not just during ngOnInit). This is what lets
   // unchecking-then-rechecking a category restore its original grants
   // instead of wiping them — nothing is actually removed from the database
-  // until the form is submitted with that category left unchecked.
+  // until the form is submitted.
   private roleIdByCategory: { [category: string]: string } = {};
 
   // NEW — existing Role Master roles per category, for the prefill dropdown
@@ -85,6 +93,8 @@ export class EmployeeMasterComponent implements OnInit {
     password?: string;
     category?: string;
     role?: string;
+    locationLoginId?: string; // NEW
+    locationPassword?: string; // NEW
   } = {};
 
   private readonly emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -102,6 +112,12 @@ export class EmployeeMasterComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+
+    // FIX: read unconditionally, before the Add/Edit branch below — this was
+    // previously only set inside the popupData (Edit) branch, so a brand-new
+    // employee form always left it null even though the info is available
+    // either way.
+    this.locationCode = localStorage.getItem('locationCode');
 
     this.loadStates();
     this.loadCities();
@@ -125,6 +141,13 @@ export class EmployeeMasterComponent implements OnInit {
       this.employeeData.dateOfJoin = this.formatDate(this.popupData.dateOfJoin);
       this.imagePreview = this.popupData.profileImage;
       this.employeeData.createLogin = !!this.popupData.emailId;
+
+      // NEW — location login: prefill the ID only. The password is never
+      // sent back from the API, so it always starts blank; leaving it blank
+      // on Update means "keep the current password" (same UX as the main
+      // Email/Password login below).
+      this.employeeData.locationLoginId = this.popupData.locationLoginId ?? '';
+      this.employeeData.locationPassword = '';
 
       this.selectedDepartments = this.popupData.selectedDepartments?.length
         ? [...this.popupData.selectedDepartments] : [];
@@ -162,6 +185,8 @@ export class EmployeeMasterComponent implements OnInit {
     }
     else {
       this.employeeData.createLogin = false;
+      this.employeeData.locationLoginId = ''; // NEW
+      this.employeeData.locationPassword = ''; // NEW
       this.loadLoggedInDealer();
     }
   }
@@ -184,6 +209,10 @@ export class EmployeeMasterComponent implements OnInit {
   }
 
   loadLoggedInDealer(): void {
+    // FIX: this was accidentally passed a second argument
+    // (`response.locationCode ?? ''`) referencing a `response` variable that
+    // doesn't exist in this scope — localStorage.getItem() only takes the
+    // key. Restored to the plain single-argument call.
     const dealerCode = localStorage.getItem('dealerCode');
     if (!dealerCode) return;
 
@@ -476,6 +505,27 @@ export class EmployeeMasterComponent implements OnInit {
       valid = false;
     }
 
+    // NEW — Location Login: required whenever at least one dealer location
+    // is selected, independent of whether "Create Login Account" is checked.
+    // This is a separate credential from the email/password login below.
+    if (this.selectedLocations.length > 0) {
+      const locLoginId = String(d.locationLoginId ?? '').trim();
+      if (!locLoginId) {
+        this.errors.locationLoginId = 'Location Login ID is required.';
+        valid = false;
+      }
+
+      const locPwd = String(d.locationPassword ?? '');
+      if (!this.isEditMode && !locPwd) {
+        this.errors.locationPassword = 'Location Password is required.';
+        valid = false;
+      } else if (locPwd && !this.strongPasswordPattern.test(locPwd)) {
+        this.errors.locationPassword =
+          'Password must be at least 6 characters and include uppercase, lowercase, a digit, and a special character.';
+        valid = false;
+      }
+    }
+
     if (!d.department) {
       this.errors.department = 'Department is required.';
       valid = false;
@@ -548,6 +598,20 @@ export class EmployeeMasterComponent implements OnInit {
       /^\d{6}$/.test(String(d.pincode ?? ''));
 
     if (!coreFilled) return false;
+
+    // NEW — mirrors the Location Login validation above: required whenever
+    // a location is selected, password optional on edit (blank = unchanged).
+    if (this.selectedLocations.length > 0) {
+      const locLoginId = String(d.locationLoginId ?? '').trim();
+      const locPwd = String(d.locationPassword ?? '');
+
+      const locLoginIdOk = !!locLoginId;
+      const locPwdOk = this.isEditMode
+        ? (!locPwd || this.strongPasswordPattern.test(locPwd))
+        : (!!locPwd && this.strongPasswordPattern.test(locPwd));
+
+      if (!locLoginIdOk || !locPwdOk) return false;
+    }
 
     if (d.createLogin) {
       const email = String(d.emailId ?? '').trim();
@@ -630,6 +694,14 @@ export class EmployeeMasterComponent implements OnInit {
       profileImage: this.imagePreview as string,
       notes: this.employeeData.notes,
       locationCode: this.selectedLocations.join(','),
+
+      // NEW — location login fields. locationPasswordHash carries a
+      // *plaintext* password to the API (named to match
+      // EmployeeMaster.LocationPasswordHash for model binding) only when one
+      // was typed; the backend hashes it before saving, and on update leaves
+      // the stored hash alone if this comes through blank/null.
+      locationLoginId: this.selectedLocations.length > 0 ? (this.employeeData.locationLoginId ?? null) : null,
+      locationPasswordHash: this.selectedLocations.length > 0 ? (this.employeeData.locationPassword || null) : null,
 
       createdBy: 'admin',
       createdDate: new Date(),
