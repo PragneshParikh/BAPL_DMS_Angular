@@ -1,0 +1,117 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">
+    Edit Location
+    <ng-container *ngIf="location">— {{ location.locCode }}</ng-container>
+  </h4>
+  <button class="btn btn-light btn-sm border" (click)="goBack()">
+    <i class="ri-close-line me-1"></i> Close
+  </button>
+</div>
+
+<div class="card">
+  <div class="card-body">
+
+    <div *ngIf="loading" class="text-center py-4">
+      <div class="spinner-border text-primary"></div>
+    </div>
+
+    <form [formGroup]="editForm" *ngIf="!loading">
+
+      <div class="row g-2 mb-3">
+        <div class="col-md-6">
+          <label class="form-label mb-1">Location Code *</label>
+          <input type="text" class="form-control form-control-sm" formControlName="locCode">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label mb-1">Location Name *</label>
+          <input type="text" class="form-control form-control-sm" formControlName="locName">
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label mb-1">Role Assignment</label>
+        <select class="form-select form-select-sm" formControlName="roleId" (change)="onRoleChange()">
+          <option value="">-- Select Role --</option>
+          <option *ngFor="let r of allRoles" [value]="r.roleId">{{ r.roleName }}</option>
+        </select>
+        <small class="text-muted d-block mt-1">
+          This role belongs to this location alone — assigning the same role to another
+          location shares that role's menu access grants across both.
+        </small>
+      </div>
+
+      <label class="form-label mb-1">Access Menu</label>
+
+      <div class="row g-2 mb-2">
+        <div class="col-md-6">
+          <label class="form-label mb-1 small">Area</label>
+          <select class="form-select form-select-sm"
+            [(ngModel)]="selectedArea" [ngModelOptions]="{standalone: true}"
+            (change)="onAreaChange()">
+            <option value="">-- Select Area --</option>
+            <option *ngFor="let a of availableAreas" [value]="a">{{ a }}</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label mb-1 small">Module</label>
+          <select class="form-select form-select-sm"
+            [(ngModel)]="selectedModule" [ngModelOptions]="{standalone: true}"
+            (change)="onModuleChange()"
+            [disabled]="!selectedArea || modulesLoading">
+            <option value="">{{ modulesLoading ? 'Loading...' : '-- Select Module --' }}</option>
+            <option *ngFor="let m of availableModules" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+      </div>
+
+      <small class="text-muted d-block mb-2" *ngIf="!editForm.value.roleId">
+        Assign a role above to manage this location's menu access.
+      </small>
+      <small class="text-muted d-block mb-2" *ngIf="editForm.value.roleId && !selectedArea">
+        Select an Area, then a Module, to view or edit this role's forms.
+      </small>
+      <small class="text-muted d-block mb-2" *ngIf="editForm.value.roleId && selectedArea && !modulesLoading && availableModules.length === 0">
+        No modules have any forms under the "{{ selectedArea }}" area.
+      </small>
+
+      <div *ngIf="itemsLoading" class="text-center py-3">
+        <div class="spinner-border spinner-border-sm text-primary"></div>
+      </div>
+
+      <table class="table table-sm table-bordered mb-0"
+        *ngIf="!itemsLoading && editForm.value.roleId && selectedArea && selectedModule && menuAccessData">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 50px;" class="text-center">
+              <input type="checkbox" *ngIf="allItems.length > 1"
+                [checked]="allGranted"
+                (change)="toggleAll($event)"
+                title="Select all">
+            </th>
+            <th>Form</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let group of filteredGroups">
+            <tr *ngFor="let item of group.items">
+              <td class="text-center">
+                <input type="checkbox" [checked]="item.isGranted" (change)="toggleItem(item)">
+              </td>
+              <td>{{ item.menuName }}</td>
+            </tr>
+          </ng-container>
+          <tr *ngIf="allItems.length === 0">
+            <td colspan="2" class="text-center text-muted py-3">No forms found for this Area / Module combination.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="text-end mt-3">
+        <button type="button" class="btn btn-secondary btn-sm me-2" (click)="goBack()">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" [disabled]="saving" (click)="save()">Save</button>
+      </div>
+
+    </form>
+
+  </div>
+</div>

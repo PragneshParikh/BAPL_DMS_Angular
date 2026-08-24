@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 import { LayoutComponent } from './layouts/layout.component';
 import { DealerMaster } from './components/dealer-master/dealer-master';
 import { DealerAccountMaster } from './components/dealer-account-master/dealer-account-master';
-import { DealerMasterBulkDataDipatch } from './components/dealer-master-bulk-data-dipatch/dealer-master-bulk-data-dipatch';
+import { DealerMasterBulkDataDipatch } from './components/department-master/dealer-master-bulk-data-dipatch/dealer-master-bulk-data-dipatch';
 import { LocationMasterComponent } from './components/location-master/location-master';
 import { BatteryCapacityMaster } from './components/battery-capacity-master/battery-capacity-master';
 import { Form22master } from './components/Showroom/form22master/form22master';
@@ -96,6 +96,10 @@ import { WarrantyClaimList } from './components/warranty-job-card-claim/warranty
 import { WarrantyPackaging } from './components/warranty-packaging/warranty-packaging';
 import { WarrantyPackagingList } from './components/warranty-packaging/warranty-packaging-list/warranty-packaging-list';
 import { DispatchMaster } from './components/dispatch-master/dispatch-master';
+import { PartInvoiceDispatch } from './components/part-invoice-dispatch/part-invoice-dispatch';
+import { VehicleInvoiceDispatch } from './components/vehicle-invoice-dispatch/vehicle-invoice-dispatch';
+import { DealerMenuAccessPage } from './components/dealer-creation/dealer-menu-access-page/dealer-menu-access-page';
+import { LocationEditPage } from './components/dealer-creation/dealer-location-edit/dealer-location-edit';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
@@ -237,7 +241,9 @@ export const routes: Routes = [
       { path: 'bg-role-master', component: BgRoleMasterList, data: [100] },
       { path: 'bg-role-master/add', component: BgRoleMaster, data: [100] },
       { path: 'bg-role-master/edit/:id', component: BgRoleMaster, data: [100] },
-      { path: 'dealer-creation-manager', component: DealerCreationManagerList, data: [101] },
+      { path: 'dealer-creation-manager', component: DealerCreationManagerList, data: [101]},
+      { path: 'dealer-menu-access/:dealerId', component: DealerMenuAccessPage, data: [101]},
+      { path: 'location-edit/:locationId', component: LocationEditPage, data: [101]},
 
       { path: 'free-service-claim', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim-list/free-service-claim-list').then(m => m.FreeServiceClaimList) },
       { path: 'free-service-claim/:id', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim').then(m => m.FreeServiceClaim) },
@@ -280,7 +286,9 @@ export const routes: Routes = [
       { path: 'uw-line-item', component: UwLineItem, data: [115] },
       { path: 'warranty-packaging', component: WarrantyPackaging, data: [116] },
       { path: 'warranty-packaging-list', component: WarrantyPackagingList, data: [116]},
-      { path: 'dispatch-master', component : DispatchMaster, data: [117]}
+      { path: 'dispatch-master', component : DispatchMaster, data: [117]},
+      { path: 'part-dispatch-invoice', component : PartInvoiceDispatch, data: [118]},
+      { path: 'vehicle-dispatch-invoice', component: VehicleInvoiceDispatch, data:[119]}
 
     ]
   },

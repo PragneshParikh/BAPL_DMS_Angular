@@ -111,4 +111,11 @@ export class EmployeeMasterService {
       params: { roleNames: roleNames.join(',') }
     });
   }
+
+  // =========================================
+  // LOCATION LOGIN — authenticate by Location Login ID + Password
+  // =========================================
+  locationLogin(payload: { locationLoginId: string; password: string; locationCode?: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auth/location-login`, payload);
+  }
 }

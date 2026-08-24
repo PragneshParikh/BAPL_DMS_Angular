@@ -772,8 +772,8 @@ export class PartsPo implements OnInit {
         this.currentItem.igstAmt = igstRate > 0 ? (((igstRate / (igstRate || 1)) * totalGSTAmount) * qty).toFixed(2) : '0.00';
       }
 
-      this.currentItem.amount = (Number(taxDetails.basePrice || 0) * qty).toFixed(2);
-      this.currentItem.mrp = (Number(taxDetails.finalPrice || 0) * qty).toFixed(2);
+      this.currentItem.amount = (Number(taxDetails.finalPrice || 0) * qty).toFixed(2);
+      this.currentItem.mrp = (Number(selectedItem.custprice || 0) * qty).toFixed(2);
 
       const itemToSave = {
         ...this.currentItem,
@@ -845,8 +845,9 @@ export class PartsPo implements OnInit {
   editItem(index: number) {
     const actualIndex = (this.page - 1) * this.pageSize + index;
     const item = this.purchaseDetails[actualIndex];
-    // this.editingIndex = actualIndex;
-    this.currentItem = { ...item };
+    // isEdit must be true, otherwise addPurchaseItem() treats this itemCode
+    // as a duplicate and blocks the update with "Part already exists."
+    this.currentItem = { ...item, isEdit: true };
   }
 
   deleteItem(index: number) {
@@ -888,86 +889,89 @@ export class PartsPo implements OnInit {
   // ───────────────────────────────────────────────────────────────────────────
 
   onSave() {
-    if (this.partsPOData.subPoType === "VOR" && !this.jobId) {
-      this.toaster.show('Please select a Job Card for VOR orders.', { classname: 'bg-danger text-white', delay: 5000 });
-      return;
-    }
-
-    if (this.isSaving) return;
-    this.isSaving = true;
-    this.loader.show();
-
-    const matchedLocation = this.locationList.find(x => x.loccode === this.partsPOData.selectedLocation);
-    let dealerCode = matchedLocation?.dealercode;
-
-    const userId = this.storageService.getUserId();
-    // PONumber is Prefix + OrderNo logic can be added later if needed. For now using orderNo.
-    const poModel = {
-      PONumber: this.partsPOData.prefixNo,
-      PODate: this.partsPOData.poDate,
-      POType: this.partsPOData.poType,
-      subOrderType: this.partsPOData.subPoType,
-      CustomerCode: dealerCode,
-      TransactionType: this.partsPOData.transactionType,
-      LocCode: this.partsPOData.selectedLocation,
-      LedgerCode: this.partsPOData.partyName,
-      IsAgainstKit: this.partsPOData.isKit,
-      jobId: this.jobId,
-      createdBy: userId,
-      createdDate: new Date(),
-      Items: this.partsPOData.isKit
-        ? this.purchaseDetails.map((item: any) => ({
-          ItemCode: item.itemCode,
-          Qty: item.qty,
-          MRP: Number(item.mrp),
-
-        }))
-        : this.pagedPurchaseDetails.map((item: any) => ({
-          ItemCode: item.itemCode,
-          Qty: item.qty,
-          MRP: Number(item.mrp),
-
-        }))
-    };
-
-    if (this.isEdit) {
-      this.purchaseService.updatePO(poModel).subscribe({
-        next: (res) => {
-          this.loader.hide();
-          this.isSaving = false;
-          if (res.success) {
-            this.toaster.show(res.message, { classname: 'bg-success text-white', delay: 5000 });
-            this.redirectToPOList();
-          } else {
-            this.toaster.show(res.message, { classname: 'bg-danger text-white', delay: 5000 });
-          }
-        },
-        error: (err) => {
-          this.loader.hide();
-          this.isSaving = false;
-          this.toaster.show('Error saving Parts PO.', { classname: 'bg-danger text-white', delay: 5000 });
-        }
-      });
-    } else {
-      this.purchaseService.createPurchaseOrder(poModel).subscribe({
-        next: (res) => {
-          this.loader.hide();
-          this.isSaving = false;
-          if (res.success) {
-            this.toaster.show(res.message, { classname: 'bg-success text-white', delay: 5000 });
-            this.redirectToPOList();
-          } else {
-            this.toaster.show(res.message, { classname: 'bg-danger text-white', delay: 5000 });
-          }
-        },
-        error: (err) => {
-          this.loader.hide();
-          this.isSaving = false;
-          this.toaster.show('Error saving Parts PO.', { classname: 'bg-danger text-white', delay: 5000 });
-        }
-      });
-    }
+  if (this.partsPOData.subPoType === "VOR" && !this.jobId) {
+    this.toaster.show('Please select a Job Card for VOR orders.', { classname: 'bg-danger text-white', delay: 5000 });
+    return;
   }
+
+  if (this.isSaving) return;
+  this.isSaving = true;
+  this.loader.show();
+
+  const matchedLocation = this.locationList.find(x => x.loccode === this.partsPOData.selectedLocation);
+  let dealerCode = matchedLocation?.dealercode;
+
+  const userId = this.storageService.getUserId();
+
+  // Both branches now send the same fields - the kit branch previously
+  // only sent MRP, which is why kit-added rows never persisted Rate/Tax.
+  const mapItem = (item: any) => ({
+    ItemCode: item.itemCode,
+    Qty: item.qty,
+    Rate: Number(item.rate) || 0,
+    SgstAmt: Number(item.sgstAmt) || 0,
+    CgstAmt: Number(item.cgstAmt) || 0,
+    IgstAmt: Number(item.igstAmt) || 0,
+    NetAmount: Number(item.amount) || 0,
+    MRP: Number(item.mrp) || 0,
+  });
+
+  const poModel = {
+    PONumber: this.partsPOData.prefixNo,
+    PODate: this.partsPOData.poDate,
+    POType: this.partsPOData.poType,
+    subOrderType: this.partsPOData.subPoType,
+    CustomerCode: dealerCode,
+    TransactionType: this.partsPOData.transactionType,
+    LocCode: this.partsPOData.selectedLocation,
+    LedgerCode: this.partsPOData.partyName,
+    IsAgainstKit: this.partsPOData.isKit,
+    jobId: this.jobId,
+    createdBy: userId,
+    createdDate: new Date(),
+    Items: this.partsPOData.isKit
+      ? this.purchaseDetails.map(mapItem)
+      : this.pagedPurchaseDetails.map(mapItem)
+  };
+
+  if (this.isEdit) {
+    this.purchaseService.updatePO(poModel).subscribe({
+      next: (res) => {
+        this.loader.hide();
+        this.isSaving = false;
+        if (res.success) {
+          this.toaster.show(res.message, { classname: 'bg-success text-white', delay: 5000 });
+          this.redirectToPOList();
+        } else {
+          this.toaster.show(res.message, { classname: 'bg-danger text-white', delay: 5000 });
+        }
+      },
+      error: (err) => {
+        this.loader.hide();
+        this.isSaving = false;
+        this.toaster.show('Error saving Parts PO.', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  } else {
+    this.purchaseService.createPurchaseOrder(poModel).subscribe({
+      next: (res) => {
+        this.loader.hide();
+        this.isSaving = false;
+        if (res.success) {
+          this.toaster.show(res.message, { classname: 'bg-success text-white', delay: 5000 });
+          this.redirectToPOList();
+        } else {
+          this.toaster.show(res.message, { classname: 'bg-danger text-white', delay: 5000 });
+        }
+      },
+      error: (err) => {
+        this.loader.hide();
+        this.isSaving = false;
+        this.toaster.show('Error saving Parts PO.', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  }
+}
 
   onSubmitToERP() {
     this.loader.show();
@@ -1024,16 +1028,14 @@ export class PartsPo implements OnInit {
   }
 
   calculateGST(finalPrice: number, totalGST: number = 0) {
-
-    const gstAmount = (finalPrice * totalGST) / 100;
-    const mrp = finalPrice + gstAmount;
-
-    return {
-      basePrice: finalPrice.toFixed(2),
-      gstAmount: gstAmount.toFixed(2),
-      finalPrice: mrp.toFixed(2),
-      totalGST: totalGST.toFixed(2)
-    };
+      const gstAmount = (finalPrice * totalGST) / 100;
+      const mrp = finalPrice + gstAmount;
+      return {
+        basePrice: finalPrice.toFixed(2),
+        gstAmount: gstAmount.toFixed(2),
+        finalPrice: mrp.toFixed(2),   // = Rate + GST
+        totalGST: totalGST.toFixed(2)
+      };
   }
 
   calculateGSTAmount(amount: number, taxDetails: any) {
@@ -1069,70 +1071,83 @@ export class PartsPo implements OnInit {
     };
   }
 
-  getDetailsByPONumber() {
-    this.loader.show();
-    this.purchaseService.getPOByNumber(this.poNumber).subscribe({
-      next: (res) => {
-        this.loader.hide();
-        this.partsPOData = {
-          id: res.id,
-          poDate: res.poDate,
-          selectedLocation: res.locCode,
-          prefixNo: res.poNumber,
-          orderNo: res.poNumber.split('/').pop(),
-          subPoType: res.subOrderType,
-          transactionType: res.transactionType,
-          isKit: res.isAgainstKit,
-          partyName: res.ledgerCode,
-          poType: 'Spares',
-          customerCode: res.customerCode
-        }
-
-        this.isSubmitted = res.isSubmitted;
-
-        const mappedData = res.items.map((item: any) => {
-
-          const totalGST = item.taxes.reduce(
-            (sum, tax) => sum + Number(tax.taxRate || 0), 0
-          );
-
-          const gstPrice = this.calculateGST(item.rate, totalGST);
-          const gstData = this.calculateGSTAmount(item.rate, item.taxes);
-
-          return {
-            id: item.lineNumber,
-            itemCode: item.itemCode,
-            itemDescription: item.itemDescription,
-            qty: item.qty,
-            rate: gstPrice.basePrice,
-            mrp: (item.mrp ? Number(item.mrp) : Number(gstPrice.finalPrice) * item.qty),
-
-            amount: Number(gstPrice.basePrice) * Number(item.qty),
-            sgstAmt: gstData.sgst * item.qty,
-            cgstAmt: gstData.cgst * item.qty,
-            igstAmt: gstData.igst * item.qty,
-            rawSgstRate: 0,
-            rawCgstRate: 0,
-            rawIgstRate: 0,
-            itemType: 1,
-            currentStock: 0
-          };
-        });
-
-        if (res.isAgainstKit) {
-          this.purchaseDetails = _.cloneDeep(mappedData);
-          this.loadPage();
-        } else {
-          this.pagedPurchaseDetails = mappedData;
-        }
-      },
-      error: (err) => {
-        this.loader.hide();
-        console.error(err);
-        this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+    getDetailsByPONumber() {
+  this.loader.show();
+  this.purchaseService.getPOByNumber(this.poNumber).subscribe({
+    next: (res) => {
+      this.loader.hide();
+      this.partsPOData = {
+        id: res.id,
+        poDate: res.poDate,
+        selectedLocation: res.locCode,
+        prefixNo: res.poNumber,
+        orderNo: res.poNumber.split('/').pop(),
+        subPoType: res.subOrderType,
+        transactionType: res.transactionType,
+        isKit: res.isAgainstKit,
+        partyName: res.ledgerCode,
+        poType: 'Spares',
+        customerCode: res.customerCode
       }
-    });
-  }
+
+      this.isSubmitted = res.isSubmitted;
+
+      const mappedData = res.items.map((item: any) => {
+        const taxes = item.taxes || [];
+
+        // Substring match, NOT strict equality - real TaxCode values may
+        // carry a rate suffix (e.g. "CGST9", "IGST18"), so exact === fails
+        // even when the row is a valid CGST/SGST/IGST entry.
+        const sumTax = (label: string) =>
+          taxes
+            .filter((t: any) => (t.taxCode || '').toUpperCase().includes(label))
+            .reduce((s: number, t: any) => s + Number(t.taxAmount || 0), 0);
+
+        const sgstAmt = sumTax('SGST');
+        const cgstAmt = sumTax('CGST');
+        const igstAmt = sumTax('IGST');
+
+        const rate = Number(item.rate || 0);
+        const qty = Number(item.qty || 0);
+        const taxTotal = sgstAmt + cgstAmt + igstAmt;
+
+        // Prefer the stored LineAmount. Only if it's missing/zero (older POs
+        // saved before LineAmount was persisted) fall back to Rate x Qty +
+        // the REAL stored tax amounts above - not a recalculated percentage,
+        // so it stays accurate even for legacy rows.
+        const storedLineAmount = Number(item.lineAmount || 0);
+        const amount = storedLineAmount > 0 ? storedLineAmount : (rate * qty) + taxTotal;
+
+        return {
+          id: item.lineNumber,
+          itemCode: item.itemCode,
+          itemDescription: item.itemDescription,
+          qty: item.qty,
+          rate: rate.toFixed(2),
+          sgstAmt,
+          cgstAmt,
+          igstAmt,
+          amount,
+          mrp: Number(item.mrp || 0),
+          itemType: 1,
+          currentStock: 0
+        };
+      });
+
+      if (res.isAgainstKit) {
+        this.purchaseDetails = _.cloneDeep(mappedData);
+        this.loadPage();
+      } else {
+        this.pagedPurchaseDetails = mappedData;
+      }
+    },
+    error: (err) => {
+      this.loader.hide();
+      console.error(err);
+      this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+    }
+  });
+}
 
   updatePOStatus(orderNo: string, isSubmitted: boolean, saleOrderNo: string, consigneeCode: string) {
     this.purchaseService.updatePOStatus(orderNo, isSubmitted, saleOrderNo, consigneeCode).subscribe({

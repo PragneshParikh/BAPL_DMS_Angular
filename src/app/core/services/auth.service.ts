@@ -98,6 +98,17 @@ export class AuthenticationService {
     }
 
     /**
+     * NEW — the location code a Location Login session is scoped to (see
+     * AuthController.LocationLogin / TryLocationLoginAsync on the backend).
+     * Absent (null) for a regular email/password login. Read from
+     * localStorage rather than currentUserValue so it stays available even
+     * before the User model is extended with a locationCode field.
+     */
+    public getLocationCode(): string | null {
+        return localStorage.getItem('locationCode');
+    }
+
+    /**
      * Logout the user
      */
     logout() {
@@ -109,6 +120,8 @@ export class AuthenticationService {
         localStorage.removeItem('selectedModule');
         localStorage.removeItem('menuRights');
         localStorage.removeItem('role');
+        localStorage.removeItem('dealerCode');   // FIX: was never cleared on logout
+        localStorage.removeItem('locationCode'); // NEW — same gap, for the new field
 
         this.menuService.resetMenu();
         this.currentUserSubject.next(null!);
@@ -196,4 +209,3 @@ export class AuthenticationService {
     }
 
 }
-

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgbModal, NgbHighlight } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { DealerService } from '../../core/services/dealer-service';
+import { DealerService } from '../../../core/services/dealer-service';
 
 @Component({
   selector: 'app-dealer-master-bulk-data-dipatch',

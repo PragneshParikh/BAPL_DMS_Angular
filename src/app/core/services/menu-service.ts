@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MENU } from '../../layouts/sidebar/menu';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { StorageService } from './storage';
@@ -32,6 +33,28 @@ export class MenuService {
 
   getMenu() {
     return this.httpClient.get(`${this.baseURL}/menu`);
+  }
+
+
+  getMyAccess(): Observable<{ roleId?: string; groups: any[] }> {
+    return this.httpClient.get<{ roleId?: string; groups: any[] }>(`${this.baseURL}/menu/my-access`);
+  }
+
+
+  loadMyAccess(): Observable<any[]> {
+    return this.getMyAccess().pipe(
+      map(res => res?.groups ?? []),
+      tap(groups => {
+        this.menuSource.next(groups);
+        this.storageService.setMenuRights(groups);
+      }),
+      catchError(err => {
+        console.error('Failed to load menu access', err);
+        this.menuSource.next([]);
+        this.storageService.setMenuRights([]);
+        return of([]);
+      })
+    );
   }
 
   resetMenu() {
