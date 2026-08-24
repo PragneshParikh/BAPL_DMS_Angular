@@ -17,28 +17,37 @@ export class BgemployeeMasterService {
     private employeeMasterService: EmployeeMasterService,
   ) {}
 
+  // FIX: every route below was mismatched against the real
+  // BgEmployeeController (e.g. this called GET /BgEmployee/GetAll, but the
+  // controller's bare [HttpGet] is just GET /BgEmployee — same class of
+  // mismatch on every method here, not just this one). Corrected to match
+  // the controller's actual [HttpGet]/[HttpPost]/etc. attributes exactly.
   getEmployees(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/GetAll`);
+    return this.http.get<any[]>(`${this.baseUrl}`);
   }
 
   getEmployeeById(id: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/GetById/${id}`);
+    return this.http.get<any>(`${this.baseUrl}/${id}`);
   }
 
   saveEmployee(employee: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/Save`, employee);
+    return this.http.post<any>(`${this.baseUrl}`, employee);
   }
 
   updateEmployee(employee: any): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/Update/${employee.id}`, employee);
+    // Controller's [HttpPut] takes no id in the route — it reads
+    // model.Id from the body, so employee.id must already be set on the
+    // object being passed in.
+    return this.http.put<any>(`${this.baseUrl}`, employee);
   }
 
   updateStatus(id: number, isActive: boolean): Observable<any> {
-    return this.http.patch<any>(`${this.baseUrl}/ToggleStatus/${id}`, { isActive });
+    // Controller reads isActive via [FromQuery], not from the body.
+    return this.http.patch<any>(`${this.baseUrl}/${id}/status?isActive=${isActive}`, null);
   }
 
   deleteEmployee(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.baseUrl}/Delete/${id}`);
+    return this.http.delete<any>(`${this.baseUrl}/${id}`);
   }
 
   getCities(): Observable<any[]> {
@@ -46,13 +55,15 @@ export class BgemployeeMasterService {
   }
 
   getAssignedDealers(excludeId: number = 0): Observable<any[]> {
+    // Route is hyphenated ("assigned-dealers", not "AssignedDealers"), and
+    // the controller's query param is named excludeEmployeeId, not excludeId.
     return this.http.get<any[]>(
-      `${this.baseUrl}/AssignedDealers?excludeId=${excludeId}`
+      `${this.baseUrl}/assigned-dealers?excludeEmployeeId=${excludeId}`
     );
   }
 
   getEmployeeListView(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/ListView`);
+    return this.http.get<any[]>(`${this.baseUrl}/list`);
   }
 
   // =========================================
@@ -66,7 +77,8 @@ export class BgemployeeMasterService {
   // =========================================
 
   downloadBgEmployeeExcel(): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/Download`, { responseType: 'blob' }).pipe(
+    // Controller route is "export", not "Download".
+    return this.http.get(`${this.baseUrl}/export`, { responseType: 'blob' }).pipe(
       catchError((err: HttpErrorResponse) => this.readBlobError(err))
     );
   }
