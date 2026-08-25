@@ -1,8 +1,12 @@
 <div class="card shadow-sm">
   <div class="card-header bg-primary bg-gradient text-white py-2">
     <div class="d-flex justify-content-between align-items-center">
-      <h6 class="mb-0 text-white"><i class="ri-file-list-3-line me-1"></i>UW Line Item</h6>
-      <button class="btn btn-sm btn-light" type="button" (click)="back()"><i class="ri-arrow-left-line me-1"></i>Back</button>
+      <h6 class="mb-0 text-white">
+        <i class="ri-file-list-3-line me-1"></i>UW Line Item
+      </h6>
+      <button class="btn btn-sm btn-light" type="button" (click)="back()">
+        <i class="ri-arrow-left-line me-1"></i>Back
+      </button>
     </div>
   </div>
 
@@ -14,29 +18,43 @@
         <label class="form-label">Date From</label>
         <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.dateFrom">
       </div>
+
       <div class="col-md-2">
         <label class="form-label">Date To</label>
         <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.dateTo">
       </div>
+
       <div class="col-md-3" style="position:relative">
         <label class="form-label">Dealer Name / Code</label>
-        <input type="text" class="form-control form-control-sm"
+        <input
+          type="text"
+          class="form-control form-control-sm"
           placeholder="Type dealer name or code"
           [(ngModel)]="dealerSearchText"
           (input)="onDealerSearchInput()"
           (blur)="onDealerSearchBlur()">
-        <ul *ngIf="showDealerSuggestions && dealerSuggestions.length > 0"
-          class="list-group position-absolute w-100" style="z-index:20; max-height:220px; overflow-y:auto;">
-          <li *ngFor="let dealer of dealerSuggestions" class="list-group-item list-group-item-action"
-            style="cursor:pointer" (click)="selectDealer(dealer)">
+
+        <ul
+          *ngIf="showDealerSuggestions && dealerSuggestions.length > 0"
+          class="list-group position-absolute w-100"
+          style="z-index:20; max-height:220px; overflow-y:auto;">
+          <li
+            *ngFor="let dealer of dealerSuggestions"
+            class="list-group-item list-group-item-action"
+            style="cursor:pointer"
+            (click)="selectDealer(dealer)">
             {{ dealer.compname }} <span class="text-muted small">({{ dealer.dealercode }})</span>
           </li>
         </ul>
-        <div *ngIf="showDealerSuggestions && !dealerSearchLoading && dealerSuggestions.length === 0"
-          class="list-group position-absolute w-100" style="z-index:20">
+
+        <div
+          *ngIf="showDealerSuggestions && !dealerSearchLoading && dealerSuggestions.length === 0"
+          class="list-group position-absolute w-100"
+          style="z-index:20">
           <div class="list-group-item text-muted small">No matching dealers</div>
         </div>
       </div>
+
       <div class="col-md-2">
         <label class="form-label">Status</label>
         <select class="form-select form-select-sm" [(ngModel)]="filter.status">
@@ -46,6 +64,7 @@
           <option value="Rejected">Rejected</option>
         </select>
       </div>
+
       <div class="col-md-2">
         <label class="form-label">Claim No</label>
         <input type="number" class="form-control form-control-sm" [(ngModel)]="filter.claimNo">
@@ -65,8 +84,12 @@
     </div>
 
     <div class="d-flex justify-content-end mb-3">
-      <button type="button" class="btn btn-primary btn-sm me-2" (click)="search()"><i class="ri-search-line me-1"></i>Search</button>
-      <button type="button" class="btn btn-light btn-sm" (click)="resetFilter()"><i class="ri-refresh-line me-1"></i>Reset</button>
+      <button type="button" class="btn btn-primary btn-sm me-2" (click)="search()">
+        <i class="ri-search-line me-1"></i>Search
+      </button>
+      <button type="button" class="btn btn-light btn-sm" (click)="resetFilter()">
+        <i class="ri-refresh-line me-1"></i>Reset
+      </button>
     </div>
 
     <div class="text-muted small mb-2">Total Record(s): {{ totalCount }}</div>
@@ -82,8 +105,6 @@
               <th style="width:320px">Reason:</th>
               <th class="text-center" style="width:150px">Accept:<br>Reject:</th>
               <th style="width:220px">Company name:<br>Location:</th>
-              <th style="width:180px">Dealer Name:</th>
-              <th style="width:180px">Dealer Location:</th>
               <th style="width:130px">Job no:<br>Date:</th>
               <th style="width:130px">Claim no:<br>Date:</th>
               <th style="width:90px">Hsn:</th>
@@ -124,32 +145,101 @@
               <td>{{ (filter.pageNumber - 1) * filter.pageSize + i + 1 }}</td>
 
               <td>
-                <span class="uw-status" [ngClass]="{ 'uw-status-pending': item.status === 'Pending', 'uw-status-approved': item.status === 'Approved', 'uw-status-rejected': item.status === 'Rejected' }">{{ item.status }}</span>
+                <span
+                  class="uw-status"
+                  [ngClass]="{
+                    'uw-status-pending': item.status === 'Pending',
+                    'uw-status-approved': item.status === 'Approved',
+                    'uw-status-rejected': item.status === 'Rejected'
+                  }">{{ item.status }}</span>
               </td>
 
               <td>
                 <span *ngIf="item.status === 'Pending'" class="uw-sub d-block"></span>
-                <input *ngIf="item.status === 'Pending'" type="text" class="form-control form-control-sm uw-reason-input" placeholder="Reason to reject" [(ngModel)]="reasonDrafts[item.id]" [disabled]="actingOnId === item.id">
+                <input
+                  *ngIf="item.status === 'Pending'"
+                  type="text"
+                  class="form-control form-control-sm uw-reason-input"
+                  placeholder="Reason to reject"
+                  [(ngModel)]="reasonDrafts[item.id]"
+                  [disabled]="actingOnId === item.id">
+
                 <span *ngIf="item.status !== 'Pending' && editingId === item.id" class="uw-sub d-block"></span>
-                <input *ngIf="item.status !== 'Pending' && editingId === item.id" type="text" class="form-control form-control-sm uw-reason-input" placeholder="Reason to reject" [(ngModel)]="reasonDrafts[item.id]" [disabled]="actingOnId === item.id">
+                <input
+                  *ngIf="item.status !== 'Pending' && editingId === item.id"
+                  type="text"
+                  class="form-control form-control-sm uw-reason-input"
+                  placeholder="Reason to reject"
+                  [(ngModel)]="reasonDrafts[item.id]"
+                  [disabled]="actingOnId === item.id">
+
                 <span *ngIf="item.status !== 'Pending' && editingId !== item.id" class="text-muted">{{ item.rejectionReason || '' }}</span>
               </td>
 
               <td class="text-center">
                 <div class="uw-action-stack" *ngIf="item.status === 'Pending'">
-                  <button type="button" class="btn btn-success btn-sm uw-icon-btn" [disabled]="actingOnId === item.id" (click)="approve(item.id)" title="Approve"><i class="ri-thumb-up-line"></i></button>
-                  <button type="button" class="btn btn-danger btn-sm uw-icon-btn" [disabled]="actingOnId === item.id" (click)="reject(item.id)" title="Reject"><i class="ri-thumb-down-line"></i></button>
+                  <button
+                    type="button"
+                    class="btn btn-success btn-sm uw-icon-btn"
+                    [disabled]="actingOnId === item.id"
+                    (click)="approve(item.id)"
+                    title="Approve">
+                    <i class="ri-thumb-up-line"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm uw-icon-btn"
+                    [disabled]="actingOnId === item.id"
+                    (click)="reject(item.id)"
+                    title="Reject">
+                    <i class="ri-thumb-down-line"></i>
+                  </button>
                 </div>
 
                 <div class="uw-action-stack" *ngIf="item.status === 'Approved' && !item.rejectionReason && editingId === item.id">
-                  <button type="button" class="btn btn-danger btn-sm uw-icon-btn" [disabled]="actingOnId === item.id" (click)="reject(item.id)" title="Reject"><i class="ri-thumb-down-line"></i></button>
-                  <button type="button" class="btn btn-light btn-sm uw-icon-btn" [disabled]="actingOnId === item.id" (click)="cancelEdit(item.id)" title="Cancel"><i class="ri-close-line"></i></button>
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm uw-icon-btn"
+                    [disabled]="actingOnId === item.id"
+                    (click)="reject(item.id)"
+                    title="Reject">
+                    <i class="ri-thumb-down-line"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-light btn-sm uw-icon-btn"
+                    [disabled]="actingOnId === item.id"
+                    (click)="cancelEdit(item.id)"
+                    title="Cancel">
+                    <i class="ri-close-line"></i>
+                  </button>
                 </div>
 
                 <div class="uw-action-stack" *ngIf="(item.status === 'Rejected' || (item.status === 'Approved' && item.rejectionReason)) && editingId === item.id">
-                  <button type="button" class="btn btn-success btn-sm uw-icon-btn" [disabled]="actingOnId === item.id" (click)="approve(item.id)" title="Approve"><i class="ri-thumb-up-line"></i></button>
-                  <button type="button" class="btn btn-danger btn-sm uw-icon-btn" [disabled]="actingOnId === item.id" (click)="reject(item.id)" title="Reject"><i class="ri-thumb-down-line"></i></button>
-                  <button type="button" class="btn btn-light btn-sm uw-icon-btn" [disabled]="actingOnId === item.id" (click)="cancelEdit(item.id)" title="Cancel"><i class="ri-close-line"></i></button>
+                  <button
+                    type="button"
+                    class="btn btn-success btn-sm uw-icon-btn"
+                    [disabled]="actingOnId === item.id"
+                    (click)="approve(item.id)"
+                    title="Approve">
+                    <i class="ri-thumb-up-line"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm uw-icon-btn"
+                    [disabled]="actingOnId === item.id"
+                    (click)="reject(item.id)"
+                    title="Reject">
+                    <i class="ri-thumb-down-line"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-light btn-sm uw-icon-btn"
+                    [disabled]="actingOnId === item.id"
+                    (click)="cancelEdit(item.id)"
+                    title="Cancel">
+                    <i class="ri-close-line"></i>
+                  </button>
                 </div>
 
                 <div *ngIf="item.status === 'Approved' && editingId !== item.id" class="mt-1">
@@ -165,13 +255,6 @@
                 </div>
               </td>
 
-              <!-- <td>
-                {{ item.dealerCompanyName }}
-                <span class="uw-sub">
-                  {{ item.locationName }}<span *ngIf="item.locationCode"> ({{ item.locationCode }})</span>
-                </span>
-              </td> -->
-
               <td>
                 {{ item.dealerCompanyName }}
                 <span class="uw-sub">
@@ -179,9 +262,15 @@
                 </span>
               </td>
 
-              <td><span class="uw-link">{{ item.jobCardNo }}</span> <span class="uw-sub">{{ item.jobCardDate | date:'dd-MM-yyyy' }}</span></td>
+              <td>
+                <span class="uw-link">{{ item.jobCardNo }}</span>
+                <span class="uw-sub">{{ item.jobCardDate | date:'dd-MM-yyyy' }}</span>
+              </td>
 
-              <td><span class="uw-link">{{ item.claimPrefix }}{{ item.claimNo }}</span> <span class="uw-sub">{{ item.claimDate | date:'dd-MM-yyyy' }}</span></td>
+              <td>
+                <span class="uw-link">{{ item.claimPrefix }}{{ item.claimNo }}</span>
+                <span class="uw-sub">{{ item.claimDate | date:'dd-MM-yyyy' }}</span>
+              </td>
 
               <td>{{ item.hsn }}</td>
 
@@ -203,7 +292,7 @@
 
               <td class="text-end">{{ item.gstAmount | number:'1.2-2' }}</td>
 
-              <td class="text-end">{{ item.amount | number:'1.2-2' }}</td>
+              <td class="text-end">{{ item.totalAmount | number:'1.2-2' }}</td>
 
               <td>{{ item.deviceInward }} <span class="uw-sub">{{ item.deviceOutward }}</span></td>
 
@@ -240,11 +329,28 @@
               <td>
                 <span class="uw-sub">{{ item.actionDate ? (item.actionDate | date:'dd-MM-yyyy') : '-' }}</span>
                 <span class="uw-sub">{{ item.actionDate ? (item.actionDate | date:'HH:mm:ss') : '' }}</span>
+                <!-- TEMP DEBUG — remove once the 00:00:00 cause is confirmed -->
+                <span class="uw-sub text-danger">RAW: {{ item.actionDate }}</span>
               </td>
 
               <td class="text-center">
-                <button *ngIf="(item.status === 'Approved' || item.status === 'Rejected') && editingId !== item.id" type="button" class="btn btn-outline-secondary btn-sm uw-icon-btn" [disabled]="actingOnId === item.id" (click)="startEdit(item.id)" title="Edit"><i class="ri-edit-line"></i></button>
-                <button type="button" class="btn btn-outline-danger btn-sm uw-icon-btn" [disabled]="actingOnId === item.id" (click)="deleteItem(item.id)" title="Delete"><i class="ri-delete-bin-line"></i></button>
+                <button
+                  *ngIf="(item.status === 'Approved' || item.status === 'Rejected') && editingId !== item.id"
+                  type="button"
+                  class="btn btn-outline-secondary btn-sm uw-icon-btn"
+                  [disabled]="actingOnId === item.id"
+                  (click)="startEdit(item.id)"
+                  title="Edit">
+                  <i class="ri-edit-line"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-danger btn-sm uw-icon-btn"
+                  [disabled]="actingOnId === item.id"
+                  (click)="deleteItem(item.id)"
+                  title="Delete">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
               </td>
 
             </tr>
@@ -261,8 +367,16 @@
     <div class="d-flex justify-content-between align-items-center mt-2" *ngIf="totalPages > 1">
       <span class="text-muted small">Page {{ filter.pageNumber }} of {{ totalPages }}</span>
       <div>
-        <button type="button" class="btn btn-sm btn-light me-1" [disabled]="filter.pageNumber === 1" (click)="goToPage(filter.pageNumber - 1)">Previous</button>
-        <button type="button" class="btn btn-sm btn-light" [disabled]="filter.pageNumber === totalPages" (click)="goToPage(filter.pageNumber + 1)">Next</button>
+        <button
+          type="button"
+          class="btn btn-sm btn-light me-1"
+          [disabled]="filter.pageNumber === 1"
+          (click)="goToPage(filter.pageNumber - 1)">Previous</button>
+        <button
+          type="button"
+          class="btn btn-sm btn-light"
+          [disabled]="filter.pageNumber === totalPages"
+          (click)="goToPage(filter.pageNumber + 1)">Next</button>
       </div>
     </div>
 
@@ -277,8 +391,10 @@
         <h6 class="modal-title">Dealer Details</h6>
         <button type="button" class="btn-close" (click)="closeDealerDetailsModal()"></button>
       </div>
+
       <div class="modal-body">
         <div *ngIf="dealerDetailsLoading" class="text-center text-muted py-3">Loading...</div>
+
         <div *ngIf="!dealerDetailsLoading && dealerDetails">
           <p><strong>Company Name:</strong> {{ dealerDetails.compname }}</p>
           <p><strong>Dealer Code:</strong> {{ dealerDetails.dealercode }}</p>
@@ -287,8 +403,10 @@
             <strong>{{ field.key }}:</strong> {{ field.value }}
           </p>
         </div>
+
         <div *ngIf="!dealerDetailsLoading && !dealerDetails" class="text-center text-muted py-3">No details found.</div>
       </div>
+
       <div class="modal-footer">
         <button type="button" class="btn btn-light btn-sm" (click)="closeDealerDetailsModal()">Close</button>
       </div>
