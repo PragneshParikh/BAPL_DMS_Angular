@@ -1,0 +1,241 @@
+<div class="warranty-register">
+  <header class="page-header">
+    <div>
+      <h1>Warranty Register</h1>
+      <p class="subtitle">
+        End-to-end tracking of warranty claims — job card through claim, order, invoice, packing and dispatch.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="exportCsv()"
+      [disabled]="exporting || loading">
+      {{ exporting ? 'Exporting…' : 'Export CSV' }}
+    </button>
+  </header>
+
+  <form class="filter-card" (ngSubmit)="applyFilters()">
+    <div class="filter-grid">
+      <label class="field">
+        <span>Dealer</span>
+        <select [(ngModel)]="filter.dealerCode" name="dealerCode">
+          <option [ngValue]="null">All Dealers</option>
+          <option *ngFor="let d of dealers" [ngValue]="d.dealerCode">{{ d.dealerName }}</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>From Date</span>
+        <input type="date" [(ngModel)]="filter.fromDate" name="fromDate" />
+      </label>
+
+      <label class="field">
+        <span>To Date</span>
+        <input type="date" [(ngModel)]="filter.toDate" name="toDate" />
+      </label>
+
+      <label class="field">
+        <span>Chassis No</span>
+        <input type="text" [(ngModel)]="filter.chassisNo" name="chassisNo" placeholder="Search chassis no" />
+      </label>
+
+      <label class="field">
+        <span>Claim No</span>
+        <input type="number" [(ngModel)]="filter.claimNo" name="claimNo" placeholder="e.g. 1024" />
+      </label>
+
+      <label class="field">
+        <span>Job No</span>
+        <input type="text" [(ngModel)]="filter.jobNo" name="jobNo" placeholder="Search job no" />
+      </label>
+
+      <label class="field">
+        <span>Claim Status</span>
+        <select [(ngModel)]="filter.warrantyClaimStatus" name="warrantyClaimStatus">
+          <option *ngFor="let s of claimStatusOptions" [ngValue]="s || null">{{ s || 'All' }}</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Order Status</span>
+        <select [(ngModel)]="filter.warrantyOrderStatus" name="warrantyOrderStatus">
+          <option *ngFor="let s of orderInvoiceStatusOptions" [ngValue]="s || null">{{ s || 'All' }}</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Invoice Status</span>
+        <select [(ngModel)]="filter.warrantyInvoiceStatus" name="warrantyInvoiceStatus">
+          <option *ngFor="let s of orderInvoiceStatusOptions" [ngValue]="s || null">{{ s || 'All' }}</option>
+        </select>
+      </label>
+
+      <label class="field field-search">
+        <span>Search</span>
+        <input
+          type="text"
+          [(ngModel)]="filter.search"
+          name="search"
+          placeholder="Chassis, claim no, party, approver, order/invoice no…" />
+      </label>
+    </div>
+
+    <div class="filter-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="loading">Apply Filters</button>
+      <button type="button" class="btn btn-ghost" (click)="resetFilters()" [disabled]="loading">Reset</button>
+    </div>
+  </form>
+
+  <div class="status-line">
+    <span *ngIf="!loading && !errorMessage">{{ totalRecords }} record{{ totalRecords === 1 ? '' : 's' }} found</span>
+    <span class="error" *ngIf="errorMessage">{{ errorMessage }}</span>
+  </div>
+
+  <div class="table-wrap">
+    <div class="loading-overlay" *ngIf="loading">
+      <div class="spinner"></div>
+      <span>Loading warranty register…</span>
+    </div>
+
+    <table *ngIf="!loading">
+      <thead>
+        <tr>
+          <th>Sr No</th>
+          <th>Claim Type</th>
+          <th>Job No</th>
+          <th>Job Date</th>
+          <th>Repair Bill No</th>
+          <th>Repair Bill Date</th>
+          <th>Chassis No</th>
+          <!-- <th>Item</th>
+          <th>Description</th> -->
+          <th>Part Name</th>
+          <th>Part Description</th>
+          <th>Model Name</th>
+          <th>Model Description</th>
+          <th>Labour Name</th>
+          <th>Labour Description</th>
+          <th class="num-col">Qty</th>
+          <th class="num-col">Rate</th>
+          <th class="num-col">MRP</th>
+          <th class="num-col">Taxable Amount</th>
+          <th class="num-col">CGST %</th>
+          <th class="num-col">CGST Amount</th>
+          <th class="num-col">SGST %</th>
+          <th class="num-col">SGST Amount</th>
+          <th class="num-col">IGST %</th>
+          <th class="num-col">IGST Amount</th>
+          <th class="num-col">Total GST</th>
+          <th class="num-col">Total Amount</th>
+          <th>Claim No</th>
+          <th>Claim Date</th>
+     
+          <th>Party</th>
+          <th>Claim Status</th>
+          <th>Approver Engineer</th>
+          <th>Accept/Reject Reason</th>
+          <!-- <th>PRN No</th> -->
+          <th>WR Order Status</th>
+          <th>WR Order No</th>
+          <th>WR Order Date</th>
+          <th>WR Invoice Status</th>
+          <th>WR Invoice No</th>
+          <th>WR Invoice Date</th>
+          <th>WR Packing Slip No</th>
+          <th>WR Packing Slip Date</th>
+          <th>WR Dispatch No</th>
+          <th>WR Dispatch Date</th>
+          <th>WR Dispatch Received Status</th>
+          <th>WR Dispatch Received Date</th>
+          <th>WR Dispatch Received Remarks</th>
+          <th>WR Verification Date</th>
+          <th>WR Packing Concern</th>
+          <th>WR Packing Concern Type</th>
+          <th>WR Packing Concern Remarks</th>
+          <th>WR Material Concern</th>
+          <th>WR Material Concern Type</th>
+          <th>WR Material Concern Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of rows">
+          <td>{{ row.srNo || '—' }}</td>
+          <td>{{ row.claimType || '—' }}</td>
+          <td>{{ row.jobNo || '—' }}</td>
+          <td>{{ formatDate(row.jobDate) }}</td>
+          <td>{{ row.rbillNo || '—' }}</td>
+          <td>{{ formatDate(row.rbillDate) }}</td>
+           <td>{{ row.chasisNo || '—' }}</td>
+          <!-- <td>{{ row.itemName || '—' }}</td>
+          <td class="wrap-cell">{{ row.description || '—' }}</td> -->
+          <td>{{ row.partName || '—' }}</td>
+          <td class="wrap-cell">{{ row.partDescription || '—' }}</td>
+          <td>{{ row.modelName || '—' }}</td>
+          <td class="wrap-cell">{{ row.modelDescription || '—' }}</td>
+          <td>{{ row.labourName || '—' }}</td>
+          <td class="wrap-cell">{{ row.labourDescription || '—' }}</td>
+          <td class="num-col">{{ formatNumber(row.qty) }}</td>
+          <td class="num-col">{{ formatCurrency(row.rate) }}</td>
+          <td class="num-col">{{ formatCurrency(row.mrp) }}</td>
+          <td class="num-col">{{ formatCurrency(row.taxableAmount) }}</td>
+          <td class="num-col">{{ formatPercent(row.cgstPercent) }}</td>
+          <td class="num-col">{{ formatCurrency(row.cgstAmount) }}</td>
+          <td class="num-col">{{ formatPercent(row.sgstPercent) }}</td>
+          <td class="num-col">{{ formatCurrency(row.sgstAmount) }}</td>
+          <td class="num-col">{{ formatPercent(row.igstPercent) }}</td>
+          <td class="num-col">{{ formatCurrency(row.igstAmount) }}</td>
+          <td class="num-col">{{ formatCurrency(row.totalGstAmount) }}</td>
+          <td class="num-col total-col">{{ formatCurrency(row.totalAmount) }}</td>
+          <td>{{ row.warrantyClaimNo || '—' }}</td>
+          <td>{{ formatDate(row.warrantyClaimDate) }}</td>
+         
+          <td>{{ row.partyName || '—' }}</td>
+          <td><span [class]="statusClass(row.warrantyClaimStatus)">{{ row.warrantyClaimStatus || '—' }}</span></td>
+          <td>{{ row.approverEngineerName || '—' }}</td>
+          <td class="wrap-cell">{{ row.claimAcceptRejectReason || '—' }}</td>
+          <!-- <td>{{ row.prnNo || '—' }}</td> -->
+          <td><span [class]="statusClass(row.warrantyOrderStatus)">{{ row.warrantyOrderStatus || '—' }}</span></td>
+          <td>{{ row.warrantyOrderNo || '—' }}</td>
+          <td>{{ formatDate(row.warrantyOrderDate) }}</td>
+          <td><span [class]="statusClass(row.warrantyInvoiceStatus)">{{ row.warrantyInvoiceStatus || '—' }}</span></td>
+          <td>{{ row.warrantyInvoiceNo || '—' }}</td>
+          <td>{{ formatDate(row.warrantyInvoiceDate) }}</td>
+          <td>{{ row.packingSlipNo || '—' }}</td>
+          <td>{{ formatDate(row.packingSlipDate) }}</td>
+          <td>{{ row.dispatchNo || '—' }}</td>
+          <td>{{ formatDate(row.dispatchDate) }}</td>
+          <td>{{ row.dispatchReceivedStatus || '—' }}</td>
+          <td>{{ formatDate(row.dispatchReceivedDate) }}</td>
+          <td class="wrap-cell">{{ row.dispatchReceivedRemarks || '—' }}</td>
+          <td>{{ formatDate(row.verificationDate) }}</td>
+          <td>{{ row.packingConcern || '—' }}</td>
+          <td>{{ row.packingConcernType || '—' }}</td>
+          <td class="wrap-cell">{{ row.packingConcernRemarks || '—' }}</td>
+          <td>{{ row.materialConcern || '—' }}</td>
+          <td>{{ row.materialConcernType || '—' }}</td>
+          <td class="wrap-cell">{{ row.materialConcernRemarks || '—' }}</td>
+        </tr>
+
+        <tr *ngIf="!rows.length">
+          <td class="empty-row" colspan="48">No warranty register records match the current filters.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer class="pagination" *ngIf="!loading && rows.length">
+    <div class="page-size">
+      <span>Rows per page</span>
+      <select [(ngModel)]="filter.pageSize" name="pageSize" (ngModelChange)="changePageSize($event)">
+        <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
+      </select>
+    </div>
+
+    <div class="page-nav">
+      <button type="button" class="btn btn-ghost" (click)="changePage(-1)" [disabled]="filter.pageIndex <= 1">Previous</button>
+      <span>Page {{ filter.pageIndex }} of {{ totalPages }}</span>
+      <button type="button" class="btn btn-ghost" (click)="changePage(1)" [disabled]="filter.pageIndex >= totalPages">Next</button>
+    </div>
+  </footer>
+</div>

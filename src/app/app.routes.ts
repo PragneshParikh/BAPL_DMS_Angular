@@ -100,6 +100,7 @@ import { PartInvoiceDispatch } from './components/part-invoice-dispatch/part-inv
 import { VehicleInvoiceDispatch } from './components/vehicle-invoice-dispatch/vehicle-invoice-dispatch';
 import { DealerMenuAccessPage } from './components/dealer-creation/dealer-menu-access-page/dealer-menu-access-page';
 import { LocationEditPage } from './components/dealer-creation/dealer-location-edit/dealer-location-edit';
+import { WarrantyRegister } from './components/Reports/warranty-register/warranty-register';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
@@ -288,7 +289,8 @@ export const routes: Routes = [
       { path: 'warranty-packaging-list', component: WarrantyPackagingList, data: [116]},
       { path: 'dispatch-master', component : DispatchMaster, data: [117]},
       { path: 'part-dispatch-invoice', component : PartInvoiceDispatch, data: [118]},
-      { path: 'vehicle-dispatch-invoice', component: VehicleInvoiceDispatch, data:[119]}
+      { path: 'vehicle-dispatch-invoice', component: VehicleInvoiceDispatch, data:[119]},
+      { path: 'warranty-register', component: WarrantyRegister, data:[123] }
 
     ]
   },

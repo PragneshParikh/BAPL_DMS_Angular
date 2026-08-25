@@ -99,6 +99,12 @@ import {
   VehicleInwardReportResponse,
   VehicleInwardReportViewModel
 } from '../../ViewModels/models/vehicle-inward-report.model';
+
+import {
+  WarrantyRegisterFilterModel,
+  WarrantyRegisterPagedResponse,
+  WarrantyRegisterViewModel
+} from '../../ViewModels/models/WarrantyRegisterViewModel';
 @Injectable({
   providedIn: 'root'
 })
@@ -792,6 +798,29 @@ export class ReportService {
     }
 
     return this.http.get(`${this.apiUrl}/GetPartsStockDetailsByDealer`, { params });
+  }
+
+  // =====================================================
+  // WARRANTY REGISTER REPORT
+  // Backend: POST /Report/warranty-register (paged) and
+  // POST /Report/warranty-register/export (unpaged, full dataset).
+  // =====================================================
+  getWarrantyRegisterReport(
+    filter: WarrantyRegisterFilterModel
+  ): Observable<WarrantyRegisterPagedResponse> {
+    return this.http.post<WarrantyRegisterPagedResponse>(
+      `${this.apiUrl}/warranty-register`,
+      filter
+    );
+  }
+
+  exportWarrantyRegisterReport(
+    filter: WarrantyRegisterFilterModel
+  ): Observable<WarrantyRegisterViewModel[]> {
+    return this.http.post<WarrantyRegisterViewModel[]>(
+      `${this.apiUrl}/warranty-register/export`,
+      filter
+    );
   }
 
 }
