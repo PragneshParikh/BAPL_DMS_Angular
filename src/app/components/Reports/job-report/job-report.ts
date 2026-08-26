@@ -65,6 +65,7 @@ export class JobReportComponent implements OnInit, OnDestroy {
   // Debounce window for auto-search — long enough that a normal typist
   // doesn't fire a request per keystroke, short enough to feel instant.
   private static readonly AUTO_SEARCH_DEBOUNCE_MS = 500;
+  grandTotal: any;
 
   constructor(
     private fb: FormBuilder,

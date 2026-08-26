@@ -244,14 +244,14 @@
 
                 <div *ngIf="item.status === 'Approved' && editingId !== item.id" class="mt-1">
                   <div class="uw-sub"><strong>Approved</strong></div>
-                  <div class="uw-sub">Date: {{ item.approvedDate || item.actionDate | date:'dd-MM-yyyy' }}</div>
-                  <div class="uw-sub">Time: {{ item.approvedDate || item.actionDate | date:'HH:mm:ss' }}</div>
+                  <div class="uw-sub">Date: {{ item.actionDateDisplay || '-' }}</div>
+                  <div class="uw-sub">Time: {{ item.actionTimeDisplay || '' }}</div>
                 </div>
 
                 <div *ngIf="item.status === 'Rejected' && editingId !== item.id" class="mt-1">
                   <div class="uw-sub"><strong>Rejected:</strong></div>
-                  <div class="uw-sub">{{ item.rejectedDate || item.actionDate | date:'dd-MM-yyyy' }}</div>
-                  <div class="uw-sub">{{ item.rejectedDate || item.actionDate | date:'HH:mm:ss' }}</div>
+                  <div class="uw-sub">{{ item.actionDateDisplay || '-' }}</div>
+                  <div class="uw-sub">{{ item.actionTimeDisplay || '' }}</div>
                 </div>
               </td>
 
@@ -327,10 +327,8 @@
               <td><span class="uw-sub">{{ item.actionBy || item.updatedBy || '-' }}</span></td>
 
               <td>
-                <span class="uw-sub">{{ item.actionDate ? (item.actionDate | date:'dd-MM-yyyy') : '-' }}</span>
-                <span class="uw-sub">{{ item.actionDate ? (item.actionDate | date:'HH:mm:ss') : '' }}</span>
-                <!-- TEMP DEBUG — remove once the 00:00:00 cause is confirmed -->
-                <span class="uw-sub text-danger">RAW: {{ item.actionDate }}</span>
+                <span class="uw-sub">{{ item.actionDateDisplay || '-' }}</span>
+                <span class="uw-sub">{{ item.actionTimeDisplay || '' }}</span>
               </td>
 
               <td class="text-center">

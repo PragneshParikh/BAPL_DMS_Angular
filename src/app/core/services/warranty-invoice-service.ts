@@ -87,7 +87,10 @@ export class WarrantyInvoiceService {
       });
   }
 
-    sendWarrantyInvoiceToErp(id: number): Observable<any> {
-    return this.httpClient.post(`${this.baseUrl}/WarrantyInvoice/SendWarrantyInvoiceToErp/${id}`, {});
+  // RENAMED from BAPLWarrantyData - the invoice id now travels in the
+  // request body ({ invoiceId }) rather than the URL path, so this is a
+  // single fixed route (UATWarrantyData) instead of one URL per invoice.
+  UATWarrantyData(id: number): Observable<any> {
+    return this.httpClient.post(`${this.baseUrl}/WarrantyInvoice/UATWarrantyData`, { invoiceId: id });
   }
 }

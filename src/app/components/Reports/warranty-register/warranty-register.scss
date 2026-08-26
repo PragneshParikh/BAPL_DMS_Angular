@@ -1,242 +1,163 @@
-:host {
-  display: block;
-  font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #1f2937;
+// ============================================================================
+// Warranty Register — component styles
+//
+// Bootstrap classes (card, form-control, badge, spinner-border, btn,
+// pagination) already handle the base look. Everything below exists
+// specifically because this report's table is unusually wide (~50
+// columns) — plain Bootstrap table classes alone leave it cramped,
+// impossible to scan while scrolling, and blown out by a handful of
+// long free-text columns.
+// ============================================================================
+
+// ── Filter card ──────────────────────────────────────────────────────────
+.card {
+  border-radius: 10px;
 }
 
-.warranty-register {
-  padding: 24px;
-  max-width: 100%;
+// Chassis typeahead suggestion list
+.position-relative .list-group {
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 2px;
 }
 
-.page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
-
-  h1 {
-    margin: 0 0 4px;
-    font-size: 22px;
-    font-weight: 600;
-    color: #111827;
-  }
-
-  .subtitle {
-    margin: 0;
-    font-size: 13px;
-    color: #6b7280;
-    max-width: 640px;
-  }
-}
-
-.btn {
-  border: 1px solid transparent;
+// ── Table scroll container ──────────────────────────────────────────────
+.table-responsive {
+  max-height: 70vh;
+  overflow: auto;
+  border: 1px solid #dee2e6;
   border-radius: 8px;
-  padding: 9px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color .15s ease, border-color .15s ease, opacity .15s ease;
 
-  &:disabled {
-    opacity: .55;
-    cursor: not-allowed;
-  }
-}
-
-.btn-primary {
-  background: #1d4ed8;
-  color: #fff;
-
-  &:hover:not(:disabled) { background: #1e40af; }
-}
-
-.btn-ghost {
-  background: #fff;
-  border-color: #d1d5db;
-  color: #374151;
-
-  &:hover:not(:disabled) { background: #f3f4f6; }
-}
-
-.filter-card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 18px 20px;
-  margin-bottom: 16px;
-}
-
-.filter-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 14px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 12px;
-  color: #4b5563;
-
-  span {
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .03em;
-    font-size: 11px;
-    color: #6b7280;
+  // A 50-column table lives or dies by how pleasant horizontal scrolling
+  // is — default browser scrollbars are thin and easy to miss.
+  &::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
   }
 
-  input, select {
-    border: 1px solid #d1d5db;
-    border-radius: 7px;
-    padding: 8px 10px;
-    font-size: 13px;
-    color: #111827;
-    background: #fff;
+  &::-webkit-scrollbar-track {
+    background: #f1f3f5;
+  }
 
-    &:focus {
-      outline: none;
-      border-color: #1d4ed8;
-      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+  &::-webkit-scrollbar-thumb {
+    background: #c1c9d0;
+    border-radius: 6px;
+
+    &:hover {
+      background: #a8b1ba;
     }
   }
 }
 
-.field-search {
-  grid-column: span 2;
-}
+// ── Base table ───────────────────────────────────────────────────────────
+table.table {
+  margin-bottom: 0;
+  font-size: 12.5px;
 
-.filter-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.status-line {
-  font-size: 13px;
-  color: #6b7280;
-  margin-bottom: 10px;
-  min-height: 18px;
-
-  .error {
-    color: #b91c1c;
-    font-weight: 600;
+  // Default every cell to a single line — codes, dates, statuses, amounts
+  // all read better this way. Genuinely long free-text fields opt back
+  // into wrapping via .wrap-cell below, rather than the table guessing.
+  th,
+  td {
+    white-space: nowrap;
+    vertical-align: middle;
+    padding: 6px 10px;
   }
 }
 
-.table-wrap {
-  position: relative;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  overflow: auto;
-  max-height: 65vh;
+// Long free-text columns (Labour/Model Description, Accept-Reject Reason,
+// the Dispatch/Packing/Material Remarks fields) — applied explicitly via
+// class in the template rather than nth-child column-position matching,
+// so this doesn't silently break the next time a column gets reordered.
+.wrap-cell {
+  white-space: normal !important;
+  min-width: 200px;
+  max-width: 320px;
+  line-height: 1.35;
 }
 
-table {
-  border-collapse: collapse;
-  width: max-content;
-  min-width: 100%;
-  font-size: 12.5px;
-}
-
-thead th {
+// ── Sticky header ────────────────────────────────────────────────────────
+thead.table-light th {
   position: sticky;
   top: 0;
-  background: #f9fafb;
-  text-align: left;
-  padding: 10px 12px;
-  font-weight: 600;
-  color: #374151;
-  border-bottom: 1px solid #e5e7eb;
-  white-space: nowrap;
-  z-index: 1;
+  z-index: 2;
+  background-color: #f8f9fa; // restate table-light's own background so
+                              // rows scrolling underneath don't show through
+  box-shadow: inset 0 -1px 0 #dee2e6; // crisp separator line that survives
+                                       // being pinned in place
 }
 
-tbody td {
-  padding: 9px 12px;
-  border-bottom: 1px solid #f1f5f9;
-  color: #1f2937;
-  white-space: nowrap;
-}
-
-tbody tr:hover {
-  background: #f8fafc;
-}
-
-.wrap-cell {
-  white-space: normal;
-  min-width: 180px;
-  max-width: 260px;
-}
-
-.empty-row {
-  text-align: center;
-  padding: 28px !important;
-  color: #9ca3af;
-  white-space: normal;
-}
-
-.badge {
-  display: inline-block;
-  padding: 3px 9px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.badge-approved { background: #dcfce7; color: #166534; }
-.badge-rejected { background: #fee2e2; color: #991b1b; }
-.badge-pending  { background: #fef3c7; color: #92400e; }
-.badge-muted    { background: #f3f4f6; color: #6b7280; }
-
-.loading-overlay {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 60px 0;
-  color: #6b7280;
-  font-size: 13px;
-}
-
-.spinner {
-  width: 28px;
-  height: 28px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #1d4ed8;
-  border-radius: 50%;
-  animation: spin .8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 14px;
-  font-size: 13px;
-  color: #4b5563;
-}
-
-.page-size, .page-nav {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  select {
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    padding: 5px 8px;
+// ── Sticky first column (Sr No) ──────────────────────────────────────────
+// With ~50 columns, Sr No scrolls out of view within the first few
+// columns — losing your place in the row while scanning right. Pinning it
+// keeps a fixed reference point. Delete this whole block if you'd rather
+// keep things simple; it's the one genuinely optional addition here.
+table.table {
+  th:first-child,
+  td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: inherit;
   }
+
+  thead th:first-child {
+    z-index: 3; // above both the sticky header row and the sticky column
+    box-shadow: inset -1px -1px 0 #dee2e6;
+  }
+
+  tbody td:first-child {
+    box-shadow: inset -1px 0 0 #dee2e6;
+  }
+}
+
+// Bootstrap's .table-striped alternates row background via nth-child on
+// <tr>; a `position: sticky` cell paints over that with its own
+// background instead of inheriting it correctly in every browser, so the
+// stripe color is restated explicitly on the pinned first cell.
+.table-striped > tbody > tr:nth-of-type(odd) > td:first-child {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.table-striped > tbody > tr:nth-of-type(even) > td:first-child {
+  background-color: #fff;
+}
+
+// ── Sortable headers ─────────────────────────────────────────────────────
+.sortable {
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+  }
+
+  i {
+    margin-left: 4px;
+    font-size: 0.75em;
+    opacity: 0.6;
+  }
+}
+
+// ── Status badges (Claim / Order / Invoice status) ──────────────────────
+.badge {
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+// ── Numeric columns ──────────────────────────────────────────────────────
+.text-end {
+  font-variant-numeric: tabular-nums;
+}
+
+// Visually anchor the Total Amount column as the row's bottom line —
+// matches the fw-semibold already applied to it in the template.
+td.fw-semibold {
+  color: #111827;
+}
+
+// ── Pagination row ───────────────────────────────────────────────────────
+.badge.bg-light.border {
+  font-weight: 600;
 }
