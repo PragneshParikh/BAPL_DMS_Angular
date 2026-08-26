@@ -19,14 +19,14 @@ import { WarrantyInvoiceService } from '../../core/services/warranty-invoice-ser
 })
 export class WarrantyInvoice implements OnInit {
 
-  invoiceId: number = 0; 
+  invoiceId: number = 0; // 0 = create, otherwise the Id being edited
 
   dateFrom: string = '';
   dateTo: string = '';
-  batchNo: string = '';       
+  batchNo: string = '';       // auto-generated, read-only on the form
   batchDate: string = '';
-  invoicePrefix: string = ''; 
-  invoiceNo: string = '';     
+  invoicePrefix: string = ''; // new prefix concept, mirrors ClaimPrefix
+  invoiceNo: string = '';     // auto-generated, read-only on the form
   invoiceDate: string = '';
   claimType: string = 'Warranty';
   selectedSupplierId: number | null = null;
@@ -49,7 +49,9 @@ export class WarrantyInvoice implements OnInit {
 
   wasApprovedOnLoad = false;
 
-  sendingToErp = false;
+  // REMOVED: sendingToErp. The ERP push now happens server-side, inside
+  // the SAME Insert/UpdateWarrantyInvoice call `saving` already covers -
+  // there's no longer a separate async step for this component to track.
 
   constructor(
     private route: ActivatedRoute,
@@ -91,7 +93,6 @@ export class WarrantyInvoice implements OnInit {
       this.loadNextInvoiceNumbers();
       this.preloadOrderFromQueryParam(Number(pending.orderId));
     } else {
-
       this.loadLatestSavedInvoice();
     }
   }
@@ -219,7 +220,6 @@ export class WarrantyInvoice implements OnInit {
         const requests = orderedInvoices.map(i => this.warrantyInvoiceService.getWarrantyInvoiceById(i.id));
         forkJoin(requests).subscribe({
           next: (invoices: any[]) => {
-
             const dedupedByOrderId = new Map<number, any>();
             invoices.forEach(invoice => {
               (invoice?.orders || []).forEach((order: any) => {
@@ -261,7 +261,7 @@ export class WarrantyInvoice implements OnInit {
           totalClaims: (res.claims || []).length,
           totalAmount: (res.claims || []).flatMap((c: any) => c.details || [])
             .reduce((sum: number, d: any) => sum + (d.totalAmount || 0), 0),
-          isApproved: false, // starts unchecked - checkbox approval is required again, per explicit request reversing the earlier "linking is itself approval" decision
+          isApproved: false,
           claims: res.claims || []
         });
 
@@ -303,7 +303,6 @@ export class WarrantyInvoice implements OnInit {
     }
   }
 
-
   get isApproved(): boolean {
     return this.selectedOrders.some(o => !!o.isApproved);
   }
@@ -341,7 +340,7 @@ export class WarrantyInvoice implements OnInit {
     return this.selectedOrders.length;
   }
 
- private buildInvoiceRowsFromOrders(orders: any[], startSrNo: number, isHistorical: boolean): any[] {
+  private buildInvoiceRowsFromOrders(orders: any[], startSrNo: number, isHistorical: boolean): any[] {
     const rows: any[] = [];
     let srNo = startSrNo;
 
@@ -410,8 +409,6 @@ export class WarrantyInvoice implements OnInit {
     return rows;
   }
 
-  // Historical orders' rows first, then the current invoice's own orders -
-  // same ordering convention as claimLineRows.
   get invoiceLineRows(): any[] {
     const historicalRows = this.buildInvoiceRowsFromOrders(this.historicalOrders, 1, true);
     const currentRows = this.buildInvoiceRowsFromOrders(this.selectedOrders, historicalRows.length + 1, false);
@@ -419,33 +416,21 @@ export class WarrantyInvoice implements OnInit {
   }
 
 
-  private sendInvoiceToErp(invoiceId: number): void {
-    this.sendingToErp = true;
-    this.warrantyInvoiceService.UATWarrantyData(invoiceId).subscribe({
-      next: (res: any) => {
-        this.sendingToErp = false;
-        if (res?.success) {
-          this.toaster.show(`Sent to ERP successfully (${res.linesSent} line(s)).`, {
-            classname: 'bg-success text-white',
-            delay: 3000
-          });
-        } else {
-          this.toaster.show(`ERP submission failed: ${res?.message || 'Unknown error'}`, {
-            classname: 'bg-danger text-white',
-            delay: 6000
-          });
-        }
-      },
-      error: (err) => {
-        this.sendingToErp = false;
-        console.error('ERP submission failed:', err);
-        const serverMsg = err?.error?.message || err?.error || 'Could not reach the ERP integration.';
-        this.toaster.show(`ERP submission failed: ${serverMsg}`, {
-          classname: 'bg-danger text-white',
-          delay: 6000
-        });
-      }
-    });
+  private showErpResultToast(erp: { success: boolean; message?: string; linesSent?: number } | null | undefined): void {
+
+    if (!erp) return;
+
+    if (erp.success) {
+      this.toaster.show(`Sent to ERP successfully (${erp.linesSent ?? 0} line(s)).`, {
+        classname: 'bg-success text-white',
+        delay: 3000
+      });
+    } else {
+      this.toaster.show(`ERP submission failed: ${erp.message || 'Unknown error'}`, {
+        classname: 'bg-danger text-white',
+        delay: 6000
+      });
+    }
   }
 
   saveWarrantyInvoice(navigateAfter: boolean = true): void {
@@ -559,11 +544,14 @@ export class WarrantyInvoice implements OnInit {
         );
 
         sessionStorage.removeItem('pendingWarrantyInvoiceOrder');
+
+        // CHANGED: no second HTTP call here anymore. res.erp already holds
+        // the full ERP submission result - InsertWarrantyInvoice /
+        // UpdateWarrantyInvoice built and sent the complete payload
+        // server-side as part of this same request, without needing this
+        // invoice's id to come back first.
         if (savingMainInvoice) {
-          const savedInvoiceId = res?.invoiceId ?? this.invoiceId;
-          if (savedInvoiceId) {
-            this.sendInvoiceToErp(Number(savedInvoiceId));
-          }
+          this.showErpResultToast(res?.erp);
         }
 
         if (navigateAfter) {
@@ -628,7 +616,7 @@ export class WarrantyInvoice implements OnInit {
           dealerCode,
           dateFrom: this.dateFrom,
           dateTo: this.dateTo,
-          batchNo: order.batchNo, // reused from the order, not numbers.batchNo
+          batchNo: order.batchNo,
           batchDate: this.formatDate(new Date()),
           invoicePrefix: numbers.invoicePrefix,
           invoiceNo: numbers.invoiceNo,
