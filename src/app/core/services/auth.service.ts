@@ -98,7 +98,27 @@ export class AuthenticationService {
     }
 
     /**
-     * NEW — the location code a Location Login session is scoped to (see
+     * Used by admin-driven session swaps (e.g. impersonation) where a new
+     * token/user payload is already in hand from the backend, but we still
+     * need to push it through the exact same storage + subject update path
+     * that a normal login() uses — reusing storageService.setUser() so the
+     * stored value is encoded identically to what login() writes, and
+     * updating currentUserSubject so every component/guard reading
+     * currentUserValue immediately sees the new session, not the stale one.
+     */
+    setSession(user: any): void {
+        this.storageService.setUser(user);
+
+        if (user?.token) {
+            localStorage.setItem('token', user.token);
+            this.startTokenTimer(user.token);
+        }
+
+        this.currentUserSubject.next(user);
+    }
+
+    /**
+     * The location code a Location Login session is scoped to (see
      * AuthController.LocationLogin / TryLocationLoginAsync on the backend).
      * Absent (null) for a regular email/password login. Read from
      * localStorage rather than currentUserValue so it stays available even
@@ -120,8 +140,9 @@ export class AuthenticationService {
         localStorage.removeItem('selectedModule');
         localStorage.removeItem('menuRights');
         localStorage.removeItem('role');
-        localStorage.removeItem('dealerCode');   // FIX: was never cleared on logout
-        localStorage.removeItem('locationCode'); // NEW — same gap, for the new field
+        localStorage.removeItem('dealerCode');    // FIX: was never cleared on logout
+        localStorage.removeItem('locationCode');  // same gap, for the location-login field
+        localStorage.removeItem('locationRoleId'); // same gap, for the location-login role field
 
         this.menuService.resetMenu();
         this.currentUserSubject.next(null!);

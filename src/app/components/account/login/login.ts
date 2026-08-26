@@ -1,3 +1,4 @@
+//src\app\components\account\login\login.ts
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { AuthenticationService } from '../../../core/services/auth.service';
@@ -29,7 +30,7 @@ export class Login {
     private router: Router,
     public toastService: ToastService,
     private storageService: StorageService,
-    private menuService: MenuService // NEW — fetches this session's granted menu tree after login
+    private menuService: MenuService // fetches this session's granted menu tree after login
   ) {
     // redirect to home if already logged in
     if (this.authenticationService.currentUserValue) {
@@ -41,25 +42,16 @@ export class Login {
     if (localStorage.getItem('currentUser')) {
       this.router.navigate(['/']);
     }
-    /**
-     * Form Validatyion
-     */
-    // this.loginForm = this.formBuilder.group({
-    //   username: ['CUS0435', [Validators.required]],
-    //   password: ['Dealer@123', [Validators.required]],
-
-    // });
 
     this.loginForm = this.formBuilder.group({
       username: ['', [Validators.required]],
       password: ['', [Validators.required]],
     });
-    // get return url from route parameters or default to '/'
-    // this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
   // convenience getter for easy access to form fields
   get f() { return this.loginForm.controls; }
+
   /**
    * Password Hide/Show
    */
@@ -76,8 +68,8 @@ export class Login {
 
     this.authenticationService.login(this.f['username'].value, this.f['password'].value).subscribe((data: any) => {
 
-      // NEW — a Location Login ID assigned to more than one location comes
-      // back this way instead of a token (see AuthController.Login /
+      // A Location Login ID assigned to more than one location comes back
+      // this way instead of a token (see AuthController.Login /
       // TryLocationLoginAsync on the backend) since there's no way to know
       // which location to scope the session to yet. There's no
       // location-picker UI wired up here, so for now this just tells the
@@ -93,8 +85,8 @@ export class Login {
       }
 
       if (data.status == 'success') {
-        // NEW — surface the location right away, in addition to wherever
-        // it ends up being shown persistently (nav bar / dashboard, etc.).
+        // Surface the location right away, in addition to wherever it ends
+        // up being shown persistently (nav bar / dashboard, etc.).
         const successMessage = data.locationCode
           ? `${data.message} — Location: ${data.locationCode}`
           : data.message;
@@ -114,9 +106,9 @@ export class Login {
           localStorage.removeItem('dealerCode');
         }
 
-        // NEW — the location this session is scoped to (Location Login
-        // only; absent for a normal email/password login). Cleared on a
-        // plain login too, so a stale value from an earlier location-based
+        // The location this session is scoped to (Location Login only;
+        // absent for a normal email/password login). Cleared on a plain
+        // login too, so a stale value from an earlier location-based
         // session never lingers.
         if (data.locationCode) {
           localStorage.setItem('locationCode', data.locationCode);
@@ -124,22 +116,24 @@ export class Login {
           localStorage.removeItem('locationCode');
         }
 
-        // NEW — Location Login's location-assigned role (LocationMaster.RoleId),
-        // separate from the employee's own category roles. AuthController now
-        // returns this and embeds it as a "LocationRoleId" JWT claim; storing it
-        // here is just for any UI that wants to show/debug it without decoding
-        // the token. The actual menu-access endpoint reads the claim server-side,
-        // not this value, so this line is informational only.
+        // Location Login's location-assigned role (LocationMaster.RoleId),
+        // separate from the employee's own category roles. AuthController
+        // returns this and embeds it as a "LocationRoleId" JWT claim;
+        // storing it here is just for any UI that wants to show/debug it
+        // without decoding the token. The actual menu-access endpoint reads
+        // the claim server-side, not this value, so this line is
+        // informational only.
         if (data.locationRoleId) {
           localStorage.setItem('locationRoleId', data.locationRoleId);
         } else {
           localStorage.removeItem('locationRoleId');
         }
 
-        // NEW — fetch this session's granted forms (location-wise if this was
-        // a Location Login, otherwise the employee/dealer's own role-based
-        // menu) and push it into MenuService's menu$ stream before navigating
-        // away, so the sidebar has something to render on first paint.
+        // Fetch this session's granted forms (location-wise if this was a
+        // Location Login, otherwise the employee/dealer's own role-based
+        // menu) and push it into MenuService's menu$ stream before
+        // navigating away, so the sidebar has something to render on first
+        // paint.
         this.menuService.loadMyAccess().subscribe({
           next: () => {
             this.isLoading = false;

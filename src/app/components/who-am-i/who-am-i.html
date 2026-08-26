@@ -3,42 +3,37 @@
 </div>
 
 <div class="modal-body">
-
     <div class="row">
-
-        <!-- HSN Code -->
-        <div class="col-md-4">
+        <div class="col-md-6">
             <label class="form-label">Dealer Email<span class="text-danger">*</span></label>
-
-            <input class="form-control form-control-sm" name="email" required pattern="^[0-9]*$" #email="ngModel"
-                [(ngModel)]="model.email" />
-
-
-
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label">Dealer Password</label>
-
-            <input class="form-control form-control-sm" name="password" pattern="^[0-9]*$" #password="ngModel"
-                [(ngModel)]="model.password" />
-
-
-
+            <input class="form-control form-control-sm" name="email" required
+                [(ngModel)]="model.email" placeholder="dealer@example.com" />
         </div>
     </div>
 
+    <div *ngIf="result" class="mt-3">
+        <div class="alert" [ngClass]="result.isDefaultPassword ? 'alert-info' : 'alert-warning'">
+            {{ result.message }}
+        </div>
 
+        <button *ngIf="!result.isDefaultPassword" type="button" class="btn btn-warning btn-sm me-2"
+            (click)="forceReset()" [disabled]="loading">
+            Force Reset to Default Password
+        </button>
+    </div>
 </div>
-<div class="d-flex justify-content mt-4">
 
+<div class="d-flex justify-content mt-4 gap-2">
+    <div>
+        <button type="submit" class="btn btn-primary btn-sm me-2" (click)="fetch()" [disabled]="loading">
+            {{ loading ? 'Checking...' : 'Check Password Status' }}
+        </button>
+    </div>
 
     <div>
-        <button type="submit" class="btn btn-primary btn-sm me-2" (click)="fetch()">
-            Fetch
+        <!-- ADDED — one-click login-as-dealer, fully audited server-side -->
+        <button type="button" class="btn btn-outline-primary btn-sm" (click)="impersonate()" [disabled]="loading">
+            {{ loading ? 'Please wait...' : 'Login as this Dealer' }}
         </button>
-
-
     </div>
-
 </div>

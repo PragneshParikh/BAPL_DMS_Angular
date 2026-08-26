@@ -1,3 +1,4 @@
+//src\app\core\services\storage.ts
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -10,7 +11,15 @@ export class StorageService {
     }
 
     decode(encoded: string): any {
-        return JSON.parse(atob(encoded));
+        try {
+            return JSON.parse(atob(encoded));
+        } catch (err) {
+            // ADDED — a corrupted/non-base64 value should never crash app
+            // bootstrap. Log it, clean up the bad key, and return null so
+            // callers fall back to "no user" instead of throwing.
+            console.warn('StorageService: failed to decode stored value, clearing it.', err);
+            return null;
+        }
     }
 
     setUser(user: any) {
@@ -20,7 +29,17 @@ export class StorageService {
 
     getUser() {
         const data = localStorage.getItem('currentUser');
-        return data ? this.decode(data) : null;
+        if (!data) return null;
+
+        const decoded = this.decode(data);
+
+        // ADDED — if decode failed, remove the bad entry so future calls
+        // don't keep hitting the same corrupted value.
+        if (decoded === null) {
+            localStorage.removeItem('currentUser');
+        }
+
+        return decoded;
     }
 
     getUserId() {
@@ -42,7 +61,15 @@ export class StorageService {
 
     getMenuRights() {
         const data = localStorage.getItem('menuRights');
-        return data ? this.decode(data) : null;
+        if (!data) return null;
+
+        const decoded = this.decode(data);
+
+        if (decoded === null) {
+            localStorage.removeItem('menuRights');
+        }
+
+        return decoded;
     }
 
     clear() {
@@ -68,6 +95,15 @@ export class StorageService {
 
     getSelectedModule(): string {
         const data = localStorage.getItem('selectedModule');
-        return data ? this.decode(data) : '';
+        if (!data) return '';
+
+        const decoded = this.decode(data);
+
+        if (decoded === null) {
+            localStorage.removeItem('selectedModule');
+            return '';
+        }
+
+        return decoded;
     }
 }

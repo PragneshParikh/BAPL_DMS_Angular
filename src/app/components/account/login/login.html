@@ -1,100 +1,91 @@
-<div class="container-fluid vh-100">
-    <div class="row h-100">
+<!--src\app\components\account\login\login.html-->
+<div class="login-root">
 
-        <!-- Left: Background -->
-        <div class="col-lg-7 d-none d-lg-flex position-relative p-0 justify-content-center align-items-center"
-            style="background-color: white;">
-            <div class="d-flex flex-column justify-content-center align-items-center w-100">
+  <!-- Left panel — brand -->
+  <div class="login-brand">
+    <div class="login-brand-inner">
+      <div class="login-logo">
+        <img src="assets/images/BGauss_Logo.png" alt="BGauss" class="login-logo-img">
+      </div>
 
-                <div class="text-center">
-                    <h1 class="text-primary logo-text" style="font-size: 35px; color: #162550 !important;">
-                        Dealer Management System
-                    </h1>
-                </div>
+      <h1 class="login-brand-headline">Dealer Management System</h1>
+      <!-- <p class="login-brand-sub">Manage sales, service, and inventory — all in one place.</p> -->
 
-                <div class="d-flex justify-content-center align-items-center">
-                    <img src="assets/images/new_logo_image.png" alt="Shape" class="img-fluid">
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Right: Login Form -->
-        <div class="col-lg-5 d-flex align-items-center justify-content-center" style="background-color: #405189;">
-            <div class="w-75">
-                <div class="text-center mb-4">
-                    <h1 class="text-primary" style="font-size: 30px; color: white !important;">
-                        Login
-                    </h1>
-                </div>
-
-                <div class="card custom-shadow rounded-4 card-bg-fill">
-                    <div class="card-body p-4">
-                        <div class="text-center mb-4">
-                            <h5 class="text-primary">Welcome Back!</h5>
-                            <p class="text-muted">Sign in to continue.</p>
-                        </div>
-
-                        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-
-                            <div class="mb-3">
-                                <label class="form-label" for="username">Username</label>
-                                <input type="text" class="form-control" id="username" formControlName="username"
-                                    [ngClass]="{ 'is-invalid': submitted && f['username'].errors }"
-                                    placeholder="Enter your username">
-                                @if (submitted && f['username'].errors) {
-                                <div class="invalid-feedback">
-                                    @if(f['username'].errors['required']){
-                                    <div>Username is required</div>}
-                                </div>
-                                }
-                            </div>
-
-                            <div class="mb-3">
-                                <div class="float-end">
-                                    <a routerLink="/forgot-password" class="text-muted">Forgot password?</a>
-                                </div>
-                                <label class="form-label" for="password-input">Password</label>
-                                <div class="position-relative auth-pass-inputgroup mb-3">
-                                    <input [type]="fieldTextType ? 'text' : 'password'" class="form-control pe-5"
-                                        placeholder="Enter password" id="password-input" formControlName="password"
-                                        [ngClass]="{ 'is-invalid': submitted && f['password'].errors }">
-                                    <button
-                                        class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted"
-                                        type="button" id="password-addon"><i class="mdi align-middle" [ngClass]="{'mdi-eye-off-outline': !fieldTextType, 'mdi-eye-outline': fieldTextType
-                                          }" (click)="toggleFieldTextType()"></i></button>
-                                    @if (submitted && f['password'].errors) {
-                                    <div class="invalid-feedback">
-                                        @if(f['password'].errors['required']){
-                                        <span>Password is required</span>
-                                        }
-                                    </div>
-                                    }
-                                </div>
-                            </div>
-
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="auth-remember-check">
-                                <label class="form-check-label" for="auth-remember-check">Remember me</label>
-                            </div>
-
-                            <div class="mt-4">
-                                <button class="btn btn-success w-100" type="submit" [disabled]="isLoading">
-                                    <span *ngIf="!isLoading">Sign In</span>
-                                    <span *ngIf="isLoading">
-                                        <span class="spinner-border spinner-border-sm me-2" role="status"
-                                            aria-hidden="true"></span>
-                                        Signing In...
-                                    </span>
-                                </button>
-                            </div>
-
-                        </form>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
+      <div class="login-scooty-wrap">
+        <a href="https://www.bgauss.com/" target="_blank" rel="noopener noreferrer">
+            <img src="assets/images/Bg0-scooty.png" alt="BGauss scooter" class="login-scooty-img">
+        </a>
     </div>
+    </div>
+  </div>
+
+  <!-- Right panel — login card -->
+  <div class="login-card-panel">
+    <div class="login-card">
+      <div class="login-card-header">
+        <h2 class="login-card-title">Welcome back</h2>
+        <p class="login-card-desc">Sign in to continue.</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-dealer-form">
+
+        <div class="login-dealer-field">
+          <label for="username">Username</label>
+          <input type="text" id="username" formControlName="username"
+            [class.is-invalid]="submitted && f['username'].errors"
+            placeholder="Enter your username">
+          @if (submitted && f['username'].errors) {
+          <div class="login-dealer-error">
+            @if (f['username'].errors['required']) {
+            <span>Username is required</span>
+            }
+          </div>
+          }
+        </div>
+
+        <div class="login-dealer-field">
+          <div class="login-field-label-row">
+            <label for="password-input">Password</label>
+            <a routerLink="/forgot-password" class="login-forgot-link">Forgot password?</a>
+          </div>
+
+          <div class="login-password-wrap">
+            <input [type]="fieldTextType ? 'text' : 'password'" id="password-input"
+              formControlName="password" placeholder="••••••••"
+              [class.is-invalid]="submitted && f['password'].errors">
+            <button type="button" class="login-password-toggle" (click)="toggleFieldTextType()">
+              <i class="mdi align-middle"
+                [ngClass]="{'mdi-eye-off-outline': !fieldTextType, 'mdi-eye-outline': fieldTextType}"></i>
+            </button>
+          </div>
+
+          @if (submitted && f['password'].errors) {
+          <div class="login-dealer-error">
+            @if (f['password'].errors['required']) {
+            <span>Password is required</span>
+            }
+          </div>
+          }
+        </div>
+
+        <div class="login-remember-row">
+          <input type="checkbox" id="auth-remember-check">
+          <label for="auth-remember-check">Remember me</label>
+        </div>
+
+        <button class="btn-signin" type="submit" [disabled]="isLoading">
+          @if (!isLoading) {
+          <span>Sign In</span>
+          } @else {
+          <span class="d-flex align-items-center justify-content-center gap-2">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Signing In...
+          </span>
+          }
+        </button>
+
+      </form>
+    </div>
+  </div>
+
 </div>

@@ -245,7 +245,7 @@ export const routes: Routes = [
       { path: 'dealer-creation-manager', component: DealerCreationManagerList, data: [101]},
       { path: 'dealer-menu-access/:dealerId', component: DealerMenuAccessPage, data: [101]},
       { path: 'location-edit/:locationId', component: LocationEditPage, data: [101]},
-
+      { path:  'who-am-i', component:WhoAmI, data:[122]},
       { path: 'free-service-claim', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim-list/free-service-claim-list').then(m => m.FreeServiceClaimList) },
       { path: 'free-service-claim/:id', data: [66], loadComponent: () => import('./components/free-service-claim/free-service-claim').then(m => m.FreeServiceClaim) },
 
