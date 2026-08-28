@@ -438,11 +438,15 @@ export class UwLineItem implements OnInit {
     // A row can reach here from Pending, or from Approved/Rejected
     // via the Edit action.
     //
-    // Rejecting an already-approved line does NOT roll back the
-    // WarrantyOrder / WarrantyInvoice that ApproveUwLineItem
-    // already created for it - the backend only flips this row's status.
-    //
-    // Make that consequence explicit before the user confirms.
+    // FIX: rejecting an already-approved line now DOES clean up the
+    // WarrantyOrder / WarrantyInvoice / WarrantyPackingSlip data already
+    // generated from it (UwLineItemRepo.RejectUwLineItem cascades this on
+    // the backend now) - only this claim's own footprint is removed, and
+    // only as far up the chain as stays otherwise empty of other claims/
+    // orders, so shared Order/Invoice records used by other claims are
+    // left untouched. Previously this only flipped the row's status and
+    // left that downstream data dangling - make the real consequence
+    // explicit before the user confirms.
 
     const item =
       this.items.find(
@@ -459,7 +463,7 @@ export class UwLineItem implements OnInit {
     const confirmMessage =
       isReversingApproval
 
-        ? 'This claim was already approved, and its Order and Invoice have already been generated from it. Rejecting it now will mark it Rejected but will NOT remove or void that Order/Invoice - those will need to be handled separately. Continue?'
+        ? 'This claim was already approved, and its Order/Invoice/Packing Slip have already been generated from it. Rejecting it now will mark it Rejected AND remove this claim\'s data from that Order/Invoice/Packing Slip (any part still shared with other claims is left untouched). Continue?'
 
         : 'Reject this claim?';
 

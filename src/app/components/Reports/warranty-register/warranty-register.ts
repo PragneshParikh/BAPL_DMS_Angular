@@ -1,11 +1,10 @@
 // src\app\components\Reports\warranty-register\warranty-register.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MenuAccessService } from '../../../core/services/menu-access.service';
-// TODO: adjust this relative path to wherever ReportService actually lives
-// in your project (it's the same service used by every other report screen).
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ReportService } from '../../../core/services/report.service';
+import { StorageService } from '../../../core/services/storage';
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 
 import {
   WarrantyRegisterFilterModel,
@@ -14,10 +13,11 @@ import {
 } from '../../../ViewModels/models/WarrantyRegisterViewModel';
 
 type StatusOption = '' | 'Pending' | 'Approved' | 'Rejected';
+type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-warranty-register',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './warranty-register.html',
   styleUrl: './warranty-register.scss',
 })
@@ -25,111 +25,242 @@ export class WarrantyRegister implements OnInit {
   readonly SUBMENU_ID = 123;
   canDownload = false;
 
-  filter: WarrantyRegisterFilterModel = this.emptyFilter();
+  Math = Math;
 
-  dealers: DealerDropdownItemLite[] = [];
+  filterForm: FormGroup;
 
-  rows: WarrantyRegisterViewModel[] = [];
+  // Kept but unused in the template for now (matches the reference, which
+  // comments this block out rather than deleting it) - the dealer dropdown
+  // is always shown to everyone; the backend already enforces dealer
+  // scoping server-side for non-admin logins regardless of what's selected
+  // here, so this is safe to leave inactive.
+  isDealer = false;
+  loggedInDealerCode = '';
+
+  dealerList: DealerDropdownItemLite[] = [];
+
+  // ── Chassis typeahead ────────────────────────────────────────────────
+  allChassisList: string[] = [];
+  filteredChassisList: string[] = [];
+  showChassisDropdown = false;
+  private chassisBlurTimeout: any = null;
+
+  reportData: WarrantyRegisterViewModel[] = [];
   totalRecords = 0;
+  pageIndex = 1;
+  pageSize = 20;
 
-  loading = false;
+  isLoading = false;
   exporting = false;
   errorMessage: string | null = null;
+
+  sortColumn: string | null = null;
+  sortDirection: SortDirection = 'asc';
 
   readonly pageSizeOptions = [10, 20, 50, 100];
   readonly claimStatusOptions: StatusOption[] = ['', 'Pending', 'Approved', 'Rejected'];
   readonly orderInvoiceStatusOptions: StatusOption[] = ['', 'Pending', 'Approved'];
 
-  constructor(private reportService: ReportService, private menuAccess: MenuAccessService) {
+  constructor(
+    private fb: FormBuilder,
+    private reportService: ReportService,
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.filterForm = this.fb.group({
+      dealerCode: [''],
+      fromDate: [''],
+      toDate: [''],
+      chassisNo: [''],
+      claimNo: [null],
+      jobNo: [''],
+      warrantyClaimStatus: [''],
+      warrantyOrderStatus: [''],
+      warrantyInvoiceStatus: [''],
+      search: ['']
+    });
+
     this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
   }
 
   ngOnInit(): void {
-    this.loadDealers();
-    this.loadReport();
-  }
+    const dealerCode = this.storageService.getDealerCode();
+    this.isDealer = !!dealerCode;
+    this.loggedInDealerCode = dealerCode || '';
 
-  private emptyFilter(): WarrantyRegisterFilterModel {
-    return {
-      dealerCode: null,
-      locationCode: null,
-      fromDate: null,
-      toDate: null,
-      chassisNo: null,
-      claimNo: null,
-      jobNo: null,
-      warrantyClaimStatus: null,
-      warrantyOrderStatus: null,
-      warrantyInvoiceStatus: null,
-      search: null,
-      pageIndex: 1,
-      pageSize: 20
-    };
+    this.loadDealers();
+    this.loadChassisList();
+    this.search();
   }
 
   private loadDealers(): void {
     this.reportService.getDealerList().subscribe({
-      next: (list) => this.dealers = list ?? [],
-      error: () => this.dealers = []
+      next: (list) => this.dealerList = list ?? [],
+      error: () => this.dealerList = []
     });
   }
 
-  loadReport(): void {
-    this.loading = true;
+  private loadChassisList(): void {
+    this.reportService.getChassisList().subscribe({
+      next: (list) => this.allChassisList = list ?? [],
+      error: () => this.allChassisList = []
+    });
+  }
+
+  // ── Chassis typeahead ────────────────────────────────────────────────
+  onChassisInput(): void {
+    const text = (this.filterForm.get('chassisNo')?.value || '').toString().trim().toLowerCase();
+    this.filteredChassisList = (text
+      ? this.allChassisList.filter(c => c.toLowerCase().includes(text))
+      : this.allChassisList
+    ).slice(0, 20);
+    this.showChassisDropdown = true;
+  }
+
+  onChassisFocus(): void {
+    this.onChassisInput();
+  }
+
+  onChassisBlur(): void {
+    // Short delay so a mousedown selection on a suggestion registers
+    // before the list disappears.
+    if (this.chassisBlurTimeout) clearTimeout(this.chassisBlurTimeout);
+    this.chassisBlurTimeout = setTimeout(() => { this.showChassisDropdown = false; }, 150);
+  }
+
+  selectChassisSuggestion(chassis: string): void {
+    this.filterForm.patchValue({ chassisNo: chassis });
+    this.showChassisDropdown = false;
+  }
+
+  private buildFilterPayload(): WarrantyRegisterFilterModel {
+    const raw = this.filterForm.value;
+    const emptyToNull = (v: any) => (v === '' || v === undefined ? null : v);
+
+    return {
+      dealerCode: emptyToNull(raw.dealerCode),
+      locationCode: null,
+      fromDate: emptyToNull(raw.fromDate),
+      toDate: emptyToNull(raw.toDate),
+      chassisNo: emptyToNull(raw.chassisNo),
+      claimNo: raw.claimNo || null,
+      jobNo: emptyToNull(raw.jobNo),
+      warrantyClaimStatus: emptyToNull(raw.warrantyClaimStatus),
+      warrantyOrderStatus: emptyToNull(raw.warrantyOrderStatus),
+      warrantyInvoiceStatus: emptyToNull(raw.warrantyInvoiceStatus),
+      search: emptyToNull(raw.search),
+      pageIndex: this.pageIndex,
+      pageSize: this.pageSize
+    };
+  }
+
+  search(): void {
+    this.isLoading = true;
     this.errorMessage = null;
 
-    this.reportService.getWarrantyRegisterReport(this.filter).subscribe({
+    this.reportService.getWarrantyRegisterReport(this.buildFilterPayload()).subscribe({
       next: (res) => {
-        this.rows = res.data ?? [];
+        this.reportData = res.data ?? [];
         this.totalRecords = res.totalRecords ?? 0;
-        this.filter.pageIndex = res.pageIndex ?? this.filter.pageIndex;
-        this.filter.pageSize = res.pageSize ?? this.filter.pageSize;
-        this.loading = false;
+        this.pageIndex = res.pageIndex ?? this.pageIndex;
+        this.pageSize = res.pageSize ?? this.pageSize;
+        this.sortColumn = null;
+        this.isLoading = false;
       },
       error: (err) => {
         this.errorMessage = err?.error?.message || 'Failed to load the warranty register report.';
-        this.rows = [];
+        this.reportData = [];
         this.totalRecords = 0;
-        this.loading = false;
+        this.isLoading = false;
       }
     });
   }
 
-  applyFilters(): void {
-    this.filter.pageIndex = 1;
-    this.loadReport();
+  onSearch(): void {
+    this.pageIndex = 1;
+    this.search();
   }
 
-  resetFilters(): void {
-    this.filter = this.emptyFilter();
-    this.loadReport();
+  onReset(): void {
+    this.filterForm.reset({
+      dealerCode: '',
+      fromDate: '',
+      toDate: '',
+      chassisNo: '',
+      claimNo: null,
+      jobNo: '',
+      warrantyClaimStatus: '',
+      warrantyOrderStatus: '',
+      warrantyInvoiceStatus: '',
+      search: ''
+    });
+    this.pageIndex = 1;
+    this.search();
   }
 
-  changePage(delta: number): void {
-    const nextPage = this.filter.pageIndex + delta;
-    if (nextPage < 1 || nextPage > this.totalPages) return;
-    this.filter.pageIndex = nextPage;
-    this.loadReport();
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.pageIndex = 1;
+    this.search();
   }
 
-  changePageSize(size: number): void {
-    this.filter.pageSize = size;
-    this.filter.pageIndex = 1;
-    this.loadReport();
+  // Used internally by lastPage() even though the badge no longer displays
+  // "of N" (matching the reference's leaner pagination display).
+  private get totalPages(): number {
+    return this.pageSize > 0 ? Math.max(1, Math.ceil(this.totalRecords / this.pageSize)) : 1;
   }
 
-  get totalPages(): number {
-    return this.filter.pageSize > 0
-      ? Math.max(1, Math.ceil(this.totalRecords / this.filter.pageSize))
-      : 1;
+  private goToPage(page: number): void {
+    if (page < 1) return;
+    this.pageIndex = page;
+    this.search();
   }
 
+  firstPage(): void { this.goToPage(1); }
+  previousPage(): void { this.goToPage(this.pageIndex - 1); }
+  nextPage(): void { this.goToPage(this.pageIndex + 1); }
+  lastPage(): void { this.goToPage(this.totalPages); }
+
+  // ── Sorting ──────────────────────────────────────────────────────────
+  // NOTE: sorts only the currently loaded PAGE of rows, client-side - the
+  // backend always orders by ClaimDate/ClaimNo. Say the word if you want
+  // this to sort across the full filtered result set instead.
+  onSort(column: keyof WarrantyRegisterViewModel): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+
+    const dir = this.sortDirection === 'asc' ? 1 : -1;
+
+    this.reportData = [...this.reportData].sort((a, b) => {
+      const valA = a[column];
+      const valB = b[column];
+
+      if (valA === null || valA === undefined) return 1;
+      if (valB === null || valB === undefined) return -1;
+
+      if (typeof valA === 'number' && typeof valB === 'number') {
+        return (valA - valB) * dir;
+      }
+
+      const strA = String(valA).toLowerCase();
+      const strB = String(valB).toLowerCase();
+      if (strA < strB) return -1 * dir;
+      if (strA > strB) return 1 * dir;
+      return 0;
+    });
+  }
+
+  // ── Formatting helpers ───────────────────────────────────────────────
   statusClass(status?: string): string {
     switch ((status || '').toLowerCase()) {
-      case 'approved': return 'badge badge-approved';
-      case 'rejected': return 'badge badge-rejected';
-      case 'pending': return 'badge badge-pending';
-      default: return 'badge badge-muted';
+      case 'approved': return 'badge bg-success-subtle text-success border border-success-subtle';
+      case 'rejected': return 'badge bg-danger-subtle text-danger border border-danger-subtle';
+      case 'pending': return 'badge bg-warning-subtle text-warning border border-warning-subtle';
+      default: return 'badge bg-light text-dark border';
     }
   }
 
@@ -140,13 +271,11 @@ export class WarrantyRegister implements OnInit {
     return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
-  // Used for Qty — plain number, no currency symbol/decimals forced.
   formatNumber(value?: number): string {
     if (value === null || value === undefined) return '—';
     return value.toLocaleString('en-IN');
   }
 
-  // Used for Rate/MRP/tax amounts — always 2 decimal places.
   formatCurrency(value?: number): string {
     if (value === null || value === undefined) return '—';
     return value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -157,11 +286,16 @@ export class WarrantyRegister implements OnInit {
     return `${value % 1 === 0 ? value : value.toFixed(2)}%`;
   }
 
-  exportCsv(): void {
+  // ── Export ───────────────────────────────────────────────────────────
+  // Produces a real CSV (not an .xlsx workbook). Kept [disabled]="exporting"
+  // on the button even though the reference doesn't show one, to prevent a
+  // double-click firing two exports - the icon itself matches the
+  // reference's icon-only style, just without a text/spinner swap.
+  exportToExcel(): void {
     this.exporting = true;
     this.errorMessage = null;
 
-    this.reportService.exportWarrantyRegisterReport(this.filter).subscribe({
+    this.reportService.exportWarrantyRegisterReport(this.buildFilterPayload()).subscribe({
       next: (rows) => {
         this.downloadCsv(rows ?? []);
         this.exporting = false;
@@ -183,8 +317,6 @@ export class WarrantyRegister implements OnInit {
       { key: 'jobDate', label: 'Job Date' },
       { key: 'rbillNo', label: 'Repair Bill No' },
       { key: 'rbillDate', label: 'Repair Bill Date' },
-      { key: 'itemName', label: 'Item' },
-      { key: 'description', label: 'Description' },
       { key: 'partName', label: 'Part Name' },
       { key: 'partDescription', label: 'Part Description' },
       { key: 'modelName', label: 'Model Name' },
@@ -206,6 +338,8 @@ export class WarrantyRegister implements OnInit {
       { key: 'warrantyClaimNo', label: 'Claim No' },
       { key: 'warrantyClaimDate', label: 'Claim Date' },
       { key: 'chasisNo', label: 'Chassis No' },
+      { key: 'locationCode', label: 'Location Code' },
+      { key: 'locationName', label: 'Location Name' },
       { key: 'partyName', label: 'Party' },
       { key: 'warrantyClaimStatus', label: 'Claim Status' },
       { key: 'approverEngineerName', label: 'Approver Engineer' },

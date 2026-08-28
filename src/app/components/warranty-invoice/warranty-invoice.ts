@@ -36,50 +36,27 @@ export class WarrantyInvoice implements OnInit {
   claimType: string = 'Warranty';
   selectedSupplierId: number | null = null;
 
-  // Selectable dropdown, not locked - defaults to the linked order's own
-  // location, but the user can freely pick a different one. No
-  // locareaidno filter, deliberately - that exact filter caused a real,
-  // confirmed bug on the Warranty Order page (excluded a valid location
-  // just because it wasn't tagged locareaidno=2).
   selectedLocation: string | null = null;
   locationList: any[] = [];
 
-  // The REAL Repair Bill No - pulled from the linked order's own claim
-  // (claim.invoiceNo, which the backend derives from RepairBillHeader:
-  // "{Prefix}{BillNo}"). Distinct from invoiceNo below, which is this
-  // invoice's own separate auto-generated sequential number (same
-  // category as batchNo) - the two are unrelated values that happened to
-  // share a confusingly similar name.
   repairBillNo: string | null = null;
   repairBillDate: string | null = null;
 
   supplierList: any[] = [];
 
-  // Orders linked to this invoice - populated only via the pending-order
-  // handoff (create) or from the saved invoice (edit). Mirrors
-  // selectedClaims's role one level up.
   selectedOrders: any[] = [];
 
-  // Orders from OTHER (previously saved) invoices, shown stacked above the
-  // current invoice's own orders so a user can see everything on one
-  // screen. Strictly read-only. Mirrors historicalClaims's role.
   historicalOrders: any[] = [];
   private readonly maxHistoricalInvoices = 10;
 
   saving = false;
   isEditMode = false;
 
-  // Captured once when an existing invoice loads - true only if it was
-  // ALREADY approved before any interaction this page load. Mirrors
-  // wasApprovedOnLoad's role in warranty-order.ts exactly - keeps Save
-  // enabled even after unchecking an already-approved invoice.
   wasApprovedOnLoad = false;
 
-  // True while the post-save ERP submission is in flight. Kept entirely
-  // separate from `saving` (the DB save) - a failure here never blocks or
-  // rolls back the DB save, which has already completed successfully by
-  // the time this runs.
-  sendingToErp = false;
+  // REMOVED: sendingToErp. The ERP push now happens server-side, inside
+  // the SAME Insert/UpdateWarrantyInvoice call `saving` already covers -
+  // there's no longer a separate async step for this component to track.
 
   constructor(
     private route: ActivatedRoute,
@@ -109,13 +86,8 @@ export class WarrantyInvoice implements OnInit {
 
     const routeId = this.route.snapshot.paramMap.get('id');
 
-    // Same sessionStorage handoff pattern as viewWarrantyOrderId - set by
-    // the Warranty Invoice List's "View" action.
     const viewInvoiceId = sessionStorage.getItem('viewWarrantyInvoiceId');
 
-    // Same pattern as pendingWarrantyOrderClaim - set when an order is
-    // approved and the user is meant to batch it into a new/existing
-    // invoice. Whatever screen triggers this flow should set this key.
     const pendingRaw = sessionStorage.getItem('pendingWarrantyInvoiceOrder');
     const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
 
@@ -131,9 +103,6 @@ export class WarrantyInvoice implements OnInit {
       this.loadNextInvoiceNumbers();
       this.preloadOrderFromQueryParam(Number(pending.orderId));
     } else {
-      // includeInactive omitted (defaults to false) - same reasoning as
-      // loadLatestSavedOrder: a fresh landing shouldn't get stuck showing
-      // a just-deleted invoice it can no longer save changes to.
       this.loadLatestSavedInvoice();
     }
   }
@@ -180,11 +149,6 @@ export class WarrantyInvoice implements OnInit {
     });
   }
 
-  // Shows only this order's own location as the sole dropdown option - not
-  // a full dealer-wide list. Same simplification already applied on
-  // warranty-order.ts: no matching/searching involved, so this also
-  // sidesteps the cross-dealer mismatch entirely (the code can
-  // legitimately belong to a different dealer than the one viewing it).
   private setLocationFromOrder(loccode: string | null | undefined, locname: string | null | undefined): void {
     if (loccode) {
       this.locationList = [{ loccode, locname: locname || loccode }];
@@ -195,15 +159,6 @@ export class WarrantyInvoice implements OnInit {
     }
   }
 
-  // batchNo is deliberately NOT set here anymore, per explicit request -
-  // it should stay blank until an order is actually linked
-  // (preloadOrderFromQueryParam then copies THAT order's own batchNo),
-  // rather than auto-generating an independent value from a separate
-  // counter that naturally drifts from the order's own Batch No over
-  // time (the root cause fixed last time for the backend auto-create
-  // path - this closes the same gap for this manual form-load path).
-  // invoicePrefix/invoiceNo are untouched - those remain genuinely
-  // separate, auto-generated identifiers.
   loadNextInvoiceNumbers(): void {
     const dealerCode = this.storageService.getDealerCode();
     this.warrantyInvoiceService.getNextInvoiceNumbers(dealerCode).subscribe({
@@ -254,9 +209,6 @@ export class WarrantyInvoice implements OnInit {
     });
   }
 
-  // Loads recent OTHER invoices' orders for read-only display, stacked
-  // above the current invoice's own orders. Mirrors loadHistoricalClaims
-  // exactly, one level up.
   loadHistoricalInvoiceOrders(currentInvoiceId: number): void {
     this.warrantyInvoiceService.searchWarrantyInvoices({
       pageNumber: 1,
@@ -278,10 +230,6 @@ export class WarrantyInvoice implements OnInit {
         const requests = orderedInvoices.map(i => this.warrantyInvoiceService.getWarrantyInvoiceById(i.id));
         forkJoin(requests).subscribe({
           next: (invoices: any[]) => {
-            // Dedup by order id - same reasoning as historicalClaims: the
-            // same order can appear across multiple invoices if it was
-            // ever re-batched, and only the most recent invoice's version
-            // should show.
             const dedupedByOrderId = new Map<number, any>();
             invoices.forEach(invoice => {
               (invoice?.orders || []).forEach((order: any) => {
@@ -304,11 +252,6 @@ export class WarrantyInvoice implements OnInit {
     });
   }
 
-  // Preloads a single order that was just approved and handed off here to
-  // be batched into a new invoice. Mirrors preloadClaimFromQueryParam
-  // exactly, one level up. No auto-save - by explicit, confirmed prior
-  // decision for the Order/Claim relationship, nothing here should assume
-  // that decision differently without being told to.
   preloadOrderFromQueryParam(orderId: number): void {
     this.loader.show();
     this.loadHistoricalInvoiceOrders(0);
@@ -328,15 +271,10 @@ export class WarrantyInvoice implements OnInit {
           totalClaims: (res.claims || []).length,
           totalAmount: (res.claims || []).flatMap((c: any) => c.details || [])
             .reduce((sum: number, d: any) => sum + (d.totalAmount || 0), 0),
-          isApproved: false, // starts unchecked - checkbox approval is required again, per explicit request reversing the earlier "linking is itself approval" decision
+          isApproved: false,
           claims: res.claims || []
         });
 
-        // Invoice's own Batch No now comes directly from the order just
-        // linked here - per explicit request, this replaces whatever
-        // (blank, since loadNextInvoiceNumbers no longer sets it)
-        // was there before. Matches the same order.batchNo reuse already
-        // applied to the backend auto-create/re-batch paths.
         this.batchNo = res.batchNo;
 
         this.setLocationFromOrder(res.location, res.locationName);
@@ -357,8 +295,6 @@ export class WarrantyInvoice implements OnInit {
     });
   }
 
-  // Removes an order and persists immediately, same as removeClaim's
-  // pattern one level up.
   removeOrder(orderId: number): void {
     const remaining = this.selectedOrders.filter(o => o.id !== orderId);
 
@@ -377,25 +313,14 @@ export class WarrantyInvoice implements OnInit {
     }
   }
 
-  // Reversed back to checkbox-driven approval, per explicit request -
-  // an order is approved only once its own checkbox is checked, same as
-  // warranty-order.ts's own isApproved getter (linking alone is no longer
-  // sufficient by itself).
   get isApproved(): boolean {
     return this.selectedOrders.some(o => !!o.isApproved);
   }
 
-  // Also considers historicalOrders, mirroring warranty-order.ts's
-  // hasAnyCheckedClaim exactly - checking a historical order (e.g. to
-  // re-batch a deleted invoice's order) enables Save even when the
-  // current invoice has zero orders of its own.
   get hasAnyCheckedOrder(): boolean {
     return this.isApproved || this.historicalOrders.some(o => !!o.isApproved);
   }
 
-  // Header "select all" checkbox - checked only when every linked order is
-  // approved (current AND historical), and there's at least one order.
-  // Mirrors warranty-order.ts's allClaimsApproved exactly.
   get allOrdersApproved(): boolean {
     const allOrders = [...this.historicalOrders, ...this.selectedOrders];
     return allOrders.length > 0 && allOrders.every(o => !!o.isApproved);
@@ -406,10 +331,6 @@ export class WarrantyInvoice implements OnInit {
     this.historicalOrders.forEach(o => o.isApproved = checked);
   }
 
-  // Updates the real order object (current OR historical) - purely local
-  // state, same as warranty-order.ts's toggleClaimApproval. Nothing saves
-  // from a checkbox toggle alone - the Save button pushes everything at
-  // once.
   toggleOrderApproval(orderId: number, checked: boolean, historicalInvoiceId?: number): void {
     if (historicalInvoiceId) {
       const order = this.historicalOrders.find(o => o.id === orderId);
@@ -429,22 +350,11 @@ export class WarrantyInvoice implements OnInit {
     return this.selectedOrders.length;
   }
 
-  // Flattens orders -> claims -> line items into one row per line, same
-  // approach as warranty-order.ts's buildRowsFromClaims/claimLineRows, one
-  // hierarchy level deeper (order -> claim -> line, instead of just
-  // claim -> line). isFirstLineOfClaim marks where the claim's own header
-  // fields (Claim No, JobCard No, etc.) should visually anchor, mirroring
-  // the Warranty Order grid's own row structure exactly.
- private buildInvoiceRowsFromOrders(orders: any[], startSrNo: number, isHistorical: boolean): any[] {
+  private buildInvoiceRowsFromOrders(orders: any[], startSrNo: number, isHistorical: boolean): any[] {
     const rows: any[] = [];
     let srNo = startSrNo;
 
     orders.forEach(order => {
-      // Skip orders with no linked claims entirely - these render as an
-      // all-blank row (only order-level Location/Party fill in) since
-      // there's nothing claim-level to show. Typically an order whose
-      // only claim(s) were later deleted, leaving zero
-      // WarrantyOrderGridDetail rows behind.
       if (!order.claims || order.claims.length === 0) {
         return;
       }
@@ -452,9 +362,6 @@ export class WarrantyInvoice implements OnInit {
       const claims = order.claims;
 
       claims.forEach((claim: any) => {
-        // Skip claims with no line items too, for the same reason - a
-        // claim with an empty details[] would otherwise still emit one
-        // blank line row.
         if (!claim?.details || claim.details.length === 0) {
           return;
         }
@@ -477,12 +384,6 @@ export class WarrantyInvoice implements OnInit {
 
             invoiceNo: claim.invoiceNo,
             invoiceDate: claim.invoiceDate,
-
-            // The PARENT invoice's own identifying fields, per row - shows
-            // "which invoice" this row belongs to. For historical rows,
-            // these came from the tagging in loadHistoricalInvoiceOrders
-            // (_invoicePrefix/_invoiceNo/_batchNo); for current rows, the
-            // backend now returns these directly on each order summary.
             warrantyInvoicePrefix: isHistorical ? order._invoicePrefix : order.invoicePrefix,
             warrantyInvoiceNo: isHistorical ? order._invoiceNo : order.invoiceNo,
             warrantyInvoiceBatchNo: isHistorical ? order._batchNo : order.invoiceBatchNo,
@@ -518,46 +419,28 @@ export class WarrantyInvoice implements OnInit {
     return rows;
   }
 
-  // Historical orders' rows first, then the current invoice's own orders -
-  // same ordering convention as claimLineRows.
   get invoiceLineRows(): any[] {
     const historicalRows = this.buildInvoiceRowsFromOrders(this.historicalOrders, 1, true);
     const currentRows = this.buildInvoiceRowsFromOrders(this.selectedOrders, historicalRows.length + 1, false);
     return [...historicalRows, ...currentRows];
   }
 
-  // Fire-and-report ERP submission for a single, just-saved invoice.
-  // Deliberately isolated from the DB save's own success/failure state -
-  // `saving`/`sendingToErp` are two independent flags, so a failure here
-  // never appears to roll back or invalidate the DB save that already
-  // completed successfully by the time this runs.
-  private sendInvoiceToErp(invoiceId: number): void {
-    this.sendingToErp = true;
-    this.warrantyInvoiceService.sendWarrantyInvoiceToErp(invoiceId).subscribe({
-      next: (res: any) => {
-        this.sendingToErp = false;
-        if (res?.success) {
-          this.toaster.show(`Sent to ERP successfully (${res.linesSent} line(s)).`, {
-            classname: 'bg-success text-white',
-            delay: 3000
-          });
-        } else {
-          this.toaster.show(`ERP submission failed: ${res?.message || 'Unknown error'}`, {
-            classname: 'bg-danger text-white',
-            delay: 6000
-          });
-        }
-      },
-      error: (err) => {
-        this.sendingToErp = false;
-        console.error('ERP submission failed:', err);
-        const serverMsg = err?.error?.message || err?.error || 'Could not reach the ERP integration.';
-        this.toaster.show(`ERP submission failed: ${serverMsg}`, {
-          classname: 'bg-danger text-white',
-          delay: 6000
-        });
-      }
-    });
+
+  private showErpResultToast(erp: { success: boolean; message?: string; linesSent?: number } | null | undefined): void {
+
+    if (!erp) return;
+
+    if (erp.success) {
+      this.toaster.show(`Sent to ERP successfully (${erp.linesSent ?? 0} line(s)).`, {
+        classname: 'bg-success text-white',
+        delay: 3000
+      });
+    } else {
+      this.toaster.show(`ERP submission failed: ${erp.message || 'Unknown error'}`, {
+        classname: 'bg-danger text-white',
+        delay: 6000
+      });
+    }
   }
 
   saveWarrantyInvoice(navigateAfter: boolean = true): void {
@@ -672,17 +555,13 @@ export class WarrantyInvoice implements OnInit {
 
         sessionStorage.removeItem('pendingWarrantyInvoiceOrder');
 
-        // Push to ERP only when the main invoice itself was actually
-        // inserted/updated this Save - not for pure historical-approval-
-        // only saves, which don't touch this invoice's own header/lines.
-        // Runs as an independent follow-up step: its own success/failure
-        // is reported separately and never affects the DB save above,
-        // which has already completed by this point.
+        // CHANGED: no second HTTP call here anymore. res.erp already holds
+        // the full ERP submission result - InsertWarrantyInvoice /
+        // UpdateWarrantyInvoice built and sent the complete payload
+        // server-side as part of this same request, without needing this
+        // invoice's id to come back first.
         if (savingMainInvoice) {
-          const savedInvoiceId = res?.invoiceId ?? this.invoiceId;
-          if (savedInvoiceId) {
-            this.sendInvoiceToErp(Number(savedInvoiceId));
-          }
+          this.showErpResultToast(res?.erp);
         }
 
         if (navigateAfter) {
@@ -705,9 +584,6 @@ export class WarrantyInvoice implements OnInit {
     });
   }
 
-  // Fetches one historical invoice once, applies ALL given order-approval
-  // updates to it in memory, then saves once. Mirrors
-  // saveHistoricalOrderApprovals exactly.
   private saveHistoricalInvoiceApprovals(invoiceId: number, updates: { orderId: number; isApproved: boolean }[]): Observable<any> {
     return this.warrantyInvoiceService.getWarrantyInvoiceById(invoiceId).pipe(
       switchMap((invoice: any) => {
@@ -741,14 +617,6 @@ export class WarrantyInvoice implements OnInit {
     );
   }
 
-  // For a historical order whose original invoice was deleted: generates
-  // a fresh Invoice No, but REUSES the order's own Batch No (order.batchNo)
-  // rather than generating a new, independent one via
-  // getNextInvoiceNumbers - same fix and same reasoning as
-  // autoCreateInvoiceForOrder in warranty-order.ts: the Invoice's Batch No
-  // should match its Order's Batch No, and the two numbers' own
-  // independent counters (Order vs Invoice) naturally drift apart over
-  // time since they aren't created in perfect 1:1 lockstep.
   private createNewInvoiceForOrder(order: any): Observable<any> {
     const dealerCode = this.storageService.getDealerCode();
     return this.warrantyInvoiceService.getNextInvoiceNumbers(dealerCode).pipe(
@@ -758,7 +626,7 @@ export class WarrantyInvoice implements OnInit {
           dealerCode,
           dateFrom: this.dateFrom,
           dateTo: this.dateTo,
-          batchNo: order.batchNo, // reused from the order, not numbers.batchNo
+          batchNo: order.batchNo,
           batchDate: this.formatDate(new Date()),
           invoicePrefix: numbers.invoicePrefix,
           invoiceNo: numbers.invoiceNo,
