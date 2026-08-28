@@ -1,3 +1,4 @@
+// src\app\components\pdi-checklistmaster\pdi-checklistmaster.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -8,7 +9,7 @@ import { LoaderService } from '../../core/services/loader';
 import { Form22MasterService } from '../../core/services/form22masterservice';
 import * as bootstrap from 'bootstrap';
 import { StorageService } from '../../core/services/storage';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-pdi-checklistmaster',
@@ -24,6 +25,10 @@ export class PdiChecklistmaster implements OnInit {
   isLoading: boolean = false;
   oemModelList: any[] = [];
   selectedOemModelId: number | null = null;
+  readonly SUBMENU_ID = 36;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
 
 
   PdiChecklistmastermodel: any = {
@@ -40,12 +45,18 @@ export class PdiChecklistmaster implements OnInit {
   userRole: string = '';
 
 
-  constructor(private Pdichecklistmasterservice: PdiChecklistMasterService,
+  constructor(
+    private Pdichecklistmasterservice: PdiChecklistMasterService,
     private form22service: Form22MasterService,
     private storageService: StorageService,
     private modalService: NgbModal,
-    private loader: LoaderService
-  ) { }
+    private loader: LoaderService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+  }
   ngOnInit() {
     this.userRole = this.storageService.getRole();
     this.loadPdiChecklistList();

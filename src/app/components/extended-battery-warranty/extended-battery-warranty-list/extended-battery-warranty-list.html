@@ -1,3 +1,4 @@
+<!-- src\app\components\extended-battery-warranty\extended-battery-warranty-list\extended-battery-warranty-list.html -->
 <div id="extended-battery-warranty-list">
     <!-- Start Breadcrumbs -->
     <app-breadcrumbs title="Extened Warranty Scheme List"></app-breadcrumbs>
@@ -14,12 +15,8 @@
 
                             <div class="d-flex align-items-center gap-2">
 
-                                <button class="btn btn-sm btn-primary" (click)="newScheme()">
-                                    Add
-                                </button>
-
-                                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
-                                    (click)="downloadExcel()">
+                                <button *ngIf="canCreate" class="btn btn-sm btn-primary" (click)="newScheme()">Add</button>
+                                <button *ngIf="canDownload" class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'" (click)="downloadExcel()">
                                     <i class="ri-file-excel-2-line"></i>
                                 </button>
 

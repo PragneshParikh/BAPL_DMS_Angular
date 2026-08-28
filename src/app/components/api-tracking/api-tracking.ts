@@ -1,3 +1,4 @@
+// src\app\components\api-tracking\api-tracking.ts
 import { Component, OnInit } from '@angular/core';
 import { ApiTrackingService } from '../../core/services/api-tracking.Service';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +11,7 @@ import { error } from 'console';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { APIUniqueList } from '../../constant';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-api-tracking',
@@ -33,6 +35,9 @@ export class ApiTracking implements OnInit {
   dataSource: any[] = [];
   searchTerm: string = '';
   jsonString: any = '';
+
+  readonly SUBMENU_ID = 7;
+  canDownload = false;
 
   selectedEndPoint: string = '';
   selectedStatus: string = '';
@@ -59,7 +64,9 @@ export class ApiTracking implements OnInit {
     private modalService: NgbModal,
     private loader: LoaderService,
     public toaster: ToastService,
+    private menuAccess: MenuAccessService
   ) {
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
   }
 
   ngOnInit() {

@@ -1,3 +1,4 @@
+<!-- src\app\components\service-head-master\service-head-master.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">ServiceHead Master</h4>
 </div>
@@ -62,9 +63,7 @@
 
             <div class="modal-footer">
 
-                <button type="button" class="btn btn-primary" (click)="saveServiceHead(modal)">
-                    Save
-                </button>
+                <button type="button" class="btn btn-primary" *ngIf="canCreate" (click)="saveServiceHead(modal)">Save</button>
 
                 <button type="button" class="btn btn-light" (click)="modal.dismiss()">
                     Close
@@ -89,11 +88,8 @@
 
                 <div class="d-flex justify-content-end align-items-center">
 
-                    <button class="btn btn-primary btn-sm me-2" (click)="openAddDetails()">
-                        Add
-                    </button>
-
-                    <button class="btn btn-success btn-sm me-3" (click)="downloadServiceHeadMasterExcel()">
+                    <button class="btn btn-primary btn-sm me-2" *ngIf="canCreate" (click)="openAddDetails()">Add</button>
+                    <button class="btn btn-success btn-sm me-3" *ngIf="canDownload" (click)="downloadServiceHeadMasterExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
 
@@ -131,25 +127,16 @@
 
                         <tbody>
 
-                            <tr *ngFor="let item of pagedData; let i = index" (click)="openEditPopup(item)"
-                                style="cursor:pointer">
-
-                                <td>
-                                    {{ ((page - 1) * pageSize) + i + 1 }}
-                                </td>
+                            <tr *ngFor="let item of pagedData; let i = index" (click)="canEdit ? openEditPopup(item) : null"
+                                [style.cursor]="canEdit ? 'pointer' : 'default'">
+                                <td>{{ ((page - 1) * pageSize) + i + 1 }}</td>
                                 <td>{{item.jobTypeName}}</td>
+                                <td>{{ item.serviceHeadName }}</td>
                                 <td>
-                                    {{ item.serviceHeadName }}
-                                </td>
-
-                                <td>
-
-                                    <button class="btn btn-danger btn-sm" (click)="deleteServiceHead(item.id, $event)">
+                                    <button *ngIf="canDelete" class="btn btn-danger btn-sm" (click)="deleteServiceHead(item.id, $event)">
                                         <i class="ri-delete-bin-5-line"></i>
                                     </button>
-
                                 </td>
-
                             </tr>
 
                             <tr *ngIf="pagedData.length === 0">
@@ -253,9 +240,7 @@
 
             <div class="modal-footer">
 
-                <button type="button" class="btn btn-primary" (click)="updateServiceHead(modal)">
-                    Save
-                </button>
+                <button type="button" class="btn btn-primary" *ngIf="canEdit" (click)="updateServiceHead(modal)">Save</button>
 
                 <button type="button" class="btn btn-light" (click)="modal.dismiss()">
                     Close

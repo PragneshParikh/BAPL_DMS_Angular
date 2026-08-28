@@ -1,3 +1,4 @@
+<!-- src\app\components\circular\circular.html -->
 <!--PAGE Title-->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
     <h5 class="mb-sm-0">Circular</h5>
@@ -14,7 +15,7 @@
             <div class="card shadow border-0 full-card">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 text-white"> News </h5>
-                    <button class="btn btn-sm fw-bold btn-light text-primary" *ngIf="isSuperAdmin"
+                    <button class="btn btn-sm fw-bold btn-light text-primary" *ngIf="isSuperAdmin && canCreate"
                         (click)="onAddNewFile()"> &nbsp; Add
                     </button>
                 </div>
@@ -106,16 +107,14 @@
                         <div class="position-absolute top-0 end-0 m-2 d-flex gap-2" *ngIf="isSuperAdmin">
 
                             <!-- Configure -->
-                            <button class="btn btn-sm btn-primary" [ngbTooltip]="'Configure'"
-                                (click)="openCircularPermission(selectedFiles[0])">
+                            <div class="position-absolute top-0 end-0 m-2 d-flex gap-2" *ngIf="isSuperAdmin && canEdit">
+                            <button class="btn btn-sm btn-primary" [ngbTooltip]="'Configure'" (click)="openCircularPermission(selectedFiles[0])">
                                 <i class="ri-settings-3-line"></i>
                             </button>
-
-                            <!-- Edit -->
-                            <button class="btn btn-sm btn-primary" [ngbTooltip]="'Edit'"
-                                (click)="editNews(selectedFiles[0])">
+                            <button class="btn btn-sm btn-primary" [ngbTooltip]="'Edit'" (click)="editNews(selectedFiles[0])">
                                 <i class="ri-pencil-line"></i>
                             </button>
+                        </div>
 
                         </div>
 

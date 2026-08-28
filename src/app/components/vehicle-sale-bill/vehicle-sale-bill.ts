@@ -15,7 +15,7 @@ import { DealerService } from '../../core/services/dealer-service';
 import { StorageService } from '../../core/services/storage';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { LocationName } from '../../ViewModels/ReceiptEntryModel';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-vehicle-sale-bill',
   imports: [CommonModule,
@@ -31,6 +31,9 @@ import { LocationName } from '../../ViewModels/ReceiptEntryModel';
   providers: [FlatpickrDefaults, FlatpickrModule],
 })
 export class VehicleSaleBill {
+  readonly SUBMENU_ID = 27;
+  canCreate = false;
+  canDownload = false;
   vehicleBills: VehicleSaleBillResponseViewModel[] = [];
   filteredBills: VehicleSaleBillResponseViewModel[] = [];
   paginatedBills: VehicleSaleBillResponseViewModel[] = [];
@@ -78,7 +81,11 @@ export class VehicleSaleBill {
     private toaster: ToastService,
     private storageService: StorageService,
     private locationService: LocationMasterService,
-  ) { }
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit() {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';

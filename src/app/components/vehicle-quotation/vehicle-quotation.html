@@ -1,3 +1,4 @@
+<!-- src\app\components\vehicle-quotation\vehicle-quotation.html -->
 <!-- ===================================================== -->
 <!-- PAGE HEADER -->
 <!-- ===================================================== -->
@@ -451,7 +452,8 @@
                 <button type="button" class="btn btn-secondary btn-sm px-3 py-1 me-2" (click)="backToList()">
                     Cancel
                 </button>
-                <button type="submit" class="btn btn-primary btn-sm px-3 py-1">
+                <button type="submit" class="btn btn-primary btn-sm px-3 py-1"
+                    *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)">
                     {{ isEditMode ? 'Update' : 'Save' }}
                 </button>
             </div>

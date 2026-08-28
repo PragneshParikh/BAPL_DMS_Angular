@@ -1,3 +1,4 @@
+<!-- src\app\components\repair-bill\repair-bill.html -->
 <div class="container-fluid repair-bill-page p-2">
 
     <!-- Header -->
@@ -789,17 +790,15 @@
                 </div>
 
                 <div class="d-flex gap-2">
-                    <button *ngIf="!isEditMode && selectedJobCard?.jobCardHeader?.jobtype != 1"
+                    <button *ngIf="!isEditMode && selectedJobCard?.jobCardHeader?.jobtype != 1 && canCreate"
                         class="btn btn-primary btn-sm" (click)="saveRepairBill()">
                         <i class="ri-save-line"></i> Save As Performa
                     </button>
                     <button class="btn btn-primary btn-sm"
+                        *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
                         [disabled]="selectedJobCard?.jobCardHeader?.jobtype != 1 && (!isEditMode || repairBillStatus === 'Billed')"
                         (click)="saveOrUpdateRepairBill()">
-
-                        <i class="ri-save-line"></i>
-                        Save As Invoice
-
+                        <i class="ri-save-line"></i> Save As Invoice
                     </button>
 
                     <button class="btn btn-light btn-sm" (click)="onNavigate()">

@@ -1,3 +1,4 @@
+<!-- src\app\components\free-service-rate\free-service-rate-list\free-service-rate-list.html -->
 <div id="free-service-claim-list">
     <!-- Start Breadcrumbs -->
     <app-breadcrumbs title="Free Service Rate"></app-breadcrumbs>
@@ -29,7 +30,7 @@
                                     <button type="submit" class="btn btn-primary btn-sm me-1">
                                         <i class="align-bottom me-1"></i> Search
                                     </button>
-                                    <button type="button" class="btn btn-primary btn-sm ms-2" (click)="addNewOEMRate()">
+                                    <button type="button" class="btn btn-primary btn-sm ms-2" *ngIf="canCreate" (click)="addNewOEMRate()">
                                         <i class="align-bottom me-1"></i> Add
                                     </button>
                                 </div>

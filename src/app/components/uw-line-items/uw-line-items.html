@@ -1,3 +1,4 @@
+<!-- src\app\components\uw-line-items\uw-line-items.html -->
 <div class="card shadow-sm">
   <div class="card-header bg-primary bg-gradient text-white py-2">
     <div class="d-flex justify-content-between align-items-center">
@@ -162,7 +163,7 @@
                   class="form-control form-control-sm uw-reason-input"
                   placeholder="Reason to reject"
                   [(ngModel)]="reasonDrafts[item.id]"
-                  [disabled]="actingOnId === item.id">
+                  [disabled]="actingOnId === item.id || !canEdit">
 
                 <span *ngIf="item.status !== 'Pending' && editingId === item.id" class="uw-sub d-block"></span>
                 <input
@@ -171,13 +172,13 @@
                   class="form-control form-control-sm uw-reason-input"
                   placeholder="Reason to reject"
                   [(ngModel)]="reasonDrafts[item.id]"
-                  [disabled]="actingOnId === item.id">
+                  [disabled]="actingOnId === item.id || !canEdit">
 
                 <span *ngIf="item.status !== 'Pending' && editingId !== item.id" class="text-muted">{{ item.rejectionReason || '' }}</span>
               </td>
 
               <td class="text-center">
-                <div class="uw-action-stack" *ngIf="item.status === 'Pending'">
+                <div class="uw-action-stack" *ngIf="item.status === 'Pending' && canEdit">
                   <button
                     type="button"
                     class="btn btn-success btn-sm uw-icon-btn"
@@ -196,7 +197,7 @@
                   </button>
                 </div>
 
-                <div class="uw-action-stack" *ngIf="item.status === 'Approved' && !item.rejectionReason && editingId === item.id">
+                <div class="uw-action-stack" *ngIf="item.status === 'Approved' && !item.rejectionReason && editingId === item.id && canEdit">
                   <button
                     type="button"
                     class="btn btn-danger btn-sm uw-icon-btn"
@@ -215,7 +216,7 @@
                   </button>
                 </div>
 
-                <div class="uw-action-stack" *ngIf="(item.status === 'Rejected' || (item.status === 'Approved' && item.rejectionReason)) && editingId === item.id">
+                <div class="uw-action-stack" *ngIf="(item.status === 'Rejected' || (item.status === 'Approved' && item.rejectionReason)) && editingId === item.id && canEdit">
                   <button
                     type="button"
                     class="btn btn-success btn-sm uw-icon-btn"
@@ -335,7 +336,7 @@
 
               <td class="text-center">
                 <button
-                  *ngIf="(item.status === 'Approved' || item.status === 'Rejected') && editingId !== item.id"
+                  *ngIf="(item.status === 'Approved' || item.status === 'Rejected') && editingId !== item.id && canEdit"
                   type="button"
                   class="btn btn-outline-secondary btn-sm uw-icon-btn"
                   [disabled]="actingOnId === item.id"
@@ -344,6 +345,7 @@
                   <i class="ri-edit-line"></i>
                 </button>
                 <button
+                  *ngIf="canDelete"
                   type="button"
                   class="btn btn-outline-danger btn-sm uw-icon-btn"
                   [disabled]="actingOnId === item.id"

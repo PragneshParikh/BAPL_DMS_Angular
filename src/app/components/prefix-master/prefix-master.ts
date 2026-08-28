@@ -11,6 +11,7 @@ import { LoaderService } from '../../core/services/loader';
 import { StorageService } from '../../core/services/storage';
 import { ModuleTypes } from '../../constant';
 import { GetPrefixModuleNamePipe } from '../../core/pipes/get-prefix-module-name-pipe';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-prefix-master',
@@ -32,6 +33,12 @@ export class PrefixMaster implements OnInit {
   lstModule = ModuleTypes;
   public searchTerm: string = '';
   sequenceList: any[] = [];
+
+  readonly SUBMENU_ID = 26;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+  canDownload = false;
 
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';

@@ -1,3 +1,4 @@
+//src\app\components\location-master\location-master.ts
 import { Component, OnInit } from '@angular/core';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +11,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { StorageService } from '../../core/services/storage';
 import { locationAreaMaster } from '../../constant';
 import { DealerService } from '../../core/services/dealer-service';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 declare var bootstrap: any;
 
@@ -39,6 +41,10 @@ export class LocationMasterComponent implements OnInit {
   sortColumn = 'rrglocationidno';
   sortDirection = 'desc';
 
+  readonly SUBMENU_ID = 3;
+  canDownload = false;
+ 
+
   isSuperAdmin: boolean = false;
   dealerCode: string | null = null;
 
@@ -47,7 +53,13 @@ export class LocationMasterComponent implements OnInit {
     private dealerMasterService: DealerService,
     private loader: LoaderService,
     private storageService: StorageService,
-    public toastr: ToastService) { }
+    public toastr: ToastService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    if (!this.isSuperAdmin) this.dealerCode = this.storageService.getDealerCode();
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     // const storedDealerCode = this.storageService.getDealerCode();

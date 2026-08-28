@@ -1,3 +1,4 @@
+// src\app\components\Reports\model-wise-current-stock\model-wise-current-stock.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -6,7 +7,7 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReportService } from '../../../core/services/report.service';
 import { DealerDropdownItem } from '../../../ViewModels/models/UnifiedSaleReportViewModel';
 import { ModelWiseStockPivotRow, ModelWiseStockCountFilter } from '../../../ViewModels/models/Model wise stock count.model';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-model-wise-current-stock',
   standalone: true,
@@ -15,6 +16,7 @@ import { ModelWiseStockPivotRow, ModelWiseStockCountFilter } from '../../../View
   providers: [ReportService]
 })
 export class ModelWiseCurrentStockComponent implements OnInit {
+  private menuAccess = inject(MenuAccessService);
 
   private reportService = inject(ReportService);
   private fb            = inject(FormBuilder);
@@ -30,12 +32,16 @@ export class ModelWiseCurrentStockComponent implements OnInit {
   columnTotals: { [modelName: string]: number } = {};
   grandTotal = 0;
 
+  readonly SUBMENU_ID = 80;
+  canDownload = false;
+
   isLoading = false;
 
   isDealerUser = false;
 
   ngOnInit(): void {
     this.isDealerUser = this.checkIsDealerUser();
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
 
     this.filterForm = this.fb.group({
       dealerCode: [''],

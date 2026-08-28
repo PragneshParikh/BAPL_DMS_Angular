@@ -1,7 +1,8 @@
+// src\app\components\Reports\warranty-register\warranty-register.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 // TODO: adjust this relative path to wherever ReportService actually lives
 // in your project (it's the same service used by every other report screen).
 import { ReportService } from '../../../core/services/report.service';
@@ -21,6 +22,8 @@ type StatusOption = '' | 'Pending' | 'Approved' | 'Rejected';
   styleUrl: './warranty-register.scss',
 })
 export class WarrantyRegister implements OnInit {
+  readonly SUBMENU_ID = 123;
+  canDownload = false;
 
   filter: WarrantyRegisterFilterModel = this.emptyFilter();
 
@@ -37,7 +40,9 @@ export class WarrantyRegister implements OnInit {
   readonly claimStatusOptions: StatusOption[] = ['', 'Pending', 'Approved', 'Rejected'];
   readonly orderInvoiceStatusOptions: StatusOption[] = ['', 'Pending', 'Approved'];
 
-  constructor(private reportService: ReportService) {}
+  constructor(private reportService: ReportService, private menuAccess: MenuAccessService) {
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.loadDealers();

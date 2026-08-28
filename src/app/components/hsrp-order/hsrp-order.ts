@@ -1,3 +1,4 @@
+// src\app\components\hsrp-order\hsrp-order.ts
 import { Component, OnInit } from '@angular/core';
 import { HsrpService } from '../../core/services/hsrp-service';
 import { StorageService } from '../../core/services/storage';
@@ -11,7 +12,7 @@ import { LoaderService } from '../../core/services/loader';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { PrefixService } from '../../core/services/prefix';
 import { log } from 'console';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-hsrp-order',
   imports: [CommonModule, NgbModule, FormsModule, FlatpickrModule],
@@ -22,7 +23,9 @@ import { log } from 'console';
 export class HSRPOrder implements OnInit {
   selectedType: string = "order";
   selectAll = false;
-
+  readonly SUBMENU_ID = 48;
+  canCreate = false;
+  canEdit = false;
   model = {
     orderNo: '',
     orderDate: new Date().toISOString().substring(0, 10),
@@ -57,8 +60,12 @@ export class HSRPOrder implements OnInit {
     private loaderService: LoaderService,
     private route: ActivatedRoute,
     private router: Router,
-    private prefixService: PrefixService
-  ) { }
+    private prefixService: PrefixService,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  }
 
   async ngOnInit() {
 

@@ -1,3 +1,4 @@
+<!-- src\app\components\Reports\warranty-register\warranty-register.html -->
 <div class="warranty-register">
   <header class="page-header">
     <div>
@@ -6,12 +7,9 @@
         End-to-end tracking of warranty claims — job card through claim, order, invoice, packing and dispatch.
       </p>
     </div>
-    <button
-      type="button"
-      class="btn btn-primary"
-      (click)="exportCsv()"
-      [disabled]="exporting || loading">
-      {{ exporting ? 'Exporting…' : 'Export CSV' }}
+    <button type="button" class="btn btn-primary" *ngIf="canDownload"
+        (click)="exportCsv()" [disabled]="exporting || loading">
+        {{ exporting ? 'Exporting…' : 'Export CSV' }}
     </button>
   </header>
 

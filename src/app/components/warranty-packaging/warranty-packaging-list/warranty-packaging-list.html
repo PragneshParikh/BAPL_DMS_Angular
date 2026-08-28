@@ -1,3 +1,4 @@
+<!-- src\app\components\warranty-packaging\warranty-packaging-list\warranty-packaging-list.html -->
 <div class="card shadow-sm">
     <div class="card-header bg-primary bg-gradient text-white py-2">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -7,7 +8,7 @@
             </h6>
 
             <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-sm btn-light" (click)="goToCreate()" title="New Packing Slip">
+                <button class="btn btn-sm btn-light" *ngIf="canCreate" (click)="goToCreate()" title="New Packing Slip">
                     <i class="ri-add-line"></i>
                 </button>
             </div>
@@ -160,11 +161,11 @@
                             <button class="btn btn-outline-primary btn-sm me-1" (click)="viewSlip(line.warrantyPackingSlipHeaderId)" title="View this slip">
                                 <i class="ri-eye-line"></i>
                             </button>
-                            <button class="btn btn-outline-secondary btn-sm me-1" [disabled]="printingId === line.warrantyPackingSlipHeaderId"
+                            <button *ngIf="canDownload" class="btn btn-outline-secondary btn-sm me-1" [disabled]="printingId === line.warrantyPackingSlipHeaderId"
                                 (click)="printSlip(line.warrantyPackingSlipHeaderId, $event)" title="Print this slip">
                                 <i class="ri-printer-line"></i>
                             </button>
-                            <button class="btn btn-outline-danger btn-sm" (click)="deleteSlip(line.warrantyPackingSlipHeaderId, $event)" title="Delete this slip">
+                            <button *ngIf="canDelete" class="btn btn-outline-danger btn-sm" (click)="deleteSlip(line.warrantyPackingSlipHeaderId, $event)" title="Delete this slip">
                                 <i class="ri-delete-bin-2-line"></i>
                             </button>
                         </td>

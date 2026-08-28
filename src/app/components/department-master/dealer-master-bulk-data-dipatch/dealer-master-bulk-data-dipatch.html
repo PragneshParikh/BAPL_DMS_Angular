@@ -1,3 +1,4 @@
+<!-- src\app\components\department-master\dealer-master-bulk-data-dipatch\dealer-master-bulk-data-dipatch.html -->
 <div class="table-responsive">
 
     <!-- TOP CONTROLS -->
@@ -22,7 +23,7 @@
 
             </select>
 
-            <button class="btn btn-primary btn-sm" (click)="uploadFile()">
+            <button *ngIf="canCreate" class="btn btn-primary btn-sm" (click)="uploadFile()">
                 Upload
             </button>
 
@@ -37,7 +38,7 @@
             <tr>
 
                 <th>
-                    <input type="checkbox" (change)="toggleSelectAll($event)">
+                    <input type="checkbox" (change)="toggleSelectAll($event)" [disabled]="!canDownload">
                 </th>
 
                 <th>Sl No.</th>

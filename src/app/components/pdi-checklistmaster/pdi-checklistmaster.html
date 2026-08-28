@@ -1,3 +1,4 @@
+<!-- src\app\components\pdi-checklistmaster\pdi-checklistmaster.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">PDI CheckList Master List</h4>
 </div>
@@ -21,7 +22,7 @@
                             <i class="ri-search-line"></i>
                         </button>
                         <!-- (click)="search()" -->
-                        <button class="btn btn-primary btn-sm" (click)="openAddpdiChecklist()" data-bs-toggle="modal"
+                        <button class="btn btn-primary btn-sm" *ngIf="canCreate" (click)="openAddpdiChecklist()" data-bs-toggle="modal"
                             data-bs-target="#pdiChecklistmasterModal">
                             <i class="ri-add-line"></i>
                         </button>
@@ -45,19 +46,25 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let item of checklistList; let i = index" (dblclick)="openEdit(item)"
+                            <tr *ngFor="let item of checklistList; let i = index" (dblclick)="canEdit ? openEdit(item) : null"
                                 style="cursor:pointer">
                                 <td>{{i + 1}}</td>
                                 <td>{{item.oemModelName }}</td>
                                 <td>{{item.checklistName}}</td>
                                 <td>{{item.isActive ? 'Yes' : 'No'}}</td>
-                                 <td>
+                                 <!-- <td> -->
                                  <!--<button class="btn btn-sm btn-soft-sm btn-soft-primary me-1" data-bs-toggle="modal"
                                         data-bs-target="#pdiChecklistmasterModal" (click)="openEdit(item)">
                                         <i class="ri-pencil-line"></i>
                                     </button> -->
                                     <!-- (click)="edit(item)" -->
-                                    <button class="btn btn-sm btn-soft-sm btn-soft-danger me-1"
+                                    <!-- <button class="btn btn-sm btn-soft-sm btn-soft-danger me-1"
+                                        (click)="deletePdiCheclistMaster(item.id,$event)">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </td> -->
+                                <td>
+                                    <button class="btn btn-sm btn-soft-sm btn-soft-danger me-1" *ngIf="canDelete"
                                         (click)="deletePdiCheclistMaster(item.id,$event)">
                                         <i class="ri-delete-bin-line"></i>
                                     </button>
@@ -149,9 +156,10 @@
                     </div>
                     <!-- FOOTER -->
                     <div class="text-end mt-3">
-                        <button type="submit" class="btn btn-primary btn-sm" [disabled]="pdichecklistmaster.invalid">
-                            <i class="ri-save-line"></i>
-                            {{ isEditMode ? 'Update' : 'Save' }}
+                        <button type="submit" class="btn btn-primary btn-sm"
+                            *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
+                            [disabled]="pdichecklistmaster.invalid">
+                            <i class="ri-save-line"></i> {{ isEditMode ? 'Update' : 'Save' }}
                         </button>
 
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">

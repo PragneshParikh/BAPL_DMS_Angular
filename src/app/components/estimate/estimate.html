@@ -1,3 +1,4 @@
+<!-- src\app\components\estimate\estimate.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent" *ngIf="!embedded">
   <h4 class="mb-sm-0">Estimate</h4>
   <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goBack()">
@@ -395,17 +396,18 @@
           </button>
         </div>
 
-        <button type="button" class="btn btn-outline-secondary" *ngIf="isEditMode" (click)="onPrint()">
-          Print
+        <button type="button" class="btn btn-outline-secondary" *ngIf="isEditMode && canDownload" (click)="onPrint()">
+            Print
         </button>
       </div>
       <div class="d-flex gap-2">
         <button type="button" class="btn btn-light border" *ngIf="embedded" (click)="onClose()">
           Cancel
         </button>
-        <button type="button" class="btn btn-success" (click)="onSave()" [disabled]="isSaving">
-          <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-1"></span>
-          {{ isSaving ? 'Saving...' : 'Save' }}
+        <button type="button" class="btn btn-success" *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
+            (click)="onSave()" [disabled]="isSaving">
+            <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-1"></span>
+            {{ isSaving ? 'Saving...' : 'Save' }}
         </button>
       </div>
     </div>

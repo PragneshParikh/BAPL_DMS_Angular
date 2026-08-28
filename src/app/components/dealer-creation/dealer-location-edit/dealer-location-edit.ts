@@ -1,3 +1,4 @@
+// src\app\components\dealer-creation\dealer-location-edit\dealer-location-edit.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -11,7 +12,7 @@ import { LocationDetailModel } from '../../../ViewModels/models/LocationDetailMo
 import { BgRoleMappingModel } from '../../../ViewModels/models/BgRoleMappingModel';
 import { LocationMenuAccessResponse } from '../../../ViewModels/models/LocationMenuAccessModel';
 import { DealerMenuAccessItem } from '../../../ViewModels/models/DealerMenuAccessModel';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 // Replaces the old "Edit Location" popup entirely. Clicking a location's
 // action icon in the dealer expansion row now opens THIS as a new browser
 // tab, same pattern as the dealer-level Menu Access page - but this one
@@ -28,7 +29,8 @@ export class LocationEditPage implements OnInit {
   location: LocationDetailModel | null = null;
   loading = true;
   saving = false;
-
+  readonly SUBMENU_ID = 101;
+  canEdit = false;
   editForm!: FormGroup;
 
   allRoles: BgRoleMappingModel[] = [];
@@ -51,8 +53,10 @@ export class LocationEditPage implements OnInit {
     private dealerService: DealerCreationManagerService,
     private bgRoleService: BgRoleService,
     private loader: LoaderService,
-    private toaster: ToastService
+    private toaster: ToastService,
+    private menuAccess: MenuAccessService
   ) {
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
     this.editForm = this.fb.group({
       locCode: [''],
       locName: [''],

@@ -1,3 +1,4 @@
+<!-- src\app\components\warranty-order\warranty-order.html -->
 <div class="card shadow-sm">
     <div class="card-header bg-primary bg-gradient text-white py-2">
         <div class="d-flex justify-content-between align-items-center">
@@ -221,8 +222,8 @@
 
             <div>
                 <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyOrder()"
-                    [disabled]="saving || (!wasApprovedOnLoad && !hasAnyCheckedClaim)"
-                    [title]="(!wasApprovedOnLoad && !hasAnyCheckedClaim) ? 'Check at least one claim to enable Save' : ''">
+                    *ngIf="(!orderId && canCreate) || (orderId > 0 && canEdit)"
+                    [disabled]="saving || (!wasApprovedOnLoad && !hasAnyCheckedClaim)">
                     <i class="ri-save-line me-1"></i>
                     {{ saving ? 'Saving...' : 'Save' }}
                 </button>

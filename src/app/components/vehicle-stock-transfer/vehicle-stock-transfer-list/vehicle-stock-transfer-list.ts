@@ -1,3 +1,4 @@
+// src\app\components\vehicle-stock-transfer\vehicle-stock-transfer-list\vehicle-stock-transfer-list.ts
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { FlatpickrModule } from 'angularx-flatpickr';
 import { NgbHighlight, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-vehicle-stock-transfer-list',
   imports: [CommonModule, FormsModule, NgbHighlight, NgbPaginationModule, FlatpickrModule, RouterOutlet, NgbTooltipModule],
@@ -17,7 +18,9 @@ import { ToastService } from '../../../shared/toaster/toast-service';
   styleUrl: './vehicle-stock-transfer-list.scss',
 })
 export class VehicleStockTransferList implements OnInit {
-
+  readonly SUBMENU_ID = 57;
+  canCreate = false;
+  canDownload = false;
   transferList: any[] = [];
   filteredTransfers: any[] = [];
   paginatedTransfers: any[] = [];
@@ -42,8 +45,12 @@ export class VehicleStockTransferList implements OnInit {
     private storageService: StorageService,
     private router: Router,
     private loader: LoaderService,
-    private toaster:ToastService
-  ) { }
+    private toaster:ToastService,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';

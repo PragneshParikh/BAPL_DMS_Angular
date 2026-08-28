@@ -1,3 +1,4 @@
+<!-- src\app\components\lotinspection\lotinspection.html -->
 <!-- =========================LOT Inspection List section ================================= -->
 <!--PAGE Title-->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
@@ -34,7 +35,7 @@
                 <input type="text" class="form-control" placeholder="Invoice No." #invoiceNo>
             </div>
             <div class="col-md-2">
-                <button class="btn btn-success btn-sm me-3" (click)="downloadLotinspectedExcel(invoiceNo.value || null)">
+                <button *ngIf="canDownload" class="btn btn-success btn-sm me-3" (click)="downloadLotinspectedExcel(invoiceNo.value || null)">
                     <i class="ri-file-excel-2-line"></i>
                 </button>
             </div>
@@ -69,8 +70,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let data of pagedData" (dblclick)="onNavigate(data.invoiceNo, $event)"
-                        style="cursor:pointer">
+                    <tr *ngFor="let data of pagedData"
+                        (dblclick)="canEdit ? onNavigate(data.invoiceNo, $event) : null"
+                        [style.cursor]="canEdit ? 'pointer' : 'default'">
                         <td>{{ data.invoiceNo }}</td>
                         <td>{{ data.invoiceDate }}</td>
                         <td>{{ data.lotno }}</td>

@@ -1,3 +1,4 @@
+// src\app\components\kit-creation\kit-creation.ts
 import { Component, OnInit } from '@angular/core';
 import { SharedModule } from '../../shared/shared.module';
 import { CommonModule } from '@angular/common';
@@ -9,7 +10,7 @@ import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { Router, RouterOutlet } from "@angular/router";
 import { error } from 'console';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-kit-creation',
   imports: [CommonModule, ReactiveFormsModule, FormsModule, SharedModule, NgbModule, RouterOutlet],
@@ -20,7 +21,9 @@ export class KitCreation implements OnInit {
 
   public searchTerm: string = '';
   kitData: any[] = [];
-
+  readonly SUBMENU_ID = 24;
+  canCreate = false;
+  canDownload = false;
   page = 1;
   pageSize = 10;
   collectionSize = 0;
@@ -32,8 +35,12 @@ export class KitCreation implements OnInit {
     private kitCreationService: KitCreationService,
     private loader: LoaderService,
     private toaster: ToastService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit() {
     this.getKitCreationData();

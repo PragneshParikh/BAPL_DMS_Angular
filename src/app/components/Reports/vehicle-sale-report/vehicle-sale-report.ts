@@ -1,3 +1,4 @@
+// src\app\components\Reports\vehicle-sale-report\vehicle-sale-report.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -8,7 +9,7 @@ import { catchError } from 'rxjs/operators';
 import { ReportService } from '../../../core/services/report.service';
 import { LedgerMasterService } from '../../../core/services/ledger-master';
 import { LedgerMaster } from '../../../ViewModels/LedgerMasterViewModel';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 import {
   DealerDropdownItem,
   UnifiedSaleReportViewModel,
@@ -24,6 +25,9 @@ import {
   providers: [ReportService]
 })
 export class VehicleSaleReportComponent implements OnInit {
+  private menuAccess = inject(MenuAccessService);
+  readonly SUBMENU_ID = 43;
+  canDownload = false;
 
   private reportService       = inject(ReportService);
   private ledgerMasterService = inject(LedgerMasterService);
@@ -76,6 +80,7 @@ export class VehicleSaleReportComponent implements OnInit {
     });
 
     this.isSuperAdmin = this.checkIsSuperAdmin();
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
 
     this.initDates();
 

@@ -1,3 +1,4 @@
+// src\app\components\hsrp-order\hsrporder-list\hsrporder-list.ts
 import { Component, OnInit } from '@angular/core';
 import { HsrpService } from '../../../core/services/hsrp-service';
 import { StorageService } from '../../../core/services/storage';
@@ -6,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-hsrporder-list',
   imports: [CommonModule, NgbModule, FormsModule, FlatpickrModule],
@@ -20,7 +21,8 @@ export class HSRPOrderList implements OnInit {
     toDate: Date
   };
   isSuperAdmin: boolean = false;
-
+  readonly SUBMENU_ID = 48;
+  canDownload = false;
   orders: any[] = [];
   filteredOrders: any[] = [];
   paginatedOrders: any[] = [];
@@ -37,8 +39,11 @@ export class HSRPOrderList implements OnInit {
   constructor(
     private hsrpService: HsrpService,
     private storageService: StorageService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);  
+   }
 
   ngOnInit(): void {
     const today = new Date();

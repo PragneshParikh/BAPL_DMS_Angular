@@ -1,3 +1,4 @@
+<!-- src\app\components\dealer-master\dealer-master.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">Dealer Master</h4>
 </div>
@@ -11,7 +12,7 @@
                 <div class="d-flex justify-content-end align-items-center">
 
                     <!-- Download Excel Button -->
-                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
+                    <button *ngIf="canDownload" class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
                         (click)="downloadDealerExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
@@ -352,7 +353,7 @@
     </div>
 
     <div class="modal-footer">
-        <button class="btn btn-primary btn-sm" (click)="updateTradeCertificate()">
+        <button *ngIf="canEdit" class="btn btn-primary btn-sm" (click)="updateTradeCertificate()">
             Save
         </button>
         <button class="btn btn-danger btn-sm" (click)="modal.close()">Close</button>

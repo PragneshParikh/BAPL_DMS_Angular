@@ -286,12 +286,16 @@
   <div class="card-footer bg-white border-top py-2">
     <div class="d-flex justify-content-between align-items-center">
       <div>
-        <button *ngIf="isEditMode" type="button" class="btn btn-danger btn-sm" (click)="deleteInvoice()">
+        <!-- CHANGED — only show Delete if user has Delete permission on this menu -->
+        <button *ngIf="isEditMode && canDelete" type="button" class="btn btn-danger btn-sm" (click)="deleteInvoice()">
           <i class="ri-delete-bin-line"></i> Delete
         </button>
       </div>
       <div class="d-flex gap-2">
-        <button class="btn btn-primary btn-sm" (click)="onSave()" [disabled]="isChassisExpired">
+        <!-- CHANGED — Save button only shows if the user has the right action
+            permission: Create for a new invoice, Edit for an existing one -->
+        <button *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
+                class="btn btn-primary btn-sm" (click)="onSave()" [disabled]="isChassisExpired">
           {{ isEditMode ? 'Update' : 'Save' }}
         </button>
         <button class="btn btn-light btn-sm" (click)="backToList()">Cancel</button>

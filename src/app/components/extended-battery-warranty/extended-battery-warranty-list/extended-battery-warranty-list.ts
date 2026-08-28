@@ -1,3 +1,4 @@
+// src\app\components\extended-battery-warranty\extended-battery-warranty-list\extended-battery-warranty-list.ts
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
@@ -10,7 +11,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { DurationTypes, RateTypes } from '../../../constant';
 import { GetDurationTypePipe } from '../../../core/pipes/get-duration-type-pipe';
 import { GetRateTypePipe } from '../../../core/pipes/get-rate-type-pipe';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-extended-battery-warranty-list',
   imports: [
@@ -31,6 +32,10 @@ export class ExtendedBatteryWarrantyList implements OnInit {
   durationTypes = DurationTypes;
   rateTypes = RateTypes;
 
+  readonly SUBMENU_ID = 37;
+  canCreate = false;
+  canDownload = false;
+
   searchTerm: string = '';
 
   dataSource: any[] = [];
@@ -48,8 +53,12 @@ export class ExtendedBatteryWarrantyList implements OnInit {
     private router: Router,
     private extendedBatteryWarrantyServie: ExtendedBatteryWarrantyService,
     private loader: LoaderService,
-    private toast: ToastService
-  ) { }
+    private toast: ToastService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.getExtendedBatteryWarrantyList();

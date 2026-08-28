@@ -3,6 +3,7 @@ import { NgbModal, NgbHighlight } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DealerService } from '../../../core/services/dealer-service';
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-dealer-master-bulk-data-dipatch',
@@ -12,6 +13,10 @@ import { DealerService } from '../../../core/services/dealer-service';
   styleUrls: ['./dealer-master-bulk-data-dipatch.scss']
 })
 export class DealerMasterBulkDataDipatch implements OnInit {
+
+  readonly SUBMENU_ID = 127;
+  canCreate = false;   // ADDED — gates Upload
+  canDownload = false; // ADDED — gates Print Selected
 
   dealerList: any[] = [];
   originalDealerList: any[] = [];
@@ -26,8 +31,12 @@ export class DealerMasterBulkDataDipatch implements OnInit {
 
   constructor(
     private dealerService: DealerService,
-    private modalService: NgbModal
-  ) { }
+    private modalService: NgbModal,
+    private menuAccess: MenuAccessService   // ADDED
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit() {
     this.loadDealers();

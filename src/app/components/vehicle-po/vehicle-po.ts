@@ -1,3 +1,4 @@
+// src\app\components\vehicle-po\vehicle-po.ts
 import { Component, OnInit } from '@angular/core';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -13,6 +14,7 @@ import Swal from 'sweetalert2';
 import { LedgerMasterService } from '../../core/services/ledger-master';
 import { PrefixService } from '../../core/services/prefix';
 import { PurchaseService } from '../../core/services/purchase-service';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 export interface PurchaseOrderItemViewModel {
   ItemCode: string;
   Qty: number;
@@ -39,6 +41,9 @@ export interface PurchaseOrderViewModel {
 })
 
 export class VehiclePO implements OnInit {
+  readonly SUBMENU_ID = 17;
+  canCreate = false;
+  canEdit = false;
   locationList: any[] = [];
   selectedLocation: string = '';
 
@@ -105,10 +110,13 @@ export class VehiclePO implements OnInit {
     private loader: LoaderService,
     public toaster: ToastService,
     private ledgerService: LedgerMasterService,
-    private prefixService: PrefixService
+    private prefixService: PrefixService,
+    private menuAccess: MenuAccessService
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     if (!this.isSuperAdmin) {
+      this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+      this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
       this.dealerCode = this.storageService.getDealerCode();
     }
   }

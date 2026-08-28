@@ -1,3 +1,4 @@
+<!-- src\app\components\taxcode-master\taxcode-master.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">Tax Code Master</h4>
 </div>
@@ -9,12 +10,8 @@
             <div class="card-header">
                 <div class="d-flex justify-content-end align-items-center">
 
-                    <button class="btn btn-primary btn-sm me-2" (click)="openAddModal()">
-                        Add
-                    </button>
-
-                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
-                        (click)="downloadTaxCodeExcel()">
+                    <button class="btn btn-primary btn-sm me-2" *ngIf="canCreate" (click)="openAddModal()">Add</button>
+                    <button class="btn btn-success btn-sm me-3" *ngIf="canDownload" [ngbTooltip]="'Export to Excel'" (click)="downloadTaxCodeExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
 
@@ -49,8 +46,8 @@
                                 <td colspan="5" class="text-center">No data available</td>
                             </tr>
 
-                            <tr *ngFor="let tax of pagedTaxCodeList; let i = index" (dblclick)="openEditModal(tax)"
-                                style="cursor: pointer;">
+                            <tr *ngFor="let tax of pagedTaxCodeList; let i = index" (dblclick)="canEdit ? openEditModal(tax) : null"
+                                 [style.cursor]="canEdit ? 'pointer' : 'default'">
                                 <td>{{ (page - 1) * pageSize + i + 1 }}</td>
                                 <td><ngb-highlight [result]="tax.taxcode" [term]="searchTerm"></ngb-highlight></td>
                                 <td><ngb-highlight [result]="tax.description" [term]="searchTerm"></ngb-highlight></td>
@@ -171,7 +168,7 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-primary btn-sm"
+                <button class="btn btn-primary btn-sm" *ngIf="(selectedTaxCode.id === 0 && canCreate) || (selectedTaxCode.id !== 0 && canEdit)"
                     (click)="formSubmitted = true; taxCodeInput.valid && taxRateInput.valid && effectiveDateInput.valid && addOrUpdateTaxCode()">
                     {{ selectedTaxCode.id === 0 ? 'Save' : 'Save' }}
                 </button>

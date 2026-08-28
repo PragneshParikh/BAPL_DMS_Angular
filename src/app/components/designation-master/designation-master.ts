@@ -1,3 +1,4 @@
+// src\app\components\designation-master\designation-master.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +9,7 @@ import { DesignationModel } from '../../ViewModels/models/DesignationModel';
 import { DepartmentModel } from '../../ViewModels/models/DepartmentModel';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-designation-master',
   imports: [CommonModule, FormsModule],
@@ -20,7 +21,9 @@ export class DesignationMaster {
   designationExists = false;
   designationList: DesignationModel[] = [];
   departmentList: DepartmentModel[] = [];
-
+  readonly SUBMENU_ID = 64;
+  canCreate = false;
+  canEdit = false;
   formData: DesignationModel = {
     designationId: 0,
     abbreviation: '',
@@ -35,8 +38,12 @@ export class DesignationMaster {
     private router: Router,
     private route: ActivatedRoute,
     private loader: LoaderService,
-    private toaster: ToastService
-  ) { }
+    private toaster: ToastService,
+    private menuAccess: MenuAccessService   // ADDED
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  }
 
   ngOnInit() {
     this.loadDepartments();

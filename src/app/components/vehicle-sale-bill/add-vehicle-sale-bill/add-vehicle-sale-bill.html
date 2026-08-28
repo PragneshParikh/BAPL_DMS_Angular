@@ -1,4 +1,5 @@
 <!-- src\app\components\vehicle-sale-bill\add-vehicle-sale-bill\add-vehicle-sale-bill.html -->
+<!-- src\app\components\vehicle-sale-bill\add-vehicle-sale-bill\add-vehicle-sale-bill.html -->
 <!-- Page Title -->
 
 <!--NB: The commented parts were designed based on old DMS, but as per requiremnet they are commented and will take into consideration with requirement-->
@@ -9,8 +10,8 @@
 <div class="card">
     <div class="card-header d-flex justify-content-end align-items-center">
 
-        <button *ngIf="(billId && isSuperAdmin) ||(billId && !isInvoiced)" type="button"
-            class="btn btn-danger btn-sm gap-2 me-3" (click)="deleteVehicleSaleBill()">
+        <button *ngIf="(billId && isSuperAdmin && canDelete) || (billId && !isInvoiced && canDelete)"
+            type="button" class="btn btn-danger btn-sm gap-2 me-3" (click)="deleteVehicleSaleBill()">
             <i class="ri-delete-bin-line"></i>Delete
         </button>
         <!-- PRINT DROPDOWN -->
@@ -74,18 +75,16 @@
 
         <div class="d-flex justify-content-end gap-1 me-3">
 
-            <button *ngIf="!billId" class="btn btn-sm btn-primary" [disabled]="!canSave() || isErpLocked"
+            <button *ngIf="!billId && canCreate" class="btn btn-sm btn-primary" [disabled]="!canSave() || isErpLocked"
                 (click)="billId ? updateVehicleSaleBill() : saveVehicleDetailsOnly()">
                 Save As{{!this.model.isD2D ? ' Proforma' :' Invoice'}}
             </button>
-            <button *ngIf="billId && !isErpLocked && !isInvoiced" class="btn btn-sm btn-primary"
-                [disabled]="!canSave() || isErpLocked" (click)=" updateVehicleSaleBill()">
+            <button *ngIf="billId && !isErpLocked && !isInvoiced && canEdit" class="btn btn-sm btn-primary"
+                [disabled]="!canSave() || isErpLocked" (click)="updateVehicleSaleBill()">
                 Update
             </button>
-
-            <!-- <button *ngIf="!isErpLocked && billId && !isInvoiced" class="btn btn-sm btn-primary" -->
-            <button *ngIf="billId && isInvoiced" class="btn btn-sm btn-primary" (click)="openRegistrationModal()">
-                Open VDN Form
+            <button *ngIf="billId && !isInvoiced && canEdit" class="btn btn-sm btn-primary" (click)="connfirmInvoiceGeneration()">
+                Genearate Invoice
             </button>
 
 

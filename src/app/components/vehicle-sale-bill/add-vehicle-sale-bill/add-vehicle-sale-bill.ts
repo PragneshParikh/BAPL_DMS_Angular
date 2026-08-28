@@ -24,7 +24,7 @@ import { PrefixService } from '../../../core/services/prefix';
 import { forkJoin } from 'rxjs';
 import { LedgerMasterService } from '../../../core/services/ledger-master';
 import { access } from 'fs';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-add-vehicle-sale-bill',
@@ -34,6 +34,10 @@ import { access } from 'fs';
   styleUrl: './add-vehicle-sale-bill.scss',
 })
 export class AddVehicleSaleBill implements OnInit {
+  readonly SUBMENU_ID = 27;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
   @ViewChild('vehicleSaleForm') vehicleSaleForm!: NgForm;
   form!: FormGroup;
   nextSaleNo: string;
@@ -169,7 +173,10 @@ export class AddVehicleSaleBill implements OnInit {
     private receiptEntryService: ReceiptEntryService, private vehicleSaleBillService: VehicleSaleBillService,
     private modalService: NgbModal, private loader: LoaderService, private toaster: ToastService,
     private router: Router, private prefixService: PrefixService, private ledgerService: LedgerMasterService,
-    private route: ActivatedRoute,) {
+    private route: ActivatedRoute,private menuAccess: MenuAccessService) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();

@@ -1,3 +1,4 @@
+<!-- src\app\components\estimate\estimate-list\estimate-list.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
   <h4 class="mb-sm-0">Estimate List</h4>
   <span class="badge bg-light text-dark border px-3 py-2 fs-6">
@@ -82,7 +83,7 @@
           <div class="d-flex flex-wrap gap-2 mt-3">
             <button type="button" class="btn btn-primary btn-sm" (click)="onSearch()">Search</button>
             <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">Reset</button>
-            <button type="button" class="btn btn-success btn-sm ms-auto" (click)="onAddNew()">+ New Estimate</button>
+            <button *ngIf="canCreate" type="button" class="btn btn-success btn-sm ms-auto" (click)="onAddNew()">+ New Estimate</button>
           </div>
         </form>
       </div>
@@ -146,15 +147,9 @@
                 <td class="text-nowrap">{{ formatDate(item.jobCardCreatedDate) }}</td>
 
               <td class="text-center text-nowrap">
-                  <button type="button" class="btn btn-outline-primary btn-sm me-1" title="Edit"
-                    (click)="onEdit(item.id)">
-                    ✏️ 
-                  </button>
-                  <button type="button" class="btn btn-outline-secondary btn-sm" title="Print"
-                    (click)="onPrint(item.id)">
-                    🖨️ 
-                  </button>
-                </td>
+                <button *ngIf="canEdit" type="button" class="btn btn-outline-primary btn-sm me-1" title="Edit" (click)="onEdit(item.id)">✏️</button>
+                <button *ngIf="canDownload" type="button" class="btn btn-outline-secondary btn-sm" title="Print" (click)="onPrint(item.id)">🖨️</button>
+            </td>
               </tr>
             </tbody>
           </table>

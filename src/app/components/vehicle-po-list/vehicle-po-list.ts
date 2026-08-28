@@ -1,3 +1,4 @@
+// src\app\components\vehicle-po-list\vehicle-po-list.ts
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -8,6 +9,7 @@ import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { StorageService } from '../../core/services/storage';
 import { PurchaseService } from '../../core/services/purchase-service';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-vehicle-po-list',
@@ -17,6 +19,9 @@ import { PurchaseService } from '../../core/services/purchase-service';
   styleUrl: './vehicle-po-list.scss',
 })
 export class VehiclePoList implements OnInit {
+  readonly SUBMENU_ID = 17;
+  canCreate = false;
+  canDownload = false;
   poStatuses = PO_STATUSES;
   purchaseNo: string = '';
   dateFrom: string = '';
@@ -49,8 +54,12 @@ export class VehiclePoList implements OnInit {
     private purchaseService: PurchaseService,
     private loader: LoaderService,
     private toastr: ToastService,
-    private storageService: StorageService
-  ) { }
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+   }
 
   ngOnInit() {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';

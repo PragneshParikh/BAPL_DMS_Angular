@@ -1,3 +1,4 @@
+// src\app\components\oemmodel-warranty\oemmodel-warranty.ts
 import { Component } from '@angular/core';
 import { OemModelWarranty } from '../../ViewModels/OemModelWarranty';
 import { OemmodelWarrantyService } from '../../core/services/oemmodel-warranty-service';
@@ -8,7 +9,7 @@ import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
 import { Router, RouterOutlet } from '@angular/router';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-oemmodel-warranty',
   imports: [CommonModule,
@@ -24,6 +25,10 @@ import { ToastService } from '../../shared/toaster/toast-service';
    providers: [FlatpickrDefaults, FlatpickrModule],
 })
 export class OemmodelWarranty {
+  readonly SUBMENU_ID = 34;
+  canCreate = false;
+  canEdit = false;
+  canDownload = false;
   list: OemModelWarranty[] = [];
   filteredList: OemModelWarranty[] = [];
   paginatedList: OemModelWarranty[] = [];
@@ -40,8 +45,17 @@ today: string = new Date().toISOString().split('T')[0];
   effectiveDateTo: '' as string | null
 };
 
-  constructor(private service: OemmodelWarrantyService, private router: Router, private loader:LoaderService,private toaster:ToastService) {}
-
+  constructor(
+    private service: OemmodelWarrantyService,
+    private router: Router,
+    private loader: LoaderService,
+    private toaster: ToastService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
   ngOnInit(): void {
      this.loadData();
     //this.setDefaultDates();

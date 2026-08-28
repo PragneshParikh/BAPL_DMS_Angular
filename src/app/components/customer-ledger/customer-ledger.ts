@@ -1,3 +1,4 @@
+// src\app\components\customer-ledger\customer-ledger.ts
 import { Component, input, Input, OnInit, Optional } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LedgerMasterService } from '../../core/services/ledger-master';
@@ -15,7 +16,7 @@ import { AuthenticationService } from '../../core/services/auth.service';
 import { GetUserNameByIdPipe } from '../../core/pipe/get-user-name-by-id-pipe';
 import { OccupationService } from '../../core/services/occupation-service';
 import { ChassisDetailService } from '../../core/services/chassis-detail';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-customer-ledger',
   imports: [FormsModule, CommonModule, GetUserNameByIdPipe],
@@ -26,6 +27,9 @@ export class CustomerLedger {
   optionalLedgerTypes = ['Party', 'Institution', 'Financier', 'Insurance'];
   genders = Gender
   ledgerTypes = LedgerTypes;
+  readonly SUBMENU_ID = 20;
+  canCreate = false;
+  canEdit = false;
   formData = {
     id: 0,
     ledgerVisibility: '',
@@ -77,6 +81,7 @@ export class CustomerLedger {
     private storageService: StorageService,
     private occupationService: OccupationService,
     private authService: AuthenticationService,
+    private menuAccess: MenuAccessService,
     @Optional() public activeModal: NgbActiveModal
   ) {
     this.activatedRoute.paramMap.subscribe(params => {
@@ -84,6 +89,8 @@ export class CustomerLedger {
       if (id > 0) {
         this.isModify = true;
         this.getCustomerLedgerDetails(id);
+        this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+        this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
       }
     });
     this.formData.createdBy = this.storageService.getDealerCode();

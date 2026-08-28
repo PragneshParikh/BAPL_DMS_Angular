@@ -1,3 +1,4 @@
+// src\app\components\warranty-packaging\warranty-packaging.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { WarrantyInvoiceService } from '../../core/services/warranty-invoice-service';
 import { WarrantyPackingSlipService } from '../../core/services/warranty-packaging-service';
 import { DealerService } from '../../core/services/dealer-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-warranty-packaging',
   standalone: true,
@@ -18,6 +19,9 @@ import { DealerService } from '../../core/services/dealer-service';
   styleUrl: './warranty-packaging.scss',
 })
 export class WarrantyPackaging implements OnInit {
+  readonly SUBMENU_ID = 116;
+  canCreate = false;
+  canEdit = false;
 
   // 0 = create, otherwise the Id being edited - same convention as
   // WarrantyInvoice's own invoiceId.
@@ -55,8 +59,12 @@ export class WarrantyPackaging implements OnInit {
     private warrantyInvoiceService: WarrantyInvoiceService,
     private warrantypackingService: WarrantyPackingSlipService,
     private dealerService: DealerService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+   }
 
   ngOnInit(): void {
     this.slipDate = this.formatDate(new Date());

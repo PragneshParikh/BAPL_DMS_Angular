@@ -1,3 +1,4 @@
+// src\app\components\estimate\estimate-list\estimate-list.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -17,7 +18,7 @@ import { ReportService } from '../../../core/services/report.service';
 // '../estimate-form/estimate'. The class is exported as `Estimate` and its
 // selector is 'app-estimate'.
 import { Estimate } from '../estimate';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-estimate-list',
   standalone: true,
@@ -29,6 +30,11 @@ export class EstimateList implements OnInit, OnDestroy {
   filterForm!: FormGroup;
   reportData: EstimateListRow[] = [];
   Math = Math;
+
+  readonly SUBMENU_ID = 98;
+  canCreate = false;
+  canEdit = false;
+  canDownload = false;
 
   isDealer = false;
   loggedInDealerCode = '';
@@ -63,8 +69,12 @@ export class EstimateList implements OnInit, OnDestroy {
     private estimateService: EstimateService,
     private storageService: StorageService,
     private reportService: ReportService,
-    private router: Router
+    private router: Router,
+    private menuAccess: MenuAccessService
   ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     this.filterForm = this.fb.group({
       chassisNo: [''],
       estimationNo: [''],

@@ -1,3 +1,4 @@
+// src\app\components\service-head-master\service-head-master.ts
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbModal, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
@@ -6,7 +7,7 @@ import { ServiceHeadService } from '../../core/services/service-head-service';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { JobTypeService } from '../../core/services/job-type-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-service-head-master',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbPagination],
@@ -14,6 +15,11 @@ import { JobTypeService } from '../../core/services/job-type-service';
   styleUrl: './service-head-master.scss',
 })
 export class ServiceHeadMaster implements OnInit {
+  readonly SUBMENU_ID = 69;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+  canDownload = false;
 
   @ViewChild('serviceHeadAdd') serviceHeadAdd!: TemplateRef<any>;
   @ViewChild('serviceHeadUpdate') serviceHeadUpdate!: TemplateRef<any>;
@@ -40,8 +46,14 @@ export class ServiceHeadMaster implements OnInit {
     private modalService: NgbModal,
     private toaster: ToastService,
     private ServiceHeadMasterService: ServiceHeadService,
-    private jobTypeMasterService: JobTypeService
-  ) { }
+    private jobTypeMasterService: JobTypeService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
 

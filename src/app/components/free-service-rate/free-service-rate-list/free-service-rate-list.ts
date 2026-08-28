@@ -1,3 +1,4 @@
+// src\app\components\free-service-rate\free-service-rate-list\free-service-rate-list.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { FreeServiceRate } from '../free-service-rate';
 import { Route, Router } from '@angular/router';
 import { FreeServiceRateService } from '../../../core/services/free-service-rate';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-free-service-rate-list',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, SharedModule, NgbPagination],
@@ -20,7 +21,8 @@ export class FreeServiceRateList implements OnInit {
   public searchTerm: string = '';
   dataSource: any[] = [];
   originalList: any[] = [];
-
+  readonly SUBMENU_ID = 67;
+  canCreate = false;
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
@@ -41,8 +43,10 @@ export class FreeServiceRateList implements OnInit {
     private toast: ToastService,
     private router: Router,
     private freeServiceRateService: FreeServiceRateService,
-
-  ) { }
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.getOEMModelList();

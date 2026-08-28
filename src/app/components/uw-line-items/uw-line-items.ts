@@ -1,3 +1,4 @@
+// src\app\components\uw-line-items\uw-line-items.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { StorageService } from '../../core/services/storage';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { UwLineItemService } from '../../core/services/uw-line-item-service';
 import { DealerService } from '../../core/services/dealer-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-uw-line-item',
   standalone: true,
@@ -16,6 +17,10 @@ import { DealerService } from '../../core/services/dealer-service';
   styleUrl: './uw-line-items.scss',
 })
 export class UwLineItem implements OnInit {
+
+  readonly SUBMENU_ID = 115;
+  canEdit = false;
+  canDelete = false;
 
   items: any[] = [];
   totalCount: number = 0;
@@ -69,8 +74,12 @@ export class UwLineItem implements OnInit {
     private storageService: StorageService,
     private toaster: ToastService,
     private uwLineItemService: UwLineItemService,
-    private dealerService: DealerService
-  ) { }
+    private dealerService: DealerService,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
 

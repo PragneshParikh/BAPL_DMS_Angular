@@ -1,3 +1,4 @@
+<!-- src\app\components\customer-ledger\customer-ledger-list\customer-ledger-list.html -->
 <div id="customer-ledger-list">
     <!-- Start Breadcrumbs -->
     <app-breadcrumbs title="Customer Ledger"></app-breadcrumbs>
@@ -31,11 +32,10 @@
 
                             <div class="d-flex align-items-end justify-content-end gap-2 w-100">
 
-                                <button class="btn btn-sm btn-primary" (click)="newLedger()">
+                                <button *ngIf="canCreate" class="btn btn-sm btn-primary" (click)="newLedger()">
                                     Add
                                 </button>
-
-                                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                                <button *ngIf="canDownload" class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
                                     (click)="downloadExcel()">
                                     <i class="ri-file-excel-2-line"></i>
                                 </button>

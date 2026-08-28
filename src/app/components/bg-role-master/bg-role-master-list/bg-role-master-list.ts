@@ -1,3 +1,4 @@
+// src\app\components\bg-role-master\bg-role-master-list\bg-role-master-list.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -6,6 +7,7 @@ import { BgRoleService } from '../../../core/services/bg-role';
 import { BgRoleMappingModel } from '../../../ViewModels/models/BgRoleMappingModel';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-bg-role-master-list',
@@ -18,12 +20,22 @@ export class BgRoleMasterList {
   filteredList: BgRoleMappingModel[] = [];
   searchText: string = '';
 
+  readonly SUBMENU_ID = 100;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+
   constructor(
     private bgRoleService: BgRoleService,
     private router: Router,
     private loader: LoaderService,
-    private toaster: ToastService
-  ) {}
+    private toaster: ToastService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+  }
 
   ngOnInit() {
     this.loadRoles();

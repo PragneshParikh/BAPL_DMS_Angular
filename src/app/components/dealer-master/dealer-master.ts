@@ -1,3 +1,4 @@
+// src\app\components\dealer-master\dealer-master.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { NgbModal, NgbModalRef, NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -8,6 +9,7 @@ import { DealerApiResponse } from '../../ViewModels/Dealer/DealerApiResponse';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
 import { StorageService } from '../../core/services/storage';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-dealer-master',
@@ -28,6 +30,10 @@ export class DealerMaster implements OnInit {
   pageSize = 10;
   collectionSize = 0;
 
+  readonly SUBMENU_ID = 4;
+  canEdit = false;
+  canDownload = false;
+
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
@@ -44,10 +50,13 @@ export class DealerMaster implements OnInit {
     private modalService: NgbModal,
     private loader: LoaderService,
     private toaster: ToastService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     this.dealerCode = this.storageService.getDealerCode() || '';
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
   }
 
   /* ================= INIT ================= */

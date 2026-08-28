@@ -1,3 +1,4 @@
+<!-- src\app\components\term-condition-master\term-condition-master.html -->
 <div>
     <!-- SEARCH CARD -->
     <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
@@ -52,9 +53,7 @@
                         </div>
 
                         <div class="col-md-12 d-flex align-items-end justify-content-end">
-                            <button type="button" class="btn btn-primary" (click)="saveCondition(modal)">
-                                Save
-                            </button>
+                            <button class="btn btn-primary" *ngIf="canCreate" (click)="saveCondition(modal)">Save</button>
                         </div>
                     </div>
                 </div>
@@ -70,11 +69,8 @@
         <div class="card">
             <div class="card-header">
                 <div class="d-flex justify-content-end align-items-center">
-                    <button class="btn btn-primary btn-sm me-3" (click)="openAddDetails()">
-                        Add
-                    </button>
-                    <!-- Download Excel Button -->
-                    <button class="btn btn-success btn-sm me-3" (click)="downloadTermConditionMasterExcel()">
+                    <button class="btn btn-primary btn-sm me-3" *ngIf="canCreate" (click)="openAddDetails()">Add</button>
+                    <button class="btn btn-success btn-sm me-3" *ngIf="canDownload" (click)="downloadTermConditionMasterExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
                     <!-- Search Box -->
@@ -105,8 +101,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let item of pagedData; let i = index" (click)="openEditPopup(item)"
-                                style="cursor:pointer">
+                            <tr *ngFor="let item of pagedData; let i = index" (click)="canEdit ? openEditPopup(item) : null"
+                                [style.cursor]="canEdit ? 'pointer' : 'default'">
 
                                 <td>{{ ((page - 1) * pageSize) + i + 1 }}</td>
 
@@ -194,9 +190,7 @@
 
     <div class="modal-footer">
 
-        <button class="btn btn-primary btn-sm" (click)="updateCondition(modal)">
-            Save
-        </button>
+        <button class="btn btn-primary btn-sm" *ngIf="canEdit" (click)="updateCondition(modal)">Save</button>
 
         <button class="btn btn-light btn-sm" (click)="modal.close()">
             Close

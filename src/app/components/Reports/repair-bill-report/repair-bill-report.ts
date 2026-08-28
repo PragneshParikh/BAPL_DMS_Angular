@@ -1,3 +1,4 @@
+// src\app\components\Reports\repair-bill-report\repair-bill-report.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -13,7 +14,7 @@ import {
 // Same shared constants module that supplies IssueTypes for the Material
 // Transfer Report — adjust path if it differs.
 import { IssueTypes } from '../../../constant';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-repair-bill-report',
   standalone: true,
@@ -21,6 +22,8 @@ import { IssueTypes } from '../../../constant';
   templateUrl: './repair-bill-report.html'
 })
 export class RepairBillReportComponent implements OnInit, OnDestroy {
+  readonly SUBMENU_ID = 92;
+  canDownload = false;
 
   filterForm!: FormGroup;
   reportData: RepairBillReportRow[] = [];
@@ -59,7 +62,8 @@ export class RepairBillReportComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private reportService: ReportService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
   ) {
     // FIX: fromDate/toDate are no longer Validators.required, and are never
     // defaulted to "this month" on load. Previously the report opened
@@ -68,6 +72,7 @@ export class RepairBillReportComponent implements OnInit, OnDestroy {
     // first open, which read as "not working." Dates now start blank, so
     // the initial (and post-Reset) load always requests every existing
     // record; the backend already treats FromDate/ToDate as fully optional.
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     this.filterForm = this.fb.group({
       dealerCode: [''],
       fromDate: [''],

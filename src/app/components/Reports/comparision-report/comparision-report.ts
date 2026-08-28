@@ -1,3 +1,4 @@
+// src\app\components\Reports\comparision-report\comparision-report.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormBuilder } from '@angular/forms';
@@ -7,7 +8,7 @@ import {
   ComparisonReportRow
 } from '../../../ViewModels/models/Comaprision-reportModel';
 import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-comparison-report',
   standalone: true,
@@ -16,6 +17,8 @@ import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model'
   styleUrls: ['./comparision-report.scss']
 })
 export class ComparisonReportComponent implements OnInit {
+  readonly SUBMENU_ID = 90;
+  canDownload = false;
 
   Math = Math;
 
@@ -45,8 +48,10 @@ export class ComparisonReportComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private reportService: ReportService
+    private reportService: ReportService,
+    private menuAccess: MenuAccessService
   ) {
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     this.filterForm = this.fb.group({
       dealerCode: [''],
       fromDate: [''],

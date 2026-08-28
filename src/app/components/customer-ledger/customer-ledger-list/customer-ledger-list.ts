@@ -1,3 +1,4 @@
+// src\app\components\customer-ledger\customer-ledger-list\customer-ledger-list.ts
 import { Component, OnInit } from '@angular/core';
 import { Route, Router, RouterOutlet } from "@angular/router";
 import { SharedModule } from '../../../shared/shared.module';
@@ -10,7 +11,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { StorageService } from '../../../core/services/storage';
 import { DealerService } from '../../../core/services/dealer-service';
 import { NgSelectModule } from '@ng-select/ng-select';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-customer-ledger-list',
   imports: [RouterOutlet, SharedModule, NgbPaginationModule, CommonModule, FormsModule, NgbTooltipModule, NgSelectModule],
@@ -30,6 +31,10 @@ export class CustomerLedgerList implements OnInit {
   collectionSize = 0;
   isSuperAdmin: boolean;
 
+  readonly SUBMENU_ID = 20;
+  canCreate = false;
+  canDownload = false;
+
   dealerSearch: string = '';
   showDropdown = false;
 
@@ -43,12 +48,13 @@ export class CustomerLedgerList implements OnInit {
     private loader: LoaderService,
     private toaster: ToastService,
     private dealerService: DealerService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-    if (!this.isSuperAdmin) {
-      this.dealerCode = this.storageService.getDealerCode();
-    }
+    if (!this.isSuperAdmin) this.dealerCode = this.storageService.getDealerCode();
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
   }
 
   ngOnInit(): void {

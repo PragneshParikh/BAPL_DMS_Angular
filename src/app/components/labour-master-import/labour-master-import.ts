@@ -1,9 +1,11 @@
+//src\app\components\labour-master-import\labour-master-import.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { LabourMasterService } from '../../core/services/labourmaaster-service';
 import { Form22MasterService } from '../../core/services/form22masterservice';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-labour-master',
@@ -18,8 +20,17 @@ import { Form22MasterService } from '../../core/services/form22masterservice';
 
 export class LabourMaster implements OnInit {
 
-  constructor(private labourmasterService: LabourMasterService,
-    private form22service: Form22MasterService) { }
+  readonly SUBMENU_ID = 54;
+  canCreate = false;
+  canDownload = false;
+  constructor(
+    private labourmasterService: LabourMasterService,
+    private form22service: Form22MasterService,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.loadOemModels();

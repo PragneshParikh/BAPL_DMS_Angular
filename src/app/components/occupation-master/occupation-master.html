@@ -1,3 +1,4 @@
+<!-- src\app\components\occupation-master\occupation-master.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">Occupation Master</h4>
 </div>
@@ -13,10 +14,7 @@
 
                         <div class="d-flex align-items-center gap-2">
 
-                            <button class="btn btn-sm btn-primary"
-                                (click)="openAddModal(editModal)">
-                                Add
-                            </button>
+                            <button class="btn btn-sm btn-primary" *ngIf="canCreate" (click)="openAddModal(editModal)">Add</button>
 
                             <div class="search-box position-relative">
                                 <input type="text"
@@ -69,8 +67,8 @@
 
                             @for (item of paginatedData; track $index) {
 
-                            <tr (dblclick)="openEditModal(editModal,item)"
-                                style="cursor:pointer">
+                            <tr (dblclick)="canEdit ? openEditModal(editModal,item) : null"
+                                [style.cursor]="canEdit ? 'pointer' : 'default'">
 
                                 <td>
                                     {{ ($index + 1) + ((page - 1) * pageSize) }}
@@ -188,13 +186,10 @@
 
         <div class="modal-footer">
 
-            <button type="button"
-                    class="btn btn-primary btn-sm"
-                    [disabled]="occupationForm.invalid"
-                    (click)="isEditMode ? updateOccupation() : addOccupation()">
-
+            <button type="button" class="btn btn-primary btn-sm"
+                [disabled]="occupationForm.invalid || (!isEditMode && !canCreate) || (isEditMode && !canEdit)"
+                (click)="isEditMode ? updateOccupation() : addOccupation()">
                 Save
-
             </button>
 
             <button type="button"

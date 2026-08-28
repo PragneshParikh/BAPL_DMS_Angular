@@ -23,7 +23,7 @@ import { ComplaintmasterService } from '../../../../core/services/complaintmaste
 import { PrefixService } from '../../../../core/services/prefix';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-
+import { MenuAccessService } from '../../../../core/services/menu-access.service';
 @Component({
   selector: 'app-job-card-add-form',
   standalone: true,
@@ -33,6 +33,9 @@ import { environment } from '../../../../../environments/environment';
 })
 export class JobCardAddForm {
   // job related dropdown binding
+  readonly SUBMENU_ID = 23;
+  canCreate = false;
+  canEdit = false;
   jobTypeList: any[] = [];
   jobSourceList: any[] = [];
   serviceHeadList: any[] = [];
@@ -161,11 +164,13 @@ export class JobCardAddForm {
     private modalService: NgbModal,
     private loader: LoaderService,
     private ebwInvoiceService: EbwInvoiceService, 
+    private menuAccess: MenuAccessService,
     private toaster: ToastService) { }
 
   ngOnInit(): void {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
     } else {

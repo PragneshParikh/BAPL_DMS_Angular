@@ -1,3 +1,4 @@
+//src\app\components\prefix-master\prefix-master-details\prefix-master-details.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -7,6 +8,7 @@ import { PrefixService } from '../../../core/services/prefix';
 import { StorageService } from '../../../core/services/storage';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ModuleTypes, BillingTypeOptions } from '../../../constant';
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-prefix-master-details',
@@ -18,6 +20,10 @@ export class PrefixMasterDetails implements OnInit {
   lstModules = ModuleTypes;
   lstBillingTypes = BillingTypeOptions;   // ADDED — reuse existing constant instead of hardcoding
   lstFinancialYears: string[] = [];
+
+  readonly SUBMENU_ID = 26;
+  canCreate = false;
+  canEdit = false;
 
   sequence = {
     moduleName: '',
@@ -52,10 +58,13 @@ export class PrefixMasterDetails implements OnInit {
     private storageService: StorageService,
     private router: Router,
     private route: ActivatedRoute,
-    private loader: LoaderService
+    private loader: LoaderService,
+    private menuAccess: MenuAccessService
   ) {
     this.isSuperAdmin = storageService.getRole().toLowerCase() === 'superadmin';
     this.dealerCode = storageService.getDealerCode();
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
 
     // if (!this.isSuperAdmin) {
     //   this.lstModules = ModuleTypes.filter(x => x.isAdmin === false);

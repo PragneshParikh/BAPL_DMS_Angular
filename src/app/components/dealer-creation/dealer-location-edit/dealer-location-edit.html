@@ -1,3 +1,4 @@
+<!-- src\app\components\dealer-creation\dealer-location-edit\dealer-location-edit.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
   <h4 class="mb-sm-0">
     Edit Location
@@ -108,7 +109,7 @@
 
       <div class="text-end mt-3">
         <button type="button" class="btn btn-secondary btn-sm me-2" (click)="goBack()">Cancel</button>
-        <button type="button" class="btn btn-primary btn-sm" [disabled]="saving" (click)="save()">Save</button>
+        <button type="button" class="btn btn-primary btn-sm" *ngIf="canEdit" [disabled]="saving" (click)="save()">Save</button>
       </div>
 
     </form>

@@ -1,3 +1,4 @@
+<!-- src\app\components\city-master\city-master.html -->
 <!-- Start Breadcrumbs -->
 <app-breadcrumbs title="City Master"></app-breadcrumbs>
 <!-- End Breadcrumbs -->
@@ -14,11 +15,11 @@
 
                         <!--BUTTONS -->
                         <div class="d-flex gap-2 me-3">
-                            <button class="btn btn-primary btn-sm" (click)="openAddModal()">
+                            <button *ngIf="canCreate" class="btn btn-primary btn-sm" (click)="openAddModal()">
                                 Add
                             </button>
 
-                            <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                            <button *ngIf="canDownload" class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
                                 (click)="downloadCityExcel()">
                                 <i class="ri-file-excel-2-line"></i>
                             </button>

@@ -1,3 +1,4 @@
+// src\app\components\parts-po-list\parts-po-list.ts
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -8,7 +9,7 @@ import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { StorageService } from '../../core/services/storage';
 import { PurchaseService } from '../../core/services/purchase-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-parts-po-list',
   standalone: true,
@@ -18,6 +19,10 @@ import { PurchaseService } from '../../core/services/purchase-service';
 })
 export class PartsPoList implements OnInit {
   poStatuses = PO_STATUSES;
+  readonly SUBMENU_ID = 33;
+  canCreate = false;
+  canEdit = false;
+  canDownload = false;
 
   poFilterData: any = {
     purchaseNo: '',
@@ -46,10 +51,14 @@ export class PartsPoList implements OnInit {
     private loader: LoaderService,
     private toastr: ToastService,
     private purchaseService: PurchaseService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     this.initDefaultDates();
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
   }
 
   ngOnInit() {

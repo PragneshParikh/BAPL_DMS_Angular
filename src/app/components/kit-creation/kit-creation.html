@@ -1,3 +1,4 @@
+<!-- src\app\components\kit-creation\kit-creation.html -->
 <div id="kit-creation-list">
     <!-- Start Breadcrumbs -->
     <app-breadcrumbs title="KIT Creation"></app-breadcrumbs>
@@ -14,12 +15,8 @@
 
                             <div class="d-flex align-items-center gap-2">
 
-                                <button class="btn btn-sm btn-primary" (click)="newKit()">
-                                    Add
-                                </button>
-
-                                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
-                                    (click)="onDownloadExcel()">
+                                <button class="btn btn-sm btn-primary" *ngIf="canCreate" (click)="newKit()">Add</button>
+                                <button class="btn btn-success btn-sm" *ngIf="canDownload" [ngbTooltip]="'Export to Excel'" (click)="onDownloadExcel()">
                                     <i class="ri-file-excel-2-line"></i>
                                 </button>
 

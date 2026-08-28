@@ -1,3 +1,4 @@
+// src\app\components\Reports\material-transfer-report\material-transfer-report.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -13,7 +14,7 @@ import {
 // Same shared constants module used by Repair Bill Report — adjust path
 // if it differs.
 import { IssueTypes } from '../../../constant';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-material-transfer-report',
   standalone: true,
@@ -21,6 +22,8 @@ import { IssueTypes } from '../../../constant';
   templateUrl: './material-transfer-report.html'
 })
 export class MaterialTransferReportComponent implements OnInit, OnDestroy {
+  readonly SUBMENU_ID = 91;
+  canDownload = false;
 
   filterForm!: FormGroup;
   reportData: MaterialTransferReportRow[] = [];
@@ -57,8 +60,10 @@ export class MaterialTransferReportComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private reportService: ReportService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
   ) {
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     this.filterForm = this.fb.group({
       dealerCode: [''],
       fromDate: [''],

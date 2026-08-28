@@ -1,3 +1,4 @@
+<!-- src\app\components\Reports\counter-bill-print\counter-bill-print.html -->
 <div class="a4-page mx-auto bg-white p-2 shadow-sm" id="reportContent">
 
     <!-- BUTTONS -->
@@ -6,7 +7,7 @@
             Back
         </button>
 
-        <button class="btn btn-sm btn-primary" (click)="printInvoice()">
+        <button *ngIf="canDownload" class="btn btn-sm btn-primary" (click)="printInvoice()">
             Print
         </button>
     </div>

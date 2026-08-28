@@ -92,17 +92,11 @@
 
                         <!-- Buttons -->
                         <div class="d-flex gap-2">
-                            <button class="btn btn-primary btn-sm" (click)="navigateToAdd()">
-                                Add
-                            </button>
-
-                            <button class="btn btn-success btn-sm" (click)="downloadSelectedBills()"
-                                [disabled]="!hasAnySelection">
+                            <button class="btn btn-primary btn-sm" *ngIf="canCreate" (click)="navigateToAdd()">Add</button>
+                            <button class="btn btn-success btn-sm" *ngIf="canDownload" (click)="downloadSelectedBills()" [disabled]="!hasAnySelection">
                                 <i class="ri-download-2-line"></i> Download Selected
                             </button>
-
-                            <button class="btn btn-success btn-sm" (click)="downloadDealerExcel()"
-                                [ngbTooltip]="'Export to Excel'">
+                            <button class="btn btn-success btn-sm" *ngIf="canDownload" (click)="downloadDealerExcel()" [ngbTooltip]="'Export to Excel'">
                                 <i class="ri-file-excel-2-line"></i>
                             </button>
                         </div>

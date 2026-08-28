@@ -1,3 +1,4 @@
+// src\app\components\hsnwisetaxcode\hsnwisetaxcode.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -6,7 +7,7 @@ import { HsnWiseTaxCodeService } from '../../core/services/hsnwisetaxcodeservice
 import { AddHsnTaxPayload, HsnTaxFormModel } from '../../ViewModels/HSNWiseTaxcodeModel';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-hsnwisetaxcode',
   standalone: true,
@@ -20,13 +21,17 @@ import { ToastService } from '../../shared/toaster/toast-service';
   styleUrl: './hsnwisetaxcode.scss',
 })
 export class Hsnwisetaxcode implements OnInit {
-
+  readonly SUBMENU_ID = 16;
+  canCreate = false;
   constructor(
     private hsnwisetaxcodeservice: HsnWiseTaxCodeService,
     private loader: LoaderService,
     public toaster: ToastService,
-    private modalService: NgbModal
-  ) { }
+    private modalService: NgbModal,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+  }
 
   // PAGINATION
   page = 1;

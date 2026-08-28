@@ -1,3 +1,4 @@
+// src\app\components\Reports\job-report\job-report.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ReportService } from '../../../core/services/report.service';
 import {
@@ -16,7 +17,7 @@ import {
   Validators
 } from '@angular/forms';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-job-report',
   standalone: true,
@@ -29,6 +30,8 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
   templateUrl: './job-report.html'
 })
 export class JobReportComponent implements OnInit, OnDestroy {
+  readonly SUBMENU_ID = 42;
+  canDownload = false;
 
   filterForm!: FormGroup;
   reportData: JobReportViewModel[] = [];
@@ -68,8 +71,10 @@ export class JobReportComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private reportService: ReportService
+    private reportService: ReportService,
+    private menuAccess: MenuAccessService
   ) {
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     this.filterForm = this.fb.group({
       dealerCode: [''],
       fromDate: ['', Validators.required],

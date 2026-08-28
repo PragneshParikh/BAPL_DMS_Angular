@@ -1,3 +1,4 @@
+// src\app\components\department-master\department-master.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -6,7 +7,7 @@ import { DepartmentService } from '../../core/services/department';
 import { DepartmentModel } from '../../ViewModels/models/DepartmentModel';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-department-master',
   imports: [CommonModule, FormsModule],
@@ -17,7 +18,9 @@ export class DepartmentMaster {
   isEditMode = false;
   departmentExists = false;
   departmentList: DepartmentModel[] = [];
-
+  readonly SUBMENU_ID = 63;
+  canCreate = false;
+  canEdit = false;
   formData: DepartmentModel = {
     departmentId: 0,
     abbreviation: '',
@@ -30,8 +33,12 @@ export class DepartmentMaster {
     private router: Router,
     private route: ActivatedRoute,
     private loader: LoaderService,
-    private toaster: ToastService
-  ) {}
+    private toaster: ToastService,
+    private menuAccess: MenuAccessService   // ADDED
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  }
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');

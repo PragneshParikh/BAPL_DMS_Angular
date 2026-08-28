@@ -1,3 +1,4 @@
+<!-- src\app\components\kit-creation\kit-creation-details\kit-creation-details.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">Service KIT</h4>
 </div>
@@ -66,7 +67,7 @@
 
                         <div class="col-md-2">
                             <label> &nbsp; </label><br>
-                            <button type="submit" [disabled]="kitCreationForm.invalid"
+                            <button type="submit" [disabled]="kitCreationForm.invalid || (!isModifyMode && !canCreate) || (isModifyMode && !canEdit)"
                                 class="btn btn-primary btn-sm float-end me-1">
                                 Add Item
                             </button>
@@ -125,7 +126,7 @@
                         <button type="button" class="btn btn-primary btn-sm float-end" (click)="backToList()">
                             Cancel
                         </button>
-                        <button type="button" [disabled]="kitHeaderForm.invalid"
+                        <button type="button" [disabled]="kitHeaderForm.invalid || (!isModifyMode && !canCreate) || (isModifyMode && !canEdit)"
                             class="btn btn-primary btn-sm float-end me-1" (click)="saveKit(kitHeaderForm)">
                             Save
                         </button>

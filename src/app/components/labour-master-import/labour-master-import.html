@@ -1,10 +1,11 @@
+<!-- src\app\components\labour-master-import\labour-master-import.html -->
 <div class="card">
     <div class="card-body">
         <div class="row">
             <!-- Download Format -->
             <div class="row g-2 mb-4">
                 <div class="col-md-2">
-                    <button class="btn btn-sm btn-primary" (click)="downloadTemplate()">
+                    <button *ngIf="canDownload" class="btn btn-sm btn-primary" (click)="downloadTemplate()">
                         Download Format
                     </button>
                 </div>
@@ -45,7 +46,7 @@
 
         <!-- Import Button -->
         <div class="mt-3">
-            <button class="btn btn-sm btn-primary" (click)="uploadExcel()">
+            <button *ngIf="canCreate" class="btn btn-sm btn-primary" (click)="uploadExcel()">
                 Import Excel
             </button>
         </div>

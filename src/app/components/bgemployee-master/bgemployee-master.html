@@ -1,3 +1,4 @@
+<!-- src\app\components\bgemployee-master\bgemployee-master.html -->
 <!-- ===================================================== -->
 <!-- PAGE HEADER                                           -->
 <!-- ===================================================== -->
@@ -469,9 +470,10 @@
             <button type="button" class="btn btn-secondary btn-sm px-3 py-1 me-2"
               (click)="backToList()">Cancel</button>
             <button type="submit" class="btn btn-primary btn-sm px-3 py-1"
+              *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
               [disabled]="!isFormValid">
               {{ isEditMode ? 'Update' : 'Save' }}
-            </button>
+          </button>
           </div>
 
         </div>

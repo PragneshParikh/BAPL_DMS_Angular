@@ -1,3 +1,4 @@
+// src\app\components\battery-capacity-master\battery-capacity-master.ts
 import { Component, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,6 +9,7 @@ import { BatteryApiResponse, BatteryCapacity } from '../../ViewModels/BatteryCap
 import { AuthenticationService } from '../../core/services/auth.service';
 import { AccessRoles } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-battery-capacity-master',
@@ -20,6 +22,11 @@ export class BatteryCapacityMaster {
 
   allBatteryCapacities: BatteryCapacity[] = [];
   filteredBatteryCapacities: BatteryCapacity[] = [];
+
+  readonly SUBMENU_ID = 8;
+  canCreate = false;
+  canEdit = false;
+  canDownload = false;
 
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -46,7 +53,8 @@ export class BatteryCapacityMaster {
     private modalService: NgbModal,
     public toastService: ToastService,
     private loader: LoaderService,
-    private authenticationService: AuthenticationService
+    private authenticationService: AuthenticationService,
+    private menuAccess: MenuAccessService
   ) { }
 
   /* ================= INIT ================= */
@@ -54,6 +62,9 @@ export class BatteryCapacityMaster {
   ngOnInit(): void {
     this.loadBatteryCapacities();
     this.batteryCapacityAccess = this.authenticationService.getAccessPermission(8);
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
   }
 
   /* ================= LOAD ================= */

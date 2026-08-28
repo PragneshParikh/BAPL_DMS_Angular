@@ -1,3 +1,4 @@
+// src\app\components\Reports\sale-letter\sale-letter.ts
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DealerMasterViewModel } from '../../../ViewModels/Dealer/DealerMasterViewModel';

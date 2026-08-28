@@ -1,8 +1,9 @@
+<!-- src\app\components\warranty-job-card-claim\warranty-claim-list\warranty-claim-list.html -->
 <div class="card shadow-sm">
     <div class="card-header bg-primary bg-gradient text-white py-2">
         <div class="d-flex justify-content-between align-items-center">
             <h6 class="mb-0 text-white">
-                <button class="btn btn-sm btn-link text-white p-0 me-2" (click)="printList()" [disabled]="printing" title="Print">
+                <button class="btn btn-sm btn-link text-white p-0 me-2" *ngIf="canDownload" (click)="printList()" [disabled]="printing" title="Print">
                     <i class="ri-printer-line"></i>
                 </button>
                 <i class="ri-file-list-3-line me-1"></i>
@@ -95,11 +96,11 @@
                         <td>{{ item.supplierName }}</td>
                         <td class="text-end">{{ item.totalAmount | number:'1.2-2' }}</td>
                         <td class="text-center" (click)="$event.stopPropagation()">
-                            <button class="btn btn-outline-secondary btn-sm me-1" (click)="printClaim(item.id)"
+                            <button class="btn btn-outline-secondary btn-sm me-1" *ngIf="canDownload" (click)="printClaim(item.id)"
                                 [disabled]="printingClaimId === item.id" title="Print this claim">
                                 <i class="ri-printer-line"></i>
                             </button>
-                            <button class="btn btn-outline-danger btn-sm" (click)="deleteClaim(item.id)"
+                            <button class="btn btn-outline-danger btn-sm" *ngIf="canDelete" (click)="deleteClaim(item.id)"
                                 [disabled]="deletingClaimId === item.id" title="Delete this claim">
                                 <i class="ri-delete-bin-2-line"></i>
                             </button>

@@ -1,3 +1,4 @@
+// src\app\components\role-master\role-master.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -5,7 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { RoleService } from '../../core/services/Deptrole';
 import { DepartmentService } from '../../core/services/department';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-role-master',
   standalone: true,
@@ -13,6 +14,9 @@ import { DepartmentService } from '../../core/services/department';
   templateUrl: './role-master.html',
 })
 export class RoleMaster implements OnInit {
+  readonly SUBMENU_ID = 75;
+  canCreate = false;
+  canEdit = false;
   roleName = '';
   category = '';
   categories: { id: string; name: string }[] = [];
@@ -25,8 +29,12 @@ export class RoleMaster implements OnInit {
     private roleService: RoleService,
     private departmentService: DepartmentService,
     private router: Router,
-    private route: ActivatedRoute
-  ) { }
+    private route: ActivatedRoute,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.departmentService.get().subscribe({

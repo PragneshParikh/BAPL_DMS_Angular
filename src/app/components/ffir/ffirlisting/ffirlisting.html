@@ -1,3 +1,4 @@
+<!-- src\app\components\ffir\ffirlisting\ffirlisting.html -->
 <!--PAGE Title-->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
     <h5 class="mb-0">FFIR List</h5>
@@ -88,12 +89,10 @@
 
                         <!-- ACTION -->
                         <td>
-                            <button class="btn btn-sm btn-soft-primary" (click)="onFFIREdit(item)"><i
-                                    class="ri-pencil-fill fs-12"></i></button>
-                             <button class="btn btn-sm btn-soft-danger" 
-                                title="Only SuperAdmin can delete" (click)="deleteFFIR(item.id)" [disabled]="!this.isSuperAdmin">
+                            <button *ngIf="canEdit" class="btn btn-sm btn-soft-primary" (click)="onFFIREdit(item)"><i class="ri-pencil-fill fs-12"></i></button>
+                            <button *ngIf="canDelete" class="btn btn-sm btn-soft-danger" title="Only SuperAdmin can delete"
+                                (click)="deleteFFIR(item.id)" [disabled]="!this.isSuperAdmin">
                                 <i class="ri-delete-bin-fill fs-12"></i>
-                                <!-- [disabled]="currentUserRole !== 'SuperAdmin'" -->
                             </button>
                             <!--<button class="btn btn-sm btn-soft-danger" [disabled]="currentUserRole !== 'SuperAdmin'"
                                 title="Only SuperAdmin can delete" (click)="deleteJobCard(item.id)">

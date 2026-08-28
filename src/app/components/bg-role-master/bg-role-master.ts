@@ -1,3 +1,4 @@
+// src\app\components\bg-role-master\bg-role-master.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -5,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { BgRoleService } from '../../core/services/bg-role';
 import { BgRoleMappingModel } from '../../ViewModels/models/BgRoleMappingModel';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-bg-role-master',
@@ -18,11 +20,19 @@ export class BgRoleMaster implements OnInit {
   isEditMode = false;
   mappingId: number | null = null;
 
+  readonly SUBMENU_ID = 100;
+  canCreate = false;
+  canEdit = false;
+
   constructor(
     private bgRoleService: BgRoleService,
     private router: Router,
-    private route: ActivatedRoute
-  ) { }
+    private route: ActivatedRoute,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');

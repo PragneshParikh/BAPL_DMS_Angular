@@ -1,3 +1,4 @@
+<!-- src\app\components\labour-rate-master\labour-rate-master.html -->
 <div class="card">
 
     <div class="card-body">
@@ -23,7 +24,7 @@
                     <i class="ri-search-line"></i>
                 </button>
 
-                <button type="button" class="btn btn-success btn-sm" (click)="downloadExcel()" [disabled]="!rateType"
+                <button type="button" class="btn btn-success btn-sm" *ngIf="canDownload" (click)="downloadExcel()" [disabled]="!rateType"
                     title="Select a Rate Type to export">
                     <i class="ri-file-excel-2-line align-bottom"></i> Export to Excel
                 </button>
@@ -334,7 +335,8 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-primary" [disabled]="!isSuperAdmin" (click)="updateLabour()"> Update </button>
+                <!-- both modal footers — combine with existing isSuperAdmin check -->
+                <button class="btn btn-primary" [disabled]="!isSuperAdmin || !canEdit" (click)="updateLabour()"> Update </button>
             </div>
         </div>
     </div>
@@ -522,8 +524,7 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-primary" [disabled]="!isSuperAdmin" (click)="updatePartwiseLabour()"> Update
-                </button>
+                <button class="btn btn-primary" [disabled]="!isSuperAdmin || !canEdit" (click)="updatePartwiseLabour()"> Update </button>
             </div>
         </div>
     </div>

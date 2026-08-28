@@ -1,3 +1,4 @@
+<!-- src\app\components\Showroom\form22master\form22master.html -->
 <div>
     <!-- SEARCH CARD -->
     <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
@@ -72,7 +73,7 @@
                             [(ngModel)]="formData.isActive">
                     </div>
                     <div class="col-md-2 div-btn-add">
-                        <button class="btn btn-add btn-sm me-3" [disabled]="form22Form.invalid">
+                        <button class="btn btn-add btn-sm me-3" *ngIf="canCreate" [disabled]="form22Form.invalid">
                             Save
                         </button>
                     </div>
@@ -89,11 +90,10 @@
             <div class="card-header">
                 <div class="d-flex justify-content-end align-items-center">
                     <!-- Add Form22master Button -->
-                    <button class="btn btn-primary btn-sm me-3" (click)="openAddDetails(form22Form,formData)">
+                    <button class="btn btn-primary btn-sm me-3" *ngIf="canCreate" (click)="openAddDetails(form22Form,formData)">
                         Add
                     </button>
-                    <!-- Download Excel Button -->
-                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
+                    <button class="btn btn-success btn-sm me-3" *ngIf="canDownload" [ngbTooltip]="'Export to Excel'"
                         (click)="downloadForm22MasterExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
@@ -125,7 +125,8 @@
                         </thead>
                         <tbody>
                             @for (data of pagedData; track $index) {
-                            <tr (dblclick)="openDetails(From22itemModal,data)" style="cursor:pointer">
+                            <tr (dblclick)="canEdit ? openDetails(From22itemModal,data) : null"
+                                [style.cursor]="canEdit ? 'pointer' : 'default'">
                                 <td> {{ (page - 1) * pageSize + $index + 1 }} </td>
                                 <td> {{data.oemModelName}} </td>
                                 <td>{{data.soundLevelHorn}} </td>
@@ -201,7 +202,7 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary btn-sm me-3" (click)="updateForm22Master(modal)">Save</button>
+        <button class="btn btn-primary btn-sm me-3" *ngIf="canEdit" (click)="updateForm22Master(modal)">Save</button>
         <button class="btn btn-light btn-sm me-3" (click)="modal.close()">Close</button>
     </div>
 </ng-template>

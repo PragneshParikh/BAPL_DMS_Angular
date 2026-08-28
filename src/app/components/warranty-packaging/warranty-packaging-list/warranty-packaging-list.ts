@@ -1,3 +1,4 @@
+// src\app\components\warranty-packaging\warranty-packaging-list\warranty-packaging-list.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { StorageService } from '../../../core/services/storage';
 import { WarrantyPackingSlipService } from '../../../core/services/warranty-packaging-service';
 import { DealerService } from '../../../core/services/dealer-service';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-warranty-packaging-list',
   standalone: true,
@@ -16,6 +17,10 @@ import { DealerService } from '../../../core/services/dealer-service';
   styleUrl: './warranty-packaging-list.scss',
 })
 export class WarrantyPackagingList implements OnInit {
+  readonly SUBMENU_ID = 116;
+  canCreate = false;
+  canDelete = false;
+  canDownload = false;
 
   lines: any[] = [];
   totalCount: number = 0;
@@ -59,8 +64,13 @@ export class WarrantyPackagingList implements OnInit {
     private toaster: ToastService,
     private storageService: StorageService,
     private dealerService: DealerService,
-    private warrantyPackingService: WarrantyPackingSlipService
-  ) { }
+    private warrantyPackingService: WarrantyPackingSlipService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+   }
 
   ngOnInit(): void {
     this.buildFinancialYears();

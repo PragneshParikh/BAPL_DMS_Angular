@@ -1,0 +1,75 @@
+<!-- <app-breadcrumbs title="Menu Rights"></app-breadcrumbs> -->
+ <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">Menu Rights</h4>
+</div>
+
+<div class="card">
+    <div class="card-body">
+
+        <div class="row g-2 mb-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Select Dealer</label>
+                <select class="form-select form-select-sm" [(ngModel)]="selectedDealerCode" (change)="onDealerChange()">
+                    <option value="">-- Select Dealer --</option>
+                    <option *ngFor="let d of dealers" [value]="d.dealerCode">
+                        {{ d.compName }} ({{ d.dealerCode }}) — {{ d.roleName || 'No Role Assigned' }}
+                    </option>
+                </select>
+            </div>
+
+            <!-- ADDED — toggle between "grant access" (full tree) and
+                 "review access" (assigned-only) views -->
+            <div class="col-md-4" *ngIf="selectedDealerCode">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="assignedOnlyToggle"
+                        [(ngModel)]="showAssignedOnly" (change)="onToggleView()">
+                    <label class="form-check-label" for="assignedOnlyToggle">
+                        Show Assigned Pages Only
+                    </label>
+                </div>
+                <small class="text-muted">
+                    {{ showAssignedOnly ? 'Showing only pages this dealer currently has access to.' : 'Showing all pages — tick to grant new access.' }}
+                </small>
+            </div>
+        </div>
+
+        <div *ngIf="menuGroups.length > 0" class="table-responsive">
+            <table class="table table-bordered table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 25%;">Menu</th>
+                        <th *ngFor="let bit of permissionBits" class="text-center">{{ bit.label }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let group of menuGroups">
+                        <tr class="table-secondary">
+                            <td colspan="6"><strong>{{ group.menuName }}</strong></td>
+                        </tr>
+                        <tr *ngFor="let sub of group.subMenus">
+                            <td class="ps-4">{{ sub.menuName }}</td>
+                            <td *ngFor="let bit of permissionBits" class="text-center">
+                                <input type="checkbox"
+                                    [checked]="hasPermission(sub, bit.value)"
+                                    (change)="togglePermission(sub, bit.value)">
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+
+            <div class="text-end mt-2">
+                <button class="btn btn-primary btn-sm" (click)="save()">Save Menu Rights</button>
+            </div>
+        </div>
+
+        <div *ngIf="selectedDealerCode && menuGroups.length === 0 && showAssignedOnly" class="text-muted text-center py-4">
+            This dealer has no assigned page access yet. Turn off "Show Assigned Pages Only" to grant access.
+        </div>
+
+        <div *ngIf="selectedDealerCode && menuGroups.length === 0 && !showAssignedOnly" class="text-muted text-center py-4">
+            No menus found.
+        </div>
+
+    </div>
+</div>

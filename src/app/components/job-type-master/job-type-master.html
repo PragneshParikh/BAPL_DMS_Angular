@@ -1,3 +1,4 @@
+<!-- src\app\components\job-type-master\job-type-master.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">JobType Master</h4>
 </div>
@@ -43,9 +44,7 @@
 
             <div class="modal-footer">
 
-                <button type="button" class="btn btn-primary" (click)="saveJobType(modal)">
-                    Save
-                </button>
+                <button type="button" class="btn btn-primary" *ngIf="canCreate" (click)="saveJobType(modal)">Save</button>
 
                 <button type="button" class="btn btn-light" (click)="modal.dismiss()">
                     Close
@@ -70,11 +69,8 @@
 
                 <div class="d-flex justify-content-end align-items-center">
 
-                    <button class="btn btn-primary btn-sm me-2" (click)="openAddDetails()">
-                        Add
-                    </button>
-
-                    <button class="btn btn-success btn-sm me-3" (click)="downloadJobTypeMasterExcel()">
+                    <button class="btn btn-primary btn-sm me-2" *ngIf="canCreate" (click)="openAddDetails()">Add</button>
+                    <button class="btn btn-success btn-sm me-3" *ngIf="canDownload" (click)="downloadJobTypeMasterExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
 
@@ -112,25 +108,15 @@
 
                         <tbody>
 
-                            <tr *ngFor="let item of pagedData; let i = index" (click)="openEditPopup(item)"
-                                style="cursor:pointer">
-
+                            <tr *ngFor="let item of pagedData; let i = index" (click)="canEdit ? openEditPopup(item) : null"
+                                [style.cursor]="canEdit ? 'pointer' : 'default'">
+                                <td>{{ ((page - 1) * pageSize) + i + 1 }}</td>
+                                <td>{{ item.jobTypeName }}</td>
                                 <td>
-                                    {{ ((page - 1) * pageSize) + i + 1 }}
-                                </td>
-
-                                <td>
-                                    {{ item.jobTypeName }}
-                                </td>
-
-                                <td>
-
-                                    <button class="btn btn-danger btn-sm" (click)="deleteJobType(item.id, $event)">
+                                    <button class="btn btn-danger btn-sm" *ngIf="canDelete" (click)="deleteJobType(item.id, $event)">
                                         <i class="ri-delete-bin-5-line"></i>
                                     </button>
-
                                 </td>
-
                             </tr>
 
                             <tr *ngIf="pagedData.length === 0">
@@ -211,9 +197,7 @@
 
             <div class="modal-footer">
 
-                <button type="button" class="btn btn-primary" (click)="updateJobType(modal)">
-                    Save
-                </button>
+                <button type="button" class="btn btn-primary" *ngIf="canEdit" (click)="updateJobType(modal)">Save</button>
 
                 <button type="button" class="btn btn-light" (click)="modal.dismiss()">
                     Close

@@ -1,3 +1,4 @@
+// src\app\components\hsrp-order\hsrp-inward\hsrp-inward.ts
 import { Component, OnInit } from '@angular/core';
 import { HsrpService } from '../../../core/services/hsrp-service';
 import { StorageService } from '../../../core/services/storage';
@@ -7,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
 import { Route, Router } from '@angular/router';
 import { ToastService } from '../../../shared/toaster/toast-service';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-hsrp-inward',
   imports: [CommonModule, NgbModule, FormsModule, FlatpickrModule],
@@ -18,7 +19,8 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 })
 export class HsrpInward implements OnInit {
   isSuperAdmin: boolean = false;
-
+  readonly SUBMENU_ID = 48;
+  canEdit = false;
   filter: {
     fromDate: Date | null;
     toDate: Date | null;
@@ -41,9 +43,11 @@ export class HsrpInward implements OnInit {
   constructor(
     private hsrpService: HsrpService,
     private storageService: StorageService,
-    private router: Router, private toasterService: ToastService
-
-  ) { }
+    private router: Router, private toasterService: ToastService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+   }
 
   ngOnInit(): void {
 

@@ -1,3 +1,4 @@
+// src\app\components\hsn-code-master\hsn-code-master.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { NgbModal, NgbModule, NgbModalRef, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -8,7 +9,7 @@ import { HsnCodeMasterViewModel } from '../../ViewModels/HSNCodeMaster/HSNCodeMa
 import { ToastService } from '../../shared/toaster/toast-service';
 import { HsnCodeMasterAddEditModel } from '../../ViewModels/HSNCodeMaster/HsnCodeMasterAddEditModel';
 import { LoaderService } from '../../core/services/loader';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-hsn-code-master',
   standalone: true,
@@ -19,7 +20,9 @@ import { LoaderService } from '../../core/services/loader';
 export class HsnCodeMaster implements OnInit {
 
   @ViewChild('hsnModal') hsnModal!: TemplateRef<unknown>;
-
+  readonly SUBMENU_ID = 13;
+  canCreate = false;
+  canDownload = false;
   modalRef!: NgbModalRef;
 
   hsnCodeList: HsnCodeMasterViewModel[] = [];
@@ -54,8 +57,12 @@ export class HsnCodeMaster implements OnInit {
     private hsnService: HsnCodeMasterService,
     private modalService: NgbModal,
     public toastService: ToastService,
-    public loader: LoaderService
-  ) { }
+    public loader: LoaderService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.loadHsnCodes();

@@ -1,3 +1,4 @@
+<!-- src\app\components\warranty-job-card-claim\warranty-job-card-claim.html -->
 <div class="card shadow-sm">
     <div class="card-header bg-primary bg-gradient text-white py-2">
         <div class="d-flex justify-content-between align-items-center">
@@ -347,7 +348,8 @@
         <!-- Footer Buttons -->
         <div class="d-flex justify-content-end align-items-end">
             <div>
-                <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyClaim()">
+                <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyClaim()"
+                    *ngIf="(!isViewMode && canCreate) || (isViewMode && canEdit)">
                     <i class="ri-save-line me-1"></i>
                     Save
                 </button>

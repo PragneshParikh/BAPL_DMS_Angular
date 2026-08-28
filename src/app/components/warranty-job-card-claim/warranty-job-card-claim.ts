@@ -1,3 +1,4 @@
+// src\app\components\warranty-job-card-claim\warranty-job-card-claim.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +15,7 @@ import { WarrantyJCClaimService } from '../../core/services/warranty-jcclaim-ser
 import { WarrantyOrderService } from '../../core/services/warranty-order-service';
 import { DealerService } from '../../core/services/dealer-service';
 import { locationAreaMaster } from '../../constant';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-warranty-job-card-claim',
   standalone: true,
@@ -23,6 +24,9 @@ import { locationAreaMaster } from '../../constant';
   styleUrl: './warranty-job-card-claim.scss',
 })
 export class WarrantyJobCardClaim implements OnInit {
+  readonly SUBMENU_ID = 74;
+  canCreate = false;
+  canEdit = false;
   jobCardList: any[] = [];
   WjobClaimprefix: string = '';
   supplierList: any[] = [];
@@ -80,8 +84,12 @@ locationList: { locname: string; loccode: string | null; areaName: string | null
     private warrantyJCClaimService: WarrantyJCClaimService,
     private warrantyOrderService: WarrantyOrderService,
     private dealerService: DealerService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
 

@@ -1,3 +1,4 @@
+<!-- src\app\components\hsn-code-master\hsn-code-master.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">HSN Code Master</h4>
 </div>
@@ -13,12 +14,8 @@
 
                     <!--BUTTONS -->
                     <div class="d-flex gap-2 me-3">
-                        <button class="btn btn-primary btn-sm" (click)="openAddModal()">
-                            Add
-                        </button>
-
-                        <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
-                            (click)="downloadHSNCodeMasterExcel()">
+                        <button class="btn btn-primary btn-sm" *ngIf="canCreate" (click)="openAddModal()">Add</button>
+                        <button class="btn btn-success btn-sm" *ngIf="canDownload" [ngbTooltip]="'Export to Excel'" (click)="downloadHSNCodeMasterExcel()">
                             <i class="ri-file-excel-2-line"></i>
                         </button>
                     </div>

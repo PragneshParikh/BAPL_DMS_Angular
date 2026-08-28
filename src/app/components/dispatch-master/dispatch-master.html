@@ -1,3 +1,4 @@
+<!-- src\app\components\dispatch-master\dispatch-master.html -->
 <!-- misc-master/dispatch-master.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">Misc. Master</h4>
@@ -9,11 +10,11 @@
 
             <div class="card-header">
                 <div class="d-flex justify-content-end align-items-center">
-                    <button class="btn btn-success btn-sm me-2" [ngbTooltip]="'Export to Excel'"
+                    <button *ngIf="canDownload" class="btn btn-success btn-sm me-2" [ngbTooltip]="'Export to Excel'"
                         (click)="downloadExcel()">
                         <i class="ri-download-2-line"></i>
                     </button>
-                    <button class="btn btn-primary btn-sm" [ngbTooltip]="'Add New'" (click)="openAddModal()">
+                    <button *ngIf="canCreate" class="btn btn-primary btn-sm" [ngbTooltip]="'Add New'" (click)="openAddModal()">
                         <i class="ri-add-line"></i>
                     </button>
                 </div>
@@ -72,20 +73,24 @@
                                 <td>{{ item.masterName }}</td>
                                 <td class="text-center">
                                     <i class="ri-checkbox-circle-fill text-success toggle-icon"
-                                        *ngIf="item.isActive"
+                                        *ngIf="item.isActive && canEdit"
                                         [ngbTooltip]="'Click to deactivate'"
                                         (click)="toggleActive(item, $event)"></i>
                                     <i class="ri-close-circle-fill text-danger toggle-icon"
-                                        *ngIf="!item.isActive"
+                                        *ngIf="!item.isActive && canEdit"
                                         [ngbTooltip]="'Click to activate'"
                                         (click)="toggleActive(item, $event)"></i>
+                                    <!-- read-only indicator when no edit permission -->
+                                    <span *ngIf="!canEdit" [ngClass]="item.isActive ? 'text-success' : 'text-danger'">
+                                        <i [class]="item.isActive ? 'ri-checkbox-circle-fill' : 'ri-close-circle-fill'"></i>
+                                    </span>
                                 </td>
                                 <td>
-                                    <button class="btn btn-outline-primary btn-sm me-1" [ngbTooltip]="'Edit'"
+                                    <button *ngIf="canEdit" class="btn btn-outline-primary btn-sm me-1" [ngbTooltip]="'Edit'"
                                         (click)="openEditModal(item); $event.stopPropagation()">
                                         <i class="ri-pencil-line"></i>
                                     </button>
-                                    <button class="btn btn-outline-danger btn-sm" [ngbTooltip]="'Delete'"
+                                    <button *ngIf="canDelete" class="btn btn-outline-danger btn-sm" [ngbTooltip]="'Delete'"
                                         (click)="deleteRecord(item, $event)">
                                         <i class="ri-delete-bin-line"></i>
                                     </button>
@@ -147,8 +152,10 @@
         </div>
     </div>
 
+    <!-- modal footer -->
     <div class="modal-footer">
-        <button class="btn btn-primary btn-sm" (click)="saveRecord()">Save</button>
+        <button *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
+            class="btn btn-primary btn-sm" (click)="saveRecord()">Save</button>
         <button class="btn btn-danger btn-sm" (click)="modal.close()">Close</button>
     </div>
 </ng-template>

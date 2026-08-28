@@ -1,7 +1,8 @@
+<!-- src\app\components\role-master\role-list-master\role-list-master.html -->
 <!-- Title -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
   <h4 class="mb-sm-0">Dealer Employee Role Master</h4>
-  <button class="btn btn-primary btn-sm" (click)="onAdd()">+ Add Role</button>
+  <button class="btn btn-primary btn-sm" *ngIf="canCreate" (click)="onAdd()">+ Add Role</button>
 </div>
 
 <div class="row">
@@ -36,13 +37,13 @@
                   <span class="badge bg-info">{{ role.category }}</span>
                 </td>
                   <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary me-1" (click)="onEdit(role)" title="Edit">
-                      <i class="ri-edit-line"></i>
+                    <button *ngIf="canEdit" class="btn btn-sm btn-outline-primary me-1" (click)="onEdit(role)" title="Edit">
+                        <i class="ri-edit-line"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" (click)="onDelete(role)" title="Delete">
-                      <i class="ri-delete-bin-line"></i>
+                    <button *ngIf="canDelete" class="btn btn-sm btn-danger" (click)="onDelete(role)" title="Delete">
+                        <i class="ri-delete-bin-line"></i>
                     </button>
-                  </td>
+                </td>
               </tr>
 
               <tr *ngIf="filteredList.length === 0">

@@ -1,3 +1,4 @@
+//src\app\components\Showroom\itemmaster-fg\itemmaster-fg.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ItemMasterService } from '../../../core/services/item-master-service';
@@ -8,6 +9,7 @@ import { BatteryType, BatteryVoltage, DurationTypes } from '../../../constant';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { StorageService } from '../../../core/services/storage';
 import { FormsModule } from '@angular/forms';
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-itemmaster-fg',
@@ -19,6 +21,10 @@ import { FormsModule } from '@angular/forms';
 export class ItemmasterFG implements OnInit {
   durationTypes = DurationTypes;
   isSuperAdmin: boolean;
+
+  readonly SUBMENU_ID = 6;
+  canEdit = false;
+  canDownload = false;
   // ===============================
   // Empty Object
   // ===============================
@@ -123,12 +129,15 @@ export class ItemmasterFG implements OnInit {
     private storageService: StorageService,
     private toaster: ToastService,
     private loader: LoaderService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private menuAccess: MenuAccessService
   ) { }
 
 
   ngOnInit() {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     this.loadItems();
   }
 

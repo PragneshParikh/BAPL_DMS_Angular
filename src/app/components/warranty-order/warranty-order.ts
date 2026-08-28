@@ -1,3 +1,4 @@
+// src\app\components\warranty-order\warranty-order.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import { LedgerMasterService } from '../../core/services/ledger-master';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { WarrantyOrderService } from '../../core/services/warranty-order-service';
 import { WarrantyInvoiceService } from '../../core/services/warranty-invoice-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-warranty-order',
   standalone: true,
@@ -19,6 +20,10 @@ import { WarrantyInvoiceService } from '../../core/services/warranty-invoice-ser
   styleUrl: './warranty-order.scss',
 })
 export class WarrantyOrder implements OnInit {
+  readonly SUBMENU_ID = 112;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
 
   orderId: number = 0; // 0 = create, otherwise the Id being edited
 
@@ -52,8 +57,13 @@ export class WarrantyOrder implements OnInit {
     private ledgerService: LedgerMasterService,
     private toaster: ToastService,
     private warrantyOrderService: WarrantyOrderService,
-    private warrantyInvoiceService: WarrantyInvoiceService
-  ) { }
+    private warrantyInvoiceService: WarrantyInvoiceService,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     const today = new Date();

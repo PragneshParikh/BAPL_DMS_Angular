@@ -1,3 +1,4 @@
+//src\app\components\city-master\city-master.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -9,6 +10,7 @@ import { City, CityTableModel } from '../../ViewModels/City';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-city-master',
@@ -28,6 +30,9 @@ import { ToastService } from '../../shared/toaster/toast-service';
   styleUrl: './city-master.scss',
 })
 export class CityMaster {
+  readonly SUBMENU_ID = 19;
+  canCreate = false;
+  canDownload = false;
   /**
    *
    */
@@ -35,8 +40,11 @@ export class CityMaster {
     private cityService:CityService,
     private  loader: LoaderService,
     private toaster:ToastService,
-     private modalService: NgbModal, ) {
-    
+    private modalService: NgbModal, 
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
   }
  searchTerm: string = '';
 

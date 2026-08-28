@@ -1,3 +1,4 @@
+// src\app\components\proforma-invoice\proforma-invoice.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -5,7 +6,7 @@ import { ProformaInvoiceService } from '../../core/services/proforma-invoice-ser
 import { NgbPaginationModule, NgbHighlight } from '@ng-bootstrap/ng-bootstrap';
 import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
 import { RouterOutlet } from '@angular/router';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-proforma-invoice',
   imports: [CommonModule, FormsModule, NgbPaginationModule,
@@ -15,6 +16,9 @@ import { RouterOutlet } from '@angular/router';
   providers: [FlatpickrDefaults]
 })
 export class ProformaInvoice implements OnInit {
+  readonly SUBMENU_ID = 22;
+  canCreate = false;
+  canDownload = false;
 
   invoices: any[] = [];
   filteredInvoices: any[] = [];
@@ -32,7 +36,13 @@ export class ProformaInvoice implements OnInit {
     customerName: ''
   };
 
-  constructor(private invoiceService: ProformaInvoiceService) { }
+  constructor(
+    private invoiceService: ProformaInvoiceService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit() {
     this.loadInvoices();

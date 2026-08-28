@@ -1,3 +1,4 @@
+// src\app\components\dealer-creation\dealer-menu-access-page\dealer-menu-access-page.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { DealerListModel } from '../../../ViewModels/models/DealerListModel';
 import { BgRoleMappingModel } from '../../../ViewModels/models/BgRoleMappingModel';
 import { DealerMenuAccessResponse, DealerMenuAccessItem } from '../../../ViewModels/models/DealerMenuAccessModel';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 // Final hierarchy: Select Role -> Select Area -> Show Area-wise Module.
 // Module is intentionally NOT loaded on init - it depends entirely on which
 // Area was picked (onAreaChange() below fetches only the modules that
@@ -24,7 +25,8 @@ export class DealerMenuAccessPage implements OnInit {
   dealerId!: number;
   dealer: DealerListModel | null = null;
   dealerLoading = true;
-
+  readonly SUBMENU_ID = 101;
+  canEdit = false;  
   allRoles: BgRoleMappingModel[] = [];
   selectedRoleId = '';
 
@@ -47,8 +49,11 @@ export class DealerMenuAccessPage implements OnInit {
     private dealerService: DealerCreationManagerService,
     private bgRoleService: BgRoleService,
     private loader: LoaderService,
-    private toaster: ToastService
-  ) { }
+    private toaster: ToastService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+   }
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('dealerId');

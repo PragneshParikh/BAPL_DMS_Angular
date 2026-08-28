@@ -1,3 +1,4 @@
+<!-- src\app\components\modelwise-service-schedule\modelwise-service-schedule.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
   <h4 class="mb-sm-0">Model Wise Service Schedule List</h4>
 </div>
@@ -35,9 +36,9 @@
             <button class="btn btn-primary btn-sm me-2" (click)="search()">
               <i class="ri-search-line"></i>
             </button>
-            <button class="btn btn-primary btn-sm" (click)="openAddModal()" data-bs-toggle="modal"
-              data-bs-target="#serviceScheduleModal">
-              <i class="ri-add-line"></i>
+            <button class="btn btn-primary btn-sm" *ngIf="canCreate" (click)="openAddModal()" data-bs-toggle="modal"
+                data-bs-target="#serviceScheduleModal">
+                <i class="ri-add-line"></i>
             </button>
           </div>
         </div>
@@ -302,8 +303,9 @@
 
           <!-- FOOTER -->
           <div class="text-end mt-3">
-            <button type="submit" class="btn btn-primary btn-sm" [disabled]="modelwiseserviceschedule.invalid">
-              <i class="ri-save-line"></i> Save
+            <button type="submit" class="btn btn-primary btn-sm" *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
+                [disabled]="modelwiseserviceschedule.invalid">
+                <i class="ri-save-line"></i> Save
             </button>
 
             <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">

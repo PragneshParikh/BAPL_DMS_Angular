@@ -1,3 +1,4 @@
+// src\app\components\role-master\role-list-master\role-list-master.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -6,7 +7,7 @@ import { RoleService } from '../../../core/services/Deptrole';
 import { RoleMappingModel } from '../../../ViewModels/RoleMappingModel';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-role-master-list',
   imports: [CommonModule, FormsModule],
@@ -17,13 +18,22 @@ export class RoleMasterList {
   roleList: RoleMappingModel[] = [];
   filteredList: RoleMappingModel[] = [];
   searchText: string = '';
+  readonly SUBMENU_ID = 75;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
 
   constructor(
     private roleService: RoleService,
     private router: Router,
     private loader: LoaderService,
-    private toaster: ToastService
-  ) {}
+    private toaster: ToastService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+  }
 
   ngOnInit() {
     this.loadRoles();

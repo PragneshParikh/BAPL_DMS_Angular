@@ -1,3 +1,4 @@
+// src\app\components\estimate\estimate.ts
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray } from '@angular/forms';
@@ -8,7 +9,7 @@ import { EstimateService, JobTypeDropdownItem } from '../../core/services/estima
 import { ReportService } from '../../core/services/report.service';
 import { LedgerMasterService } from '../../core/services/ledger-master';
 import { Observable } from 'rxjs';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 interface PartyDetails {
   partyName: string;
@@ -55,6 +56,11 @@ interface VehicleInfoResponse {
 export class Estimate implements OnInit {
 
   form!: FormGroup;
+
+  readonly SUBMENU_ID = 98;
+  canCreate = false;
+  canEdit = false;
+  canDownload = false;
 
   isSearching = false;
   isSaving = false;
@@ -118,7 +124,8 @@ export class Estimate implements OnInit {
     private route: ActivatedRoute,
     private estimateService: EstimateService,
     private reportService: ReportService,
-    private ledgerMasterService: LedgerMasterService
+    private ledgerMasterService: LedgerMasterService,
+    private menuAccess: MenuAccessService
   ) {
     this.form = this.fb.group({
       estimationNo: [{ value: '', disabled: true }],
@@ -139,6 +146,9 @@ export class Estimate implements OnInit {
   }
 
   ngOnInit(): void {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     this.loadJobTypes();
     this.loadChassisList();
     this.loadInsuranceName();

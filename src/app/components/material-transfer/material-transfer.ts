@@ -1,3 +1,4 @@
+// src\app\components\material-transfer\material-transfer.ts
 import { Component, OnInit } from '@angular/core';
 import { SharedModule } from '../../shared/shared.module';
 import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -9,7 +10,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { MaterialTransferService } from '../../core/services/material-transfer';
 import { StorageService } from '../../core/services/storage';
 import { LocationMasterService } from '../../core/services/location-master-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-material-transfer',
   imports: [
@@ -27,6 +28,10 @@ import { LocationMasterService } from '../../core/services/location-master-servi
 export class MaterialTransfer implements OnInit {
   public searchTerm: string = '';
   dataSource: any[] = [];
+
+  readonly SUBMENU_ID = 29;
+  canCreate = false;
+  canDownload = false;
 
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -48,8 +53,12 @@ export class MaterialTransfer implements OnInit {
     private toast: ToastService,
     private materialTransfterService: MaterialTransferService,
     private storageService: StorageService,
-    private locationMasterService: LocationMasterService
-  ) { }
+    private locationMasterService: LocationMasterService,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';

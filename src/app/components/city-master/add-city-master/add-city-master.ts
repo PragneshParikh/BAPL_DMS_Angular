@@ -1,3 +1,4 @@
+//src\app\components\city-master\add-city-master\add-city-master.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +8,7 @@ import { StateService } from '../../../core/services/state';
 import { CityModel } from '../../../ViewModels/City';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-add-city-master',
@@ -24,14 +26,21 @@ export class AddCityMaster {
   cityExists: boolean = false;
   cityList: CityModel[] = [];
 
+  readonly SUBMENU_ID = 19;
+  canCreate = false;
+  canEdit = false;
   constructor(
     private cityService: CityService,
     private router: Router,
     private route: ActivatedRoute,
     private stateService: StateService,
     private loader: LoaderService,
-    private toaster: ToastService
-  ) { }
+    private toaster: ToastService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+   }
 
   //    Form Model (Matches Backend)
   formData: any = {

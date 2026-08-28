@@ -1,9 +1,10 @@
+// src\app\components\vehicle-quotation\vehicle-quotation.ts
 import { Component, OnInit, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 import { VehicleQuotationService } from '../../core/services/vehicle-quotationservice';
 import { DealerService } from '../../core/services/dealer-service';
 import { ColorMasterService } from '../../core/services/color-master.service';
@@ -22,6 +23,9 @@ import { LedgerMasterService } from '../../core/services/ledger-master';
   styleUrls: ['./vehicle-quotation.scss']
 })
 export class VehicleQuotation implements OnInit, OnChanges {
+  readonly SUBMENU_ID = 87;
+  canCreate = false;
+  canEdit = false;
 
   @Input() quotationId?: number;
   @Input() isModal: boolean = false;
@@ -76,8 +80,12 @@ export class VehicleQuotation implements OnInit, OnChanges {
     private stateService: StateService,
     private cityService: CityService,
     private oemModelService: OemmodelMasterService,
-    private LedgerService: LedgerMasterService
-  ) { }
+    private LedgerService: LedgerMasterService,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     forkJoin({

@@ -1,3 +1,4 @@
+<!-- src\app\components\vehicle-po\vehicle-po.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0 text-center">
         <i class="ri-car-line me-2"></i>
@@ -258,11 +259,13 @@
 
             <div class="card-footer bg-white border-top py-2">
                 <div class="d-flex justify-content-end gap-1">
-                    <button class="btn btn-sm btn-primary" (click)="onSubmitToERP()"
-                        [disabled]="isSubmitted || !PODetails?.id || PODetails.id <= 0">Submit
-                        To ERP
+                    <button class="btn btn-sm btn-primary" (click)="onSave()"
+                        *ngIf="(!ponumber && canCreate) || (ponumber && canEdit)" [disabled]="isSubmitted">
+                        Save
                     </button>
-                    <button class="btn btn-sm btn-primary" (click)="onSave()" [disabled]="isSubmitted">Save
+                    <button class="btn btn-sm btn-primary" (click)="onSubmitToERP()" *ngIf="canEdit"
+                        [disabled]="isSubmitted || !PODetails?.id || PODetails.id <= 0">
+                        Submit To ERP
                     </button>
                     <button class="btn btn-sm btn-danger" (click)="redirectToCreatePOList()">Cancel
                     </button>

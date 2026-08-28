@@ -1,10 +1,11 @@
+// src\app\components\Reports\vehicle-sale-d2d-report\vehicle-sale-d2d-report.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 // import * as XLSX from 'xlsx';
 import { ReportService } from '../../../core/services/report.service';
 import { D2DReportFilter, D2DReportRow } from '../../../ViewModels/models/d2d-reportModel';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-vehicle-sale-d2d-report',
   imports: [CommonModule, FormsModule],
@@ -16,6 +17,8 @@ export class VehicleSaleD2dReport implements OnInit {
   chassisList: string[] = [];
   filteredChassisList: string[] = [];
   showChassisDropdown = false;
+  readonly SUBMENU_ID = 61;
+  canDownload = false;
 
   // NEW — SuperAdmins can browse D2D transfers across every dealer, so they
   // keep the "Dealer" picker. Everyone else is always restricted server-side
@@ -48,10 +51,11 @@ export class VehicleSaleD2dReport implements OnInit {
   exporting = false;
   errorMessage = '';
 
-  constructor(private reportService: ReportService) { }
+  constructor(private reportService: ReportService, private menuAccess: MenuAccessService) { }
 
   ngOnInit(): void {
     this.isSuperAdmin = this.checkIsSuperAdmin();
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
 
     if (this.isSuperAdmin) {
       this.loadDealers();

@@ -1,3 +1,4 @@
+// src\app\components\free-service-claim\free-service-claim.ts
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { LoaderService } from '../../core/services/loader';
@@ -11,7 +12,7 @@ import { StorageService } from '../../core/services/storage';
 import { PrefixService } from '../../core/services/prefix';
 import { SharedModule } from '../../shared/shared.module';
 import { LedgerMasterService } from '../../core/services/ledger-master';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-free-service-claim',
   imports: [CommonModule, NgbTooltip, ReactiveFormsModule, FormsModule, SharedModule],
@@ -20,7 +21,10 @@ import { LedgerMasterService } from '../../core/services/ledger-master';
 })
 export class FreeServiceClaim implements OnInit {
   @ViewChild('claimFilterForm') claimFilterForm!: NgForm;
-
+  readonly SUBMENU_ID = 66;
+  canCreate = false;
+  canEdit = false;
+  canDownload = false;
   claimId: Number = 0;
   isEdit: boolean = false;
   dealerCode: string | null = null;
@@ -58,11 +62,14 @@ export class FreeServiceClaim implements OnInit {
     private locationMasterService: LocationMasterService,
     private storageService: StorageService,
     private prefixMasterService: PrefixService,
+    private menuAccess: MenuAccessService,
     private ledgerMasterService: LedgerMasterService
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     this.user = this.storageService.getUser();
-
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
     }

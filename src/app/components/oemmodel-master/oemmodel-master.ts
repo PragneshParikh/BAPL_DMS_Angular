@@ -1,4 +1,4 @@
-
+// src\app\components\oemmodel-master\oemmodel-master.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,7 @@ import { OemmodelMasterService } from '../../core/services/oemmodel-master-servi
 import { OemModelViewModel } from '../../ViewModels/OemModelViewModel';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 declare var bootstrap: any;
 
 @Component({
@@ -31,6 +32,11 @@ export class OemmodelMasterComponent implements OnInit {
   page = 1;
   pageSize = 10;
 
+  readonly SUBMENU_ID = 11;
+  canCreate = false;
+  canEdit = false;
+  canDownload = false;
+
   totalRecords = 0;
 
   sortColumn = '';
@@ -39,7 +45,13 @@ export class OemmodelMasterComponent implements OnInit {
 
   constructor(private modelService: OemmodelMasterService,
     public toastr: ToastService,
-    private loader: LoaderService) { }
+    private loader: LoaderService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.loadModels();

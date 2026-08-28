@@ -1,3 +1,4 @@
+// src\app\components\Reports\counter-bill-print\counter-bill-print.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -6,7 +7,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ReportService } from '../../../core/services/report.service';
 import { CounterBillPrintDetail, CounterBillPrintModel } from '../../../ViewModels/CounterBillModel';
 import { CurrencyService } from '../../../core/services/currency-service';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-counter-bill-print',
   imports: [CommonModule, FormsModule, NgbModule],
@@ -15,6 +16,8 @@ import { CurrencyService } from '../../../core/services/currency-service';
 })
 
 export class CounterBillPrint implements OnInit {
+  readonly SUBMENU_ID = 77;
+  canDownload = false;
 
   billData!: CounterBillPrintModel;
 
@@ -24,8 +27,12 @@ export class CounterBillPrint implements OnInit {
 
   constructor(
     private reportService: ReportService,
-    private route: ActivatedRoute, private currencyService: CurrencyService
-  ) { }
+    private route: ActivatedRoute,
+    private currencyService: CurrencyService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
 

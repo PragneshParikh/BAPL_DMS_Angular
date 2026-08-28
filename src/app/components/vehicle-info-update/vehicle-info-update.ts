@@ -1,3 +1,4 @@
+// src\app\components\vehicle-info-update\vehicle-info-update.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +12,7 @@ import { LedgerMaster } from '../../ViewModels/LedgerMasterViewModel';
 import { StorageService } from '../../core/services/storage';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-vehicle-info-update',
   imports: [CommonModule, FormsModule, NgbHighlight, NgbPaginationModule, FlatpickrModule, RouterOutlet, NgbTooltipModule
@@ -21,6 +22,8 @@ import { ToastService } from '../../shared/toaster/toast-service';
   providers: [FlatpickrDefaults, FlatpickrModule],
 })
 export class VehicleInfoUpdate implements OnInit {
+  readonly SUBMENU_ID = 73;
+  canEdit = false;
   searchCriteria = 'chassis';
   searchValue = '';
   showVehicleDetails = false;
@@ -36,8 +39,10 @@ export class VehicleInfoUpdate implements OnInit {
   isSuperAdmin: boolean;
   constructor(private vehicleInfoService: VehicleInfoService, private chassisService: ChassisSearchService,
     private ledgerService: LedgerMasterService, private storageService: StorageService,
-    private loader: LoaderService, private toaster: ToastService
-  ) { }
+    private loader: LoaderService, private toaster: ToastService,private menuAccess: MenuAccessService
+  ) { 
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  }
   updateData: any = {
     battery1: '',
     battery2: '',

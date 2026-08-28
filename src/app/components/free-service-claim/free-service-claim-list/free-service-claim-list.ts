@@ -1,3 +1,4 @@
+// src\app\components\free-service-claim\free-service-claim-list\free-service-claim-list.ts
 import { Component, OnInit } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { CommonModule } from '@angular/common';
@@ -11,7 +12,7 @@ import { FreeServiceClaim } from '../free-service-claim';
 import { FreeServiceClaimService } from '../../../core/services/free-service-claim';
 import { error } from 'console';
 import { Route, Router } from '@angular/router';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-free-service-claim-list',
   imports: [SharedModule, CommonModule, NgbPagination, FormsModule, ReactiveFormsModule, NgbTooltip],
@@ -24,7 +25,9 @@ export class FreeServiceClaimList implements OnInit {
   dataSource: any[] = [];
   locationList: any[] = [];
   dealerCode: string | null = null;
-
+  readonly SUBMENU_ID = 66;
+  canCreate = false;
+  canDownload = false;
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
@@ -48,8 +51,11 @@ export class FreeServiceClaimList implements OnInit {
     private toaster: ToastService,
     private locationMasterService: LocationMasterService,
     private freeServiceClaimService: FreeServiceClaimService,
+    private menuAccess: MenuAccessService,
     private router: Router
   ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
     if (!this.isSuperAdmin) {
