@@ -1,3 +1,4 @@
+// src\app\components\service-type-master\service-type-master.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -6,7 +7,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { ServiceHeadService } from '../../core/services/service-head-service';
 import { ServiceTypeService } from '../../core/services/service-type-service';
 import Swal from 'sweetalert2';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-service-type-master',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbPagination],
@@ -14,6 +15,11 @@ import Swal from 'sweetalert2';
   styleUrl: './service-type-master.scss',
 })
 export class ServiceTypeMaster implements OnInit {
+  readonly SUBMENU_ID = 70;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+  canDownload = false;
 
 
   @ViewChild('serviceTypeAdd') serviceTypeAdd!: TemplateRef<any>;
@@ -42,7 +48,13 @@ export class ServiceTypeMaster implements OnInit {
     private toaster: ToastService,
     private ServiceTypeMasterService: ServiceTypeService,
     private ServiceHeadMasterService: ServiceHeadService,
-  ) { }
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
 

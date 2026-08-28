@@ -1,3 +1,4 @@
+// src\app\components\warranty-invoice\warranty-invoice.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { StorageService } from '../../core/services/storage';
 import { LedgerMasterService } from '../../core/services/ledger-master';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { WarrantyInvoiceService } from '../../core/services/warranty-invoice-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-warranty-invoice',
   standalone: true,
@@ -18,6 +19,10 @@ import { WarrantyInvoiceService } from '../../core/services/warranty-invoice-ser
   styleUrl: './warranty-invoice.scss',
 })
 export class WarrantyInvoice implements OnInit {
+  readonly SUBMENU_ID = 113;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
 
   invoiceId: number = 0; // 0 = create, otherwise the Id being edited
 
@@ -60,8 +65,13 @@ export class WarrantyInvoice implements OnInit {
     private storageService: StorageService,
     private ledgerService: LedgerMasterService,
     private toaster: ToastService,
-    private warrantyInvoiceService: WarrantyInvoiceService
-  ) { }
+    private warrantyInvoiceService: WarrantyInvoiceService,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     const today = new Date();

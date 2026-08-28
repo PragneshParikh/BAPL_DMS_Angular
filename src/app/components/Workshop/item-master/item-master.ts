@@ -1,3 +1,4 @@
+//src\app\components\Workshop\item-master\item-master.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ItemMasterService } from '../../../core/services/item-master-service';
@@ -9,6 +10,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { StorageService } from '../../../core/services/storage';
 import { subscribe } from 'diagnostics_channel';
 import { LedgerMasterService } from '../../../core/services/ledger-master';
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-item-master',
@@ -26,6 +28,11 @@ export class ItemMaster implements OnInit {
 
   searchTerm: string = '';
   selectedItem: any;
+
+  readonly SUBMENU_ID = 5;
+  canCreate = false;
+  canEdit = false;
+  canDownload = false;
 
   // pagination
   page = 1;
@@ -46,11 +53,15 @@ export class ItemMaster implements OnInit {
     private modalService: NgbModal,
     private toaster: ToastService,
     private ledgerservice: LedgerMasterService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
   ) { }
 
   ngOnInit() {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     this.loadItems();
     this.loadsuplier();
   }

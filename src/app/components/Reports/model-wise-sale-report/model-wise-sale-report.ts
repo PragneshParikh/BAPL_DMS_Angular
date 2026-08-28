@@ -1,3 +1,4 @@
+// src\app\components\Reports\model-wise-sale-report\model-wise-sale-report.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -9,7 +10,7 @@ import {
   ModelWiseSaleCountFilter,
   ModelWiseSalePivotRow
 } from '../../../ViewModels/models/model-wise-sale-countModel';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-model-wise-sale-report',
   standalone: true,
@@ -18,6 +19,9 @@ import {
   providers: [ReportService]
 })
 export class ModelWiseSaleReportComponent implements OnInit {
+  private menuAccess = inject(MenuAccessService);
+  readonly SUBMENU_ID = 79;
+  canDownload = false;
 
   private reportService = inject(ReportService);
   private fb            = inject(FormBuilder);
@@ -39,6 +43,7 @@ export class ModelWiseSaleReportComponent implements OnInit {
 
   ngOnInit(): void {
     this.isDealerUser = this.checkIsDealerUser();
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);  
 
     this.filterForm = this.fb.group({
       dealerCode: [''],

@@ -9,6 +9,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { StorageService } from '../../core/services/storage';
 import { DealerService } from '../../core/services/dealer-service';
 import { EbwInvoiceService } from '../../core/services/ebw-invoice-service';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-ebw-reports',
@@ -29,6 +30,9 @@ export class EBWReports implements OnInit {
   dealerList: any[] = [];
   gridData: any[] = [];
 
+  readonly EBW_REPORT_SUBMENU_ID = 111;
+  canDownload = false;
+
   filterFormData: any = {
     selectedDealerCode: '',
     fromDate: '',
@@ -44,7 +48,8 @@ export class EBWReports implements OnInit {
     private toast: ToastService,
     private storageService: StorageService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private menuAccess: MenuAccessService   // ADDED
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
@@ -52,6 +57,8 @@ export class EBWReports implements OnInit {
       this.dealerCode = this.storageService.getDealerCode();
       this.filterFormData.selectedDealerCode = this.dealerCode;
     }
+
+    this.canDownload = this.menuAccess.canDownload(this.EBW_REPORT_SUBMENU_ID);   // ADDED
 
     this.initDefaultDates();
   }

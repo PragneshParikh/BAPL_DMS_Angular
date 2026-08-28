@@ -1,3 +1,4 @@
+<!-- src\app\components\color\color.html -->
 <!-- Start Breadcrumbs -->
 <app-breadcrumbs title="Color Master"></app-breadcrumbs>
 <!-- End Breadcrumbs -->
@@ -12,7 +13,7 @@
                     <div class="d-flex justify-content-end align-items-center gap-2">
 
                         <!-- Download Excel Button -->
-                        <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                        <button *ngIf="canDownload" class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
                             (click)="downloadColorExcel()">
                             <i class="ri-file-excel-2-line"></i>
                         </button>

@@ -158,8 +158,9 @@
                     [disabled]="prefixMasterForm.invalid || isDuplicate || isAdminModule()">Save</button> -->
                 <!-- Save button — CHANGED to also disable on isDuplicate -->
                 <button type="submit" class="btn btn-primary btn-sm"
+                    *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
                     [disabled]="prefixMasterForm.invalid || isDuplicate || isAdminModule()">
-                {{ isEditMode ? 'Update' : 'Save' }}
+                    {{ isEditMode ? 'Update' : 'Save' }}
                 </button>
                 <button type="button" class="btn btn-danger btn-sm ms-2" (click)="backToList()">Cancel</button>
             </div>

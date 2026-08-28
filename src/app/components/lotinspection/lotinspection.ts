@@ -1,3 +1,4 @@
+// src\app\components\lotinspection\lotinspection.ts
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -9,7 +10,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { StorageService } from '../../core/services/storage';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-lotinspection',
   standalone: true,
@@ -25,6 +26,10 @@ export class Lotinspection implements OnInit {
   //List Data binding
   filteredData: any[] = [];
   pagedData: any[] = [];
+
+  readonly SUBMENU_ID = 18;
+  canEdit = false;
+  canDownload = false;
 
   //  PAGINATION
   page = 1;
@@ -44,12 +49,17 @@ export class Lotinspection implements OnInit {
   isLotInspected: any;
 
 
-  constructor(private lotinspectionService: LotInspectionService,
+  constructor(
+    private lotinspectionService: LotInspectionService,
     private loader: LoaderService,
     public toaster: ToastService,
     private router: Router,
-    private storageService: StorageService
-  ) { }
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
 
   ngOnInit() {

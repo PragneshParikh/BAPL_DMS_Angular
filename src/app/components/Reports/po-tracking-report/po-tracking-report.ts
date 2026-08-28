@@ -1,3 +1,4 @@
+// src\app\components\Reports\po-tracking-report\po-tracking-report.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -14,7 +15,7 @@ import {
   PagedResponse,
   DealerDropdownItem
 } from '../../../ViewModels/models/po-tracking-report.model';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-po-tracking-report',
   standalone: true,
@@ -26,6 +27,8 @@ import {
   templateUrl: './po-tracking-report.html'
 })
 export class POTrackingReportComponent implements OnInit {
+  readonly SUBMENU_ID = 47;
+  canDownload = false;
 
   filterForm!: FormGroup;
 
@@ -50,10 +53,7 @@ export class POTrackingReportComponent implements OnInit {
   // user's own dropdown selection would never actually change their results.
   isDealerUser = false;
 
-  constructor(
-    private fb           : FormBuilder,
-    private reportService: ReportService
-  ) {
+  constructor(private fb: FormBuilder, private reportService: ReportService, private menuAccess: MenuAccessService) {
     this.filterForm = this.fb.group({
       dealerCode: [''],
       fromDate  : [''],
@@ -65,6 +65,7 @@ export class POTrackingReportComponent implements OnInit {
 
   ngOnInit(): void {
     this.isDealerUser = this.checkIsDealerUser();
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
 
     this.initializeDates();
     this.loadAllDropdowns();

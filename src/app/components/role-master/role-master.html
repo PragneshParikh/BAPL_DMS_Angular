@@ -1,3 +1,4 @@
+<!-- src\app\components\role-master\role-master.html -->
 <div class="d-flex justify-content-between align-items-center mb-2">
   <h5 class="mb-0">{{ isEditMode ? 'Edit Role' : 'Add Role' }}</h5>
   <button class="btn btn-secondary btn-sm" (click)="backToList()">
@@ -30,7 +31,8 @@
 
     <div class="text-end mt-3">
       <button class="btn btn-secondary btn-sm me-2" (click)="backToList()">Cancel</button>
-      <button class="btn btn-primary btn-sm" (click)="save()" [disabled]="saving">Save</button>
+      <button class="btn btn-primary btn-sm" *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
+          (click)="save()" [disabled]="saving">Save</button>
     </div>
   </div>
 </div>

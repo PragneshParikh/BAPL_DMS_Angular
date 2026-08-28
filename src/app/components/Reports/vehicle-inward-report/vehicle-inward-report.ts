@@ -1,3 +1,4 @@
+// src\app\components\Reports\vehicle-inward-report\vehicle-inward-report.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -10,7 +11,7 @@ import {
   VehicleInwardReportViewModel,
   VehicleInwardReportResponse
 } from '../../../ViewModels/models/vehicle-inward-report.model';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-vehicle-inward-report',
   standalone: true,
@@ -18,6 +19,8 @@ import {
   templateUrl: './vehicle-inward-report.html'
 })
 export class VehicleInwardReport implements OnInit, OnDestroy {
+  readonly SUBMENU_ID = 78;
+  canDownload = false; 
 
   filterForm!: FormGroup;
   reportData: VehicleInwardReportViewModel[] = [];
@@ -51,11 +54,13 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private reportService: ReportService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
   ) {
     // Dates start blank (not defaulted to "this month") so the report
     // always shows every existing record on first load — same fix applied
     // to Repair Bill Report after it opened empty by default.
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     this.filterForm = this.fb.group({
       dealerCode: [''],
       fromDate: [''],

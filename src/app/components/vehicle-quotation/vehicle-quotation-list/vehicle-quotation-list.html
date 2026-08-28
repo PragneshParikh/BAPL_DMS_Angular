@@ -1,3 +1,4 @@
+<!-- src\app\components\vehicle-quotation\vehicle-quotation-list\vehicle-quotation-list.html -->
 <div class="card shadow-sm">
 
     <div class="card-header bg-white">
@@ -26,9 +27,8 @@
             </div>
 
             <div class="col-md-2 text-end">
-                <button type="button" class="btn btn-primary" (click)="addNew()">
-                    <i class="ri-add-line"></i>
-                    New Quotation
+                <button type="button" class="btn btn-primary" *ngIf="canCreate" (click)="addNew()">
+                    <i class="ri-add-line"></i> New Quotation
                 </button>
             </div>
         </div>
@@ -86,18 +86,11 @@
                     </td>
 
                     <td class="text-center">
-                        <button
-                            class="btn btn-sm btn-primary me-1"
-                            (click)="edit(row.vehicleQuotationId)"
-                            title="Edit">
+                        <button class="btn btn-sm btn-primary me-1" *ngIf="canEdit" (click)="edit(row.vehicleQuotationId)" title="Edit">
                             <i class="ri-edit-line"></i>
                         </button>
-
-                        <button
-                            class="btn btn-sm btn-outline-secondary me-1"
-                            (click)="printQuotation(row.vehicleQuotationId)"
-                            [disabled]="printingId === row.vehicleQuotationId"
-                            title="Print / Download PDF">
+                        <button class="btn btn-sm btn-outline-secondary me-1" *ngIf="canDownload" (click)="printQuotation(row.vehicleQuotationId)"
+                            [disabled]="printingId === row.vehicleQuotationId" title="Print / Download PDF">
                             <i class="ri-printer-line" *ngIf="printingId !== row.vehicleQuotationId"></i>
                             <span *ngIf="printingId === row.vehicleQuotationId" class="spinner-border spinner-border-sm"></span>
                         </button>

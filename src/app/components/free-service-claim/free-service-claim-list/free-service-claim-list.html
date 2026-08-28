@@ -1,3 +1,4 @@
+<!-- src\app\components\free-service-claim\free-service-claim-list\free-service-claim-list.html -->
 <div id="free-service-claim-list">
     <!-- Start Breadcrumbs -->
     <app-breadcrumbs title="Free Service Claim"></app-breadcrumbs>
@@ -41,12 +42,10 @@
                                     <button type="submit" class="btn btn-primary btn-sm me-1">
                                         <i class="align-bottom me-1"></i> Search
                                     </button>
-                                    <button type="button" class="btn btn-primary btn-sm ms-2"
-                                        (click)="addNewClaim(null)">
-                                        <i class="align-bottom me-1"></i> Add
+                                    <button *ngIf="canCreate" type="button" class="btn btn-primary btn-sm ms-2" (click)="addNewClaim(null)">
+                                        Add
                                     </button>
-                                    <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'"
-                                        (click)="downloadExcel()">
+                                    <button *ngIf="canDownload" class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'" (click)="downloadExcel()">
                                         <i class="ri-file-excel-2-line"></i>
                                     </button>
                                 </div>

@@ -1,3 +1,4 @@
+// src\app\components\modelwise-service-schedule\modelwise-service-schedule.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { delay } from 'lodash';
 import Swal from 'sweetalert2';
 import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-modelwise-service-schedule',
   standalone: true,
@@ -19,13 +20,20 @@ import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
   styleUrl: './modelwise-service-schedule.scss',
 })
 export class ModelwiseServiceSchedule {
-
-  constructor(private form22service: Form22MasterService,
+  readonly SUBMENU_ID = 36;
+  canCreate = false;
+  canEdit = false;
+  constructor(
+    private form22service: Form22MasterService,
     private jobCardService: JobCardService,
     private modelwiseservicescheduleservice: ModewiseServiceScheduleService,
     public toaster: ToastService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  }
 
   oemModelList: any[] = [];
   serviceheadlist: any[] = [];

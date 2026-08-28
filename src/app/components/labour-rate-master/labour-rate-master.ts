@@ -1,3 +1,4 @@
+// src\app\components\labour-rate-master\labour-rate-master.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { Form22MasterService } from '../../core/services/form22masterservice';
 import { StorageService } from '../../core/services/storage';
 import { JobCardService } from '../../core/services/job-card-service';
 import { debug } from 'console';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-labour-rate-master',
   imports: [FormsModule, CommonModule],
@@ -21,13 +22,20 @@ export class LabourRateMaster implements OnInit {
   sortDirection: string;
   page: number;
   pagedData: any;
-
-  constructor(private LabourMasterService: LabourMasterService,
+  readonly SUBMENU_ID = 55;
+  canEdit = false;
+  canDownload = false;
+  constructor(
+    private LabourMasterService: LabourMasterService,
     private storageService: StorageService,
     private jobCardService: JobCardService,
     private form22service: Form22MasterService,
-    private loader: LoaderService
-  ) { }
+    private loader: LoaderService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   showEditPopup = false;
   showPartwiseEditPopup = false;

@@ -1,3 +1,4 @@
+// src\app\components\repair-bill\repair-bill.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -20,7 +21,7 @@ import { LocationMasterService } from '../../core/services/location-master-servi
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { Console } from 'console';
 import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-repair-bill',
   imports: [FormsModule, CommonModule, NgbDropdownModule],
@@ -28,6 +29,9 @@ import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
   styleUrl: './repair-bill.scss',
 })
 export class RepairBill implements OnInit {
+  readonly SUBMENU_ID = 51;
+  canCreate = false;
+  canEdit = false;
 
   currentDate: string = new Date().toISOString().split('T')[0];
   RepairBillprefix: string = '';
@@ -181,8 +185,11 @@ export class RepairBill implements OnInit {
     private route: ActivatedRoute,
     private loader: LoaderService,
     private toaster: ToastService,
-    private router: Router
+    private router: Router,
+    private menuAccess: MenuAccessService
   ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
 
   }
   ngOnInit(): void {

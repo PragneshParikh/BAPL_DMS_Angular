@@ -1,3 +1,4 @@
+// src\app\components\part-inward\part-inward.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { PartsInwardService } from '../../core/services/partsinwardservice';
 import { LedgerMasterService } from '../../core/services/ledger-master';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-part-inward',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
@@ -18,6 +19,8 @@ import { NotificationService } from '../../core/services/notification-service';
 })
 export class PartInward implements OnInit {
   @ViewChild('partsInwardForm') partsInwardForm!: NgForm;
+  readonly SUBMENU_ID = 99;
+  canEdit = false;
 
   partsInwardData: any = {
     invoiceNo: '',
@@ -55,13 +58,16 @@ export class PartInward implements OnInit {
     private ledgerMasterService: LedgerMasterService,
     private route: ActivatedRoute,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private menuAccess: MenuAccessService   // ADDED
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
     }
+
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);   // ADDED
   }
 
   ngOnInit(): void {

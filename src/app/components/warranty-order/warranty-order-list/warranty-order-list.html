@@ -1,3 +1,4 @@
+<!-- src\app\components\warranty-order\warranty-order-list\warranty-order-list.html -->
 <div class="card shadow-sm">
     <div class="card-header bg-primary bg-gradient text-white py-2">
         <div class="d-flex justify-content-between align-items-center">
@@ -131,7 +132,7 @@
                                 </span>
                             </td>
                             <td class="text-center">
-                                <button class="btn btn-outline-danger btn-sm" (click)="deleteOrder(order.id, $event)" title="Delete this order">
+                                <button *ngIf="canDelete" class="btn btn-outline-danger btn-sm" (click)="deleteOrder(order.id, $event)" title="Delete this order">
                                     <i class="ri-delete-bin-2-line"></i>
                                 </button>
                             </td>

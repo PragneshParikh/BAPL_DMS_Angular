@@ -1,3 +1,4 @@
+<!-- src\app\components\dealer-creation\dealer-menu-access-page\dealer-menu-access-page.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
   <h4 class="mb-sm-0">
     Menu Access
@@ -94,7 +95,7 @@
 
       <div class="text-end mt-3" *ngIf="selectedRoleId && selectedArea && selectedModule">
         <button class="btn btn-secondary btn-sm me-2" (click)="goBack()">Cancel</button>
-        <button class="btn btn-primary btn-sm" [disabled]="saving || itemsLoading" (click)="save()">Save</button>
+        <button class="btn btn-primary btn-sm" *ngIf="canEdit" [disabled]="saving || itemsLoading" (click)="save()">Save</button>
       </div>
 
     </ng-container>

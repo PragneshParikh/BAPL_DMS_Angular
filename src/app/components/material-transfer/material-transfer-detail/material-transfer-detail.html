@@ -1,3 +1,4 @@
+<!-- src\app\components\material-transfer\material-transfer-detail\material-transfer-detail.html -->
 <!-- Start Breadcrumbs -->
 <app-breadcrumbs title="Material Transfer"></app-breadcrumbs>
 <!-- End Breadcrumbs -->
@@ -152,7 +153,7 @@
                                 <div class="col-md-3">
                                     <label class="form-label">&nbsp;</label><br>
                                     <button type="submit" class="btn btn-primary btn-sm me-2"
-                                        [disabled]="this.formData.jobNo <= 0">
+                                        [disabled]="this.formData.jobNo <= 0 || (!isEdit && !canCreate) || (isEdit && !canEdit)">
                                         Add
                                     </button>
                                     <button type="button" class="btn btn-primary btn-sm"
@@ -255,7 +256,7 @@
                             <button type="button" class="btn btn-danger btn-sm float-end" (click)="backToList()">
                                 Cancel
                             </button>
-                            <button type="submit" [disabled]="materialTransferForm.invalid" [disabled]="jobCardStatus"
+                            <button type="submit" [disabled]="materialTransferForm.invalid || jobCardStatus || (!isEdit && !canCreate) || (isEdit && !canEdit)"
                                 class="btn btn-primary btn-sm float-end me-1" (click)="onSubmit(materialTransferForm)">
                                 Save
                             </button>

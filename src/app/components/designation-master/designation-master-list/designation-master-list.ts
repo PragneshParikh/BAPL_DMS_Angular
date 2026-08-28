@@ -1,3 +1,4 @@
+// src\app\components\designation-master\designation-master-list\designation-master-list.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -6,7 +7,7 @@ import { DesignationService } from '../../../core/services/designation';
 import { DesignationModel } from '../../../ViewModels/models/DesignationModel';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-designation-master-list',
   imports: [CommonModule, FormsModule],
@@ -17,13 +18,21 @@ export class DesignationMasterList {
   designationList: DesignationModel[] = [];
   filteredList: DesignationModel[] = [];
   searchText: string = '';
-
+  readonly SUBMENU_ID = 64;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
   constructor(
     private designationService: DesignationService,
     private router: Router,
     private loader: LoaderService,
-    private toaster: ToastService
-  ) {}
+    private toaster: ToastService,
+    private menuAccess: MenuAccessService   // ADDED
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+  }
 
   ngOnInit() {
     this.loadDesignations();

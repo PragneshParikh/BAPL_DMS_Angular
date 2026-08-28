@@ -1,3 +1,4 @@
+// src\app\components\Reports\part-dispatch-kit-report\part-dispatch-kit-report.ts
 import { Component, OnInit } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -11,7 +12,7 @@ import {
 import {
   PartDispatchKitReportViewModel
 } from '../../../ViewModels/models/part-dispatch-kit-report.model';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-part-dispatch-kit-report',
 
@@ -30,6 +31,8 @@ import {
 })
 export class PartDispatchKitReport
 implements OnInit {
+  readonly SUBMENU_ID = 51;
+  canDownload = false;
 
   loading = false;
 
@@ -56,13 +59,11 @@ implements OnInit {
   // call entirely rather than show a control that does nothing.
   isSuperAdmin = false;
 
-  constructor(
-    private reportService: ReportService
-  ) { }
+  constructor(private reportService: ReportService, private menuAccess: MenuAccessService) { }
 
   ngOnInit(): void {
-
     this.isSuperAdmin = this.checkIsSuperAdmin();
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
 
     if (this.isSuperAdmin) {
       this.loadDealers();

@@ -1,3 +1,4 @@
+<!-- src\app\components\vehicle-info-update\vehicle-info-update.html -->
 <!-- Page Title -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-3">
     <h4 class="mb-0 text-primary">Vehicle Info Update</h4>
@@ -43,7 +44,7 @@
     <!-- Vehicle Update Table -->
     <div class="card mt-3" *ngIf="showVehicleDetails">
         <div class="card-body p-0">
-            <fieldset [disabled]="!isSuperAdmin">
+            <fieldset [disabled]="!isSuperAdmin || !canEdit">
 
                 <div class="table-responsive table-scroll-container">
                     <table class="table table-bordered  table-sm mb-0" style="font-size: 12px;">
@@ -411,7 +412,7 @@
                     Generate HSRP Order
                 </button> -->
 
-                    <button *ngIf="isSuperAdmin" class="btn btn-primary btn-sm" (click)="updateAll()">
+                    <button *ngIf="isSuperAdmin && canEdit" class="btn btn-primary btn-sm" (click)="updateAll()">
                         Update All
                     </button>
                 </div>

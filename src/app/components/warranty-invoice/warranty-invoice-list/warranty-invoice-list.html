@@ -1,3 +1,4 @@
+<!-- src\app\components\warranty-invoice\warranty-invoice-list\warranty-invoice-list.html -->
 <div class="card shadow-sm">
     <div class="card-header bg-primary bg-gradient text-white py-2">
         <div class="d-flex justify-content-between align-items-center">
@@ -176,12 +177,11 @@
                                 <i class="ri-eye-line"></i>
                             </button>
 
-                            <button class="btn btn-outline-secondary btn-sm me-1" [disabled]="printingId === invoice.id"
+                            <button *ngIf="canDownload" class="btn btn-outline-secondary btn-sm me-1" [disabled]="printingId === invoice.id"
                                 (click)="openPrintModal(invoice.id, $event)" title="Print">
                                 <i class="ri-printer-line"></i>
                             </button>
-
-                            <button class="btn btn-outline-danger btn-sm" (click)="deleteInvoice(invoice.id, $event)" title="Delete this invoice">
+                            <button *ngIf="canDelete" class="btn btn-outline-danger btn-sm" (click)="deleteInvoice(invoice.id, $event)" title="Delete this invoice">
                                 <i class="ri-delete-bin-2-line"></i>
                             </button>
                         </td>

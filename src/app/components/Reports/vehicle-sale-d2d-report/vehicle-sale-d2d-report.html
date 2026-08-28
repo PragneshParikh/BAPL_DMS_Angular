@@ -1,3 +1,4 @@
+<!-- src\app\components\Reports\vehicle-sale-d2d-report\vehicle-sale-d2d-report.html -->
 <div class="d2d-report-container p-3">
   <h4 class="mb-3">D2D Report</h4>
 
@@ -99,14 +100,11 @@
         <button class="btn btn-outline-secondary" (click)="resetFilters()">
           Reset
         </button>
-        <button
-          class="btn btn-success"
-          (click)="exportToExcel()"
-          [disabled]="exporting || loading"
-        >
+        <button class="btn btn-success" *ngIf="canDownload"
+          (click)="exportToExcel()" [disabled]="exporting || loading">
           <span *ngIf="exporting" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
           {{ exporting ? 'Exporting...' : 'Export to Excel' }}
-        </button>
+      </button>
       </div>
     </div>
   </div>

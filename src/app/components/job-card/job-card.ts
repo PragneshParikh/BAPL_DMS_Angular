@@ -13,7 +13,7 @@ import Swal from 'sweetalert2';
 import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { LoaderService } from '../../core/services/loader';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-job-card',
   standalone: true,
@@ -28,6 +28,11 @@ export class JobCard {
   jobCardList: any[] = [];
   jobCardId: number = 0;
   isEditMode = false;
+  readonly SUBMENU_ID = 23;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+  canDownload = false;
   //dropdown changes
   selectedLocation: string = '';
   selectedJobtype: any;
@@ -61,8 +66,14 @@ export class JobCard {
     private storageService: StorageService,
     private jobCardService: JobCardService,
     private loader: LoaderService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+   }
 
   searchModel: JobCardSearchModel = {
     dealerCode: '',

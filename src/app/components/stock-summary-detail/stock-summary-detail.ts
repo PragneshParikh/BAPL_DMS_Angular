@@ -1,3 +1,4 @@
+// src\app\components\stock-summary-detail\stock-summary-detail.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { DealerService } from '../../core/services/dealer-service';
 import { InventoryService } from '../../core/services/inventory-service';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ItemMasterService } from '../../core/services/item-master-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-stock-summary-detail',
   imports: [
@@ -24,6 +25,8 @@ import { ItemMasterService } from '../../core/services/item-master-service';
   styleUrl: './stock-summary-detail.scss',
 })
 export class StockSummaryDetail implements OnInit {
+  readonly SUBMENU_ID = 58;
+  canDownload = false;
 
   stockFilterdFormData: any = {
     dateFrom: '',
@@ -50,10 +53,12 @@ export class StockSummaryDetail implements OnInit {
     private toaster: ToastService,
     private dealerMasterService: DealerService,
     private inventoryService: InventoryService,
-    private itemMasterService: ItemMasterService
+    private itemMasterService: ItemMasterService,
+    private menuAccess: MenuAccessService
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     this.dealerCode = this.storageService.getDealerCode();
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
   }
 
   ngOnInit(): void {

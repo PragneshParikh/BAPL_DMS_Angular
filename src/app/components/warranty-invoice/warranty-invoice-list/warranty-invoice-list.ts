@@ -1,3 +1,4 @@
+// src\app\components\warranty-invoice\warranty-invoice-list\warranty-invoice-list.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { WarrantyInvoiceService } from '../../../core/services/warranty-invoice-service';
 import { LedgerMasterService } from '../../../core/services/ledger-master';
 import { StorageService } from '../../../core/services/storage';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-warranty-invoice-list',
   standalone: true,
@@ -16,6 +17,9 @@ import { StorageService } from '../../../core/services/storage';
   styleUrl: './warranty-invoice-list.scss',
 })
 export class WarrantyInvoiceList implements OnInit {
+  readonly SUBMENU_ID = 113;
+  canDelete = false;
+  canDownload = false;
 
   invoices: any[] = [];
   supplierList: any[] = [];
@@ -78,8 +82,12 @@ export class WarrantyInvoiceList implements OnInit {
     private toaster: ToastService,
     private storageService: StorageService,
     private ledgerService: LedgerMasterService,
-    private warrantyInvoiceService: WarrantyInvoiceService
-  ) { }
+    private warrantyInvoiceService: WarrantyInvoiceService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+   }
 
   ngOnInit(): void {
     this.loadSuppliers();

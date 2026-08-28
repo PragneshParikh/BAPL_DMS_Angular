@@ -1,3 +1,4 @@
+// src\app\components\Showroom\form22master\form22master.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Form22MasterService } from '../../../core/services/form22masterservice';
@@ -6,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { Form22MasterModel } from '../../../ViewModels/Form22MasterModel';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { LoaderService } from '../../../core/services/loader';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-form22master',
   standalone: true,
@@ -16,6 +17,10 @@ import { LoaderService } from '../../../core/services/loader';
 })
 
 export class Form22master implements OnInit {
+  readonly SUBMENU_ID = 10;
+  canCreate = false;
+  canEdit = false;
+  canDownload = false;
   //binding dropdown value fields
   oemModelList: any[] = [];
   selectedOemModelId: number | null = null;
@@ -57,8 +62,13 @@ export class Form22master implements OnInit {
   constructor(private form22service: Form22MasterService,
     public toaster: ToastService,
     private loader: LoaderService,
-    private modalService: NgbModal
-  ) { }
+    private modalService: NgbModal,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit() {
     this.loadOemModels();

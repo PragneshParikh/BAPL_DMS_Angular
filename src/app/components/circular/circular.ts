@@ -1,3 +1,4 @@
+// src\app\components\circular\circular.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { StorageService } from '../../core/services/storage';
@@ -10,7 +11,7 @@ import { AddCircular } from '../../dialogs/add-circular/add-circular';
 import { finalize } from 'rxjs/operators';
 import { CircularPermission } from '../../dialogs/circular-permission/circular-permission';
 import { CircularDealerAssignmentService } from '../../core/services/circular-dealer-assignment';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-circular',
   imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbTooltipModule],
@@ -30,6 +31,10 @@ export class Circular {
   selectedMonth: string | null = null;
   selectedDate: string | null = null;
 
+  readonly SUBMENU_ID = 53;
+  canCreate = false;
+  canEdit = false;
+
   selectedFiles: any[] = [];
 
   isSuperAdmin: boolean = false;
@@ -41,13 +46,13 @@ export class Circular {
     private loader: LoaderService,
     private toast: ToastService,
     private curcularService: CircularService,
-    private circularDealerAssignmentService: CircularDealerAssignmentService
+    private circularDealerAssignmentService: CircularDealerAssignmentService,
+    private menuAccess: MenuAccessService
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-
-    if (!this.isSuperAdmin) {
-      this.dealerCode = this.storageService.getDealerCode();
-    }
+    if (!this.isSuperAdmin) this.dealerCode = this.storageService.getDealerCode();
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
   }
 
   ngOnInit(): void {

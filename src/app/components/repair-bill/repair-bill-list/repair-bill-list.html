@@ -1,3 +1,4 @@
+<!-- src\app\components\repair-bill\repair-bill-list\repair-bill-list.html -->
 <!--PAGE Title-->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
     <h5 class="mb-0">Repair Bill List</h5>
@@ -61,13 +62,13 @@
             </div>
 
             <div class="col-md-1 d-grid">
-                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'">
+                <button class="btn btn-success btn-sm" *ngIf="canDownload" [ngbTooltip]="'Export to Excel'">
                     <i class="ri-file-excel-2-line"></i>
                 </button>
             </div>
 
             <div class="col-md-1 d-grid">
-                <button class="btn btn-primary btn-sm" (click)="onNavigate()">Add</button>
+                <button class="btn btn-primary btn-sm" *ngIf="canCreate" (click)="onNavigate()">Add</button>
             </div>
 
         </div>
@@ -106,19 +107,15 @@
                         <!-- Action column: Edit + Invoice Download -->
                         <td class="text-center" style="min-width:88px; white-space:nowrap">
 
-                            <button class="btn btn-sm btn-soft-primary me-1"
-                                [ngbTooltip]="'Edit Bill'"
+                            <button *ngIf="canEdit" class="btn btn-sm btn-soft-primary me-1" [ngbTooltip]="'Edit Bill'"
                                 (click)="editRepairBill(item); $event.stopPropagation()">
                                 <i class="ri-pencil-fill fs-12"></i>
                             </button>
-                            <button class="btn btn-sm btn-soft-danger" 
-                                title="Only SuperAdmin can delete" (click)="deleteRepairbill(item.id)" [disabled]="!this.isSuperAdmin">
+                            <button *ngIf="canDelete" class="btn btn-sm btn-soft-danger" title="Only SuperAdmin can delete"
+                                (click)="deleteRepairbill(item.id)" [disabled]="!this.isSuperAdmin">
                                 <i class="ri-delete-bin-fill fs-12"></i>
-                                <!-- [disabled]="currentUserRole !== 'SuperAdmin'" -->
                             </button>
-
-                            <button class="btn btn-sm btn-soft-success"
-                                [ngbTooltip]="'Download Invoice'"
+                            <button *ngIf="canDownload" class="btn btn-sm btn-soft-success" [ngbTooltip]="'Download Invoice'"
                                 (click)="printInvoice(item); $event.stopPropagation()">
                                 <i class="ri-file-download-line fs-12"></i>
                             </button>

@@ -1,3 +1,4 @@
+//src\app\components\bgemployee-master\bgemployee-master-list\bgemployee-master-list.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -11,7 +12,7 @@ import { DesignationService } from '../../../core/services/designation';
 import { RoleService } from '../../../core/services/Deptrole';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { LoaderService } from '../../../core/services/loader';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-bgemployee-master-list',
   standalone: true,
@@ -33,6 +34,11 @@ export class BgemployeeMasterList implements OnInit {
   departmentMap:  { [id: string]: string }   = {};
   designationMap: { [id: string]: string }   = {};
 
+  readonly SUBMENU_ID = 76;
+  canCreate = false;
+  canEdit = false;
+  canDownload = false;
+
   departmentList: any[] = [];
   roles: { title: string; value: string }[]  = [];
 
@@ -49,13 +55,18 @@ export class BgemployeeMasterList implements OnInit {
 
   constructor(
     private bgEmployeeService: BgemployeeMasterService,
-    private locationService:   LocationMasterService,
+    private locationService: LocationMasterService,
     private departmentService: DepartmentService,
-    private designationService:DesignationService,
-    private roleService:       RoleService,
-    private toaster:           ToastService,
-    private loader:             LoaderService,
-  ) {}
+    private designationService: DesignationService,
+    private roleService: RoleService,
+    private toaster: ToastService,
+    private loader: LoaderService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.loadEmployees();

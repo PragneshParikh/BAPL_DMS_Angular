@@ -1,3 +1,4 @@
+// src\app\components\employee-master\employee-master.ts
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -13,6 +14,7 @@ import { LocationMasterService } from '../../core/services/location-master-servi
 import { DepartmentService } from '../../core/services/department';
 import { DesignationService } from '../../core/services/designation';
 import { RoleService } from '../../core/services/Deptrole';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 interface MenuAccessItem {
   subMenuId: number;
@@ -51,7 +53,9 @@ export class EmployeeMasterComponent implements OnInit {
   dealerInfo: any = null;
   dealerLocations: any[] = [];
   selectedLocations: string[] = [];
-
+  readonly SUBMENU_ID = 49;
+  canCreate = false;
+  canEdit = false;
   departmentOptions: { id: string; name: string }[] = [];
   selectedDepartments: string[] = [];
   menuGroupsByDepartment: { [dept: string]: MenuAccessGroup[] } = {};
@@ -108,7 +112,8 @@ export class EmployeeMasterComponent implements OnInit {
     private locationService: LocationMasterService,
     private departmentService: DepartmentService,
     private designationService: DesignationService,
-    private roleService: RoleService
+    private roleService: RoleService,
+    private menuAccess: MenuAccessService
   ) { }
 
   ngOnInit(): void {
@@ -124,6 +129,8 @@ export class EmployeeMasterComponent implements OnInit {
     this.loadDepartments();
     this.loadDesignations();
     this.loadDepartmentOptions();
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
 
     if (this.popupData) {
 

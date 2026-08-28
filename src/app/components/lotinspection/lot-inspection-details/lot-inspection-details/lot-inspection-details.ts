@@ -1,3 +1,4 @@
+// src\app\components\lotinspection\lot-inspection-details\lot-inspection-details\lot-inspection-details.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +13,7 @@ import { LocationName } from '../../../../ViewModels/ReceiptEntryModel';
 import Swal from 'sweetalert2';
 import { LocationMasterService } from '../../../../core/services/location-master-service';
 import { LedgerMasterService } from '../../../../core/services/ledger-master';
-
+import { MenuAccessService } from '../../../../core/services/menu-access.service';
 @Component({
   selector: 'app-lot-inspection-details',
   standalone: true,
@@ -32,6 +33,9 @@ export class LotInspectionDetails implements OnInit {
   selectedSupervisor: string = '';
   selectedlotPartyId: any;
 
+  readonly SUBMENU_ID = 18;
+  canEdit = false;
+
   isLotInspected: any;
   isSuperAdmin: boolean;
   dealerCode: any;
@@ -47,8 +51,11 @@ export class LotInspectionDetails implements OnInit {
     public toaster: ToastService,
     private loader: LoaderService,
     private router: Router,
-    private storageService: StorageService
-  ) { }
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+   }
 
   ngOnInit(): void {
 

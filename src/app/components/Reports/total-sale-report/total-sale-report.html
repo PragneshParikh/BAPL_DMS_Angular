@@ -1,3 +1,4 @@
+<!-- src\app\components\Reports\total-sale-report\total-sale-report.html -->
 <style>
   .pivot-table thead th {
     padding: 5px 10px !important;
@@ -54,10 +55,10 @@
                 <i class="ri-search-line me-1"></i>Search
               </button>
               <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">Reset</button>
-              <button type="button" class="btn btn-success btn-sm"
+              <button type="button" class="btn btn-success btn-sm" *ngIf="canDownload"
                 (click)="exportToCSV()" [disabled]="!rows.length" title="Export CSV">
                 <i class="ri-file-excel-2-line"></i>
-              </button>
+            </button>
             </div>
 
           </div>

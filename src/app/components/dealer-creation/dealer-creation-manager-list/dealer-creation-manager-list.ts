@@ -1,3 +1,4 @@
+// src\app\components\dealer-creation\dealer-creation-manager-list\dealer-creation-manager-list.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -12,7 +13,7 @@ import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model'
 import { BgRoleService } from '../../../core/services/bg-role';
 import { BgRoleMappingModel } from '../../../ViewModels/models/BgRoleMappingModel';
 import { DealerLocationModel } from '../../../ViewModels/models/DealerMenuAccessModel';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-dealer-creation-manager-list',
   standalone: true,
@@ -23,7 +24,9 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   filterForm!: FormGroup;
   dealerList: DealerListModel[] = [];
   dealerDropdown: DealerDropdownItem[] = [];
-
+  readonly SUBMENU_ID = 101;
+  canEdit = false;
+  canDelete = false;
   pageIndex = 1;
   pageSize = 20;
   totalRecords = 0;
@@ -75,8 +78,12 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     private bgRoleService: BgRoleService,
     private loader: LoaderService,
     private toaster: ToastService,
-    private router: Router
+    private router: Router,
+    private menuAccess: MenuAccessService   // ADDED
   ) {
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+
     this.filterForm = this.fb.group({
       dealerCode: [''],
       search: ['']

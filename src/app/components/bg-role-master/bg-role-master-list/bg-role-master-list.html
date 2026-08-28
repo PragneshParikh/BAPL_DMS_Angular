@@ -1,6 +1,7 @@
+<!-- src\app\components\bg-role-master\bg-role-master-list\bg-role-master-list.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
   <h4 class="mb-sm-0">BG Role Master</h4>
-  <button class="btn btn-primary btn-sm" (click)="onAdd()">+ Add BG Role</button>
+  <button *ngIf="canCreate" class="btn btn-primary btn-sm" (click)="onAdd()">+ Add BG Role</button>
 </div>
 
 <div class="row">
@@ -29,8 +30,8 @@
                 <td>{{ i + 1 }}</td>
                 <td>{{ role.roleName }}</td>
                 <td class="text-center">
-                  <button class="btn btn-sm btn-outline-primary me-1" (click)="onEdit(role)">Edit</button>
-                  <button class="btn btn-sm btn-danger" (click)="onDelete(role)">Delete</button>
+                  <button *ngIf="canEdit" class="btn btn-sm btn-outline-primary me-1" (click)="onEdit(role)">Edit</button>
+                  <button *ngIf="canDelete" class="btn btn-sm btn-danger" (click)="onDelete(role)">Delete</button>
                 </td>
               </tr>
               <tr *ngIf="filteredList.length === 0">

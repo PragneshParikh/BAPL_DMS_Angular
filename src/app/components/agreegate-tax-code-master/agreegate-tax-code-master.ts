@@ -1,3 +1,4 @@
+// src\app\components\agreegate-tax-code-master\agreegate-tax-code-master.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -5,6 +6,7 @@ import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { AgreegateTaxCodeMasterService } from '../../core/services/agreegate-tax-code-masterservice';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-agreegate-tax-code-master',
@@ -18,13 +20,17 @@ import { ToastService } from '../../shared/toaster/toast-service';
   styleUrls: ['./agreegate-tax-code-master.scss']
 })
 export class AgreegateTaxCodeMaster implements OnInit {
-
+  readonly SUBMENU_ID = 12;
+  canCreate = false;
   constructor(
     private agreegatetaxService: AgreegateTaxCodeMasterService,
     private loader: LoaderService,
     public toaster: ToastService,
-    private modalService: NgbModal
-  ) { }
+    private modalService: NgbModal,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+  }
 
   // FORM DATA
   formData: any = {

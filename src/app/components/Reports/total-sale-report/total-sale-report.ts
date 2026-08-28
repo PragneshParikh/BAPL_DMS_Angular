@@ -1,3 +1,4 @@
+// src\app\components\Reports\total-sale-report\total-sale-report.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -9,7 +10,7 @@ import {
   TotalSaleReportDealerWiseRow,
   TotalSaleReportDealerWiseFilter
 } from '../../../ViewModels/models/total-sale-reportModel';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-total-sale-dealer-wise',
   standalone: true,
@@ -18,6 +19,9 @@ import {
   providers: [ReportService]
 })
 export class TotalSaleDealerWiseComponent implements OnInit {
+  private menuAccess = inject(MenuAccessService);
+  readonly SUBMENU_ID = 81;
+  canDownload = false;
 
   private reportService = inject(ReportService);
   private fb            = inject(FormBuilder);
@@ -36,6 +40,7 @@ export class TotalSaleDealerWiseComponent implements OnInit {
 
   ngOnInit(): void {
     this.isDealerUser = this.checkIsDealerUser();
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
 
     this.filterForm = this.fb.group({
       dealerCode: [''],

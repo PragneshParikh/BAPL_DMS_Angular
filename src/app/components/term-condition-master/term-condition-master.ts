@@ -1,3 +1,4 @@
+// src\app\components\term-condition-master\term-condition-master.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -7,7 +8,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { TermConditionService } from '../../core/services/term-condition-service';
 import { conditionModule } from '../../constant';
 import Swal from 'sweetalert2';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-term-condition-master',
   standalone: true,
@@ -20,6 +21,11 @@ import Swal from 'sweetalert2';
 
 
 export class TermConditionMaster implements OnInit {
+  readonly SUBMENU_ID = 60;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+  canDownload = false;
   @ViewChild('termandConditionAdd') termandConditionAdd!: TemplateRef<any>;
   @ViewChild('termandConditionUpdate') termandConditionUpdate!: TemplateRef<any>;
 
@@ -43,8 +49,14 @@ export class TermConditionMaster implements OnInit {
     private modalService: NgbModal,
     private termConditionService: TermConditionService,
     private loader: LoaderService,
-    private toaster: ToastService
-  ) { }
+    private toaster: ToastService,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
 

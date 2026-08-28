@@ -120,7 +120,7 @@
             <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">
               <i class="fas fa-redo me-1"></i>Reset
             </button>
-            <button type="button" class="btn btn-success btn-sm"
+            <button type="button" class="btn btn-success btn-sm" *ngIf="canDownload"
               (click)="exportToExcel()" [disabled]="exporting" aria-label="Export to Excel">
               <i class="ri-file-excel-2-line align-bottom"></i>
             </button>

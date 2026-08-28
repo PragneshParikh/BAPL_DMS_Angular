@@ -1,3 +1,4 @@
+// src\app\components\vehicle-quotation\vehicle-quotation-list\vehicle-quotation-list.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +8,7 @@ import { AuthenticationService } from '../../../core/services/auth.service';
 import { ReportService } from '../../../core/services/report.service';
 import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model';
 import { VehicleQuotation } from '../../vehicle-quotation/vehicle-quotation';
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 
 // =====================================
 // PRINT STYLES
@@ -181,6 +183,11 @@ table.pricing tr.total td {
   styleUrls: ['./vehicle-quotation-list.scss']
 })
 export class VehicleQuotationListComponent implements OnInit {
+  readonly SUBMENU_ID = 87;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+  canDownload = false;
 
   quotations: any[] = [];
   filteredData: any[] = [];
@@ -209,8 +216,14 @@ export class VehicleQuotationListComponent implements OnInit {
     private quotationService: VehicleQuotationService,
     private authService: AuthenticationService,
     private reportService: ReportService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     const currentUser = this.authService.currentUserValue;

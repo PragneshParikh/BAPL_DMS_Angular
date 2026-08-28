@@ -1,3 +1,4 @@
+// src\app\components\repair-bill\repair-bill-list\repair-bill-list.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +13,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 import { LoaderService } from '../../../core/services/loader';
 import Swal from 'sweetalert2';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-repair-bill-list',
   imports: [FormsModule, CommonModule, NgbTooltip, NgbPagination, NgbDropdownModule],
@@ -20,6 +21,11 @@ import Swal from 'sweetalert2';
   styleUrl: './repair-bill-list.scss',
 })
 export class RepairBillList implements OnInit {
+  readonly SUBMENU_ID = 51;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+  canDownload = false;
 
   locations: LocationName[] = [];
 
@@ -44,8 +50,14 @@ export class RepairBillList implements OnInit {
     private repairBillService: RepairBillService,
     private toaster: ToastService,
     private locationService: LocationMasterService,
-    private loader: LoaderService
-  ) { }
+    private loader: LoaderService,
+    private menuAccess: MenuAccessService
+  ) {
+      this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+      this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+      this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+      this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   repairbillsearchModel: RepairBillSearchModel = {
     dealerCode: '',

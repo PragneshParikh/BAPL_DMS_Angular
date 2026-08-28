@@ -1,3 +1,4 @@
+// src\app\components\part-inward\part-inward-list\part-inward-list.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild, viewChild } from '@angular/core';
 import { FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { StorageService } from '../../../core/services/storage';
 import { DealerService } from '../../../core/services/dealer-service';
 import { Router } from '@angular/router';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-part-inward-list',
   imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbPagination, NgbTooltip],
@@ -22,6 +23,8 @@ export class PartInwardList implements OnInit {
   page = 1;
   pageSize = 10;
   collectionSize = 0;
+  readonly SUBMENU_ID = 99;
+  canDownload = false;
 
   dealerCode: string = '';
   isSuperAdmin: boolean = false;
@@ -41,7 +44,8 @@ export class PartInwardList implements OnInit {
     private dealerMasterService: DealerService,
     private toast: ToastService,
     private storageService: StorageService,
-    private router: Router
+    private router: Router,
+    private menuAccess: MenuAccessService   // ADDED
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
@@ -49,7 +53,9 @@ export class PartInwardList implements OnInit {
       this.dealerCode = this.storageService.getDealerCode();
     }
     this.initDefaultDates();
-  }
+
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);   // ADDED
+}
 
   ngOnInit(): void {
     this.getDealerList();

@@ -1,3 +1,4 @@
+<!-- src\app\components\employee-master\employee-master.html -->
 <!-- ===================================================== -->
 <!-- PAGE HEADER -->
 <!-- ===================================================== -->
@@ -488,9 +489,10 @@
               Cancel
             </button>
             <button type="submit" class="btn btn-primary btn-sm px-2 py-1"
+              *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
               [disabled]="!isFormValid || resolvingRoles">
               {{ resolvingRoles ? 'Saving...' : (isEditMode ? 'Update' : 'Save') }}
-            </button>
+          </button>
           </div>
 
         </div>

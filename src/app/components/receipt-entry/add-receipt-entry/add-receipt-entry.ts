@@ -1,3 +1,4 @@
+// src\app\components\receipt-entry\add-receipt-entry\add-receipt-entry.ts
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { ReceiptEntryService } from '../../../core/services/receipt-entry-service';
@@ -19,7 +20,7 @@ import { PrefixService } from '../../../core/services/prefix';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 import { LMSLeadService } from '../../../core/services/lmslead-service';
 import { LedgerMasterService } from '../../../core/services/ledger-master';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-add-receipt-entry',
   templateUrl: './add-receipt-entry.html',
@@ -35,6 +36,9 @@ import { LedgerMasterService } from '../../../core/services/ledger-master';
   ],
 })
 export class AddReceiptEntry implements OnInit {
+  readonly SUBMENU_ID = 19;
+  canCreate = false;
+  canEdit = false;
   customerTypes = TRANSACTION_TYPES;
   today = new Date().toISOString().split('T')[0];
   disableSave: boolean;
@@ -94,21 +98,23 @@ export class AddReceiptEntry implements OnInit {
   selectedParty: string;
   isSearchMobileInvalid: boolean;
   showPartyDropdown: boolean;
-  constructor(private router: ActivatedRoute,
+  constructor(
+    private router: ActivatedRoute,
     private receiptEntryService: ReceiptEntryService,
     private lmsService: LMSLeadService,
     private locationService: LocationMasterService,
     private storageService: StorageService,
-    private itemService: ItemMasterService, private modalService: NgbModal,
+    private itemService: ItemMasterService,
+    private modalService: NgbModal,
     private navigation: Router,
     private loader: LoaderService,
     public toaster: ToastService,
     public prefixService: PrefixService,
-    public ledgerService:LedgerMasterService
+    public ledgerService: LedgerMasterService,
+    private menuAccess: MenuAccessService
   ) {
-    this.router.paramMap.subscribe(params => {
-      this.id = params.get('id');
-    });
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
   }
 
   async ngOnInit(): Promise<void> {

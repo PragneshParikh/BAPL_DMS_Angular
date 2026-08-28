@@ -1,3 +1,4 @@
+<!-- src\app\components\Reports\vehicle-inward-report\vehicle-inward-report.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
   <h4 class="mb-sm-0">Vehicle Inward Report</h4>
   <span class="badge bg-light text-dark border px-3 py-2 fs-6">
@@ -77,9 +78,10 @@
             <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">
               <i class="fas fa-redo me-1"></i>Reset
             </button>
-            <button type="button" class="btn btn-success btn-sm" (click)="exportToExcel()" [disabled]="exporting || isLoading">
-              <span *ngIf="exporting" class="spinner-border spinner-border-sm me-1"></span>
-              {{ exporting ? 'Exporting...' : 'Export to Excel' }}
+            <button type="button" class="btn btn-success btn-sm" *ngIf="canDownload"
+                (click)="exportToExcel()" [disabled]="exporting || isLoading">
+                <span *ngIf="exporting" class="spinner-border spinner-border-sm me-1"></span>
+                {{ exporting ? 'Exporting...' : 'Export to Excel' }}
             </button>
           </div>
         </form>

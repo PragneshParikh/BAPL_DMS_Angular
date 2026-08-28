@@ -1,3 +1,4 @@
+// src\app\components\receipt-entry\receipt-entry.ts
 import { Component, OnInit } from '@angular/core';
 import { ReceiptEntryService } from '../../core/services/receipt-entry-service';
 import { LoaderService } from '../../core/services/loader';
@@ -11,7 +12,7 @@ import { Router, RouterOutlet } from '@angular/router';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { debounceTime, Subject, switchMap } from 'rxjs';
 import { LocationMasterService } from '../../core/services/location-master-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-receipt-entry',
   templateUrl: './receipt-entry.html',
@@ -27,6 +28,9 @@ import { LocationMasterService } from '../../core/services/location-master-servi
   providers: [FlatpickrDefaults, FlatpickrModule],
 })
 export class ReceiptEntry implements OnInit {
+  readonly SUBMENU_ID = 19;
+  canCreate = false;
+  canDownload = false;
 
   receiptEntries: ReceiptEntryModel[] = [];
   filteredReceipts: ReceiptEntryModel[] = [];
@@ -55,8 +59,12 @@ export class ReceiptEntry implements OnInit {
     private toaster: ToastService,
     private storageService: StorageService,
     private modalService: NgbModal,
-    private router: Router
-  ) { }
+    private router: Router,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.isSuperAdmin=this.storageService.getRole().toLowerCase() === 'superadmin';

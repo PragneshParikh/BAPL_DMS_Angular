@@ -1,3 +1,4 @@
+// src\app\components\group-master\group-master.ts
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -5,7 +6,7 @@ import { NgbModal, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { GroupMasterService } from '../../core/services/group-master-service';
 import Swal from 'sweetalert2';
 import { ToastService } from '../../shared/toaster/toast-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-group-master',
   standalone: true,
@@ -24,7 +25,11 @@ export class GroupMaster implements OnInit {
   @ViewChild('groupUpdate') groupUpdate!: TemplateRef<any>;
 
   groupForm!: FormGroup;
-
+  readonly SUBMENU_ID = 59;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+  canDownload = false;
   groupNameList: any[] = [];
   filteredList: any[] = [];
   pagedData: any[] = [];
@@ -41,8 +46,14 @@ export class GroupMaster implements OnInit {
     private fb: FormBuilder,
     private modalService: NgbModal,
     private toaster: ToastService,
+    private menuAccess: MenuAccessService,
     private groupMasterService: GroupMasterService
-  ) { }
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+   }
 
   ngOnInit(): void {
 

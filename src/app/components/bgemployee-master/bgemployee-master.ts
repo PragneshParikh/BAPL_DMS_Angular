@@ -1,3 +1,4 @@
+// src\app\components\bgemployee-master\bgemployee-master.ts
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +16,7 @@ import { EmployeeProfileMasterService }  from '../../core/services/employee-prof
 import { ZoneMasterService }             from '../../core/services/zone-master.service';
 import { RoleService }                   from '../../core/services/Deptrole';
 import { ZoneViewModel, ZoneDealerViewModel } from '../../ViewModels/models/ZoneViewModel';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-bgemployee-master',
   standalone: true,
@@ -32,6 +33,10 @@ export class BgemployeeMaster implements OnInit {
   @Input()  popupData:   any;
   @Input()  isPopupMode: boolean = false;
   @Output() closed = new EventEmitter<void>();
+
+  readonly SUBMENU_ID = 76;
+  canCreate = false;
+  canEdit = false;
 
   // =====================================================
   // CORE DATA
@@ -124,6 +129,7 @@ export class BgemployeeMaster implements OnInit {
     private zoneMasterService:            ZoneMasterService,
     private roleService:                  RoleService,
     private http:                         HttpClient,
+    private menuAccess:                   MenuAccessService
   ) {}
 
   // =====================================================
@@ -139,6 +145,8 @@ export class BgemployeeMaster implements OnInit {
     this.loadDepartmentOptions();
     this.loadAllRoles();
     this.loadReportingToOptions();
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
 
     if (this.popupData) {
       this.initEditMode(this.popupData);

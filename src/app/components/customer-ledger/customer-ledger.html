@@ -1,4 +1,5 @@
-<div *ngIf="!isExternalCall"
+
+<!-- src\app\components\customer-ledger\customer-ledger.html<div *ngIf="!isExternalCall" -->
     class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">Customer Ledger</h4>
 </div>
@@ -283,9 +284,9 @@
                             <button type="button" class="btn btn-primary btn-sm float-end" (click)="backToList()">
                                 Cancel
                             </button>
-                            <button type="submit" class="btn btn-primary btn-sm float-end me-1" [disabled]="customerLedgerForm.invalid 
-                || mobileExist 
-                || (formData.ledgerType === 'Dealer' && role !== 'SuperAdmin')">
+                            <button type="submit" class="btn btn-primary btn-sm float-end me-1"
+                                *ngIf="(!isModify && canCreate) || (isModify && canEdit)"
+                                [disabled]="customerLedgerForm.invalid || mobileExist || (formData.ledgerType === 'Dealer' && role !== 'SuperAdmin')">
                                 {{ isModify ? 'Update' : 'Save' }}
                             </button>
 

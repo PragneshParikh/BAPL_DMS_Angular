@@ -1,6 +1,8 @@
+// src\app\components\dealer-account-master\dealer-account-master.ts
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-dealer-account-master',
@@ -10,6 +12,9 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./dealer-account-master.scss']
 })
 export class DealerAccountMaster {
+
+  readonly SUBMENU_ID = 128;
+  canEdit = false;   // ADDED — gates the Save button once it's wired to a real backend call
 
   selectedGroup: any = '';
   searchGroup = '';
@@ -24,6 +29,10 @@ export class DealerAccountMaster {
     { name: 'Parts', selected: false },
     { name: 'Patent, Trademark & Copyright', selected: false }
   ];
+
+  constructor(private menuAccess: MenuAccessService) {   // ADDED
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  }
 
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
@@ -50,4 +59,9 @@ export class DealerAccountMaster {
       .join(', ');
   }
 
+  // ADDED — stub so the Save button has something to bind to. No backend
+  // service call exists for this page yet; replace this body once one does.
+  onSave() {
+    console.warn('DealerAccountMaster.onSave() called — no backend wiring exists yet.');
+  }
 }

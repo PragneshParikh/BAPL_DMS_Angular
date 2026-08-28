@@ -1,3 +1,4 @@
+//src\app\components\color\color.ts
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { ColorMasterService } from '../../core/services/color-master.service';
@@ -10,7 +11,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { error } from 'console';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-color',
   imports: [
@@ -34,6 +35,9 @@ export class Color implements OnInit {
   dataSource: any[] = [];
   rowData: any = {};
 
+  readonly SUBMENU_ID = 2;
+  canDownload = false;
+
   //#region sorting variables
   sortColumn: string = 'colorname';
   sortDirection: boolean = true; // false for ascending, true for descending
@@ -55,7 +59,9 @@ export class Color implements OnInit {
     public service: PaginationService,
     private loader: LoaderService,
     public toaster: ToastService,
+    private menuAccess: MenuAccessService   // ADDED — already imported, now used
   ) {
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
   }
 
   ngOnInit(): void {

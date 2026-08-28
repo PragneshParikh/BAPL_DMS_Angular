@@ -1,3 +1,4 @@
+// src\app\components\employee-master\employee-master-list\employee-master-list.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -12,6 +13,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { LoaderService } from '../../../core/services/loader';
 import { StorageService } from '../../../core/services/storage';
 import { FormsModule } from '@angular/forms';
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-employee-master-list',
@@ -43,6 +45,11 @@ export class EmployeeMasterList
   departmentMap: { [id: string]: string } = {};
   designationMap: { [id: string]: string } = {};
 
+  readonly SUBMENU_ID = 49;
+  canCreate = false;
+  canEdit = false;
+  canDownload = false;
+
   roles: { title: string; value: string }[] = [];
   selectedRoles: string[] = ['Employee'];
 
@@ -65,9 +72,13 @@ export class EmployeeMasterList
     private dealerService: DealerService,
     private toaster: ToastService,
     private loader: LoaderService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
   ) {
     this.isSuperAdmin = this.storageService.getRole()?.toLowerCase() === 'superadmin';
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
   }
 
   // =====================================

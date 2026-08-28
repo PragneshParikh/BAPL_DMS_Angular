@@ -1,3 +1,4 @@
+// src\app\components\extended-battery-warranty\extended-battery-warranty.ts
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,7 +10,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { ItemMasterService } from '../../core/services/item-master-service';
 import { ExtendedBatteryWarrantyService } from '../../core/services/extended-battery-warranty';
 import { StorageService } from '../../core/services/storage';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-extended-battery-warranty',
   imports: [FormsModule, CommonModule],
@@ -20,6 +21,10 @@ export class ExtendedBatteryWarranty implements OnInit {
 
   rateTypes = RateTypes;
   durationTypes = DurationTypes;
+
+  readonly SUBMENU_ID = 37;
+  canCreate = false;
+  canEdit = false;
 
   items: any[] = [];
   oemModelsList: any[] = [];
@@ -60,10 +65,12 @@ export class ExtendedBatteryWarranty implements OnInit {
     private itemMasterService: ItemMasterService,
     private extendedBatteryWarrantyService: ExtendedBatteryWarrantyService,
     private storageService: StorageService,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private menuAccess: MenuAccessService
   ) {
     this.currentUser = this.storageService.getUser();
-
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
     this.activatedRoute.paramMap.subscribe(param => {
       this.schemeId = Number(param.get('id'));
     });

@@ -1,3 +1,4 @@
+<!-- src\app\components\warranty-packaging\warranty-packaging.html -->
 <div class="card shadow-sm">
     <div class="card-header bg-primary bg-gradient text-white py-2">
         <div class="d-flex justify-content-between align-items-center">
@@ -190,7 +191,8 @@
         </div>
 
         <div class="d-flex justify-content-end mt-2">
-            <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyPackingSlip()">
+            <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyPackingSlip()"
+                *ngIf="(!(packingSlipId > 0) && canCreate) || (packingSlipId > 0 && canEdit)">
                 <i class="ri-save-line me-1"></i>
                 {{ packingSlipId > 0 ? 'Update' : 'Save' }}
             </button>

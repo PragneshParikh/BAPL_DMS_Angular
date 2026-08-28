@@ -1,3 +1,4 @@
+<!-- src\app\components\dealer-creation\dealer-creation-manager-list\dealer-creation-manager-list.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
   <h4 class="mb-sm-0">Dealer Role Assignment</h4>
   <span class="badge bg-light text-dark border px-3 py-2 fs-6">
@@ -113,14 +114,14 @@
                     </span>
                   </td>
                   <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary me-1" title="Edit" (click)="onEdit(dealer)">
-                      <i class="ri-edit-line"></i>
+                    <button *ngIf="canEdit" class="btn btn-sm btn-outline-primary me-1" title="Edit" (click)="onEdit(dealer)">
+                        <i class="ri-edit-line"></i>
                     </button>
                     <button class="btn btn-sm btn-outline-secondary me-1" title="Menu Access (opens in a new tab)" (click)="onMenuAccess(dealer)">
-                      <i class="ri-list-check-2"></i>
+                        <i class="ri-list-check-2"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" title="Delete" [disabled]="!dealer.isActive" (click)="onDelete(dealer)">
-                      <i class="ri-delete-bin-2-line"></i>
+                    <button *ngIf="canDelete" class="btn btn-sm btn-danger" title="Delete" [disabled]="!dealer.isActive" (click)="onDelete(dealer)">
+                        <i class="ri-delete-bin-2-line"></i>
                     </button>
                   </td>
                 </tr>
@@ -177,20 +178,21 @@
                           </tbody>
                         </table>
 
-                        <div class="d-flex justify-content-between align-items-center" *ngIf="dealerLocations.length > 0">
-                          <small class="text-muted">{{ selectedLocationIds.size }} selected</small>
-                          <div>
-                            <button class="btn btn-outline-success btn-sm me-2"
-                              [disabled]="selectedLocationIds.size === 0 || bulkActionLoading"
-                              (click)="bulkUpdateLocationStatus(true)">
-                              Activate Selected
-                            </button>
-                            <button class="btn btn-outline-secondary btn-sm"
-                              [disabled]="selectedLocationIds.size === 0 || bulkActionLoading"
-                              (click)="bulkUpdateLocationStatus(false)">
-                              Deactivate Selected
-                            </button>
-                          </div>
+                        <!-- Bulk location activate/deactivate — gated on Edit -->
+                        <div class="d-flex justify-content-between align-items-center" *ngIf="dealerLocations.length > 0 && canEdit">
+                            <small class="text-muted">{{ selectedLocationIds.size }} selected</small>
+                            <div>
+                                <button class="btn btn-outline-success btn-sm me-2"
+                                    [disabled]="selectedLocationIds.size === 0 || bulkActionLoading"
+                                    (click)="bulkUpdateLocationStatus(true)">
+                                    Activate Selected
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm"
+                                    [disabled]="selectedLocationIds.size === 0 || bulkActionLoading"
+                                    (click)="bulkUpdateLocationStatus(false)">
+                                    Deactivate Selected
+                                </button>
+                            </div>
                         </div>
                       </ng-container>
 
@@ -298,9 +300,10 @@
         </div>
       </form>
 
+      <!-- Edit modal footer -->
       <div class="text-end mt-3">
-        <button class="btn btn-secondary btn-sm me-2" (click)="closeEditModal()">Cancel</button>
-        <button class="btn btn-primary btn-sm" (click)="saveEdit()">Save</button>
+          <button class="btn btn-secondary btn-sm me-2" (click)="closeEditModal()">Cancel</button>
+          <button *ngIf="canEdit" class="btn btn-primary btn-sm" (click)="saveEdit()">Save</button>
       </div>
     </div>
 

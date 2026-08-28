@@ -1,3 +1,4 @@
+<!-- src\app\components\parts-po-list\parts-po-list.html -->
 <div>
     <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
         <h4 class="mb-sm-0">Parts Purchase Order</h4>
@@ -37,14 +38,13 @@
                         <button type="submit" class="btn btn-primary btn-sm me-1">
                             <i class="align-bottom me-1"></i> Search
                         </button>
-                        <button type="button" class="btn btn-primary btn-sm ms-2" (click)="editPO(null)">
+                        <button type="button" class="btn btn-primary btn-sm ms-2" *ngIf="canCreate" (click)="editPO(null)">
                             <i class="align-bottom me-1"></i> Add
                         </button>
                         <button type="button" class="btn btn-primary btn-sm ms-2" (click)="resetFilters()">
                             <i class="align-bottom me-1"></i> Reset
                         </button>
-                        <button class="btn btn-success btn-sm ms-3" [ngbTooltip]="'Export to Excel'"
-                            (click)="downloadPurchaseOrderExcel()">
+                        <button class="btn btn-success btn-sm ms-3" *ngIf="canDownload" [ngbTooltip]="'Export to Excel'" (click)="downloadPurchaseOrderExcel()">
                             <i class="ri-file-excel-2-line"></i>
                         </button>
                     </div>
@@ -71,8 +71,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let po of pagedPurchaseOrders; let i=index" (dblclick)="editPO(po)"
-                                style="cursor: pointer;" class="hover-row">
+                            <tr *ngFor="let po of pagedPurchaseOrders; let i=index"
+                                (dblclick)="canEdit ? editPO(po) : null"
+                                [style.cursor]="canEdit ? 'pointer' : 'default'" class="hover-row">
                                 <td>{{ (page - 1) * pageSize + i + 1 }}</td>
                                 <td>{{po.poNumber}}</td>
                                 <td>{{po.poDate | date : 'dd-MM-yyyy'}}</td>

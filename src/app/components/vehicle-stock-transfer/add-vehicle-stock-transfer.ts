@@ -1,3 +1,4 @@
+// src\app\components\vehicle-stock-transfer\add-vehicle-stock-transfer.ts
 import { Component, OnInit } from '@angular/core';
 import { PrefixService } from '../../core/services/prefix';
 import { StorageService } from '../../core/services/storage';

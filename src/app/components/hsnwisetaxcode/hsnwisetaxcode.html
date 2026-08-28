@@ -1,3 +1,4 @@
+<!-- src\app\components\hsnwisetaxcode\hsnwisetaxcode.html -->
 <div>
     <!-- main div -->
     <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
@@ -113,7 +114,8 @@
                             </div>
                         </div>
                         <div class="col-md-6 div-btn-add">
-                            <button type="submit" class="btn btn-add btn-sm" [disabled]="addHsnwiseATaxForm.invalid">
+                            <button type="submit" class="btn btn-add btn-sm" *ngIf="canCreate"
+                                [disabled]="addHsnwiseATaxForm.invalid">
                                 Save
                             </button>
                         </div>
@@ -156,7 +158,7 @@
             <div class="card-header">
                 <div class="d-flex justify-content-end align-items-center">
                     <!-- Add HSNWiseTaxCode Button -->
-                    <button class="btn btn-primary btn-sm me-3" (click)="openAddDetails(AddHSNWiseATaxcode)">
+                    <button class="btn btn-primary btn-sm me-3" *ngIf="canCreate" (click)="openAddDetails(AddHSNWiseATaxcode)">
                         Add
                     </button>
                     <!-- Search Box -->

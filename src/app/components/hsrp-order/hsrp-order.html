@@ -1,3 +1,4 @@
+<!-- src\app\components\hsrp-order\hsrp-order.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">HSRP Order Entry</h4>
 </div>
@@ -394,7 +395,8 @@
                     </button> -->
 
                     <!-- SAVE BUTTON -->
-                    <button class="btn btn-primary btn-sm" (click)="submitHSRPOrder()" [disabled]="!hasSelection()">
+                    <button class="btn btn-primary btn-sm" *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
+                        (click)="submitHSRPOrder()" [disabled]="!hasSelection()">
                         Save
                     </button>
 

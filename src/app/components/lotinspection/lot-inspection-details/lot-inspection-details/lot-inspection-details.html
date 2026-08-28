@@ -1,3 +1,4 @@
+<!-- src\app\components\lotinspection\lot-inspection-details\lot-inspection-details\lot-inspection-details.html -->
 <!-- HEADER -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
     <h5 class="mb-0">LOT Inspection</h5>
@@ -336,7 +337,7 @@
 
         <!-- BUTTONS -->
         <div class="text-end mt-2">
-            <button class="btn btn-add btn-sm me-2 text-white btn-primary" (click)="saveData()"
+            <button class="btn btn-add btn-sm me-2 text-white btn-primary" *ngIf="canEdit" (click)="saveData()"
                 [disabled]="isLotInspected === true">
                 Save
             </button><button class="btn btn-light btn-sm ">Close</button>

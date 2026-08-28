@@ -1,3 +1,4 @@
+<!-- src\app\components\Reports\parts-stock-details\parts-stock-details.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">
         Parts Stock Details
@@ -62,7 +63,7 @@
                                 <button type="button" class="btn btn-primary btn-sm border" (click)="resetForm()">
                                     Reset
                                 </button>
-                                <button type="button" class="btn btn-success btn-sm" [ngbTooltip]="'Export To Excel'">
+                                <button type="button" class="btn btn-success btn-sm" *ngIf="canDownload" [ngbTooltip]="'Export To Excel'">
                                     <i class="ri-file-excel-2-line"></i>
                                 </button>
 

@@ -1,7 +1,7 @@
 <!-- ===================================================== -->
 <!-- EMPLOYEE TABLE -->
 <!-- ===================================================== -->
-
+<!-- src\app\components\employee-master\employee-master-list\employee-master-list.html -->
 <div class="card mt-2 shadow-sm mx-2">
 
     <!-- HEADER -->
@@ -26,14 +26,13 @@
             </select>
 
             <!-- EXPORT EXCEL -->
-            <button class="btn btn-success btn-sm" title="Export to Excel" (click)="downloadExcel()">
+            <button *ngIf="canDownload" class="btn btn-success btn-sm" title="Export to Excel" (click)="downloadExcel()">
                 <i class="ri-file-excel-2-line"></i>
             </button>
 
             <!-- ADD EMPLOYEE -->
-            <button class="btn btn-primary btn-sm" routerLink="/employee/add">
-                <i class="ri-add-line"></i>
-                Add Employee
+            <button *ngIf="canCreate" class="btn btn-primary btn-sm" routerLink="/employee/add">
+                <i class="ri-add-line"></i> Add Employee
             </button>
 
         </div>
@@ -212,7 +211,7 @@
 
                     <!-- ACTION -->
                     <td class="text-center">
-                        <button class="btn btn-sm btn-soft-primary"
+                        <button *ngIf="canEdit" class="btn btn-sm btn-soft-primary"
                             (click)="openEditPopup(emp); $event.stopPropagation()">
                             <i class="ri-pencil-fill fs-12"></i> Edit
                         </button>

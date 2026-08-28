@@ -1,3 +1,4 @@
+// src\app\components\occupation-master\occupation-master.ts
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { BatteryApiResponse, BatteryCapacity } from '../../ViewModels/BatteryCapacityMaster/BatteryCapacity';
 import { CommonModule } from '@angular/common';
@@ -10,7 +11,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
 import { Occupation, OccupationApiResponse } from '../../ViewModels/OccupationMasterViewModel';
 import { OccupationService } from '../../core/services/occupation-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-occupation-master',
   imports: [CommonModule, FormsModule, NgbPaginationModule, NgbHighlight, NgbTooltipModule],
@@ -18,7 +19,9 @@ import { OccupationService } from '../../core/services/occupation-service';
   styleUrl: './occupation-master.scss',
 })
 export class OccupationMaster implements OnInit {
-
+  readonly SUBMENU_ID = 62;
+  canCreate = false;
+  canEdit = false;
   allOccupations: Occupation[] = [];
   filteredOccupations: Occupation[] = [];
   sortColumn = '';
@@ -41,8 +44,12 @@ export class OccupationMaster implements OnInit {
     private modalService: NgbModal,
     public toastService: ToastService,
     private loader: LoaderService,
-    private authenticationService: AuthenticationService
-  ) { }
+    private authenticationService: AuthenticationService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.loadOccupations();

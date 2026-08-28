@@ -16,11 +16,11 @@
 
                             <div class="d-flex align-items-center gap-2">
 
-                                <button class="btn btn-sm btn-primary" (click)="newPrefix()">
+                                <button *ngIf="canCreate" class="btn btn-sm btn-primary" (click)="newPrefix()">
                                     Add
                                 </button>
 
-                                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                                <button *ngIf="canDownload" class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
                                     (click)="onDownloadExcel()">
                                     <i class="ri-file-excel-2-line"></i>
                                 </button>
@@ -57,12 +57,12 @@
                                         <td>{{ sequence?.nextNo }}</td>
                                         <td>{{ sequence?.dealerCode }}</td>
                                         <td>
-                                        <button class="btn btn-sm btn-soft-info py-0 px-1 me-1" (click)="onSequenceClick(sequence)" title="Edit">
-                                            <i class="ri-pencil-line"></i>
-                                        </button>
-                                        <button *ngIf="isSuperAdmin" class="btn btn-sm btn-soft-danger py-0 px-1" (click)="deleteSequence(sequence)" title="Delete">
-                                            <i class="ri-delete-bin-line"></i>
-                                        </button>
+                                            <button *ngIf="canEdit" class="btn btn-sm btn-soft-info py-0 px-1 me-1" (click)="onSequenceClick(sequence)" title="Edit">
+                                                <i class="ri-pencil-line"></i>
+                                            </button>
+                                            <button *ngIf="isSuperAdmin && canDelete" class="btn btn-sm btn-soft-danger py-0 px-1" (click)="deleteSequence(sequence)" title="Delete">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
                                         </td>
                                     </tr>
 

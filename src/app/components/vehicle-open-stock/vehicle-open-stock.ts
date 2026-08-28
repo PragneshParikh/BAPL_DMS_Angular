@@ -1,3 +1,4 @@
+// src\app\components\vehicle-open-stock\vehicle-open-stock.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +9,7 @@ import { StorageService } from '../../core/services/storage';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { VehicleOpenStockService } from '../../core/services/vehicle-open-stock-service';
 import { batteryMake } from '../../constant';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-vehicle-open-stock',
   standalone: true,
@@ -17,6 +18,9 @@ import { batteryMake } from '../../constant';
   styleUrl: './vehicle-open-stock.scss',
 })
 export class VehicleOpenStock {
+  readonly SUBMENU_ID = 89;
+  canCreate = false;
+  canEdit = false;
 
   fromDate: string = '';
   toDate: string = '';
@@ -35,9 +39,11 @@ export class VehicleOpenStock {
     private locationService: LocationMasterService,
     private vehicleOpenStockService: VehicleOpenStockService,
     private toaster: ToastService,
-    private loader: LoaderService
+    private loader: LoaderService,
+    private menuAccess: MenuAccessService
   ) {
-
+     this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+     this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
   }
 
   ngOnInit(): void {

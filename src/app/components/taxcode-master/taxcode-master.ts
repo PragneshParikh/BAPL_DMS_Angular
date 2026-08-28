@@ -1,3 +1,4 @@
+// src\app\components\taxcode-master\taxcode-master.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -5,7 +6,7 @@ import { NgbModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { TaxCodeMasterService } from '../../core/services/taxcode-master-service';
 import { LoaderService } from '../../core/services/loader';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 declare var bootstrap: any;
 
 @Component({
@@ -16,7 +17,10 @@ declare var bootstrap: any;
   styleUrl: './taxcode-master.scss'
 })
 export class TaxCodeMasterComponent implements OnInit {
-
+  readonly SUBMENU_ID = 14;
+  canCreate = false;
+  canEdit = false;
+  canDownload = false;
   taxCodeList: any[] = [];
   originalTaxCodeList: any[] = [];
   pagedTaxCodeList: any[] = [];
@@ -38,8 +42,13 @@ export class TaxCodeMasterComponent implements OnInit {
   constructor(
     private taxCodeService: TaxCodeMasterService,
     private toastr: ToastService,
-    private loader: LoaderService
-  ) { }
+    private loader: LoaderService,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     const today = new Date();

@@ -1,3 +1,4 @@
+// src\app\components\oemmodel-warranty\add-oemmodel-warranty\add-oemmodel-warranty.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -10,7 +11,7 @@ import { OemModelViewModel } from '../../../ViewModels/OemModelViewModel';
 
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-add-oemmodel-warranty',
   standalone: true,
@@ -19,6 +20,9 @@ import { ToastService } from '../../../shared/toaster/toast-service';
   styleUrl: './add-oemmodel-warranty.scss',
 })
 export class AddOemmodelWarranty implements OnInit {
+  readonly SUBMENU_ID = 34;
+  canCreate = false;
+  canEdit = false;
 
   isEditMode = false;
   id: number = 0;
@@ -44,8 +48,12 @@ export class AddOemmodelWarranty implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private loader: LoaderService,
-    private toaster: ToastService
-  ) {}
+    private toaster: ToastService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.loadOEMModels();

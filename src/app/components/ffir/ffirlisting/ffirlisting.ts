@@ -1,3 +1,4 @@
+// src\app\components\ffir\ffirlisting\ffirlisting.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +9,7 @@ import { FFIRService } from '../../../core/services/ffirservice';
 import { Router } from '@angular/router';
 import { NgbPaginationModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import Swal from 'sweetalert2';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-ffirlisting',
   standalone: true,
@@ -20,6 +21,10 @@ export class Ffirlisting {
 
   FFIRList: any[] = [];
   searchTimeout: any;
+
+  readonly SUBMENU_ID = 23;
+  canEdit = false;
+  canDelete = false;
 
   // PAGINATION
   page = 1;
@@ -34,8 +39,12 @@ export class Ffirlisting {
   constructor(
     private storageService: StorageService,
     private FFIRService: FFIRService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+  }
 
   searchModel: FFIRSearchModel = {
     dealerCode: '',

@@ -1,3 +1,4 @@
+src\app\components\extended-battery-warranty\extended-battery-warranty.html
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">Extended Warranty Scheme</h4>
 </div>
@@ -211,6 +212,7 @@
                                 Cancel
                             </button>
                             <button type="submit" [disabled]="warrantySchemeForm.invalid"
+                                *ngIf="(schemeId <= 0 && canCreate) || (schemeId > 0 && canEdit)"
                                 class="btn btn-primary btn-sm float-end me-1">
                                 Save
                             </button>

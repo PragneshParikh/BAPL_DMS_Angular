@@ -1,3 +1,4 @@
+// src\app\components\warranty-job-card-claim\warranty-claim-list\warranty-claim-list.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -6,7 +7,7 @@ import { LoaderService } from '../../../core/services/loader';
 import { StorageService } from '../../../core/services/storage';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { WarrantyJCClaimService } from '../../../core/services/warranty-jcclaim-service';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-warranty-claim-list',
   standalone: true,
@@ -15,6 +16,9 @@ import { WarrantyJCClaimService } from '../../../core/services/warranty-jcclaim-
   styleUrl: './warranty-claim-list.scss',
 })
 export class WarrantyClaimList implements OnInit {
+  readonly SUBMENU_ID = 74;
+  canDelete = false;
+  canDownload = false;
 
   claims: any[] = [];
   totalCount: number = 0;
@@ -35,8 +39,12 @@ export class WarrantyClaimList implements OnInit {
     private loader: LoaderService,
     private storageService: StorageService,
     private toaster: ToastService,
-    private warrantyJCClaimService: WarrantyJCClaimService
-  ) { }
+    private warrantyJCClaimService: WarrantyJCClaimService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     const today = new Date();

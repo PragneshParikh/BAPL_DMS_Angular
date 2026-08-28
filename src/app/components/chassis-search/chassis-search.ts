@@ -1,9 +1,11 @@
+//src\app\components\chassis-search\chassis-search.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { ChassisSearchService } from '../../core/services/chassis-search-service';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-chassis-search',
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
@@ -17,6 +19,9 @@ export class ChassisSearch {
   // ============================================
 
   formData: any = { chassisNumber: '' };
+
+  readonly SUBMENU_ID = 39;
+  canCreate = false;
 
   // ============================================
   // VIN DATA
@@ -43,8 +48,11 @@ export class ChassisSearch {
   constructor(
     private chassisSearchService: ChassisSearchService,
     private loader: LoaderService,
-    private toastr: ToastService
-  ) { }
+    private toastr: ToastService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+  }
 
   // ============================================
   // SEARCH CHASSIS

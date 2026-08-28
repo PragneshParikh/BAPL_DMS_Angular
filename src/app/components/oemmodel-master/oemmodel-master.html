@@ -1,3 +1,4 @@
+<!-- src\app\components\oemmodel-master\oemmodel-master.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">OEM Model List</h4>
 </div>
@@ -8,11 +9,11 @@
             <div class="card-header">
                 <div class="d-flex justify-content-end align-items-center">
 
-                    <button class="btn btn-primary btn-sm me-2" (click)="openAddModal()">
+                    <button *ngIf="canCreate" class="btn btn-primary btn-sm me-2" (click)="openAddModal()">
                         Add
                     </button>
 
-                    <button class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
+                    <button *ngIf="canDownload" class="btn btn-success btn-sm me-3" [ngbTooltip]="'Export to Excel'"
                         (click)="downloadOEMModelExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
@@ -146,7 +147,7 @@
                         </div>
 
                         <div class="modal-footer">
-                            <button class="btn btn-primary btn-sm"
+                            <button *ngIf="canEdit" class="btn btn-primary btn-sm"
                                 (click)="formSubmitted=true; editModelName.valid && editModelShortName.valid && updateModel()">
                                 Save
                             </button>

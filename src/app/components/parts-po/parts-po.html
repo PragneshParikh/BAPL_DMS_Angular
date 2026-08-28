@@ -1,3 +1,4 @@
+<!-- src\app\components\parts-po\parts-po.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0 text-center">
         <i class="ri-settings-line me-2"></i>
@@ -347,11 +348,16 @@
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button class="btn btn-primary btn-sm" (click)="onSubmitToERP()"
+                            <!-- <button class="btn btn-primary btn-sm" (click)="onSubmitToERP()"
+                                [disabled]="isSubmitted || !partsPOData?.id || partsPOData.id <= 0">
+                                Submit To ERP
+                            </button> -->
+                            <button class="btn btn-primary btn-sm" *ngIf="canEdit" (click)="onSubmitToERP()"
                                 [disabled]="isSubmitted || !partsPOData?.id || partsPOData.id <= 0">
                                 Submit To ERP
                             </button>
-                            <button class="btn btn-primary btn-sm" (click)="onSave()" [disabled]="isSubmitted">
+                            <button class="btn btn-primary btn-sm" *ngIf="(!isEdit && canCreate) || (isEdit && canEdit)"
+                                (click)="onSave()" [disabled]="isSubmitted">
                                 Save
                             </button>
                             <button class="btn btn-danger btn-sm" (click)="redirectToPOList()"> Cancel </button>

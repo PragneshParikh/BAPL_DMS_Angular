@@ -1,3 +1,4 @@
+<!-- src\app\components\free-service-rate\free-service-rate.html -->
 <div id="free-service-claim-list">
     <!-- Start Breadcrumbs -->
     <app-breadcrumbs title="Free Service Rate"></app-breadcrumbs>
@@ -90,7 +91,8 @@
                                     Cancel
                                 </button>
                                 <button type="button" class="btn btn-primary btn-sm float-end me-1"
-                                    (click)="saveRates()" [disabled]="isEdit">
+                                    *ngIf="(!isEdit && canCreate) || (isEdit && canEdit)"
+                                    (click)="saveRates()" [disabled]="isEdit && !canEdit">
                                     Save
                                 </button>
                             </div>

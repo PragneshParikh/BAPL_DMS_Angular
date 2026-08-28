@@ -1,3 +1,4 @@
+// src\app\components\dispatch-master\dispatch-master.ts
 // misc-master/dispatch-master.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
@@ -7,7 +8,7 @@ import { DispatchMasterService } from '../../core/services/dispatch-master-servi
 import { DispatchMasterListViewModel, DispatchMasterViewModel } from '../../ViewModels/models/DispatchMasterViewModel';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-dispatch-master',
   standalone: true,
@@ -19,6 +20,11 @@ export class DispatchMaster implements OnInit {
 
   @ViewChild('dispatchModal') dispatchModal!: TemplateRef<unknown>;
 
+  readonly SUBMENU_ID = 117;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+  canDownload = false;
   masterTypeList: string[] = ['Dispatch Thru Master'];
 
   dispatchList: DispatchMasterListViewModel[] = [];
@@ -38,8 +44,14 @@ export class DispatchMaster implements OnInit {
     private dispatchService: DispatchMasterService,
     private modalService: NgbModal,
     private loader: LoaderService,
-    private toaster: ToastService
-  ) {}
+    private toaster: ToastService,
+    private menuAccess: MenuAccessService   // ADDED
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.loadRecords();

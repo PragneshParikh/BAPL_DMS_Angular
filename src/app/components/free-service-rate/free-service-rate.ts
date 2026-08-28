@@ -1,3 +1,4 @@
+// src\app\components\free-service-rate\free-service-rate.ts
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
@@ -9,7 +10,7 @@ import { FreeServiceRateService } from '../../core/services/free-service-rate';
 import { identity } from 'lodash';
 import { threadId } from 'worker_threads';
 import { StorageService } from '../../core/services/storage';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-free-service-rate',
   imports: [CommonModule, SharedModule, FormsModule, ReactiveFormsModule],
@@ -20,6 +21,9 @@ export class FreeServiceRate implements OnInit {
 
   oemModelList: any[] = [];
   groupInfo: any;
+  readonly SUBMENU_ID = 67;
+  canCreate = false;
+  canEdit = false;
 
   claimId: number = 0;
   dataSource: any[] = [
@@ -39,13 +43,15 @@ export class FreeServiceRate implements OnInit {
     private toast: ToastService,
     private freeServiceRateService: FreeServiceRateService,
     private storageService: StorageService,
+    private menuAccess: MenuAccessService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
     this.oemModelList = history.state.oemModelList || [];
     this.groupInfo = history.state.serviceInfo || [];
-
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
     this.route.params.subscribe(params => {
 
       const encPO = params['id'];

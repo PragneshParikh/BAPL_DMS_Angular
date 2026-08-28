@@ -101,7 +101,7 @@ import { VehicleInvoiceDispatch } from './components/vehicle-invoice-dispatch/ve
 import { DealerMenuAccessPage } from './components/dealer-creation/dealer-menu-access-page/dealer-menu-access-page';
 import { LocationEditPage } from './components/dealer-creation/dealer-location-edit/dealer-location-edit';
 import { WarrantyRegister } from './components/Reports/warranty-register/warranty-register';
-
+import { MenuRight } from './components/menu-right/menu-right';
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
   { path: 'forgot-password', loadComponent: () => import('./components/account/forgot-password/forgot-password').then(m => m.ForgotPassword) },
@@ -114,8 +114,8 @@ export const routes: Routes = [
       { path: 'showroom/form22master', component: Form22master, data: [10] },
       { path: 'workshop/item-master', component: ItemMaster, data: [5] },
       { path: 'dealer-master', component: DealerMaster, data: [4] },
-      { path: 'dealer-account-master', component: DealerAccountMaster, data: [4] },
-      { path: 'upload', component: DealerMasterBulkDataDipatch, data: [] },
+      { path: 'dealer-account-master', component: DealerAccountMaster, data: [128] },
+      { path: 'upload', component: DealerMasterBulkDataDipatch, data: [127] },
       { path: 'location-master', component: LocationMasterComponent, data: [3] },
       { path: 'color', data: [2], loadComponent: () => import('./components/color/color').then(m => m.Color) },
       { path: 'api-tracking', data: [7], loadComponent: () => import('./components/api-tracking/api-tracking').then(m => m.ApiTracking) },
@@ -270,13 +270,13 @@ export const routes: Routes = [
       { path: 'vehicle-quotation', component: VehicleQuotationListComponent, data: [87] },
       { path: 'vehicle-quotation/add', component: VehicleQuotation, data: [87] },
       { path: 'vehicle-quotation/edit/:id', component: VehicleQuotation, data: [87] },
-      { path: 'parts-inward', data: [0], component: PartInwardList },
-      { path: 'parts-inward/:invoiceNo', data: [0], component: PartInward },
+      { path: 'parts-inward', data: [99], component: PartInwardList },
+      { path: 'parts-inward/:invoiceNo', data: [99], component: PartInward },
       { path: 'parts-stock-details', data: [93], loadComponent: () => import('./components/Reports/parts-stock-details/parts-stock-details').then(m => m.PartsStockDetails) },
       { path: 'estimate', component: EstimateList, data: [98] },
       { path: 'estimate/add', component: Estimate, data: [98] },
       { path: 'estimate/edit/:id', component: Estimate, data: [98] },
-      { path: 'ebw-invoice', data: [106], loadComponent: () => import('./components/ebw-invoice/ebw-invoice').then(m => m.EBWInvoice) },
+      //{ path: 'ebw-invoice', data: [106], loadComponent: () => import('./components/ebw-invoice/ebw-invoice').then(m => m.EBWInvoice) },
       { path: 'ebw-report', data: [111], loadComponent: () => import('./components/ebw-reports/ebw-reports').then(m => m.EBWReports) },
       { path: 'ebw-invoice-list', data: [111], loadComponent: () => import('./components/ebw-invoice-list/ebw-invoice-list').then(m => m.EbwInvoiceList) },
       { path: 'ebw-invoice/:id', data: [106], loadComponent: () => import('./components/ebw-invoice/ebw-invoice').then(m => m.EBWInvoice) },
@@ -290,7 +290,8 @@ export const routes: Routes = [
       { path: 'dispatch-master', component : DispatchMaster, data: [117]},
       { path: 'part-dispatch-invoice', component : PartInvoiceDispatch, data: [118]},
       { path: 'vehicle-dispatch-invoice', component: VehicleInvoiceDispatch, data:[119]},
-      { path: 'warranty-register', component: WarrantyRegister, data:[123] }
+      { path: 'warranty-register', component: WarrantyRegister, data:[123] },
+      { path: 'menu-right', component: MenuRight, data:[124]}
 
     ]
   },

@@ -1,3 +1,4 @@
+// src\app\components\kit-creation\kit-creation-details\kit-creation-details.ts
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { error } from 'console';
@@ -11,7 +12,7 @@ import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ItemMasterService } from '../../../core/services/item-master-service';
 import { KitCreationService } from '../../../core/services/kit-creation.service';
 import { StorageService } from '../../../core/services/storage';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-kit-creation-details',
   imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbPaginationModule],
@@ -21,7 +22,9 @@ import { StorageService } from '../../../core/services/storage';
 export class KitCreationDetails implements OnInit {
   kitDetails: any[] = [];
   itemList: any[] = [];
-
+  readonly SUBMENU_ID = 24;
+  canCreate = false;
+  canEdit = false;
   kitHeaderData: any = {
     kitName: '',
     kitDate: new Date(),
@@ -57,11 +60,13 @@ export class KitCreationDetails implements OnInit {
     private toaster: ToastService,
     private itemMasterService: ItemMasterService,
     private kitCreationService: KitCreationService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
   ) { }
 
   ngOnInit(): void {
-
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
     this.route.paramMap.subscribe((params: any) => {
       const kitHeaderId = Number(params.get('id'));
 

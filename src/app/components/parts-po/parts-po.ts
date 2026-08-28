@@ -1,3 +1,4 @@
+// src\app\components\parts-po\parts-po.ts
 import { Component, ElementRef, OnInit } from '@angular/core';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -19,7 +20,7 @@ import { LedgerMasterService } from '../../core/services/ledger-master';
 import _ from 'lodash';
 import { JobSearch } from '../../dialogs/job-search/job-search';
 import { NgSelectModule } from '@ng-select/ng-select';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-parts-po',
   standalone: true,
@@ -30,6 +31,9 @@ import { NgSelectModule } from '@ng-select/ng-select';
 export class PartsPo implements OnInit {
   locationList: any[] = [];
   jobId: number | null = null;
+  readonly SUBMENU_ID = 33;
+  canCreate = false;
+  canEdit = false;
 
   itemList: any[] = [];
   kitList: any[] = [];
@@ -122,12 +126,15 @@ export class PartsPo implements OnInit {
     private prefixService: PrefixService,
     private ledgerService: LedgerMasterService,
     private modalService: NgbModal,
+    private menuAccess: MenuAccessService,
     private eRef: ElementRef) {
+      this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+      this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
 
-    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+      this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
-    if (!this.isSuperAdmin) {
-      this.dealerCode = this.storageService.getDealerCode();
+      if (!this.isSuperAdmin) {
+        this.dealerCode = this.storageService.getDealerCode();
     }
   }
 

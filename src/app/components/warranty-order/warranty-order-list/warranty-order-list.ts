@@ -1,3 +1,4 @@
+// src\app\components\warranty-order\warranty-order-list\warranty-order-list.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { WarrantyOrderService } from '../../../core/services/warranty-order-service';
 import { LedgerMasterService } from '../../../core/services/ledger-master';
 import { StorageService } from '../../../core/services/storage';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-warranty-order-list',
   standalone: true,
@@ -16,6 +17,8 @@ import { StorageService } from '../../../core/services/storage';
   styleUrl: './warranty-order-list.scss',
 })
 export class WarrantyOrderList implements OnInit {
+  readonly SUBMENU_ID = 112;
+  canDelete = false;
 
   orders: any[] = [];
   supplierList: any[] = [];
@@ -62,8 +65,11 @@ export class WarrantyOrderList implements OnInit {
     private toaster: ToastService,
     private storageService: StorageService,
     private ledgerService: LedgerMasterService,
-    private warrantyOrderService: WarrantyOrderService
-  ) { }
+    private warrantyOrderService: WarrantyOrderService,
+    private menuAccess: MenuAccessService
+  ) { 
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
     this.loadSuppliers();

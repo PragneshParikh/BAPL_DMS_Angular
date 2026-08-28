@@ -1,8 +1,10 @@
+// src\app\components\Reports\warranty-register\warranty-register.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ReportService } from '../../../core/services/report.service';
 import { StorageService } from '../../../core/services/storage';
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 
 import {
   WarrantyRegisterFilterModel,
@@ -20,6 +22,8 @@ type SortDirection = 'asc' | 'desc';
   styleUrl: './warranty-register.scss',
 })
 export class WarrantyRegister implements OnInit {
+  readonly SUBMENU_ID = 123;
+  canDownload = false;
 
   Math = Math;
 
@@ -60,7 +64,8 @@ export class WarrantyRegister implements OnInit {
   constructor(
     private fb: FormBuilder,
     private reportService: ReportService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
   ) {
     this.filterForm = this.fb.group({
       dealerCode: [''],
@@ -74,6 +79,8 @@ export class WarrantyRegister implements OnInit {
       warrantyInvoiceStatus: [''],
       search: ['']
     });
+
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
   }
 
   ngOnInit(): void {

@@ -1,3 +1,4 @@
+// src\app\components\complaint-master\complaint-master.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -5,7 +6,7 @@ import { ComplaintMasterModel } from '../../ViewModels/ComplaintMasterModel';
 import { NgbModal, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { ComplaintmasterService } from '../../core/services/complaintmaster-service';
 import { GroupMasterService } from '../../core/services/group-master-service';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-complaint-master',
@@ -19,7 +20,11 @@ export class ComplaintMaster implements OnInit {
   @ViewChild('complaintAdd') complaintAdd!: TemplateRef<any>;
   @ViewChild('complaintitemModal') complaintitemModal!: TemplateRef<any>;
 
-
+  readonly SUBMENU_ID = 56;
+  canCreate = false;
+  canEdit = false;
+  canDownload = false;
+  
   selectedComplaint: any = {};
 
   complaintForm!: FormGroup;
@@ -36,8 +41,13 @@ export class ComplaintMaster implements OnInit {
     private fb: FormBuilder,
     private modalService: NgbModal,
     private complaintService: ComplaintmasterService,
-     private groupMasterService: GroupMasterService
-  ) { }
+    private groupMasterService: GroupMasterService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
 

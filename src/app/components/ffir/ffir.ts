@@ -1,3 +1,4 @@
+// src\app\components\ffir\ffir.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +13,7 @@ import { FFIRIssueType, FFIRPresentVehicleStatus, FFIRPurposeofCIR, FFIRTypeRoad
 import { number } from 'echarts';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { PrefixService } from '../../core/services/prefix';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-ffir',
   standalone: true,
@@ -21,7 +22,9 @@ import { PrefixService } from '../../core/services/prefix';
   styleUrl: './ffir.scss',
 })
 export class FFIR implements OnInit {
-
+  readonly SUBMENU_ID = 23;
+  canCreate = false;
+  canEdit = false;
   locations: LocationName[];
   ffirData: any = {};
   jobNo: number = 0;
@@ -98,6 +101,7 @@ export class FFIR implements OnInit {
     private ffirService: FFIRService,
     private route: ActivatedRoute,
     private loader: LoaderService,
+    private menuAccess: MenuAccessService,
     private jobCardService: JobCardService) { }
 
 
@@ -105,6 +109,8 @@ export class FFIR implements OnInit {
   ngOnInit(): void {
     this.jobCardId = Number(this.route.snapshot.paramMap.get('id'));
     this.ffirObj.cirDate = new Date().toISOString().split('T')[0];
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
     this.loadPrefix();
     this.fetchJobNoBasedData();
 

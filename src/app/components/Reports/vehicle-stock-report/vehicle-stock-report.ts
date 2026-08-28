@@ -1,3 +1,4 @@
+// src\app\components\Reports\vehicle-stock-report\vehicle-stock-report.ts
 import {
     Component,
     OnInit
@@ -21,7 +22,7 @@ import {
 import {
     VehicleStockReportViewModel
 } from '../../../ViewModels/models/vehicle-stock-report.model';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
     selector: 'app-vehicle-stock-report',
 
@@ -38,6 +39,8 @@ import {
 })
 export class VehicleStockReportComponent
     implements OnInit {
+        readonly SUBMENU_ID = 46;
+        canDownload = false;
 
     filterForm!: FormGroup;
 
@@ -102,42 +105,13 @@ get pageNumbers(): number[] {
     for (let i = start; i <= end; i++) pages.push(i);
     return pages;
 }
-    constructor(
-        private fb: FormBuilder,
-        private reportService: ReportService
-    ) {
-
-        this.filterForm = this.fb.group({
-
-            dealerCode: [''],
-
-            modelCode: [''],
-
-            colorCode: [''],
-
-            chassisNo: [''],
-
-            stockStatus: [''],
-
-            isBilled: [false],
-
-            fromDate: [null],
-
-            toDate: [null]
-        });
-    }
-
-    // =====================================================
-    // INIT
-    // =====================================================
+    constructor(private fb: FormBuilder, private reportService: ReportService, private menuAccess: MenuAccessService) { }
 
     ngOnInit(): void {
-
-        this.isSuperAdmin = this.checkIsSuperAdmin();
-
-        this.loadDropdowns();
-
-        this.loadReport();
+    this.isSuperAdmin = this.checkIsSuperAdmin();
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+    this.loadDropdowns();
+    this.loadReport();
     }
 
     /**

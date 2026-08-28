@@ -12,6 +12,7 @@ import { TermConditionService } from '../../core/services/term-condition-service
 import { LocationMasterService } from '../../core/services/location-master-service';
 import * as XLSX from 'xlsx';
 import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-ebw-invoice-list',
@@ -27,6 +28,12 @@ export class EbwInvoiceList implements OnInit {
 
   private readonly EBW_INVOICE_MODULE_ID = 8;
   private readonly WORKSHOP_AREA_ID = 2;
+  readonly EBW_LIST_SUBMENU_ID = 111;
+
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+  canDownload = false;
 
   locationList: any[] = [];
 
@@ -54,10 +61,20 @@ export class EbwInvoiceList implements OnInit {
     private http: HttpClient,
     private termConditionService: TermConditionService,
     private locationMasterService: LocationMasterService,
-    private router: Router
+    private router: Router,
+    private menuAccess: MenuAccessService   // ADDED
   ) {
     const role = this.storageService.getRole().toLowerCase();
     this.canManageInvoices = role === 'employee' || role === 'superadmin';
+
+    // ADDED — real per-action permission flags, independent of the existing
+    // role-based canManageInvoices flag. Both gates apply: canManageInvoices
+    // controls whether the Manage column shows at all; these control which
+    // buttons appear inside it (and the page-level Add/Export buttons).
+    this.canCreate = this.menuAccess.canCreate(this.EBW_LIST_SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.EBW_LIST_SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.EBW_LIST_SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.EBW_LIST_SUBMENU_ID);
 
     const to = new Date();
     const from = new Date();

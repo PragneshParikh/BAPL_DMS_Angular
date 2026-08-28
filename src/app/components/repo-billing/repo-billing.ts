@@ -1,3 +1,4 @@
+// src\app\components\repo-billing\repo-billing.ts
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -8,7 +9,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CustomerLedger } from '../customer-ledger/customer-ledger';
 import { ChassisDetailService } from '../../core/services/chassis-detail';
 import { StorageService } from '../../core/services/storage';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-repo-billing',
   imports: [FormsModule, CommonModule, ReactiveFormsModule],
@@ -16,6 +17,8 @@ import { StorageService } from '../../core/services/storage';
   styleUrl: './repo-billing.scss',
 })
 export class RepoBilling {
+  readonly SUBMENU_ID = 88;
+  canEdit = false;
 
   formData: any = { chassisNumber: '', searchCriteria: 'chassis' };
   showVehicleDetails = true;
@@ -92,8 +95,11 @@ export class RepoBilling {
     private loader: LoaderService,
     private modalService: NgbModal,
     private chassisDetailService: ChassisDetailService,
-    private storageService: StorageService
-  ) { }
+    private storageService: StorageService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  }
 
   onSubmit(form: any) {
     if (form.invalid)

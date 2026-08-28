@@ -42,10 +42,11 @@
             <input type="text" class="form-control form-control-sm" placeholder="Search..."
                    [(ngModel)]="searchTerm" (ngModelChange)="onFilterChange()">
           </div> -->
-          <button class="btn btn-success btn-sm filter-icon-btn" title="Download Excel" (click)="exportToExcel()">
+          <button *ngIf="canDownload" class="btn btn-success btn-sm filter-icon-btn" title="Download Excel" (click)="exportToExcel()">
             <i class="ri-file-excel-2-line"></i>
           </button>
-          <button class="btn btn-primary btn-sm filter-icon-btn" title="Add New" (click)="addNew()">
+          <!-- CHANGED — Add New gated on Create permission -->
+          <button *ngIf="canCreate" class="btn btn-primary btn-sm filter-icon-btn" title="Add New" (click)="addNew()">
             <i class="ri-add-line"></i>
           </button>
         </div>
@@ -65,11 +66,12 @@
               <th>Bill Type</th>
               <th>Mode</th>
               <th>Bill Amount</th>
-              <th>Print</th>
+              <!-- CHANGED — Print column header gated on Download permission -->
+              <th *ngIf="canDownload">Print</th>
               <th *ngIf="canManageInvoices">Manage</th>
             </tr>
-          </thead>
-          <tbody>
+        </thead>
+        <tbody>
             <tr *ngFor="let row of pagedGrid; let i = index" (dblclick)="openInvoice(row)" style="cursor:pointer;">
               <td>{{ (page - 1) * pageSize + i + 1 }}</td>
               <td>{{ row.billNo }}</td>
@@ -80,16 +82,18 @@
               <td>{{ row.billType }}</td>
               <td>{{ row.cashAccName }}</td>
               <td class="text-end">{{ row.netAmount | number:'1.2-2' }}</td>
-              <td (dblclick)="$event.stopPropagation()">
+              <!-- CHANGED — Print button gated on Download permission -->
+              <td *ngIf="canDownload" (dblclick)="$event.stopPropagation()">
                 <button class="btn btn-sm btn-soft-primary py-0 px-1" (click)="openPrintPopup(row)" title="Print">
                   <i class="ri-printer-line"></i>
                 </button>
               </td>
               <td *ngIf="canManageInvoices" (dblclick)="$event.stopPropagation()">
-                <button class="btn btn-sm btn-soft-info py-0 px-1 me-1" (click)="editRow(row)" title="Edit">
+                <!-- CHANGED — Edit/Delete individually gated -->
+                <button *ngIf="canEdit" class="btn btn-sm btn-soft-info py-0 px-1 me-1" (click)="editRow(row)" title="Edit">
                   <i class="ri-pencil-line"></i>
                 </button>
-                <button class="btn btn-sm btn-soft-danger py-0 px-1" (click)="deleteRow(row)" title="Delete">
+                <button *ngIf="canDelete" class="btn btn-sm btn-soft-danger py-0 px-1" (click)="deleteRow(row)" title="Delete">
                   <i class="ri-delete-bin-line"></i>
                 </button>
               </td>
@@ -97,7 +101,7 @@
             <tr *ngIf="pagedGrid.length === 0">
               <td [attr.colspan]="canManageInvoices ? 11 : 10" class="text-center p-3">No Records Found</td>
             </tr>
-          </tbody>
+        </tbody>
         </table>
 
         <div class="d-flex justify-content-end align-items-center gap-3 mt-2" *ngIf="filteredGrid.length > 0">

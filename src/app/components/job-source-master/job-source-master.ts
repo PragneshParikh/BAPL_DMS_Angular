@@ -1,3 +1,4 @@
+// src\app\components\job-source-master\job-source-master.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -5,7 +6,7 @@ import { NgbModal, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { JobsourceMasterService } from '../../core/services/jobsource-master-service';
 import Swal from 'sweetalert2';
-
+import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-job-source-master',
   standalone: true,
@@ -24,7 +25,11 @@ export class JobSourceMaster implements OnInit {
   filteredList: any[] = [];
   pagedData: any[] = [];
   searchText: string = '';
-
+  readonly SUBMENU_ID = 71;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
+  canDownload = false;
   page = 1;
   pageSize = 10;
   collectionSize = 0;
@@ -36,8 +41,14 @@ export class JobSourceMaster implements OnInit {
     private fb: FormBuilder,
     private modalService: NgbModal,
     private toaster: ToastService,
-    private jobSourceMasterService: JobsourceMasterService
-  ) { }
+    private jobSourceMasterService: JobsourceMasterService,
+    private menuAccess: MenuAccessService
+  ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  }
 
   ngOnInit(): void {
 

@@ -1,3 +1,4 @@
+<!-- src\app\components\vehicle-open-stock\vehicle-open-stock.html -->
 <div class="card shadow-sm">
 
     <!-- Header -->
@@ -191,8 +192,8 @@
 
                 <div class="col text-end">
 
-                    <button type="button" class="btn btn-primary btn-sm me-2" (click)="addVehicle()">
-
+                    <button type="button" class="btn btn-primary btn-sm me-2" *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
+                        (click)="addVehicle()">
                         <i class="bi" [ngClass]="isEditMode ? 'bi-check-lg' : 'bi-plus'"></i>
                         {{ isEditMode ? 'Update' : 'Add' }}
                     </button>

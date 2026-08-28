@@ -1,3 +1,4 @@
+// src\app\components\material-transfer\material-transfer-detail\material-transfer-detail.ts
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SharedModule } from '../../../shared/shared.module';
@@ -18,7 +19,7 @@ import { GetIssueTypeNamePipe } from '../../../core/pipes/get-issue-type-name-pi
 import { TaxService } from '../../../core/services/tax';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { PrefixService } from '../../../core/services/prefix';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-material-transfer-detail',
   imports: [
@@ -38,6 +39,10 @@ export class MaterialTransferDetail implements OnInit {
 
   issueTypes = IssueTypes.filter(x => x.id === 1 || x.id === 2);
   lstTechnician = TechnicianList;
+
+  readonly SUBMENU_ID = 29;
+  canCreate = false;
+  canEdit = false;
 
   formData: any = {
     prefix: '',
@@ -131,8 +136,11 @@ export class MaterialTransferDetail implements OnInit {
     private locationService: LocationMasterService,
     private storageService: StorageService,
     private jobCardService: JobCardService,
-    private prefixMasterService: PrefixService
+    private prefixMasterService: PrefixService,
+    private menuAccess: MenuAccessService
   ) {
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
 
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 

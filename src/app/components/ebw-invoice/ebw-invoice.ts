@@ -1,3 +1,4 @@
+//src\app\components\ebw-invoice\ebw-invoice.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -11,6 +12,7 @@ import { ChassisSearchService } from '../../core/services/chassis-search-service
 import { EbwInvoiceService } from '../../core/services/ebw-invoice-service';
 import { EbwReportService } from '../../core/services/ebw-report-service';
 import { PartsInwardService } from '../../core/services/partsinwardservice';
+import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-ebw-invoice',
@@ -25,6 +27,11 @@ export class EBWInvoice implements OnInit {
 
   invoiceId: number | null = null;
   isEditMode: boolean = false;
+
+  readonly EBW_INVOICE_SUBMENU_ID = 106;
+  canCreate = false;
+  canEdit = false;
+  canDelete = false;
 
   formData: any = {
     date: new Date().toISOString().split('T')[0],
@@ -116,9 +123,13 @@ export class EBWInvoice implements OnInit {
     private toast: ToastService,
     private storageService: StorageService,
     private route: ActivatedRoute,
+    private menuAccess: MenuAccessService,
     private router: Router
   ) {
     this.dealerCode = this.storageService.getDealerCode();
+    this.canCreate = this.menuAccess.canCreate(this.EBW_INVOICE_SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.EBW_INVOICE_SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.EBW_INVOICE_SUBMENU_ID);
   }
 
   ngOnInit(): void {

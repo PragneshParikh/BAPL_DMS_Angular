@@ -1,3 +1,4 @@
+<!-- src\app\components\bgemployee-master\bgemployee-master-list\bgemployee-master-list.html -->
 <!-- ===================================================== -->
 <!-- STAT CARDS -->
 <!-- ===================================================== -->
@@ -50,14 +51,11 @@
     </h5>
 
     <div class="d-flex align-items-center gap-2">
-      <button class="btn btn-success btn-sm" title="Export to Excel" (click)="downloadExcel()">
-        <i class="ri-file-excel-2-line"></i>
-        Export Excel
+      <button *ngIf="canDownload" class="btn btn-success btn-sm" title="Export to Excel" (click)="downloadExcel()">
+          <i class="ri-file-excel-2-line"></i> Export Excel
       </button>
-
-      <button class="btn btn-primary btn-sm" routerLink="/bgemployee-master/add">
-        <i class="ri-add-line"></i>
-        Add Employee
+      <button *ngIf="canCreate" class="btn btn-primary btn-sm" routerLink="/bgemployee-master/add">
+          <i class="ri-add-line"></i> Add Employee
       </button>
     </div>
 
@@ -199,11 +197,11 @@
 
           <!-- ACTION -->
           <td class="text-center">
-            <button class="btn btn-sm btn-soft-primary"
-                    (click)="openEditPopup(emp); $event.stopPropagation()">
-              <i class="ri-pencil-fill fs-12"></i> Edit
+            <button *ngIf="canEdit" class="btn btn-sm btn-soft-primary"
+                (click)="openEditPopup(emp); $event.stopPropagation()">
+                <i class="ri-pencil-fill fs-12"></i> Edit
             </button>
-          </td>
+        </td>
 
         </tr>
 

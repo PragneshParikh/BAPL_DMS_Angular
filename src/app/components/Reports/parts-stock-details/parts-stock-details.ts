@@ -1,3 +1,4 @@
+// src\app\components\Reports\parts-stock-details\parts-stock-details.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { ReportService } from '../../../core/services/report.service';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { DealerService } from '../../../core/services/dealer-service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-
+import { MenuAccessService } from '../../../core/services/menu-access.service';
 @Component({
   selector: 'app-parts-stock-details',
   imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbTooltip],
@@ -18,6 +19,8 @@ export class PartsStockDetails implements OnInit {
   @ViewChild('stockReportFilterForm') stockReportFilterForm!: NgForm
   dealerCode: string = '';
   isSuperAdmin: boolean = false;
+  readonly SUBMENU_ID = 93;
+  canDownload = false; 
 
   partsStockData: any[] = [];
   dealerList: any[] = [];
@@ -33,9 +36,11 @@ export class PartsStockDetails implements OnInit {
     private loader: LoaderService,
     private reportService: ReportService,
     private toaster: ToastService,
-    private dealerMasterService: DealerService
+    private dealerMasterService: DealerService,
+    private menuAccess: MenuAccessService
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
 
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();

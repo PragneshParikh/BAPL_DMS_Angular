@@ -1,3 +1,4 @@
+<!-- src\app\components\agreegate-tax-code-master\agreegate-tax-code-master.html -->
 <div>
     <!-- SEARCH CARD -->
     <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
@@ -131,7 +132,7 @@
             <div class="card-header">
                 <div class="d-flex justify-content-end align-items-center">
                     <!-- Add Form22master Button -->
-                    <button class="btn btn-primary btn-sm me-3" (click)="openAddDetails(AddAgreegateTaxcode)">
+                    <button *ngIf="canCreate" class="btn btn-primary btn-sm me-3" (click)="openAddDetails(AddAgreegateTaxcode)">
                         Add
                     </button>
                     <!-- Search Box -->
