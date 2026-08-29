@@ -44,7 +44,7 @@
 
             <div class="modal-footer">
 
-                <button type="button" class="btn btn-primary" *ngIf="canCreate" (click)="saveJobType(modal)">Save</button>
+                <button type="button" class="btn btn-primary" *ngIf="canCreate" (click)="saveJobSource(modal)">Save</button>
 
                 <button type="button" class="btn btn-light" (click)="modal.dismiss()">
                     Close
@@ -70,7 +70,7 @@
                 <div class="d-flex justify-content-end align-items-center">
 
                     <button class="btn btn-primary btn-sm me-2" *ngIf="canCreate" (click)="openAddDetails()">Add</button>
-                    <button class="btn btn-success btn-sm me-3" *ngIf="canDownload" (click)="downloadJobTypeMasterExcel()">
+                    <button class="btn btn-success btn-sm me-3" *ngIf="canDownload" (click)="downloadJobSourceMasterExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
 
@@ -113,7 +113,7 @@
                                 <td>{{ ((page - 1) * pageSize) + i + 1 }}</td>
                                 <td>{{ item.jobTypeName }}</td>
                                 <td>
-                                    <button class="btn btn-danger btn-sm" *ngIf="canDelete" (click)="deleteJobType(item.id, $event)">
+                                    <button class="btn btn-danger btn-sm" *ngIf="canDelete" (click)="deleteJobSource(item.id, $event)">
                                         <i class="ri-delete-bin-5-line"></i>
                                     </button>
                                 </td>
@@ -197,7 +197,7 @@
 
             <div class="modal-footer">
 
-                <button type="button" class="btn btn-primary" *ngIf="canEdit" (click)="updateJobType(modal)">Save</button>
+                <button type="button" class="btn btn-primary" *ngIf="canEdit" (click)="updateJobSource(modal)">Save</button>
 
                 <button type="button" class="btn btn-light" (click)="modal.dismiss()">
                     Close

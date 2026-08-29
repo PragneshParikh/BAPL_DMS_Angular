@@ -46,7 +46,8 @@ export class KitCreationDetails implements OnInit {
   collectionSize = 0;
 
   selectedIndex: number | null = null;
-  private isModify = false;
+  //private isModify = false;
+  isModifyMode = false;
 
   private tempId = -1;
 
@@ -72,7 +73,7 @@ export class KitCreationDetails implements OnInit {
 
       this.getItemList();
       if (kitHeaderId > 0) {
-        this.isModify = true;
+        this.isModifyMode = true;
         this.kitHeaderId = kitHeaderId;
         this.getHeaderDetails(kitHeaderId);
         this.getKitDetails(kitHeaderId);
@@ -240,17 +241,17 @@ export class KitCreationDetails implements OnInit {
   saveKit(headerForm: any) {
     if (headerForm.invalid) return;
 
-    const action$ = this.isModify
+    const action$ = this.isModifyMode
       ? this.kitCreationService.update(this.kitHeaderData)
       : this.kitCreationService.save(this.kitHeaderData);
 
     action$.subscribe({
       next: (res) => {
         this.loader.hide();
-        if (res && res > 0 && !this.isModify) {
+        if (res && res > 0 && !this.isModifyMode) {
           this.kitDetails = this.kitDetails.map(item => ({ ...item, kitHeaderId: res }));
         }
-        this.showToast(`Kit details ${this.isModify ? 'updated' : 'added'} successfully!`);
+        this.showToast(`Kit details ${this.isModifyMode ? 'updated' : 'added'} successfully!`);
       },
       error: (err) => this.handleError(err),
       complete: () => {
