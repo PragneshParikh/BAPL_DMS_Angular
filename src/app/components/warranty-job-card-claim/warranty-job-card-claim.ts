@@ -65,7 +65,7 @@ export class WarrantyJobCardClaim implements OnInit {
   claimNo: number = 0;
   fromDate: string;
   toDate: string;
-locationList: { locname: string; loccode: string | null; areaName: string | null }[] = [];
+  locationList: { locname: string; loccode: string | null; areaName: string | null }[] = [];
   private allLocations: any[] = [];
   private lastRawJobCards: any[] = [];
 
@@ -86,12 +86,30 @@ locationList: { locname: string; loccode: string | null; areaName: string | null
     private dealerService: DealerService,
     private router: Router,
     private menuAccess: MenuAccessService
-  ) { 
+  ) {
+    // Initial synchronous read from whatever was cached at login — this
+    // is a fast first paint, but it's the STALE value if rights changed
+    // after login. ngOnInit's refreshMenuRights().subscribe() below is
+    // what corrects it once the fresh data actually arrives.
     this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
     this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
   }
 
   ngOnInit(): void {
+    // FIX: refreshMenuRights() is async — subscribe to it and re-derive
+    // canCreate/canEdit once the fresh rights actually land, instead of
+    // firing it and leaving the constructor's stale snapshot in place.
+    this.menuAccess.refreshMenuRights().subscribe({
+      next: () => {
+        this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+        this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+      },
+      error: (err) => {
+        console.error('Failed to refresh menu rights, using cached values.', err);
+        // canCreate/canEdit stay at whatever the constructor already set —
+        // fail-safe rather than fail-blank.
+      }
+    });
 
     const today = new Date();
 
