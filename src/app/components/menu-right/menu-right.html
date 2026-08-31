@@ -38,13 +38,24 @@
                 <thead class="table-light">
                     <tr>
                         <th style="width: 25%;">Menu</th>
-                        <th *ngFor="let bit of permissionBits" class="text-center">{{ bit.label }}</th>
+                        <th *ngFor="let bit of permissionBits" class="text-center">
+                            {{ bit.label }}
+                            <br>
+                            <input type="checkbox"
+                                [checked]="isColumnFullySelected(bit.value)"
+                                (change)="toggleColumn(bit.value)"
+                                title="Select all {{ bit.label }}">
+                        </th>
+                        <!-- NEW: row-level "select all" column -->
+                        <th class="text-center" style="width: 90px;">
+                            All
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     <ng-container *ngFor="let group of menuGroups">
                         <tr class="table-secondary">
-                            <td colspan="6"><strong>{{ group.menuName }}</strong></td>
+                            <td [attr.colspan]="permissionBits.length + 2"><strong>{{ group.menuName }}</strong></td>
                         </tr>
                         <tr *ngFor="let sub of group.subMenus">
                             <td class="ps-4">{{ sub.menuName }}</td>
@@ -52,6 +63,13 @@
                                 <input type="checkbox"
                                     [checked]="hasPermission(sub, bit.value)"
                                     (change)="togglePermission(sub, bit.value)">
+                            </td>
+                            <!-- NEW: select all bits for this one sub-menu row -->
+                            <td class="text-center">
+                                <input type="checkbox"
+                                    [checked]="isRowFullySelected(sub)"
+                                    (change)="toggleRow(sub)"
+                                    title="Select all for this row">
                             </td>
                         </tr>
                     </ng-container>

@@ -161,4 +161,45 @@ export class MenuRight implements OnInit {
       }
     });
   }
+  // Sum of every permission bit — used to check/set "fully selected" state
+  get allBitsMask(): number {
+    return this.permissionBits.reduce((mask, bit) => mask | bit.value, 0);
+  }
+
+  // ===== Row-level select all =====
+  isRowFullySelected(subMenu: any): boolean {
+    return (subMenu.permission & this.allBitsMask) === this.allBitsMask;
+  }
+
+  toggleRow(subMenu: any) {
+    if (this.isRowFullySelected(subMenu)) {
+      subMenu.permission = 0;
+    } else {
+      subMenu.permission = this.allBitsMask;
+    }
+  }
+
+  // ===== Column-level select all =====
+  isColumnFullySelected(bit: number): boolean {
+    // "fully selected" only if there's at least one row, and every visible
+    // row currently has this bit set — an empty menuGroups (e.g. filtered
+    // to nothing) should read as unchecked, not checked-by-default
+    const allSubMenus = this.menuGroups.flatMap(g => g.subMenus);
+    if (allSubMenus.length === 0) return false;
+
+    return allSubMenus.every((sub: any) => this.hasPermission(sub, bit));
+  }
+
+  toggleColumn(bit: number) {
+    const shouldSelect = !this.isColumnFullySelected(bit);
+    const allSubMenus = this.menuGroups.flatMap(g => g.subMenus);
+
+    allSubMenus.forEach((sub: any) => {
+      if (shouldSelect) {
+        sub.permission |= bit;
+      } else {
+        sub.permission &= ~bit;
+      }
+    });
+  }
 }
