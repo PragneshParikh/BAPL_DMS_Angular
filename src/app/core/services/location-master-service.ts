@@ -93,4 +93,10 @@ getDetail(id: number): Observable<LocationDetailModel> {
     });
   }
 
+  importLocationExcel(file: File): Observable<any> {
+  const formData = new FormData();
+  formData.append('file', file);
+  return this.httpClient.post<any>(`${this.baseUrl}/LocationMaster/ImportLocationMasterExcel`, formData);
+}
+
 }

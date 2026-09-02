@@ -425,24 +425,6 @@ export class WarrantyInvoice implements OnInit {
     return [...historicalRows, ...currentRows];
   }
 
-
-  private showErpResultToast(erp: { success: boolean; message?: string; linesSent?: number } | null | undefined): void {
-
-    if (!erp) return;
-
-    if (erp.success) {
-      this.toaster.show(`Sent to ERP successfully (${erp.linesSent ?? 0} line(s)).`, {
-        classname: 'bg-success text-white',
-        delay: 3000
-      });
-    } else {
-      this.toaster.show(`ERP submission failed: ${erp.message || 'Unknown error'}`, {
-        classname: 'bg-danger text-white',
-        delay: 6000
-      });
-    }
-  }
-
   saveWarrantyInvoice(navigateAfter: boolean = true): void {
     if (this.saving) return;
 
@@ -555,22 +537,25 @@ export class WarrantyInvoice implements OnInit {
 
         sessionStorage.removeItem('pendingWarrantyInvoiceOrder');
 
-        // CHANGED: no second HTTP call here anymore. res.erp already holds
-        // the full ERP submission result - InsertWarrantyInvoice /
-        // UpdateWarrantyInvoice built and sent the complete payload
-        // server-side as part of this same request, without needing this
-        // invoice's id to come back first.
-        if (savingMainInvoice) {
-          this.showErpResultToast(res?.erp);
+        // FIX: compute the saved invoice's id BEFORE the navigateAfter
+        // branch below - sendToErp() needs it in both cases (previously
+        // this was only computed in the non-navigate branch, since nothing
+        // else needed it before navigating away).
+        const savedId = res?.invoiceId ?? this.invoiceId;
+        if (savedId) {
+          this.invoiceId = Number(savedId);
+        }
+
+        // FIX: ERP submission is no longer bundled into Insert/Update's
+        // response (res.erp no longer exists) - it's now its own endpoint
+        // (UATWarrantyData), called explicitly here. See sendToErp() below.
+        if (savingMainInvoice && savedId) {
+          this.sendToErp(Number(savedId));
         }
 
         if (navigateAfter) {
           this.router.navigate(['/warranty-invoice-list']);
         } else {
-          const savedId = res?.invoiceId ?? this.invoiceId;
-          if (savedId) {
-            this.invoiceId = Number(savedId);
-          }
           this.loadHistoricalInvoiceOrders(this.invoiceId);
         }
       },
@@ -582,8 +567,31 @@ export class WarrantyInvoice implements OnInit {
         this.toaster.show(serverMsg, { classname: 'bg-danger text-white', delay: 3000 });
       }
     });
-  }
+}
 
+// REPLACES showErpResultToast - the old shape ({ success, message,
+// linesSent }) no longer exists on the save response; PostToErpAsync
+// now returns the ERP's raw response body directly from its own
+// endpoint, so this makes that call explicitly and reports success/
+// failure from it.
+private sendToErp(invoiceId: number): void {
+    this.warrantyInvoiceService.UATWarrantyData(invoiceId).subscribe({
+      next: () => {
+        this.toaster.show('Sent to ERP successfully.', {
+          classname: 'bg-success text-white',
+          delay: 3000
+        });
+      },
+      error: (err) => {
+        console.error('ERP submission failed:', err);
+        const serverMsg = err?.error || 'ERP submission failed. You can retry sending this invoice later.';
+        this.toaster.show(serverMsg, {
+          classname: 'bg-danger text-white',
+          delay: 6000
+        });
+      }
+    });
+}
   private saveHistoricalInvoiceApprovals(invoiceId: number, updates: { orderId: number; isApproved: boolean }[]): Observable<any> {
     return this.warrantyInvoiceService.getWarrantyInvoiceById(invoiceId).pipe(
       switchMap((invoice: any) => {

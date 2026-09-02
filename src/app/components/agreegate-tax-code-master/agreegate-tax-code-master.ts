@@ -1,8 +1,8 @@
 // src\app\components\agreegate-tax-code-master\agreegate-tax-code-master.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { AgreegateTaxCodeMasterService } from '../../core/services/agreegate-tax-code-masterservice';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
@@ -14,7 +14,8 @@ import { MenuAccessService } from '../../core/services/menu-access.service';
   imports: [
     CommonModule,
     FormsModule,
-    NgbPaginationModule
+    NgbPaginationModule,
+    NgbTooltipModule
   ],
   templateUrl: './agreegate-tax-code-master.html',
   styleUrls: ['./agreegate-tax-code-master.scss']
@@ -22,6 +23,9 @@ import { MenuAccessService } from '../../core/services/menu-access.service';
 export class AgreegateTaxCodeMaster implements OnInit {
   readonly SUBMENU_ID = 12;
   canCreate = false;
+
+  @ViewChild('importFileInput') importFileInput!: ElementRef<HTMLInputElement>;
+
   constructor(
     private agreegatetaxService: AgreegateTaxCodeMasterService,
     private loader: LoaderService,
@@ -262,6 +266,50 @@ export class AgreegateTaxCodeMaster implements OnInit {
       createdBy: 'Admin'
     };
     this.selectedTax = null;
+  }
+
+  // Opens the hidden file picker; the actual import happens in onImportFileSelected
+  // once the user has chosen a file.
+  triggerImportFileInput(): void {
+    this.importFileInput.nativeElement.click();
+  }
+
+  onImportFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.loader.show();
+
+    this.agreegatetaxService.importAggregateTaxCodeExcel(file).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        input.value = ''; // reset so selecting the same file again still fires a change event
+
+        // NOTE: assumes the API returns camelCase JSON (insertedCount/updatedCount/
+        // failedCount) — adjust the property names below if your API uses PascalCase.
+        const summary = res?.data;
+        const message = summary
+          ? `Import complete: ${summary.insertedCount} added, ${summary.updatedCount} updated, ${summary.failedCount} failed.`
+          : 'Aggregate Tax Code data imported successfully';
+
+        this.toaster.show(message, {
+          classname: summary?.failedCount ? 'bg-warning text-dark' : 'bg-success text-white',
+          delay: 5000
+        });
+
+        this.loadAggreegateTaxCode();
+      },
+      error: (err) => {
+        this.loader.hide();
+        input.value = '';
+
+        this.toaster.show('Failed to import Aggregate Tax Code data', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+      }
+    });
   }
 
 }

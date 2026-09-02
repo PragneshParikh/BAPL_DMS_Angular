@@ -816,7 +816,14 @@ export class JobCardAddForm {
   }
   //insert jobcard
   isSubmitted = false;
+  isSaving = false;
   saveJobCard() {
+    // NEW: hard stop for re-entrant calls — double-click, a second (click)/(ngSubmit)
+    // firing, or the user clicking again before the loader visually blocks input.
+    if (this.isSaving) {
+      return;
+    }
+
     this.isSubmitted = true;
 
     if (this.selectedJobtype == 1 && this.pdiCheckList.length == 0) {
@@ -866,14 +873,12 @@ export class JobCardAddForm {
     const estDel = new Date(`${this.estDelDate}T${this.estDelTime}`);
 
     if (estDel <= jobIn) {
-
       Swal.fire({
         icon: 'warning',
         title: 'Validation',
         text: 'Estimated Delivery Date & Time should be greater than Job In Date & Time.',
         width: '350px'
       });
-
       return;
     }
     if (!this.observation) {
@@ -883,7 +888,6 @@ export class JobCardAddForm {
         text: 'Observation required.',
         width: '350px'
       });
-
       return;
     }
     if (!this.supervisorComment) {
@@ -893,18 +897,15 @@ export class JobCardAddForm {
         text: 'Supervisor Comment required.',
         width: '350px'
       });
-
       return;
     }
 
     this.showComplaintValidation = false;
 
-    // Pending entry exists but not added
     if (
       this.complaintObj.customerVoice?.trim() ||
       this.complaintObj.complaint?.trim()
     ) {
-
       this.showComplaintValidation = true;
       this.isOpen.voice = true;
       Swal.fire({
@@ -916,7 +917,6 @@ export class JobCardAddForm {
       return;
     }
 
-    // At least one record should exist
     if (this.complaintList.length === 0) {
       this.showComplaintValidation = true;
       this.isOpen.voice = true;
@@ -928,7 +928,7 @@ export class JobCardAddForm {
       });
       return;
     }
-    //  VALIDATION (recommended)
+
     if (this.selectedJobtype == 1 && !this.isPdiSaved) {
       Swal.fire('Error', 'Please complete PDI first', 'error');
       return;
@@ -945,7 +945,6 @@ export class JobCardAddForm {
     const dealerCode = this.storageService.getDealerCode();
     const userId = this.storageService.getUserId();
 
-    //  HEADER
     const jobCardHeader = {
       id: this.isEditMode ? this.editId : 0,
       jobtype: this.selectedJobtype || 0,
@@ -979,7 +978,6 @@ export class JobCardAddForm {
       updatedBy: userId
     };
 
-    // BATTERY
     const jobCardBattery = {
       dealerCode: dealerCode,
       batteryMake: this.batteryMake,
@@ -1000,7 +998,6 @@ export class JobCardAddForm {
       updatedBy: userId
     };
 
-    //  CUSTOMER
     const jobCardCustomer = {
       customerLedgerId: this.customerObj.customerLedgerId || 0,
       customerName: this.customerObj.customerName || null,
@@ -1011,19 +1008,15 @@ export class JobCardAddForm {
       registerNo: this.registerNo || null,
       motorNo: this.motorNo || null,
       batteryNo: this.batteryNumber || null,
-
       saleDate: this.customerObj.saleDate || null,
       insuranceExpDate: this.customerObj.insuranceExpDate || null,
       nextServiceDueDate: this.customerObj.nextServiceDueDate || null,
       rsaRenewalDate: this.customerObj.rsaRenewalDate || null,
-
       remarks: this.customerObj.remarks || null,
-
       createdBy: userId,
       updatedBy: userId
     };
 
-    //  COMPLAINT
     const jobCardComplaint = this.complaintList.map(x => ({
       id: x.id || 0,
       dealerCode: dealerCode,
@@ -1034,18 +1027,15 @@ export class JobCardAddForm {
       updatedBy: userId
     }));
 
-    //  PDI (USE STORED DATA )
-
     const JobCardpdiChecklist = this.pdiCheckList.map(x => ({
-
       pdichecklistMasterId: x.id,
       oemModelId: x.oemModelId,
-      isStatus: x.isStatus,   // use normalized value
+      isStatus: x.isStatus,
       remarks: x.remarks,
       createdBy: userId,
       updatedBy: userId
     }));
-    //  FINAL PAYLOAD
+
     const payload = {
       jobCardHeader,
       jobCardBattery,
@@ -1054,26 +1044,23 @@ export class JobCardAddForm {
       pdiChecklistChassiWise: JobCardpdiChecklist
     };
 
-    //  API CALL
     const apiCall = this.isEditMode
       ? this.jobCardService.updateJobCard(payload)
       : this.jobCardService.insertJobCard(payload);
 
+    this.isSaving = true; // NEW: lock out further calls until this request settles
     this.loader.show();
     apiCall.subscribe({
       next: (res: any) => {
+        this.isSaving = false; // NEW
         this.toastr.show(`${this.isEditMode ? 'Updated' : 'Saved'} Successfully`, { classname: 'bg-success text-white', delay: 5000 });
         this.resetForm();
         this.router.navigate(['/job-card']);
         this.isEditMode = false;
         this.loader.hide();
       },
-      // error: (err) => {
-      //   console.error(err);
-      //   this.loader.hide();
-      //   this.toastr.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
-      // }
       error: (err) => {
+        this.isSaving = false; // NEW
         console.error(err);
         this.loader.hide();
 

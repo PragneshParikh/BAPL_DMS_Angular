@@ -11,6 +11,11 @@
                 <div class="d-flex justify-content-end align-items-center">
 
                     <button class="btn btn-primary btn-sm me-2" *ngIf="canCreate" (click)="openAddModal()">Add</button>
+                    <button class="btn btn-outline-primary btn-sm me-2" *ngIf="canCreate" [ngbTooltip]="'Import from Excel'"
+                        (click)="triggerImportFileInput()">
+                        <i class="ri-upload-2-line"></i>
+                    </button>
+                    <input #importFileInput type="file" accept=".xlsx" hidden (change)="onImportFileSelected($event)">
                     <button class="btn btn-success btn-sm me-3" *ngIf="canDownload" [ngbTooltip]="'Export to Excel'" (click)="downloadTaxCodeExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>

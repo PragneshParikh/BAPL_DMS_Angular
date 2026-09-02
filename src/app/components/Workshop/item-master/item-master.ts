@@ -1,5 +1,5 @@
 //src\app\components\Workshop\item-master\item-master.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ItemMasterService } from '../../../core/services/item-master-service';
 import { NgbHighlight, NgbModal, NgbPaginationModule, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -19,6 +19,8 @@ import { MenuAccessService } from '../../../core/services/menu-access.service';
   styleUrl: './item-master.scss',
 })
 export class ItemMaster implements OnInit {
+
+  @ViewChild('importFileInput') importFileInput!: ElementRef<HTMLInputElement>;
 
   durationTypes = DurationTypes;
 
@@ -142,6 +144,53 @@ export class ItemMaster implements OnInit {
 
   }
 
+  // ===============================
+  // Excel Import
+  // ===============================
+
+  // Opens the hidden file picker; the actual import happens in onImportFileSelected
+  // once the user has chosen a file.
+  triggerImportFileInput(): void {
+    this.importFileInput.nativeElement.click();
+  }
+
+  onImportFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.loader.show();
+
+    this.itemService.importItemMasterExcel(file).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        input.value = ''; // reset so selecting the same file again still fires a change event
+
+        const summary = res?.data;
+        const message = summary
+          ? `Import complete: ${summary.insertedCount} added, ${summary.updatedCount} updated, ${summary.failedCount} failed.`
+          : 'Item data imported successfully';
+
+        this.toaster.show(message, {
+          classname: summary?.failedCount ? 'bg-warning text-dark' : 'bg-success text-light',
+          delay: 5000
+        });
+
+        this.loadItems();
+      },
+      error: (err) => {
+        this.loader.hide();
+        input.value = '';
+        console.error(err);
+
+        this.toaster.show('Failed to import item data!', {
+          classname: 'bg-danger text-light',
+          delay: 5000
+        });
+      }
+    });
+  }
+
   // sorting
   sort(column: string) {
 
@@ -181,16 +230,13 @@ export class ItemMaster implements OnInit {
   }
 
   openDetails(modal: any, item: any) {
-    this.selectedItem = {};
-    this.selectedItem = item;
+    this.selectedItem = { ...item };   // CHANGED — clone so edits don't leak into pagedData until saved
     this.modalService.open(modal, { size: 'xl' });
   }
 
   updateItem() {
     this.loader.show();
     this.selectedItem.dealerCode = this.storageService.getDealerCode();
-    this.selectedItem.uom = this.itemObj.uom;
-    this.itemObj.status = this.selectedItem.status 
     this.selectedItem.updatedBy = this.storageService.getUserId();
     this.selectedItem.updatedDate = new Date();
     this.itemService.updateItem(this.selectedItem).subscribe({

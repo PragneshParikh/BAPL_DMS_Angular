@@ -87,42 +87,6 @@ thead.table-light th {
                                        // being pinned in place
 }
 
-// ── Sticky first column (Sr No) ──────────────────────────────────────────
-// With ~50 columns, Sr No scrolls out of view within the first few
-// columns — losing your place in the row while scanning right. Pinning it
-// keeps a fixed reference point. Delete this whole block if you'd rather
-// keep things simple; it's the one genuinely optional addition here.
-table.table {
-  th:first-child,
-  td:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 1;
-    background-color: inherit;
-  }
-
-  thead th:first-child {
-    z-index: 3; // above both the sticky header row and the sticky column
-    box-shadow: inset -1px -1px 0 #dee2e6;
-  }
-
-  tbody td:first-child {
-    box-shadow: inset -1px 0 0 #dee2e6;
-  }
-}
-
-// Bootstrap's .table-striped alternates row background via nth-child on
-// <tr>; a `position: sticky` cell paints over that with its own
-// background instead of inheriting it correctly in every browser, so the
-// stripe color is restated explicitly on the pinned first cell.
-.table-striped > tbody > tr:nth-of-type(odd) > td:first-child {
-  background-color: rgba(0, 0, 0, 0.03);
-}
-
-.table-striped > tbody > tr:nth-of-type(even) > td:first-child {
-  background-color: #fff;
-}
-
 // ── Sortable headers ─────────────────────────────────────────────────────
 .sortable {
   cursor: pointer;

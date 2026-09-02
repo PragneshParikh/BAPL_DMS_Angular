@@ -11,8 +11,9 @@
                     <label class="form-label">Dealer Name</label>
                     <select class="form-select form-select-sm" [(ngModel)]="dealerCode"
                         (ngModelChange)="checkSearchReset($event)" [disabled]="isDealer">
-                        <option value=null>-- Select Dealer --</option>
-                        <option *ngFor="let d of dealerList" [value]="d.dealerCode">
+                        <option [ngValue]="null">Select Dealer</option>
+                        <option [ngValue]="null">All</option>
+                        <option *ngFor="let d of dealerList" [ngValue]="d.dealerCode">
                             {{d.dealerName}}
                         </option>
                     </select>
@@ -43,6 +44,12 @@
                         (click)="downloadLocationExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>
+
+                    <button *ngIf="canEdit" class="btn btn-outline-primary btn-sm" [ngbTooltip]="'Import from Excel'"
+                        (click)="triggerImportFileInput()">
+                        <i class="ri-upload-2-line"></i>
+                    </button>
+                    <input #importFileInput type="file" accept=".xlsx" hidden (change)="onImportFileSelected($event)">
 
                 </div>
             </div>
@@ -114,6 +121,7 @@
                         <div class="text-md-right float-md-end gridjs-pagination">
 
                             <ngb-pagination [collectionSize]="totalRecords" [(page)]="page" [pageSize]="pageSize"
+                                [maxSize]="5" [boundaryLinks]="true" [rotate]="true"
                                 (pageChange)="loadPage()">
                             </ngb-pagination>
                         </div>
@@ -269,4 +277,4 @@
             </div>
         </div>
     </div>
-</div>
+</div>s

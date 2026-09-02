@@ -1,6 +1,6 @@
 // src\app\components\hsn-code-master\hsn-code-master.ts
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { NgbModal, NgbModule, NgbModalRef, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
@@ -20,6 +20,7 @@ import { MenuAccessService } from '../../core/services/menu-access.service';
 export class HsnCodeMaster implements OnInit {
 
   @ViewChild('hsnModal') hsnModal!: TemplateRef<unknown>;
+  @ViewChild('importFileInput') importFileInput!: ElementRef<HTMLInputElement>;
   readonly SUBMENU_ID = 13;
   canCreate = false;
   canDownload = false;
@@ -308,6 +309,51 @@ export class HsnCodeMaster implements OnInit {
       });
     });
   }
+
+  // Opens the hidden file picker; the actual import happens in onImportFileSelected
+  // once the user has chosen a file.
+  triggerImportFileInput(): void {
+    this.importFileInput.nativeElement.click();
+  }
+
+  onImportFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.loader.show();
+
+    this.hsnService.importHSNCodeExcel(file).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        input.value = ''; // reset so selecting the same file again still fires a change event
+
+        // NOTE: assumes the API returns camelCase JSON (insertedCount/skippedCount/
+        // failedCount) — adjust the property names below if your API uses PascalCase.
+        const summary = res?.data;
+        const message = summary
+          ? `Import complete: ${summary.insertedCount} added, ${summary.skippedCount} skipped, ${summary.failedCount} failed.`
+          : 'HSN Code data imported successfully';
+
+        this.toastService.show(message, {
+          classname: summary?.failedCount ? 'bg-warning text-dark' : 'bg-success text-white',
+          delay: 5000
+        });
+
+        this.loadHsnCodes();
+      },
+      error: (err) => {
+        this.loader.hide();
+        input.value = '';
+
+        this.toastService.show('Failed to import HSN Code data', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+      }
+    });
+  }
+
   // ================= EDIT =================
   openEditModal(hsn: HsnCodeMasterViewModel) {
     this.isDuplicateHSN = false;

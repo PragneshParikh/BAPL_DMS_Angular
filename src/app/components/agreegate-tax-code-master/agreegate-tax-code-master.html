@@ -135,6 +135,12 @@
                     <button *ngIf="canCreate" class="btn btn-primary btn-sm me-3" (click)="openAddDetails(AddAgreegateTaxcode)">
                         Add
                     </button>
+                    <!-- Import Excel Button -->
+                    <button *ngIf="canCreate" class="btn btn-outline-primary btn-sm me-3" [ngbTooltip]="'Import from Excel — adds new codes, updates matching ones'"
+                        (click)="triggerImportFileInput()">
+                        <i class="ri-upload-2-line"></i>
+                    </button>
+                    <input #importFileInput type="file" accept=".xlsx" hidden (change)="onImportFileSelected($event)">
                     <!-- Search Box -->
                     <div class="search-box">
                         <input type="text" class="form-control search" placeholder="Search..."

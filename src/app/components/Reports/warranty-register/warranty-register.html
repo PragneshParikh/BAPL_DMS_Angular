@@ -147,144 +147,303 @@
     <div class="card">
       <div class="card-body">
 
-        <div class="text-center p-4" *ngIf="reportData.length === 0">
-          No records found. Please adjust your filters and try again.
-        </div>
 
         <div class="table-responsive" *ngIf="reportData.length > 0">
           <table class="table table-bordered table-striped table-sm">
             <thead class="table-light">
               <tr>
+
+                <!-- 1 -->
                 <th class="sortable" (click)="onSort('srNo')">
                   Sr.No
                   <i class="fas" [ngClass]="{
-                    'fa-sort-up':   sortColumn === 'srNo' && sortDirection === 'asc',
+                    'fa-sort-up': sortColumn === 'srNo' && sortDirection === 'asc',
                     'fa-sort-down': sortColumn === 'srNo' && sortDirection === 'desc',
-                    'fa-sort':      sortColumn !== 'srNo'
+                    'fa-sort': sortColumn !== 'srNo'
                   }"></i>
                 </th>
-                <th>Location</th>
-                <th>Claim Type</th>
-                <th>Job No</th>
-                <th>Job Date</th>
-                <th>Repair Bill No</th>
-                <th>Repair Bill Date</th>
-                <!-- <th>Item</th>
-                <th>Description</th> -->
-                <th>Chassis No</th>
-                <th>Model Name</th>
-                <th>Model Description</th>
-                <th>Labour Name</th>
-                <th>Labour Description</th>
-                <th>Part Name</th>
-                <th>Part Description</th>
-                <th class="text-end">Qty</th>
-                <th class="text-end">Rate</th>
-                <th class="text-end">MRP</th>
-                <th class="text-end">Taxable Amount</th>
-                <th class="text-end">CGST %</th>
-                <th class="text-end">CGST Amount</th>
-                <th class="text-end">SGST %</th>
-                <th class="text-end">SGST Amount</th>
-                <th class="text-end">IGST %</th>
-                <th class="text-end">IGST Amount</th>
-                <th class="text-end">Total GST</th>
-                <th class="text-end">Total Amount</th>
+
+                <th>Location Name</th>              <!-- 2 -->
+                <th>Location Code</th>               <!-- 3 -->
+                <th>Chassis No</th>                  <!-- 4 -->
+                <th>Model Name</th>                  <!-- 5 -->
+                <th>Part Name</th>                   <!-- 6 -->
+                <th>Part Description</th>            <!-- 7 -->
+                <th>Labour Name</th>                 <!-- 8 -->
+                <th>Labour Description</th>          <!-- 9 -->
+
+                <th class="text-end">Qty</th>              <!-- 10 -->
+                <th class="text-end">Rate</th>             <!-- 11 -->
+                <th class="text-end">MRP</th>              <!-- 12 -->
+                <th class="text-end">Taxable Amount</th>   <!-- 13 -->
+                <th class="text-end">CGST %</th>           <!-- 14 -->
+                <th class="text-end">CGST Amount</th>      <!-- 15 -->
+                <th class="text-end">SGST %</th>           <!-- 16 -->
+                <th class="text-end">SGST Amount</th>      <!-- 17 -->
+                <th class="text-end">IGST %</th>           <!-- 18 -->
+                <th class="text-end">IGST Amount</th>      <!-- 19 -->
+                <th class="text-end">Total GST Amount</th> <!-- 20 -->
+                <th class="text-end">Total Amount</th>     <!-- 21 -->
+
                 <th class="sortable" (click)="onSort('warrantyClaimNo')">
-                  Claim No
+                  Claim No                           <!-- 22 -->
                   <i class="fas" [ngClass]="{
-                    'fa-sort-up':   sortColumn === 'warrantyClaimNo' && sortDirection === 'asc',
+                    'fa-sort-up': sortColumn === 'warrantyClaimNo' && sortDirection === 'asc',
                     'fa-sort-down': sortColumn === 'warrantyClaimNo' && sortDirection === 'desc',
-                    'fa-sort':      sortColumn !== 'warrantyClaimNo'
+                    'fa-sort': sortColumn !== 'warrantyClaimNo'
                   }"></i>
                 </th>
-                <th>Claim Date</th>
-                <th>Party</th>
-                <th>Claim Status</th>
-                <th>Approver Engineer</th>
-                <th>Accept/Reject Reason</th>
-                <!-- <th>PRN No</th> -->
-                <th>WR Order Status</th>
-                <th>WR Order No</th>
-                <th>WR Order Date</th>
-                <th>WR Invoice Status</th>
-                <th>WR Invoice No</th>
-                <th>WR Invoice Date</th>
-                <th>WR Packing Slip No</th>
-                <th>WR Packing Slip Date</th>
-                <th>WR Dispatch No</th>
-                <th>WR Dispatch Date</th>
-                <th>WR Dispatch Received Status</th>
-                <th>WR Dispatch Received Date</th>
-                <th>WR Dispatch Received Remarks</th>
-                <th>WR Verification Date</th>
-                <th>WR Packing Concern</th>
-                <th>WR Packing Concern Type</th>
-                <th>WR Packing Concern Remarks</th>
-                <th>WR Material Concern</th>
-                <th>WR Material Concern Type</th>
-                <th>WR Material Concern Remarks</th>
+
+                <th>Claim Date</th>                  <!-- 23 -->
+                <th>Party</th>                        <!-- 24 -->
+                <th>Claim Status</th>                <!-- 25 -->
+                <th>Approver Engineer</th>           <!-- 26 -->
+                <th>Reject Reason</th>               <!-- 27 -->
+
+                <th>Order Status</th>                <!-- 28 -->
+                <th>Order No</th>                    <!-- 29 -->
+                <th>Order Date</th>                  <!-- 30 -->
+
+                <th>Invoice Status</th>              <!-- 31 -->
+
+                <th>Job No</th>                       <!-- 32 -->
+                <th>Job Date</th>                     <!-- 33 -->
+
+                <th>Repair Bill No</th>              <!-- 34 -->
+                <th>Repair Bill Date</th>            <!-- 35 -->
+
+                <th>Invoice No</th>                  <!-- 36 -->
+                <th>Invoice Date</th>                <!-- 37 -->
+
+                <th>Packing Slip No</th>             <!-- 38 -->
+                <th>Packing Slip Date</th>           <!-- 39 -->
+
+                <th>Dispatch No</th>                  <!-- 40 -->
+                <th>Dispatch Date</th>                <!-- 41 -->
+                <th>Dispatch Received Status</th>    <!-- 42 -->
+                <th>Dispatch Received Date</th>      <!-- 43 -->
+                <th>Dispatch Received Remarks</th>   <!-- 44 -->
+
+                <th>Verification Date</th>           <!-- 45 -->
+
+                <th>Packing Concern</th>             <!-- 46 -->
+                <th>Packing Concern Type</th>        <!-- 47 -->
+                <th>Packing Concern Remarks</th>     <!-- 48 -->
+
+                <th>Material Concern</th>            <!-- 49 -->
+                <th>Material Concern Type</th>       <!-- 50 -->
+                <th>Material Concern Remarks</th>    <!-- 51 -->
+
+                <th>Claim Type</th>                  <!-- 52 -->
+
               </tr>
             </thead>
+
             <tbody>
               <tr *ngFor="let row of reportData">
+
+                <!-- 1 -->
                 <td>{{ row.srNo || '—' }}</td>
-                <td>
-                  {{ row.locationName || '—' }}<span *ngIf="row.locationCode"> ({{ row.locationCode }})</span>
-                </td>
-                <td>{{ row.claimType || '—' }}</td>
-                <td>{{ row.jobNo || '—' }}</td>
-                <td class="text-nowrap">{{ formatDate(row.jobDate) }}</td>
-                <td>{{ row.rbillNo || '—' }}</td>
-                <td class="text-nowrap">{{ formatDate(row.rbillDate) }}</td>
-                <!-- <td>{{ row.itemName || '—' }}</td>
-                <td>{{ row.description || '—' }}</td> -->
+
+                <!-- 2, 3 -->
+                <td>{{ row.locationName || '—' }}</td>
+                <td>{{ row.locationCode || '—' }}</td>
+
+                <!-- 4, 5 -->
                 <td>{{ row.chasisNo || '—' }}</td>
                 <td>{{ row.modelName || '—' }}</td>
-                <td class="wrap-cell">{{ row.modelDescription || '—' }}</td>
+
+                <!-- 6, 7 -->
+                <td>{{ row.partName || '—' }}</td>
+                <td class="wrap-cell">{{ row.partDescription || '—' }}</td>
+
+                <!-- 8, 9 -->
                 <td>{{ row.labourName || '—' }}</td>
                 <td class="wrap-cell">{{ row.labourDescription || '—' }}</td>
-                <td>{{ row.partName || '—' }}</td>
-                <td>{{ row.partDescription || '—' }}</td>
-                <td class="text-end">{{ formatNumber(row.qty) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(row.rate) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(row.mrp) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(row.taxableAmount) }}</td>
-                <td class="text-end">{{ formatPercent(row.cgstPercent) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(row.cgstAmount) }}</td>
-                <td class="text-end">{{ formatPercent(row.sgstPercent) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(row.sgstAmount) }}</td>
-                <td class="text-end">{{ formatPercent(row.igstPercent) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(row.igstAmount) }}</td>
-                <td class="text-end text-nowrap">{{ formatCurrency(row.totalGstAmount) }}</td>
-                <td class="text-end text-nowrap fw-semibold">{{ formatCurrency(row.totalAmount) }}</td>
-                <td>{{ row.warrantyClaimNo || '—' }}</td>
-                <td class="text-nowrap">{{ formatDate(row.warrantyClaimDate) }}</td>
-                <td>{{ row.partyName || '—' }}</td>
-                <td><span [class]="statusClass(row.warrantyClaimStatus)">{{ row.warrantyClaimStatus || '—' }}</span></td>
-                <td>{{ row.approverEngineerName || '—' }}</td>
-                <td class="wrap-cell">{{ row.claimAcceptRejectReason || '—' }}</td>
-                <!-- <td>{{ row.prnNo || '—' }}</td> -->
-                <td><span [class]="statusClass(row.warrantyOrderStatus)">{{ row.warrantyOrderStatus || '—' }}</span></td>
-                <td>{{ row.warrantyOrderNo || '—' }}</td>
-                <td class="text-nowrap">{{ formatDate(row.warrantyOrderDate) }}</td>
-                <td><span [class]="statusClass(row.warrantyInvoiceStatus)">{{ row.warrantyInvoiceStatus || '—' }}</span></td>
-                <td>{{ row.warrantyInvoiceNo || '—' }}</td>
-                <td class="text-nowrap">{{ formatDate(row.warrantyInvoiceDate) }}</td>
-                <td>{{ row.packingSlipNo || '—' }}</td>
-                <td class="text-nowrap">{{ formatDate(row.packingSlipDate) }}</td>
-                <td>{{ row.dispatchNo || '—' }}</td>
-                <td class="text-nowrap">{{ formatDate(row.dispatchDate) }}</td>
-                <td>{{ row.dispatchReceivedStatus || '—' }}</td>
-                <td class="text-nowrap">{{ formatDate(row.dispatchReceivedDate) }}</td>
-                <td class="wrap-cell">{{ row.dispatchReceivedRemarks || '—' }}</td>
-                <td class="text-nowrap">{{ formatDate(row.verificationDate) }}</td>
-                <td>{{ row.packingConcern || '—' }}</td>
-                <td>{{ row.packingConcernType || '—' }}</td>
-                <td class="wrap-cell">{{ row.packingConcernRemarks || '—' }}</td>
-                <td>{{ row.materialConcern || '—' }}</td>
-                <td>{{ row.materialConcernType || '—' }}</td>
-                <td class="wrap-cell">{{ row.materialConcernRemarks || '—' }}</td>
+
+                <!-- 10-21 -->
+                <td class="text-end">
+                  {{ formatNumber(row.qty) }}
+                </td>
+
+                <td class="text-end text-nowrap">
+                  {{ formatCurrency(row.rate) }}
+                </td>
+
+                <td class="text-end text-nowrap">
+                  {{ formatCurrency(row.mrp) }}
+                </td>
+
+                <td class="text-end text-nowrap">
+                  {{ formatCurrency(row.taxableAmount) }}
+                </td>
+
+                <td class="text-end">
+                  {{ formatPercent(row.cgstPercent) }}
+                </td>
+
+                <td class="text-end text-nowrap">
+                  {{ formatCurrency(row.cgstAmount) }}
+                </td>
+
+                <td class="text-end">
+                  {{ formatPercent(row.sgstPercent) }}
+                </td>
+
+                <td class="text-end text-nowrap">
+                  {{ formatCurrency(row.sgstAmount) }}
+                </td>
+
+                <td class="text-end">
+                  {{ formatPercent(row.igstPercent) }}
+                </td>
+
+                <td class="text-end text-nowrap">
+                  {{ formatCurrency(row.igstAmount) }}
+                </td>
+
+                <td class="text-end text-nowrap">
+                  {{ formatCurrency(row.totalGstAmount) }}
+                </td>
+
+                <td class="text-end text-nowrap fw-semibold">
+                  {{ formatCurrency(row.totalAmount) }}
+                </td>
+
+                <!-- 22-27 -->
+                <td>
+                  {{ row.warrantyClaimNo || '—' }}
+                </td>
+
+                <td class="text-nowrap">
+                  {{ formatDate(row.warrantyClaimDate) }}
+                </td>
+
+                <td>
+                  {{ row.partyName || '—' }}
+                </td>
+
+                <td>
+                  <span [class]="statusClass(row.warrantyClaimStatus)">
+                    {{ row.warrantyClaimStatus || '—' }}
+                  </span>
+                </td>
+
+                <td>
+                  {{ row.approverEngineerName || '—' }}
+                </td>
+
+                <td class="wrap-cell">
+                  {{ row.claimAcceptRejectReason || '—' }}
+                </td>
+
+                <!-- 28-30 -->
+                <td>
+                  <span [class]="statusClass(row.warrantyOrderStatus)">
+                    {{ row.warrantyOrderStatus || '—' }}
+                  </span>
+                </td>
+
+                <td>
+                  {{ row.warrantyOrderNo || '—' }}
+                </td>
+
+                <td class="text-nowrap">
+                  {{ formatDate(row.warrantyOrderDate) }}
+                </td>
+
+                <!-- 31 -->
+                <td>
+                  <span [class]="statusClass(row.warrantyInvoiceStatus)">
+                    {{ row.warrantyInvoiceStatus || '—' }}
+                  </span>
+                </td>
+
+                <!-- 32, 33 -->
+                <td>{{ row.jobNo || '—' }}</td>
+                <td class="text-nowrap">
+                  {{ formatDate(row.jobDate) }}
+                </td>
+
+                <!-- 34, 35 -->
+                <td>{{ row.rbillNo || '—' }}</td>
+                <td class="text-nowrap">
+                  {{ formatDate(row.rbillDate) }}
+                </td>
+
+                <!-- 36, 37 -->
+                <td>
+                  {{ row.warrantyInvoiceNo || '—' }}
+                </td>
+
+                <td class="text-nowrap">
+                  {{ formatDate(row.warrantyInvoiceDate) }}
+                </td>
+
+                <!-- 38, 39 -->
+                <td>
+                  {{ row.packingSlipNo || '—' }}
+                </td>
+
+                <td class="text-nowrap">
+                  {{ formatDate(row.packingSlipDate) }}
+                </td>
+
+                <!-- 40-44 -->
+                <td>
+                  {{ row.dispatchNo || '—' }}
+                </td>
+
+                <td class="text-nowrap">
+                  {{ formatDate(row.dispatchDate) }}
+                </td>
+
+                <td>
+                  {{ row.dispatchReceivedStatus || '—' }}
+                </td>
+
+                <td class="text-nowrap">
+                  {{ formatDate(row.dispatchReceivedDate) }}
+                </td>
+
+                <td class="wrap-cell">
+                  {{ row.dispatchReceivedRemarks || '—' }}
+                </td>
+
+                <!-- 45 -->
+                <td class="text-nowrap">
+                  {{ formatDate(row.verificationDate) }}
+                </td>
+
+                <!-- 46-48 -->
+                <td>
+                  {{ row.packingConcern || '—' }}
+                </td>
+
+                <td>
+                  {{ row.packingConcernType || '—' }}
+                </td>
+
+                <td class="wrap-cell">
+                  {{ row.packingConcernRemarks || '—' }}
+                </td>
+
+                <!-- 49-51 -->
+                <td>
+                  {{ row.materialConcern || '—' }}
+                </td>
+
+                <td>
+                  {{ row.materialConcernType || '—' }}
+                </td>
+
+                <td class="wrap-cell">
+                  {{ row.materialConcernRemarks || '—' }}
+                </td>
+
+                <!-- 52 -->
+                <td>{{ row.claimType || '—' }}</td>
+
               </tr>
             </tbody>
           </table>

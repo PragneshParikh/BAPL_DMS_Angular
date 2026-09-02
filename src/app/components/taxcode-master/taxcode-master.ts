@@ -1,6 +1,6 @@
 // src\app\components\taxcode-master\taxcode-master.ts
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../shared/toaster/toast-service';
@@ -38,6 +38,8 @@ export class TaxCodeMasterComponent implements OnInit {
 
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
+
+  @ViewChild('importFileInput') importFileInput!: ElementRef<HTMLInputElement>;
 
   constructor(
     private taxCodeService: TaxCodeMasterService,
@@ -332,6 +334,51 @@ export class TaxCodeMasterComponent implements OnInit {
         this.loader.hide();
         console.error('Excel Download Error:', err);
         this.toastr.show('Excel download failed', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+      }
+    });
+  }
+
+  // Opens the hidden file picker; the actual import happens in onImportFileSelected
+  // once the user has chosen a file.
+  triggerImportFileInput(): void {
+    this.importFileInput.nativeElement.click();
+  }
+
+  onImportFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.loader.show();
+
+    this.taxCodeService.importTaxCodeExcel(file).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        input.value = ''; // reset so selecting the same file again still fires a change event
+
+        // NOTE: assumes the API returns camelCase JSON (insertedCount/skippedCount/
+        // failedCount) — adjust the property names below if your API uses PascalCase.
+        const summary = res?.data;
+        const message = summary
+          ? `Import complete: ${summary.insertedCount} added, ${summary.skippedCount} skipped, ${summary.failedCount} failed.`
+          : 'Tax Code data imported successfully';
+
+        this.toastr.show(message, {
+          classname: summary?.failedCount ? 'bg-warning text-dark' : 'bg-success text-white',
+          delay: 5000
+        });
+
+        this.loadTaxCodes();
+      },
+      error: (err) => {
+        this.loader.hide();
+        input.value = '';
+        console.error(err);
+
+        this.toastr.show('Failed to import Tax Code data', {
           classname: 'bg-danger text-white',
           delay: 5000
         });

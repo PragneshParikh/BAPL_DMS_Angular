@@ -50,5 +50,13 @@ export class AgreegateTaxCodeMasterService {
     );
   }
 
+  // Posts as multipart/form-data — do not set a Content-Type header manually here,
+  // the browser needs to set its own boundary for FormData to be parsed correctly.
+  importAggregateTaxCodeExcel(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.httpClient.post(`${this.baseUrl}/AgreegateTaxCode/import`, formData);
+  }
 
 }

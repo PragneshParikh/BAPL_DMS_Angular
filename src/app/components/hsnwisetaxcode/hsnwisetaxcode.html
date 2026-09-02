@@ -1,224 +1,500 @@
-<!-- src\app\components\hsnwisetaxcode\hsnwisetaxcode.html -->
 <div>
-    <!-- main div -->
+    <!-- Page Title -->
     <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
         <h4 class="mb-sm-0">HSNWise TaxCode Master</h4>
     </div>
 
-    <!--Add page-->
+    <!-- ========================================== -->
+    <!-- ADD HSN WISE TAX CODE MODAL -->
+    <!-- ========================================== -->
+
     <ng-template #AddHSNWiseATaxcode let-modal>
-        <form #addHsnwiseATaxForm="ngForm" (ngSubmit)="addHSNWiseATax(addHsnwiseATaxForm, modal)">
+
+        <form
+            #addHsnwiseATaxForm="ngForm"
+            (ngSubmit)="addHSNWiseATax(addHsnwiseATaxForm, modal)"
+        >
 
             <div class="card">
 
                 <!-- Header -->
                 <div class="modal-header">
-                    <h5 class="modal-title">Add HSNWise TaxCode Details</h5>
-                    <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+
+                    <h5 class="modal-title">
+                        Add HSNWise TaxCode Details
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="btn-close btn-close-white"
+                        (click)="modal.dismiss()">
+                    </button>
+
                 </div>
+
 
                 <!-- Body -->
                 <div class="card-body">
-                    <div *ngIf="showAlert" class="alert alert-warning material-shadow alert-dismissible fade show"
+
+                    <!-- Alert -->
+                    <div
+                        *ngIf="showAlert"
+                        class="alert alert-warning material-shadow alert-dismissible fade show"
                         role="alert">
+
                         {{ alertMessage }}
-                        <button type="button" class="btn-close" (click)="showAlert = false">
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            (click)="showAlert = false">
                         </button>
+
                     </div>
+
+
                     <div class="row">
 
-                        <!-- HSN Code (Auto Filled) -->
+                        <!-- HSN Code -->
                         <div class="col-md-2">
-                            <label class="form-label">HSN Code</label>
-                            <span class="text-danger">*</span>
-                            <select class="form-select form-select-sm" [(ngModel)]="formData.hsncode" name="HsnCodeDD"
-                                #HsnCodeDD="ngModel" required>
-                                <option [ngValue]="null">-- Select HSNCode --</option>
-                                <option *ngFor="let h of HsnCodeDDList" [ngValue]="h.hsnCodeDD">
-                                    {{ h.hsnCodeDD }}
+
+                            <label class="form-label">
+                                HSN Code
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select
+                                class="form-select form-select-sm"
+                                [(ngModel)]="formData.hsncode"
+                                name="HsnCodeDD"
+                                #HsnCodeDD="ngModel"
+                                required>
+
+                                <option [ngValue]="null">
+                                    -- Select HSNCode --
                                 </option>
+
+                                <option
+                                    *ngFor="let h of HsnCodeDDList"
+                                    [ngValue]="h.hsnCodeDD">
+
+                                    {{ h.hsnCodeDD }}
+
+                                </option>
+
                             </select>
-                            <small class="text-danger"
-                                *ngIf="HsnCodeDD.invalid && (HsnCodeDD.touched || addHsnwiseATaxForm.submitted)">
+
+                            <small
+                                class="text-danger"
+                                *ngIf="HsnCodeDD.invalid &&
+                                (HsnCodeDD.touched ||
+                                addHsnwiseATaxForm.submitted)">
+
                                 HSNCode is required
+
                             </small>
+
                         </div>
+
+
                         <!-- Aggregate Tax Code -->
                         <div class="col-md-2">
-                            <label class="form-label">Aggregate TaxCode</label>
-                            <span class="text-danger">*</span>
-                            <select class="form-select form-select-sm" name="ataxCode" #ataxCode="ngModel" required
-                                [(ngModel)]="formData.selectedATax" (change)="onATaxCodeChange()">
-                                <option [ngValue]="null">-- Select ATaxCode --</option>
-                                <option *ngFor="let a of ataxCodeList" [ngValue]="a">
-                                    {{ a.ataxCode }}
+
+                            <label class="form-label">
+                                Aggregate TaxCode
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select
+                                class="form-select form-select-sm"
+                                name="ataxCode"
+                                #ataxCode="ngModel"
+                                [(ngModel)]="formData.selectedATax"
+                                (change)="onATaxCodeChange()"
+                                required>
+
+                                <option [ngValue]="null">
+                                    -- Select ATaxCode --
                                 </option>
+
+                                <option
+                                    *ngFor="let a of ataxCodeList"
+                                    [ngValue]="a">
+
+                                    {{ a.ataxCode }}
+
+                                </option>
+
                             </select>
-                            <small class="text-danger"
-                                *ngIf="ataxCode.invalid && (ataxCode.touched || addHsnwiseATaxForm.submitted)">
+
+                            <small
+                                class="text-danger"
+                                *ngIf="ataxCode.invalid &&
+                                (ataxCode.touched ||
+                                addHsnwiseATaxForm.submitted)">
+
                                 Aggregate Tax Code is required
+
                             </small>
+
                         </div>
+
+
+                        <!-- Tax Code -->
                         <div class="col-md-2">
-                            <label class="form-label">TaxCode</label>
-                            <span class="text-danger">*</span>
-                            <input type="text" class="form-control form-control-sm" name="taxCode"
-                                [(ngModel)]="formData.taxCode" readonly>
+
+                            <label class="form-label">
+                                TaxCode
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                name="taxCode"
+                                [(ngModel)]="formData.taxCode"
+                                readonly>
+
                         </div>
+
+
+                        <!-- Tax Rate -->
                         <div class="col-md-2">
-                            <label class="form-label">TaxRate</label>
-                            <span class="text-danger">*</span>
-                            <input type="text" class="form-control form-control-sm" name="taxRate"
-                                [(ngModel)]="formData.taxRate" readonly>
+
+                            <label class="form-label">
+                                TaxRate
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                name="taxRate"
+                                [(ngModel)]="formData.taxRate"
+                                readonly>
+
                         </div>
-                        <!-- Description -->
-                        <!-- Custom Radio Color -->
+
+
+                        <!-- State Flag -->
                         <div class="col-md-3">
-                            <label class="form-label d-block">State Flag<span class="text-danger">*</span></label>
+
+                            <label class="form-label d-block">
+                                State Flag
+                                <span class="text-danger">*</span>
+                            </label>
 
                             <div class="d-flex gap-3 align-items-center">
 
+                                <!-- Same -->
                                 <div class="form-check">
-                                    <input class="form-check-input form-check-input-sm" type="radio" name="stateFlag"
-                                        id="same" value="S" [(ngModel)]="formData.stateflag" #stateFlag="ngModel"
+
+                                    <input
+                                        class="form-check-input form-check-input-sm"
+                                        type="radio"
+                                        name="stateFlag"
+                                        id="same"
+                                        value="S"
+                                        [(ngModel)]="formData.stateflag"
+                                        #stateFlag="ngModel"
                                         required>
-                                    <label class="form-check-label" for="same">
+
+                                    <label
+                                        class="form-check-label"
+                                        for="same">
+
                                         Same
+
                                     </label>
+
                                 </div>
 
+
+                                <!-- Other -->
                                 <div class="form-check">
-                                    <input class="form-check-input form-check-input-sm" type="radio" name="stateFlag"
-                                        id="other" value="O" [(ngModel)]="formData.stateflag" required>
-                                    <label class="form-check-label" for="other">
+
+                                    <input
+                                        class="form-check-input form-check-input-sm"
+                                        type="radio"
+                                        name="stateFlag"
+                                        id="other"
+                                        value="O"
+                                        [(ngModel)]="formData.stateflag"
+                                        required>
+
+                                    <label
+                                        class="form-check-label"
+                                        for="other">
+
                                         Other
+
                                     </label>
+
                                 </div>
 
                             </div>
 
-                            <small class="text-danger"
-                                *ngIf="stateFlag.invalid && (stateFlag.touched || addHsnwiseATaxForm.submitted)">
+
+                            <small
+                                class="text-danger"
+                                *ngIf="stateFlag.invalid &&
+                                (stateFlag.touched ||
+                                addHsnwiseATaxForm.submitted)">
+
                                 StateFlag is required
+
                             </small>
+
                         </div>
+
+
+                        <!-- Effective Date -->
                         <div class="col-md-6">
-                            <label class="form-label">Effective Date <span class="text-danger">*</span></label>
 
-                            <input type="date" class="form-control form-control-sm" [(ngModel)]="formData.effectivedate"
-                                name="effectivedate" required #effectiveDateInput="ngModel">
+                            <label class="form-label">
+                                Effective Date
+                                <span class="text-danger">*</span>
+                            </label>
 
-                            <div *ngIf="effectiveDateInput.invalid && (effectiveDateInput.touched || addHsnwiseATaxForm.submitted)"
+                            <input
+                                type="date"
+                                class="form-control form-control-sm"
+                                [(ngModel)]="formData.effectivedate"
+                                name="effectivedate"
+                                required
+                                #effectiveDateInput="ngModel">
+
+                            <div
+                                *ngIf="effectiveDateInput.invalid &&
+                                (effectiveDateInput.touched ||
+                                addHsnwiseATaxForm.submitted)"
                                 class="text-danger">
+
                                 Effective Date is required.
+
                             </div>
+
                         </div>
+
+
+                        <!-- Save Button -->
                         <div class="col-md-6 div-btn-add">
-                            <button type="submit" class="btn btn-add btn-sm" *ngIf="canCreate"
+
+                            <button
+                                type="submit"
+                                class="btn btn-add btn-sm"
+                                *ngIf="canCreate"
                                 [disabled]="addHsnwiseATaxForm.invalid">
+
                                 Save
+
                             </button>
+
                         </div>
 
                     </div>
+
                 </div>
 
-                <!-- Footer -->
             </div>
-            <!-- <div class="">
-                
-                <table class="table table-bordered">
-                    <thead class="table-bgColor">
-                        <tr>
-                            <th>HSNCode</th>
-                            <th>ATaxCode</th>
-                            <th>StateFlag</th>
-                            <th>EffectiveDate</th>
-                        </tr>
-                    </thead>
 
-                    <tbody>
-                        <tr *ngFor="*ngFor="let at of griddata"">
-                            <td>{{at.hsncode }}</td>
-                            <td>{{at.aTaxCode }}</td>
-                            <td>{{ at.stateflag }}</td>
-                            <td>{{ at.effectivedate }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div> -->
         </form>
+
     </ng-template>
+
 </div>
 
-<!-- view list details -->
-<div class="row" id="hsnwise-tax-code">
+
+<!-- ========================================== -->
+<!-- HSN WISE TAX CODE LIST -->
+<!-- ========================================== -->
+
+<div
+    class="row"
+    id="hsnwise-tax-code">
+
     <div class="col-lg-12">
+
         <div class="card">
+
+            <!-- Card Header -->
             <div class="card-header">
-                <div class="d-flex justify-content-end align-items-center">
-                    <!-- Add HSNWiseTaxCode Button -->
-                    <button class="btn btn-primary btn-sm me-3" *ngIf="canCreate" (click)="openAddDetails(AddHSNWiseATaxcode)">
+
+                <div class="d-flex justify-content-end align-items-center gap-2">
+
+                    <!-- Add Button -->
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        *ngIf="canCreate"
+                        (click)="openAddDetails(AddHSNWiseATaxcode)">
+
                         Add
+
                     </button>
-                    <!-- Search Box -->
+
+
+                    <!-- Import Excel Button -->
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm"
+                        *ngIf="canCreate"
+                        ngbTooltip="Import from Excel — adds new HSN/ATax mappings and updates matching ones"
+                        (click)="triggerImportFileInput()">
+
+                        <i class="ri-upload-2-line"></i>
+
+                    </button>
+
+
+                    <!-- Hidden Excel File Input -->
+                    <input
+                        #importFileInput
+                        type="file"
+                        accept=".xlsx,.xls"
+                        hidden
+                        (change)="onImportFileSelected($event)">
+
+
+                    <!-- Search -->
                     <div class="search-box">
-                        <input type="text" class="form-control search" placeholder="Search..."
-                            (input)="searchItems($event)" />
+
+                        <input
+                            type="text"
+                            class="form-control search"
+                            placeholder="Search..."
+                            (input)="searchItems($event)">
+
                         <i class="ri-search-line search-icon"></i>
+
                     </div>
+
                 </div>
+
             </div>
-            <!-- end card header -->
+
+
+            <!-- Card Body -->
             <div class="card-body">
+
+                <!-- Table -->
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered mb-0 table-sm">
+
+                    <table
+                        class="table table-hover table-bordered mb-0 table-sm">
+
                         <thead class="table-bgColor">
+
                             <tr>
-                                <th class="sort" (click)="sort('hsncode')" data-sort="Hsncode">HSNCode</th>
-                                <th class="sort" (click)="sort('ataxCode')" data-sort="AtaxCode">Agreegate Tax Code</th>
-                                <th class="sort" (click)="sort('stateFlag')" data-sort="StateFlag">StateFlag</th>
-                                <th class="sort" (click)="sort('effectiveDate')" data-sort="EffectiveDate">EffectiveDate
+
+                                <th
+                                    class="sort"
+                                    (click)="sort('hsncode')"
+                                    data-sort="Hsncode">
+
+                                    HSNCode
+
                                 </th>
+
+
+                                <th
+                                    class="sort"
+                                    (click)="sort('ataxCode')"
+                                    data-sort="AtaxCode">
+
+                                    Aggregate Tax Code
+
+                                </th>
+
+
+                                <th
+                                    class="sort"
+                                    (click)="sort('stateFlag')"
+                                    data-sort="StateFlag">
+
+                                    StateFlag
+
+                                </th>
+
+
+                                <th
+                                    class="sort"
+                                    (click)="sort('effectiveDate')"
+                                    data-sort="EffectiveDate">
+
+                                    EffectiveDate
+
+                                </th>
+
                             </tr>
+
                         </thead>
+
+
                         <tbody>
-                            <tr *ngFor="let data of pagedData" style="cursor:pointer" ngbTooltip="
+
+                            <tr
+                                *ngFor="let data of pagedData"
+                                style="cursor:pointer"
+                                ngbTooltip="
                                     HSN: {{data.hsncode}}
                                     TaxCode: {{data.ataxCode}}
                                     State: {{data.stateFlag}}
                                     Date: {{data.effectiveDate | date:'dd-MM-yyyy'}}
-                                    " placement="top" container="body">
-                                <td>{{ data.hsncode }}</td>
-                                <td>{{ data.ataxCode }}</td>
-                                <td>{{ data.stateFlag?.trim() }}</td>
-                                <td>{{ data.effectiveDate | date:'dd-MM-yyyy' }}</td>
+                                "
+                                placement="top"
+                                container="body">
+
+                                <td>
+                                    {{ data.hsncode }}
+                                </td>
+
+                                <td>
+                                    {{ data.ataxCode }}
+                                </td>
+
+                                <td>
+                                    {{ data.stateFlag?.trim() }}
+                                </td>
+
+                                <td>
+                                    {{ data.effectiveDate | date:'dd-MM-yyyy' }}
+                                </td>
+
                             </tr>
+
                         </tbody>
+
                     </table>
+
                 </div>
-                <!-- <div class="row justify-content-md-between align-items-md-center">
-                    <\!-- Pagination --\>
-                    <div class="col-sm-12 col-md-5">
-                        <div class="text-md-right float-md-end gridjs-pagination">
-                            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
-                                (pageChange)="pageChange($event)">
-                            </ngb-pagination>
-                        </div>
-                    </div>
-                    <\!-- End Pagination --\>
-                </div> -->
-                <!-- PAGINATION -->
+
+
+                <!-- Pagination -->
                 <div class="col-sm-12 col-md-12 mt-2">
-                    <div class="text-md-right float-md-end gridjs-pagination">
-                        <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
-                            (pageChange)="pageChange($event)" [maxSize]="10" [boundaryLinks]="true">
+
+                    <div
+                        class="text-md-right float-md-end gridjs-pagination">
+
+                        <ngb-pagination
+                            [collectionSize]="collectionSize"
+                            [(page)]="page"
+                            [pageSize]="pageSize"
+                            (pageChange)="pageChange($event)"
+                            [maxSize]="10"
+                            [boundaryLinks]="true">
+
                         </ngb-pagination>
+
                     </div>
+
                 </div>
-            </div><!-- end card-body -->
-        </div><!-- end card -->
+
+            </div>
+
+        </div>
+
     </div>
-    <!-- end col -->
+
 </div>
-<!-- end row -->
+

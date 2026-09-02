@@ -100,9 +100,10 @@ export class RepairBill implements OnInit {
   discountType = 'Value';
   discountPartType = 'Value';
 
-  cgst = 0;
-  sgst = 0;
-  igst = 0;
+  totalGrossAmount = 0;
+  totalCgstAmount = 0;
+  totalSgstAmount = 0;
+  totalIgstAmount = 0;
 
   totalDiscount = 0;
   totalTaxableAmount = 0;
@@ -770,6 +771,14 @@ export class RepairBill implements OnInit {
   }
 
   calculateTotals(): void {
+    // Gross Amount - full pre-discount, pre-tax value regardless of issue type,
+    // so a warranty/FSC line still shows what it would have cost.
+    const labourGross =
+      this.labourItems.reduce((sum, x) => sum + ((x.qty || 0) * (x.rate || 0)), 0);
+    const partGross =
+      this.materialedJobCarDList.reduce((sum, x) => sum + ((x.partQty || 0) * (x.partRate || 0)), 0);
+    this.totalGrossAmount = labourGross + partGross;
+
     const labourDiscount =
       this.labourItems.reduce(
         (sum, x) => sum + (x.discount || 0),
@@ -799,6 +808,31 @@ export class RepairBill implements OnInit {
     this.totalTaxableAmount =
       labourTaxable + partTaxable;
 
+    // CGST/SGST/IGST - Labour items already carry properly-zeroed tax
+    // amounts for U/W/FSC (set at addLabour()/auto-generation time), but
+    // Part items' cgstAmount/sgstAmount come straight from the backend
+    // without that zeroing, so guard them here to stay consistent with
+    // taxableAmount/netAmount, which ARE already zeroed for those rows.
+    const isPartZeroed = (x: any) => x.issuetypeName === 'U/W' || x.issuetypeName === 'FSC';
+
+    const labourCgst =
+      this.labourItems.reduce((sum, x) => sum + (x.cgstAmount || 0), 0);
+    const partCgst =
+      this.materialedJobCarDList.reduce((sum, x) => sum + (isPartZeroed(x) ? 0 : (x.cgstAmount || 0)), 0);
+    this.totalCgstAmount = labourCgst + partCgst;
+
+    const labourSgst =
+      this.labourItems.reduce((sum, x) => sum + (x.sgstAmount || 0), 0);
+    const partSgst =
+      this.materialedJobCarDList.reduce((sum, x) => sum + (isPartZeroed(x) ? 0 : (x.sgstAmount || 0)), 0);
+    this.totalSgstAmount = labourSgst + partSgst;
+
+    const labourIgst =
+      this.labourItems.reduce((sum, x) => sum + (x.igstAmount || 0), 0);
+    const partIgst =
+      this.materialedJobCarDList.reduce((sum, x) => sum + (isPartZeroed(x) ? 0 : (x.igstAmount || 0)), 0);
+    this.totalIgstAmount = labourIgst + partIgst;
+
     const labourNet =
       this.labourItems.reduce(
         (sum, x) => sum + (x.netAmount || 0),
@@ -816,7 +850,7 @@ export class RepairBill implements OnInit {
     // this.discountValue = partDiscount + labourDiscount;
     this.amountReceived =
       this.totalNetAmount;
-  }
+}
   editLabour(index: number): void {
     const item = this.labourItems[index];
 

@@ -184,7 +184,34 @@ export class JobCardService {
     return this.httpClient.get(`${this.baseUrl}/JobCard/GetJobCardStatusById/${id}`);
   }
 
-  getIssueTypebasedJobDetails(dealerCode: string, jobNo: number, serviceloc: string, fromDate: Date, toDate: Date) {
-    return this.httpClient.get(`${this.baseUrl}/JobCard/GetIssueTypebasedJobDetails/${dealerCode}/${jobNo}/${serviceloc}/${fromDate}/${toDate}`)
+  getIssueTypebasedJobDetails(
+    dealerCode: string | null,
+    jobNo: number | null,
+    serviceloc: string | null,
+    fromDate: string | null,
+    toDate: string | null
+  ): Observable<any[]> {
+    let params = new HttpParams();
+
+    if (dealerCode) {
+      params = params.set('dealerCode', dealerCode);
+    }
+    if (jobNo) {
+      params = params.set('jobNo', jobNo.toString());
+    }
+    if (serviceloc) {
+      params = params.set('serviceloc', serviceloc);
+    }
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+    if (toDate) {
+      params = params.set('toDate', toDate);
+    }
+
+    return this.httpClient.get<any[]>(
+      `${this.baseUrl}/JobCard/GetIssueTypebasedJobDetails`,
+      { params }
+    );
   }
 }

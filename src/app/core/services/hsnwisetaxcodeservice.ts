@@ -35,4 +35,10 @@ export class HsnWiseTaxCodeService {
     }
     return this.httpClient.get<any[]>(`${this.baseUrl}/HSNWiseTaxCode/GetHsnwiseTaxcodedetails`, { params });
   }
+
+  importHsnwiseTaxCodeExcel(file: File): Observable<any> {
+  const formData = new FormData();
+  formData.append('file', file);
+  return this.httpClient.post(`${this.baseUrl}/HSNWiseTaxCode/import`, formData);
+}
 }

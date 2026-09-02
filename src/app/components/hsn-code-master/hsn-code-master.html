@@ -15,6 +15,11 @@
                     <!--BUTTONS -->
                     <div class="d-flex gap-2 me-3">
                         <button class="btn btn-primary btn-sm" *ngIf="canCreate" (click)="openAddModal()">Add</button>
+                        <button class="btn btn-outline-primary btn-sm" *ngIf="canCreate" [ngbTooltip]="'Import from Excel'"
+                            (click)="triggerImportFileInput()">
+                            <i class="ri-upload-2-line"></i>
+                        </button>
+                        <input #importFileInput type="file" accept=".xlsx" hidden (change)="onImportFileSelected($event)">
                         <button class="btn btn-success btn-sm" *ngIf="canDownload" [ngbTooltip]="'Export to Excel'" (click)="downloadHSNCodeMasterExcel()">
                             <i class="ri-file-excel-2-line"></i>
                         </button>

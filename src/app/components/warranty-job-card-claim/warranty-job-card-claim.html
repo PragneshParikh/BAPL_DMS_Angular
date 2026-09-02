@@ -181,92 +181,82 @@
         <div class="row g-3 mt-1">
 
             <div class="table-responsive">
-                <h6>Part Item Details</h6>
-                <table class="table table-bordered table-sm align-middle warranty-table">
-                    <thead>
-                        <tr>
-                            <th>Part Item</th>
-                            <th>Description</th>
-                            <th>Inward Serial</th>
-                            <th>Outward Serial</th>
-                            <th class="text-center">Qty</th>
-                            <th class="text-end">Rate</th>
-                            <th class="text-end">MRP</th>
-                            <th class="text-end">IGST Amnt</th>
-                            <th class="text-end">Amount</th>
-                            <th>Dealer Observation</th>
-                            <th>Root Cause Analysis(RCA)</th>
-                            <th>Claim Type</th>
-                        </tr>
-                    </thead>
+            <h6>Part Item Details</h6>
+            <table class="table table-bordered table-sm align-middle warranty-table">
+                <thead>
+                    <tr>
+                        <th>Part Item</th>
+                        <th>Description</th>
+                        <th>Inward Serial</th>
+                        <th>Outward Serial</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-end">Purchase Rate</th>
+                        <th class="text-end">IGST Amnt</th>
+                        <th class="text-end">Amount</th>
+                        <th>Dealer Observation</th>
+                        <th>Root Cause Analysis(RCA)</th>
+                        <th>Claim Type</th>
+                    </tr>
+                </thead>
 
-                    <tbody>
-                        <tr *ngFor="let item of partDetails">
-                            <td>{{item.partitemName}}</td>
+                <tbody>
+                    <tr *ngFor="let item of partDetails">
+                        <td>{{item.partitemName}}</td>
 
-                            <td>{{item.partitemDesc}}</td>
+                        <td>{{item.partitemDesc}}</td>
 
-                            <td>
-                                <input type="text" class="form-control form-control-sm" [(ngModel)]="item.inwardSerial">
-                            </td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm" [(ngModel)]="item.inwardSerial">
+                        </td>
 
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="item.outwardSerial">
-                            </td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm"
+                                [(ngModel)]="item.outwardSerial">
+                        </td>
 
-                            <td class="text-center">
-                                {{item.partItemQty}}
-                            </td>
+                        <td class="text-center">
+                            {{item.partItemQty}}
+                        </td>
 
-                            <td class="text-end">
-                                {{item.partItemRate | number:'1.2-2'}}
-                            </td>
+                        <td class="text-end">
+                            {{item.partItemRate | number:'1.2-2'}}
+                        </td>
 
-                            <td class="text-end">
-                                {{item.mrp | number:'1.2-2'}}
-                            </td>
+                        <td class="text-end">
+                            {{item.igstAmount | number:'1.2-2'}}
+                        </td>
 
-                            <td class="text-end">
-                                {{item.igstAmount | number:'1.2-2'}}
-                            </td>
+                        <td class="text-end">
+                            {{item.totalWithTax | number:'1.2-2'}}
+                        </td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm"
+                                [(ngModel)]="item.dealerObservation">
+                        </td>
 
-                            <td class="text-end">
-                                {{item.amount | number:'1.2-2'}}
-                            </td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm"
+                                [(ngModel)]="item.rootCauseAnalysis">
+                        </td>
 
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="item.dealerObservation">
-                            </td>
+                        <td>
+                            {{item.claimType}}
+                        </td>
+                    </tr>
+                </tbody>
 
-                            <td>
-                                <input type="text" class="form-control form-control-sm"
-                                    [(ngModel)]="item.rootCauseAnalysis">
-                            </td>
-
-                            <td>
-                                <select class="form-select form-select-sm" [(ngModel)]="item.claimType">
-                                    <option value="Warranty Claim">Warranty Claim</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-
-                    <tfoot *ngIf="partsGridData && partsGridData.length > 0">
-                        <tr class="fw-bold bg-light">
-                            <td colspan="4">Total</td>
-                            <td>{{ totalPartsQty }}</td>
-                            <td>{{ totalPartsRate | number:'1.2-2' }}</td>
-                            <td></td>
-                            <td>{{ totalPartsIgst | number:'1.2-2' }}</td>
-                            <td>{{ totalPartsAmount | number:'1.2-2' }}</td>
-                            <td colspan="3"></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-
+                <tfoot *ngIf="partsGridData && partsGridData.length > 0">
+                    <tr class="fw-bold bg-light">
+                        <td colspan="4">Total</td>
+                        <td class="text-center">{{ totalPartsQty }}</td>
+                        <td class="text-end">{{ totalPartsRate | number:'1.2-2' }}</td>
+                        <td class="text-end">{{ totalPartsIgst | number:'1.2-2' }}</td>
+                        <td class="text-end">{{ totalPartsAmount | number:'1.2-2' }}</td>
+                        <td colspan="3"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
         </div>
 
         <div class="row g-4 mt-1">
@@ -421,6 +411,7 @@
 
                     <tr>
                         <th>Sr.No</th>
+                        <th>Dealer</th>
                         <th>Job Type</th>
                         <th>Date</th>
                         <th>Location</th>
@@ -439,9 +430,10 @@
                     <tr *ngFor="let item of jobCardList; let i=index">
 
                         <td>{{i+1}}</td>
+                        <td>{{ getJobCardDealerLabel(item) }}</td>
                         <td>{{item.jobType}}</td>
                         <td>{{item.jobInDate | date:'dd-MM-yyyy'}}</td>
-                        <td>{{item.jobLocation}}</td>
+                        <td>{{ getJobCardLocationLabel(item) }}</td>
                         <td>{{item.jobNo}}</td>
                         <td>{{item.serviceHead}}</td>
                         <td>{{item.serviceType}}</td>
@@ -459,7 +451,7 @@
                     </tr>
 
                     <tr *ngIf="jobCardList.length==0">
-                        <td colspan="10" class="text-center">
+                        <td colspan="11" class="text-center">
                             No Records Found
                         </td>
                     </tr>

@@ -32,4 +32,13 @@ export class TaxCodeMasterService {
       responseType: 'blob'
     });
   }
+
+  // Posts as multipart/form-data — do not set a Content-Type header manually here,
+  // the browser needs to set its own boundary for FormData to be parsed correctly.
+  importTaxCodeExcel(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post(`${this.apiUrl}/TaxCodeMaster/import`, formData);
+  }
 }

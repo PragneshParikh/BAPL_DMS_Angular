@@ -746,8 +746,40 @@
                 </div>
 
                 <div class="col-md-2">
+                    <label class="form-label">Gross Amount</label>
+                    <input class="form-control form-control-sm text-end" [value]="totalGrossAmount | number:'1.2-2'"
+                        readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Disc. Amount(-)</label>
+                    <input class="form-control form-control-sm text-end" [value]="totalDiscount | number:'1.2-2'"
+                        readonly>
+                </div>
+
+                <div class="col-md-2">
                     <label class="form-label">Taxable Amount</label>
                     <input class="form-control form-control-sm text-end" [value]="totalTaxableAmount | number:'1.2-2'"
+                        readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">CGST Amt.</label>
+                    <input class="form-control form-control-sm text-end" [value]="totalCgstAmount | number:'1.2-2'"
+                        readonly>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">SGST Amt.</label>
+                    <input class="form-control form-control-sm text-end" [value]="totalSgstAmount | number:'1.2-2'"
+                        readonly>
+                </div>
+            </div>
+
+            <div class="row g-2 mb-2">
+                <div class="col-md-2">
+                    <label class="form-label">IGST Amt.</label>
+                    <input class="form-control form-control-sm text-end" [value]="totalIgstAmount | number:'1.2-2'"
                         readonly>
                 </div>
 
@@ -757,26 +789,11 @@
                         readonly>
                 </div>
 
-                <!-- <div class="col-md-2">
-                    <label class="form-label">Discount</label>
-                    <input class="form-control form-control-sm text-end" [value]="discountValue | number:'1.2-2'" readonly>
-                </div> -->
-
-                <div class="col-md-2">
-                    <label class="form-label">Disc. Amount(-)</label>
-                    <input class="form-control form-control-sm text-end" [value]="totalDiscount | number:'1.2-2'"
-                        readonly>
-                </div>
-
                 <div class="col-md-2">
                     <label class="form-label">Amount Received</label>
                     <input class="form-control form-control-sm text-end" [value]="amountReceived | number:'1.2-2'"
                         readonly>
                 </div>
-            </div>
-            <div class="col-md-12">
-                <label class="form-label">Remarks</label>
-                <textarea rows="4" class="form-control" [(ngModel)]="remarks"></textarea>
             </div>
 
 

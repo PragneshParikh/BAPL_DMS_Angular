@@ -40,6 +40,15 @@ export class DealerService {
     );
   }
 
+  // Posts as multipart/form-data — do not set a Content-Type header manually here,
+  // the browser needs to set its own boundary for FormData to be parsed correctly.
+  importDealerExcel(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.httpClient.post(`${this.baseUrl}/DealerMaster/import`, formData);
+  }
+
   updateTradeCertificate(dealerCode: string, tradeCertificate: string) {
     return this.httpClient.put(
       `${this.baseUrl}/DealerMaster/updateTradeCertificate?dealerCode=${dealerCode}`,
@@ -54,11 +63,11 @@ export class DealerService {
     return this.httpClient.get(`${this.baseUrl}/DealerMaster/GetByDealerCode/${dealerCode}`);
   }
 
-  getDealerDropdown(dealerCode: string | null): Observable<any> {
+  getDealerDropdown(dealerCode?: string | null): Observable<any> {
     let params = new HttpParams();
     if (dealerCode) {
-      params = params.set('dealerCode', dealerCode)
+      params = params.set('dealerCode', dealerCode);
     }
-    return this.httpClient.get<any>(`${this.baseUrl}/DealerMaster/GetDealerDropdown`, { params });
+    return this.httpClient.get<any>(`${this.baseUrl}/DealerMaster/getDealerDropdown`, { params });
   }
 }

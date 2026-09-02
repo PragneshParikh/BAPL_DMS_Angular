@@ -12,6 +12,7 @@ import { StorageService } from '../../core/services/storage';
 import { locationAreaMaster } from '../../constant';
 import { DealerService } from '../../core/services/dealer-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { ElementRef, ViewChild } from '@angular/core';
 
 declare var bootstrap: any;
 
@@ -27,7 +28,6 @@ export class LocationMasterComponent implements OnInit {
   locationList: any[] = [];
   originalLocationList: any[] = [];
   dealerList: any[] = [];
-  // dealerCode: string = '';
   isDealer: boolean = false;
   locationArea: string = '';
   locationName: string = '';
@@ -43,10 +43,12 @@ export class LocationMasterComponent implements OnInit {
 
   readonly SUBMENU_ID = 3;
   canDownload = false;
- 
+  canEdit = false;
 
   isSuperAdmin: boolean = false;
   dealerCode: string | null = null;
+
+  @ViewChild('importFileInput') importFileInput!: ElementRef<HTMLInputElement>;
 
   constructor(
     private locationService: LocationMasterService,
@@ -57,23 +59,19 @@ export class LocationMasterComponent implements OnInit {
     private menuAccess: MenuAccessService
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-    if (!this.isSuperAdmin) this.dealerCode = this.storageService.getDealerCode();
     this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    // NOTE: dealerCode is intentionally NOT pre-filled from storage here.
+    // The page always opens showing every dealer's locations with the
+    // filter dropdown on its placeholder — see loadLocations() and
+    // loadDealerDropdown() below. If a genuinely dealer-scoped login should
+    // be locked to its own data, that restriction belongs here (set
+    // isDealer = true and dealerCode = storage value), but as shipped
+    // isDealer is never set true anywhere in this component.
   }
 
   ngOnInit(): void {
-    // const storedDealerCode = this.storageService.getDealerCode();
-    // // Assuming if dealerCode is present and not 'admin', it's a dealer
-    // if (storedDealerCode && storedDealerCode.toLowerCase() !== 'admin') {
-    //   this.isDealer = true;
-    //   this.dealerCode = storedDealerCode;
-    // }
-
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-
-    if (!this.isSuperAdmin) {
-      this.dealerCode = this.storageService.getDealerCode();
-    }
 
     this.loadDealerDropdown();
     this.loadLocations();
@@ -87,13 +85,13 @@ export class LocationMasterComponent implements OnInit {
         const data = res?.data || res;
         this.originalLocationList = data;
 
-        // if (this.isDealer && this.dealerCode) {
-        //   this.locationList = data.filter((x: any) => x.dealercode == this.dealerCode);
-        // } else {
-        //   this.locationList = data;
-        // }
+        // FIX: always populate locationList with the full, unfiltered data
+        // on initial load. Previously the dealer-scoped filtering below was
+        // commented out with no fallback assignment, so locationList stayed
+        // an empty array and the table showed nothing until a search ran.
+        this.locationList = [...data];
 
-        this.loadPage();// for pagination
+        this.loadPage(); // for pagination
         this.sort(this.sortColumn, true);
       },
       error: (err) => {
@@ -106,10 +104,7 @@ export class LocationMasterComponent implements OnInit {
   searchLocation() {
     let filtered = this.originalLocationList;
 
-    // Safety: Always enforce dealer restriction if user is a dealer
-    if (this.isDealer && this.dealerCode) {
-      filtered = filtered.filter((x: any) => x.dealercode == this.dealerCode);
-    } else if (this.dealerCode) {
+    if (this.dealerCode) {
       filtered = filtered.filter((x: any) => x.dealercode == this.dealerCode);
     }
 
@@ -129,23 +124,13 @@ export class LocationMasterComponent implements OnInit {
     this.sort(this.sortColumn, true);
     this.page = 1;
     this.loadPage();
-    // this.dealerCode = '';
-    // this.locationArea = '';
-    // this.locationName = '';
   }
 
   resetSearch() {
-    if (this.isDealer) {
-      // For dealers, reset only the non-dealer filters
-      this.locationArea = '';
-      this.locationName = '';
-      this.locationList = this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode);
-    } else {
-      this.dealerCode = '';
-      this.locationArea = '';
-      this.locationName = '';
-      this.locationList = this.originalLocationList;
-    }
+    this.dealerCode = null;
+    this.locationArea = '';
+    this.locationName = '';
+    this.locationList = [...this.originalLocationList];
     this.page = 1;
     this.loadPage();
   }
@@ -157,6 +142,7 @@ export class LocationMasterComponent implements OnInit {
     );
     modal.show();
   }
+
   sort(column: string, isDefault: boolean = false) {
     if (!isDefault) {
       if (this.sortColumn === column) {
@@ -175,6 +161,7 @@ export class LocationMasterComponent implements OnInit {
     });
     this.loadPage();
   }
+
   locationAreaMaster = locationAreaMaster;
   getLocationAreaName(id: number) {
     const area = this.locationAreaMaster.find(x => x.id == id);
@@ -199,79 +186,52 @@ export class LocationMasterComponent implements OnInit {
       : 'sort-desc';
   }
 
-  checkSearchReset(event: any) {
-    // if (!this.dealerCode && !this.locationArea && !this.locationName) {
-    //   if (this.isDealer && this.dealerCode) {
-    //     this.locationList = this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode);
-    //   } else {
-    //     this.locationList = [...this.originalLocationList];
-    //   }
-    //   this.page = 1;
-    //   this.loadPage();
-    // }
+  // FIX: "-- Select Dealer --" now binds via [ngValue]="null" in the
+  // template (real null, not the string "null"), so a falsy selectedDealerCode
+  // here correctly means "cleared" and restores the full list — previously
+  // there was no such branch, so clearing the dropdown silently did nothing.
+  checkSearchReset(selectedDealerCode: string | null) {
+    this.page = 1;
 
-    if (event) {
-      this.locationList = this.originalLocationList.filter((x: any) => x.dealercode == event);
-      this.page = 1;
-      this.loadPage();
-    }
+    this.locationList = selectedDealerCode
+      ? this.originalLocationList.filter((x: any) => x.dealercode == selectedDealerCode)
+      : [...this.originalLocationList];
 
+    this.loadPage();
   }
 
   checkIfEmpty() {
-
     if (
       (!this.locationName || this.locationName.trim() === '') &&
       (!this.dealerCode || this.dealerCode === '') &&
       (!this.locationArea || this.locationArea === '')
     ) {
-
       this.page = 1;
-      // full list show with dealer scope
-      if (this.isDealer && this.dealerCode) {
-        this.locationList = this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode);
-      } else {
-        this.locationList = [...this.originalLocationList];
-      }
+      this.locationList = [...this.originalLocationList];
       this.pagedLocationList = [...this.locationList];
       this.loadPage();
     }
-
   }
-  checkKeywordReset() {
 
+  checkKeywordReset() {
     if (!this.locationName || this.locationName.trim() === '') {
-      if (this.isDealer && this.dealerCode) {
-        this.locationList = this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode);
-      } else {
-        this.locationList = [...this.originalLocationList];
-      }
+      this.locationList = this.dealerCode
+        ? this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode)
+        : [...this.originalLocationList];
       this.page = 1;
       this.loadPage();
-
     }
-
   }
+
   loadDealerDropdown() {
     this.loader.show();
 
-    // this.dealerMasterService.getDealerDropdown().subscribe({
-    //   next: (res: any) => {
-    //     this.loader.hide();
-    //     const dealers = res?.data || res;
-
-    //     if (this.isDealer && this.dealerCode) {
-    //       this.dealerList = dealers.filter((d: any) => d.dealerCode == this.dealerCode);
-    //     } else {
-    //       this.dealerList = dealers;
-    //     }
-    //   },
-    //   error: (err) => {
-    //     this.loader.hide();
-    //     console.error("Dealer Dropdown Error:", err);
-    //   }
-    // });
-    this.dealerMasterService.getDealerDropdown(this.dealerCode).subscribe({
+    // FIX: always fetch the complete dealer list for the filter dropdown by
+    // passing null explicitly, regardless of any dealerCode the component
+    // might otherwise hold — previously this.dealerCode (which could carry
+    // a stale or scoped value) was passed through, so the dropdown could
+    // come back with only one dealer instead of every dealer with a location.
+    this.dealerMasterService.getDealerDropdown(null).subscribe({
       next: (res: any) => {
         this.dealerList = res.data;
         this.loader.hide();
@@ -280,9 +240,9 @@ export class LocationMasterComponent implements OnInit {
         this.loader.hide();
         console.error("Dealer Dropdown Error:", err);
       }
-    })
-
+    });
   }
+
   downloadLocationExcel() {
     this.loader.show();
     this.locationService.downloadLocationMasterExcel().subscribe({
@@ -306,6 +266,46 @@ export class LocationMasterComponent implements OnInit {
         this.loader.hide();
         console.error(err);
         this.toastr.show('Excel download failed', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  }
+
+  triggerImportFileInput(): void {
+    this.importFileInput.nativeElement.click();
+  }
+
+  onImportFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.loader.show();
+
+    this.locationService.importLocationExcel(file).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        input.value = '';
+
+        const summary = res?.data;
+        const message = summary
+          ? `Import complete: ${summary.insertedCount} added, ${summary.updatedCount} updated, ${summary.failedCount} failed.`
+          : 'Location data imported successfully';
+
+        this.toastr.show(message, {
+          classname: summary?.failedCount ? 'bg-warning text-dark' : 'bg-success text-white',
+          delay: 5000
+        });
+
+        this.loadLocations();
+      },
+      error: (err) => {
+        this.loader.hide();
+        input.value = '';
+        console.error(err);
+        this.toastr.show('Failed to import location data!', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
       }
     });
   }

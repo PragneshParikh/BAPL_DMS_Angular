@@ -13,6 +13,14 @@
               (click)="downloadItemMasterExcel()">
               <i class="ri-file-excel-2-line"></i>
           </button>
+
+          <!-- Import Excel Button -->
+          <button *ngIf="canEdit" class="btn btn-outline-primary btn-sm me-3" [ngbTooltip]="'Import from Excel'"
+              (click)="triggerImportFileInput()">
+              <i class="ri-upload-2-line"></i>
+          </button>
+          <input #importFileInput type="file" accept=".xlsx" hidden (change)="onImportFileSelected($event)">
+
           <button *ngIf="canCreate" class="btn btn-primary btn-sm me-3" (click)="openAddItem(addItemModal)">
               +
           </button>
@@ -149,13 +157,15 @@
 
   <div class="modal-body">
     <div class="row">
-       <div class="col-md-2">
+      <!-- Single Item Type field, bound to selectedItem — the second, disconnected
+           readonly-style "Item Type" field has been removed. -->
+      <div class="col-md-2">
         <label class="form-label">
           Item Type <span class="text-danger">*</span>
         </label>
-        <select class="form-select form-select-sm" [(ngModel)]="itemObj.itemtype" name="itemtype">
+        <select class="form-select form-select-sm" [(ngModel)]="selectedItem.itemtype" name="itemtype">
           <option [ngValue]="1">Vehicle</option>
-          <option [ngValue]="2" selected>Parts</option>
+          <option [ngValue]="2">Parts</option>
           <option [ngValue]="3">Labour</option>
           <option [ngValue]="4">Accessory</option>
           <option [ngValue]="6">Outside Work</option>
@@ -166,56 +176,77 @@
           <option [ngValue]="12">Battery/E-Device</option>
         </select>
       </div>
-      <div class="col-md-2">
-        <label class="form-label">Item Type</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.itemtype == 1 ? 'Vehicle' : 'Parts'"
-          readonly>
-      </div>
 
       <div class="col-md-2">
         <label class="form-label">Part No</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.itemname" readonly />
+        <input class="form-control form-control-sm" [(ngModel)]="selectedItem.itemname" name="itemname" />
       </div>
       <div class="col-md-2">
         <label class="form-label">Description</label>
-        <input type="text" class="form-control form-control-sm" [value]="selectedItem?.itemdesc" readonly />
+        <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedItem.itemdesc" name="itemdesc" />
       </div>
       <div class="col-md-2">
         <label class="form-label">Part Code</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.itemcode" readonly>
+        <input class="form-control form-control-sm" [(ngModel)]="selectedItem.itemcode" name="itemcode">
       </div>
       <div class="col-md-2">
         <label class="form-label">Is OEM Part</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.iselectric ? 'Yes' : 'No'" readonly>
+        <select class="form-select form-select-sm" [(ngModel)]="selectedItem.iselectric" name="iselectric">
+          <option [ngValue]="true">Yes</option>
+          <option [ngValue]="false">No</option>
+        </select>
       </div>
       <div class="col-md-2">
         <label class="form-label">OEM Part No.</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [(ngModel)]="selectedItem.oemPartNo" name="oemPartNo">
       </div>
       <div class="col-md-2">
         <label class="form-label">Select Group</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.grpidno == 1 ? 'Spares' : 'FG'" readonly>
+        <select class="form-select form-select-sm" [(ngModel)]="selectedItem.grpidno" name="grpidno">
+          <option [ngValue]="1">Spares</option>
+          <option [ngValue]="2">Tools</option>
+          <option [ngValue]="3">Accessories</option>
+          <option [ngValue]="6">FG</option>
+          <option [ngValue]="16">FGWG</option>
+          <option [ngValue]="80">Electric 2 Wheeler</option>
+          <option [ngValue]="81">Spares</option>
+          <option [ngValue]="82">Consumable</option>
+          <option [ngValue]="83">Packing</option>
+          <option [ngValue]="98">BGAUSS B8</option>
+          <option [ngValue]="99">BGAUSS A2</option>
+          <option [ngValue]="100">Parts</option>
+          <option [ngValue]="101">BGAUSS B8.</option>
+          <option [ngValue]="102">BGAUSS A2.</option>
+          <option [ngValue]="198">A2</option>
+          <option [ngValue]="199">B8</option>
+          <option [ngValue]="205">A2/B8</option>
+          <option [ngValue]="259">Other</option>
+          <option [ngValue]="11448">C12</option>
+          <option [ngValue]="11449">D15</option>
+          <option [ngValue]="11450">Generic</option>
+          <option [ngValue]="11493">Extended Warranty</option>
+          <option [ngValue]="11536">Initial Kit</option>
+          <option [ngValue]="12039">FGWB</option>
+        </select>
       </div>
       <div class="col-md-2">
         <label class="form-label">Vehicle Model Name</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.oemmodelname" readonly>
+        <input class="form-control form-control-sm" [(ngModel)]="selectedItem.oemmodelname" name="oemmodelname">
       </div>
       <div class="col-md-2">
         <label class="form-label">OEM Part Description</label>
-        <input class="form-control form-control-sm" [value]="" readonly>
+        <input class="form-control form-control-sm" [(ngModel)]="selectedItem.oemPartDescription" name="oemPartDescription">
       </div>
       <div class="col-md-2">
         <label class="form-label">
           Supplier
         </label>
-        <select class="form-select form-select-sm" [(ngModel)]="itemObj.supplierId" name="supplierId">
-
+        <!-- FIXED — was itemObj.supplierId (belongs to the Add modal, never saved) -->
+        <select class="form-select form-select-sm" [(ngModel)]="selectedItem.supplierId" name="supplierId">
           <option [ngValue]="null">-- Select Supplier --</option>
-
           <option *ngFor="let supplier of supplierlist" [ngValue]="supplier.id">
             {{ supplier.ledgerName }}
           </option>
-
         </select>
       </div>
       <!-- UOM -->
@@ -223,7 +254,8 @@
         <label class="form-label">
           UOM
         </label>
-        <select class="form-select form-select-sm" [(ngModel)]="itemObj.uom" name="uom">
+        <!-- FIXED — was itemObj.uom (belongs to the Add modal, never saved) -->
+        <select class="form-select form-select-sm" [(ngModel)]="selectedItem.uom" name="uom">
           <option value="39">Kit</option>
           <option value="40">Make</option>
           <option value="42">PCS</option>
@@ -233,87 +265,92 @@
 
       <div class="col-md-2">
         <label class="form-label">HSN Code</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.hsncode" readonly>
+        <input class="form-control form-control-sm" [(ngModel)]="selectedItem.hsncode" name="hsncode">
       </div>
       <div class="col-md-2">
         <label class="form-label">TAX[%]</label>
-        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.taxPercent" name="taxPercent">
       </div>
       <div class="col-md-2">
         <label class="form-label">SGST</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.sgst" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.sgst" name="sgst">
       </div>
       <div class="col-md-2">
         <label class="form-label">CGST</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.cgst" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.cgst" name="cgst">
       </div>
       <div class="col-md-2">
         <label class="form-label">IGST</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.igst" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.igst" name="igst">
       </div>
       <div class="col-md-2">
         <label class="form-label">UGST</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.ugst" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.ugst" name="ugst">
       </div>
       <div class="col-md-2">
         <label class="form-label">GST Cess</label>
-        <input class="form-control form-control-sm" [value]="'0'" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.gstCess" name="gstCess">
       </div>
       <div class="col-md-2">
         <label class="form-label">TCS</label>
-        <input class="form-control form-control-sm" [value]="'0'" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.tcs" name="tcs">
       </div>
       <div class="col-md-2">
         <label class="form-label">Item Category</label>
-        <input class="form-control form-control-sm" [value]="'Parts'" readonly>
+        <select class="form-select form-select-sm" [(ngModel)]="selectedItem.itemCategory" name="itemCategory">
+          <option value="Parts">Parts</option>
+          <option value="Vehicle">Vehicle</option>
+        </select>
       </div>
       <div class="col-md-2">
         <label class="form-label">HRs/TAT</label>
-        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.hrsTat" name="hrsTat">
       </div>
       <div class="col-md-2">
         <label class="form-label">List Price</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.dlrprice" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.dlrprice" name="dlrprice">
       </div>
       <div class="col-md-2">
+        <!-- Item MRP mirrors Custprice — see earlier note: there is no separate
+             MRP column on ItemMaster, and Excel import only populates Custprice. -->
         <label class="form-label">Item MRP</label>
-        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.custprice" name="itemMrp">
       </div>
       <div class="col-md-2">
         <label class="form-label">OEM MRP</label>
-        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.oemMrp" name="oemMrp">
       </div>
       <div class="col-md-2">
         <label class="form-label">Purchase Rate</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.ipurrate" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.ipurrate" name="ipurrate">
       </div>
       <div class="col-md-2">
         <label class="form-label">Sale Rate</label>
-        <input class="form-control form-control-sm" [value]="selectedItem?.custprice" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.custprice" name="custprice">
       </div>
       <div class="col-md-2">
         <label class="form-label">Margin %</label>
-        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.margin" name="margin">
       </div>
       <div class="col-md-2">
         <label class="form-label">Part Labr</label>
-        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.partLabour" name="partLabour">
       </div>
       <div class="col-md-2">
         <label class="form-label">Re-Ord</label>
-        <input class="form-control form-control-sm" [value]="'0.00'" readonly>
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.reOrderQty" name="reOrderQty">
       </div>
       <div class="col-md-2">
         <label class="form-label">Min Bill QTY</label>
-        <input class="form-control form-control-sm" [(ngModel)]="selectedItem.minBillQty">
+        <input class="form-control form-control-sm" [(ngModel)]="selectedItem.minBillQty" name="minBillQty">
       </div>
       <div class="col-md-2">
         <label class="form-label">Min Order QTY</label>
-        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.minOrderQty">
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.minOrderQty" name="minOrderQty">
       </div>
       <div class="col-md-2">
         <label class="form-label">Warranty Period</label>
-        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.warrantyPeriod">
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.warrantyPeriod" name="warrantyPeriod">
       </div>
       <div class="col-md-2">
         <label class="form-label">Month/Year</label>
@@ -326,7 +363,7 @@
       </div>
       <div class="col-md-2">
         <label class="form-label">Warranty Kms.</label>
-        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.warrantyKms">
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.warrantyKms" name="warrantyKms">
       </div>
       <div class="col-md-2">
         <label class="form-label">Item Wrnt. Approval</label> <br>
@@ -340,7 +377,7 @@
       </div>
       <div class="col-md-2">
         <label class="form-label">VOR Rate</label>
-        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.vorRate">
+        <input type="number" class="form-control form-control-sm" [(ngModel)]="selectedItem.vorRate" name="vorRate">
       </div>
       <div class="col-md-2">
         <label class="form-label">VOR Specific</label><br>
@@ -364,33 +401,33 @@
       </div>
       <div class="col-md-12">
         <label class="form-label">Remarks</label>
-        <input class="form-control form-control-sm" [(ngModel)]="selectedItem.remarks">
+        <input class="form-control form-control-sm" [(ngModel)]="selectedItem.remarks" name="remarks">
       </div>
       <!-- Checkbox info -->
       <div class="row">
         <div class="col-md-2">
-          <input class="form-check-input" type="checkbox" id="isExempted" [(ngModel)]="selectedItem.isExempted">
+          <input class="form-check-input" type="checkbox" id="isExempted" name="isExempted" [(ngModel)]="selectedItem.isExempted">
           <label class="form-check-label" for="isExempted">&nbsp; IS Exempted</label>
         </div>
         <div class="col-md-2">
-          <input class="form-check-input" type="checkbox" id="toolkitFirstAid"
+          <input class="form-check-input" type="checkbox" id="toolkitFirstAid" name="isToolkitFirstAid"
             [(ngModel)]="selectedItem.isToolkitFirstAid">
           <label class="form-check-label" for="toolkitFirstAid"> &nbsp; ToolKit/First Aid.</label>
         </div>
         <div class="col-md-2">
-          <input class="form-check-input" type="checkbox" id="mustStock" [(ngModel)]="selectedItem.isStockRequired">
+          <input class="form-check-input" type="checkbox" id="mustStock" name="isStockRequired" [(ngModel)]="selectedItem.isStockRequired">
           <label class="form-check-label" for="mustStock">&nbsp; Must Stock</label>
         </div>
         <div class="col-md-2">
-          <input class="form-check-input" type="checkbox" id="isHelmet" [(ngModel)]="selectedItem.isHelmet">
+          <input class="form-check-input" type="checkbox" id="isHelmet" name="isHelmet" [(ngModel)]="selectedItem.isHelmet">
           <label class="form-check-label" for="isHelmet">&nbsp; Save as Helmet</label>
         </div>
         <div class="col-md-2">
-          <input class="form-check-input" type="checkbox" id="isInventory" [(ngModel)]="selectedItem.isInventory">
+          <input class="form-check-input" type="checkbox" id="isInventory" name="isInventory" [(ngModel)]="selectedItem.isInventory">
           <label class="form-check-label" for="isInventory">&nbsp; Non-Inventory</label>
         </div>
         <div class="col-md-2">
-          <input class="form-check-input" type="checkbox" id="ineligibleInput"
+          <input class="form-check-input" type="checkbox" id="ineligibleInput" name="isInEligibleInput"
             [(ngModel)]="selectedItem.isInEligibleInput">
           <label class="form-check-label" for="ineligibleInput"> &nbsp; In-eligible Input</label>
         </div>
@@ -399,14 +436,11 @@
     </div>
   </div>
   <div class="modal-footer">
-    <!-- CHANGED — Update button now gated on canEdit, not just isSuperAdmin -->
     <button class="btn btn-primary btn-sm" (click)="updateItem()" [disabled]="!isSuperAdmin && !canEdit">Update</button>
     <button class="btn btn-danger btn-sm" (click)="modal.close()">Close</button>
   </div>
 </ng-template>
 <!-- end item popup -->
-
-<!-- Add item popup-->
 <ng-template #addItemModal let-modal>
 
   <div class="modal-header item-modal-header">
@@ -527,29 +561,6 @@
         </select>
 
       </div>
-
-      <!-- Vehicle Model -->
-      <!-- <div class="col-md-2">
-
-        <label class="form-label">
-          Vehicle Model Name
-        </label>
-
-        <select class="form-select form-select-sm" [(ngModel)]="itemObj.oemModelId" name="oemModelId">
-
-          <option [ngValue]="null">
-            Select Model
-          </option>
-
-          <option *ngFor="let model of modelList" [ngValue]="model.id">
-
-            {{model.modelName}}
-
-          </option>
-
-        </select>
-
-      </div> -->
 
       <!-- OEM Description -->
       <div class="col-md-2">

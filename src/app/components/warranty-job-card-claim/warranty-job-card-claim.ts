@@ -25,8 +25,8 @@ import { MenuAccessService } from '../../core/services/menu-access.service';
 })
 export class WarrantyJobCardClaim implements OnInit {
   readonly SUBMENU_ID = 74;
-  canCreate = false;
-  canEdit = false;
+  canCreate = true;
+  canEdit = true;
   jobCardList: any[] = [];
   WjobClaimprefix: string = '';
   supplierList: any[] = [];
@@ -196,12 +196,12 @@ export class WarrantyJobCardClaim implements OnInit {
       // Only defaults from storage for admin logins - a dealer login's
       // selectedDealerCode was already set (to their own code) above in
       // loadDealers(), and shouldn't be re-derived or overridden here.
-      if (!this.isDealerUser) {
-        const currentDealerCode = this.storageService.getDealerCode();
-        if (currentDealerCode && this.dealerList.some((d: any) => d.dealerCode === currentDealerCode)) {
-          this.selectedDealerCode = currentDealerCode;
-        }
-      }
+      // if (!this.isDealerUser) {
+      //   const currentDealerCode = this.storageService.getDealerCode();
+      //   if (currentDealerCode && this.dealerList.some((d: any) => d.dealerCode === currentDealerCode)) {
+      //     this.selectedDealerCode = currentDealerCode;
+      //   }
+      // }
 
       this.onDealerChange();
   }
@@ -231,14 +231,15 @@ export class WarrantyJobCardClaim implements OnInit {
       this.lastRawJobCards = [];
     }
 
+    // Dealer-independent catalog - load regardless of dealer selection.
+    this.loadAllLocations();
+
     if (!this.selectedDealerCode) {
-      this.allLocations = [];
       return;
     }
 
     this.loadPrefix();
-    this.loadAllLocations();
-  }
+}
 
   loadClaimForView(id: number): void {
     this.loader.show();
@@ -478,82 +479,70 @@ private resolveWorkshopLocation(jobLocationName: string | null | undefined): voi
       const name = this.dealerList.find((d: any) => d.dealerCode === code)?.dealerName;
       return name ? `${name} (${code})` : code;
   }
-  loadJobCarDetails(): void {
-    if (!this.selectedDealerCode) {
-      this.toaster.show('Please select a Dealer first.', { classname: 'bg-warning text-white', delay: 3000 });
-      return;
-    }
-
-    this.loader.show();
-    const dealerCode = this.selectedDealerCode;
-
-    let jobNo = this.jobSearch.jobNo;
-    if (jobNo === null || jobNo === undefined || jobNo === '') {
-      jobNo = 0;
-    } else {
-      jobNo = Number(jobNo);
-      if (isNaN(jobNo)) jobNo = 0;
-    }
-
-    let fromDate = this.jobSearch.rBillfromDate;
-    let toDate = this.jobSearch.rBilltoDate;
-
-    // Always fetch WITHOUT a server-side location filter, then build the
-    // dropdown from these exact results and narrow client-side if the
-    // user picked one - guarantees the dropdown can never disagree with
-    // what's actually on a job card (see buildLocationOptionsFromJobCards).
-    this.jobcardService.getIssueTypebasedJobDetails(dealerCode, jobNo, null, fromDate, toDate).subscribe({
-      next: (res: any) => {
-        this.loader.hide();
-        const rawResults = res || [];
-        this.lastRawJobCards = rawResults;
-
-        this.locationList = this.buildLocationOptionsFromJobCards(rawResults);
-
-        let results = rawResults;
-
-        if (this.selectedLocationId) {
-          const selectedLocName = this.selectedLocationId.toString().trim().toUpperCase();
-          results = rawResults.filter((item: any) =>
-            (item.jobLocation || '').toString().trim().toUpperCase() === selectedLocName
-          );
-        }
-
-        this.jobCardList = results;
-
-        if (this.jobCardList.length === 0) {
-          this.toaster.show('No job cards found for the given search.', {
-            classname: 'bg-warning text-white',
-            delay: 3000
-          });
-          this.partsGridData = [];
-          this.labourGridData = [];
-          return;
-        }
-
-        const allDetails = this.jobCardList[0]?.repairBillDetails || [];
-
-        this.partsGridData = allDetails.filter((x: any) => x.itemType === 'Part');
-        this.calculatePartsTotal();
-
-        this.labourGridData = allDetails.filter((x: any) => x.itemType === 'Labour');
-        this.calculateLabourTotal();
-      }, error: (err) => {
-        this.loader.hide();
-        console.error(err)
+    loadJobCarDetails(): void {
+      if (this.isDealerUser && !this.selectedDealerCode) {
+        this.toaster.show('Please select a Dealer first.', { classname: 'bg-warning text-white', delay: 3000 });
+        return;
       }
-    })
 
+      this.loader.show();
+      const dealerCode = this.selectedDealerCode || null;
+
+      let jobNo = this.jobSearch.jobNo;
+      if (jobNo === null || jobNo === undefined || jobNo === '') {
+        jobNo = 0;
+      } else {
+        jobNo = Number(jobNo);
+        if (isNaN(jobNo)) jobNo = 0;
+      }
+
+      let fromDate = this.jobSearch.rBillfromDate;
+      let toDate = this.jobSearch.rBilltoDate;
+
+      this.jobcardService.getIssueTypebasedJobDetails(dealerCode, jobNo, null, fromDate, toDate).subscribe({
+        next: (res: any) => {
+          this.loader.hide();
+          const rawResults = res || [];
+          this.lastRawJobCards = rawResults;
+
+          this.locationList = this.buildLocationOptionsFromJobCards(rawResults);
+
+          let results = rawResults;
+
+          if (this.selectedLocationId) {
+            const selectedLocName = this.selectedLocationId.toString().trim().toUpperCase();
+            results = rawResults.filter((item: any) =>
+              (item.jobLocation || '').toString().trim().toUpperCase() === selectedLocName
+            );
+          }
+
+          this.jobCardList = results;
+
+          if (this.jobCardList.length === 0) {
+            this.toaster.show('No job cards found for the given search.', {
+              classname: 'bg-warning text-white',
+              delay: 3000
+            });
+          }
+
+          // FIX: parts/labour grids (and their Total row) must only ever
+          // reflect the job the user actually picks in selectJob() - not
+          // whichever job happened to load first in this search result list.
+          // Populating them here, before any selection, is what let one
+          // job's totals leak onto a different selected job's form.
+        }, error: (err) => {
+          this.loader.hide();
+          console.error(err)
+        }
+      })
   }
 
-  openJobSearch(content: any) {
-    if (!this.selectedDealerCode) {
+openJobSearch(content: any) {
+    if (this.isDealerUser && !this.selectedDealerCode) {
       this.toaster.show('Please select a Dealer first.', { classname: 'bg-warning text-white', delay: 3000 });
       return;
     }
 
-    // Reset any previous filter so the first load shows every job card
-    // (and therefore every real location) for this dealer.
     this.selectedLocationId = null;
     this.loadJobCarDetails();
     this.modalService.open(content, {
@@ -562,20 +551,25 @@ private resolveWorkshopLocation(jobLocationName: string | null | undefined): voi
       centered: true,
       scrollable: true
     });
-
-  }
+}
 
   goToClaimList(): void {
     this.router.navigate(['/warranty-claim-list']);
   }
-
-  calculatePartsTotal() {
+calculatePartsTotal() {
     this.totalPartsQty = this.partsGridData.reduce((sum, item) => sum + (item.partItemQty || 0), 0);
     this.totalPartsRate = this.partsGridData.reduce((sum, item) => sum + (item.partItemRate || 0), 0);
     this.totalPartsIgst = this.partsGridData.reduce((sum, item) => sum + (item.igstAmount || 0), 0);
-    this.totalPartsAmount = this.partsGridData.reduce((sum, item) => sum + (item.rowSubTotal || 0), 0);
-  }
-
+    // FIX: was summing item.rowSubTotal (the PRE-tax subtotal, qty * rate),
+    // so the footer Total excluded IGST entirely and undercounted every row
+    // by its tax amount. Sum the post-tax total instead, the same way
+    // calculateLabourTotal() already does.
+    this.totalPartsAmount = this.partsGridData.reduce((sum, item) => {
+      const base = (item.partItemQty || 0) * (item.partItemRate || 0);
+      const gst = item.igstAmount || 0;
+      return sum + (item.totalWithTax ?? (base + gst));
+    }, 0);
+}
  calculateLabourTotal() {
   this.totalLabourQty = this.labourGridData.reduce((sum, item) => sum + (item.labourQty || 0), 0);
   this.totalLabourRate = this.labourGridData.reduce((sum, item) => sum + (item.labourRate || 0), 0);
@@ -586,7 +580,7 @@ private resolveWorkshopLocation(jobLocationName: string | null | undefined): voi
     return sum + (item.totalWithTax ?? (base + gst));
   }, 0);
 }
-  selectJob(item: any, modal: any) {
+    selectJob(item: any, modal: any) {
     this.selectedJob = { ...item };
     this.selectedJob.repairBillDetails?.forEach((x: any) => {
       x.dealerObservation = '';
@@ -594,16 +588,32 @@ private resolveWorkshopLocation(jobLocationName: string | null | undefined): voi
       if (x.itemType === 'Labour' && !x.mrp) {
         x.mrp = x.labourRate ?? 0;
       }
+      // FIX: Part rows never had `mrp` populated at all - the backend now
+      // returns it as partMRP; fall back to the billed rate if that
+      // resolves to 0 (e.g. PartItemId didn't match an ItemMaster row).
+      if (x.itemType === 'Part' && !x.mrp) {
+        x.mrp = x.partMRP || x.partItemRate || 0;
+      }
     });
+
+    const allDetails = this.selectedJob.repairBillDetails || [];
+    this.partsGridData = allDetails.filter((x: any) => x.itemType === 'Part');
+    this.calculatePartsTotal();
+    this.labourGridData = allDetails.filter((x: any) => x.itemType === 'Labour');
+    this.calculateLabourTotal();
 
     const resolved = this.resolveLocationByCode(item.jobLocationCode);
     this.claimLocationName = resolved.locname || item.jobLocation || null;
     this.claimLocationCode = item.jobLocationCode || null;
     this.claimLocationArea = resolved.areaName;
 
+    if (resolved.dealerCode && resolved.dealerCode !== this.selectedDealerCode) {
+      this.selectedDealerCode = resolved.dealerCode;
+      this.loadPrefix();
+    }
+
     modal.close();
 }
-
   get partDetails() {
     return this.selectedJob?.repairBillDetails?.filter(x => x.itemType === 'Part') || [];
   }

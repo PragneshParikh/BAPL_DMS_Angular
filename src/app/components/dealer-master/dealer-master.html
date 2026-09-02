@@ -17,6 +17,13 @@
                         <i class="ri-file-excel-2-line"></i>
                     </button>
 
+                    <!-- Import Excel Button -->
+                    <button *ngIf="canEdit" class="btn btn-outline-primary btn-sm me-3" [ngbTooltip]="'Import from Excel'"
+                        (click)="triggerImportFileInput()">
+                        <i class="ri-upload-2-line"></i>
+                    </button>
+                    <input #importFileInput type="file" accept=".xlsx" hidden (change)="onImportFileSelected($event)">
+
                     <!-- Search Box -->
                     <div class="search-box">
                         <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm"

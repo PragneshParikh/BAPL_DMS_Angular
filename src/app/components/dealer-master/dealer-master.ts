@@ -1,6 +1,6 @@
 // src\app\components\dealer-master\dealer-master.ts
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { NgbModal, NgbModalRef, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DealerService } from '../../core/services/dealer-service';
 import { FormsModule } from '@angular/forms';
@@ -22,6 +22,7 @@ import { MenuAccessService } from '../../core/services/menu-access.service';
 export class DealerMaster implements OnInit {
 
   @ViewChild('dealerModal') dealerModal!: TemplateRef<unknown>;
+  @ViewChild('importFileInput') importFileInput!: ElementRef<HTMLInputElement>;
 
   dealerList: DealerMasterViewModel[] = [];
   selectedDealer!: DealerMasterViewModel;
@@ -195,6 +196,51 @@ export class DealerMaster implements OnInit {
       this.toaster.show('Dealer Excel downloaded successfully', { classname: 'bg-success text-light', delay: 3000 });
     });
 
+  }
+
+  // Opens the hidden file picker; the actual import happens in onImportFileSelected
+  // once the user has chosen a file.
+  triggerImportFileInput(): void {
+    this.importFileInput.nativeElement.click();
+  }
+
+  onImportFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.loader.show();
+
+    this.dealerService.importDealerExcel(file).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        input.value = ''; // reset so selecting the same file again still fires a change event
+
+        // NOTE: assumes the API returns camelCase JSON (insertedCount/updatedCount/
+        // failedCount) — adjust the property names below if your API uses PascalCase.
+        const summary = res?.data;
+        const message = summary
+          ? `Import complete: ${summary.insertedCount} added, ${summary.updatedCount} updated, ${summary.failedCount} failed.`
+          : 'Dealer data imported successfully';
+
+        this.toaster.show(message, {
+          classname: summary?.failedCount ? 'bg-warning text-dark' : 'bg-success text-light',
+          delay: 5000
+        });
+
+        this.loadDealers();
+      },
+      error: (err) => {
+        this.loader.hide();
+        input.value = '';
+        console.error(err);
+
+        this.toaster.show('Failed to import dealer data!', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+      }
+    });
   }
 
   onSearchChange(): void {
