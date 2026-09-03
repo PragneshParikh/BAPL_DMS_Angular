@@ -204,31 +204,36 @@ export class JobCardAddForm {
     }
   }
 
-  loadPrefix(): void {
-    this.loader.show();
-    const dealerCode = this.storageService.getDealerCode();
-    const module = 'job_card';
-    this.prefixService.getPrefixByDealerByModule(dealerCode, module).subscribe({
-      next: (res: string) => {
-        this.loader.hide();
-        this.jobPrefix = res;
-        const parts = res.split('/');
-        this.jobNo = parseInt(parts[parts.length - 1], 10);
-      }, error: (err) => {
-        this.loader.hide();
-        console.error(err);
-
-      }
-    })
-  }
+    loadPrefix(): void {
+      this.loader.show();
+      const dealerCode = this.storageService.getDealerCode();
+      const module = 'job_card';
+      this.prefixService.getPrefixByDealerByModule(dealerCode, module).subscribe({
+        next: (res: string) => {
+          this.loader.hide();
+          this.jobPrefix = res;
+          // FIXED: this used to also do
+          //   const parts = res.split('/');
+          //   this.jobNo = parseInt(parts[parts.length - 1], 10);
+          // which raced against getJobNo() (a different endpoint reading a
+          // different source of truth) to set the same field. jobNo is now
+          // only ever set by getJobNo().
+        }, error: (err) => {
+          this.loader.hide();
+          console.error(err);
+        }
+      })
+    }
   get isBatteryReadOnly(): boolean {
     return !!this.selectedJobtype;
   }
   //Fetech Dealer Location
   fetchLocations(): void {
-    this.loadPrefix();
+    // FIXED: removed the redundant `this.loadPrefix();` call that used to
+    // be here — ngOnInit already calls loadPrefix() once. Calling it again
+    // here fired a second, unnecessary HTTP request on every page load.
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-
+ 
     if (!this.isSuperAdmin) {
       this.dealerCode = this.storageService.getDealerCode();
     } else {
@@ -236,10 +241,10 @@ export class JobCardAddForm {
     }
     this.locationService.getLocationList(this.dealerCode).subscribe({
       next: (data: any[]) => {
-
+ 
         // only Workshop (id = 2)
         this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-
+ 
         if (!this.isSuperAdmin) {
           this.dealerCode = this.storageService.getDealerCode();
         } else {
@@ -466,13 +471,19 @@ export class JobCardAddForm {
   onJobType(isEdit = false, isFromEstimate: boolean = false) {
     if (!this.selectedJobtype) return;
 
-    // this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-
-    // if (!this.isSuperAdmin) {
-    this.dealerCode = this.storageService.getDealerCode();
-    // } else {
-    //   this.dealerCode = null;
-    // }
+    // FIXED: this method never branched on isSuperAdmin like every other
+    // chassis/location loader in this component does (fetchLocations,
+    // loadChassisList). It always sent the logged-in user's own dealerCode,
+    // so even a true SuperAdmin session got scoped to their own dealer and
+    // never saw other dealers' chassis (e.g. isSuperAdmin bypass in
+    // GetAllInspectedLotChassisAsync's "isSuperAdmin || v.DealerId == dealerCode"
+    // check never actually triggered because dealerCode was never null here).
+    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    if (!this.isSuperAdmin) {
+      this.dealerCode = this.storageService.getDealerCode();
+    } else {
+      this.dealerCode = null;
+    }
 
     // Load chassis
     this.jobCardService
@@ -499,7 +510,14 @@ export class JobCardAddForm {
           return;
         }
 
-        this.dealerCode = this.storageService.getDealerCode();
+        // FIXED: same missing branch here — this second dealerCode
+        // assignment (used for the chassis reload just below) also ignored
+        // isSuperAdmin.
+        if (!this.isSuperAdmin) {
+          this.dealerCode = this.storageService.getDealerCode();
+        } else {
+          this.dealerCode = null;
+        }
 
         // Load chassis
         this.jobCardService
@@ -547,7 +565,7 @@ export class JobCardAddForm {
             }
           });
       });
-  }
+}
   onServiceHeadChange() {
     this.loadServiceType(this.selectedServiceHead);
   }

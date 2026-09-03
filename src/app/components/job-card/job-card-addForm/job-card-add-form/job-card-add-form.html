@@ -753,11 +753,11 @@
   <!-- FOOTER -->
   <div class="card-footer d-flex justify-content-end gap-2">
     <button type="button" class="btn btn-primary btn-sm"
-      *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
-      [disabled]="repairBillStatus === 'Billed' && !isSuperAdmin || (selectedJobtype == 1 && !isPdiSaved)"
-      (click)="saveJobCard()">
-      Save
-  </button>
+          
+          [disabled]="isSaving || (repairBillStatus === 'Billed' && !isSuperAdmin) || (selectedJobtype == 1 && !isPdiSaved)"
+          (click)="saveJobCard()">
+          {{ isSaving ? 'Saving...' : 'Save' }}
+    </button>
     <!--<button type="button" class="btn btn-primary btn-sm" [disabled]="!isPdiSaved" (click)="saveJobCard()">Save</button>-->
     <button class="btn btn-primary btn-sm" [disabled]="selectedJobtype != 1 || repairBillStatus === 'Billed' "
       (click)="openPdiModal(PdiModelChecklist)">PDI Checklist</button>

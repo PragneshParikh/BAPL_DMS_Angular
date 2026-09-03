@@ -83,7 +83,7 @@
                 <button class="btn btn-success btn-sm" *ngIf="canDownload" [ngbTooltip]="'Export to Excel'">
                     <i class="ri-file-excel-2-line"></i> Excel
                 </button>
-                <button class="btn btn-primary btn-sm" *ngIf="canCreate" (click)="onNavigate()">Add</button>
+                <button class="btn btn-primary btn-sm" (click)="onNavigate()">Add</button>
             </div>
             <!--End action buttons-->
 
@@ -126,14 +126,14 @@
 
                         <!-- ACTION -->
                         <td>
-                            <button class="btn btn-sm btn-soft-primary" *ngIf="canEdit" (click)="onEdit(item)">
+                            <button class="btn btn-sm btn-soft-primary" (click)="onEdit(item)">
                                 <i class="ri-pencil-fill fs-12"></i>
                             </button>
-                            <button class="btn btn-sm btn-soft-danger" *ngIf="canDelete" title="Only SuperAdmin can delete"
+                            <button class="btn btn-sm btn-soft-danger" title="Only SuperAdmin can delete"
                                 (click)="deleteJobCard(item.jobCardHeader.id)" [disabled]="!this.isSuperAdmin">
                                 <i class="ri-delete-bin-fill fs-12"></i>
                             </button>
-                            <button class="btn btn-sm btn-soft-success" *ngIf="canDownload" title="Print Invoice" (click)="printJobCard(item)">
+                            <button class="btn btn-sm btn-soft-success" title="Print Invoice" (click)="printJobCard(item)">
                                 <i class="ri-printer-line fs-12"></i>
                             </button>
                         </td>
