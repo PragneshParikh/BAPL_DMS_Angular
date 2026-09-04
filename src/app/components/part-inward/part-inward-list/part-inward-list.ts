@@ -120,12 +120,69 @@ export class PartInwardList implements OnInit {
     this.getPartsInwardDetails();
   }
 
-  goToInvoice(item: any) {
-    const invoiceNo = item?.invoiceNo || '0';
-    const value = Date.now() + '|' + invoiceNo;
-    const encClaim = btoa(value);
-    this.router.navigate(['parts-inward', encClaim])
+ goToInvoice(item: any): void {
+
+  console.log('========== PART INWARD DOUBLE CLICK ==========');
+  console.log('Selected row:', item);
+  console.log('Invoice No:', item?.invoiceNo);
+
+  const invoiceNo = item?.invoiceNo?.toString().trim();
+
+  if (!invoiceNo) {
+    console.error('Invoice number is missing from selected row:', item);
+
+    this.toast.show(
+      'Invoice number not found for this record.',
+      {
+        classname: 'bg-danger text-white',
+        delay: 4000
+      }
+    );
+
+    return;
   }
+
+  const value = `${Date.now()}|${invoiceNo}`;
+  const encClaim = btoa(value);
+
+  console.log('Invoice No:', invoiceNo);
+  console.log('Encoded value:', encClaim);
+  console.log('Navigating to Part Inward:', [
+    '/parts-inward',
+    encClaim
+  ]);
+
+  this.router.navigate([
+    '/parts-inward',
+    encClaim
+  ]).then(success => {
+
+    console.log('Navigation success:', success);
+
+    if (!success) {
+      this.toast.show(
+        'Unable to open Part Inward details.',
+        {
+          classname: 'bg-danger text-white',
+          delay: 4000
+        }
+      );
+    }
+
+  }).catch(error => {
+
+    console.error('Navigation error:', error);
+
+    this.toast.show(
+      'Error opening Part Inward details.',
+      {
+        classname: 'bg-danger text-white',
+        delay: 4000
+      }
+    );
+
+  });
+}
 
   resetForm() {
     this.filterFormData = {

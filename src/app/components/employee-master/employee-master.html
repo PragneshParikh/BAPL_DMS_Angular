@@ -1,502 +1,810 @@
 <!-- src\app\components\employee-master\employee-master.html -->
+
 <!-- ===================================================== -->
 <!-- PAGE HEADER -->
 <!-- ===================================================== -->
-<div class="d-flex justify-content-between align-items-center mb-2">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
   <div class="d-flex align-items-center gap-2">
     <h4 class="fw-bold mb-0 text-uppercase">
       {{ isEditMode ? 'Edit Employee' : 'Add Employee' }}
     </h4>
-    <!-- NEW — the location the currently logged-in user signed in from
-         (Location Login only; absent for a regular email/password login). -->
+
     <span class="badge bg-secondary" *ngIf="locationCode">
       Logged in: {{ locationCode }}
     </span>
   </div>
 
   <button type="button" class="btn btn-secondary btn-sm" (click)="backToList()">
-    <i class="ri-arrow-left-line"></i> Back
+    <i class="ri-arrow-left-line"></i>
+    Back
   </button>
+
 </div>
+
 
 <!-- ===================================================== -->
 <!-- EMPLOYEE FORM -->
 <!-- ===================================================== -->
+
 <div class="card shadow-sm mx-2">
-  <div class="card-body p-3">
+  <div class="card-body p-4">
+
     <form #employeeMasterForm="ngForm" (ngSubmit)="onSubmit(employeeMasterForm)" autocomplete="off">
-      <div class="row">
+      <div class="row g-4">
 
+        <!-- ================================================= -->
         <!-- PROFILE IMAGE -->
-        <div class="col-md-2 text-center">
-          <div class="border rounded overflow-hidden bg-white d-flex align-items-center justify-content-center"
-            style="width:100px; height:120px; margin:auto;">
-            <img *ngIf="imagePreview" [src]="imagePreview" class="w-100 h-100" style="object-fit:cover;" />
-            <i *ngIf="!imagePreview" class="ri-image-line text-muted" style="font-size:40px;"></i>
-          </div>
+        <!-- ================================================= -->
 
-          <div class="border border-top-0 p-1 fw-semibold" style="width:100px; margin:auto; font-size:12px;">
-            Upload Profile Image
-          </div>
+        <div class="col-md-2">
+          <div class="d-flex flex-column align-items-center">
 
-          <input #fileInput type="file" hidden accept="image/*" (change)="onFileSelect($event)" />
+            <div class="profile-image-box">
+              <img *ngIf="imagePreview" [src]="imagePreview" class="profile-image" />
+              <div class="empty-image-box" *ngIf="!imagePreview">
+                <i class="ri-image-line image-icon"></i>
+              </div>
+            </div>
 
-          <button type="button" class="btn btn-primary btn-sm mt-2 px-2 py-1" style="width:100px;"
-            (click)="fileInput.click()">
-            Upload
-          </button>
+            <div class="upload-title">Upload Profile Image</div>
 
-          <div class="mt-2 text-muted" style="font-size:11px; line-height:18px;">
-            <b>Note</b><br>
-            Photo should be 3.5cm x 4.5cm at 100 dpi.<br>
-            Maximum size should be 50kb.
+            <input #fileInput type="file" hidden accept="image/*" (change)="onFileSelect($event)" />
+
+            <button type="button" class="btn btn-primary profile-btn mt-2" (click)="fileInput.click()">
+              <i class="ri-upload-2-line me-1"></i>
+              Upload
+            </button>
+
+            <div class="image-note">
+              <div class="note-title">Note</div>
+              Photo should be 3.5cm x 4.5cm at 100 dpi.<br />
+              Maximum size should be 50kb.
+            </div>
+
           </div>
         </div>
 
+
+        <!-- ================================================= -->
         <!-- FORM SECTION -->
-        <div class="col-md-10 ps-2">
+        <!-- ================================================= -->
 
-          <!-- ROW 1 -->
-          <div class="row mb-2">
-            <div class="col-md-3">
-              <label class="form-label mb-1">Employee Code</label>
-              <input type="text" class="form-control form-control-sm py-1"
-                [(ngModel)]="employeeData.employeeCode" name="employeeCode" readonly>
+        <div class="col-md-10">
+
+          <!-- ================================================= -->
+          <!-- EMPLOYEE INFORMATION -->
+          <!-- ================================================= -->
+
+          <div class="card border shadow-sm mb-3">
+            <div class="card-header bg-light py-2 fw-semibold">
+              <i class="ri-user-line me-1"></i>
+              Employee Information
             </div>
 
-            <div class="col-md-3">
-              <label class="form-label mb-1">First Name <span class="text-danger">*</span></label>
-              <input type="text" class="form-control form-control-sm py-1"
-                [class.is-invalid]="errors.firstName"
-                [(ngModel)]="employeeData.firstName" name="firstName">
-              <small *ngIf="errors.firstName" class="text-danger">{{ errors.firstName }}</small>
-            </div>
+            <div class="card-body p-3">
 
-            <div class="col-md-3">
-              <label class="form-label mb-1">Last Name <span class="text-danger">*</span></label>
-              <input type="text" class="form-control form-control-sm py-1"
-                [class.is-invalid]="errors.lastName"
-                [(ngModel)]="employeeData.lastName" name="lastName">
-              <small *ngIf="errors.lastName" class="text-danger">{{ errors.lastName }}</small>
-            </div>
+              <!-- ROW 1: Identity -->
+              <div class="row g-3 mb-3">
 
-            <div class="col-md-3">
-              <label class="form-label mb-1">Gender <span class="text-danger">*</span></label>
-              <select class="form-select form-select-sm py-1"
-                [class.is-invalid]="errors.gender"
-                [ngModel]="employeeData.gender ?? ''"
-                (ngModelChange)="employeeData.gender = $event" name="gender">
-                <option value="">Select Gender</option>
-                <option *ngFor="let g of genders" [value]="g.value">{{ g.title }}</option>
-              </select>
-              <small *ngIf="errors.gender" class="text-danger">{{ errors.gender }}</small>
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Employee Code</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    [(ngModel)]="employeeData.employeeCode"
+                    name="employeeCode"
+                    readonly
+                  />
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label mb-1">First Name <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    [class.is-invalid]="errors.firstName"
+                    [(ngModel)]="employeeData.firstName"
+                    name="firstName"
+                  />
+                  <small *ngIf="errors.firstName" class="text-danger">{{ errors.firstName }}</small>
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Last Name <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    [class.is-invalid]="errors.lastName"
+                    [(ngModel)]="employeeData.lastName"
+                    name="lastName"
+                  />
+                  <small *ngIf="errors.lastName" class="text-danger">{{ errors.lastName }}</small>
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Gender <span class="text-danger">*</span></label>
+                  <select
+                    class="form-select form-select-sm"
+                    [class.is-invalid]="errors.gender"
+                    [ngModel]="employeeData.gender ?? ''"
+                    (ngModelChange)="employeeData.gender = $event"
+                    name="gender"
+                  >
+                    <option value="">Select Gender</option>
+                    <option *ngFor="let g of genders" [value]="g.value">{{ g.title }}</option>
+                  </select>
+                  <small *ngIf="errors.gender" class="text-danger">{{ errors.gender }}</small>
+                </div>
+
+              </div>
+
+
+              <!-- ROW 2: Contact & Joining -->
+              <div class="row g-3 mb-3">
+
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Mobile No. <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    [class.is-invalid]="errors.mobile"
+                    inputmode="numeric"
+                    maxlength="10"
+                    [(ngModel)]="employeeData.mobile"
+                    name="mobile"
+                    (input)="onlyDigits($event, 'mobile', 10)"
+                  />
+                  <small *ngIf="errors.mobile" class="text-danger">{{ errors.mobile }}</small>
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Date Of Join <span class="text-danger">*</span></label>
+                  <input
+                    type="date"
+                    class="form-control form-control-sm"
+                    [class.is-invalid]="errors.dateOfJoin"
+                    [(ngModel)]="employeeData.dateOfJoin"
+                    name="dateOfJoin"
+                  />
+                  <small *ngIf="errors.dateOfJoin" class="text-danger">{{ errors.dateOfJoin }}</small>
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Dealer Code</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    [(ngModel)]="employeeData.dealerCode"
+                    name="dealerCode"
+                    readonly
+                  />
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Supervisor</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    [(ngModel)]="employeeData.supervisor"
+                    name="supervisor"
+                    [disabled]="isSupervisorDisabled"
+                    [placeholder]="isSupervisorDisabled ? 'Not applicable for Sales' : ''"
+                  />
+                </div>
+
+              </div>
+
+
+              <!-- ROW 3: Status -->
+              <div class="row g-3" *ngIf="isEditMode">
+
+                <div class="col-md-3">
+                  <label class="form-label mb-1 d-block">Status</label>
+                  <span *ngIf="employeeData.isActive" class="badge bg-success px-3 py-2">Active</span>
+                  <span *ngIf="!employeeData.isActive" class="badge bg-danger px-3 py-2">Inactive</span>
+                </div>
+
+              </div>
+
             </div>
           </div>
 
-          <!-- ROW 2 -->
-          <div class="row mb-2">
-            <div class="col-md-3">
-              <label class="form-label mb-1">Mobile No. <span class="text-danger">*</span></label>
-              <input type="text" class="form-control form-control-sm py-1"
-                [class.is-invalid]="errors.mobile"
-                inputmode="numeric" maxlength="10"
-                [(ngModel)]="employeeData.mobile" name="mobile"
-                (input)="onlyDigits($event, 'mobile', 10)">
-              <small *ngIf="errors.mobile" class="text-danger">{{ errors.mobile }}</small>
+
+          <!-- ================================================= -->
+          <!-- ADDRESS DETAILS -->
+          <!-- ================================================= -->
+
+          <div class="card border shadow-sm mb-3">
+            <div class="card-header bg-light py-2 fw-semibold">
+              <i class="ri-map-2-line me-1"></i>
+              Address Details
             </div>
 
-            <div class="col-md-3">
-              <label class="form-label mb-1">Date Of Join <span class="text-danger">*</span></label>
-              <input type="date" class="form-control form-control-sm py-1"
-                [class.is-invalid]="errors.dateOfJoin"
-                [(ngModel)]="employeeData.dateOfJoin" name="dateOfJoin">
-              <small *ngIf="errors.dateOfJoin" class="text-danger">{{ errors.dateOfJoin }}</small>
-            </div>
+            <div class="card-body p-3">
 
-            <div class="col-md-3">
-              <label class="form-label mb-1">Dealer Code</label>
-              <input type="text" class="form-control form-control-sm py-1"
-                [(ngModel)]="employeeData.dealerCode" name="dealerCode" readonly>
-            </div>
+              <div class="row g-3 mb-3">
 
-            <div class="col-md-3">
-              <label class="form-label mb-1 d-block">Dealer Location <span class="text-danger">*</span></label>
-
-              <div class="border rounded p-2"
-                   [class.border-danger]="errors.location"
-                   [style.max-height]="dealerLocations.length > 3 ? '110px' : 'auto'"
-                   [style.overflow-y]="dealerLocations.length > 3 ? 'auto' : 'visible'"
-                   [class.scrollable]="dealerLocations.length > 3">
-
-                <!-- SELECT ALL -->
-                <div class="form-check border-bottom pb-1 mb-1" *ngIf="dealerLocations.length">
-                  <input class="form-check-input" type="checkbox" id="loc_all"
-                    [checked]="allLocationsSelected"
-                    [indeterminate]="someLocationsSelected"
-                    (change)="toggleAllLocations($event)">
-                  <label class="form-check-label fw-semibold" for="loc_all">Select All</label>
+                <div class="col-md-3">
+                  <label class="form-label mb-1">State <span class="text-danger">*</span></label>
+                  <select
+                    class="form-select form-select-sm"
+                    [class.is-invalid]="errors.state"
+                    [ngModel]="employeeData.state ?? ''"
+                    (ngModelChange)="employeeData.state = $event; onStateChange()"
+                    name="state"
+                  >
+                    <option value="">Select State</option>
+                    <option *ngFor="let state of states" [value]="state.stateId">{{ state.stateName }}</option>
+                  </select>
+                  <small *ngIf="errors.state" class="text-danger">{{ errors.state }}</small>
                 </div>
 
-                <!-- INDIVIDUAL LOCATIONS -->
-                <div class="form-check" *ngFor="let loc of dealerLocations">
-                  <input class="form-check-input" type="checkbox"
-                    [id]="'loc_' + loc.locCode"
-                    [checked]="isLocationSelected(loc.locCode)"
-                    (change)="onLocationToggle(loc.locCode, $event)">
-                  <label class="form-check-label" [for]="'loc_' + loc.locCode">
-                    {{ loc.locName }}
+                <div class="col-md-3">
+                  <label class="form-label mb-1">City <span class="text-danger">*</span></label>
+                  <select
+                    class="form-select form-select-sm"
+                    [class.is-invalid]="errors.city"
+                    [ngModel]="employeeData.city ?? ''"
+                    (ngModelChange)="employeeData.city = $event"
+                    name="city"
+                  >
+                    <option value="">Select City</option>
+                    <option *ngFor="let city of filteredCities" [value]="city.cityId">{{ city.cityName }}</option>
+                  </select>
+                  <small *ngIf="errors.city" class="text-danger">{{ errors.city }}</small>
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Pincode <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    [class.is-invalid]="errors.pincode"
+                    inputmode="numeric"
+                    maxlength="6"
+                    [(ngModel)]="employeeData.pincode"
+                    name="pincode"
+                    (input)="onlyDigits($event, 'pincode', 6)"
+                  />
+                  <small *ngIf="errors.pincode" class="text-danger">{{ errors.pincode }}</small>
+                </div>
+
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-9">
+                  <label class="form-label mb-1">Address</label>
+                  <textarea
+                    rows="2"
+                    class="form-control form-control-sm"
+                    [(ngModel)]="employeeData.address"
+                    name="address"
+                  ></textarea>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- ================================================= -->
+          <!-- DEALER LOCATION & LOCATION LOGIN -->
+          <!-- ================================================= -->
+
+          <div class="card border shadow-sm mb-3">
+            <div class="card-header bg-light py-2 fw-semibold">
+              <i class="ri-building-line me-1"></i>
+              Dealer Location
+            </div>
+
+            <div class="card-body p-3">
+
+              <label class="form-label mb-1">
+                Select Dealer Location <span class="text-danger">*</span>
+              </label>
+
+              <!-- DROPDOWN HEADER -->
+              <div
+                class="location-dropdown"
+                [class.border-danger]="errors.location"
+                (click)="locationDropdownOpen = !locationDropdownOpen"
+              >
+                <div class="location-dropdown-value">
+                  <span *ngIf="selectedLocations.length === 0" class="text-muted">
+                    Select dealer location
+                  </span>
+
+                  <span *ngIf="selectedLocations.length > 0" class="text-dark">
+                    {{ selectedLocations.length }} location(s) selected
+                  </span>
+                </div>
+
+                <i class="ri-arrow-down-s-line" [class.rotate]="locationDropdownOpen"></i>
+              </div>
+
+              <!-- LOCATION DROPDOWN MENU -->
+              <div class="location-dropdown-menu" *ngIf="locationDropdownOpen" (click)="$event.stopPropagation()">
+
+                <!-- SELECT ALL -->
+                <div class="location-select-all" *ngIf="dealerLocations.length">
+                  <label class="form-check mb-0">
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      [checked]="allLocationsSelected"
+                      [indeterminate]="someLocationsSelected"
+                      (change)="toggleAllLocations($event)"
+                    />
+                    <span class="form-check-label fw-semibold">Select All</span>
                   </label>
                 </div>
 
-                <small *ngIf="!dealerLocations.length" class="text-muted">No locations found.</small>
+                <!-- LOCATION LIST -->
+                <div class="location-dropdown-list" *ngIf="dealerLocations?.length; else noLocations">
+
+                  <label class="location-dropdown-item" *ngFor="let loc of dealerLocations">
+
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      [id]="'loc_' + loc.locCode"
+                      [checked]="isLocationSelected(loc.locCode)"
+                      (change)="onLocationToggle(loc.locCode, $event)"
+                    />
+
+                    <div class="location-details">
+                      <div class="location-code">{{ loc.locCode }}</div>
+                      <div class="location-name">{{ loc.locName }}</div>
+                    </div>
+
+                    <span *ngIf="isLocationSelected(loc.locCode)" class="badge bg-success-subtle text-success">
+                      <i class="ri-check-line me-1"></i>
+                      Assigned
+                    </span>
+
+                    <span *ngIf="!isLocationSelected(loc.locCode)" class="badge bg-light text-muted">
+                      Unassigned
+                    </span>
+
+                  </label>
+
+                </div>
+
+                <ng-template #noLocations>
+                  <div class="no-location-message">
+                    <i class="ri-information-line me-1"></i>
+                    No locations found.
+                  </div>
+                </ng-template>
+
               </div>
-              <small *ngIf="errors.location" class="text-danger">{{ errors.location }}</small>
-            </div>
-          </div>
 
-          <!-- ===================================================== -->
-          <!-- LOCATION LOGIN — a credential separate from "Create Login -->
-          <!-- Account" below (which is the email/password Identity login -->
-          <!-- used for menu access). Shown whenever at least one dealer -->
-          <!-- location is checked above. -->
-          <!-- ===================================================== -->
-          <div class="row mb-2 p-2 mx-0 bg-light rounded" *ngIf="selectedLocations.length">
-            <div class="col-12">
-              <label class="form-label mb-1 fw-semibold d-block">Location Login</label>
-            </div>
+              <small *ngIf="errors.location" class="text-danger d-block mt-1">{{ errors.location }}</small>
 
-            <div class="col-md-3">
-              <label class="form-label mb-1">Location Login ID <span class="text-danger">*</span></label>
-              <input type="text" class="form-control form-control-sm py-1"
-                [class.is-invalid]="errors.locationLoginId"
-                [(ngModel)]="employeeData.locationLoginId" name="locationLoginId" autocomplete="off">
-              <small *ngIf="errors.locationLoginId" class="text-danger">{{ errors.locationLoginId }}</small>
-            </div>
 
-            <div class="col-md-3">
-              <label class="form-label mb-1">
-                Location Password
-                <span class="text-danger" *ngIf="!isEditMode">*</span>
-              </label>
-              <input type="password" class="form-control form-control-sm py-1"
-                [class.is-invalid]="errors.locationPassword"
-                [(ngModel)]="employeeData.locationPassword" name="locationPassword" autocomplete="new-password"
-                [placeholder]="isEditMode ? 'Leave blank to keep current password' : ''">
-              <small *ngIf="errors.locationPassword" class="text-danger">{{ errors.locationPassword }}</small>
-            </div>
-          </div>
+              <!-- LOCATION LOGIN -->
+              <div class="location-login-section mt-3" *ngIf="selectedLocations.length">
 
-          <!-- ROW 3 -->
-          <div class="row mb-2">
-            <div class="col-md-3">
-              <label class="form-label mb-1">Department <span class="text-danger">*</span></label>
-              <select class="form-select form-select-sm py-1"
-                [class.is-invalid]="errors.department"
-                [ngModel]="employeeData.department ?? ''"
-                (ngModelChange)="employeeData.department = $event; onDepartmentFieldChange()" name="department">
-                <option value="">Select Department</option>
-                <option *ngFor="let dept of departments" [value]="dept.departmentId">{{ dept.departmentName }}</option>
-              </select>
-              <small *ngIf="errors.department" class="text-danger">{{ errors.department }}</small>
-            </div>
+                <div class="location-login-title">
+                  <i class="ri-lock-line me-1"></i>
+                  Location Login
+                </div>
 
-            <div class="col-md-3">
-              <label class="form-label mb-1">Designation <span class="text-danger">*</span></label>
-              <select class="form-select form-select-sm py-1"
-                [class.is-invalid]="errors.designation"
-                [ngModel]="employeeData.designation ?? ''"
-                (ngModelChange)="employeeData.designation = $event" name="designation">
-                <option value="">Select Designation</option>
-                <option *ngFor="let desg of designations" [value]="desg.designationId">{{ desg.designationName }}</option>
-              </select>
-              <small *ngIf="errors.designation" class="text-danger">{{ errors.designation }}</small>
-            </div>
+                <div class="row g-3">
 
-            <div class="col-md-3">
-              <label class="form-label mb-1">Supervisor</label>
-              <input type="text" class="form-control form-control-sm py-1"
-                [(ngModel)]="employeeData.supervisor" name="supervisor"
-                [disabled]="isSupervisorDisabled"
-                [placeholder]="isSupervisorDisabled ? 'Not applicable for Sales' : ''">
-            </div>
+                  <div class="col-md-4">
+                    <label class="form-label mb-1">Location Login ID <span class="text-danger">*</span></label>
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      [class.is-invalid]="errors.locationLoginId"
+                      [(ngModel)]="employeeData.locationLoginId"
+                      name="locationLoginId"
+                      autocomplete="off"
+                    />
+                    <small *ngIf="errors.locationLoginId" class="text-danger">{{ errors.locationLoginId }}</small>
+                  </div>
 
-            <div class="col-md-3">
-              <label class="form-label mb-1">State <span class="text-danger">*</span></label>
-              <select class="form-select form-select-sm py-1"
-                [class.is-invalid]="errors.state"
-                [ngModel]="employeeData.state ?? ''"
-                (ngModelChange)="employeeData.state = $event; onStateChange()" name="state">
-                <option value="">Select State</option>
-                <option *ngFor="let state of states" [value]="state.stateId">{{ state.stateName }}</option>
-              </select>
-              <small *ngIf="errors.state" class="text-danger">{{ errors.state }}</small>
-            </div>
-          </div>
+                  <div class="col-md-4">
+                    <label class="form-label mb-1">
+                      Location Password
+                      <span class="text-danger" *ngIf="!isEditMode">*</span>
+                    </label>
 
-          <!-- ROW 4 -->
-          <div class="row mb-2">
-            <div class="col-md-3">
-              <label class="form-label mb-1">City <span class="text-danger">*</span></label>
-              <select class="form-select form-select-sm py-1"
-                [class.is-invalid]="errors.city"
-                [ngModel]="employeeData.city ?? ''"
-                (ngModelChange)="employeeData.city = $event" name="city">
-                <option value="">Select City</option>
-                <option *ngFor="let city of filteredCities" [value]="city.cityId">{{ city.cityName }}</option>
-              </select>
-              <small *ngIf="errors.city" class="text-danger">{{ errors.city }}</small>
-            </div>
+                    <div class="input-group input-group-sm">
+                      <input
+                        [type]="showLocationPassword ? 'text' : 'password'"
+                        class="form-control form-control-sm"
+                        [class.is-invalid]="errors.locationPassword"
+                        [(ngModel)]="employeeData.locationPassword"
+                        name="locationPassword"
+                        autocomplete="new-password"
+                        placeholder="Enter location password"
+                      />
 
-            <div class="col-md-3">
-              <label class="form-label mb-1">Pincode <span class="text-danger">*</span></label>
-              <input type="text" class="form-control form-control-sm py-1"
-                [class.is-invalid]="errors.pincode"
-                inputmode="numeric" maxlength="6"
-                [(ngModel)]="employeeData.pincode" name="pincode"
-                (input)="onlyDigits($event, 'pincode', 6)">
-              <small *ngIf="errors.pincode" class="text-danger">{{ errors.pincode }}</small>
-            </div>
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        (click)="showLocationPassword = !showLocationPassword"
+                        title="Show/Hide Location Password"
+                      >
+                        <i [class]="showLocationPassword ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+                      </button>
+                    </div>
 
-            <div class="col-md-2" *ngIf="isEditMode">
-              <label class="form-label mb-1">Status</label>
-              <div>
-                <span *ngIf="employeeData.isActive" class="badge bg-success px-3 py-2">Active</span>
-                <span *ngIf="!employeeData.isActive" class="badge bg-danger px-3 py-2">Inactive</span>
+                    <small *ngIf="errors.locationPassword" class="text-danger">{{ errors.locationPassword }}</small>
+                    <small *ngIf="isEditMode" class="text-muted d-block mt-1">
+                      Showing the current password. Change it here to update it, or clear it to remove location login access.
+                    </small>
+                  </div>
+
+                </div>
               </div>
+
             </div>
           </div>
 
-          <!-- ADDRESS / NOTES -->
-          <div class="row mb-2">
-            <div class="col-md-6">
-              <label class="form-label mb-1">Address</label>
-              <textarea rows="2" class="form-control form-control-sm"
-                [(ngModel)]="employeeData.address" name="address"></textarea>
-            </div>
 
-            <div class="col-md-6">
+          <!-- ================================================= -->
+          <!-- NOTES -->
+          <!-- ================================================= -->
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-9">
               <label class="form-label mb-1">Notes</label>
-              <textarea rows="2" class="form-control form-control-sm"
-                [(ngModel)]="employeeData.notes" name="notes"></textarea>
+              <textarea
+                rows="2"
+                class="form-control form-control-sm"
+                [(ngModel)]="employeeData.notes"
+                name="notes"
+              ></textarea>
             </div>
           </div>
 
-          <!-- ===================================================== -->
-          <!-- LOGIN ACCESS (toggle) -->
-          <!-- ===================================================== -->
-          <div class="row mb-2 mt-1">
-            <div class="col-12">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="createLogin"
-                  [(ngModel)]="employeeData.createLogin" name="createLogin">
+
+          <!-- ================================================= -->
+          <!-- LOGIN ACCESS -->
+          <!-- ================================================= -->
+
+          <div class="card border shadow-sm mb-3">
+            <div class="card-header bg-light py-2">
+              <div class="form-check mb-0">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="createLogin"
+                  [(ngModel)]="employeeData.createLogin"
+                  name="createLogin"
+                />
                 <label class="form-check-label fw-semibold" for="createLogin">
                   Create Login Account
                 </label>
               </div>
             </div>
-          </div>
 
-          <!-- Email / Password / Department + per-category menu access — shown only when "Create Login Account" is checked -->
-          <div class="row mb-2 p-2 mx-0 bg-light rounded" *ngIf="employeeData.createLogin">
+            <div class="card-body p-3" *ngIf="employeeData.createLogin">
 
-            <div class="col-md-3">
-              <label class="form-label mb-1">Email ID</label>
-              <input type="email" class="form-control form-control-sm py-1"
-                [class.is-invalid]="errors.emailId"
-                [(ngModel)]="employeeData.emailId" name="emailId" autocomplete="off">
-              <small *ngIf="errors.emailId" class="text-danger">{{ errors.emailId }}</small>
-            </div>
+              <!-- EMAIL / PASSWORD / CATEGORY -->
+              <div class="row g-3 mb-3">
 
-            <div class="col-md-3">
-              <label class="form-label mb-1">Password</label>
-              <input type="password" class="form-control form-control-sm py-1"
-                [class.is-invalid]="errors.password"
-                [(ngModel)]="employeeData.password" name="password" autocomplete="new-password">
-              <small *ngIf="errors.password" class="text-danger">{{ errors.password }}</small>
-            </div>
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Email ID</label>
+                  <input
+                    type="email"
+                    class="form-control form-control-sm"
+                    [class.is-invalid]="errors.emailId"
+                    [(ngModel)]="employeeData.emailId"
+                    name="emailId"
+                    autocomplete="off"
+                  />
+                  <small *ngIf="errors.emailId" class="text-danger">{{ errors.emailId }}</small>
+                </div>
 
-            <!-- DEPARTMENT CHECKBOXES (from DepartmentMaster) -->
-            <div class="col-md-6">
-              <label class="form-label mb-1 d-block">Category</label>
-              <div class="d-flex flex-wrap gap-3 pt-1">
-                <div class="form-check" *ngFor="let dept of departmentOptions">
-                  <input class="form-check-input" type="checkbox"
-                    [id]="'dept_' + dept.id"
-                    [checked]="isDepartmentSelected(dept.name)"
-                    (change)="onDepartmentToggle(dept.name, $event)">
-                  <label class="form-check-label" [for]="'dept_' + dept.id">
-                    {{ dept.name }}
+                <div class="col-md-3">
+                  <label class="form-label mb-1">Password</label>
+                  <div class="input-group input-group-sm">
+                    <input
+                      [type]="showPassword ? 'text' : 'password'"
+                      class="form-control form-control-sm"
+                      [class.is-invalid]="errors.password"
+                      [(ngModel)]="employeeData.password"
+                      name="password"
+                      autocomplete="new-password"
+                      [placeholder]="isEditMode ? 'Enter new password to change' : 'Enter password'"
+                    />
+
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary"
+                      (click)="showPassword = !showPassword"
+                      title="Show/Hide Password"
+                    >
+                      <i [class]="showPassword ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+                    </button>
+                  </div>
+
+                  <small *ngIf="errors.password" class="text-danger">{{ errors.password }}</small>
+                  <small *ngIf="isEditMode" class="text-muted d-block mt-1">
+                    Leave blank to keep the existing password.
+                  </small>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label mb-1 d-block">Category</label>
+
+                  <div class="d-flex flex-wrap gap-3 pt-1">
+                    <div class="form-check" *ngFor="let dept of departmentOptions">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        [id]="'dept_' + dept.id"
+                        [checked]="isDepartmentSelected(dept.name)"
+                        (change)="onDepartmentToggle(dept.name, $event)"
+                      />
+                      <label class="form-check-label" [for]="'dept_' + dept.id">{{ dept.name }}</label>
+                    </div>
+                  </div>
+
+                  <small *ngIf="errors.category" class="text-danger">{{ errors.category }}</small>
+                </div>
+
+              </div>
+
+
+              <!-- ================================================= -->
+              <!-- MENU ACCESS -->
+              <!-- ================================================= -->
+
+              <div *ngIf="selectedDepartments.length">
+
+                <div *ngFor="let dept of selectedDepartments" class="mb-4">
+
+                  <label class="form-label mb-2 d-block fw-semibold">
+                    {{ dept }} — Menu Access
                   </label>
+
+                  <!-- EXISTING ROLE PREFILL -->
+                  <div class="mb-2" *ngIf="existingRolesByDepartment[dept]?.length">
+                    <label class="form-label mb-1 small text-muted d-block">
+                      Prefill from existing role:
+                    </label>
+
+                    <div class="d-flex flex-wrap gap-3">
+                      <div class="form-check" *ngFor="let r of existingRolesByDepartment[dept]">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          [id]="dept + '-existing-role-' + r.roleId"
+                          [checked]="selectedExistingRoleByDepartment[dept] === r.roleId"
+                          (change)="onExistingRoleCheckboxToggle(dept, r.roleId, $event)"
+                        />
+                        <label class="form-check-label small" [for]="dept + '-existing-role-' + r.roleId">
+                          {{ r.roleName }}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- GRANTED MENU -->
+                  <div class="card mb-2">
+                    <div class="row g-0">
+
+                      <!-- PROCESS -->
+                      <div class="col-md-6 border-end">
+                        <div class="card-header fw-bold py-2 d-flex justify-content-between align-items-center">
+                          <span>Process</span>
+
+                          <div class="form-check mb-0" *ngIf="getGrantedProcessItems(dept).length > 1">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              [id]="dept + '-granted-process-all'"
+                              [checked]="isAllMenuItemsSelected(getGrantedProcessItems(dept))"
+                              (change)="toggleAllMenuItems(getGrantedProcessItems(dept), $event)"
+                            />
+                            <label class="form-check-label small fw-normal" [for]="dept + '-granted-process-all'">
+                              Select All
+                            </label>
+                          </div>
+                        </div>
+
+                        <div class="card-body py-2">
+                          <div class="form-check" *ngFor="let item of getGrantedProcessItems(dept)">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              [id]="dept + '-granted-' + item.subMenuId"
+                              [(ngModel)]="item.isGranted"
+                              [name]="dept + '-granted-' + item.subMenuId"
+                            />
+                            <label class="form-check-label" [for]="dept + '-granted-' + item.subMenuId">
+                              {{ item.menuName }}
+                            </label>
+                          </div>
+
+                          <div class="text-muted small" *ngIf="getGrantedProcessItems(dept).length === 0">
+                            None assigned yet.
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- REPORTS -->
+                      <div class="col-md-6">
+                        <div class="card-header fw-bold py-2 d-flex justify-content-between align-items-center">
+                          <span>Reports</span>
+
+                          <div class="form-check mb-0" *ngIf="getGrantedReportsItems(dept).length > 1">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              [id]="dept + '-granted-reports-all'"
+                              [checked]="isAllMenuItemsSelected(getGrantedReportsItems(dept))"
+                              (change)="toggleAllMenuItems(getGrantedReportsItems(dept), $event)"
+                            />
+                            <label class="form-check-label small fw-normal" [for]="dept + '-granted-reports-all'">
+                              Select All
+                            </label>
+                          </div>
+                        </div>
+
+                        <div class="card-body py-2">
+                          <div class="form-check" *ngFor="let item of getGrantedReportsItems(dept)">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              [id]="dept + '-granted-' + item.subMenuId"
+                              [(ngModel)]="item.isGranted"
+                              [name]="dept + '-granted-' + item.subMenuId"
+                            />
+                            <label class="form-check-label" [for]="dept + '-granted-' + item.subMenuId">
+                              {{ item.menuName }}
+                            </label>
+                          </div>
+
+                          <div class="text-muted small" *ngIf="getGrantedReportsItems(dept).length === 0">
+                            None assigned yet.
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <!-- ADD MENU ITEM -->
+                  <button type="button" class="btn btn-sm btn-outline-primary mb-2" (click)="toggleAddMenu(dept)">
+                    <i class="ri-add-line"></i>
+                    {{ isAddMenuExpanded(dept) ? 'Hide' : 'Add Menu Item' }}
+                  </button>
+
+                  <div class="card mb-2" *ngIf="isAddMenuExpanded(dept)">
+                    <div class="row g-0">
+
+                      <!-- AVAILABLE PROCESS -->
+                      <div class="col-md-6 border-end">
+                        <div class="card-header fw-bold py-2 d-flex justify-content-between align-items-center">
+                          <span>Process</span>
+
+                          <div class="form-check mb-0" *ngIf="getAvailableProcessItems(dept).length > 1">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              [id]="dept + '-avail-process-all'"
+                              [checked]="isAllMenuItemsSelected(getAvailableProcessItems(dept))"
+                              (change)="toggleAllMenuItems(getAvailableProcessItems(dept), $event)"
+                            />
+                            <label class="form-check-label small fw-normal" [for]="dept + '-avail-process-all'">
+                              Select All
+                            </label>
+                          </div>
+                        </div>
+
+                        <div class="card-body py-2">
+                          <div class="form-check" *ngFor="let item of getAvailableProcessItems(dept)">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              [id]="dept + '-avail-' + item.subMenuId"
+                              [(ngModel)]="item.isGranted"
+                              [name]="dept + '-avail-' + item.subMenuId"
+                            />
+                            <label class="form-check-label" [for]="dept + '-avail-' + item.subMenuId">
+                              {{ item.menuName }}
+                            </label>
+                          </div>
+
+                          <div class="text-muted small" *ngIf="getAvailableProcessItems(dept).length === 0">
+                            All Process items already assigned.
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- AVAILABLE REPORTS -->
+                      <div class="col-md-6">
+                        <div class="card-header fw-bold py-2 d-flex justify-content-between align-items-center">
+                          <span>Reports</span>
+
+                          <div class="form-check mb-0" *ngIf="getAvailableReportsItems(dept).length > 1">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              [id]="dept + '-avail-reports-all'"
+                              [checked]="isAllMenuItemsSelected(getAvailableReportsItems(dept))"
+                              (change)="toggleAllMenuItems(getAvailableReportsItems(dept), $event)"
+                            />
+                            <label class="form-check-label small fw-normal" [for]="dept + '-avail-reports-all'">
+                              Select All
+                            </label>
+                          </div>
+                        </div>
+
+                        <div class="card-body py-2">
+                          <div class="form-check" *ngFor="let item of getAvailableReportsItems(dept)">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              [id]="dept + '-avail-' + item.subMenuId"
+                              [(ngModel)]="item.isGranted"
+                              [name]="dept + '-avail-' + item.subMenuId"
+                            />
+                            <label class="form-check-label" [for]="dept + '-avail-' + item.subMenuId">
+                              {{ item.menuName }}
+                            </label>
+                          </div>
+
+                          <div class="text-muted small" *ngIf="getAvailableReportsItems(dept).length === 0">
+                            All Reports items already assigned.
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
                 </div>
+
+                <small *ngIf="errors.role" class="text-danger d-block">{{ errors.role }}</small>
+
               </div>
-              <small *ngIf="errors.category" class="text-danger">{{ errors.category }}</small>
-            </div>
 
-            <!-- PER-CATEGORY MENU ACCESS — only granted items show by default,
-                 as removable checkboxes. New items are added via the separate
-                 "+ Add Menu Item" section, which only lists what's not yet granted. -->
-            <div class="col-12 mt-2" *ngIf="selectedDepartments.length">
-              <div *ngFor="let dept of selectedDepartments" class="mb-3">
-                <label class="form-label mb-2 d-block fw-semibold">{{ dept }} — Menu Access</label>
 
-                <!-- PREFILL FROM EXISTING ROLE — populates the checkboxes below
-                     from a role already created in Role Master for this category.
-                     Purely a starting point: checking one overwrites the current
-                     checkbox state, but every item stays fully editable afterward,
-                     and nothing is saved until the form is submitted. Behaves like
-                     a radio group — checking one automatically unchecks any other,
-                     since [checked] is bound to whether this role is the one
-                     currently tracked in selectedExistingRoleByDepartment. -->
-                <div class="mb-2" *ngIf="existingRolesByDepartment[dept]?.length">
-                  <label class="form-label mb-1 small text-muted d-block">Prefill from existing role:</label>
-                  <div class="d-flex flex-wrap gap-3">
-                    <div class="form-check" *ngFor="let r of existingRolesByDepartment[dept]">
-                      <input class="form-check-input" type="checkbox"
-                        [id]="dept + '-existing-role-' + r.roleId"
-                        [checked]="selectedExistingRoleByDepartment[dept] === r.roleId"
-                        (change)="onExistingRoleCheckboxToggle(dept, r.roleId, $event)">
-                      <label class="form-check-label small" [for]="dept + '-existing-role-' + r.roleId">
-                        {{ r.roleName }}
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- GRANTED — always visible, checkbox unchecks to remove -->
-                <div class="card mb-2">
-                  <div class="row g-0">
-                    <div class="col-md-6 border-end">
-                      <div class="card-header fw-bold py-2 d-flex justify-content-between align-items-center">
-                        <span>Process</span>
-                        <div class="form-check mb-0" *ngIf="getGrantedProcessItems(dept).length > 1">
-                          <input class="form-check-input" type="checkbox" [id]="dept + '-granted-process-all'"
-                            [checked]="isAllMenuItemsSelected(getGrantedProcessItems(dept))"
-                            (change)="toggleAllMenuItems(getGrantedProcessItems(dept), $event)">
-                          <label class="form-check-label small fw-normal" [for]="dept + '-granted-process-all'">Select All</label>
-                        </div>
-                      </div>
-                      <div class="card-body py-2">
-                        <div class="form-check" *ngFor="let item of getGrantedProcessItems(dept)">
-                          <input class="form-check-input" type="checkbox" [id]="dept + '-granted-' + item.subMenuId"
-                            [(ngModel)]="item.isGranted" [name]="dept + '-granted-' + item.subMenuId">
-                          <label class="form-check-label" [for]="dept + '-granted-' + item.subMenuId">
-                            {{ item.menuName }}
-                          </label>
-                        </div>
-                        <div class="text-muted small" *ngIf="getGrantedProcessItems(dept).length === 0">
-                          None assigned yet.
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="card-header fw-bold py-2 d-flex justify-content-between align-items-center">
-                        <span>Reports</span>
-                        <div class="form-check mb-0" *ngIf="getGrantedReportsItems(dept).length > 1">
-                          <input class="form-check-input" type="checkbox" [id]="dept + '-granted-reports-all'"
-                            [checked]="isAllMenuItemsSelected(getGrantedReportsItems(dept))"
-                            (change)="toggleAllMenuItems(getGrantedReportsItems(dept), $event)">
-                          <label class="form-check-label small fw-normal" [for]="dept + '-granted-reports-all'">Select All</label>
-                        </div>
-                      </div>
-                      <div class="card-body py-2">
-                        <div class="form-check" *ngFor="let item of getGrantedReportsItems(dept)">
-                          <input class="form-check-input" type="checkbox" [id]="dept + '-granted-' + item.subMenuId"
-                            [(ngModel)]="item.isGranted" [name]="dept + '-granted-' + item.subMenuId">
-                          <label class="form-check-label" [for]="dept + '-granted-' + item.subMenuId">
-                            {{ item.menuName }}
-                          </label>
-                        </div>
-                        <div class="text-muted small" *ngIf="getGrantedReportsItems(dept).length === 0">
-                          None assigned yet.
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- ADD MORE — collapsed by default, only lists what's not yet granted -->
-                <button type="button" class="btn btn-sm btn-outline-primary mb-2"
-                  (click)="toggleAddMenu(dept)">
-                  <i class="ri-add-line"></i> {{ isAddMenuExpanded(dept) ? 'Hide' : 'Add Menu Item' }}
-                </button>
-
-                <div class="card mb-2" *ngIf="isAddMenuExpanded(dept)">
-                  <div class="row g-0">
-                    <div class="col-md-6 border-end">
-                      <div class="card-header fw-bold py-2 d-flex justify-content-between align-items-center">
-                        <span>Process</span>
-                        <div class="form-check mb-0" *ngIf="getAvailableProcessItems(dept).length > 1">
-                          <input class="form-check-input" type="checkbox" [id]="dept + '-avail-process-all'"
-                            [checked]="isAllMenuItemsSelected(getAvailableProcessItems(dept))"
-                            (change)="toggleAllMenuItems(getAvailableProcessItems(dept), $event)">
-                          <label class="form-check-label small fw-normal" [for]="dept + '-avail-process-all'">Select All</label>
-                        </div>
-                      </div>
-                      <div class="card-body py-2">
-                        <div class="form-check" *ngFor="let item of getAvailableProcessItems(dept)">
-                          <input class="form-check-input" type="checkbox" [id]="dept + '-avail-' + item.subMenuId"
-                            [(ngModel)]="item.isGranted" [name]="dept + '-avail-' + item.subMenuId">
-                          <label class="form-check-label" [for]="dept + '-avail-' + item.subMenuId">
-                            {{ item.menuName }}
-                          </label>
-                        </div>
-                        <div class="text-muted small" *ngIf="getAvailableProcessItems(dept).length === 0">
-                          All Process items already assigned.
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="card-header fw-bold py-2 d-flex justify-content-between align-items-center">
-                        <span>Reports</span>
-                        <div class="form-check mb-0" *ngIf="getAvailableReportsItems(dept).length > 1">
-                          <input class="form-check-input" type="checkbox" [id]="dept + '-avail-reports-all'"
-                            [checked]="isAllMenuItemsSelected(getAvailableReportsItems(dept))"
-                            (change)="toggleAllMenuItems(getAvailableReportsItems(dept), $event)">
-                          <label class="form-check-label small fw-normal" [for]="dept + '-avail-reports-all'">Select All</label>
-                        </div>
-                      </div>
-                      <div class="card-body py-2">
-                        <div class="form-check" *ngFor="let item of getAvailableReportsItems(dept)">
-                          <input class="form-check-input" type="checkbox" [id]="dept + '-avail-' + item.subMenuId"
-                            [(ngModel)]="item.isGranted" [name]="dept + '-avail-' + item.subMenuId">
-                          <label class="form-check-label" [for]="dept + '-avail-' + item.subMenuId">
-                            {{ item.menuName }}
-                          </label>
-                        </div>
-                        <div class="text-muted small" *ngIf="getAvailableReportsItems(dept).length === 0">
-                          All Reports items already assigned.
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
+              <!-- CATEGORY VALIDATION -->
+              <div class="text-danger small mt-2 text-end" *ngIf="categoriesMissingMenuItems.length">
+                Select at least one menu item for: {{ categoriesMissingMenuItems.join(', ') }}
               </div>
 
-              <small *ngIf="errors.role" class="text-danger d-block">{{ errors.role }}</small>
             </div>
-
-          </div>
-          <!-- End login access -->
-
-          <!-- NEW — explains why Update may be disabled, instead of a silent disabled button -->
-          <div class="text-danger small mb-2 text-end" *ngIf="categoriesMissingMenuItems.length">
-            Select at least one menu item for: {{ categoriesMissingMenuItems.join(', ') }}
           </div>
 
+
+          <!-- ================================================= -->
           <!-- BUTTONS -->
+          <!-- ================================================= -->
+
           <div class="text-end mt-2">
-            <button type="button" class="btn btn-secondary btn-sm px-2 py-1 me-2" (click)="backToList()">
+
+            <button type="button" class="btn btn-secondary btn-sm px-3 py-1 me-2" (click)="backToList()">
+              <i class="ri-close-line me-1"></i>
               Cancel
             </button>
-            <button type="submit" class="btn btn-primary btn-sm px-2 py-1"
+
+            <button
+              type="submit"
+              class="btn btn-primary btn-sm px-3 py-1"
               *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
-              [disabled]="!isFormValid || resolvingRoles">
+              [disabled]="!isFormValid || resolvingRoles"
+            >
+              <i *ngIf="!resolvingRoles" class="ri-save-line me-1"></i>
               {{ resolvingRoles ? 'Saving...' : (isEditMode ? 'Update' : 'Save') }}
-          </button>
+            </button>
+
           </div>
 
         </div>
+
       </div>
     </form>
+
   </div>
 </div>

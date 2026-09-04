@@ -364,26 +364,45 @@ export class RepairBill implements OnInit {
     this.showPopup = false;
   }
   loadJobCardList(): void {
-    debugger;
-    let dealerCode = '';
-    if (!this.isSuperAdmin) {
-      dealerCode = this.storageService.getDealerCode();
-    }
-    this.loader.show();
+  let dealerCode = '';
 
-    this.jobCardService.getJobCardListRepairBill(this.searchModel
-    ).subscribe({
-      next: (res) => {
-        this.loader.hide();
-        this.jobCardList = res;
-
-      },
-      error: (err) => {
-        this.loader.hide();
-        console.error('Error fetching job cards', err);
-      }
-    });
+  if (!this.isSuperAdmin) {
+    dealerCode = this.storageService.getDealerCode();
   }
+
+  this.loader.show();
+
+  this.jobCardService.getJobCardListRepairBill(this.searchModel).subscribe({
+    next: (res: any[]) => {
+      this.loader.hide();
+
+      // Remove duplicate Job Cards using Job Card Header ID
+      const uniqueJobCards = (res || []).filter(
+        (jobCard: any, index: number, self: any[]) => {
+          const jobCardId = jobCard?.jobCardHeader?.id;
+
+          return (
+            jobCardId != null &&
+            index === self.findIndex(
+              (item: any) =>
+                item?.jobCardHeader?.id === jobCardId
+            )
+          );
+        }
+      );
+
+      this.jobCardList = uniqueJobCards;
+    },
+
+    error: (err) => {
+      this.loader.hide();
+      console.error('Error fetching job cards', err);
+
+      this.jobCardList = [];
+    }
+  });
+}
+
   //currently not to used
   showMaterialTransferWarning(item: any): void {
     if (item.isMaterialTransfer === false || item.isMaterialTransfer === null) {

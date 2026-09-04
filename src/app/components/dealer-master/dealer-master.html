@@ -143,7 +143,6 @@
 </div> <!-- row -->
 
 <!-- Dealer Modal -->
-
 <ng-template #dealerModal let-modal>
 
     <div class="modal-header dealer-modal-header">
@@ -154,35 +153,41 @@
 
         <button class="btn-close btn-close-white btn-sm" (click)="modal.dismiss()">
         </button>
-
     </div>
 
     <div class="modal-body">
 
         <!-- Dealer Info -->
-
         <h5 class="mb-2 text-primary">Dealer Info</h5>
 
         <div class="row">
 
             <div class="col-md-3">
                 <label class="form-label">Company Name</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.compname" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.compname">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Company Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.compcode" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.compcode">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Dealer Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.dealercode" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.dealercode">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Credit Limit</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.ceditLimit" [disabled]="true">
+                <input type="number"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.ceditLimit">
             </div>
 
         </div>
@@ -191,14 +196,16 @@
 
             <div class="col-md-6">
                 <label class="form-label">Address 1</label>
-                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress1"
-                    [disabled]="true"></textarea>
+                <textarea class="form-control form-control-sm"
+                          rows="2"
+                          [(ngModel)]="selectedDealer.adress1"></textarea>
             </div>
 
             <div class="col-md-6">
                 <label class="form-label">Address 2</label>
-                <textarea class="form-control form-control-sm" [value]="selectedDealer?.adress2"
-                    [disabled]="true"></textarea>
+                <textarea class="form-control form-control-sm"
+                          rows="2"
+                          [(ngModel)]="selectedDealer.adress2"></textarea>
             </div>
 
         </div>
@@ -207,22 +214,30 @@
 
             <div class="col-md-3">
                 <label class="form-label">City</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.city" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.city">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">State</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.state" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.state">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Pin Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.pin" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.pin">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Mobile</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.mobile" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.mobile">
             </div>
 
         </div>
@@ -231,9 +246,10 @@
 
             <div class="col-md-3">
                 <label class="form-label">Active</label>
-                <select class="form-select form-select-sm" [value]="selectedDealer?.isActive" [disabled]="true">
-                    <option value="true"> Yes </option>
-                    <option value="false"> No </option>
+                <select class="form-select form-select-sm"
+                        [(ngModel)]="selectedDealer.isActive">
+                    <option [ngValue]="true">Yes</option>
+                    <option [ngValue]="false">No</option>
                 </select>
             </div>
 
@@ -242,24 +258,29 @@
         <hr class="custom-hr">
 
         <!-- Contact Info -->
-
         <h5 class="mb-2 text-primary">Contact Info</h5>
 
         <div class="row">
 
             <div class="col-md-4">
                 <label class="form-label">Email</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.email" [disabled]="true">
+                <input type="email"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.email">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Contact Person</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.contactperson" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.contactperson">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Phone Office</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.phoneOff" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.phoneOff">
             </div>
 
         </div>
@@ -267,24 +288,29 @@
         <hr class="custom-hr">
 
         <!-- Other Info -->
-
         <h5 class="mb-2 text-primary">Other Info</h5>
 
         <div class="row">
 
             <div class="col-md-4">
                 <label class="form-label">Brand Name</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.brandName" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.brandName">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">GSTIN</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.compgstinNo" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.compgstinNo">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">PAN</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.pan" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.pan">
             </div>
 
         </div>
@@ -293,17 +319,23 @@
 
             <div class="col-md-4">
                 <label class="form-label">CIN No</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.cinNo" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.cinNo">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Trade Certificate</label>
-                <input class="form-control form-control-sm" [(ngModel)]="selectedDealer.tradCert">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.tradCert">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Area Office Id</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.areaofficeid" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.areaofficeid">
             </div>
 
         </div>
@@ -312,18 +344,25 @@
 
             <div class="col-md-4">
                 <label class="form-label">VAT No</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.vatNo" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.vatNo">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Is TCS</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.isTcs ? 'Yes' : 'No'"
-                    [disabled]="true">
+                <select class="form-select form-select-sm"
+                        [(ngModel)]="selectedDealer.isTcs">
+                    <option [ngValue]="true">Yes</option>
+                    <option [ngValue]="false">No</option>
+                </select>
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">TCS Percent</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.tcsPercent" [disabled]="true">
+                <input type="number"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.tcsPercent">
             </div>
 
         </div>
@@ -332,18 +371,25 @@
 
             <div class="col-md-4">
                 <label class="form-label">FameII Code</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.fameiiCode" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.fameiiCode">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">B2B</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.b2b ? 'Yes' : 'No'"
-                    [disabled]="true">
+                <select class="form-select form-select-sm"
+                        [(ngModel)]="selectedDealer.b2b">
+                    <option [ngValue]="true">Yes</option>
+                    <option [ngValue]="false">No</option>
+                </select>
             </div>
 
             <div class="col-md-4">
                 <label class="form-label">Registration Date</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.regDate" [disabled]="true">
+                <input type="date"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.regDate">
             </div>
 
         </div>
@@ -352,7 +398,9 @@
 
             <div class="col-md-12">
                 <label class="form-label">Registration Address</label>
-                <input class="form-control form-control-sm" [value]="selectedDealer?.regAddress" [disabled]="true">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       [(ngModel)]="selectedDealer.regAddress">
             </div>
 
         </div>
@@ -360,10 +408,19 @@
     </div>
 
     <div class="modal-footer">
-        <button *ngIf="canEdit" class="btn btn-primary btn-sm" (click)="updateTradeCertificate()">
+
+        <button *ngIf="canEdit"
+                class="btn btn-primary btn-sm"
+                (click)="updateTradeCertificate()">
+            <i class="ri-save-line me-1"></i>
             Save
         </button>
-        <button class="btn btn-danger btn-sm" (click)="modal.close()">Close</button>
+
+        <button class="btn btn-danger btn-sm"
+                (click)="modal.close()">
+            Close
+        </button>
+
     </div>
 
 </ng-template>

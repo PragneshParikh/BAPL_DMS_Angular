@@ -51,6 +51,7 @@ export class EmployeeMasterComponent implements OnInit {
   departments: any[] = [];
   designations: any[] = [];
   dealerInfo: any = null;
+  allDealerLocations: any[] = [];
   dealerLocations: any[] = [];
   selectedLocations: string[] = [];
   readonly SUBMENU_ID = 49;
@@ -61,6 +62,10 @@ export class EmployeeMasterComponent implements OnInit {
   menuGroupsByDepartment: { [dept: string]: MenuAccessGroup[] } = {};
   expandedAddForDept: { [dept: string]: boolean } = {};
   resolvingRoles: boolean = false;
+  showPassword = false;
+  showLocationPassword = false;
+  hasSavedLocationPassword = false;
+  locationDropdownOpen = false;
 
   // NEW — the location the *currently logged-in* user signed in from (via
   // Location Login — see AuthController.LocationLogin / login.ts on the
@@ -88,8 +93,6 @@ export class EmployeeMasterComponent implements OnInit {
     mobile?: string;
     dateOfJoin?: string;
     location?: string;
-    department?: string;
-    designation?: string;
     state?: string;
     city?: string;
     pincode?: string;
@@ -118,85 +121,180 @@ export class EmployeeMasterComponent implements OnInit {
 
   ngOnInit(): void {
 
-    // FIX: read unconditionally, before the Add/Edit branch below — this was
-    // previously only set inside the popupData (Edit) branch, so a brand-new
-    // employee form always left it null even though the info is available
-    // either way.
-    this.locationCode = localStorage.getItem('locationCode');
+  this.locationCode = localStorage.getItem('locationCode');
 
-    this.loadStates();
-    this.loadCities();
-    this.loadDepartments();
-    this.loadDesignations();
-    this.loadDepartmentOptions();
-    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
-    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  this.loadStates();
+  this.loadCities();
+  this.loadDepartments();
+  this.loadDesignations();
+  this.loadDepartmentOptions();
 
-    if (this.popupData) {
+  this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+  this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
 
-      this.employeeData = { ...this.popupData };
+  // =========================
+  // EDIT MODE
+  // =========================
+  if (this.popupData) {
 
-      this.employeeData.department =
-        this.popupData.department != null ? String(this.popupData.department) : '';
+  // -----------------------------------------
+  // EDIT MODE MUST BE SET FIRST
+  // -----------------------------------------
+  this.isEditMode = true;
 
-      this.employeeData.designation =
-        this.popupData.designation != null ? String(this.popupData.designation) : '';
+  this.showLocationPassword = false;
+  this.showPassword = false;
 
-      this.employeeData.location =
-        this.popupData.locationCode != null ? String(this.popupData.locationCode).trim() : '';
+  // -----------------------------------------
+  // Copy employee data
+  // -----------------------------------------
+  this.employeeData = {
+    ...this.popupData
+  };
 
-      this.employeeData.dateOfJoin = this.formatDate(this.popupData.dateOfJoin);
-      this.imagePreview = this.popupData.profileImage;
-      this.employeeData.createLogin = !!this.popupData.emailId;
+  this.employeeData.department =
+    this.popupData.department != null
+      ? String(this.popupData.department)
+      : '';
 
-      // NEW — location login: prefill the ID only. The password is never
-      // sent back from the API, so it always starts blank; leaving it blank
-      // on Update means "keep the current password" (same UX as the main
-      // Email/Password login below).
-      this.employeeData.locationLoginId = this.popupData.locationLoginId ?? '';
-      this.employeeData.locationPassword = '';
+  this.employeeData.designation =
+    this.popupData.designation != null
+      ? String(this.popupData.designation)
+      : '';
 
-      this.selectedDepartments = this.popupData.selectedDepartments?.length
-        ? [...this.popupData.selectedDepartments] : [];
+  this.employeeData.state =
+    this.popupData.state != null
+      ? String(this.popupData.state)
+      : '';
 
-      // FIX: category -> roleId, taken directly from EmployeeRoleMapping.RoleId
-      // (returned by GetEmployeeById as popupData.roleMappings). Stored on
-      // the component (not a local var) so onDepartmentToggle can reuse it
-      // later when a category is re-checked mid-session — that's what lets
-      // uncheck-then-recheck restore the original grants instead of wiping
-      // them out, without touching anything in the database until Save.
-      this.roleIdByCategory = {};
-      (this.popupData.roleMappings ?? []).forEach((rm: any) => {
-        if (rm.category && rm.roleId) this.roleIdByCategory[rm.category] = rm.roleId;
-      });
+  // IMPORTANT:
+  // City is CITY ID
+  this.employeeData.city =
+    this.popupData.city != null
+      ? String(this.popupData.city)
+      : '';
 
-      this.selectedDepartments.forEach(dept => {
-        this.loadCategoryChecklist(dept, this.roleIdByCategory[dept]);
-        this.loadExistingRolesForCategory(dept);
-      });
+  this.employeeData.location =
+    this.popupData.locationCode != null
+      ? String(this.popupData.locationCode).trim()
+      : '';
 
-      if (this.popupData.dealerCode) {
-        this.loadDealerInfo(this.popupData.dealerCode);
-        this.loadDealerLocations(this.popupData.dealerCode);
-      }
-      const savedLoc = this.popupData.locationCode;
-      this.selectedLocations = savedLoc
-        ? String(savedLoc).split(',').map((c: string) => c.trim()).filter(Boolean)
-        : [];
-      this.isEditMode = true;
+  this.employeeData.dateOfJoin =
+    this.formatDate(this.popupData.dateOfJoin);
 
-      setTimeout(() => {
-        this.onStateChange();
-        this.employeeData.city = this.popupData.city;
-      }, 300);
-    }
-    else {
-      this.employeeData.createLogin = false;
-      this.employeeData.locationLoginId = ''; // NEW
-      this.employeeData.locationPassword = ''; // NEW
-      this.loadLoggedInDealer();
-    }
+  this.imagePreview =
+    this.popupData.profileImage;
+
+  this.employeeData.createLogin =
+    !!this.popupData.emailId;
+
+  // -----------------------------------------
+  // Location Login
+  // -----------------------------------------
+  this.employeeData.locationLoginId =
+    this.popupData.locationLoginId ?? '';
+
+  // CHANGED — show the employee's actual current location password
+  // instead of always blanking it. This ONLY works if the backend
+  // returns the real password in reversible/plaintext form under
+  // `locationPassword` on the object passed in as popupData (e.g. from
+  // GetEmployeeById). If your backend still only stores/returns a
+  // one-way hash (e.g. `locationPasswordHash`), that value CANNOT be
+  // turned back into the original password — it must not be assigned
+  // here, since resubmitting a hash as if it were plaintext would cause
+  // it to get re-hashed and corrupt the stored password. Confirm the
+  // backend contract before relying on this.
+  this.employeeData.locationPassword =
+    this.popupData.locationPassword ?? '';
+
+  this.employeeData.password = '';
+
+  // -----------------------------------------
+  // Restore selected locations
+  // -----------------------------------------
+  const savedLoc =
+    this.popupData.locationCode;
+
+  this.selectedLocations = savedLoc
+    ? String(savedLoc)
+        .split(',')
+        .map((c: string) => c.trim())
+        .filter(Boolean)
+    : [];
+
+  // -----------------------------------------
+  // Load dealer
+  // -----------------------------------------
+  if (this.popupData.dealerCode) {
+
+    this.loadDealerInfo(
+      this.popupData.dealerCode
+    );
+
+    this.loadDealerLocations(
+      this.popupData.dealerCode
+    );
   }
+
+  // -----------------------------------------
+  // Departments / Roles
+  // -----------------------------------------
+  this.selectedDepartments =
+    this.popupData.selectedDepartments?.length
+      ? [...this.popupData.selectedDepartments]
+      : [];
+
+  this.roleIdByCategory = {};
+
+  (this.popupData.roleMappings ?? [])
+    .forEach((rm: any) => {
+
+      if (rm.category && rm.roleId) {
+        this.roleIdByCategory[rm.category] =
+          rm.roleId;
+      }
+
+    });
+
+  this.selectedDepartments.forEach(
+    (dept: string) => {
+
+      this.loadCategoryChecklist(
+        dept,
+        this.roleIdByCategory[dept]
+      );
+
+      this.loadExistingRolesForCategory(
+        dept
+      );
+
+    }
+  );
+
+  // -----------------------------------------
+  // City dependent dropdown
+  // -----------------------------------------
+  this.onStateChange();
+}
+
+  // =========================
+  // ADD MODE
+  // =========================
+  else {
+
+    this.isEditMode = false;
+
+    this.employeeData.createLogin = false;
+    this.employeeData.locationLoginId = '';
+    this.employeeData.locationPassword = '';
+    this.employeeData.password = '';
+    this.showPassword = false;
+    this.showLocationPassword = false;
+    this.hasSavedLocationPassword = false;
+
+    this.loadLoggedInDealer();
+  }
+}
 
   formatDate(value: any): string {
     if (!value) return '';
@@ -216,10 +314,6 @@ export class EmployeeMasterComponent implements OnInit {
   }
 
   loadLoggedInDealer(): void {
-    // FIX: this was accidentally passed a second argument
-    // (`response.locationCode ?? ''`) referencing a `response` variable that
-    // doesn't exist in this scope — localStorage.getItem() only takes the
-    // key. Restored to the plain single-argument call.
     const dealerCode = localStorage.getItem('dealerCode');
     if (!dealerCode) return;
 
@@ -236,42 +330,435 @@ export class EmployeeMasterComponent implements OnInit {
     });
   }
 
-  loadDealerLocations(dealerCode: string): void {
-    this.locationService.getAllLocationByDealerCode(dealerCode).subscribe({
-      next: (response: any[]) => {
+  loadDealerLocations(
+  dealerCode: string
+): void {
 
-        this.dealerLocations = (response ?? []).map(l => ({
-          locCode: String(l.locCode ?? l.loccode ?? l.Loccode ?? '').trim(),
-          locName: l.locName ?? l.locname ?? l.Locname ?? ''
-        }));
+  if (!dealerCode) {
 
-        const saved =
-          this.isEditMode && this.popupData?.locationCode != null
-            ? String(this.popupData.locationCode).trim()
-            : '';
+    this.dealerLocations = [];
+    this.allDealerLocations = [];
 
-        if (saved) {
-          setTimeout(() => {
-            const match = this.dealerLocations.find(l => l.locCode === saved);
-            this.employeeData.location = match ? match.locCode : '';
-          });
-        }
-      },
-      error: (error) => console.error('Dealer location load error', error)
-    });
+    return;
   }
 
+  this.locationService
+    .getAllLocationByDealerCode(dealerCode)
+    .subscribe({
+
+      next: (response: any[]) => {
+
+        // -----------------------------------------
+        // Convert API response
+        // -----------------------------------------
+        const locations =
+          (response ?? [])
+            .map((l: any) => ({
+
+              locCode: String(
+                l.locCode ??
+                l.loccode ??
+                l.Loccode ??
+                ''
+              ).trim(),
+
+              locName: String(
+                l.locName ??
+                l.locname ??
+                l.Locname ??
+                ''
+              ).trim(),
+
+              city: String(
+                l.city ??
+                l.cityName ??
+                l.City ??
+                l.CityName ??
+                ''
+              ).trim()
+
+            }))
+            .filter(
+              (l: any) => !!l.locCode
+            );
+
+
+        // -----------------------------------------
+        // Remove duplicate location codes
+        // -----------------------------------------
+        this.allDealerLocations =
+          Array.from(
+            new Map(
+              locations.map(
+                (location: any) => [
+                  location.locCode,
+                  location
+                ]
+              )
+            ).values()
+          );
+
+
+        // -----------------------------------------
+        // Apply city filter
+        // -----------------------------------------
+        this.filterLocationsByCity();
+
+
+        console.log(
+          'All dealer locations:',
+          this.allDealerLocations
+        );
+
+        console.log(
+          'Visible dealer locations:',
+          this.dealerLocations
+        );
+
+      },
+
+      error: (error) => {
+
+        console.error(
+          'Dealer location load error:',
+          error
+        );
+
+        this.dealerLocations = [];
+        this.allDealerLocations = [];
+
+      }
+
+    });
+}
   loadStates(): void {
     this.employeeService.getStates().subscribe({
       next: (response) => { this.states = response; }
     });
   }
+    loadCities(): void {
 
-  loadCities(): void {
-    this.employeeService.getCities().subscribe({
-      next: (response) => { this.cities = response; }
-    });
+      this.employeeService.getCities().subscribe({
+
+        next: (response: any[]) => {
+
+          this.cities = response ?? [];
+
+          // Populate filtered city list
+          if (this.employeeData?.state) {
+            this.onStateChange();
+          }
+
+          // Locations may have loaded before cities.
+          // Re-apply city filter after cities arrive.
+          if (
+            this.isEditMode &&
+            this.allDealerLocations?.length
+          ) {
+            this.filterLocationsByCity();
+          }
+        },
+
+        error: (error) => {
+
+          console.error(
+            'City load error:',
+            error
+          );
+
+          this.cities = [];
+          this.filteredCities = [];
+        }
+
+      });
+    }
+
+    filterLocationsByCity(): void {
+
+  // -----------------------------------------
+  // ADD MODE
+  // -----------------------------------------
+  if (!this.isEditMode) {
+
+    this.dealerLocations =
+      [...this.allDealerLocations];
+
+    return;
   }
+
+
+  // -----------------------------------------
+  // Get employee City ID
+  // -----------------------------------------
+  const cityId = String(
+    this.employeeData?.city ?? ''
+  ).trim();
+
+
+  if (!cityId) {
+
+    console.warn(
+      'Employee city ID is empty.'
+    );
+
+    this.dealerLocations = [];
+
+    return;
+  }
+
+
+  // -----------------------------------------
+  // Find city from Cities API
+  // -----------------------------------------
+  const selectedCity =
+    this.cities.find(
+      (city: any) =>
+        String(city.cityId).trim() === cityId
+    );
+
+
+  if (!selectedCity) {
+
+    console.warn(
+      'City not found:',
+      cityId,
+      this.cities
+    );
+
+    this.dealerLocations = [];
+
+    return;
+  }
+
+
+  const cityName = String(
+    selectedCity.cityName ?? ''
+  ).trim();
+
+
+  if (!cityName) {
+
+    this.dealerLocations = [];
+
+    return;
+  }
+
+
+  const normalizedCity =
+    cityName.toLowerCase().trim();
+
+
+  // -----------------------------------------
+  // Filter locations
+  // -----------------------------------------
+  this.dealerLocations =
+    this.allDealerLocations.filter(
+      (location: any) => {
+
+        // If API gives city directly
+        const locationCity =
+          String(
+            location.city ?? ''
+          )
+            .trim()
+            .toLowerCase();
+
+        if (locationCity) {
+
+          return (
+            locationCity ===
+            normalizedCity
+          );
+
+        }
+
+
+        // -------------------------------------
+        // Current API:
+        // locName contains city
+        // -------------------------------------
+        const locationName =
+          String(
+            location.locName ?? ''
+          )
+            .trim()
+            .toLowerCase();
+
+
+        return locationName.includes(
+          normalizedCity
+        );
+
+      }
+    );
+
+
+  // -----------------------------------------
+  // Remove duplicate locations
+  // -----------------------------------------
+  this.dealerLocations =
+    Array.from(
+      new Map(
+        this.dealerLocations.map(
+          (location: any) => [
+            location.locCode,
+            location
+          ]
+        )
+      ).values()
+    );
+
+
+  // -----------------------------------------
+  // Keep saved assignments checked
+  // -----------------------------------------
+  this.selectedLocations =
+    this.selectedLocations.filter(
+      (code: string) =>
+        this.dealerLocations.some(
+          (location: any) =>
+            location.locCode === code
+        )
+    );
+
+
+  this.employeeData.location =
+    this.selectedLocations.length
+      ? this.selectedLocations[0]
+      : '';
+
+
+  console.log(
+    'Employee City:',
+    cityName
+  );
+
+  console.log(
+    'Filtered Locations:',
+    this.dealerLocations
+  );
+}
+
+    filterLocationsByEmployeeCity(): void {
+
+      // ADD MODE
+      // Show all dealer locations.
+      if (!this.isEditMode) {
+        this.dealerLocations = [...this.allDealerLocations];
+        return;
+      }
+
+      // Employee city is stored as cityId
+      const employeeCityId = String(
+        this.employeeData?.city ?? ''
+      ).trim();
+
+      if (!employeeCityId) {
+        console.warn('Employee city is empty.');
+        this.dealerLocations = [];
+        return;
+      }
+
+      // Convert cityId → cityName
+      const city = this.cities.find(
+        (c: any) =>
+          String(c.cityId).trim() === employeeCityId
+      );
+
+      if (!city) {
+
+        console.warn(
+          'City not found for cityId:',
+          employeeCityId
+        );
+
+        // Don't incorrectly show all locations.
+        this.dealerLocations = [];
+        return;
+      }
+
+      const cityName = String(
+        city.cityName ?? ''
+      ).trim();
+
+      if (!cityName) {
+        this.dealerLocations = [];
+        return;
+      }
+
+      const normalizedCity =
+        cityName.toLowerCase().trim();
+
+      console.log(
+        'Filtering dealer locations for city:',
+        cityName
+      );
+
+      // Filter only locations belonging to employee city.
+      this.dealerLocations =
+        this.allDealerLocations.filter(
+          (location: any) => {
+
+            // If API provides city information,
+            // prefer that.
+            const locationCity = String(
+              location.city ??
+              location.cityName ??
+              ''
+            ).trim().toLowerCase();
+
+            if (locationCity) {
+              return locationCity === normalizedCity;
+            }
+
+            // Current API only gives locCode + locName.
+            // Therefore match city name from location name.
+            const locationName = String(
+              location.locName ?? ''
+            ).trim().toLowerCase();
+
+            return locationName.includes(
+              normalizedCity
+            );
+          }
+        );
+
+      // Remove duplicates
+      this.dealerLocations =
+        Array.from(
+          new Map(
+            this.dealerLocations.map(
+              (location: any) => [
+                location.locCode,
+                location
+              ]
+            )
+          ).values()
+        );
+
+      // Keep only saved locations that are
+      // visible for this employee city.
+      this.selectedLocations =
+        this.selectedLocations.filter(
+          (code: string) =>
+            this.dealerLocations.some(
+              (location: any) =>
+                location.locCode === code
+            )
+        );
+
+      this.employeeData.location =
+        this.selectedLocations.length > 0
+          ? this.selectedLocations[0]
+          : '';
+
+      console.log(
+        'City:',
+        cityName,
+        'Locations:',
+        this.dealerLocations
+      );
+    }
 
   onStateChange(): void {
     const selectedStateId = Number(this.employeeData.state);
@@ -512,9 +999,12 @@ export class EmployeeMasterComponent implements OnInit {
       valid = false;
     }
 
-    // NEW — Location Login: required whenever at least one dealer location
-    // is selected, independent of whether "Create Login Account" is checked.
+    // Location Login: required whenever at least one dealer location is
+    // selected, independent of whether "Create Login Account" is checked.
     // This is a separate credential from the email/password login below.
+    // CHANGED — locationPassword is now prefilled with the real existing
+    // password in edit mode (see ngOnInit), so it is effectively always
+    // required once a location is selected, in both Add and Edit mode.
     if (this.selectedLocations.length > 0) {
       const locLoginId = String(d.locationLoginId ?? '').trim();
       if (!locLoginId) {
@@ -523,24 +1013,14 @@ export class EmployeeMasterComponent implements OnInit {
       }
 
       const locPwd = String(d.locationPassword ?? '');
-      if (!this.isEditMode && !locPwd) {
+      if (!locPwd) {
         this.errors.locationPassword = 'Location Password is required.';
         valid = false;
-      } else if (locPwd && !this.strongPasswordPattern.test(locPwd)) {
+      } else if (!this.strongPasswordPattern.test(locPwd)) {
         this.errors.locationPassword =
           'Password must be at least 6 characters and include uppercase, lowercase, a digit, and a special character.';
         valid = false;
       }
-    }
-
-    if (!d.department) {
-      this.errors.department = 'Department is required.';
-      valid = false;
-    }
-
-    if (!d.designation) {
-      this.errors.designation = 'Designation is required.';
-      valid = false;
     }
 
     if (!d.state) {
@@ -598,24 +1078,22 @@ export class EmployeeMasterComponent implements OnInit {
       /^\d{10}$/.test(String(d.mobile ?? '')) &&
       !!d.dateOfJoin &&
       this.selectedLocations.length > 0 &&
-      !!d.department &&
-      !!d.designation &&
       !!d.state &&
       !!d.city &&
       /^\d{6}$/.test(String(d.pincode ?? ''));
 
     if (!coreFilled) return false;
 
-    // NEW — mirrors the Location Login validation above: required whenever
-    // a location is selected, password optional on edit (blank = unchanged).
+    // CHANGED — mirrors the Location Login validation above: since the
+    // password field is now always prefilled with the real value in edit
+    // mode, blank no longer means "unchanged" — it is required whenever a
+    // location is selected, in both Add and Edit mode.
     if (this.selectedLocations.length > 0) {
       const locLoginId = String(d.locationLoginId ?? '').trim();
       const locPwd = String(d.locationPassword ?? '');
 
       const locLoginIdOk = !!locLoginId;
-      const locPwdOk = this.isEditMode
-        ? (!locPwd || this.strongPasswordPattern.test(locPwd))
-        : (!!locPwd && this.strongPasswordPattern.test(locPwd));
+      const locPwdOk = !!locPwd && this.strongPasswordPattern.test(locPwd);
 
       if (!locLoginIdOk || !locPwdOk) return false;
     }
@@ -686,7 +1164,9 @@ export class EmployeeMasterComponent implements OnInit {
       mobile: this.employeeData.mobile,
 
       emailId: this.employeeData.createLogin ? this.employeeData.emailId : null,
-      password: this.employeeData.createLogin ? this.employeeData.password : null,
+      password: this.employeeData.createLogin
+        ? (this.employeeData.password || null)
+        : null,
 
       address: this.employeeData.address,
       state: Number(this.employeeData.state),
@@ -702,11 +1182,12 @@ export class EmployeeMasterComponent implements OnInit {
       notes: this.employeeData.notes,
       locationCode: this.selectedLocations.join(','),
 
-      // NEW — location login fields. locationPasswordHash carries a
-      // *plaintext* password to the API (named to match
-      // EmployeeMaster.LocationPasswordHash for model binding) only when one
-      // was typed; the backend hashes it before saving, and on update leaves
-      // the stored hash alone if this comes through blank/null.
+      // Location login fields. locationPasswordHash carries the actual
+      // location password to the API (named to match
+      // EmployeeMaster.LocationPasswordHash for model binding) whenever a
+      // location is selected. NOTE: for the "show existing password"
+      // behavior to work, the backend must store this reversibly and
+      // return it as plaintext on read — see the comment in ngOnInit.
       locationLoginId: this.selectedLocations.length > 0 ? (this.employeeData.locationLoginId ?? null) : null,
       locationPasswordHash: this.selectedLocations.length > 0 ? (this.employeeData.locationPassword || null) : null,
 
@@ -868,11 +1349,27 @@ export class EmployeeMasterComponent implements OnInit {
     return this.selectedLocations.length > 0 && !this.allLocationsSelected;
   }
 
-  toggleAllLocations(event: any): void {
-    if (event.target.checked) {
-      this.selectedLocations = this.dealerLocations.map(l => l.locCode);
+  toggleAllLocations(event: Event): void {
+
+    const checkbox =
+      event.target as HTMLInputElement;
+
+    if (checkbox.checked) {
+
+      this.selectedLocations =
+        this.dealerLocations.map(
+          (loc: any) => loc.locCode
+        );
+
     } else {
+
       this.selectedLocations = [];
+
     }
+
+    this.employeeData.location =
+      this.selectedLocations.length > 0
+        ? this.selectedLocations[0]
+        : '';
   }
 }

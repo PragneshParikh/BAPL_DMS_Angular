@@ -31,8 +31,8 @@
                                     [(ngModel)]="searchTerm" (keyup)="onSearchChange()">
                                 <i class="ri-search-line search-icon"></i>
                             </div>
-                            <button *ngIf="canCreate" class="btn btn-sm btn-primary" (click)="addMaterialTransfer()">Add</button>
-                            <button *ngIf="canDownload" class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'" (click)="downloadExcel()">
+                            <button  class="btn btn-sm btn-primary" (click)="addMaterialTransfer()">Add</button>
+                            <button  class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'" (click)="downloadExcel()">
                                 <i class="ri-file-excel-2-line"></i>
                             </button>
                         </div>

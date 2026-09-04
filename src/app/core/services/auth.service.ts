@@ -1,3 +1,236 @@
+// import { Injectable, NgZone } from '@angular/core';
+// import { HttpClient, HttpHeaders } from '@angular/common/http';
+// import { catchError, map } from 'rxjs/operators';
+// import { BehaviorSubject, Observable, throwError } from 'rxjs';
+// import { User } from '../../store/Authentication/auth.models';
+// import { environment } from '../../../environments/environment';
+// import { StorageService } from './storage';
+// import { Router } from '@angular/router';
+// import { MenuService } from './menu-service';
+
+
+// const httpOptions = {
+//     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+// };
+
+
+// @Injectable({ providedIn: 'root' })
+
+// /**
+//  * Auth-service Component
+//  */
+// export class AuthenticationService {
+
+//     user!: User;
+//     private currentUserSubject = new BehaviorSubject<User | null>(null);
+//     public currentUser$ = this.currentUserSubject.asObservable();
+//     private timeoutId: any;
+
+//     protected baseUrl = environment.apiUrl;
+
+//     constructor(
+//         private httpClient: HttpClient,
+//         private storageService: StorageService,
+//         private ngZone: NgZone,
+//         private router: Router,
+//         private menuService: MenuService
+//     ) {
+
+//         const storedUser = storageService.getUser();
+//         if (storedUser && storedUser !== 'undefined') {
+//             this.currentUserSubject.next(storedUser);
+//         }
+//     }
+
+//     public get currentUserValue(): User | null {
+//         return this.currentUserSubject.value;
+//     }
+
+//     // initAuth(): void {
+//     //     const token = localStorage.getItem('token');
+
+//     //     if (!token) return;
+
+//     //     try {
+//     //         const payload = JSON.parse(atob(token.split('.')[1]));
+//     //         const expiry = payload.exp * 1000;
+
+//     //         if (expiry <= Date.now()) {
+//     //             this.logout();
+//     //         } else {
+//     //             this.startTokenTimer(token);
+//     //         }
+
+//     //     } catch {
+//     //         this.logout();
+//     //     }
+//     // }
+
+//     /**
+//      * Performs the auth
+//      * @param email email of user
+//      * @param password password of user
+//      */
+//     login(username: string, password: string) {
+
+//         return this.httpClient.post(this.baseUrl + '/auth', {
+//             username,
+//             password
+//         }, httpOptions).pipe(
+//             map((response: any) => {
+//                 if (response.status === 'success') {
+//                     const user: any = response;
+
+//                     this.storageService.setUser(user);
+//                     localStorage.setItem('token', response.token);
+//                     this.currentUserSubject.next(user);
+
+//                     return response;
+//                 } else {
+//                     return response;
+//                 }
+//             }),
+//             catchError((error: any) => {
+//                 const errorMessage = 'Login failed'; // Customize the error message as needed
+//                 return throwError(errorMessage);
+//             })
+//         );
+//     }
+
+//     /**
+//      * Used by admin-driven session swaps (e.g. impersonation) where a new
+//      * token/user payload is already in hand from the backend, but we still
+//      * need to push it through the exact same storage + subject update path
+//      * that a normal login() uses — reusing storageService.setUser() so the
+//      * stored value is encoded identically to what login() writes, and
+//      * updating currentUserSubject so every component/guard reading
+//      * currentUserValue immediately sees the new session, not the stale one.
+//      */
+//     setSession(user: any): void {
+//         this.storageService.setUser(user);
+
+//         if (user?.token) {
+//             localStorage.setItem('token', user.token);
+//             this.startTokenTimer(user.token);
+//         }
+
+//         this.currentUserSubject.next(user);
+//     }
+
+//     /**
+//      * The location code a Location Login session is scoped to (see
+//      * AuthController.LocationLogin / TryLocationLoginAsync on the backend).
+//      * Absent (null) for a regular email/password login. Read from
+//      * localStorage rather than currentUserValue so it stays available even
+//      * before the User model is extended with a locationCode field.
+//      */
+//     public getLocationCode(): string | null {
+//         return localStorage.getItem('locationCode');
+//     }
+
+//     /**
+//      * Logout the user
+//      */
+//     logout() {
+//         // this.store.dispatch(logout());
+//         // logout the user
+//         // return getFirebaseBackend()!.logout();
+//         localStorage.removeItem('currentUser');
+//         localStorage.removeItem('token');
+//         localStorage.removeItem('selectedModule');
+//         localStorage.removeItem('menuRights');
+//         localStorage.removeItem('role');
+//         localStorage.removeItem('dealerCode');    // FIX: was never cleared on logout
+//         localStorage.removeItem('locationCode');  // same gap, for the location-login field
+//         localStorage.removeItem('locationRoleId'); // same gap, for the location-login role field
+
+//         this.menuService.resetMenu();
+//         this.currentUserSubject.next(null!);
+
+//         this.ngZone.run(() => {
+//             this.router.navigate(['/login']);
+//         });
+//     }
+
+//     forgotPassword(email: string) {
+//         return this.httpClient
+//             .post<{ success: boolean; message: string }>(
+//                 `${this.baseUrl}/auth/forgot-password`,
+//                 { email }
+//             )
+//             .pipe(
+//                 map((response) => {
+//                     // If the API returns a valid object, just pass it along
+//                     return response;
+//                 }),
+//                 catchError((error) => {
+//                     console.error('Forgot password API error:', error);
+
+//                     // Wrap the error in the same object shape so component code works
+//                     const fallback = { success: false, message: 'Password reset failed. Please try again.' };
+//                     return throwError(fallback);
+//                 })
+//             );
+//     }
+
+//     resetPassword(email: string, token: string, password: string, confirmPassword: string) {
+//         return this.httpClient.post(this.baseUrl + '/auth/reset-password', { email, token, password, confirmPassword }, httpOptions).pipe(
+//             map((response: any) => {
+//                 return response;
+//             }),
+//             catchError((error: any) => {
+//                 const errorMessage = 'Password reset failed'; // Customize the error message as needed
+//                 return throwError(errorMessage);
+//             })
+//         );
+
+//     }
+
+//     getAccessPermission(subMenuId: number) {
+//         const permissions = this.storageService.getMenuRights();
+
+//         const match = permissions.find((p: any) => p.subMenuId === subMenuId);
+
+//         return match.permission;
+//     }
+
+//     startTokenTimer(token: string): void {
+//         try {
+//             const payload = JSON.parse(atob(token.split('.')[1]));
+
+//             const expiry = payload.exp * 1000; // convert to milliseconds
+//             const now = new Date().getTime();
+
+//             const timeout = expiry - now;
+
+//             // If already expired
+//             if (timeout <= 0) {
+//                 this.logout();
+//                 return;
+//             }
+
+//             // Clear existing timer
+//             if (this.timeoutId) {
+//                 clearTimeout(this.timeoutId);
+//             }
+
+//             // Start new timer
+//             this.timeoutId = setTimeout(() => {
+//                 this.logout();
+//             }, timeout);
+
+//         } catch (error) {
+//             console.error('Invalid JWT token');
+//             this.logout();
+//         }
+//     }
+
+//     getUserList(): Observable<any> {
+//         return this.httpClient.get(`${this.baseUrl}/auth`);
+//     }
+
+// }
+
 import { Injectable, NgZone } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
@@ -7,27 +240,27 @@ import { environment } from '../../../environments/environment';
 import { StorageService } from './storage';
 import { Router } from '@angular/router';
 import { MenuService } from './menu-service';
-
-
+ 
+ 
 const httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
-
-
+ 
+ 
 @Injectable({ providedIn: 'root' })
-
+ 
 /**
  * Auth-service Component
  */
 export class AuthenticationService {
-
+ 
     user!: User;
     private currentUserSubject = new BehaviorSubject<User | null>(null);
     public currentUser$ = this.currentUserSubject.asObservable();
     private timeoutId: any;
-
+ 
     protected baseUrl = environment.apiUrl;
-
+ 
     constructor(
         private httpClient: HttpClient,
         private storageService: StorageService,
@@ -35,44 +268,44 @@ export class AuthenticationService {
         private router: Router,
         private menuService: MenuService
     ) {
-
+ 
         const storedUser = storageService.getUser();
         if (storedUser && storedUser !== 'undefined') {
             this.currentUserSubject.next(storedUser);
         }
     }
-
+ 
     public get currentUserValue(): User | null {
         return this.currentUserSubject.value;
     }
-
+ 
     // initAuth(): void {
     //     const token = localStorage.getItem('token');
-
+ 
     //     if (!token) return;
-
+ 
     //     try {
     //         const payload = JSON.parse(atob(token.split('.')[1]));
     //         const expiry = payload.exp * 1000;
-
+ 
     //         if (expiry <= Date.now()) {
     //             this.logout();
     //         } else {
     //             this.startTokenTimer(token);
     //         }
-
+ 
     //     } catch {
     //         this.logout();
     //     }
     // }
-
+ 
     /**
      * Performs the auth
      * @param email email of user
      * @param password password of user
      */
     login(username: string, password: string) {
-
+ 
         return this.httpClient.post(this.baseUrl + '/auth', {
             username,
             password
@@ -80,11 +313,18 @@ export class AuthenticationService {
             map((response: any) => {
                 if (response.status === 'success') {
                     const user: any = response;
-
+ 
                     this.storageService.setUser(user);
                     localStorage.setItem('token', response.token);
+ 
+                    // FIXED: this was never called for a normal login — only
+                    // setSession() (impersonation) started the expiry timer.
+                    // Regular sessions likely never auto-logged-out on token
+                    // expiry as a result.
+                    this.startTokenTimer(response.token);
+ 
                     this.currentUserSubject.next(user);
-
+ 
                     return response;
                 } else {
                     return response;
@@ -96,7 +336,92 @@ export class AuthenticationService {
             })
         );
     }
+ 
+    /**
+     * Location Login — for Dealer Location Employees, whose credentials
+     * are a LocationLoginId + a separate Location Password
+     * (EmployeeMaster.LocationLoginId / LocationPasswordHash on the
+     * backend), not a regular email/password AspNetUsers account. This
+     * has to hit a dedicated endpoint since a Location Login identity has
+     * no AspNetUsers row at all to check against — see
+     * AuthController.LocationLogin on the backend.
+     *
+     * @param locationLoginId the Location Login ID (not an email/username)
+     * @param password the separate Location Password
+     */
+    locationLogin(locationLoginId: string, password: string) {
 
+        return this.httpClient.post(
+            this.baseUrl + '/auth/location-login',
+            {
+            locationLoginId: locationLoginId.trim(),
+            password: password
+            },
+            httpOptions
+        ).pipe(
+
+            map((response: any) => {
+
+            if (response.status === 'success') {
+
+                const user: any = response;
+
+                this.storageService.setUser(user);
+
+                localStorage.setItem(
+                'token',
+                response.token
+                );
+
+                if (response.dealerCode) {
+                localStorage.setItem(
+                    'dealerCode',
+                    response.dealerCode
+                );
+                } else {
+                localStorage.removeItem('dealerCode');
+                }
+
+                if (response.locationCode) {
+                localStorage.setItem(
+                    'locationCode',
+                    response.locationCode
+                );
+                } else {
+                localStorage.removeItem('locationCode');
+                }
+
+                if (response.locationRoleId) {
+                localStorage.setItem(
+                    'locationRoleId',
+                    String(response.locationRoleId)
+                );
+                } else {
+                localStorage.removeItem('locationRoleId');
+                }
+
+                this.startTokenTimer(response.token);
+
+                this.currentUserSubject.next(user);
+            }
+
+            return response;
+            }),
+
+            catchError((error: any) => {
+
+            console.error(
+                'Location Login API error:',
+                error
+            );
+
+            return throwError(
+                () => error
+            );
+            })
+        );
+        }
+ 
     /**
      * Used by admin-driven session swaps (e.g. impersonation) where a new
      * token/user payload is already in hand from the backend, but we still
@@ -108,15 +433,15 @@ export class AuthenticationService {
      */
     setSession(user: any): void {
         this.storageService.setUser(user);
-
+ 
         if (user?.token) {
             localStorage.setItem('token', user.token);
             this.startTokenTimer(user.token);
         }
-
+ 
         this.currentUserSubject.next(user);
     }
-
+ 
     /**
      * The location code a Location Login session is scoped to (see
      * AuthController.LocationLogin / TryLocationLoginAsync on the backend).
@@ -127,7 +452,7 @@ export class AuthenticationService {
     public getLocationCode(): string | null {
         return localStorage.getItem('locationCode');
     }
-
+ 
     /**
      * Logout the user
      */
@@ -143,15 +468,15 @@ export class AuthenticationService {
         localStorage.removeItem('dealerCode');    // FIX: was never cleared on logout
         localStorage.removeItem('locationCode');  // same gap, for the location-login field
         localStorage.removeItem('locationRoleId'); // same gap, for the location-login role field
-
+ 
         this.menuService.resetMenu();
         this.currentUserSubject.next(null!);
-
+ 
         this.ngZone.run(() => {
             this.router.navigate(['/login']);
         });
     }
-
+ 
     forgotPassword(email: string) {
         return this.httpClient
             .post<{ success: boolean; message: string }>(
@@ -165,14 +490,14 @@ export class AuthenticationService {
                 }),
                 catchError((error) => {
                     console.error('Forgot password API error:', error);
-
+ 
                     // Wrap the error in the same object shape so component code works
                     const fallback = { success: false, message: 'Password reset failed. Please try again.' };
                     return throwError(fallback);
                 })
             );
     }
-
+ 
     resetPassword(email: string, token: string, password: string, confirmPassword: string) {
         return this.httpClient.post(this.baseUrl + '/auth/reset-password', { email, token, password, confirmPassword }, httpOptions).pipe(
             map((response: any) => {
@@ -183,50 +508,50 @@ export class AuthenticationService {
                 return throwError(errorMessage);
             })
         );
-
+ 
     }
-
+ 
     getAccessPermission(subMenuId: number) {
         const permissions = this.storageService.getMenuRights();
-
+ 
         const match = permissions.find((p: any) => p.subMenuId === subMenuId);
-
+ 
         return match.permission;
     }
-
+ 
     startTokenTimer(token: string): void {
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-
+ 
             const expiry = payload.exp * 1000; // convert to milliseconds
             const now = new Date().getTime();
-
+ 
             const timeout = expiry - now;
-
+ 
             // If already expired
             if (timeout <= 0) {
                 this.logout();
                 return;
             }
-
+ 
             // Clear existing timer
             if (this.timeoutId) {
                 clearTimeout(this.timeoutId);
             }
-
+ 
             // Start new timer
             this.timeoutId = setTimeout(() => {
                 this.logout();
             }, timeout);
-
+ 
         } catch (error) {
             console.error('Invalid JWT token');
             this.logout();
         }
     }
-
+ 
     getUserList(): Observable<any> {
         return this.httpClient.get(`${this.baseUrl}/auth`);
     }
-
+ 
 }

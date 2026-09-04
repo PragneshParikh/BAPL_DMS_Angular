@@ -56,8 +56,8 @@ export class MaterialTransfer implements OnInit {
     private locationMasterService: LocationMasterService,
     private menuAccess: MenuAccessService
   ) { 
-    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
-    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+    // this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    // this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
   }
 
   ngOnInit(): void {

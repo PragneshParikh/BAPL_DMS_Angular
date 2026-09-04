@@ -1,106 +1,273 @@
-.profile-image-box {
+/* =========================================================
+   PROFILE IMAGE
+   ========================================================= */
 
+.profile-image-box {
   width: 160px;
   height: 190px;
-
   border: 1px solid #cfcfcf;
-
   background: #fff;
-
   overflow: hidden;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
 }
 
 .profile-image {
-
   width: 100%;
   height: 100%;
-
   object-fit: cover;
-
 }
 
 .empty-image-box {
-
   width: 100%;
   height: 100%;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   background: #f8f9fa;
-
 }
 
 .image-icon {
-
   font-size: 40px;
-
   color: #adb5bd;
-
 }
 
 .upload-title {
-
   width: 160px;
-
   border: 1px solid #cfcfcf;
   border-top: none;
-
   text-align: center;
-
   padding: 6px;
-
   font-weight: 500;
-
   background: #f8f9fa;
-
 }
 
 .image-note {
-
   width: 160px;
-
   text-align: center;
-
   line-height: 22px;
-
   color: #555;
-
 }
 
 .note-title {
-
   border-top: 1px solid #ddd;
-
   margin-bottom: 10px;
-
   padding-top: 10px;
-
   font-weight: 600;
-
 }
 
 .profile-btn {
-
   width: 120px !important;
-
   margin: auto;
-
   display: block;
+  font-size: 13px;
+  padding: 4px 10px;
+}
+
+
+/* =========================================================
+   LOCATION DROPDOWN
+   ========================================================= */
+
+.location-dropdown {
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  background: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  cursor: pointer;
+  user-select: none;
+}
+
+.location-dropdown:hover {
+  border-color: #86b7fe;
+}
+
+.location-dropdown > i {
+  font-size: 20px;
+  transition: transform 0.2s ease;
+}
+
+.location-dropdown > i.rotate {
+  transform: rotate(180deg);
+}
+
+
+/* =========================================================
+   LOCATION DROPDOWN MENU
+   ========================================================= */
+
+.location-dropdown-menu {
+  position: relative;
+  z-index: 1050;
+
+  margin-top: 4px;
+
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+
+  background: #fff;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+}
+
+
+/* =========================================================
+   SELECT ALL
+   ========================================================= */
+
+.location-select-all {
+  padding: 9px 12px;
+
+  border-bottom: 1px solid #dee2e6;
+
+  background: #f8f9fa;
+}
+
+
+/* =========================================================
+   LOCATION LIST
+   ========================================================= */
+
+.location-dropdown-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.location-dropdown-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.location-dropdown-list::-webkit-scrollbar-thumb {
+  background: #adb5bd;
+  border-radius: 10px;
+}
+
+
+/* =========================================================
+   LOCATION ITEM
+   ========================================================= */
+
+.location-dropdown-item {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 9px 12px;
+  margin: 0;
+
+  border-bottom: 1px solid #f0f0f0;
+
+  cursor: pointer;
+
+  transition: background 0.15s ease;
+}
+
+.location-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.location-dropdown-item:hover {
+  background: #f8f9fa;
+}
+
+.location-dropdown-item .form-check-input {
+  margin: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+
+/* =========================================================
+   LOCATION CODE + NAME
+   ========================================================= */
+
+.location-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.location-code {
+  color: #40558f;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 18px;
+}
+
+.location-name {
+  color: #495057;
+  font-size: 13px;
+  margin-top: 2px;
+  line-height: 18px;
+}
+
+
+/* =========================================================
+   LOCATION STATUS
+   ========================================================= */
+
+.location-dropdown-item .badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   NO LOCATION
+   ========================================================= */
+
+.no-location-message {
+  padding: 14px;
+
+  color: #6c757d;
 
   font-size: 13px;
-
-  padding: 4px 10px;
-
 }
+
+
+/* =========================================================
+   EXISTING LOCATION SCROLL
+   ========================================================= */
 
 .location-scroll.scrollable {
   max-height: 110px;
   overflow-y: auto;
+}
+
+
+/* =========================================================
+   LOCATION LOGIN
+   ========================================================= */
+
+.location-login-section {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 5px;
+  padding: 12px;
+}
+
+.location-login-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+
+/* =========================================================
+   PASSWORD INPUT
+   ========================================================= */
+
+.input-group .btn {
+  min-width: 40px;
+}
+
+.input-group .btn i {
+  font-size: 16px;
 }

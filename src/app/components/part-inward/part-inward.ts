@@ -70,23 +70,56 @@ export class PartInward implements OnInit {
     this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);   // ADDED
   }
 
-  ngOnInit(): void {
+ngOnInit(): void {
 
-    this.route.params.subscribe(params => {
+  this.getLocationList();
+  this.getLedgerList();
 
-      const encClaim = params['invoiceNo'];
+  this.route.params.subscribe(params => {
+
+    const encClaim = params['invoiceNo'];
+
+    console.log('Encoded invoice:', encClaim);
+
+    if (!encClaim) {
+      console.error(
+        'Invoice route parameter is missing.'
+      );
+      return;
+    }
+
+    try {
+
       const decoded = atob(encClaim);
 
-      this.invoiceNo = decoded.split('|')[1];
+      console.log(
+        'Decoded invoice:',
+        decoded
+      );
 
-      if (this.invoiceNo && this.invoiceNo !== '') {
+      const parts = decoded.split('|');
+
+      this.invoiceNo =
+        parts[1]?.trim();
+
+      console.log(
+        'Final invoice number sent to API:',
+        this.invoiceNo
+      );
+
+      if (this.invoiceNo) {
         this.getInwardDetailsByInvoice();
       }
-    });
 
-    this.getLocationList();
-    this.getLedgerList();
-  }
+    } catch (error) {
+
+      console.error(
+        'Invalid encoded invoice:',
+        error
+      );
+    }
+  });
+}
 
   getLocationList() {
     this.loader.show();
@@ -118,43 +151,131 @@ export class PartInward implements OnInit {
     })
   }
 
-  getInwardDetailsByInvoice() {
-    this.loader.show();
-    this.partInwardService.getInwardPartDetailByInvoiceNo(this.invoiceNo).subscribe({
-      next: (res) => {
-        this.loader.hide();
+  getInwardDetailsByInvoice(): void {
 
-        if (res === null) {
-          this.returnToList();
-        }
+  console.log(
+    'Getting inward details for invoice:',
+    this.invoiceNo
+  );
 
-        const to = new Date();
-        this.partsInwardData = {
-          invoiceNo: res.invoiceNo,
-          invoiceDate: res.invoiceDate,
-          selectedLocation: res.locationCode,
-          receiptDate: res.receiptDate === null ? to.toISOString().split('T')[0] : res.receiptDate,
-          prefixNo: res.prefixNo,
-          purchaseNo: res.prefixNo.split('/').pop(),
-          documentNo: res.documentNo,
-          partyCode: 'LED1',
-          sourceType: 'erp',
-          isAccepted: res.isAccepted,
-          poType: 'B2C'
-        }
-        this.partsPurchaseDetails = res.partInwards;
-
-        if (res.isAccepted) {
-          this.isFormDisabled = true;
-        }
-      },
-      error: (err) => {
-        console.error(err);
-        this.loader.hide();
-        this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
-      }
-    })
+  if (!this.invoiceNo) {
+    console.error('Invoice number is empty.');
+    return;
   }
+
+  this.loader.show();
+
+  this.partInwardService
+    .getInwardPartDetailByInvoiceNo(this.invoiceNo)
+    .subscribe({
+      next: (res: any) => {
+
+        console.log(
+          'Part Inward API response:',
+          res
+        );
+
+        if (!res) {
+
+          console.error(
+            'Part Inward API returned null for invoice:',
+            this.invoiceNo
+          );
+
+          this.loader.hide();
+
+          this.toaster.show(
+            `No Part Inward details found for invoice ${this.invoiceNo}.`,
+            {
+              classname: 'bg-warning text-dark',
+              delay: 5000
+            }
+          );
+
+          return;
+        }
+
+        /*
+         * ================================
+         * HEADER DATA
+         * ================================
+         */
+
+        this.partsInwardData.invoiceNo =
+          res.invoiceNo ?? '';
+
+        this.partsInwardData.invoiceDate =
+          res.invoiceDate ?? '';
+
+        this.partsInwardData.receiptDate =
+          res.receiptDate ?? '';
+
+        this.partsInwardData.selectedLocation =
+          res.locationCode ?? '';
+
+        this.partsInwardData.prefixNo =
+          res.prefixNo ?? '';
+
+        this.partsInwardData.documentNo =
+          res.documentNo ?? '';
+
+        this.partsInwardData.isAccepted =
+          res.isAccepted ?? false;
+
+        /*
+         * These fields are not currently returned
+         * by the API response you showed.
+         */
+        this.partsInwardData.purchaseNo =
+          res.purchaseNo ?? '';
+
+        this.partsInwardData.partyCode =
+          res.partyCode ?? '';
+
+        this.partsInwardData.sourceType =
+          res.sourceType ?? 'DMS';
+
+        /*
+         * ================================
+         * PART DETAILS
+         * ================================
+         */
+
+        this.partsPurchaseDetails =
+          res.partInwards ?? [];
+
+        console.log(
+          'Header data:',
+          this.partsInwardData
+        );
+
+        console.log(
+          'Part details:',
+          this.partsPurchaseDetails
+        );
+
+        this.loader.hide();
+      },
+
+      error: (err) => {
+
+        console.error(
+          'Error loading Part Inward details:',
+          err
+        );
+
+        this.loader.hide();
+
+        this.toaster.show(
+          'Unable to load Part Inward details.',
+          {
+            classname: 'bg-danger text-white',
+            delay: 5000
+          }
+        );
+      }
+    });
+}
 
   onSave() {
     if (this.partsInwardForm.invalid)
@@ -179,12 +300,12 @@ export class PartInward implements OnInit {
     });
   }
 
-  get totalQty() {
-    return this.partsPurchaseDetails.reduce(
-      (total, item) => total + Number(item.itemQty || 0),
-      0
-    );;
-  }
+get totalQty() {
+  return this.partsPurchaseDetails.reduce(
+    (total, item) => total + Number(item.itemQty || 0),
+    0
+  );
+}
 
   get totalAmount() {
     return this.partsPurchaseDetails.reduce(

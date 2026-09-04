@@ -120,7 +120,7 @@
                             </tr>
 
                             <!-- Data Rows -->
-                            <tr *ngFor="let item of partsInwardData; let i = index" (dblclick)="goToInvoice(item)"
+                            <tr *ngFor="let item of partsInwardData; let i = index" (dblclick)="goToInvoice(item)" (click)="goToInvoice(item)"
                                 style="cursor: pointer;">
                                 <td>{{ i + 1 }}</td>
                                 <td>{{ item.invoiceNo }}</td>
