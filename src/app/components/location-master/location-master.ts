@@ -61,13 +61,17 @@ export class LocationMasterComponent implements OnInit {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
-    // NOTE: dealerCode is intentionally NOT pre-filled from storage here.
-    // The page always opens showing every dealer's locations with the
-    // filter dropdown on its placeholder — see loadLocations() and
-    // loadDealerDropdown() below. If a genuinely dealer-scoped login should
-    // be locked to its own data, that restriction belongs here (set
-    // isDealer = true and dealerCode = storage value), but as shipped
-    // isDealer is never set true anywhere in this component.
+
+    // FIXED: a genuinely dealer-scoped login must be locked to its own
+    // dealerCode and see only its own locations. Previously isDealer was
+    // never set true anywhere in this component and dealerCode was left
+    // null for every login, so a dealer user saw every other dealer's
+    // locations too. The dropdown's [disabled]="isDealer" binding in the
+    // template was already wired for this — it just never activated.
+    if (!this.isSuperAdmin) {
+      this.isDealer = true;
+      this.dealerCode = this.storageService.getDealerCode();
+    }
   }
 
   ngOnInit(): void {
@@ -85,11 +89,13 @@ export class LocationMasterComponent implements OnInit {
         const data = res?.data || res;
         this.originalLocationList = data;
 
-        // FIX: always populate locationList with the full, unfiltered data
-        // on initial load. Previously the dealer-scoped filtering below was
-        // commented out with no fallback assignment, so locationList stayed
-        // an empty array and the table showed nothing until a search ran.
-        this.locationList = [...data];
+        // FIXED: a dealer-scoped login (isDealer/dealerCode set in the
+        // constructor) must only ever see its own dealer's locations on
+        // initial load, not the full unfiltered list. Superadmin logins
+        // (dealerCode null) still see everything, same as before.
+        this.locationList = this.dealerCode
+          ? data.filter((x: any) => x.dealercode == this.dealerCode)
+          : [...data];
 
         this.loadPage(); // for pagination
         this.sort(this.sortColumn, true);
@@ -127,10 +133,21 @@ export class LocationMasterComponent implements OnInit {
   }
 
   resetSearch() {
-    this.dealerCode = null;
+    // FIXED: a dealer-scoped login must stay locked to its own dealerCode —
+    // only a superadmin login's Reset should clear the dealer filter back to
+    // "all dealers". Previously this.dealerCode was cleared unconditionally,
+    // so Reset would silently leak every other dealer's locations into a
+    // dealer-scoped user's view.
+    if (!this.isDealer) {
+      this.dealerCode = null;
+    }
     this.locationArea = '';
     this.locationName = '';
-    this.locationList = [...this.originalLocationList];
+
+    this.locationList = this.dealerCode
+      ? this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode)
+      : [...this.originalLocationList];
+
     this.page = 1;
     this.loadPage();
   }
@@ -186,12 +203,20 @@ export class LocationMasterComponent implements OnInit {
       : 'sort-desc';
   }
 
-  // FIX: "-- Select Dealer --" now binds via [ngValue]="null" in the
-  // template (real null, not the string "null"), so a falsy selectedDealerCode
-  // here correctly means "cleared" and restores the full list — previously
-  // there was no such branch, so clearing the dropdown silently did nothing.
   checkSearchReset(selectedDealerCode: string | null) {
     this.page = 1;
+
+    // FIXED: a dealer-scoped login has its dropdown disabled and dealerCode
+    // locked to its own code — always re-derive the list from that locked
+    // value rather than trusting the event's selectedDealerCode, so this
+    // can't be widened back out to every dealer's locations.
+    if (this.isDealer) {
+      this.locationList = this.originalLocationList.filter(
+        (x: any) => x.dealercode == this.dealerCode
+      );
+      this.loadPage();
+      return;
+    }
 
     this.locationList = selectedDealerCode
       ? this.originalLocationList.filter((x: any) => x.dealercode == selectedDealerCode)
@@ -226,11 +251,11 @@ export class LocationMasterComponent implements OnInit {
   loadDealerDropdown() {
     this.loader.show();
 
-    // FIX: always fetch the complete dealer list for the filter dropdown by
-    // passing null explicitly, regardless of any dealerCode the component
-    // might otherwise hold — previously this.dealerCode (which could carry
-    // a stale or scoped value) was passed through, so the dropdown could
-    // come back with only one dealer instead of every dealer with a location.
+    // NOTE: still fetches every dealer (passing null), not just this.dealerCode.
+    // This is intentional even for a dealer-scoped login: the dropdown is
+    // disabled but its [(ngModel)] still needs to resolve dealerCode to a
+    // matching option so it displays the dealer's own name instead of a
+    // blank/placeholder value.
     this.dealerMasterService.getDealerDropdown(null).subscribe({
       next: (res: any) => {
         this.dealerList = res.data;

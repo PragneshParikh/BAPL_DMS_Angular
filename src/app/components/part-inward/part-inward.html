@@ -30,11 +30,20 @@
                                         [ngModel]="partsInwardData.invoiceDate | date:'dd-MM-yyyy'" [disabled]="true">
                                 </div>
 
+                                <!-- CHANGED — plain text input storing/displaying dd-MM-yyyy,
+                                     matching Invoice Date's numeric format exactly, while
+                                     staying editable. Native type="date" is removed since
+                                     its calendar-icon display format is locale-controlled
+                                     by the browser and can't be forced to dd-MM-yyyy. -->
                                 <div class="col-md-1-5">
                                     <label class="form-label mb-0 small">Receipt Date</label>
-                                    <input type="text" class="form-control form-control-sm bg-light" name="receiptDate"
-                                        #receiptDate="ngModel"
-                                        [ngModel]="partsInwardData.receiptDate | date:'dd-MM-yyyy'" [disabled]="true">
+                                    <input type="text" class="form-control form-control-sm" name="receiptDate"
+                                        #receiptDate="ngModel" [(ngModel)]="partsInwardData.receiptDate"
+                                        placeholder="dd-mm-yyyy" pattern="^\d{2}-\d{2}-\d{4}$" maxlength="10">
+                                    <div class="text-danger small mt-0"
+                                         *ngIf="receiptDate.invalid && (receiptDate.dirty || receiptDate.touched)">
+                                        Use dd-mm-yyyy
+                                    </div>
                                 </div>
 
                                 <div class="col-md-3">
@@ -68,22 +77,14 @@
 
                                 <div class="col-md-3">
                                     <label class="form-label mb-0 small">Party Name</label>
-                                    <select class="form-select form-select-sm" [(ngModel)]="partsInwardData.partyCode"
-                                        name="party" #party="ngModel" [disabled]="true">
-                                        <option *ngFor="let ledger of ledgerList" [value]="ledger.ledgerCode">
-                                            {{ledger.ledgerName}}
-                                        </option>
-                                    </select>
+                                    <input type="text" class="form-control form-control-sm bg-light" name="partyName"
+                                        #partyName="ngModel" [ngModel]="partsInwardData.partyName" [disabled]="true">
                                 </div>
 
                                 <div class="col-md-2">
                                     <label class="form-label mb-0 small">Source System</label>
-                                    <select class="form-select form-select-sm border-start border-2" name="sourceType"
-                                        #sourceType="ngModel" [(ngModel)]=" partsInwardData.sourceType">
-                                        <option value="">-- Select --</option>
-                                        <option value="erp">ERP</option>
-                                        <option value="dms">DMS</option>
-                                    </select>
+                                    <input type="text" class="form-control form-control-sm bg-light" name="sourceType"
+                                        #sourceType="ngModel" [ngModel]="partsInwardData.sourceTypeDisplay" [disabled]="true">
                                 </div>
 
                                 <!-- <div class="col-md-1-5">

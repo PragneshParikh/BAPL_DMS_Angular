@@ -59,10 +59,22 @@ export class CustomerLedgerList implements OnInit {
 
   ngOnInit(): void {
     this.filteredDealers = this.dealers;
-    if (!this.isSuperAdmin) {
 
+    if (!this.isSuperAdmin) {
+      // dealerCode was already locked to this login's own code in the
+      // constructor, so this call was already scoped correctly — no
+      // other dealer's customers are returned here.
       this.getCustomerLedgerDetails();
+
+      // FIXED: previously getDealerCodes() ran unconditionally below,
+      // fetching every dealer's code/name into a dealer-scoped session
+      // even though the dealer-picker dropdown that data feeds is hidden
+      // for non-superadmin logins (*ngIf="isSuperAdmin" in the template).
+      // A dealer login has no use for the full dealer list and shouldn't
+      // receive it, so this now returns before that call.
+      return;
     }
+
     this.getDealerCodes();
   }
   getDealerCodes() {
