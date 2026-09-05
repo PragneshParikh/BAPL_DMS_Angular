@@ -182,7 +182,7 @@ export class PartsPo implements OnInit {
 
   loadShowroomLocations() {
     this.loader.show();
-    this.locationService.GetDealerPrimaryLocationByAreaId(2, 'W1', this.dealerCode).subscribe({
+    this.locationService.getLocationByDealerCodeAndAreaId(this.dealerCode, 2).subscribe({
       next: (res: any) => {
         this.loader.hide();
         this.locationList = res;
@@ -988,7 +988,6 @@ export class PartsPo implements OnInit {
         ConsigneeCode: this.partsPOData.selectedLocation,
         TestCertificate: '',
         RefNo: this.partsPOData.prefixNo,
-        // ordrtype: this.partsPOData.poType,
         ordrtype: 'SP',
         pordr_type: this.partsPOData.subPoType === 'SSOMSO' ? 'SSO' : this.partsPOData.subPoType,
         Amount: this.totalAmount.toFixed(2),
@@ -1013,17 +1012,21 @@ export class PartsPo implements OnInit {
     this.purchaseService.sendToERP(_erpObject).subscribe({
       next: (res: any) => {
         this.loader.hide();
+        let parsed: any = null;
+        try {
+          parsed = res?.raw ? JSON.parse(res.raw) : res;
+        } catch (parseErr) {
+          console.error('Could not parse ERP response payload:', parseErr, res);
+        }
 
-        this.isSubmitted = res.Succeed; // Disable button after success
+        this.isSubmitted = parsed?.Succeed === true; // Disable button after success
 
-        // const match = res?.ConfirmMessage?.match(/SO No\.\s*([A-Za-z0-9/-]+)/);
-        // const salesOrderNo = match ? match[1] : '';
-        if (res.Succeed) {
-          const salesOrderNo = res.ReturnValue.SOId;
-          this.updatePOStatus(this.partsPOData.prefixNo, res.Succeed, salesOrderNo, this.partsPOData.selectedLocation);
-          this.toaster.show('Submit to ERP successful!', { classname: 'bg-success text-white', delay: 5000 });
+        if (parsed?.Succeed) {
+          const salesOrderNo = parsed.ReturnValue?.SOId;
+          this.updatePOStatus(this.partsPOData.prefixNo, true, salesOrderNo, this.partsPOData.selectedLocation);
+          this.toaster.show(parsed.ConfirmMessage || 'Submit to ERP successful!', { classname: 'bg-success text-white', delay: 5000 });
         } else {
-          this.toaster.show('Submit to ERP failed!', { classname: 'bg-warning text-white', delay: 5000 });
+          this.toaster.show(parsed?.Exception || 'Submit to ERP failed!', { classname: 'bg-warning text-white', delay: 5000 });
         }
       },
       error: (err) => {
