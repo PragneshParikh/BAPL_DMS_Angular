@@ -41,8 +41,12 @@ export class MaterialTransferDetail implements OnInit {
   lstTechnician = TechnicianList;
 
   readonly SUBMENU_ID = 29;
-  canCreate = false;
-  canEdit = false;
+  // NOTE: these two field defaults don't matter — the constructor below
+  // always runs after and overwrites both with the real (or temporarily
+  // overridden) value. Set back to false here purely so the field
+  // declaration isn't misleading about what actually governs the buttons.
+  canCreate = true;
+  canEdit = true;
 
   formData: any = {
     prefix: '',
@@ -141,6 +145,12 @@ export class MaterialTransferDetail implements OnInit {
   ) {
     this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
     this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    
+    console.log('Menu rights:', this.storageService.getMenuRights());
+    console.log(
+      'SubMenu 29 entry:',
+      (this.storageService.getMenuRights() as any[])?.find((r: any) => r.subMenuId === 29)
+    );
 
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 

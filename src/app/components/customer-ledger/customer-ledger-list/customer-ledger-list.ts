@@ -12,6 +12,7 @@ import { StorageService } from '../../../core/services/storage';
 import { DealerService } from '../../../core/services/dealer-service';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { LedgerTypes } from '../../../constant';
 @Component({
   selector: 'app-customer-ledger-list',
   imports: [RouterOutlet, SharedModule, NgbPaginationModule, CommonModule, FormsModule, NgbTooltipModule, NgSelectModule],
@@ -42,6 +43,10 @@ export class CustomerLedgerList implements OnInit {
 
   dealerCode: string = '';
 
+  // NEW: Ledger Type filter
+  ledgerTypes: any[] = [];
+  selectedLedgerType: string = '';
+
   constructor(
     private ledgerMasterService: LedgerMasterService,
     private route: Router,
@@ -55,23 +60,20 @@ export class CustomerLedgerList implements OnInit {
     if (!this.isSuperAdmin) this.dealerCode = this.storageService.getDealerCode();
     this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
     this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+
+    // NEW: same admin-only-type gating already used on the Add/Edit form
+    // (customer-ledger.ts's ngOnInit), so a dealer login isn't offered a
+    // filter option for a ledger type it couldn't create itself.
+    this.ledgerTypes = this.isSuperAdmin
+      ? LedgerTypes
+      : LedgerTypes.filter((x: any) => !x.isAdmin);
   }
 
   ngOnInit(): void {
     this.filteredDealers = this.dealers;
 
     if (!this.isSuperAdmin) {
-      // dealerCode was already locked to this login's own code in the
-      // constructor, so this call was already scoped correctly — no
-      // other dealer's customers are returned here.
       this.getCustomerLedgerDetails();
-
-      // FIXED: previously getDealerCodes() ran unconditionally below,
-      // fetching every dealer's code/name into a dealer-scoped session
-      // even though the dealer-picker dropdown that data feeds is hidden
-      // for non-superadmin logins (*ngIf="isSuperAdmin" in the template).
-      // A dealer login has no use for the full dealer list and shouldn't
-      // receive it, so this now returns before that call.
       return;
     }
 
@@ -87,9 +89,20 @@ export class CustomerLedgerList implements OnInit {
 
   getCustomerLedgerDetails() {
     this.loader.show();
-    this.ledgerMasterService.getLedgerByPaged(this.searchTerm, this.page - 1, this.pageSize, this.dealerCode).subscribe({
+    // NEW: selectedLedgerType passed through as a 6th argument. Also now
+    // always passes selectedDealerCode (previously only onDealerChange did)
+    // so a superadmin's dealer filter survives pagination/search instead of
+    // silently dropping on the next page — see onPageChange/onSearchChange.
+    this.ledgerMasterService.getLedgerByPaged(
+      this.searchTerm,
+      this.page - 1,
+      this.pageSize,
+      this.dealerCode,
+      this.selectedDealerCode,
+      this.selectedLedgerType
+    ).subscribe({
       next: (res) => {
-               
+
         this.collectionSize = 0;
         if (res) {
           this.dataSource = res.data;
@@ -184,27 +197,22 @@ export class CustomerLedgerList implements OnInit {
       }
     });
   }
-  onDealerChange() {
-    this.ledgerMasterService.getLedgerByPaged(this.searchTerm, this.page - 1, this.pageSize, this.dealerCode, this.selectedDealerCode
-    ).subscribe({
-      next: (res) => {
 
-        this.collectionSize = 0;
-        if (res) {
-               
-          this.dataSource = res.data;
-          this.collectionSize = res.totalRecords;
-        }
-        this.loader.hide();
-      }, error: (err) => {
-        console.error(err);
-        this.loader.hide();
-        this.toaster.show('Something went wrong', {
-          classname: 'bg-danger text-white',
-          delay: 5000
-        });
-      }
-    })
+  // FIXED (incidental, while touching this method to wire in the new
+  // filter): the old body here never called loader.show() before its
+  // request — only loader.hide() after — so the spinner never actually
+  // appeared on a dealer-code change. Delegating to
+  // getCustomerLedgerDetails() (which already calls both) fixes that and
+  // keeps this from drifting out of sync with the main fetch again.
+  onDealerChange() {
+    this.page = 1;
+    this.getCustomerLedgerDetails();
+  }
+
+  // NEW
+  onLedgerTypeChange() {
+    this.page = 1;
+    this.getCustomerLedgerDetails();
   }
 
   filterDealers() {

@@ -12,6 +12,8 @@ export class LedgerMasterService {
 
   constructor(private httpClient: HttpClient) { }
 
+  
+
   getLedger(): Observable<any> {
     return this.httpClient.get(`${this.baseUrl}/ledger-master`)
   }
@@ -20,7 +22,21 @@ export class LedgerMasterService {
     return this.httpClient.get(`${this.baseUrl}/ledger-master/companies`)
   }
 
-  getLedgerByPaged(searchTerm: string | null = null, pageIndex: number, pageSize: number, dealerCode: string | null = null, filter: string | null = null): Observable<any> {
+  // FIXED: `filter` moved back to the 5th position (matching the positional
+  // order onDealerChange() already relies on for its 5-arg call — passing
+  // selectedDealerCode there was always meant to hit `filter`, the
+  // super-admin drill-down-to-one-dealer selector). `ledgerType` is now the
+  // 6th param, and — the actual bug — is now appended to `params`. It was
+  // previously accepted into the method signature but never added to the
+  // outgoing HttpParams at all, so the value could never reach the API
+  // regardless of argument order.
+  getLedgerByPaged(
+    searchTerm: string | null = null, 
+    pageIndex: number, 
+    pageSize: number, 
+    dealerCode: string | null = null, 
+    filter: string | null = null,
+    ledgerType?: string | null): Observable<any> {
     let params = new HttpParams().set('pageIndex', pageIndex).set('pageSize', pageSize);
     if (searchTerm) {
       params = params.set('searchTerm', searchTerm);
@@ -31,6 +47,10 @@ export class LedgerMasterService {
     if (filter) {
       params = params.set('filter', filter);
     }
+    if (ledgerType) {
+      params = params.set('ledgerType', ledgerType);
+    }
+    
     return this.httpClient.get(`${this.baseUrl}/ledger-master/paged`, { params });
   }
 

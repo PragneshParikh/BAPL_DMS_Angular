@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, retryWhen } from 'rxjs';
 
 @Injectable({
@@ -11,9 +11,31 @@ export class MaterialTransferService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getByDealer(searchTerm: string = null, dealerCode: any, pageIndex: number, pageSize: number): Observable<any> {
-    return this.httpClient.get(`${this.baseUrl}/material-transfer/GetByDealerPaged?searchTerm=${searchTerm}&dealerCode=${dealerCode}&pageIndex=${pageIndex}&pageSize=${pageSize}`);
+getByDealer(
+  searchTerm: string,
+  dealerCode: string,
+  pageIndex: number,
+  pageSize: number,
+  fromDate?: string | null,
+  toDate?: string | null
+): Observable<any> {
+  let params = new HttpParams()
+    .set('dealerCode', dealerCode ?? '')
+    .set('pageIndex', pageIndex)
+    .set('pageSize', pageSize);
+
+  if (searchTerm) {
+    params = params.set('searchTerm', searchTerm);
   }
+  if (fromDate) {
+    params = params.set('fromDate', fromDate);
+  }
+  if (toDate) {
+    params = params.set('toDate', toDate);
+  }
+
+  return this.httpClient.get<any>(`${this.baseUrl}/material-transfer/GetByDealerPaged`, { params });
+}
 
   getMaterialIssueId() {
     return this.httpClient.get<any>(`${this.baseUrl}/material-transfer/issue-id`);
@@ -39,6 +61,10 @@ export class MaterialTransferService {
       }
     });
   }
+
+deleteByJobId(jobId: number): Observable<any> {
+  return this.httpClient.delete<any>(`${this.baseUrl}/material-transfer/by-job/${jobId}`);
+}
 
   downloadExcel() {
     return this.httpClient.get(`${this.baseUrl}/material-transfer/download`, { responseType: 'blob' });

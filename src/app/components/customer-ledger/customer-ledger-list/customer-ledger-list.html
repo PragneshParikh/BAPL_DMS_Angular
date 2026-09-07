@@ -11,13 +11,12 @@
                 <!-- Table Card -->
                 <div class="card">
                     <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="row g-2 align-items-end">
 
+                            <div *ngIf="isSuperAdmin" class="col-md-2">
+                                <label class="form-label form-label-sm mb-1">Dealer Code</label>
 
-                            <div *ngIf="isSuperAdmin" class="col-md-2 mb-0">
-                                <label class="form-label form-label-sm">Select Dealer Code</label>
-
-                                <ng-select class="ng-select-sm" style="width:180px;" [items]="dealers"
+                                <ng-select class="ng-select-sm" [items]="dealers"
                                     bindLabel="dealerName" bindValue="dealerCode" [(ngModel)]="selectedDealerCode"
                                     [searchable]="true" [clearable]="false" placeholder="Select Dealer Code"
                                     [searchFn]="customSearchFn" (change)="onDealerChange()">
@@ -29,23 +28,31 @@
                                 </ng-select>
                             </div>
 
+                            <div class="col-md-2">
+                                <label class="form-label form-label-sm mb-1">Ledger Type</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="selectedLedgerType"
+                                    (change)="onLedgerTypeChange()">
+                                    <option value="">All</option>
+                                    <option *ngFor="let lt of ledgerTypes" [value]="lt.value">
+                                        {{ lt.name }}
+                                    </option>
+                                </select>
+                            </div>
 
-                            <div class="d-flex align-items-end justify-content-end gap-2 w-100">
-
-                                <button  class="btn btn-sm btn-primary" (click)="newLedger()">
+                            <div class="col-md-auto ms-md-auto d-flex align-items-end gap-2">
+                                <button class="btn btn-sm btn-primary" (click)="newLedger()">
                                     Add
                                 </button>
-                                <button  class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                                <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
                                     (click)="downloadExcel()">
                                     <i class="ri-file-excel-2-line"></i>
                                 </button>
 
                                 <div class="search-box position-relative">
-                                    <input type="text" class="form-control" placeholder="Search..."
+                                    <input type="text" class="form-control form-control-sm" placeholder="Search..."
                                         [(ngModel)]="searchTerm" (keyup)="onSearchChange()">
                                     <i class="ri-search-line search-icon"></i>
                                 </div>
-
                             </div>
 
                         </div>
