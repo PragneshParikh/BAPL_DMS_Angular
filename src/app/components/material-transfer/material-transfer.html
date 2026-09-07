@@ -10,10 +10,10 @@
 
                 <!-- Primary actions -->
                 <div class="card-header d-flex justify-content-end align-items-center gap-2">
-                    <button class="btn btn-primary btn-sm" (click)="addMaterialTransfer()">
+                    <button class="btn btn-primary btn-sm" *ngIf="canCreate" (click)="addMaterialTransfer()">
                         <i class="ri-add-line align-middle me-1"></i>Add
                     </button>
-                    <button class="btn btn-success btn-sm" [ngbTooltip]="'Export to Excel'"
+                    <button class="btn btn-success btn-sm" *ngIf="canDownload" [ngbTooltip]="'Export to Excel'"
                         (click)="downloadExcel()">
                         <i class="ri-file-excel-2-line"></i>
                     </button>

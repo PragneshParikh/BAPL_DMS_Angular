@@ -22,9 +22,26 @@ export class MenuAccessService {
     private http: HttpClient
   ) {}
 
+  // Menu Rights only ever apply to Dealer logins. Every other role
+  // (SuperAdmin, BG Employee roles, etc.) always has full access to every
+  // button, regardless of what happens to be sitting in the cached
+  // menuRights array — even if it's populated (e.g. stale from a previous
+  // dealer session, or the backend happens to return rows for this role
+  // too). This check must run BEFORE anything looks at rights.length.
+  private isDealerRole(): boolean {
+    const role = (this.storageService.getRole() || '').toLowerCase().trim();
+    return role === 'dealer';
+  }
+
   hasPermission(subMenuId: number, bit: MenuPermissionBit): boolean {
+    if (!this.isDealerRole()) {
+      return true;
+    }
+
     const rights = this.storageService.getMenuRights();
-    if (!rights || !Array.isArray(rights)) return true; // fail-open for SuperAdmin/roles with no restriction rows
+    if (!rights || !Array.isArray(rights) || rights.length === 0) {
+      return true; // fail-open safeguard: a Dealer with no configured rights sees everything
+    }
 
     const match = rights.find((r: any) => r.subMenuId === subMenuId);
     if (!match) return false;
@@ -38,9 +55,9 @@ export class MenuAccessService {
   canDelete(subMenuId: number): boolean { return this.hasPermission(subMenuId, MenuPermissionBit.Delete); }
   canDownload(subMenuId: number): boolean { return this.hasPermission(subMenuId, MenuPermissionBit.Download); }
 
-  // FIX: now returns Observable<void> so callers can .subscribe() and know
-  // exactly when the refreshed rights have actually landed in storage,
-  // instead of firing-and-forgetting with no way to sequence follow-up work.
+  // Returns Observable<void> so callers can .subscribe() and know exactly
+  // when the refreshed rights have actually landed in storage, instead of
+  // firing-and-forgetting with no way to sequence follow-up work.
   refreshMenuRights(): Observable<void> {
     const dealerCode = this.storageService.getDealerCode();
     if (!dealerCode) {

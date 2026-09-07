@@ -55,17 +55,20 @@ export class MaterialTransfer implements OnInit, OnDestroy {
   lstLocations: any[] = [];
 
   constructor(
-    private router: Router,
-    private loader: LoaderService,
-    private toast: ToastService,
-    private materialTransfterService: MaterialTransferService,
-    private storageService: StorageService,
-    private locationMasterService: LocationMasterService,
-    private menuAccess: MenuAccessService,
-  ) {
-    // this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
-    // this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
-  }
+  private router: Router,
+  private loader: LoaderService,
+  private toast: ToastService,
+  private materialTransfterService: MaterialTransferService,
+  private storageService: StorageService,
+  private locationMasterService: LocationMasterService,
+  private menuAccess: MenuAccessService,
+) {
+  console.log('role:', JSON.stringify(this.storageService.getRole()));
+  console.log('menuRights:', this.storageService.getMenuRights());
+  this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+  this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+  console.log('canCreate:', this.canCreate, 'canDownload:', this.canDownload);
+}
 
   ngOnInit(): void {
     const defaultRange = this.getDefaultDateRange();

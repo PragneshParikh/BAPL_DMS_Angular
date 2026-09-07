@@ -43,8 +43,6 @@
                                     <label class="form-label">Technician</label>
                                     <select class="form-select form-select-sm" name="technician"
                                         [(ngModel)]="formData.technician" [disabled]="true">
-                                        <!-- <option *ngFor="let tech of lstTechnician" [value]="tech.id"> {{ tech.name }}
-                                        </option> -->
                                         <option value="Manoj">Manoj</option>
                                         <option value="Suraj">Suraj</option>
                                         <option value="Vishal">Vishal</option>
@@ -178,24 +176,18 @@
                                         <th>Qty</th>
                                         <th>Rate</th>
                                         <th>HSN Code</th>
-                                        <!-- <th>Stock</th> -->
                                         <th>Issue Type</th>
                                         <th>Inward Sr No.</th>
                                         <th>Issue Sr No.</th>
                                         <th>Technician</th>
-                                        <!-- <th>CGST({{cgstPercent}}%)</th> -->
                                         <th>CGST Amt.</th>
-                                        <!-- <th>SGST({{sgstPercent}}%)</th> -->
                                         <th>SGST Amt.</th>
-                                        <!-- <th>IGST({{igstPercent}}%)</th> -->
                                         <th>IGST Amt. </th>
                                         <th>Amount</th>
                                         <th>MRP</th>
-                                        <!-- <th>Remarks</th> -->
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Sample Data Row -->
                                     <tr *ngFor="let item of items; let i = index" [hidden]="item.status === 'Deleted'">
                                         <td class="action-cell text-nowrap">
                                             <button class="btn btn-sm btn-soft-info py-0 px-1 me-1"
@@ -215,7 +207,6 @@
                                         <td class="text-nowrap">{{ item.quantity }}</td>
                                         <td class="text-nowrap">{{ item.itemRate }}</td>
                                         <td class="text-nowrap">{{ item.hsncode }}</td>
-                                        <!-- <td class="text-nowrap">{{ item.stock }}</td> -->
                                         <td class="text-nowrap">{{ item.issueType | getIssueTypeName: issueTypes }}</td>
                                         <td>{{ item.inwardsrno }}</td>
                                         <td class="text-nowrap">{{ item.issuesrno }}</td>
@@ -226,11 +217,6 @@
                                         <td>{{ item.igstAmount }}</td>
                                         <td class="text-nowrap">{{ item.amount }}</td>
                                         <td class="text-nowrap">{{ item.mrp | number:'1.2-2' }}</td>
-                                        <!-- <td class="text-nowrap" [title]="item.remarks">
-                                            {{ item.remarks?.length > 30
-                                            ? (item.remarks | slice:0:30) + '...'
-                                            : item.remarks }}
-                                        </td> -->
                                     </tr>
 
                                 </tbody>
@@ -241,7 +227,6 @@
                                         <td colspan="9"></td>
                                         <td>{{ getTotalAmount() }}</td>
                                         <td></td>
-                                        <!-- <td></td> -->
                                     </tr>
                                 </tfoot>
 

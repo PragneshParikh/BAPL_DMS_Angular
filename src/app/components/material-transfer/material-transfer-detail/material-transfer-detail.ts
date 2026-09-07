@@ -20,6 +20,7 @@ import { TaxService } from '../../../core/services/tax';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { PrefixService } from '../../../core/services/prefix';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+
 @Component({
   selector: 'app-material-transfer-detail',
   imports: [
@@ -43,10 +44,10 @@ export class MaterialTransferDetail implements OnInit {
   readonly SUBMENU_ID = 29;
   // NOTE: these two field defaults don't matter — the constructor below
   // always runs after and overwrites both with the real (or temporarily
-  // overridden) value. Set back to false here purely so the field
-  // declaration isn't misleading about what actually governs the buttons.
-  canCreate = true;
-  canEdit = true;
+  // overridden) value. Set to false here purely so the field declaration
+  // isn't misleading about what actually governs the buttons.
+  canCreate = false;
+  canEdit = false;
 
   formData: any = {
     prefix: '',
@@ -54,12 +55,10 @@ export class MaterialTransferDetail implements OnInit {
     jobNo: 0,
     OdoMeter: 0,
     date: new Date(),
-    // technician: '',
     location: '',
     isSameLocation: false
   };
   newItem = {
-    //#region Item Table Field
     id: 0,
     jobId: 0,
     itemId: null,
@@ -70,7 +69,6 @@ export class MaterialTransferDetail implements OnInit {
     stock: 0,
     batchClosingQty: 0,
     issueType: '',
-    // issueSubType: '',
     inwardsrno: '',
     issuesrno: '',
     technician: 0,
@@ -85,20 +83,15 @@ export class MaterialTransferDetail implements OnInit {
     igstAmount: '',
     amount: '',
     mrp: '',
-    // wav: '',
     validdays: null,
     validkms: null,
     remarks: '',
-    // firstfill: null,
-    // firstfillstock: null,
     received: null,
     receivedrate: null,
     cir: null,
     warrantyapproval: null,
     warrantyapprovalstatus: null,
-    //#endregion
 
-    //#region Item Detail Field
     rackNo: null,
     binNo: '',
     returnQty: 0,
@@ -109,7 +102,6 @@ export class MaterialTransferDetail implements OnInit {
     updatedBy: null,
     updatedDate: null,
     isEdit: false
-    //#endregion
   }
 
   private jobId: number = 0;
@@ -124,9 +116,6 @@ export class MaterialTransferDetail implements OnInit {
 
   jobCardStatus: boolean = false;
 
-  // cgstPercent: any;
-  // sgstPercent: any;
-  // igstPercent: any;
   totalGST: any;
 
   constructor(
@@ -145,12 +134,6 @@ export class MaterialTransferDetail implements OnInit {
   ) {
     this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
     this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
-    
-    console.log('Menu rights:', this.storageService.getMenuRights());
-    console.log(
-      'SubMenu 29 entry:',
-      (this.storageService.getMenuRights() as any[])?.find((r: any) => r.subMenuId === 29)
-    );
 
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
@@ -175,24 +158,9 @@ export class MaterialTransferDetail implements OnInit {
   }
 
   ngOnInit() {
-    // if (this.jobId === 0) {
-    //   this.getMaterialIssueId();
-    // }
-    // this.getItemList();
     this.getLocationList(this.dealerCode, 2);
     this.getMaterialTransferList(this.jobId, null);
   }
-
-  // getMaterialIssueId() {
-  //   this.materialTransferService.getMaterialIssueId().subscribe({
-  //     next: (res) => {
-  //       this.formData.issueNumber = res;
-  //     },
-  //     error: (err) => {
-  //       console.error(err);
-  //     }
-  //   });
-  // }
 
   getItemList(jobDetails: any) {
     this.loader.show();
@@ -232,35 +200,40 @@ export class MaterialTransferDetail implements OnInit {
     this.materialTransferService.getMaterialTransferByJobId(jobId).subscribe({
       next: (res: any) => {
         this.items = [];
-  if (res && res.length > 0) {
+        if (res && res.length > 0) {
 
-    const materialPrefix = res[0].materialPrefix ?? '';
-    const materialIssueNumber = res[0].materialIssueNumber;
+          const materialPrefix = res[0].materialPrefix ?? '';
+          const materialIssueNumber = res[0].materialIssueNumber;
 
-      this.formData.prefix = this.normalizeMaterialPrefix(
-        materialPrefix,
-        materialIssueNumber
-      );
+          // FIX: merge into formData instead of relying on it being set
+          // elsewhere — this call and getJobCardById() can resolve in
+          // either order, so each one must only patch the keys it owns.
+          this.formData = {
+            ...this.formData,
+            prefix: this.normalizeMaterialPrefix(
+              materialPrefix,
+              materialIssueNumber
+            ),
+            issueNumber:
+              materialIssueNumber != null
+                ? String(Number(materialIssueNumber))
+                : ''
+          };
 
-      this.formData.issueNumber =
-        materialIssueNumber != null
-          ? String(Number(materialIssueNumber))
-          : '';
+          this.items = res.map((item: any) => {
+            item.mrp = (
+              Number(item.custprice) *
+              (item.quantity || 0)
+            ).toFixed(2);
 
-      this.items = res.map((item: any) => {
-        item.mrp = (
-          Number(item.custprice) *
-          (item.quantity || 0)
-        ).toFixed(2);
+            return item;
+          });
 
-        return item;
-      });
-
-    } else {
-      if (dealerCode && dealerCode !== '') {
-        this.getMaterialPrefix(dealerCode);
-      }
-    }
+        } else {
+          if (dealerCode && dealerCode !== '') {
+            this.getMaterialPrefix(dealerCode);
+          }
+        }
 
         this.loader.hide();
       },
@@ -283,7 +256,6 @@ export class MaterialTransferDetail implements OnInit {
     const lstAdded: any[] = this.items.filter(x => x.status === "Added");
     const lstModified: any[] = this.items.filter(x => x.status === "Modified");
     const lstDeleted: number[] = this.items.filter(x => x.status === "Deleted").map(x => x.id);
-    // const lstDeleted: number[] = this.items.filter(x => x.status === "Deleted");
 
     if (lstAdded.length > 0) {
       this.loader.show();
@@ -377,24 +349,14 @@ export class MaterialTransferDetail implements OnInit {
       ...this.newItem,
       location: this.formData.location,
       dealerCode: this.lstLocation.filter(x => x.loccode === this.formData.location)[0].dealerCode,
-      dealerLocation: this.lstLocation.filter(x => x.loccode === this.formData.location)[0].locname, // ADD THIS LINE
+      dealerLocation: this.lstLocation.filter(x => x.loccode === this.formData.location)[0].locname,
       materialPrefix: this.formData.prefix,
       materialissueNumber: this.formData.issueNumber,
       updatedBy: this.storageService.getUserId(),
       updatedDate: new Date()
-    };    
-
-    // this.newItem.cgstAmount = totalGST > 0 ? ((Number(this.items[index].cgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-    // this.newItem.sgstAmount = totalGST > 0 ? ((Number(this.items[index].sgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-    // this.newItem.igstAmount = totalGST > 0 ? ((Number(this.items[index].igstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-
+    };
 
     if (index > -1) {
-      // itemToSave.status = 'Modified';
-      // this.items[index] = itemToSave;
-
-      // ← Increase quantity and recalculate tax
-      // const updatedQuantity = Number(this.items[index].quantity) + Number(this.newItem.quantity);
       let totalGST = 0;
 
       if (this.formData.isSameLocation) {
@@ -410,13 +372,8 @@ export class MaterialTransferDetail implements OnInit {
 
       this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
 
-      // itemToSave.quantity = this.newItem.quantity;
       itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
       itemToSave.mrp = this.items[index].mrp;
-
-      // itemToSave.cgstAmount = totalGST > 0 ? ((Number(this.items[index].cgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      // itemToSave.sgstAmount = totalGST > 0 ? ((Number(this.items[index].sgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      // itemToSave.igstAmount = totalGST > 0 ? ((Number(this.items[index].igst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
 
       itemToSave.cgstAmount = this.formData.isSameLocation && totalGST > 0
         ? ((Number(this.items[index].cgst) / totalGST) * totalGSTAmount).toFixed(2)
@@ -438,9 +395,6 @@ export class MaterialTransferDetail implements OnInit {
 
     } else {
 
-      // const totalGST = Number(this.newItem.cgst) + Number(this.newItem.sgst) //+ Number(this.newItem.igst);
-      // const finalPrice = Number(this.newItem.itemRate) * this.newItem.quantity * (1 + totalGST / 100);
-      // const taxDetails = this.calculateGST(finalPrice, totalGST);
       const totalGST = this.formData.isSameLocation
         ? Number(this.newItem.cgst) + Number(this.newItem.sgst)
         : Number(this.newItem.igst);
@@ -455,10 +409,6 @@ export class MaterialTransferDetail implements OnInit {
 
       itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
       itemToSave.mrp = taxDetails.finalPrice;
-
-      // itemToSave.cgstAmount = totalGST > 0 ? ((Number(this.newItem.cgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      // itemToSave.sgstAmount = totalGST > 0 ? ((Number(this.newItem.sgst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      // itemToSave.igstAmount = totalGST > 0 ? ((Number(this.newItem.igst) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
 
       itemToSave.cgstAmount = this.formData.isSameLocation && totalGST > 0
         ? ((Number(this.newItem.cgst) / totalGST) * totalGSTAmount).toFixed(2)
@@ -517,9 +467,12 @@ export class MaterialTransferDetail implements OnInit {
   getJobCardById(id: number) {
     this.jobCardService.getJobCardById(id).subscribe({
       next: (res) => {
+        // FIX: merge into formData rather than replacing it wholesale —
+        // getMaterialTransferList() sets formData.prefix / issueNumber
+        // independently, and whichever of these two async calls resolves
+        // second must not wipe out what the other one already set.
         this.formData = {
-          // prefix: res.materialPrefix,
-          // issueNumber: res.materialIssueNumber,
+          ...this.formData,
           jobNo: res.jobNo,
           OdoMeter: res.vehiclekms,
           date: res.jobinDate,
@@ -540,7 +493,6 @@ export class MaterialTransferDetail implements OnInit {
   resetNewItem() {
     this.totalGST = 0;
     this.newItem = {
-      //#region Item Table Field
       id: 0,
       jobId: 0,
       itemId: 0,
@@ -551,7 +503,6 @@ export class MaterialTransferDetail implements OnInit {
       stock: 0,
       batchClosingQty: 0,
       issueType: '',
-      // issueSubType: '',
       inwardsrno: '',
       issuesrno: '',
       technician: 0,
@@ -566,21 +517,15 @@ export class MaterialTransferDetail implements OnInit {
       igstAmount: '',
       amount: '',
       mrp: '',
-      // wav: '',
       validdays: null,
       validkms: null,
       remarks: '',
-      // firstfill: null,
-      // firstfillstock: null,
       received: null,
       receivedrate: null,
       cir: null,
       warrantyapproval: null,
       warrantyapprovalstatus: null,
 
-      //#endregion
-
-      //#region Item Detail Field
       rackNo: null,
       binNo: '',
       returnQty: 0,
@@ -591,7 +536,6 @@ export class MaterialTransferDetail implements OnInit {
       updatedBy: null,
       updatedDate: null,
       isEdit: false
-      //#endregion
     };
   }
 
@@ -623,12 +567,7 @@ export class MaterialTransferDetail implements OnInit {
 
       this.totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage);
 
-      // const cgstPercent = res.find((x: any) => x.taxCode.startsWith('CGST'))?.taxRate || 0;
-      // const sgstPercent = res.find((x: any) => x.taxCode.startsWith('SGST'))?.taxRate || 0;
-      // const igstPercent = res.find((x: any) => x.taxCode.startsWith('IGST'))?.taxRate || 0;
-
-
-      const totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage) //+ Number(this.newItem.igst);
+      const totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage);
       const taxDetails = this.calculateGST(selectedItem.custprice, totalGST);
 
       this.newItem.itemdesc = selectedItem.itemdesc;
@@ -642,57 +581,10 @@ export class MaterialTransferDetail implements OnInit {
       this.newItem.sgst = selectedItem.sgstPercentage;
       this.newItem.igst = selectedItem.igstPercentage;
 
-      // this.newItem.cgstPercent = cgstPercent;
-      // this.newItem.sgstPercent = sgstPercent;
-      // this.newItem.igstPercent = igstPercent;
-
-      // this.totalGST = selectedItem.cgst + selectedItem.sgst;
-
       if (this.newItem.batchClosingQty > 0) {
         this.newItem.quantity = 1;
       }
       this.loader.hide();
-
-      // this.taxService.getTaxList(selectedItem.itemcode.toString(), dealerCode, '').subscribe({
-      //   next: (res) => {
-      //     this.loader.hide();
-
-      //     const totalGST = res.reduce(
-      //       (sum, tax) => sum + Number(tax.taxRate || 0), 0
-      //     );
-
-      //     this.totalGST = totalGST;
-
-      //     const cgstPercent = res.find((x: any) => x.taxCode.startsWith('CGST'))?.taxRate || 0;
-      //     const sgstPercent = res.find((x: any) => x.taxCode.startsWith('SGST'))?.taxRate || 0;
-      //     const igstPercent = res.find((x: any) => x.taxCode.startsWith('IGST'))?.taxRate || 0;
-
-      //     const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
-
-      //     this.newItem.itemdesc = selectedItem.itemdesc;
-      //     this.newItem.itemcode = selectedItem.itemcode;
-      //     this.newItem.itemId = selectedItem.id;
-      //     this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
-      //     this.newItem.batchClosingQty = selectedItem.batchClosingQty;
-
-      //     this.newItem.cgstPercent = cgstPercent;
-      //     this.newItem.sgstPercent = sgstPercent;
-      //     this.newItem.igstPercent = igstPercent;
-
-      //     // this.newItem.cgstAmount = totalGST > 0 ? ((Number(this.items[index].cgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      //     // this.newItem.sgstAmount = totalGST > 0 ? ((Number(this.items[index].sgstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-      //     // this.newItem.igstAmount = totalGST > 0 ? ((Number(this.items[index].igstPercent) / totalGST) * totalGSTAmount).toFixed(2) : '0.00';
-
-      //     if (this.newItem.batchClosingQty > 0) {
-      //       this.newItem.quantity = 1;
-      //     }
-      //   },
-      //   error: (err) => {
-      //     this.loader.hide();
-      //     console.error(err);
-      //     this.toast.show('Failed to fetch tax details. Please try again later.', { classname: 'bg-danger text-light' });
-      //   }
-      // });
     }
   }
 
@@ -714,7 +606,6 @@ export class MaterialTransferDetail implements OnInit {
       stock: row.stock,
       batchClosingQty: row.batchClosingQty ?? _item[0].batchClosingQty,
       issueType: row.issueType,
-      // issueSubType: '',
       inwardsrno: '',
       issuesrno: '',
       technician: row.technician,
@@ -728,12 +619,9 @@ export class MaterialTransferDetail implements OnInit {
 
       amount: row.amount,
       mrp: '',
-      // wav: '',
       validdays: null,
       validkms: null,
       remarks: row.remarks,
-      // firstfill: null,
-      // firstfillstock: null,
       received: null,
       receivedrate: null,
       cir: null,
@@ -803,68 +691,63 @@ export class MaterialTransferDetail implements OnInit {
     );
   }
 
-getMaterialPrefix(dealerCode: string): void {
-  this.loader.show();
+  getMaterialPrefix(dealerCode: string): void {
+    this.loader.show();
 
-  this.prefixMasterService
-    .getPrefixByDealerByModule(dealerCode, 'material_transfer')
-    .subscribe({
-      next: (res: string) => {
-        this.loader.hide();
+    this.prefixMasterService
+      .getPrefixByDealerByModule(dealerCode, 'material_transfer')
+      .subscribe({
+        next: (res: string) => {
+          this.loader.hide();
 
-        if (!res) {
+          if (!res) {
+            this.formData.prefix = '';
+            this.formData.issueNumber = '';
+            return;
+          }
+
+          const prefixValue = String(res).trim();
+
+          const lastSlashIndex = prefixValue.lastIndexOf('/');
+
+          if (lastSlashIndex === -1) {
+            this.formData.prefix = prefixValue;
+            this.formData.issueNumber = '';
+            return;
+          }
+
+          const lastPart = prefixValue.substring(lastSlashIndex + 1);
+
+          if (/^\d+$/.test(lastPart)) {
+            this.formData.prefix =
+              prefixValue.substring(0, lastSlashIndex + 1);
+
+            this.formData.issueNumber =
+              String(Number(lastPart));
+          } else {
+            this.formData.prefix = prefixValue;
+            this.formData.issueNumber = '';
+          }
+        },
+
+        error: (err) => {
+          this.loader.hide();
+
+          console.error(err);
+
           this.formData.prefix = '';
           this.formData.issueNumber = '';
-          return;
+
+          this.toast.show(
+            'Something went wrong.',
+            {
+              classname: 'bg-danger text-white',
+              delay: 5000
+            }
+          );
         }
-
-        const prefixValue = String(res).trim();
-
-        const lastSlashIndex = prefixValue.lastIndexOf('/');
-
-        if (lastSlashIndex === -1) {
-          // No "/" found, so treat the complete response as prefix
-          this.formData.prefix = prefixValue;
-          this.formData.issueNumber = '';
-          return;
-        }
-
-        // Get the last part of the prefix response
-        const lastPart = prefixValue.substring(lastSlashIndex + 1);
-
-        // If the last part is numeric, remove it from the prefix
-        // and use it as the issue number without leading zeros.
-        if (/^\d+$/.test(lastPart)) {
-          this.formData.prefix =
-            prefixValue.substring(0, lastSlashIndex + 1);
-
-          this.formData.issueNumber =
-            String(Number(lastPart));
-        } else {
-          // No numeric suffix
-          this.formData.prefix = prefixValue;
-          this.formData.issueNumber = '';
-        }
-      },
-
-      error: (err) => {
-        this.loader.hide();
-
-        console.error(err);
-
-        this.formData.prefix = '';
-        this.formData.issueNumber = '';
-
-        this.toast.show(
-          'Something went wrong.',
-          {
-            classname: 'bg-danger text-white',
-            delay: 5000
-          }
-        );
-      }
-    });
-}
+      });
+  }
 
 
   getJobCardStatus(jobId: Number) {
@@ -888,7 +771,7 @@ getMaterialPrefix(dealerCode: string): void {
       .findIndex(item => item === this.items[index]) + 1;
   }
 
-    private normalizeMaterialPrefix(
+  private normalizeMaterialPrefix(
     prefix: string,
     issueNumber: number | string | null | undefined
   ): string {
@@ -903,8 +786,6 @@ getMaterialPrefix(dealerCode: string): void {
 
     const number = String(issueNumber);
 
-    // Remove only the exact issue number, including
-    // any zero-padding, from the end of the prefix.
     const escapedNumber = number.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
     const regex = new RegExp(`0*${escapedNumber}$`);

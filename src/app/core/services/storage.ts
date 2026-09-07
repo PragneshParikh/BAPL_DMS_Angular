@@ -54,22 +54,22 @@ export class StorageService {
             ?? '';
     }
 
-    setMenuRights(menu) {
-        const encode = this.encode(menu);
-        localStorage.setItem('menuRights', encode);
+    setMenuRights(rights: { subMenuId: number; permission: number }[]): void {
+        try {
+            localStorage.setItem('menuRights', JSON.stringify(rights || []));
+        } catch (e) {
+            console.error('Failed to persist menu rights', e);
+        }
     }
 
-    getMenuRights() {
-        const data = localStorage.getItem('menuRights');
-        if (!data) return null;
-
-        const decoded = this.decode(data);
-
-        if (decoded === null) {
-            localStorage.removeItem('menuRights');
+    getMenuRights(): { subMenuId: number; permission: number }[] {
+        try {
+            const raw = localStorage.getItem('menuRights');
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            console.error('Failed to parse stored menu rights', e);
+            return [];
         }
-
-        return decoded;
     }
 
     clear() {

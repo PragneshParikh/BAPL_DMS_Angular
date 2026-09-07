@@ -1,4 +1,4 @@
-//BAPL_DMS_Angular\src\app\layouts\sidebar\sidebar.component.ts
+// BAPL_DMS_Angular\src\app\layouts\sidebar\sidebar.component.ts
 import { Component, OnInit, EventEmitter, Output, ViewChild, ElementRef } from '@angular/core';
 import { NavigationEnd, Route, Router, RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
