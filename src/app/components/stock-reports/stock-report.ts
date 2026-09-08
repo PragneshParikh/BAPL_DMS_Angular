@@ -47,6 +47,11 @@ export class StockReportComponent implements OnInit {
       this.selectedDealerCode = currentUser?.dealerCode ?? undefined;
     }
 
+    // Default the date filter to the current month (1st of this month
+    // through today) before the first load, instead of leaving
+    // fromDate/toDate blank.
+    this.setDefaultDateRange();
+
     this.loadDealerWiseReport();
   }
 
@@ -60,6 +65,26 @@ export class StockReportComponent implements OnInit {
       next: (data: DealerOption[]) => { this.dealers = data; },
       error: () => { this.dealers = []; }
     });
+  }
+
+  // Sets fromDate/toDate to the first day of the current month and today,
+  // in 'YYYY-MM-DD' form so they bind directly to <input type="date">.
+  private setDefaultDateRange(): void {
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    this.fromDate = this.formatDate(firstDayOfMonth);
+    this.toDate = this.formatDate(now);
+  }
+
+  // Small local helper so we don't pull in a date library just for
+  // 'YYYY-MM-DD' formatting. Uses local time (not UTC) so the date shown
+  // matches what the user's calendar/clock says "today" is.
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   loadDealerWiseReport(): void {
@@ -105,8 +130,10 @@ export class StockReportComponent implements OnInit {
   }
 
   onReset(): void {
-    this.fromDate = '';
-    this.toDate = '';
+    // Restores the current-month default instead of clearing to blank, so
+    // "Reset" consistently returns to the same starting view as a fresh
+    // page load rather than an unfiltered all-dates report.
+    this.setDefaultDateRange();
     if (this.isSuperAdmin) {
       this.selectedDealerCode = undefined;
     }
@@ -115,5 +142,55 @@ export class StockReportComponent implements OnInit {
 
   printReport(): void {
     window.print();
+  }
+
+  // =========================================
+  // EXPORT CSV
+  // NEW — mirrors the on-screen table exactly: one row per item, a
+  // sub-total row per dealer, and a final grand-total row. Built from
+  // dealerWiseReports directly (already in memory client-side), so unlike
+  // the other reports' exportToExcel()/exportToCSV() this needs no service
+  // call, loading spinner, or error handling around a request — it's a
+  // synchronous flatten-and-download.
+  // =========================================
+
+  exportToCSV(): void {
+    if (!this.dealerWiseReports || this.dealerWiseReports.length === 0) {
+      return;
+    }
+
+    const headers = ['Sr No', 'Dealer Name', 'Dealer Code', 'Model', 'Colour', 'Total Qty'];
+    const rows: (string | number)[][] = [headers];
+
+    this.dealerWiseReports.forEach(dealer => {
+      dealer.items.forEach((item, i) => {
+        rows.push([
+          i + 1,
+          dealer.dealerName,
+          dealer.dealerCode,
+          item.model,
+          item.colour,
+          item.totalQty
+        ]);
+      });
+
+      rows.push([
+        `${dealer.dealerName} - Sub Total`, '', '', '', '', dealer.totalQty
+      ]);
+    });
+
+    rows.push(['GRAND TOTAL', '', '', '', '', this.grandTotal]);
+
+    const csvContent = rows
+      .map(row => row.map(cell => `"${(cell ?? '').toString().replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `stock-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 }

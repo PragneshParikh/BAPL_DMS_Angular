@@ -19,91 +19,61 @@
 
       <div class="card-body">
 
-        <div class="row g-3 align-items-end">
+        <div class="row g-2 align-items-end">
 
           <!-- Dealer Code -->
-          <div class="col-xl-3 col-lg-3 col-md-6" *ngIf="isSuperAdmin">
-
-            <label class="form-label">
+          <div class="col-md-2" *ngIf="isSuperAdmin">
+            <label class="form-label mb-1">
               Dealer Code
             </label>
-
-            <select
-                class="form-select form-select-sm"
-                [(ngModel)]="dealerCode">
-
-                <option value="">
-                  All Dealers
-                </option>
-
-                <option
-                  *ngFor="let dealer of dealerList"
-                  [value]="dealer.dealerCode">
-
-                  {{ dealer.dealerName }}
-
-                </option>
-
+            <select class="form-select form-select-sm" [(ngModel)]="dealerCode">
+              <option value="">All Dealers</option>
+              <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
+                {{ dealer.dealerName }}
+              </option>
             </select>
-
           </div>
 
           <!-- From Date -->
-          <div class="col-xl-3 col-lg-3 col-md-6">
-
-            <label class="form-label">
+          <div class="col-md-2">
+            <label class="form-label mb-1">
               From Date
             </label>
-
-            <input
-              type="date"
-              class="form-control form-control-sm"
-              [(ngModel)]="fromDate">
-
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="fromDate">
           </div>
 
           <!-- To Date -->
-          <div class="col-xl-3 col-lg-3 col-md-6">
-
-            <label class="form-label">
+          <div class="col-md-2">
+            <label class="form-label mb-1">
               To Date
             </label>
-
-            <input
-              type="date"
-              class="form-control form-control-sm"
-              [(ngModel)]="toDate">
-
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="toDate">
           </div>
 
-          <!-- Buttons -->
-          <div class="col-xl-3 col-lg-3 col-md-12">
+          <!-- Buttons — inline with the fields, right-aligned, same pattern as the other reports -->
+          <div class="col-md-auto ms-auto d-flex gap-2">
 
-            <label class="form-label d-block invisible">
-              Action
-            </label>
+            <button type="button" class="btn btn-primary btn-sm" (click)="getReport()">
+              Search
+            </button>
 
-            <div class="d-flex gap-2 justify-content-start">
+            <button type="button" class="btn btn-light btn-sm border" (click)="resetFilters()">
+              Reset
+            </button>
 
-              <button
-                type="button"
-                class="btn btn-primary btn-sm"
-                (click)="getReport()">
-
-                Search
-
-              </button>
-
-              <button
-                type="button"
-                class="btn btn-light btn-sm border"
-                (click)="resetFilters()">
-
-                Reset
-
-              </button>
-
-            </div>
+            <!--
+              NOTE: no canDownload gating here — this component has no
+              MenuAccessService wired in at all (unlike Part Dispatch Kit
+              Report / D2D / Vehicle Stock / Vehicle Inward), and I don't
+              have a confirmed SUBMENU_ID for this report to add one
+              correctly. Disabled-when-empty only, same treatment as
+              Stock Report. Give me the submenu ID and I'll wire in the
+              same *ngIf="canDownload" gating used elsewhere.
+            -->
+            <button type="button" class="btn btn-success btn-sm"
+                (click)="exportToCSV()" [disabled]="reportData.length === 0" title="Export to Excel">
+              <i class="ri-file-excel-2-line"></i>
+            </button>
 
           </div>
 
