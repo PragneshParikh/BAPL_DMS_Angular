@@ -416,8 +416,12 @@
                         </div>
                         <div class="col-md-1">
                             <label class="form-label">Qty</label>
-                            <input type="number" class="form-control form-control-sm text-end bg-light text-muted"
-                                [(ngModel)]="selectedPartQty" readonly>
+                            <!-- CHANGED: editable when adding a new part; still
+                                 read-only while editing an existing (auto-populated)
+                                 row, matching editPart()'s existing comment that qty
+                                 is display-only during edit. -->
+                            <input type="number" class="form-control form-control-sm text-end"
+                                [(ngModel)]="selectedPartQty" [readonly]="isPartEditMode">
                         </div>
                         <div class="col-md-1">
 
@@ -457,7 +461,10 @@
                         </div> -->
                         <!-- Button -->
                         <div class="col-md-1 d-grid">
-                            <button class="btn btn-sm btn-primary" (click)="isPartEditMode ? updatePart() : ''">
+                            <!-- CHANGED: was `isPartEditMode ? updatePart() : ''` —
+                                 the else-branch was a no-op, so a brand-new part could
+                                 never actually be added, only an existing row edited. -->
+                            <button class="btn btn-sm btn-primary" (click)="isPartEditMode ? updatePart() : addPart()">
                                 + Add
                             </button>
                         </div>
@@ -1256,3 +1263,54 @@
 </ng-template>
 
 <!--End insurance popup-->
+
+<!-- Suggested Labour Popup -->
+<ng-template [ngIf]="showLabourSuggestionPopup">
+    <div class="custom-modal-backdrop">
+        <div class="custom-modal" style="width:600px;">
+            <div class="custom-modal-header bg-primary text-white">
+                <h5 class="mb-0 text-white">Suggested Labour for this Part</h5>
+                <button type="button" class="btn-close-custom text-white" (click)="closeSuggestedLabourPopup()">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <div class="custom-modal-body">
+                <p class="text-muted small mb-2">
+                    This part has associated labour codes. Select the ones to add to the Labour Details List.
+                </p>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:40px"></th>
+                                <th>Labour Code</th>
+                                <th>Description</th>
+                                <th class="text-end">Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of suggestedLabourList">
+                                <td>
+                                    <input type="checkbox"
+                                        [checked]="selectedSuggestedLabourIds.has(item.partwiseLabourId)"
+                                        (change)="toggleSuggestedLabour(item.partwiseLabourId)">
+                                </td>
+                                <td>{{ item.labourCode }}</td>
+                                <td>{{ item.labourName }}</td>
+                                <td class="text-end">{{ item.labourRate | number:'1.2-2' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    <button class="btn btn-sm btn-primary me-2" (click)="confirmAddSuggestedLabour()">
+                        <i class="ri-check-line"></i> Add Selected
+                    </button>
+                    <button class="btn btn-sm btn-light" (click)="closeSuggestedLabourPopup()">
+                        <i class="ri-close-line"></i> Skip
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
