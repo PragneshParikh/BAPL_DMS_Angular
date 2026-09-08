@@ -62,6 +62,12 @@ export class VehicleSaleD2dReport implements OnInit {
     }
 
     this.loadChassisList();
+
+    // NEW — default the date filter to the current month (1st of this
+    // month through today) before the first load, instead of leaving
+    // filter.fromDate/toDate null.
+    this.setDefaultDateRange();
+
     this.loadReport();
   }
 
@@ -78,6 +84,32 @@ export class VehicleSaleD2dReport implements OnInit {
   private checkIsSuperAdmin(): boolean {
     const role = localStorage.getItem('role');
     return role === 'SuperAdmin';
+  }
+
+  // =========================================
+  // DEFAULT DATE RANGE (current month)
+  // NEW — same pattern as the Stock Report / Vehicle Stock Report / Parts
+  // Dispatch Report / Part Dispatch Kit Report components, adapted here to
+  // write into filter.fromDate/filter.toDate instead of top-level
+  // properties, since that's where this component keeps its date filters.
+  // =========================================
+
+  private setDefaultDateRange(): void {
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    this.filter.fromDate = this.toDateInputString(firstDayOfMonth);
+    this.filter.toDate = this.toDateInputString(now);
+  }
+
+  // Formats a Date as 'YYYY-MM-DD' in LOCAL time (not UTC), so it binds
+  // correctly to <input type="date"> and matches what the user's
+  // clock/calendar says "today" is.
+  private toDateInputString(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   loadDealers(): void {
@@ -159,6 +191,13 @@ export class VehicleSaleD2dReport implements OnInit {
       pageIndex: 1,
       pageSize: 25
     };
+
+    // CHANGED — restores the current-month default instead of leaving
+    // fromDate/toDate null, so "Reset" consistently returns to the same
+    // starting view as a fresh page load rather than an unfiltered
+    // all-dates report.
+    this.setDefaultDateRange();
+
     this.loadReport();
   }
 

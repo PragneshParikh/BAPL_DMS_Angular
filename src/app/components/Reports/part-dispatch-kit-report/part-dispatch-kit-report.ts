@@ -51,12 +51,6 @@ implements OnInit {
 
   toDate = '';
 
-  // NEW — SuperAdmins can browse this report across every dealer, so they
-  // keep the "Dealer Name" picker. Everyone else is always restricted
-  // server-side to their own dealer's data now (see
-  // ReportController.GetPartDispatchKitReport), so the picker can't
-  // actually change what comes back — hide it and skip the dealer-list API
-  // call entirely rather than show a control that does nothing.
   isSuperAdmin = false;
 
   constructor(private reportService: ReportService, private menuAccess: MenuAccessService) { }
@@ -70,28 +64,32 @@ implements OnInit {
     }
 
     this.loadPOType();
-
+    this.setDefaultDateRange();
     this.getReport();
   }
 
-  /**
-   * ASSUMPTION — I don't have this project's actual auth/token service, so
-   * this reads the role the same flat way the Login API's JSON response
-   * shape suggests it might be stored (`role` in localStorage). If this app
-   * already keeps auth state in a shared AuthService/TokenService instead,
-   * replace the body of this one method with a call into that
-   * (e.g. `return this.authService.hasRole('SuperAdmin');`) — nothing else
-   * in this component needs to change, since everything else here just
-   * depends on `isSuperAdmin` being set correctly.
-   *
-   * NOTE — this is now duplicated in the D2D report, Vehicle Sale Report,
-   * and Vehicle Stock Report components too. Worth pulling into one shared
-   * service/helper once the real auth check is wired in, so it only needs
-   * fixing in one place.
-   */
   private checkIsSuperAdmin(): boolean {
     const role = localStorage.getItem('role');
     return role === 'SuperAdmin';
+  }
+
+  // =========================================
+  // DEFAULT DATE RANGE (current month)
+  // =========================================
+
+  private setDefaultDateRange(): void {
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    this.fromDate = this.toDateInputString(firstDayOfMonth);
+    this.toDate = this.toDateInputString(now);
+  }
+
+  private toDateInputString(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   // =========================================
@@ -121,24 +119,24 @@ implements OnInit {
   // LOAD PO TYPES
   // =========================================
 
-      loadPOType(): void {
+  loadPOType(): void {
 
-      this.reportService
-        .getPartDispatchKitPOTypeDropdown()
-        .subscribe({
+    this.reportService
+      .getPartDispatchKitPOTypeDropdown()
+      .subscribe({
 
-          next: (response) => {
+        next: (response) => {
 
-            this.poTypeList =
-              response || [];
-          },
+          this.poTypeList =
+            response || [];
+        },
 
-          error: (error) => {
+        error: (error) => {
 
-            console.error(error);
-          }
-        });
-    }
+          console.error(error);
+        }
+      });
+  }
 
   // =========================================
   // GET REPORT
@@ -169,10 +167,6 @@ implements OnInit {
             Array.isArray(response)
               ? response
               : [];
-
-          // ===============================
-          // PO TYPE FILTER
-          // ===============================
 
           if (this.poType) {
 
@@ -207,11 +201,63 @@ implements OnInit {
 
     this.poType = '';
 
-    this.fromDate = '';
-
-    this.toDate = '';
+    this.setDefaultDateRange();
 
     this.getReport();
   }
-  
+
+  // =========================================
+  // EXPORT CSV
+  // NEW — mirrors the on-screen table exactly, one row per record. The
+  // PO Type filter is applied client-side inside getReport() above, so
+  // reportData already reflects it by the time this runs — no separate
+  // "export" API call needed, unlike reports whose export hits its own
+  // backend endpoint.
+  // =========================================
+
+  private formatDateForExport(date: any): string {
+    if (!date) return '';
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB');
+  }
+
+  exportToCSV(): void {
+    if (!this.reportData || this.reportData.length === 0) {
+      return;
+    }
+
+    const headers = [
+      'Sr No', 'PO Number', 'PO Date', 'Submit To ERP Date', 'PO Type',
+      'Company Name', 'Mobile No', 'Dealer Code', 'Dealer City', 'Dealer State',
+      'Location Code', 'Location Name', 'Location City'
+    ];
+
+    const rows = this.reportData.map(item => [
+      item.srNo,
+      item.poNumber,
+      this.formatDateForExport(item.poDate),
+      this.formatDateForExport(item.submitToERPDate),
+      item.poType,
+      item.companyName,
+      item.mobileNo,
+      item.dealerCode,
+      item.dealerCity,
+      item.dealerState,
+      item.locationCode,
+      item.locationName,
+      item.locationCity
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${(cell ?? '').toString().replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `part-dispatch-kit-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 }

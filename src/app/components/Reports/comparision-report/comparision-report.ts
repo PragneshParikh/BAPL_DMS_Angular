@@ -52,10 +52,13 @@ export class ComparisonReportComponent implements OnInit {
     private menuAccess: MenuAccessService
   ) {
     this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+    // NEW — fromDate/toDate now default to the current month (1st of this
+    // month through today) instead of blank, same pattern as the other
+    // report components.
     this.filterForm = this.fb.group({
       dealerCode: [''],
-      fromDate: [''],
-      toDate: [''],
+      fromDate: [this.getDefaultFromDate()],
+      toDate: [this.getDefaultToDate()],
       chassisNo: [''],
       customerName: [''],
       performaStatus: [''],
@@ -118,6 +121,32 @@ export class ComparisonReportComponent implements OnInit {
     }
   }
 
+  // =========================================
+  // DEFAULT DATE RANGE (current month)
+  // NEW — same pattern as the other report components. Split into two
+  // getters so they can be used directly as FormBuilder initial values in
+  // the constructor, and reused identically in onReset() below.
+  // =========================================
+
+  private getDefaultFromDate(): string {
+    const now = new Date();
+    return this.toDateInputString(new Date(now.getFullYear(), now.getMonth(), 1));
+  }
+
+  private getDefaultToDate(): string {
+    return this.toDateInputString(new Date());
+  }
+
+  // Formats a Date as 'YYYY-MM-DD' in LOCAL time (not UTC), so it binds
+  // correctly to <input type="date"> and matches what the user's
+  // clock/calendar says "today" is.
+  private toDateInputString(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   loadDealers(): void {
     this.reportService.getDealerDropdown().subscribe({
       next: (data) => (this.dealerList = data ?? []),
@@ -171,10 +200,14 @@ export class ComparisonReportComponent implements OnInit {
   }
 
   onReset(): void {
+    // CHANGED — fromDate/toDate now restore to the current-month default
+    // instead of blank, so "Reset" consistently returns to the same
+    // starting view as a fresh page load rather than an unfiltered
+    // all-dates report.
     this.filterForm.reset({
       dealerCode: this.isDealer ? this.loggedInDealerCode : '',
-      fromDate: '',
-      toDate: '',
+      fromDate: this.getDefaultFromDate(),
+      toDate: this.getDefaultToDate(),
       chassisNo: '',
       customerName: '',
       performaStatus: '',
