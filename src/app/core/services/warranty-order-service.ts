@@ -61,4 +61,8 @@ export class WarrantyOrderService {
       params: { dealerCode }
     });
   }
+  
+  UATWarrantyData(orderId: number): Observable<any> {
+    return this.httpClient.post(`${this.baseUrl}/WarrantyOrder/UATWarrantyData`, { orderId });
+  }
 }

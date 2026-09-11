@@ -35,6 +35,7 @@ export class AuthGuard {
             menuRights = this.storageService.getMenuRights();
         } catch (e) {
             console.error('Invalid menuRights in storage');
+            this.authService.logout();      
             this.router.navigate(['/login']);
             return false;
         }
