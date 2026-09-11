@@ -10,6 +10,7 @@ export interface WarrantyRegisterViewModel {
   rbillDate?: string;
 
   itemName?: string;
+  partCode?: string;          // NEW - added for the Part Code column
   partName?: string;
   partDescription?: string;
   labourName?: string;
@@ -37,6 +38,8 @@ export interface WarrantyRegisterViewModel {
   warrantyClaimDate?: string;
   chasisNo?: string;
   partyName?: string;
+  customerName?: string;      // NEW
+  customerMobile?: string;    // NEW
 
   warrantyClaimStatus?: string;
   approverEngineerName?: string;
@@ -70,6 +73,9 @@ export interface WarrantyRegisterViewModel {
   materialConcern?: string;
   materialConcernType?: string;
   materialConcernRemarks?: string;
+  erpPoNumber?: string; 
+  erpPoDate?: string;
+  partNo?: string;   // pre-existing, unused by this report - left as-is, see note above
 }
 
 export interface WarrantyRegisterFilterModel {

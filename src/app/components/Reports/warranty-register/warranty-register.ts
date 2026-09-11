@@ -286,31 +286,7 @@ export class WarrantyRegister implements OnInit {
     return `${value % 1 === 0 ? value : value.toFixed(2)}%`;
   }
 
-  // ── Export ───────────────────────────────────────────────────────────
-  // Produces a real CSV (not an .xlsx workbook). Kept [disabled]="exporting"
-  // on the button even though the reference doesn't show one, to prevent a
-  // double-click firing two exports - the icon itself matches the
-  // reference's icon-only style, just without a text/spinner swap.
-  //
-  // Column order below mirrors the on-screen table's <th> order exactly:
-  // 1) Sr No  2) Location Name  3) Location Code  4) Chassis No
-  // 5) Model Name  6) Part Name  7) Part Description  8) Labour Name
-  // 9) Labour Description  10) Qty  11) Rate  12) MRP  13) Taxable Amount
-  // 14-19) CGST/SGST/IGST % & Amount  20) Total GST Amount  21) Total Amount
-  // 22) Claim No  23) Claim Date  24) Party  25) Claim Status
-  // 26) Approver Engineer  27) Reject Reason  28) Order Status
-  // 29) Order No  30) Order Date  31) Invoice Status  32) Job No
-  // 33) Job Date  34) Repair Bill No  35) Repair Bill Date  36) Invoice No
-  // 37) Invoice Date  38) Packing Slip No  39) Packing Slip Date
-  // 40) Dispatch No  41) Dispatch Date  42) Dispatch Received Status
-  // 43) Dispatch Received Date  44) Dispatch Received Remarks
-  // 45) Verification Date  46-48) Packing Concern / Type / Remarks
-  // 49-51) Material Concern / Type / Remarks  52) Claim Type
-  //
-  // Model Description has no on-screen column, so it's been dropped from
-  // the export too. PRN No has no on-screen column either but is kept as
-  // a trailing export-only field.
-  exportToExcel(): void {
+ exportToExcel(): void {
     this.exporting = true;
     this.errorMessage = null;
 
@@ -333,68 +309,73 @@ export class WarrantyRegister implements OnInit {
       { key: 'srNo', label: 'Sr No' },                                       // 1
       { key: 'locationName', label: 'Location Name' },                      // 2
       { key: 'locationCode', label: 'Location Code' },                      // 3
-      { key: 'chasisNo', label: 'Chassis No' },                             // 4
-      { key: 'modelName', label: 'Model Name' },                            // 5
-      { key: 'partName', label: 'Part Name' },                              // 6
-      { key: 'partDescription', label: 'Part Description' },                // 7
-      { key: 'labourName', label: 'Labour Name' },                          // 8
-      { key: 'labourDescription', label: 'Labour Description' },            // 9
+      { key: 'partyName', label: 'Party' },                                 // 4
+      { key: 'customerName', label: 'Customer Name' },                      // 5
+      { key: 'customerMobile', label: 'Mobile No' },                        // 6
+      { key: 'chasisNo', label: 'Chassis No' },                             // 7
+      { key: 'partCode', label: 'Part Code' },                              // 8
+      { key: 'partName', label: 'Part Name' },                              // 9
+      { key: 'partDescription', label: 'Part Description' },                // 10
+      { key: 'modelName', label: 'Model Name' },                            // 11
+      { key: 'labourName', label: 'Labour Name' },                          // 12
+      { key: 'labourDescription', label: 'Labour Description' },            // 13
 
-      { key: 'qty', label: 'Qty' },                                         // 10
-      { key: 'rate', label: 'Rate' },                                       // 11
-      { key: 'mrp', label: 'MRP' },                                         // 12
-      { key: 'taxableAmount', label: 'Taxable Amount' },                    // 13
-      { key: 'cgstPercent', label: 'CGST %' },                              // 14
-      { key: 'cgstAmount', label: 'CGST Amount' },                          // 15
-      { key: 'sgstPercent', label: 'SGST %' },                              // 16
-      { key: 'sgstAmount', label: 'SGST Amount' },                          // 17
-      { key: 'igstPercent', label: 'IGST %' },                              // 18
-      { key: 'igstAmount', label: 'IGST Amount' },                          // 19
-      { key: 'totalGstAmount', label: 'Total GST Amount' },                 // 20
-      { key: 'totalAmount', label: 'Total Amount' },                        // 21
+      { key: 'qty', label: 'Qty' },                                         // 14
+      { key: 'rate', label: 'Rate' },                                       // 15
+      { key: 'mrp', label: 'MRP' },                                         // 16
+      { key: 'taxableAmount', label: 'Taxable Amount' },                    // 17
+      { key: 'cgstPercent', label: 'CGST %' },                              // 18
+      { key: 'cgstAmount', label: 'CGST Amount' },                          // 19
+      { key: 'sgstPercent', label: 'SGST %' },                              // 20
+      { key: 'sgstAmount', label: 'SGST Amount' },                          // 21
+      { key: 'igstPercent', label: 'IGST %' },                              // 22
+      { key: 'igstAmount', label: 'IGST Amount' },                          // 23
+      { key: 'totalGstAmount', label: 'Total GST Amount' },                 // 24
+      { key: 'totalAmount', label: 'Total Amount' },                        // 25
 
-      { key: 'warrantyClaimNo', label: 'Claim No' },                        // 22
-      { key: 'warrantyClaimDate', label: 'Claim Date' },                    // 23
-      { key: 'partyName', label: 'Party' },                                 // 24
-      { key: 'warrantyClaimStatus', label: 'Claim Status' },                // 25
-      { key: 'approverEngineerName', label: 'Approver Engineer' },          // 26
-      { key: 'claimAcceptRejectReason', label: 'Reject Reason' },           // 27
+      { key: 'warrantyClaimNo', label: 'Claim No' },                        // 26
+      { key: 'warrantyClaimDate', label: 'Claim Date' },                    // 27
+      { key: 'warrantyClaimStatus', label: 'Claim Status' },                // 28
+      { key: 'approverEngineerName', label: 'Approver Engineer' },          // 29
+      { key: 'claimAcceptRejectReason', label: 'Reject Reason' },           // 30
 
-      { key: 'warrantyOrderStatus', label: 'Order Status' },                // 28
-      { key: 'warrantyOrderNo', label: 'Order No' },                        // 29
-      { key: 'warrantyOrderDate', label: 'Order Date' },                    // 30
+      { key: 'warrantyOrderStatus', label: 'Order Status' },                // 31
+      { key: 'warrantyOrderNo', label: 'Order No' },                        // 32
+      { key: 'warrantyOrderDate', label: 'Order Date' },                    // 33
+      { key: 'erpPoNumber', label: 'PO No' },                                // 34
+      { key: 'erpPoDate', label: 'PO Date' },                                // 35
 
-      { key: 'warrantyInvoiceStatus', label: 'Invoice Status' },            // 31
+      { key: 'warrantyInvoiceStatus', label: 'Invoice Status' },            // 36
 
-      { key: 'jobNo', label: 'Job No' },                                    // 32
-      { key: 'jobDate', label: 'Job Date' },                                // 33
+      { key: 'jobNo', label: 'Job No' },                                    // 37
+      { key: 'jobDate', label: 'Job Date' },                                // 38
 
-      { key: 'rbillNo', label: 'Repair Bill No' },                          // 34
-      { key: 'rbillDate', label: 'Repair Bill Date' },                      // 35
+      { key: 'rbillNo', label: 'Repair Bill No' },                          // 39
+      { key: 'rbillDate', label: 'Repair Bill Date' },                      // 40
 
-      { key: 'warrantyInvoiceNo', label: 'Invoice No' },                    // 36
-      { key: 'warrantyInvoiceDate', label: 'Invoice Date' },                // 37
+      { key: 'warrantyInvoiceNo', label: 'Invoice No' },                    // 41
+      { key: 'warrantyInvoiceDate', label: 'Invoice Date' },                // 42
 
-      { key: 'packingSlipNo', label: 'Packing Slip No' },                   // 38
-      { key: 'packingSlipDate', label: 'Packing Slip Date' },               // 39
+      { key: 'packingSlipNo', label: 'Packing Slip No' },                   // 43
+      { key: 'packingSlipDate', label: 'Packing Slip Date' },               // 44
 
-      { key: 'dispatchNo', label: 'Dispatch No' },                          // 40
-      { key: 'dispatchDate', label: 'Dispatch Date' },                      // 41
-      { key: 'dispatchReceivedStatus', label: 'Dispatch Received Status' }, // 42
-      { key: 'dispatchReceivedDate', label: 'Dispatch Received Date' },     // 43
-      { key: 'dispatchReceivedRemarks', label: 'Dispatch Received Remarks' }, // 44
+      { key: 'dispatchNo', label: 'Dispatch No' },                          // 45
+      { key: 'dispatchDate', label: 'Dispatch Date' },                      // 46
+      { key: 'dispatchReceivedStatus', label: 'Dispatch Received Status' }, // 47
+      { key: 'dispatchReceivedDate', label: 'Dispatch Received Date' },     // 48
+      { key: 'dispatchReceivedRemarks', label: 'Dispatch Received Remarks' }, // 49
 
-      { key: 'verificationDate', label: 'Verification Date' },              // 45
+      { key: 'verificationDate', label: 'Verification Date' },              // 50
 
-      { key: 'packingConcern', label: 'Packing Concern' },                  // 46
-      { key: 'packingConcernType', label: 'Packing Concern Type' },         // 47
-      { key: 'packingConcernRemarks', label: 'Packing Concern Remarks' },   // 48
+      { key: 'packingConcern', label: 'Packing Concern' },                  // 51
+      { key: 'packingConcernType', label: 'Packing Concern Type' },         // 52
+      { key: 'packingConcernRemarks', label: 'Packing Concern Remarks' },   // 53
 
-      { key: 'materialConcern', label: 'Material Concern' },                // 49
-      { key: 'materialConcernType', label: 'Material Concern Type' },       // 50
-      { key: 'materialConcernRemarks', label: 'Material Concern Remarks' }, // 51
+      { key: 'materialConcern', label: 'Material Concern' },                // 54
+      { key: 'materialConcernType', label: 'Material Concern Type' },       // 55
+      { key: 'materialConcernRemarks', label: 'Material Concern Remarks' }, // 56
 
-      { key: 'claimType', label: 'Claim Type' },                            // 52
+      { key: 'claimType', label: 'Claim Type' },                            // 57
 
       // Not shown in the on-screen table; kept in the export, appended at the end
       { key: 'prnNo', label: 'PRN No' },
