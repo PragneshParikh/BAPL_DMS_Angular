@@ -314,6 +314,49 @@ export class MaterialTransferDetail implements OnInit {
     this.route.navigate(['/material-transfer']);
   }
 
+  // FIX (material transfer "added but not save" / POST 500): the backend's
+  // MaterialTransferViewModel binds ItemRate/Mrp as decimal and
+  // Technician/IssueType as int (all non-nullable). Several places above
+  // build these values with .toFixed(2) (which always returns a STRING) or
+  // copy them straight out of <select> bindings that may hand back strings
+  // too. As long as those stay JS strings in the object that gets
+  // JSON-serialized, System.Text.Json's default (strict) settings throw
+  // while binding the request body — before the controller action, and
+  // before IPartInventoryService.UpdateOutgoing ever runs — which is
+  // exactly why nothing gets persisted even though the row "added" fine in
+  // the on-screen grid. This helper forces the real numeric fields back to
+  // actual JS numbers right before an item is stored in `this.items`
+  // (the array `lstAdded`/`lstModified` are later filtered from), so
+  // whatever format they arrived in, what gets POSTed is always a number.
+  private sanitizeForSave(item: any): any {
+    const toNum = (v: any): number => {
+      const n = Number(v);
+      return isNaN(n) ? 0 : n;
+    };
+    const toNullableNum = (v: any): number | null => {
+      if (v === null || v === undefined || v === '') return null;
+      const n = Number(v);
+      return isNaN(n) ? null : n;
+    };
+
+    return {
+      ...item,
+      itemRate: toNum(item.itemRate),
+      mrp: toNum(item.mrp),
+      quantity: toNum(item.quantity),
+      technician: toNum(item.technician),
+      issueType: toNum(item.issueType),
+      rackNo: toNullableNum(item.rackNo),
+      validdays: toNullableNum(item.validdays),
+      // FIX (found from the actual POST payload in DevTools): formData.issueNumber
+      // is built as a string (String(Number(materialIssueNumber))) and copied
+      // into itemToSave.materialissueNumber verbatim — backend's
+      // MaterialIssueNumber is `int?`, so a quoted "1" is the same class of
+      // type-mismatch as itemRate/mrp/technician/issueType were.
+      materialissueNumber: toNullableNum(item.materialissueNumber),
+    };
+  }
+
   onAddItem() {
 
     const _existingItem = this.items.filter(x => x.itemcode === this.newItem.itemcode);
@@ -391,7 +434,11 @@ export class MaterialTransferDetail implements OnInit {
       itemToSave.stock = itemToSave.batchClosingQty - this.newItem.quantity;
 
       itemToSave.status = this.newItem.id > 0 ? 'Modified' : 'Added';
-      this.items[index] = itemToSave;
+      // FIX: itemRate/mrp/technician/issueType can still be strings here
+      // (toFixed(2) above, or a plain [value]-bound <select>) — coerce to
+      // real numbers right before this row becomes part of what gets
+      // POSTed, see sanitizeForSave() above.
+      this.items[index] = this.sanitizeForSave(itemToSave);
 
     } else {
 
@@ -433,7 +480,11 @@ export class MaterialTransferDetail implements OnInit {
       itemToSave.createdBy = this.storageService.getUserId();
       itemToSave.createdDate = new Date();
 
-      this.items = [...this.items, itemToSave];
+      // FIX: same coercion as the edit branch above — itemRate/mrp are
+      // toFixed(2) strings at this point (mrp = taxDetails.finalPrice,
+      // itself a .toFixed(2) string from calculateGST), and
+      // technician/issueType can be strings from the <select> bindings.
+      this.items = [...this.items, this.sanitizeForSave(itemToSave)];
     }
 
     this.resetNewItem();

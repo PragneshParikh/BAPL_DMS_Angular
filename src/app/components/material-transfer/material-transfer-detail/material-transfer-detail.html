@@ -134,8 +134,8 @@
                                     <label class="form-label">Technician</label>
                                     <select class="form-select form-select-sm" name="technician" #technician="ngModel"
                                         [(ngModel)]="newItem.technician">
-                                        <option *ngFor="let tech of lstTechnician" [value]="tech.id">{{ tech.name }}
-                                        </option>
+                                        <option *ngFor="let tech of lstTechnician" [ngValue]="tech.id">{{ tech.name }}</option>
+                                        <!-- <option *ngFor="let tech of lstTechnician" [value]="tech.id">{{ tech.name }}</option> -->
                                     </select>
                                 </div>
                                 <div class="col-md-2">
@@ -143,9 +143,8 @@
                                     <select class="form-select form-select-sm" name="issueType" #issueType="ngModel"
                                         [(ngModel)]="newItem.issueType">
                                         <option value=""> -- Select -- </option>
-                                        <option *ngFor="let issue of issueTypes" [value]="issue.id">
-                                            {{ issue.name }}
-                                        </option>
+                                        <option *ngFor="let issue of issueTypes" [ngValue]="issue.id">{{ issue.name }}</option>
+                                        <!-- <option *ngFor="let issue of issueTypes" [value]="issue.id">{{ issue.name }}</option> -->
                                     </select>
                                 </div>
                                 <div class="col-md-3">

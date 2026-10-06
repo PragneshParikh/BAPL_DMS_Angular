@@ -8,7 +8,6 @@ import { CounterBillService } from '../../core/services/counter-bill-service';
 import { StorageService } from '../../core/services/storage';
 import { DealerService } from '../../core/services/dealer-service';
 import { LoaderService } from '../../core/services/loader';
-import { MenuAccessService } from '../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-counter-bill',
@@ -24,10 +23,6 @@ export class CounterBill implements OnInit {
     fromDate: null,
     toDate: null
   };
-
-  readonly SUBMENU_ID = 77;
-  canCreate = false;
-  canDownload = false;
 
   searchTerm: string = '';
 
@@ -46,18 +41,8 @@ export class CounterBill implements OnInit {
   dealerSelected: string = '';
   showDropdown: boolean = false;
 
-  constructor(
-    private router: Router,
-    private counterBillService: CounterBillService,
-    private loader: LoaderService,
-    private storageService: StorageService,
-    private dealerService: DealerService,
-    private eRef: ElementRef,
-    private menuAccess: MenuAccessService
-  ) {
-    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
-    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
-  }
+  constructor(private router: Router, private counterBillService: CounterBillService, private loader: LoaderService,
+    private storageService: StorageService, private dealerService: DealerService, private eRef: ElementRef) { }
   @ViewChild('dealerContainer')
   dealerContainer!: ElementRef;
   @HostListener('document:click', ['$event'])

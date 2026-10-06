@@ -1,8 +1,8 @@
 <!-- src\app\components\counter-bill\add-counter-bill\add-counter-bill.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0"> Counter Bill </h4>
-    <button type="button" class="btn btn-primary btn-sm" *ngIf="isEditMode && canDownload"
-        (click)="printBill()" title="Print"> <i class="ri-printer-line"></i>
+    <button *ngIf="isEditMode" type="button" class="btn btn-primary btn-sm" (click)="printBill()" title="Print"> <i
+            class="ri-printer-line"></i>
     </button>
 </div>
 
@@ -31,7 +31,7 @@
                             <select class="form-select form-select-sm" [(ngModel)]="model.locationCode"
                                 name="locationCode">
                                 <<option *ngFor="let loc of locationList" [value]="loc.loccode">
-                                    {{ loc.locname}}
+                                        {{ loc.locname}} 
                                     </option>
                             </select>
                         </div>
@@ -97,7 +97,7 @@
                                 <li class="list-group-item list-group-item-action" *ngFor="let party of filteredParties"
                                     (click)="selectParty(party)">
 
-                                    <b>{{ party.ledgerName }}</b><br>({{party.ledgerCode}})
+                                     <b>{{ party.ledgerName }}</b><br>({{party.ledgerCode}})
 
                                 </li>
 
@@ -111,9 +111,8 @@
                             </label>
 
                             <input type="text" class="form-control form-control-sm" [(ngModel)]="model.partyState"
-                                name="partyState" #partyState="ngModel" [readonly]="isExistingParty"
-                                [required]="!isExistingParty" (input)="filterStates()" (change)="onStateChanged()"
-                                [readonly]="isExistingParty" required>
+                                name="partyState" #partyState="ngModel" [readonly]="isExistingParty" [required]="!isExistingParty"
+                                (input)="filterStates()" (change)="onStateChanged()" [readonly]="isExistingParty" required>
 
                             <div class="text-danger small"
                                 *ngIf="partyState.invalid && partyState.touched && !isExistingParty">
@@ -136,8 +135,8 @@
                             <label class="form-label mb-1">Mobile No<span class="text-danger">*</span></label>
                             <div class="input-group input-group-sm">
                                 <input (input)="sanitizeMobile($event)" type="text" class="form-control"
-                                    [(ngModel)]="model.mobileNo" #mobileNo="ngModel" name="mobileNo"
-                                    (ngModelChange)="onMobileNoChange()" [readonly]="isExistingParty" required>
+                                    [(ngModel)]="model.mobileNo" #mobileNo="ngModel" name="mobileNo" (ngModelChange)="onMobileNoChange()"
+                                    [readonly]="isExistingParty" required>
                                 <!-- <button type="button" class="btn btn-primary"> <i class="ri-add-line"></i> </button> -->
                             </div>
                             <div class="text-danger small" *ngIf="mobileNo.touched && mobileNo.errors?.['required']">
@@ -200,7 +199,7 @@
 
                     <div class="row g-1">
 
-                        <div class="col-md-4 position-relative" #dealerContainer>
+                        <div class="col-md-4 position-relative">
 
                             <label class="form-label mb-1">
                                 Part Name
@@ -263,7 +262,7 @@
 
                         <div class="col-md-1">
                             <label class="form-label mb-1">Item Rate</label>
-                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.baseItemRate"
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.itemRate"
                                 name="itemRate" #itemRate="ngModel" readonly>
                         </div>
 
@@ -354,14 +353,14 @@
                     <table class="table table-bordered table-sm" style="font-size: 12px;">
                         <thead>
                             <tr>
-                                <th width="70">Action</th>
-                                <th width="300"> Item Name /<br>Item Code</th>
+                                <th width="60">Action</th>
+                                <th>Item Name /Item Code</th>
                                 <th width="80">Qty</th>
                                 <th width="80">Sale Type</th>
                                 <th width="100">MRP</th>
                                 <th width="100">Item Rate</th>
-                                <th width="100">GSTPer/<br>GstAmnt</th>
-                                <th width="100">Dis. Type</th>
+                                <th width="100">IGSTPer/IgstAmnt</th>
+                                <th width="100">Discount Type</th>
                                 <th width="100">Discount</th>
                                 <th width="120">Amount</th>
                             </tr>
@@ -386,12 +385,12 @@
                                     </button>
                                 </td>
 
-                                <td><strong>{{ item.itemName }}</strong> <br>{{item.itemCode}}</td>
+                                <td>{{ item.itemName }} <br>{{item.itemCode}}</td>
                                 <td>{{ item.qty }}</td>
                                 <td>{{ item.saleType}}</td>
                                 <td>{{ item.itemMrp | number:'1.2-2' }}</td>
 
-                                <td>{{ item.originalItemRate | number:'1.2-2' }}</td>
+                                <td>{{ item.itemRate | number:'1.2-2' }}</td>
 
                                 <td>
                                     <div *ngIf="item.igstPer > 0">
@@ -412,10 +411,7 @@
 
                                 <td>{{ item.discountType }}</td>
 
-                                <td>
-                                    {{ item.discount}}
-                                    <span *ngIf="item.discountType === '%'">%</span>
-                                </td>
+                                <td>{{ item.discount | number:'1.2-2' }}</td>
 
                                 <td>
                                     <strong>{{ item.amount | number:'1.2-2' }}</strong>
@@ -444,7 +440,7 @@
 
                         <div class="col-md-2">
                             <label class="form-label mb-1"> Parts Disc. </label>
-                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.partsDiscountAmount"
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.partsDiscount"
                                 name="partsDiscount" (ngModelChange)="calculateSummary()">
                         </div>
 
@@ -454,17 +450,15 @@
                                 name="partsAmount" readonly>
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label mb-1"> Net Amount </label>
-
-                            <div class="d-flex gap-1">
-                                <input type="number" class="form-control form-control-sm" [(ngModel)]="model.netAmount"
-                                    name="netAmount" readonly>
-
-                                <button type="button" class="btn btn-primary btn-sm" (click)="openDiscountPopup()">
-                                    +Discount
-                                </button>
-                            </div>
+                            <input type="number" class="form-control form-control-sm" [(ngModel)]="model.netAmount"
+                                name="netAmount" readonly>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-primary btn-sm w-100" (click)="openDiscountPopup()">
+                                +Discount
+                            </button>
                         </div>
                     </div>
 
@@ -476,19 +470,18 @@
                     </div>
                 </div>
 
-            </fieldset>
                 <!-- Footer Buttons -->
                 <div class="d-flex justify-content-end gap-1">
-                    <button *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
-                        class="btn btn-sm btn-primary" (click)="save()">
+                    <button class="btn btn-sm btn-primary" (click)="save()" gap-1>
                         {{ isEditMode ? 'Update' : 'Save' }}
                     </button>
-                    <button *ngIf="isEditMode && canDelete" type="button" class="btn btn-danger btn-sm"
+                    <button *ngIf="isEditMode && editPermission" type="button" class="btn btn-danger btn-sm"
                         (click)="deleteCounterBill()">
                         <i class="ri-delete-bin-line"></i>Delete
                     </button>
                     <button type="button" class="btn btn-light btn-sm" (click)="navigateToListPage()"> Close </button>
                 </div>
+            </fieldset>
         </form>
     </div>
 </div>

@@ -1,4 +1,4 @@
-//src\app\components\counter-bill\counter-bill.html
+<!-- src\app\components\counter-bill\counter-bill.html -->
 <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
     <h4 class="mb-sm-0">Counter Bill</h4>
 </div>
@@ -54,8 +54,8 @@
                     <div class="d-flex align-items-center gap-3">
                         <!-- Buttons -->
                         <div class="d-flex gap-2">
-                            <button *ngIf="canCreate" class="btn btn-primary btn-sm" (click)="addCounterBill()"> Add </button>
-                            <button *ngIf="canDownload" class="btn btn-success btn-sm" (click)="downloadExcel()">
+                            <button class="btn btn-primary btn-sm" (click)="addCounterBill()"> Add </button>
+                            <button class="btn btn-success btn-sm" (click)="downloadExcel()">
                                 <i class="ri-file-excel-2-line"></i>
                             </button>
                         </div>
