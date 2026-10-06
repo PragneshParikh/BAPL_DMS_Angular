@@ -1,4 +1,3 @@
-// src\app\components\warranty-order\warranty-order.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -615,6 +614,18 @@ export class WarrantyOrder implements OnInit {
     return this.isApproved || this.historicalClaims.some(c => !!c.isApproved);
   }
 
+  // Bifurcation check: true if THIS order's own linked claims
+  // (selectedClaims - never historicalClaims, which belong to other
+  // orders) have at least one Part-type line anywhere. Used to skip the
+  // ERP call entirely for a labour-only order, mirroring the same
+  // ItemType == "Part" filter the backend's BuildErpPayload already
+  // applies when building the actual payload.
+  get hasAnyPartLine(): boolean {
+    return (this.selectedClaims || []).some(claim =>
+      (claim.details || []).some((d: any) => (d?.itemType || '').trim().toLowerCase() === 'part')
+    );
+  }
+
   get totalClaims(): number {
     return this.selectedClaims.length;
   }
@@ -828,16 +839,34 @@ export class WarrantyOrder implements OnInit {
 
         sessionStorage.removeItem('pendingWarrantyOrderClaim');
 
+        // Computed up front, not just inside the navigateAfter=false branch
+        // below - both autoCreateInvoiceForOrder() and sendToErp() need
+        // the saved order's id regardless of which branch runs.
+        const savedId = res?.orderId ?? this.orderId;
+        if (savedId) {
+          this.orderId = Number(savedId);
+        }
+
         // Only fires when this Save click just created a brand-new order (i.e.
         // the user checked a claim's box and clicked Save for the first time) -
         // fire-and-forget, doesn't block navigation either way.
         const orderJustBecameApproved = savingMainOrder && !this.wasApprovedOnLoad && this.isApproved;
 
-        if (orderJustBecameApproved) {
-          const savedOrderId = res?.orderId ?? this.orderId;
-          if (savedOrderId) {
-            this.autoCreateInvoiceForOrder(Number(savedOrderId));
-          }
+        if (orderJustBecameApproved && savedId) {
+          this.autoCreateInvoiceForOrder(Number(savedId));
+        }
+
+        // Send to ERP - automatic on every save of the main order, same
+        // pattern as Warranty Invoice's own Save flow. Bifurcated: skip
+        // entirely when this order has no Part lines at all (labour-only) -
+        // BuildErpPayload would return zero PO lines for it regardless, so
+        // calling the endpoint would only ever produce a "no claim lines to
+        // send" error for no reason. When Parts and Labour are mixed on the
+        // same order, the backend's BuildErpPayload already filters down to
+        // Part-type grid rows only before building the payload - Labour
+        // lines are never included in what gets sent.
+        if (savingMainOrder && savedId && this.hasAnyPartLine) {
+          this.sendToErp(Number(savedId));
         }
 
 // Prevent re-firing invoice creation on a second Save within the same
@@ -848,10 +877,6 @@ this.wasApprovedOnLoad = this.isApproved;
         if (navigateAfter) {
           this.router.navigate(['/warranty-order-list']);
         } else {
-          const savedId = res?.orderId ?? this.orderId;
-          if (savedId) {
-            this.orderId = Number(savedId);
-          }
           this.loadHistoricalClaims(this.orderId);
         }
       },
@@ -861,6 +886,30 @@ this.wasApprovedOnLoad = this.isApproved;
         console.error('Validation errors:', err?.error);
         const serverMsg = err?.error?.title || err?.error || 'Something went wrong. Check console for details.';
         this.toaster.show(serverMsg, { classname: 'bg-danger text-white', delay: 3000 });
+      }
+    });
+  }
+
+  // Reports success/failure of the ERP push explicitly, since it's its own
+  // request rather than a field bundled into the save response (see
+  // WarrantyInvoice's own equivalent for the identical pattern). Runs
+  // after the "saved successfully" toast, so a failure here reads as "saved,
+  // but ERP submission needs a retry" rather than undoing that message.
+  private sendToErp(orderId: number): void {
+    this.warrantyOrderService.UATWarrantyData(orderId).subscribe({
+      next: () => {
+        this.toaster.show('Sent to ERP successfully.', {
+          classname: 'bg-success text-white',
+          delay: 3000
+        });
+      },
+      error: (err) => {
+        console.error('ERP submission failed:', err);
+        const serverMsg = err?.error || 'ERP submission failed. You can retry sending this order later.';
+        this.toaster.show(serverMsg, {
+          classname: 'bg-danger text-white',
+          delay: 6000
+        });
       }
     });
   }

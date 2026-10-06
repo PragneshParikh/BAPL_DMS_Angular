@@ -83,7 +83,7 @@
                 <!-- Table -->
                 <div class="table-responsive">
 
-                    <table class="table table-bordered table-sm table-striped align-middle text-nowrap mb-0">
+                    <table class="table table-bordered table-sm table-striped table-hover align-middle text-nowrap mb-0">
 
                         <thead class="table-light sticky-top" style="z-index: 1;">
                             <tr>
@@ -95,7 +95,15 @@
                                 <th>Part Description</th>
                                 <th>Item Type</th>
                                 <th>Pur.Qty</th>
+                                <!--
+                                    STILL OPEN, unresolved from before: MT and
+                                    Sale Qty both bind to item.saleCount, so
+                                    they'll show identical numbers. Left as-is
+                                    since removal/repurposing wasn't confirmed.
+                                -->
                                 <th>MT</th>
+                                <th>Sale Qty</th>
+                                <th>Stock Adjustment</th>
                                 <th>Bal.Qty</th>
                                 <th>HSN Code</th>
                                 <th>Rate</th>
@@ -107,9 +115,9 @@
 
                         <tbody>
 
-                            <!-- No Data -->
-                            <tr>
-                                <td colspan="14" *ngIf="partsStockData.length === 0" class="text-center">
+                            <!-- No Data — colspan matches the 17 headers above -->
+                            <tr *ngIf="partsStockData.length === 0">
+                                <td colspan="17" class="text-center">
                                     No data available
                                 </td>
                             </tr>
@@ -125,6 +133,11 @@
                                 <td>{{ item.groupType }}</td>
                                 <td>{{ item.purchaseCount }}</td>
                                 <td>{{ item.saleCount }}</td>
+                                <td>{{ item.saleCount }}</td>
+                                <!-- FIXED — now bound to the real, newly-added
+                                     backend field: net TI/TO quantity from
+                                     PartsInventory in the selected date range. -->
+                                <td>{{ item.stockAdjustmentQty }}</td>
                                 <td class="text-end">{{ item.batchClosingQty }}</td>
                                 <td>{{ item.hsncode }}</td>
                                 <td class="text-end">{{ item.dlrprice | number:'1.2-2' }}</td>
@@ -135,8 +148,9 @@
                         </tbody>
                         <tfoot class="table-secondary">
                             <tr>
-                                <td class="text-end" colspan="11"><strong>Total</strong></td>
+                                <td class="text-end" colspan="13"><strong>Total</strong></td>
                                 <td class="text-end"><strong>{{getTotalRate() | number:'1.2-2'}}</strong></td>
+                                <td></td>
                                 <td></td>
                                 <td></td>
                             </tr>

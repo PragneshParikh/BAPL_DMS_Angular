@@ -166,11 +166,17 @@ export class RepairBill implements OnInit {
   dealerCode: string;
   isPartEditMode: boolean;
   editPartIndex: number;
-  selectedPartQty: number;
+  // CHANGED: defaulted to 1, matching qty's own default for the Labour side.
+  // Previously undefined until something set it — addPart() still guarded
+  // this with `|| 1`, but a real default is clearer than relying on that.
+  selectedPartQty: number = 1;
   selectedPartIssueType: number;
   partdiscount: number;
   dealerState: string;
   discountValue: number;
+  showLabourSuggestionPopup = false;
+  suggestedLabourList: any[] = [];
+  selectedSuggestedLabourIds = new Set<number>();
 
 
 
@@ -364,44 +370,52 @@ export class RepairBill implements OnInit {
     this.showPopup = false;
   }
   loadJobCardList(): void {
-  let dealerCode = '';
+    let dealerCode = '';
 
-  if (!this.isSuperAdmin) {
-    dealerCode = this.storageService.getDealerCode();
-  }
-
-  this.loader.show();
-
-  this.jobCardService.getJobCardListRepairBill(this.searchModel).subscribe({
-    next: (res: any[]) => {
-      this.loader.hide();
-
-      // Remove duplicate Job Cards using Job Card Header ID
-      const uniqueJobCards = (res || []).filter(
-        (jobCard: any, index: number, self: any[]) => {
-          const jobCardId = jobCard?.jobCardHeader?.id;
-
-          return (
-            jobCardId != null &&
-            index === self.findIndex(
-              (item: any) =>
-                item?.jobCardHeader?.id === jobCardId
-            )
-          );
-        }
-      );
-
-      this.jobCardList = uniqueJobCards;
-    },
-
-    error: (err) => {
-      this.loader.hide();
-      console.error('Error fetching job cards', err);
-
-      this.jobCardList = [];
+    if (!this.isSuperAdmin) {
+      dealerCode = this.storageService.getDealerCode();
     }
-  });
-}
+
+    // FIXED: dealerCode was computed above but never assigned onto
+    // searchModel, so searchModel.dealerCode stayed '' (its initial value)
+    // for every user, SuperAdmin or not. getJobCardListRepairBill()'s
+    // params-builder only sends dealerCode when it's truthy, so the query
+    // silently went out with no dealer filter at all — showing every
+    // dealer's job cards to every logged-in dealer.
+    this.searchModel.dealerCode = dealerCode;
+
+    this.loader.show();
+
+    this.jobCardService.getJobCardListRepairBill(this.searchModel).subscribe({
+      next: (res: any[]) => {
+        this.loader.hide();
+
+        // Remove duplicate Job Cards using Job Card Header ID
+        const uniqueJobCards = (res || []).filter(
+          (jobCard: any, index: number, self: any[]) => {
+            const jobCardId = jobCard?.jobCardHeader?.id;
+
+            return (
+              jobCardId != null &&
+              index === self.findIndex(
+                (item: any) =>
+                  item?.jobCardHeader?.id === jobCardId
+              )
+            );
+          }
+        );
+
+        this.jobCardList = uniqueJobCards;
+      },
+
+      error: (err) => {
+        this.loader.hide();
+        console.error('Error fetching job cards', err);
+
+        this.jobCardList = [];
+      }
+    });
+  }
 
   //currently not to used
   showMaterialTransferWarning(item: any): void {
@@ -1849,6 +1863,159 @@ export class RepairBill implements OnInit {
     }
 
     return prefix.replace(/\d+$/, '');
+  }
+
+  // NEW — this is the method the Part "+Add" button was missing entirely.
+  // Previously, clicking Add on a manually-entered part did nothing unless
+  // isPartEditMode was true (editing an existing, auto-populated row).
+  addPart(): void {
+    if (!this.itemcode) {
+      this.toaster.show('Please select a part.', { classname: 'bg-warning text-dark', delay: 4000 });
+      return;
+    }
+
+    const partCode = this.itemcode; // captured before calculatePart() clears the form
+
+    const alreadyExists = this.partItems.some(x =>
+      x.partCode?.trim().toLowerCase() === partCode.trim().toLowerCase()
+    );
+
+    if (alreadyExists) {
+      Swal.fire({ icon: 'warning', title: 'Duplicate Part', text: 'This part is already added.' });
+      return;
+    }
+
+    const selectedItem = this.selectedPart; // set by selectPart()
+
+    // ASSUMPTION: selectedItem carries cgst/sgst/igst/hsncode/custprice/id —
+    // inferred from ItemMaster.Cgst/Sgst/Igst being used directly elsewhere
+    // in this codebase (RepairBillRepo's GetRepairBillById and
+    // generateRepairBillPerformaDetails both read d.PartItem.Cgst/Sgst/Igst).
+    // I haven't seen ItemMasterService.getItemsByItemType's actual return
+    // shape — if these come back undefined, the part's GST will silently
+    // compute as 0, which is the first thing to check if numbers look wrong
+    // on a freshly-added manual part.
+    const partItem: PartItem = {
+      id: 0,
+      materialId: 0,
+      partItemId: selectedItem?.id || 0,
+      partCode: partCode,
+      partDesc: this.selectedPartDescription,
+      partQty: this.selectedPartQty || 1,
+      partRate: this.selectedPartRate || 0,
+      partMRP: selectedItem?.custprice || 0,
+      fscRate: 0,
+      partHsnCode: selectedItem?.hsncode || '',
+      discountValue: this.partdiscount || 0,
+      discount: this.partdiscount || 0,
+      discountType: this.discountPartType,
+      taxableAmount: 0,
+      taxAmount: 0,
+      netAmount: 0,
+      totalTaxPer: 0,
+      issuetypeId: this.selectedPartIssueType || 0,
+      issuetypeName: this.IssueType.find(x => x.id === this.selectedPartIssueType)?.name || '',
+      cgst: selectedItem?.cgst || 0,
+      sgst: selectedItem?.sgst || 0,
+      igst: selectedItem?.igst || 0,
+      cgstAmount: 0,
+      sgstAmount: 0,
+      igstAmount: 0,
+      dealerState: this.dealerState,
+      custState: this.selectedJobCard?.partyState,
+      isAutoGenerated: false
+    } as PartItem;
+
+    this.partItems.push(partItem);
+    this.materialedJobCarDList.push(partItem); // kept in sync — calculateTotals() reads from materialedJobCarDList, the grid renders from partItems
+
+    this.calculatePart(partItem); // computes GST/net, calls calculateTotals(), clears the entry form
+
+    this.loadSuggestedLabourForPart(partCode);
+  }
+
+  // NEW
+  loadSuggestedLabourForPart(partCode: string): void {
+    const jobId = this.selectedJobCard?.jobCardHeader?.id;
+    if (!jobId) {
+      return;
+    }
+
+    this.jobCardService.getLabourCodesByPart(partCode, jobId).subscribe({
+      next: (res: any[]) => {
+        if (res && res.length > 0) {
+          this.suggestedLabourList = res;
+          // Pre-checked by default — user deselects rather than hunting to select.
+          // Change to `new Set<number>()` if you'd rather they opt in instead.
+          this.selectedSuggestedLabourIds = new Set(res.map(x => x.partwiseLabourId));
+          this.showLabourSuggestionPopup = true;
+        }
+        // No matching labour codes: no popup, nothing interrupts the flow.
+      },
+      error: (err) => {
+        console.error('Error fetching suggested labour codes', err);
+      }
+    });
+  }
+
+  // NEW
+  toggleSuggestedLabour(id: number): void {
+    if (this.selectedSuggestedLabourIds.has(id)) {
+      this.selectedSuggestedLabourIds.delete(id);
+    } else {
+      this.selectedSuggestedLabourIds.add(id);
+    }
+  }
+
+  // NEW
+  confirmAddSuggestedLabour(): void {
+    this.suggestedLabourList
+      .filter(l => this.selectedSuggestedLabourIds.has(l.partwiseLabourId))
+      .forEach(labour => {
+        const exists = this.labourItems.some(x => x.partWiseLabourId === labour.partwiseLabourId);
+        if (exists) return;
+
+        this.labourItems.push({
+          partWiseLabourId: labour.partwiseLabourId,
+          labourId: 0,
+          labourCode: labour.labourCode,
+          description: labour.labourName,
+          qty: 1,
+          rate: labour.labourRate ?? 0,
+          waveRate: this.waveRate ?? 0,
+          labourHsnCode: labour.labourHsnCode ?? '',
+          discountValue: 0,
+          discount: 0,
+          discountType: this.discountType,
+          igst: labour.igst ?? 0,
+          igstAmount: 0,
+          cgst: labour.cgst ?? 0,
+          cgstAmount: 0,
+          sgst: labour.sgst ?? 0,
+          sgstAmount: 0,
+          taxableAmount: 0,
+          taxAmount: 0,
+          totalTaxPer: 0,
+          netAmount: labour.labourRate ?? 0,
+          issuetypeId: 0,
+          issuetypeName: '',
+          // Deliberately NOT auto-generated: the user explicitly confirmed
+          // this one, unlike the silent Material-Transfer-driven rows — so
+          // it stays editable/deletable like any manually-added labour line.
+          isAutoGenerated: false,
+          partCode: null
+        });
+      });
+
+    this.calculateTotals();
+    this.closeSuggestedLabourPopup();
+  }
+
+  // NEW
+  closeSuggestedLabourPopup(): void {
+    this.showLabourSuggestionPopup = false;
+    this.suggestedLabourList = [];
+    this.selectedSuggestedLabourIds = new Set<number>();
   }
 
 }

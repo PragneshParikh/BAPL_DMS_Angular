@@ -16,7 +16,8 @@ import { MenuAccessService } from '../../../core/services/menu-access.service';
   selector: 'app-vehicle-inward-report',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './vehicle-inward-report.html'
+  templateUrl: './vehicle-inward-report.html',
+  styleUrl: './vehicle-inward-report.scss'   // ← add this line
 })
 export class VehicleInwardReport implements OnInit, OnDestroy {
   readonly SUBMENU_ID = 78;
@@ -57,14 +58,18 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
     private storageService: StorageService,
     private menuAccess: MenuAccessService
   ) {
-    // Dates start blank (not defaulted to "this month") so the report
-    // always shows every existing record on first load — same fix applied
-    // to Repair Bill Report after it opened empty by default.
+    // CHANGED — per explicit request, this now defaults fromDate/toDate to
+    // the current month (1st of this month through today) on load, same
+    // pattern as the other report components. This intentionally reverses
+    // the earlier "keep dates blank" fix noted below; if the current-month
+    // range turns out to hide records the way the old default once did
+    // (per the Repair Bill Report precedent), that's the tradeoff being
+    // made here — worth watching for after this ships.
     this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     this.filterForm = this.fb.group({
       dealerCode: [''],
-      fromDate: [''],
-      toDate: [''],
+      fromDate: [this.getDefaultFromDate()],
+      toDate: [this.getDefaultToDate()],
       locationCode: [''],
       invoiceNo: [''],
       chassisNo: [''],
@@ -96,6 +101,33 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  // =========================================
+  // DEFAULT DATE RANGE (current month)
+  // NEW — same pattern as the other report components. Split into two
+  // getters (rather than a single setDefaultDateRange() mutator) so they
+  // can be used directly as FormBuilder initial values in the constructor,
+  // and reused identically in onReset() below.
+  // =========================================
+
+  private getDefaultFromDate(): string {
+    const now = new Date();
+    return this.toDateInputString(new Date(now.getFullYear(), now.getMonth(), 1));
+  }
+
+  private getDefaultToDate(): string {
+    return this.toDateInputString(new Date());
+  }
+
+  // Formats a Date as 'YYYY-MM-DD' in LOCAL time (not UTC), so it binds
+  // correctly to <input type="date"> and matches what the user's
+  // clock/calendar says "today" is.
+  private toDateInputString(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   loadDealerDropdown(): void {
@@ -146,7 +178,20 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
   }
 
   onReset(): void {
-    this.filterForm.reset();
+    // CHANGED — filterForm.reset() alone would clear fromDate/toDate back
+    // to '', not to the current-month default. Explicitly restoring them
+    // here keeps Reset consistent with the constructor's initial state,
+    // same as the other report components.
+    this.filterForm.reset({
+      dealerCode: '',
+      fromDate: this.getDefaultFromDate(),
+      toDate: this.getDefaultToDate(),
+      locationCode: '',
+      invoiceNo: '',
+      chassisNo: '',
+      motorNo: '',
+      batteryNo: ''
+    });
 
     if (this.isDealer) {
       this.filterForm.get('dealerCode')?.setValue(this.loggedInDealerCode);

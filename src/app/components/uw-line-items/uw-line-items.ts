@@ -221,10 +221,11 @@ export class UwLineItem implements OnInit {
 
   search(): void {
     this.loader.show();
-    const dealerCode = this.storageService.getDealerCode();
-    // dateFrom/dateTo must be null (not '') when empty - an empty string
-    // fails to deserialize as DateTime? on the backend, same fix already
-    // applied on the other list pages in this app.
+
+    const role = (this.storageService.getRole() || '').toLowerCase().replace(/\s+/g, '');
+    const isSuperAdmin = role.includes('admin');
+    const dealerCode = isSuperAdmin ? null : this.storageService.getDealerCode();
+
     const payload = {
       ...this.filter,
       dateFrom: this.filter.dateFrom || null,
@@ -246,7 +247,7 @@ export class UwLineItem implements OnInit {
         this.toaster.show('Failed to load UW Line Items.', { classname: 'bg-danger text-white', delay: 3000 });
       }
     });
-  }
+}
 
   resetFilter(): void {
 

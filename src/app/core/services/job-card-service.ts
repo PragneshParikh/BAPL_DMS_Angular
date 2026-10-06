@@ -214,4 +214,12 @@ export class JobCardService {
       { params }
     );
   }
+
+    getLabourCodesByPart(partCode: string, jobId: number): Observable<any[]> {
+    let params = new HttpParams()
+      .set('partCode', partCode)
+      .set('jobId', jobId.toString());
+
+    return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetLabourCodesByPart`, { params });
+  }
 }

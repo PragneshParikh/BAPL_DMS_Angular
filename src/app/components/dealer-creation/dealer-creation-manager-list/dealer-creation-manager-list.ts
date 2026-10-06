@@ -378,10 +378,7 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   // ═══════════════════════════════════════════════════════════════════
 
   onMenuAccess(dealer: DealerListModel): void {
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree(['/dealer-menu-access', dealer.id])
-    );
-    window.open(url, '_blank');
+    this.router.navigate(['/dealer-menu-access', dealer.id]);
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -486,9 +483,6 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   // ═══════════════════════════════════════════════════════════════════
 
   onOpenLocation(loc: DealerLocationModel): void {
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree(['/location-edit', loc.id])
-    );
-    window.open(url, '_blank');
+    this.router.navigate(['/location-edit', loc.id]);
   }
 }

@@ -211,28 +211,15 @@
         </div>
 
         <div class="d-flex justify-content-between align-items-center mt-3">
-            <!-- <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="isApprovedCheck"
-                    [checked]="isApproved" disabled>
-                <label class="form-check-label" for="isApprovedCheck">
-                    Order Approved
-                    <small class="text-muted">(auto-set once any claim below is checked)</small>
-                </label>
-            </div> -->
-
             <div>
-                <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyOrder()"
+                  <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyOrder()"
                     *ngIf="(!orderId && canCreate) || (orderId > 0 && canEdit)"
                     [disabled]="saving || (!wasApprovedOnLoad && !hasAnyCheckedClaim)">
                     <i class="ri-save-line me-1"></i>
                     {{ saving ? 'Saving...' : 'Save' }}
                 </button>
-                <!-- <button *ngIf="isEditMode" class="btn btn-light btn-sm" (click)="cancelEdit()">
-                    <i class="ri-close-line me-1"></i>
-                    Cancel Edit
-                </button> -->
+
             </div>
         </div>
-
     </div>
 </div>

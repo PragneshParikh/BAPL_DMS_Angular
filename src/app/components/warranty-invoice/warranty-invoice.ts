@@ -525,40 +525,40 @@ export class WarrantyInvoice implements OnInit {
       .map(order => this.createNewInvoiceForOrder(order));
 
     forkJoin([request$, ...historicalUpdateRequests$, ...rebatchRequests$]).subscribe({
-      next: ([res]: any[]) => {
-        this.saving = false;
-        this.loader.hide();
-        this.toaster.show(
-          savingMainInvoice
-            ? (this.invoiceId > 0 ? 'Warranty Invoice updated successfully.' : 'Warranty Invoice saved successfully.')
-            : 'Changes saved successfully.',
-          { classname: 'bg-success text-white', delay: 3000 }
-        );
+      // next: ([res]: any[]) => {
+      //   this.saving = false;
+      //   this.loader.hide();
+      //   this.toaster.show(
+      //     savingMainInvoice
+      //       ? (this.invoiceId > 0 ? 'Warranty Invoice updated successfully.' : 'Warranty Invoice saved successfully.')
+      //       : 'Changes saved successfully.',
+      //     { classname: 'bg-success text-white', delay: 3000 }
+      //   );
 
-        sessionStorage.removeItem('pendingWarrantyInvoiceOrder');
+      //   sessionStorage.removeItem('pendingWarrantyInvoiceOrder');
 
-        // FIX: compute the saved invoice's id BEFORE the navigateAfter
-        // branch below - sendToErp() needs it in both cases (previously
-        // this was only computed in the non-navigate branch, since nothing
-        // else needed it before navigating away).
-        const savedId = res?.invoiceId ?? this.invoiceId;
-        if (savedId) {
-          this.invoiceId = Number(savedId);
-        }
+      //   // FIX: compute the saved invoice's id BEFORE the navigateAfter
+      //   // branch below - sendToErp() needs it in both cases (previously
+      //   // this was only computed in the non-navigate branch, since nothing
+      //   // else needed it before navigating away).
+      //   const savedId = res?.invoiceId ?? this.invoiceId;
+      //   if (savedId) {
+      //     this.invoiceId = Number(savedId);
+      //   }
 
-        // FIX: ERP submission is no longer bundled into Insert/Update's
-        // response (res.erp no longer exists) - it's now its own endpoint
-        // (UATWarrantyData), called explicitly here. See sendToErp() below.
-        if (savingMainInvoice && savedId) {
-          this.sendToErp(Number(savedId));
-        }
+      //   // FIX: ERP submission is no longer bundled into Insert/Update's
+      //   // response (res.erp no longer exists) - it's now its own endpoint
+      //   // (UATWarrantyData), called explicitly here. See sendToErp() below.
+      //   if (savingMainInvoice && savedId) {
+      //     this.sendToErp(Number(savedId));
+      //   }
 
-        if (navigateAfter) {
-          this.router.navigate(['/warranty-invoice-list']);
-        } else {
-          this.loadHistoricalInvoiceOrders(this.invoiceId);
-        }
-      },
+      //   if (navigateAfter) {
+      //     this.router.navigate(['/warranty-invoice-list']);
+      //   } else {
+      //     this.loadHistoricalInvoiceOrders(this.invoiceId);
+      //   }
+      // },
       error: (err) => {
         this.loader.hide();
         this.saving = false;
@@ -574,24 +574,24 @@ export class WarrantyInvoice implements OnInit {
 // now returns the ERP's raw response body directly from its own
 // endpoint, so this makes that call explicitly and reports success/
 // failure from it.
-private sendToErp(invoiceId: number): void {
-    this.warrantyInvoiceService.UATWarrantyData(invoiceId).subscribe({
-      next: () => {
-        this.toaster.show('Sent to ERP successfully.', {
-          classname: 'bg-success text-white',
-          delay: 3000
-        });
-      },
-      error: (err) => {
-        console.error('ERP submission failed:', err);
-        const serverMsg = err?.error || 'ERP submission failed. You can retry sending this invoice later.';
-        this.toaster.show(serverMsg, {
-          classname: 'bg-danger text-white',
-          delay: 6000
-        });
-      }
-    });
-}
+// private sendToErp(invoiceId: number): void {
+//     this.warrantyInvoiceService.UATWarrantyData(invoiceId).subscribe({
+//       next: () => {
+//         this.toaster.show('Sent to ERP successfully.', {
+//           classname: 'bg-success text-white',
+//           delay: 3000
+//         });
+//       },
+//       error: (err) => {
+//         console.error('ERP submission failed:', err);
+//         const serverMsg = err?.error || 'ERP submission failed. You can retry sending this invoice later.';
+//         this.toaster.show(serverMsg, {
+//           classname: 'bg-danger text-white',
+//           delay: 6000
+//         });
+//       }
+//     });
+// }
   private saveHistoricalInvoiceApprovals(invoiceId: number, updates: { orderId: number; isApproved: boolean }[]): Observable<any> {
     return this.warrantyInvoiceService.getWarrantyInvoiceById(invoiceId).pipe(
       switchMap((invoice: any) => {
