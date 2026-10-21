@@ -301,6 +301,8 @@ export class WarrantyPackaging implements OnInit {
     });
   }
 
+ 
+
   onFinancialYearChange(): void {
     this.selectedInvoiceId = null;
     this.invoiceDate = null;
@@ -321,20 +323,37 @@ export class WarrantyPackaging implements OnInit {
     this.warrantypackingService.getPackableLines(this.selectedInvoiceId).subscribe({
       next: (res: any) => {
         this.loader.hide();
-        this.packableLines = (res || []).map((l: any) => ({
-          warrantyOrderGridDetailId: l.warrantyOrderGridDetailId,
-          claimNo: l.claimNo,
-          itemType: l.itemType,
-          partDescription: l.partDescription,
-          partCode: l.partCode,
-          invQty: 0,
-          qty: l.alreadyPackedQty,
-          maxQty: l.remainingQty,
-          selected: false,
-          locked: false
-        }));
-        this.selectAll = false;
-      },
+
+        const filteredLines = (res || []).filter((l: any) => l.itemType === 'Part');
+        this.packableLines = filteredLines.map((l: any) => ({
+      warrantyOrderGridDetailId: l.warrantyOrderGridDetailId,
+      claimNo: l.claimNo,
+      itemType: l.itemType,
+      partDescription: l.partDescription,
+      partCode: l.partCode,
+      invQty: 0,
+      qty: l.alreadyPackedQty,
+      maxQty: l.remainingQty,
+      selected: false,
+      locked: false
+     }));
+       this.selectAll = false;
+     },
+
+      //   this.packableLines = (res || []).map((l: any) => ({
+      //     warrantyOrderGridDetailId: l.warrantyOrderGridDetailId,
+      //     claimNo: l.claimNo,
+      //     itemType: l.itemType,
+      //     partDescription: l.partDescription,
+      //     partCode: l.partCode,
+      //     invQty: 0,
+      //     qty: l.alreadyPackedQty,
+      //     maxQty: l.remainingQty,
+      //     selected: false,
+      //     locked: false
+      //   }));
+      //   this.selectAll = false;
+      // },
       error: (err) => {
         this.loader.hide();
         console.error(err);

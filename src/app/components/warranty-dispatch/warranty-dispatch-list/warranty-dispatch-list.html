@@ -1,0 +1,82 @@
+<div class="card shadow-sm">
+  <!-- Header with Gradient and Add/Back Button -->
+  <div class="card-header bg-primary bg-gradient text-white py-2">
+    <div class="d-flex justify-content-between align-items-center">
+      <h6 class="mb-0 text-white">
+        <i class="ri-file-list-3-line me-1"></i> Warranty Dispatch List
+      </h6>
+         <button class="btn btn-sm btn-light" (click)="back()" title="Back to Warranty Dispatch">
+                    <i class="ri-arrow-left-line me-1"></i>
+                    Back
+         </button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <!-- Filter Section -->
+    <div class="row g-3 mb-3">
+      <div class="col-md-3">
+        <label class="form-label">Date From</label>
+        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateFrom">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Date To</label>
+        <input type="date" class="form-control form-control-sm" [(ngModel)]="dateTo">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Slip No / Doc No</label>
+        <input type="text" class="form-control form-control-sm" [(ngModel)]="slipNo" placeholder="Enter Slip No">
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <button class="btn btn-sm btn-primary me-2" (click)="searchDispatches()">
+          <i class="ri-search-line"></i> Search
+        </button>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Data Table Grid -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped align-middle">
+        <thead class="table-secondary">
+          <tr>
+            <th>Sr.No</th>
+            <th>Slip Prefix</th>
+            <th>Doc No</th>
+            <th>Doc Date</th>
+            <th>Dispatched Through</th>
+            <th>Contact Person</th>
+            <th>Mobile No</th>
+            <th>GR No</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="dispatchList.length === 0">
+            <td colspan="8" class="text-center text-muted">No dispatch records found.</td>
+          </tr>
+          <!-- <tr *ngFor="let item of dispatchList; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.slipPrefix }}</td>
+            <td>{{ item.docNo }}</td>
+            <td>{{ item.docDate | date:'dd-MM-yyyy' }}</td>
+            <td>{{ item.dispatchedThrough }}</td>
+            <td>{{ item.contactPerson }}</td>
+            <td>{{ item.mobileNumber }}</td>
+            <td>{{ item.grNo }}</td>
+          </tr> -->
+          <tr *ngFor="let item of dispatchList; let i = index" (dblclick)="onRowDoubleClick(item)" style="cursor: pointer;" title="Double click to view/edit">
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.slipPrefix }}</td>
+            <td>{{ item.docNo }}</td>
+            <td>{{ item.docDate | date:'dd-MM-yyyy' }}</td>
+            <td>{{ item.dispatchedThrough }}</td>
+            <td>{{ item.contactPerson }}</td>
+            <td>{{ item.mobileNumber }}</td>
+            <td>{{ item.grNo }}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

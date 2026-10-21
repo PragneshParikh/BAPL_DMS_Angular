@@ -140,7 +140,7 @@
             </tr>
           </thead>
 
-          <tbody>
+          <!-- <tbody>
             <tr *ngFor="let item of items; let i = index">
 
               <td>{{ (filter.pageNumber - 1) * filter.pageSize + i + 1 }}</td>
@@ -358,7 +358,152 @@
             <tr *ngIf="items.length === 0">
               <td colspan="36" class="text-center text-muted py-3">No Records Found</td>
             </tr>
-          </tbody>
+          </tbody> -->
+
+          <tbody>
+  <tr *ngFor="let item of items; let i = index">
+
+    <td>{{ (filter.pageNumber - 1) * filter.pageSize + i + 1 }}</td>
+
+    <!-- STATUS COLUMN -->
+    <td>
+      <span
+        class="uw-status"
+        [ngClass]="{
+          'uw-status-pending': item.status === 'Pending',
+          'uw-status-approved': item.status === 'Approved',
+          'uw-status-rejected': item.status === 'Rejected'
+        }">{{ item.status }}</span>
+    </td>
+
+    <!-- REASON COLUMN -->
+    <td>
+      <input
+        *ngIf="item.status === 'Pending' || editingId === item.id"
+        type="text"
+        class="form-control form-control-sm uw-reason-input"
+        placeholder="Reason to reject"
+        [(ngModel)]="reasonDrafts[item.id]"
+        [disabled]="actingOnId === item.id || !canEdit">
+
+      <span *ngIf="item.status !== 'Pending' && editingId !== item.id" class="text-muted">{{ item.rejectionReason || '' }}</span>
+    </td>
+
+    <!-- ACTION BUTTONS / STATUS DISPLAY COLUMN -->
+    <td class="text-center">
+      <!-- PENDING STATE ACTIONS -->
+      <div class="uw-action-stack" *ngIf="item.status === 'Pending' && canEdit">
+        <button
+          type="button"
+          class="btn btn-success btn-sm uw-icon-btn"
+          [disabled]="actingOnId === item.id"
+          (click)="approve(item.id)"
+          title="Approve">
+          <i class="ri-thumb-up-line"></i>
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger btn-sm uw-icon-btn"
+          [disabled]="actingOnId === item.id"
+          (click)="reject(item.id)"
+          title="Reject">
+          <i class="ri-thumb-down-line"></i>
+        </button>
+      </div>
+
+      <!-- EDITING / APPROVED STATE ACTIONS -->
+      <div class="uw-action-stack" *ngIf="item.status === 'Approved' && editingId === item.id && canEdit">
+        <button
+          type="button"
+          class="btn btn-danger btn-sm uw-icon-btn"
+          [disabled]="actingOnId === item.id"
+          (click)="reject(item.id)"
+          title="Reject">
+          <i class="ri-thumb-down-line"></i>
+        </button>
+        <button
+          type="button"
+          class="btn btn-light btn-sm uw-icon-btn"
+          [disabled]="actingOnId === item.id"
+          (click)="cancelEdit(item.id)"
+          title="Cancel">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+
+      <!-- APPROVED DISPLAY (WHEN NOT EDITING) -->
+      <div *ngIf="item.status === 'Approved' && editingId !== item.id" class="mt-1">
+        <div class="uw-sub"><strong>Approved</strong></div>
+        <div class="uw-sub">Date: {{ item.actionDateDisplay || '-' }}</div>
+        <div class="uw-sub">Time: {{ item.actionTimeDisplay || '' }}</div>
+      </div>
+
+      <!-- REJECTED DISPLAY (WHEN NOT EDITING) -->
+      <div *ngIf="item.status === 'Rejected' && editingId !== item.id" class="mt-1">
+        <div class="uw-sub"><strong>Rejected:</strong></div>
+        <div class="uw-sub">{{ item.actionDateDisplay || '-' }}</div>
+        <div class="uw-sub">{{ item.actionTimeDisplay || '' }}</div>
+      </div>
+    </td>
+
+    <!-- BAKICHE SAGLE COLUMNS SAME RAHIL -->
+    <td>{{ item.dealerCompanyName }} <span class="uw-sub">{{ item.locationName }}</span></td>
+    <td><span class="uw-link">{{ item.jobCardNo }}</span><span class="uw-sub">{{ item.jobCardDate | date:'dd-MM-yyyy' }}</span></td>
+    <td><span class="uw-link">{{ item.claimPrefix }}{{ item.claimNo }}</span><span class="uw-sub">{{ item.claimDate | date:'dd-MM-yyyy' }}</span></td>
+    <td>{{ item.hsn }}</td>
+    <td>{{ item.partCode }}</td>
+    <td>{{ item.labourCode }}</td>
+    <td>{{ item.qty }}</td>
+    <td class="text-end">{{ item.rate | number:'1.2-2' }}</td>
+    <td class="text-end">{{ item.mrp | number:'1.2-2' }}</td>
+    <td class="text-end">{{ item.cgst | number:'1.2-2' }}</td>
+    <td class="text-end">{{ item.sgst | number:'1.2-2' }}</td>
+    <td class="text-end">{{ item.igst | number:'1.2-2' }}</td>
+    <td class="text-end">{{ item.gstAmount | number:'1.2-2' }}</td>
+    <td class="text-end">{{ item.totalAmount | number:'1.2-2' }}</td>
+    <td>{{ item.deviceInward }}</td>
+    <td>{{ item.serviceHead }}</td>
+    <td>{{ item.serviceType }}</td>
+    <td>{{ item.chassisNo }}</td>
+    <td>{{ item.motorNo }}</td>
+    <td>{{ item.invoiceNo }}</td>
+    <td>{{ item.invoiceDate | date:'dd-MM-yyyy' }}</td>
+    <td>{{ item.kms }}</td>
+    <td>{{ item.customerName }}</td>
+    <td>{{ item.customerMobile }}</td>
+    <td>{{ item.saleDate | date:'dd-MM-yyyy' }}</td>
+    <td>{{ item.failureDate | date:'dd-MM-yyyy' }}</td>
+    <td>{{ item.claimType }}</td>
+    <td>{{ item.dealerObservation || '-' }}</td>
+    <td>{{ item.rca || '-' }}</td>
+    <td>{{ item.actionBy || '-' }}</td>
+    <td>{{ item.actionDateDisplay || '-' }}</td>
+
+    <td class="text-center">
+      <button
+        *ngIf="(item.status === 'Approved' || item.status === 'Rejected') && editingId !== item.id && canEdit"
+        type="button"
+        class="btn btn-outline-secondary btn-sm uw-icon-btn"
+        (click)="startEdit(item.id)"
+        title="Edit">
+        <i class="ri-edit-line"></i>
+      </button>
+      <button
+        *ngIf="canDelete"
+        type="button"
+        class="btn btn-outline-danger btn-sm uw-icon-btn"
+        (click)="deleteItem(item.id)"
+        title="Delete">
+        <i class="ri-delete-bin-line"></i>
+      </button>
+    </td>
+
+  </tr>
+
+  <tr *ngIf="items.length === 0">
+    <td colspan="36" class="text-center text-muted py-3">No Records Found</td>
+  </tr>
+</tbody>
         </table>
       </div>
     </div>

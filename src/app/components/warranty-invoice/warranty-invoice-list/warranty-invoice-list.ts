@@ -90,9 +90,28 @@ export class WarrantyInvoiceList implements OnInit {
    }
 
   ngOnInit(): void {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    
+    this.filter.dateFrom = this.formatDate(firstDayOfMonth);
+    this.filter.dateTo = this.formatDate(today);
+
     this.loadSuppliers();
     this.loadLocations();
     this.search();
+  }
+
+  private formatDate(date: Date): string {
+    const d = new Date(date);
+    let month = '' + (d.getMonth() + 1);
+    let day = '' + d.getDate();
+    const year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
   }
 
   loadSuppliers(): void {
@@ -239,8 +258,13 @@ export class WarrantyInvoiceList implements OnInit {
   }
 
   resetFilter(): void {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     this.filter = {
-      dateFrom: '', dateTo: '', batchNo: '', invoiceNo: '', claimInvoiceNo: '',
+      // dateFrom: '', dateTo: '',
+      dateFrom: this.formatDate(firstDayOfMonth),
+      dateTo: this.formatDate(today),
+       batchNo: '', invoiceNo: '', claimInvoiceNo: '',
       location: null, claimType: '', supplierId: null,
       isApproved: true, pageNumber: 1, pageSize: 25
     };

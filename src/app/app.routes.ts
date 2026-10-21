@@ -94,6 +94,8 @@ import { WarrantyInvoiceList } from './components/warranty-invoice/warranty-invo
 import { UwLineItem } from './components/uw-line-items/uw-line-items';
 import { WarrantyClaimList } from './components/warranty-job-card-claim/warranty-claim-list/warranty-claim-list';
 import { WarrantyPackaging } from './components/warranty-packaging/warranty-packaging';
+import { WarrantyDispatch } from './components/warranty-dispatch/warranty-dispatch';
+import { WarrantyDispatchList } from './components/warranty-dispatch/warranty-dispatch-list/warranty-dispatch-list';
 import { WarrantyPackagingList } from './components/warranty-packaging/warranty-packaging-list/warranty-packaging-list';
 import { DispatchMaster } from './components/dispatch-master/dispatch-master';
 import { PartInvoiceDispatch } from './components/part-invoice-dispatch/part-invoice-dispatch';
@@ -102,6 +104,7 @@ import { DealerMenuAccessPage } from './components/dealer-creation/dealer-menu-a
 import { LocationEditPage } from './components/dealer-creation/dealer-location-edit/dealer-location-edit';
 import { WarrantyRegister } from './components/Reports/warranty-register/warranty-register';
 import { MenuRight } from './components/menu-right/menu-right';
+
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
   { path: 'forgot-password', loadComponent: () => import('./components/account/forgot-password/forgot-password').then(m => m.ForgotPassword) },
@@ -286,6 +289,9 @@ export const routes: Routes = [
       { path: 'warranty-invoice-list', component: WarrantyInvoiceList, data: [113] },
       { path: 'uw-line-item', component: UwLineItem, data: [115] },
       { path: 'warranty-packaging', component: WarrantyPackaging, data: [116] },
+      { path: 'warranty-dispatch', component: WarrantyDispatch, data: [125]},
+      { path: 'warranty-dispatch/:id', component: WarrantyDispatch, data: [125] },
+      { path: 'warranty-dispatch-list', component: WarrantyDispatchList, data: [125] },
       { path: 'warranty-packaging-list', component: WarrantyPackagingList, data: [116]},
       { path: 'dispatch-master', component : DispatchMaster, data: [117]},
       { path: 'part-dispatch-invoice', component : PartInvoiceDispatch, data: [118]},

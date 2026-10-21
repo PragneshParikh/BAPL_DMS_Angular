@@ -496,8 +496,11 @@ private resolveWorkshopLocation(jobLocationName: string | null | undefined): voi
         if (isNaN(jobNo)) jobNo = 0;
       }
 
-      let fromDate = this.jobSearch.rBillfromDate;
-      let toDate = this.jobSearch.rBilltoDate;
+      // let fromDate = this.jobSearch.rBillfromDate;
+      // let toDate = this.jobSearch.rBilltoDate;
+
+      const fromDate = this.jobSearch.rBillfromDate || null;
+      const toDate = this.jobSearch.rBilltoDate || null;
 
       this.jobcardService.getIssueTypebasedJobDetails(dealerCode, jobNo, null, fromDate, toDate).subscribe({
         next: (res: any) => {
@@ -544,6 +547,10 @@ openJobSearch(content: any) {
     }
 
     this.selectedLocationId = null;
+     this.jobSearch.jobNo = null;
+    this.jobSearch.rBillfromDate = '';
+    this.jobSearch.rBilltoDate = '';
+
     this.loadJobCarDetails();
     this.modalService.open(content, {
       size: 'xl',

@@ -1,0 +1,163 @@
+<div class="card shadow-sm">
+    <div class="card-header bg-primary bg-gradient text-white py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-white">
+                <i class="ri-box-3-line me-1"></i>
+                Warranty Dispatch
+            </h6>
+            <button class="btn btn-sm btn-light" (click)="goToDispatchList()" title="View Dispatch List">
+                <i class="ri-menu-line"></i>
+            </button>
+        </div>
+    </div>
+  <div class="card-body">
+   
+    <form [formGroup]="dispatchForm">
+      <div class="row g-3">
+        <div class="col-md-3">
+        <label class="form-label">Slip Prefix</label>
+        <input type="text" class="form-control bg-light" formControlName="slipPrefix" readonly>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Box Count</label>
+          <input type="number" class="form-control" formControlName="boxCount" placeholder="Enter Box Count">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Doc No</label>
+          <input type="text" class="form-control" formControlName="docNo">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Doc Date</label>
+          <input type="date" class="form-control" formControlName="docDate">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Dispatched Through</label>
+            <select class="form-select form-select-sm" formControlName="dispatchedThrough">
+                <option value="">--Select--</option>
+                <option *ngFor="let item of dispatchThruList" [value]="item.name || item.masterName">
+                    {{ item.name || item.masterName }}
+                </option>
+            </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Contact Person</label>
+          <input type="text" class="form-control" formControlName="contactPerson" placeholder="Enter Contact Person">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Mobile Number</label>
+          <input type="text" class="form-control" formControlName="mobileNumber" placeholder="Enter Mobile Number">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Courier Charges</label>
+          <input type="number" class="form-control" formControlName="courierCharges" placeholder="Enter Charges">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">GR No</label>
+          <input type="text" class="form-control" formControlName="grNo" placeholder="Enter GR Number">
+        </div>
+      </div>
+    </form>
+
+    <hr class="my-4">
+
+    <!-- Packing Slips Grid Table -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped align-middle">
+        <thead>
+          <tr>
+            <th style="width: 50px;">
+              <input type="checkbox" class="form-check-input" (change)="toggleSelectAll($event)">
+            </th>
+            <th>Sr.No</th>
+            <th>Packing Slip Prefix</th>
+            <th>Packing Slip No | Date</th>
+            <th>Invoice No | Date</th>
+            <th>Detail(s)</th>
+          </tr>
+        </thead>
+       <tbody>
+  <tr *ngIf="pendingSlips.length === 0">
+    <td colspan="6" class="text-center text-muted">No pending packing slips found</td>
+  </tr>
+
+  <ng-container *ngFor="let item of pendingSlips; let i = index">
+    <!-- Main Row -->
+    <tr [class.table-active]="item.expanded">
+      <td><input type="checkbox" [(ngModel)]="item.selected"></td>
+      <td>{{ i + 1 }}.</td>
+      <td>{{ item.slipPrefix }}</td>
+      <td>{{ item.slipNo }} | {{ item.slipDate | date:'dd-MM-yyyy' }}</td>
+      <td>{{ item.invoiceNo }} | {{ item.invoiceDate | date:'dd-MM-yyyy' }}</td>
+      <td>
+        <button type="button" class="btn btn-sm btn-info text-white" (click)="toggleDetails(item)">
+          <i class="bi bi-info-circle"></i> 🛈
+        </button>
+      </td>
+    </tr>
+
+    <!-- Nested Expandable Detail Row -->
+    <tr *ngIf="item.expanded">
+      <td colspan="6" class="p-3 bg-light">
+        <div *ngIf="item.loadingDetails" class="text-center my-2 text-primary">
+          <span>Loading Details...</span>
+        </div>
+
+        <div *ngIf="!item.loadingDetails && item.details">
+          <div *ngFor="let box of item.details.boxes" class="table-responsive mb-2">
+            <table class="table table-bordered table-sm text-center bg-white mb-0">
+              <thead class="table-secondary">
+                <tr>
+                  <th>Job Number</th>
+                  <th>Chassis Number</th>
+                  <th>Box Number</th>
+                  <th>Box Type</th>
+                  <th>Claim No</th>
+                  <th>Part Number</th>
+                  <th>Part Description</th>
+                  <th>Qty</th>
+                  <th>Box Dimension</th>
+                  <!-- <th>Length</th>
+                  <th>Width</th>
+                  <th>Height</th>
+                  <th>Weight</th> -->
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let line of box.lines">
+                  <td>{{ line.jobNo || line.JobNo || '-' }}</td>
+<td>{{ line.chassisNo || line.ChassisNo || '-' }}</td>
+                  <td>{{ box.boxNumber }}</td>
+                  <td>{{ box.boxType }}</td>
+                  <td>{{ line.claimNo }}</td>
+                  <td>{{ line.partCode }}</td>
+                  <td class="text-start">{{ line.partDescription }}</td>
+                  <td>{{ line.qty }}</td>
+                 <td>
+                    {{ 
+                      box.dimension ? box.dimension : 
+                      (box.length && box.width ? box.length + '*' + box.width : 
+                      (box.length ? box.length : '-')) 
+                    }}
+                  </td>
+                  <!-- <td>{{ box.length }}</td>
+                  <td>{{ box.width }}</td>
+                  <td>{{ box.height }}</td>
+                  <td>{{ box.weight }}</td> -->
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </ng-container>
+</tbody>
+      </table>
+    </div>
+<!-- Submit Action Button -->
+<div class="text-end mt-3">
+  <button type="button" class="btn btn-primary" (click)="onSubmit()">Save Dispatch</button>
+</div>
+  </div>
+</div>
+
