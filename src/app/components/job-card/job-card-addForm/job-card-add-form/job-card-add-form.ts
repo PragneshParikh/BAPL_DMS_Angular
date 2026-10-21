@@ -24,6 +24,7 @@ import { PrefixService } from '../../../../core/services/prefix';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { MenuAccessService } from '../../../../core/services/menu-access.service';
+import { ChassisSearchService } from '../../../../core/services/chassis-search-service';
 @Component({
   selector: 'app-job-card-add-form',
   standalone: true,
@@ -95,6 +96,13 @@ export class JobCardAddForm {
   repairBillStatus: string;
   fromEstimateData: any = null;
 
+  // ===== Global chassis search (modal) — logic reused from ebw-invoice.ts,
+  // presented as a modal via NgbModal rather than an inline collapsible box =====
+  globalChassisSearchTerm: string = '';
+  globalSaleData: any = null;
+  globalSearchNotFound: boolean = false;
+  globalSearching: boolean = false;
+  private globalSearchModalRef: any = null;
 
   chargerMake: string = '';
   batteryVoltage: string = '';
@@ -163,8 +171,9 @@ export class JobCardAddForm {
     public toastr: ToastService,
     private modalService: NgbModal,
     private loader: LoaderService,
-    private ebwInvoiceService: EbwInvoiceService, 
+    private ebwInvoiceService: EbwInvoiceService,
     private menuAccess: MenuAccessService,
+    private chassisSearchService: ChassisSearchService,
     private toaster: ToastService) { }
 
   ngOnInit(): void {
@@ -300,6 +309,151 @@ export class JobCardAddForm {
     setTimeout(() => {
       this.filteredChassisList = [];
     }, 200);
+  }
+
+  // ===== Global chassis search (modal) =====================================
+  // Opens a modal (same NgbModal pattern this file already uses for the PDI
+  // Checklist popup) so the user can look up a chassis that isn't in this
+  // dealer's own inspected-lot list — e.g. a vehicle sold by another dealer.
+
+  openGlobalChassisSearch(content: any) {
+    this.globalChassisSearchTerm = this.selectedChassis || '';
+    this.globalSaleData = null;
+    this.globalSearchNotFound = false;
+
+    this.globalSearchModalRef = this.modalService.open(content, {
+      size: 'lg',
+      centered: true,
+      backdrop: 'static'
+    });
+  }
+
+  closeGlobalSearchModal() {
+    this.globalSearchModalRef?.dismiss();
+    this.globalSearchModalRef = null;
+    this.globalChassisSearchTerm = '';
+    this.globalSaleData = null;
+    this.globalSearchNotFound = false;
+  }
+
+  searchGlobalChassis() {
+    if (!this.globalChassisSearchTerm) {
+      this.toaster.show('Enter a Chassis No to search.', { classname: 'bg-warning text-white', delay: 4000 });
+      return;
+    }
+
+    this.globalSearching = true;
+    this.globalSaleData = null;
+    this.globalSearchNotFound = false;
+
+    this.chassisSearchService.getGlobalChassisDetails(this.globalChassisSearchTerm).subscribe({
+      next: (res: any) => {
+        this.globalSearching = false;
+        this.globalSaleData = res;
+      },
+      error: (err) => {
+        this.globalSearching = false;
+        console.error(err);
+        this.globalSearchNotFound = true;
+      },
+    });
+  }
+
+  // Applies the globally-found chassis into this form and closes the modal.
+  // This chassis isn't in the dealer's own inspected-lot list (chassisList
+  // only ever holds this dealer's own vehicles), so onChassisChange()'s local
+  // find() would never match it. This method now mirrors onChassisChange()
+  // field-for-field instead of only filling customer/basic info — the backend
+  // (GetGlobalChassisDataAsync) has been extended to also return battery
+  // details, OemModelId and warranty (OdoReading/Duration/DurationType/
+  // ExpireWarrentyDate), so "Valid till", "In Warranty Expired on", PDI
+  // checklist and EBW lookup all populate exactly like a normal dropdown pick.
+  applyGlobalChassisResult() {
+    if (!this.globalSaleData) return;
+
+    const data = this.globalSaleData;
+
+    this.selectedChassis = this.globalChassisSearchTerm;
+    this.filteredChassisList = [];
+
+    // ===== Same field set as onChassisChange() =====
+    this.invoiceNo = data.invoiceNo || '';
+    this.couponNo = this.selectedChassis.slice(-13);
+    this.inwardType = data.inwardType || '';
+    this.vehiclePrevkms = data.vehiclePrevKms || 0;
+
+    this.customerObj.customerLedgerId = data.customerLedgerId || 0;
+    this.customerObj.customerName = data.customerName || '';
+    this.customerObj.customerMobile = data.mobileNo || '';
+    this.customerObj.customerAltMobile = data.customerAltMobile || '';
+    this.customerObj.saleDate = data.saleDate ? String(data.saleDate).split('T')[0] : '';
+    this.customerObj.nextServiceDueDate = data.nextserviceDueDate ? String(data.nextserviceDueDate).split('T')[0] : '';
+    this.customerObj.insuranceExpDate = data.insuranceExpDate ? String(data.insuranceExpDate).split('T')[0] : '';
+
+    this.modelName = data.modelName
+      ? data.modelName + (data.colourName ? ` (${data.colourName})` : '')
+      : (data.modelName || '');
+
+    this.registerNo = data.registerNo || '';
+
+    // Battery details — same fields onChassisChange() sets
+    this.batteryCapacity = data.batteryCapacity || '';
+    this.batteryMake = data.batteryMake || '';
+    this.batteryChemestry = data.batteryChemestry || '';
+    this.batteryNumber = data.batteryNumber || '';
+    this.motorNo = data.motorNo || '';
+    this.controllerNo = data.controllerNo || '';
+    this.converterNo = data.converterNo || '';
+    this.chargerNumber = data.chargerNumber || '';
+
+    // Warranty — same fields onChassisChange() sets, driving "Valid till" /
+    // "In Warranty Expired on" in the Job Basic Information header
+    this.odoReading = data.odoReading || 0;
+    this.duration = data.duration || 0;
+    this.durationType = data.durationType || '';
+    this.expireWarrentyDate = data.expireWarrentyDate || '';
+    this.oemModelId = data.oemModelId || 0;
+
+    if (this.oemModelId) {
+      this.loadPdiData(this.oemModelId);
+    }
+
+    this.loadServiceHistory(this.selectedChassis);
+    this.loadEbwInfo(this.selectedChassis);
+
+    // /VehicleInfo fallback — only fills whatever the DMS query above didn't
+    // already resolve (e.g. if battery/motor rows are missing from
+    // ChassisBatteryDetails but exist in the separate VehicleInfo source).
+    this.http.get<any>(`${environment.apiUrl}/VehicleInfo`, {
+      params: { chassisNo: this.selectedChassis, regNo: this.selectedChassis }
+    }).subscribe({
+      next: (res) => {
+        const vd = res?.vehicleDetails;
+        if (!vd) return;
+
+        if (!this.modelName) {
+          this.modelName = vd.modelName
+            ? vd.modelName + (vd.colorName ? ` (${vd.colorName})` : '')
+            : this.modelName;
+        }
+        this.registerNo = this.registerNo || vd.regNo || '';
+
+        this.batteryNumber = this.batteryNumber || vd.batteries?.[0]?.batteryNo || '';
+        this.batteryMake = this.batteryMake || vd.batteries?.[0]?.batteryMake || '';
+        this.batteryCapacity = this.batteryCapacity || vd.batteries?.[0]?.capacity || '';
+        this.batteryChemestry = this.batteryChemestry || vd.batteries?.[0]?.chemicalType || '';
+
+        this.motorNo = this.motorNo || vd.motors?.[0]?.componentNo || '';
+        this.chargerNumber = this.chargerNumber || vd.chargers?.[0]?.componentNo || '';
+        this.controllerNo = this.controllerNo || vd.controllers?.[0]?.componentNo || '';
+        this.converterNo = this.converterNo || vd.converters?.[0]?.componentNo || '';
+      },
+      error: () => {
+        // best-effort only — don't block job card creation if this lookup fails
+      }
+    });
+
+    this.closeGlobalSearchModal();
   }
 
   allowOnlyNumbers(

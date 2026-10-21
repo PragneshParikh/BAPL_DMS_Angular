@@ -1,4 +1,4 @@
-//BAPL_DMS_Angular\src\app\components\counter-bill\add-counter-bill\add-counter-bill.ts
+// src\app\components\counter-bill\add-counter-bill\add-counter-bill.ts
 import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CashTypeOptions } from '../../../constant';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +18,7 @@ import { ChassisSearchService } from '../../../core/services/chassis-search-serv
 import Swal from 'sweetalert2';
 import { CounterBillService } from '../../../core/services/counter-bill-service';
 import { LoaderService } from '../../../core/services/loader';
-import { MenuAccessService } from '../../../core/services/menu-access.service';
+
 @Component({
   selector: 'app-add-counter-bill',
   imports: [FormsModule, CommonModule, NgbPaginationModule, NgbTooltipModule,
@@ -37,12 +37,6 @@ export class AddCounterBill implements OnInit {
   filteredChassis: any[] = [];
   showChassisDropdown = false;
   showDiscountPopup = false;
-
-  readonly SUBMENU_ID = 77;
-  canCreate = false;
-  canEdit = false;
-  canDelete = false;
-  canDownload = false;
 
   discountModel = {
     partsDiscountType: 'Value',
@@ -110,8 +104,7 @@ export class AddCounterBill implements OnInit {
     private locationMasterService: LocationMasterService, private ledgerService: LedgerMasterService,
     private modalService: NgbModal, private stateService: StateService, private router: Router, private itemService: ItemMasterService,
     private toaster: ToastService, private chassisService: ChassisSearchService, private counterBillService: CounterBillService,
-    private route: ActivatedRoute, private loader: LoaderService,
-    private menuAccess: MenuAccessService
+    private route: ActivatedRoute, private loader: LoaderService
 
   ) { }
   @ViewChild('dealerContainer')
@@ -130,10 +123,10 @@ export class AddCounterBill implements OnInit {
     this.loader.show();
     this.userRole = this.storageService.getRole().toLowerCase();
     this.editPermission = this.userRole === 'superadmin';
-    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
-    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
-    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
-    this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
+    this.getNextCounterBillNo();
+    this.getLocations();
+    this.getParties();
+    this.getStateList();
 
     // const id = this.route.snapshot.paramMap.get('id');
     const id = history.state?.counterBillId;

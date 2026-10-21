@@ -84,13 +84,20 @@ export class CustomerLedger {
     private menuAccess: MenuAccessService,
     @Optional() public activeModal: NgbActiveModal
   ) {
+    // FIXED: canCreate/canEdit used to only be set inside the `if (id > 0)`
+    // branch below, meaning they stayed false forever on a brand-new ledger
+    // (routed here as /customer-ledger/0, so id > 0 is false) — the Save
+    // button never showed on Add for ANY role, SuperAdmin included, since
+    // *ngIf="(!isModify && canCreate) || ..." always evaluated the left side
+    // against an uninitialized canCreate = false.
+    this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
+    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+
     this.activatedRoute.paramMap.subscribe(params => {
       const id = Number(params.get('id'));
       if (id > 0) {
         this.isModify = true;
         this.getCustomerLedgerDetails(id);
-        this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
-        this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
       }
     });
     this.formData.createdBy = this.storageService.getDealerCode();

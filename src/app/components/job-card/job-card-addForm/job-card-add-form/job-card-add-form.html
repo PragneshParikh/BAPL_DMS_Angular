@@ -147,9 +147,15 @@
 
                 <!-- Add Mode -->
                 <div *ngIf="!isEditMode">
-                  <input type="text" class="form-control form-control-sm" placeholder="Type Chassis No."
-                    [(ngModel)]="selectedChassis" (input)="filterChassis()" (focus)="filterChassis()"
-                    (blur)="hideChassisDropdown()">
+                  <div class="input-group input-group-sm">
+                    <input type="text" class="form-control" placeholder="Type Chassis No."
+                      [(ngModel)]="selectedChassis" (input)="filterChassis()" (focus)="filterChassis()"
+                      (blur)="hideChassisDropdown()">
+                    <button type="button" class="btn btn-outline-secondary" (click)="openGlobalChassisSearch(globalChassisSearchModal)"
+                      title="Search chassis across all dealers">
+                      <i class="ri-search-line"></i>
+                    </button>
+                  </div>
 
                   <div class="dropdown-menu dropdown-menu-chassis show w-100" *ngIf="filteredChassisList.length > 0">
                     <button type="button" class="dropdown-item" *ngFor="let item of filteredChassisList"
@@ -157,6 +163,10 @@
                       {{ item.chassisNumber }}
                     </button>
                   </div>
+
+                  <small class="text-muted d-block mt-1" *ngIf="selectedChassis && filteredChassisList.length === 0">
+                    Not found here? Click <i class="ri-search-line"></i> to search across all dealers.
+                  </small>
                 </div>
 
                 <!-- Edit Mode -->
@@ -823,6 +833,78 @@
   <div class="modal-footer">
     <button class="btn btn-primary btn-sm" (click)="savePdi(); modal.close()">Save</button>
     <button class="btn btn-danger btn-sm" (click)="onClose(modal)">Close</button>
+  </div>
+
+</ng-template>
+
+<!-- =======================Global Chassis Search Modal ============================== -->
+<ng-template #globalChassisSearchModal let-modal>
+
+  <div class="modal-header">
+    <h5 class="modal-title">Search Chassis Across All Dealers</h5>
+    <button type="button" class="btn-close" (click)="closeGlobalSearchModal()"></button>
+  </div>
+
+  <div class="modal-body">
+
+    <div class="row g-2 align-items-end">
+      <div class="col-md-8">
+        <label class="form-label mb-0 small">Chassis No</label>
+        <input type="text" class="form-control form-control-sm" [(ngModel)]="globalChassisSearchTerm"
+          name="globalChassisSearchTerm" placeholder="Enter chassis no..."
+          (keyup.enter)="searchGlobalChassis()">
+      </div>
+      <div class="col-md-4">
+        <button type="button" class="btn btn-primary btn-sm w-100" [disabled]="globalSearching"
+          (click)="searchGlobalChassis()">
+          {{ globalSearching ? 'Searching...' : 'Search' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-3" *ngIf="globalSaleData">
+      <table class="table table-sm table-bordered mb-0">
+        <tbody>
+          <tr>
+            <td class="text-muted small" style="width:30%;">Customer Name</td>
+            <td>{{ globalSaleData.customerName || '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small">Mobile No.</td>
+            <td>{{ globalSaleData.mobileNo || '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small">Model</td>
+            <td>{{ globalSaleData.modelName || '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small">Register No</td>
+            <td>{{ globalSaleData.registerNo || '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small">Sold By Dealer</td>
+            <td>{{ globalSaleData.dealerCode || '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small">Sale Date</td>
+            <td>{{ globalSaleData.saleDate | date:'dd-MM-yyyy' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-3" *ngIf="globalSearchNotFound">
+      <span class="text-danger small">No sale record found for this chassis in any dealership.</span>
+    </div>
+
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-success btn-sm" [disabled]="!globalSaleData"
+      (click)="applyGlobalChassisResult()">
+      Use This Chassis
+    </button>
+    <button type="button" class="btn btn-light btn-sm" (click)="closeGlobalSearchModal()">Close</button>
   </div>
 
 </ng-template>

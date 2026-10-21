@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { environment } from '../../../environments/environment';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -51,11 +52,11 @@ export class ChassisSearchService {
     );
   }
 
-  getGlobalChassisDetails(chassisNo: string) {
-    return this.httpClient.get<any>(`${this.baseUrl}/chassis/global/${chassisNo}`);
+  getGlobalChassisDetails(chassisNo: string): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/chassis/global/${chassisNo}`);
   }
 
-  getChassisDetailsByLocationCode(locationCode: string) {
+  getChassisDetailsByLocationCode(locationCode: string): Observable<any[]> {
     return this.httpClient.get<any[]>(`${this.baseUrl}/chassis-details/chassisList?locationCode=${locationCode}`);
   }
    getAllSoldChassis() {
