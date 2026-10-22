@@ -214,7 +214,7 @@ export class WarrantyOrder implements OnInit {
 //       return;
 //     }
 
-//     // प्रत्येक क्लेमचे पूर्ण तपशील (पार्ट्स, लेबर, इन्व्हॉइस सह) मिळवण्यासाठी forkJoin वापरूया
+//    
 //     const detailRequests = claims.map(c => this.warrantyOrderService.getWarrantyJCClaimById(c.id));
     
 //     forkJoin(detailRequests).subscribe({
@@ -787,21 +787,41 @@ loadPendingClaims(): void {
   // Header "select all" checkbox - checked only when every linked claim is
   // approved (current AND historical), and there's at least one claim.
   get allClaimsApproved(): boolean {
-    const allClaims = [...this.historicalClaims, ...this.selectedClaims];
-    return allClaims.length > 0 && allClaims.every(c => !!c.isApproved);
-  }
+  const allRows = this.claimLineRows;
+  return allRows.length > 0 && allRows.every(r => !!r.isApproved);
+}
 
   toggleSelectAllApproved(checked: boolean): void {
-    // Purely local for both groups now - Save pushes everything at once.
-    this.selectedClaims.forEach(c => c.isApproved = checked);
-    this.historicalClaims.forEach(c => c.isApproved = checked);
-  }
+  const allRows = this.claimLineRows;
+  allRows.forEach(row => {
+    row.isApproved = checked;
+    if (row.lineRef) {
+      row.lineRef.isApproved = checked;
+    }
+  });
+
+  this.selectedClaims.forEach(c => {
+    c.isApproved = checked;
+    if (c.details) {
+      c.details.forEach((d: any) => d.isApproved = checked);
+    }
+  });
+
+  this.historicalClaims.forEach(c => {
+    c.isApproved = checked;
+    if (c.details) {
+      c.details.forEach((d: any) => d.isApproved = checked);
+    }
+  });
+}
 
   // Order-level approval is now derived, not manually set - the order is
   // considered approved as soon as at least one linked claim is approved.
-  get isApproved(): boolean {
-    return this.selectedClaims.some(c => !!c.isApproved);
-  }
+ get isApproved(): boolean {
+  return this.selectedClaims.some(c => 
+    c.isApproved || (c.details && c.details.some((d: any) => d.isApproved))
+  );
+}
 
   // Separate from isApproved above (which stays scoped to selectedClaims
   // only, since it's used directly in the order's own save payload).
@@ -811,9 +831,9 @@ loadPendingClaims(): void {
   // saveWarrantyOrder() already handles that case correctly; this just
   // lets the button actually be clicked to reach it.
   get hasAnyCheckedClaim(): boolean {
-    return this.isApproved || this.historicalClaims.some(c => !!c.isApproved);
-  }
-
+  const checkedInTable = this.claimLineRows.some(r => !!r.isApproved);
+  return checkedInTable || this.isApproved;
+}
   // Bifurcation check: true if THIS order's own linked claims
   // (selectedClaims - never historicalClaims, which belong to other
   // orders) have at least one Part-type line anywhere. Used to skip the
@@ -835,7 +855,25 @@ loadPendingClaims(): void {
   // invoice/chassis/party info on every line. isFirstLineOfClaim marks
   // where to show the per-claim "Remove" button (only ever true for the
   // CURRENT order's own rows - historical rows never show it).
- private buildRowsFromClaims(claims: any[], startSrNo: number, isHistorical: boolean): any[] {
+//  private buildRowsFromClaims(claims: any[], startSrNo: number, isHistorical: boolean): any[] {
+//   const rows: any[] = [];
+//   let srNo = startSrNo;
+
+//   claims.forEach(claim => {
+//     const lines = (claim.details && claim.details.length > 0) ? claim.details : [null];
+
+//     lines.forEach((line: any, i: number) => {
+//       rows.push({
+//         srNo: srNo++,
+//         claimId: claim.id,
+//         isFirstLineOfClaim: i === 0,
+//         isApproved: !!claim.isApproved,
+//         isHistorical,
+//         orderId: claim._orderId ?? this.orderId,
+//         isOrderDeleted: !!claim._isOrderDeleted,
+//         orderNo: claim._orderNo ?? this.orderNo,
+//         batchNo: claim._batchNo ?? this.batchNo,
+private buildRowsFromClaims(claims: any[], startSrNo: number, isHistorical: boolean): any[] {
   const rows: any[] = [];
   let srNo = startSrNo;
 
@@ -843,32 +881,38 @@ loadPendingClaims(): void {
     const lines = (claim.details && claim.details.length > 0) ? claim.details : [null];
 
     lines.forEach((line: any, i: number) => {
+      if (line && line.isApproved === undefined) {
+        line.isApproved = !!claim.isApproved;
+      }
+
       rows.push({
         srNo: srNo++,
         claimId: claim.id,
-        isFirstLineOfClaim: i === 0,
-        isApproved: !!claim.isApproved,
+        lineRef: line, 
+        isFirstLineOfClaim: true, 
+        isApproved: line ? !!line.isApproved : !!claim.isApproved,
         isHistorical,
         orderId: claim._orderId ?? this.orderId,
         isOrderDeleted: !!claim._isOrderDeleted,
         orderNo: claim._orderNo ?? this.orderNo,
         batchNo: claim._batchNo ?? this.batchNo,
 
+
         claimNo: `${claim.claimPrefix || ''}${claim.claimNo || ''}`,
         claimDate: claim.claimDate,
 
-        // 👇 JobCard आणि Invoice साठी अचूक fallbacks दिले आहेत:
+       
         jobCardNo: claim.jobCardNo || claim.jobCardNumber || '',
         jobCardDate: claim.jobCardDate || '',
 
         invoiceNo: claim.invoiceNo || claim.repBillNo || claim.billNo || '',
         invoiceDate: claim.invoiceDate || claim.repBillDate || claim.billDate || '',
 
-        // 👇 Service Head आणि KMS साठी fallbacks:
+       
         serviceHead: claim.serviceHead || claim.claimType || '',
         kms: claim.kms ?? claim.kilometers ?? claim.distance ?? 0,
 
-        // 👇 Location आणि Party साठी fallbacks:
+       
         locationName: claim.locationName || claim.serviceLocation || claim.locationCode || '',
 
         chassisNo: claim.chassisNo,
@@ -896,6 +940,24 @@ loadPendingClaims(): void {
   return rows;
 }
 
+toggleRowApproval(row: any, checked: boolean): void {
+  row.isApproved = checked;
+  if (row.lineRef) {
+    row.lineRef.isApproved = checked;
+  }
+
+  const targetClaim = row.isHistorical 
+    ? this.historicalClaims.find(c => c.id === row.claimId)
+    : this.selectedClaims.find(c => c.id === row.claimId);
+    
+  if (targetClaim) {
+    if (targetClaim.details && targetClaim.details.length > 0) {
+      targetClaim.isApproved = targetClaim.details.some((d: any) => !!d.isApproved);
+    } else {
+      targetClaim.isApproved = checked;
+    }
+  }
+}
   // Historical (other orders') rows first - oldest first, so the current
   // order's own rows render last, i.e. "below the previous entry". Only
   // the non-historical rows are ever wired to checkbox/remove/save actions.
