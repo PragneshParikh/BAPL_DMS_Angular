@@ -73,6 +73,40 @@ export class WarrantyInvoice implements OnInit {
     this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
   }
 
+  // ngOnInit(): void {
+  //   const today = new Date();
+  //   this.invoiceDate = this.formatDate(today);
+  //   this.batchDate = this.formatDate(today);
+
+  //   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  //   this.dateFrom = this.formatDate(firstDayOfMonth);
+  //   this.dateTo = this.formatDate(today);
+
+  //   this.loadSuppliers();
+
+  //   const routeId = this.route.snapshot.paramMap.get('id');
+
+  //   const viewInvoiceId = sessionStorage.getItem('viewWarrantyInvoiceId');
+
+  //   const pendingRaw = sessionStorage.getItem('pendingWarrantyInvoiceOrder');
+  //   const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
+
+  //   if (viewInvoiceId) {
+  //     sessionStorage.removeItem('viewWarrantyInvoiceId');
+  //     this.invoiceId = Number(viewInvoiceId);
+  //     this.loadExistingInvoice(this.invoiceId);
+  //   } else if (routeId) {
+  //     this.invoiceId = Number(routeId);
+  //     this.loadExistingInvoice(this.invoiceId);
+  //   } else if (pending?.orderId) {
+  //     this.wasApprovedOnLoad = false;
+  //     this.loadNextInvoiceNumbers();
+  //     this.preloadOrderFromQueryParam(Number(pending.orderId));
+  //   } else {
+  //     this.loadLatestSavedInvoice();
+  //   }
+  // }
+
   ngOnInit(): void {
     const today = new Date();
     this.invoiceDate = this.formatDate(today);
@@ -85,9 +119,7 @@ export class WarrantyInvoice implements OnInit {
     this.loadSuppliers();
 
     const routeId = this.route.snapshot.paramMap.get('id');
-
     const viewInvoiceId = sessionStorage.getItem('viewWarrantyInvoiceId');
-
     const pendingRaw = sessionStorage.getItem('pendingWarrantyInvoiceOrder');
     const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
 
@@ -103,32 +135,127 @@ export class WarrantyInvoice implements OnInit {
       this.loadNextInvoiceNumbers();
       this.preloadOrderFromQueryParam(Number(pending.orderId));
     } else {
-      this.loadLatestSavedInvoice();
+     
+      this.invoiceId = 0;
+      this.selectedOrders = [];
+      this.historicalOrders = [];
+      this.loadNextInvoiceNumbers();
+      this.loadPendingOrders()
     }
   }
 
+  // loadLatestSavedInvoice(): void {
+  //   this.warrantyInvoiceService.searchWarrantyInvoices({ pageNumber: 1, pageSize: 1 }).subscribe({
+  //     next: (res: any) => {
+  //       const items = res?.items || [];
+  //       if (items.length > 0) {
+  //         this.invoiceId = items[0].id;
+  //         this.loadExistingInvoice(this.invoiceId);
+  //       } else {
+  //         this.loadNextInvoiceNumbers();
+  //         this.loadHistoricalInvoiceOrders(0);
+  //       }
+  //     },
+  //     error: (err) => {
+  //       console.error('loadLatestSavedInvoice failed:', err);
+  //       this.toaster.show('Could not load the last saved invoice.', {
+  //         classname: 'bg-danger text-white',
+  //         delay: 5000
+  //       });
+  //       this.loadNextInvoiceNumbers();
+  //     }
+  //   });
+  // }
+
   loadLatestSavedInvoice(): void {
-    this.warrantyInvoiceService.searchWarrantyInvoices({ pageNumber: 1, pageSize: 1 }).subscribe({
-      next: (res: any) => {
-        const items = res?.items || [];
-        if (items.length > 0) {
-          this.invoiceId = items[0].id;
-          this.loadExistingInvoice(this.invoiceId);
-        } else {
-          this.loadNextInvoiceNumbers();
-          this.loadHistoricalInvoiceOrders(0);
-        }
-      },
-      error: (err) => {
-        console.error('loadLatestSavedInvoice failed:', err);
-        this.toaster.show('Could not load the last saved invoice.', {
-          classname: 'bg-danger text-white',
-          delay: 5000
-        });
-        this.loadNextInvoiceNumbers();
+  this.invoiceId = 0;
+  this.selectedOrders = [];
+  this.historicalOrders = [];
+  this.loadNextInvoiceNumbers();
+  this.loadPendingOrders();
+}
+
+// loadPendingOrders(): void {
+//   const dealerCode = this.storageService.getDealerCode();
+//   this.loader.show();
+//   this.warrantyInvoiceService.getPendingOrders(dealerCode).subscribe({
+//     next: (orders: any[]) => {
+//       this.loader.hide();
+//       this.selectedOrders = (orders || []).map(o => ({ ...o, isApproved: true }));
+//       if (this.selectedOrders.length > 0) {
+//         const first = this.selectedOrders[0];
+//         this.batchNo = first.batchNo;
+//         this.setLocationFromOrder(first.location, first.locationName);
+//         if (first.supplierId) this.selectedSupplierId = first.supplierId;
+//       }
+//     },
+//     error: (err) => {
+//       this.loader.hide();
+//       console.error(err);
+//       this.selectedOrders = [];
+//     }
+//   });
+// }
+
+// loadPendingOrders(): void {
+//   const dealerCode = this.storageService.getDealerCode();
+//   this.loader.show();
+//   this.warrantyInvoiceService.getPendingOrders(dealerCode).subscribe({
+//     next: (res: any) => {
+//       this.loader.hide();
+      
+//       const orders = Array.isArray(res) ? res : (res?.items || res?.data || []);
+      
+//      // this.selectedOrders = orders.map((o: any) => ({ ...o, isApproved: true }));
+//         this.selectedOrders = orders.map((o: any) => ({
+//       ...o,
+//       isApproved: true,
+//       claims: (o.claims || []).map((c: any) => ({ ...c, isApproved: true }))
+//     }));
+          
+//       if (this.selectedOrders.length > 0) {
+//         const first = this.selectedOrders[0];
+//         this.batchNo = first.batchNo || '';
+//         this.setLocationFromOrder(first.location, first.locationName);
+//         if (first.supplierId) this.selectedSupplierId = first.supplierId;
+//       }
+//     },
+//     error: (err) => {
+//       this.loader.hide();
+//       console.error('Failed to load pending orders:', err);
+//       this.selectedOrders = [];
+//     }
+//   });
+// }
+
+loadPendingOrders(): void {
+  const dealerCode = this.storageService.getDealerCode();
+  this.loader.show();
+  this.warrantyInvoiceService.getPendingOrders(dealerCode).subscribe({
+    next: (res: any) => {
+      this.loader.hide();
+      const orders = Array.isArray(res) ? res : (res?.items || res?.data || []);
+      
+      this.selectedOrders = orders.map((o: any) => ({
+        ...o,
+        isApproved: false,
+        claims: (o.claims || []).map((c: any) => ({ ...c, isApproved: false }))
+      }));
+          
+      if (this.selectedOrders.length > 0) {
+        const first = this.selectedOrders[0];
+        this.batchNo = first.batchNo || '';
+        this.setLocationFromOrder(first.location, first.locationName);
+        if (first.supplierId) this.selectedSupplierId = first.supplierId;
       }
-    });
-  }
+    },
+    error: (err) => {
+      this.loader.hide();
+      console.error('Failed to load pending orders:', err);
+      this.selectedOrders = [];
+    }
+  });
+}
 
   formatDate(date: Date): string {
     const year = date.getFullYear();
@@ -313,112 +440,192 @@ export class WarrantyInvoice implements OnInit {
     }
   }
 
-  get isApproved(): boolean {
-    return this.selectedOrders.some(o => !!o.isApproved);
-  }
+  // get isApproved(): boolean {
+  //   return this.selectedOrders.some(o => !!o.isApproved);
+  // }
 
-  get hasAnyCheckedOrder(): boolean {
-    return this.isApproved || this.historicalOrders.some(o => !!o.isApproved);
-  }
+  // get hasAnyCheckedOrder(): boolean {
+  //   return this.isApproved || this.historicalOrders.some(o => !!o.isApproved);
+  // }
 
-  get allOrdersApproved(): boolean {
-    const allOrders = [...this.historicalOrders, ...this.selectedOrders];
-    return allOrders.length > 0 && allOrders.every(o => !!o.isApproved);
-  }
+  //   get allOrdersApproved(): boolean {
+  //  const allOrders = [...this.historicalOrders, ...this.selectedOrders];
+  //   return allOrders.length > 0 && allOrders.every(o => !!o.isApproved);
+  // }
+        get allOrdersApproved(): boolean {
+          const claims = [...this.historicalOrders, ...this.selectedOrders]
+            .flatMap(o => o.claims || []);
+          return claims.length > 0 && claims.every((c: any) => !!c.isApproved);
+        }
 
-  toggleSelectAllApproved(checked: boolean): void {
-    this.selectedOrders.forEach(o => o.isApproved = checked);
-    this.historicalOrders.forEach(o => o.isApproved = checked);
-  }
+        get isApproved(): boolean {
+          return this.selectedOrders.some(o => (o.claims || []).some((c: any) => !!c.isApproved));
+        }
 
-  toggleOrderApproval(orderId: number, checked: boolean, historicalInvoiceId?: number): void {
-    if (historicalInvoiceId) {
-      const order = this.historicalOrders.find(o => o.id === orderId);
-      if (order) {
-        order.isApproved = checked;
+        get hasAnyCheckedOrder(): boolean {
+          return this.isApproved ||
+            this.historicalOrders.some(o => (o.claims || []).some((c: any) => !!c.isApproved));
+        }
+  //   toggleSelectAllApproved(checked: boolean): void {
+  //    this.selectedOrders.forEach(o => o.isApproved = checked);
+  //    this.historicalOrders.forEach(o => o.isApproved = checked);
+  //  }
+
+  //  toggleOrderApproval(orderId: number, checked: boolean, historicalInvoiceId?: number): void {
+  //    if (historicalInvoiceId) {
+  //      const order = this.historicalOrders.find(o => o.id === orderId);
+  //      if (order) {
+  //        order.isApproved = checked;
+  //      }
+  //      return;
+  //    }
+
+  //    const currentOrder = this.selectedOrders.find(o => o.id === orderId);
+  //    if (currentOrder) {
+  //      currentOrder.isApproved = checked;
+  //    }
+  //  }
+
+        toggleSelectAllApproved(checked: boolean): void {
+        [...this.selectedOrders, ...this.historicalOrders].forEach(o => {
+          (o.claims || []).forEach((c: any) => c.isApproved = checked);
+          o.isApproved = checked;
+        });
       }
+        toggleOrderApproval(orderId: number, checked: boolean, historicalInvoiceId?: number, claimId?: number): void {
+        const list = historicalInvoiceId ? this.historicalOrders : this.selectedOrders;
+        const order = list.find(o => o.id === orderId);
+        if (!order) return;
+
+    if (claimId != null && order.claims && order.claims.length > 0) {
+      const claim = order.claims.find((c: any) => c.id === claimId);
+      if (claim) claim.isApproved = checked;
+    
+      order.isApproved = order.claims.some((c: any) => !!c.isApproved);
       return;
     }
 
-    const currentOrder = this.selectedOrders.find(o => o.id === orderId);
-    if (currentOrder) {
-      currentOrder.isApproved = checked;
+      order.isApproved = checked;
     }
-  }
+
+//   toggleSelectAllApproved(checked: boolean): void {
+//     const allRows = [...this.historicalOrders, ...this.selectedOrders];
+    
+//     this.selectedOrders.forEach(o => o.isApproved = checked);
+//     this.historicalOrders.forEach(o => o.isApproved = checked);
+//   }
+
+//   toggleOrderApproval(orderId: number, checked: boolean, historicalInvoiceId?: number): void {
+//     if (historicalInvoiceId) {
+//       const order = this.historicalOrders.find(o => o.id === orderId);
+//       if (order) {
+//         order.isApproved = checked;
+//       }
+//       return;
+//     }
+
+//     const currentOrder = this.selectedOrders.find(o => o.id === orderId);
+//     if (currentOrder) {
+//       currentOrder.isApproved = checked;
+//     }
+//   }
+
+//   get allOrdersApproved(): boolean {
+//   const allOrders = [...this.historicalOrders, ...this.selectedOrders];
+//   return allOrders.length > 0 && allOrders.every(o => !!o.isApproved);
+// }
 
   get totalOrders(): number {
     return this.selectedOrders.length;
   }
 
-  private buildInvoiceRowsFromOrders(orders: any[], startSrNo: number, isHistorical: boolean): any[] {
-    const rows: any[] = [];
-    let srNo = startSrNo;
 
-    orders.forEach(order => {
-      if (!order.claims || order.claims.length === 0) {
-        return;
-      }
+private buildInvoiceRowsFromOrders(orders: any[], startSrNo: number, isHistorical: boolean): any[] {
+  const rows: any[] = [];
+  const processedKeys = new Set<string>(); // 🛡️ Duplicate rows global level var rokhnyasathi
+  let srNo = startSrNo;
 
-      const claims = order.claims;
+  (orders || []).forEach(order => {
+    const claims = (order.claims && order.claims.length > 0) ? order.claims : [order];
 
-      claims.forEach((claim: any) => {
-        if (!claim?.details || claim.details.length === 0) {
-          return;
+    claims.forEach((claim: any) => {
+      const details = claim.details || order.details || [];
+      const claimNo = claim.claimNo ? `${claim.claimPrefix || ''}${claim.claimNo}` : (order.orderNo || '');
+      const jobCardNo = claim.jobCardNo || order.jobCardNo || '';
+
+      if (details.length === 0) {
+        const uniqueKey = `${claimNo}_${jobCardNo}`;
+        if (!processedKeys.has(uniqueKey)) {
+          processedKeys.add(uniqueKey);
+          rows.push(this.mapToRowObject(srNo++, order, claim, {}, true, isHistorical));
         }
+      } else {
+        details.forEach((line: any, i: number) => {
+          // Pratyek part/labour line sahiti unique key banvun duplicate drop hoil
+          const partCode = line?.partCode || line?.labourCode || i;
+          const uniqueKey = `${claimNo}_${jobCardNo}_${partCode}`;
 
-        claim.details.forEach((line: any, i: number) => {
-          rows.push({
-            srNo: srNo++,
-            orderId: order.id,
-            isHistorical,
-
-            claimId: claim.id,
-            isFirstLineOfClaim: i === 0,
-            isApproved: !!order.isApproved,
-
-            claimNo: `${claim.claimPrefix || ''}${claim.claimNo || ''}`,
-            claimDate: claim.claimDate,
-
-            jobCardNo: claim.jobCardNo,
-            jobCardDate: claim.jobCardDate,
-
-            invoiceNo: claim.invoiceNo,
-            invoiceDate: claim.invoiceDate,
-            warrantyInvoicePrefix: isHistorical ? order._invoicePrefix : order.invoicePrefix,
-            warrantyInvoiceNo: isHistorical ? order._invoiceNo : order.invoiceNo,
-            warrantyInvoiceBatchNo: isHistorical ? order._batchNo : order.invoiceBatchNo,
-
-            serviceHead: claim.serviceHead,
-            kms: claim.kms,
-
-            locationName: claim.locationName || order.locationName || '',
-
-            chassisNo: claim.chassisNo,
-            motorNo: claim.motorNo,
-            partyName: claim.partyName || order.partyName,
-
-            partName: line?.partName || '',
-            partDescription: line?.partDescription || '',
-            partCode: line?.partCode || '',
-            labourCode: line?.labourCode || '',
-            labourDescription: line?.labourDescription || '',
-            quantity: line?.quantity ?? '',
-            cgstPercent: line?.cgstPercent ?? 0,
-            cgstAmount: line?.cgstAmount ?? 0,
-            sgstPercent: line?.sgstPercent ?? 0,
-            sgstAmount: line?.sgstAmount ?? 0,
-            igstPercent: line?.igstPercent ?? 0,
-            igstAmount: line?.igstAmount ?? 0,
-            totalAmount: line?.totalAmount ?? 0,
-            mrp: line?.mrp ?? 0
-          });
+          if (!processedKeys.has(uniqueKey)) {
+            processedKeys.add(uniqueKey);
+            rows.push(this.mapToRowObject(srNo++, order, claim, line, i === 0, isHistorical));
+          }
         });
-      });
+      }
     });
+  });
 
-    return rows;
-  }
+  return rows;
+}
 
+
+private mapToRowObject(srNo: number, order: any, claim: any, line: any, isFirstLine: boolean, isHistorical: boolean): any {
+  return {
+    srNo: srNo,
+    orderId: order.id,
+    isHistorical: isHistorical,
+
+    claimId: claim.id || order.id,
+    isFirstLineOfClaim: isFirstLine,
+   // isApproved: !!order.isApproved,
+   isApproved: claim.isApproved !== undefined ? !!claim.isApproved : !!order.isApproved,
+
+    claimNo: claim.claimNo ? `${claim.claimPrefix || ''}${claim.claimNo}` : (order.orderNo || ''),
+    claimDate: claim.claimDate || order.orderDate,
+
+    jobCardNo: claim.jobCardNo || order.jobCardNo || '',
+    jobCardDate: claim.jobCardDate || order.jobCardDate,
+
+    invoiceNo: claim.invoiceNo || order.invoiceNo || '',
+    invoiceDate: claim.invoiceDate || order.invoiceDate,
+    warrantyInvoicePrefix: isHistorical ? order._invoicePrefix : order.invoicePrefix,
+    warrantyInvoiceNo: isHistorical ? order._invoiceNo : order.invoiceNo,
+    warrantyInvoiceBatchNo: isHistorical ? order._batchNo : order.invoiceBatchNo,
+
+    serviceHead: claim.serviceHead || order.serviceHead || '',
+    kms: claim.kms || order.kms || 0,
+
+    locationName: claim.locationName || order.locationName || '',
+
+    chassisNo: claim.chassisNo || order.chassisNo || '',
+    motorNo: claim.motorNo || order.motorNo || '',
+    partyName: claim.partyName || order.partyName || '',
+
+    partName: line?.partName || '',
+    partDescription: line?.partDescription || '',
+    partCode: line?.partCode || '',
+    labourCode: line?.labourCode || '',
+    labourDescription: line?.labourDescription || '',
+    quantity: line?.quantity ?? 0,
+    cgstPercent: line?.cgstPercent ?? 0,
+    cgstAmount: line?.cgstAmount ?? 0,
+    sgstPercent: line?.sgstPercent ?? 0,
+    sgstAmount: line?.sgstAmount ?? 0,
+    igstPercent: line?.igstPercent ?? 0,
+    igstAmount: line?.igstAmount ?? 0,
+    totalAmount: line?.totalAmount ?? order.totalAmount ?? 0,
+    mrp: line?.mrp ?? 0
+  };
+}
   get invoiceLineRows(): any[] {
     const historicalRows = this.buildInvoiceRowsFromOrders(this.historicalOrders, 1, true);
     const currentRows = this.buildInvoiceRowsFromOrders(this.selectedOrders, historicalRows.length + 1, false);
@@ -497,8 +704,10 @@ export class WarrantyInvoice implements OnInit {
               claimType: this.claimType,
               supplierId: this.selectedSupplierId,
               isApproved: this.isApproved,
-              warrantyOrderIds: this.selectedOrders.map(o => o.id),
-              orderApprovals: this.selectedOrders.map(o => ({ orderId: o.id, isApproved: !!o.isApproved }))
+              // warrantyOrderIds: this.selectedOrders.map(o => o.id),
+              // orderApprovals: this.selectedOrders.map(o => ({ orderId: o.id, isApproved: !!o.isApproved }))
+              warrantyOrderIds: this.selectedOrders.filter(o => !!o.isApproved).map(o => o.id),
+              orderApprovals: this.selectedOrders.filter(o => !!o.isApproved).map(o => ({ orderId: o.id, isApproved: true }))
             })
           : this.warrantyInvoiceService.insertWarrantyInvoice({
               id: this.invoiceId,
@@ -513,8 +722,10 @@ export class WarrantyInvoice implements OnInit {
               claimType: this.claimType,
               supplierId: this.selectedSupplierId,
               isApproved: this.isApproved,
-              warrantyOrderIds: this.selectedOrders.map(o => o.id),
-              orderApprovals: this.selectedOrders.map(o => ({ orderId: o.id, isApproved: !!o.isApproved }))
+              // warrantyOrderIds: this.selectedOrders.map(o => o.id),
+              // orderApprovals: this.selectedOrders.map(o => ({ orderId: o.id, isApproved: !!o.isApproved }))
+              warrantyOrderIds: this.selectedOrders.filter(o => !!o.isApproved).map(o => o.id),
+              orderApprovals: this.selectedOrders.filter(o => !!o.isApproved).map(o => ({ orderId: o.id, isApproved: true }))
             }))
       : of(null);
 
@@ -524,50 +735,50 @@ export class WarrantyInvoice implements OnInit {
     const rebatchRequests$ = deletedInvoiceOrdersToRebatch
       .map(order => this.createNewInvoiceForOrder(order));
 
-    forkJoin([request$, ...historicalUpdateRequests$, ...rebatchRequests$]).subscribe({
-      // next: ([res]: any[]) => {
-      //   this.saving = false;
-      //   this.loader.hide();
-      //   this.toaster.show(
-      //     savingMainInvoice
-      //       ? (this.invoiceId > 0 ? 'Warranty Invoice updated successfully.' : 'Warranty Invoice saved successfully.')
-      //       : 'Changes saved successfully.',
-      //     { classname: 'bg-success text-white', delay: 3000 }
-      //   );
+//     forkJoin([request$, ...historicalUpdateRequests$, ...rebatchRequests$]).subscribe({
+//       // next: ([res]: any[]) => {
+//       //   this.saving = false;
+//       //   this.loader.hide();
+//       //   this.toaster.show(
+//       //     savingMainInvoice
+//       //       ? (this.invoiceId > 0 ? 'Warranty Invoice updated successfully.' : 'Warranty Invoice saved successfully.')
+//       //       : 'Changes saved successfully.',
+//       //     { classname: 'bg-success text-white', delay: 3000 }
+//       //   );
 
-      //   sessionStorage.removeItem('pendingWarrantyInvoiceOrder');
+//       //   sessionStorage.removeItem('pendingWarrantyInvoiceOrder');
 
-      //   // FIX: compute the saved invoice's id BEFORE the navigateAfter
-      //   // branch below - sendToErp() needs it in both cases (previously
-      //   // this was only computed in the non-navigate branch, since nothing
-      //   // else needed it before navigating away).
-      //   const savedId = res?.invoiceId ?? this.invoiceId;
-      //   if (savedId) {
-      //     this.invoiceId = Number(savedId);
-      //   }
+//       //   // FIX: compute the saved invoice's id BEFORE the navigateAfter
+//       //   // branch below - sendToErp() needs it in both cases (previously
+//       //   // this was only computed in the non-navigate branch, since nothing
+//       //   // else needed it before navigating away).
+//       //   const savedId = res?.invoiceId ?? this.invoiceId;
+//       //   if (savedId) {
+//       //     this.invoiceId = Number(savedId);
+//       //   }
 
-      //   // FIX: ERP submission is no longer bundled into Insert/Update's
-      //   // response (res.erp no longer exists) - it's now its own endpoint
-      //   // (UATWarrantyData), called explicitly here. See sendToErp() below.
-      //   if (savingMainInvoice && savedId) {
-      //     this.sendToErp(Number(savedId));
-      //   }
+//       //   // FIX: ERP submission is no longer bundled into Insert/Update's
+//       //   // response (res.erp no longer exists) - it's now its own endpoint
+//       //   // (UATWarrantyData), called explicitly here. See sendToErp() below.
+//       //   if (savingMainInvoice && savedId) {
+//       //     this.sendToErp(Number(savedId));
+//       //   }
 
-      //   if (navigateAfter) {
-      //     this.router.navigate(['/warranty-invoice-list']);
-      //   } else {
-      //     this.loadHistoricalInvoiceOrders(this.invoiceId);
-      //   }
-      // },
-      error: (err) => {
-        this.loader.hide();
-        this.saving = false;
-        console.error('Validation errors:', err?.error);
-        const serverMsg = err?.error?.title || err?.error || 'Something went wrong. Check console for details.';
-        this.toaster.show(serverMsg, { classname: 'bg-danger text-white', delay: 3000 });
-      }
-    });
-}
+//       //   if (navigateAfter) {
+//       //     this.router.navigate(['/warranty-invoice-list']);
+//       //   } else {
+//       //     this.loadHistoricalInvoiceOrders(this.invoiceId);
+//       //   }
+//       // },
+//       error: (err) => {
+//         this.loader.hide();
+//         this.saving = false;
+//         console.error('Validation errors:', err?.error);
+//         const serverMsg = err?.error?.title || err?.error || 'Something went wrong. Check console for details.';
+//         this.toaster.show(serverMsg, { classname: 'bg-danger text-white', delay: 3000 });
+//       }
+//     });
+// }
 
 // REPLACES showErpResultToast - the old shape ({ success, message,
 // linesSent }) no longer exists on the save response; PostToErpAsync
@@ -592,6 +803,139 @@ export class WarrantyInvoice implements OnInit {
 //       }
 //     });
 // }
+
+
+// forkJoin([request$, ...historicalUpdateRequests$, ...rebatchRequests$]).subscribe({
+//   next: ([res]: any[]) => {
+//     this.loader.hide();
+//     this.saving = false;
+
+//     this.toaster.show(
+//       savingMainInvoice
+//         ? (this.invoiceId > 0
+//             ? 'Warranty Invoice updated successfully.'
+//             : 'Warranty Invoice saved successfully.')
+//         : 'Changes saved successfully.',
+//       {
+//         classname: 'bg-success text-white',
+//         delay: 3000
+//       }
+//     );
+
+//     sessionStorage.removeItem('pendingWarrantyInvoiceOrder');
+
+//     // Update invoice ID when the API returns it.
+//     const savedId = res?.invoiceId ?? res?.id;
+
+//     if (savedId != null && Number(savedId) > 0) {
+//       this.invoiceId = Number(savedId);
+//     }
+
+//     if (navigateAfter) {
+//       this.router.navigate(['/warranty-invoice-list']);
+//     } else {
+//       this.loadHistoricalInvoiceOrders(this.invoiceId);
+//     }
+//   },
+// forkJoin([request$, ...historicalUpdateRequests$, ...rebatchRequests$]).subscribe({
+//   next: ([res]: any[]) => {
+//     this.loader.hide();
+//     this.saving = false;
+
+//     this.toaster.show(
+//       savingMainInvoice
+//         ? (this.invoiceId > 0
+//             ? 'Warranty Invoice updated successfully.'
+//             : 'Warranty Invoice saved successfully.')
+//         : 'Changes saved successfully.',
+//       {
+//         classnames: 'bg-success text-white',
+//         delay: 3000
+//       }
+//     );
+forkJoin([request$, ...historicalUpdateRequests$, ...rebatchRequests$]).subscribe({
+  next: ([res]: any[]) => {
+    this.loader.hide();
+    this.saving = false;
+
+    this.toaster.show(
+      savingMainInvoice
+        ? (this.invoiceId > 0
+            ? 'Warranty Invoice updated successfully.'
+            : 'Warranty Invoice saved successfully.')
+        : 'Changes saved successfully.',
+      {
+        classname: 'bg-success text-white',
+        delay: 3000
+      }
+    );
+
+    sessionStorage.removeItem('pendingWarrantyInvoiceOrder');
+
+    this.selectedOrders = [];
+    this.historicalOrders = [];
+    this.invoiceId = 0;
+    // -----------------------------------
+
+    if (navigateAfter) {
+      this.router.navigate(['/warranty-invoice-list']);
+    } else {
+      
+      this.loadNextInvoiceNumbers();
+    }
+  },
+  
+
+    // sessionStorage.removeItem('pendingWarrantyInvoiceOrder');
+
+    // const savedOrderIds = this.selectedOrders.map(o => o.id);
+    // this.selectedOrders = this.selectedOrders.filter(o => !savedOrderIds.includes(o.id));
+
+  //   sessionStorage.removeItem('pendingWarrantyInvoiceOrder');
+
+  //   const savedOrderIds = this.selectedOrders.map(o => o.id);
+  //   this.selectedOrders = this.selectedOrders.filter(o => !savedOrderIds.includes(o.id));
+
+  //   this.historicalOrders = this.historicalOrders.filter(o => !savedOrderIds.includes(o.id));
+
+  //   this.invoiceId = 0;
+  //   // ----------------------------------------
+
+  //   // Update invoice ID when the API returns it.
+  //   const savedId = res?.invoiceId ?? res?.id;
+
+  //   if (savedId != null && Number(savedId) > 0) {
+  //     this.invoiceId = Number(savedId);
+  //   }
+
+  //   if (navigateAfter) {
+  //     this.router.navigate(['/warranty-invoice-list']);
+  //   } else {
+  //     this.loadHistoricalInvoiceOrders(this.invoiceId);
+  //   }
+  // },
+  error: (err) => {
+    this.loader.hide();
+    this.saving = false;
+
+    console.error('Warranty Invoice save failed:', err);
+
+    const serverMsg =
+      typeof err?.error === 'string'
+        ? err.error
+        : err?.error?.title ||
+          err?.error?.message ||
+          'Something went wrong while saving Warranty Invoice.';
+
+    this.toaster.show(serverMsg, {
+      classname: 'bg-danger text-white',
+      delay: 5000
+    });
+  }
+});
+  }
+
+
   private saveHistoricalInvoiceApprovals(invoiceId: number, updates: { orderId: number; isApproved: boolean }[]): Observable<any> {
     return this.warrantyInvoiceService.getWarrantyInvoiceById(invoiceId).pipe(
       switchMap((invoice: any) => {

@@ -351,7 +351,9 @@ export class RepairBill implements OnInit {
         // auto select first workshop location
         if (this.locations.length > 0) {
           this.selectedLocation = this.locations[0].locname;
-          this.selectedLocationCode = this.locations[0].locCode;
+         // this.selectedLocationCode = this.locations[0].locCode;
+          this.selectedLocationCode = this.locations[0].loccode ?? this.locations[0].locCode;
+
         }
       },
       error: (err) => {
@@ -369,53 +371,120 @@ export class RepairBill implements OnInit {
   closePopup(): void {
     this.showPopup = false;
   }
+  // loadJobCardList(): void {
+  //   let dealerCode = '';
+
+  //   if (!this.isSuperAdmin) {
+  //     dealerCode = this.storageService.getDealerCode();
+  //   }
+
+  //   // FIXED: dealerCode was computed above but never assigned onto
+  //   // searchModel, so searchModel.dealerCode stayed '' (its initial value)
+  //   // for every user, SuperAdmin or not. getJobCardListRepairBill()'s
+  //   // params-builder only sends dealerCode when it's truthy, so the query
+  //   // silently went out with no dealer filter at all — showing every
+  //   // dealer's job cards to every logged-in dealer.
+  //   this.searchModel.dealerCode = dealerCode;
+
+  //   this.loader.show();
+
+  //   this.jobCardService.getJobCardListRepairBill(this.searchModel).subscribe({
+  //     next: (res: any[]) => {
+  //       this.loader.hide();
+
+  //       // Remove duplicate Job Cards using Job Card Header ID
+  //       const uniqueJobCards = (res || []).filter(
+  //         (jobCard: any, index: number, self: any[]) => {
+  //           const jobCardId = jobCard?.jobCardHeader?.id;
+
+  //           return (
+  //             jobCardId != null &&
+  //             index === self.findIndex(
+  //               (item: any) =>
+  //                 item?.jobCardHeader?.id === jobCardId
+  //             )
+  //           );
+  //         }
+  //       );
+
+  //       this.jobCardList = uniqueJobCards;
+  //     },
+
+  //     error: (err) => {
+  //       this.loader.hide();
+  //       console.error('Error fetching job cards', err);
+
+  //       this.jobCardList = [];
+  //     }
+  //   });
+  // }
+
   loadJobCardList(): void {
-    let dealerCode = '';
 
-    if (!this.isSuperAdmin) {
-      dealerCode = this.storageService.getDealerCode();
-    }
+  let dealerCode = '';
 
-    // FIXED: dealerCode was computed above but never assigned onto
-    // searchModel, so searchModel.dealerCode stayed '' (its initial value)
-    // for every user, SuperAdmin or not. getJobCardListRepairBill()'s
-    // params-builder only sends dealerCode when it's truthy, so the query
-    // silently went out with no dealer filter at all — showing every
-    // dealer's job cards to every logged-in dealer.
-    this.searchModel.dealerCode = dealerCode;
+  if (!this.isSuperAdmin) {
+    dealerCode = this.storageService.getDealerCode();
+  }
 
-    this.loader.show();
+ 
+  this.searchModel.dealerCode = dealerCode;
 
-    this.jobCardService.getJobCardListRepairBill(this.searchModel).subscribe({
+  this.loader.show();
+
+  this.jobCardService
+    .getJobCardListRepairBill(this.searchModel)
+    .subscribe({
+
       next: (res: any[]) => {
+
         this.loader.hide();
 
-        // Remove duplicate Job Cards using Job Card Header ID
-        const uniqueJobCards = (res || []).filter(
-          (jobCard: any, index: number, self: any[]) => {
-            const jobCardId = jobCard?.jobCardHeader?.id;
+        console.log('API Job Card List:', res);
 
-            return (
-              jobCardId != null &&
-              index === self.findIndex(
-                (item: any) =>
-                  item?.jobCardHeader?.id === jobCardId
-              )
-            );
-          }
-        );
+        const uniqueJobCards = new Map<string, any>();
 
-        this.jobCardList = uniqueJobCards;
+(res || []).forEach((jobCard: any) => {
+
+  const header = jobCard?.jobCardHeader;
+
+  if (!header) {
+    return;
+  }
+
+  const jobNo = String(header.jobNo || '')
+    .trim()
+    .toLowerCase();
+
+  if (!jobNo) {
+    return;
+  }
+
+  if (!uniqueJobCards.has(jobNo)) {
+    uniqueJobCards.set(jobNo, jobCard);
+  }
+
+});
+
+this.jobCardList =
+  Array.from(uniqueJobCards.values());
+
       },
 
       error: (err) => {
+
         this.loader.hide();
-        console.error('Error fetching job cards', err);
+
+        console.error(
+          'Error fetching job cards',
+          err
+        );
 
         this.jobCardList = [];
       }
+
     });
-  }
+}
 
   //currently not to used
   showMaterialTransferWarning(item: any): void {
@@ -457,131 +526,492 @@ export class RepairBill implements OnInit {
     this.showSelectedJob = !this.showSelectedJob;
   }
 
+  // loadMaterialedJobCardList(): void {
+
+  //   this.loader.show();
+
+  //   const jobId = this.selectedJobCard?.jobCardHeader?.id;
+  //   const dealerCode = this.storageService.getDealerCode();
+
+  //   this.isPartSelected = true;
+  //   this.isLabourSelected = true;
+
+  //   this.jobCardService.getMaterialedJobCardList(jobId, dealerCode).subscribe({
+
+  //     next: (res) => {
+
+  //       this.loader.hide();
+
+  //       this.materialedJobCarDList = res;
+  //       // Part Grid
+  //       this.materialedJobCarDList = res.map((x: any) => ({
+  //         ...x,
+  //         issuetypeName: this.IssueType.find(i => i.id === Number(x.issueType))?.name || '',
+  //         issuetypeId: this.IssueType.find(i => i.id == Number(x.issueType))?.id || 0
+  //       }));
+
+  //       this.materialedJobCarDList.forEach(item => {
+
+  //         item.discount = Number(item.discount || 0);
+
+  //         // Taxable Amount
+  //         item.taxableAmount =
+  //           (item.issuetypeName === 'U/W' || item.issuetypeName === 'FSC') ? 0 :
+  //             (Number(item.partQty) * Number(item.partRate)) - item.discount;
+
+  //         // Net Amount
+  //         item.netAmount =
+  //           (item.issuetypeName === 'U/W' || item.issuetypeName === 'FSC')
+  //             ? 0
+  //             : item.taxableAmount +
+  //             Number(item.cgstAmount || 0) +
+  //             Number(item.sgstAmount || 0) +
+  //             Number(item.igstAmount || 0);
+  //         item.discountValue = item.discountValue || 0;
+  //         // item.netAmount =
+  //         //   item.taxableAmount +
+  //         //   Number(item.cgstAmount || 0) +
+  //         //   Number(item.sgstAmount || 0) +
+  //         //   Number(item.igstAmount || 0);
+  //       });
+
+  //       this.partItems = [...this.materialedJobCarDList];
+
+  //       this.calculateTotals();
+
+  //       // Labour Grid
+
+  //       // For Add Mode only
+  //       if (!this.isEditMode) {
+  //         this.labourItems = [];
+  //       }
+
+  //       res.forEach((part: any) => {
+
+  //         if (part.labourCodeDetailslist?.length > 0) {
+
+  //           part.labourCodeDetailslist.forEach((labour: any) => {
+
+  //             const exists = this.labourItems.some(x =>
+  //               x.partWiseLabourId === labour.partwiseLabourId
+  //             );
+
+  //             if (!exists) {
+
+  //               this.labourItems.push({
+  //                 partWiseLabourId: labour.partwiseLabourId,
+  //                 labourId: 0,
+  //                 labourCode: labour.labourCode,
+  //                 description: labour.labourName,
+
+  //                 qty: 1,
+  //                 rate: labour.labourRate ?? 0,
+  //                 waveRate: this.waveRate ?? 0,
+  //                 labourHsnCode: labour.labourHsnCode ?? '',
+  //                 discountValue: 0,
+  //                 discount: 0,
+  //                 discountType: this.discountType,
+
+  //                 igst: labour.igst ?? 0,
+  //                 igstAmount: 0,
+
+  //                 cgst: labour.cgst ?? 0,
+  //                 cgstAmount: 0,
+
+  //                 sgst: labour.sgst ?? 0,
+  //                 sgstAmount: 0,
+
+  //                 taxableAmount: 0,
+  //                 taxAmount: 0,
+  //                 totalTaxPer: 0,
+
+  //                 netAmount: labour.labourRate ?? 0,
+
+  //                 issuetypeId: part.issueType,
+  //                 issuetypeName: '',
+
+  //                 isAutoGenerated: true,
+  //                 partCode: part.partCode
+  //               });
+
+  //             }
+
+  //           });
+
+  //         }
+
+  //       });
+  //     },
+
+  //     error: (err) => {
+  //       this.loader.hide();
+  //       console.error(err);
+  //     }
+
+  //   });
+
+  // }
+
   loadMaterialedJobCardList(): void {
 
-    this.loader.show();
+  this.loader.show();
 
-    const jobId = this.selectedJobCard?.jobCardHeader?.id;
-    const dealerCode = this.storageService.getDealerCode();
+  const jobId = this.selectedJobCard?.jobCardHeader?.id;
+  const dealerCode = this.storageService.getDealerCode();
 
-    this.isPartSelected = true;
-    this.isLabourSelected = true;
+  this.isPartSelected = true;
+  this.isLabourSelected = true;
 
-    this.jobCardService.getMaterialedJobCardList(jobId, dealerCode).subscribe({
+  this.jobCardService.getMaterialedJobCardList(jobId, dealerCode).subscribe({
 
-      next: (res) => {
+    next: (res: any[]) => {
 
-        this.loader.hide();
+      this.loader.hide();
 
-        this.materialedJobCarDList = res;
-        // Part Grid
-        this.materialedJobCarDList = res.map((x: any) => ({
+      // ============================================
+      // MATERIAL TRANSFER PARTS
+      // ============================================
+
+      const processedParts = (res || []).map((x: any) => {
+
+        const issueType = this.IssueType.find(
+          i => i.id === Number(x.issueType)
+        );
+
+        const issueTypeName = issueType?.name || '';
+
+        const discount = Number(x.discount || 0);
+
+        const grossAmount =
+          Number(x.partQty || 0) *
+          Number(x.partRate || 0);
+
+        const taxableAmount =
+          (issueTypeName === 'U/W' || issueTypeName === 'FSC')
+            ? 0
+            : grossAmount - discount;
+
+        const cgstAmount =
+          (issueTypeName === 'U/W' || issueTypeName === 'FSC')
+            ? 0
+            : Number(x.cgstAmount || 0);
+
+        const sgstAmount =
+          (issueTypeName === 'U/W' || issueTypeName === 'FSC')
+            ? 0
+            : Number(x.sgstAmount || 0);
+
+        // const igstAmount =
+        //   (issueTypeName === 'U/W' || issueTypeName === 'FSC')
+        //     ? 0
+        //     : Number(x.igstAmount || 0);
+
+        // const netAmount =
+        //   taxableAmount +
+        //   cgstAmount +
+        //   sgstAmount +
+        //   igstAmount;
+
+        const igstAmount =
+  (issueTypeName === 'U/W' || issueTypeName === 'FSC')
+    ? 0
+    : Number(x.partRate || 0) * Number(x.igst || 0) / 100;
+
+// const netAmount =
+//   Number(x.partRate || 0) + igstAmount;
+  
+const netAmount =
+  (issueTypeName === 'U/W' || issueTypeName === 'FSC')
+    ? 0
+    : Number(x.partRate || 0) + igstAmount;
+
+    
+        return {
           ...x,
-          issuetypeName: this.IssueType.find(i => i.id === Number(x.issueType))?.name || '',
-          issuetypeId: this.IssueType.find(i => i.id == Number(x.issueType))?.id || 0
-        }));
 
-        this.materialedJobCarDList.forEach(item => {
+          // IDs
+          id: x.id || 0,
+          materialId: x.materialTransferId || x.materialId || 0,
+          partItemId: x.itemId || x.partItemId || 0,
 
-          item.discount = Number(item.discount || 0);
+          // Part details
+          partCode: x.partCode || x.itemcode || '',
+          partDesc: x.partDesc || x.itemdesc || '',
 
-          // Taxable Amount
-          item.taxableAmount =
-            (item.issuetypeName === 'U/W' || item.issuetypeName === 'FSC') ? 0 :
-              (Number(item.partQty) * Number(item.partRate)) - item.discount;
+          partQty: Number(x.partQty || 0),
+          partRate: Number(x.partRate || 0),
+          partMRP: Number(x.partMRP || x.mrp || 0),
 
-          // Net Amount
-          item.netAmount =
-            (item.issuetypeName === 'U/W' || item.issuetypeName === 'FSC')
-              ? 0
-              : item.taxableAmount +
-              Number(item.cgstAmount || 0) +
-              Number(item.sgstAmount || 0) +
-              Number(item.igstAmount || 0);
-          item.discountValue = item.discountValue || 0;
-          // item.netAmount =
-          //   item.taxableAmount +
-          //   Number(item.cgstAmount || 0) +
-          //   Number(item.sgstAmount || 0) +
-          //   Number(item.igstAmount || 0);
-        });
+          partHsnCode:
+            x.partHsnCode ||
+            x.hsncode ||
+            '',
 
-        this.partItems = [...this.materialedJobCarDList];
+          // Discount
+          discountValue: Number(
+            x.discountValue || x.discount || 0
+          ),
 
-        this.calculateTotals();
+          discount: discount,
 
-        // Labour Grid
+          discountType:
+            x.discountType || 'Value',
 
-        // For Add Mode only
-        if (!this.isEditMode) {
-          this.labourItems = [];
-        }
+          // Issue Type
+          issuetypeId: Number(x.issueType || 0),
+          issuetypeName: issueTypeName,
 
-        res.forEach((part: any) => {
+          // GST
+          cgst: Number(x.cgst || 0),
+          sgst: Number(x.sgst || 0),
+          igst: Number(x.igst || 0),
 
-          if (part.labourCodeDetailslist?.length > 0) {
+          cgstAmount: cgstAmount,
+          sgstAmount: sgstAmount,
+          igstAmount: igstAmount,
 
-            part.labourCodeDetailslist.forEach((labour: any) => {
+          totalTaxPer:
+            Number(x.totalTaxPer || 0),
 
-              const exists = this.labourItems.some(x =>
-                x.partWiseLabourId === labour.partwiseLabourId
-              );
+          // Amount
+          taxableAmount: taxableAmount,
 
-              if (!exists) {
+          taxAmount:
+            cgstAmount +
+            sgstAmount +
+            igstAmount,
 
-                this.labourItems.push({
-                  partWiseLabourId: labour.partwiseLabourId,
-                  labourId: 0,
-                  labourCode: labour.labourCode,
-                  description: labour.labourName,
+          netAmount: netAmount,
 
-                  qty: 1,
-                  rate: labour.labourRate ?? 0,
-                  waveRate: this.waveRate ?? 0,
-                  labourHsnCode: labour.labourHsnCode ?? '',
-                  discountValue: 0,
-                  discount: 0,
-                  discountType: this.discountType,
+          // States
+          dealerState: this.dealerState,
+          custState:
+            this.selectedJobCard?.partyState,
 
-                  igst: labour.igst ?? 0,
-                  igstAmount: 0,
+          // Material Transfer
+          isAutoGenerated: true
+        };
 
-                  cgst: labour.cgst ?? 0,
-                  cgstAmount: 0,
+      });
 
-                  sgst: labour.sgst ?? 0,
-                  sgstAmount: 0,
+      // ============================================
+      // IMPORTANT:
+      // ONLY ONE SOURCE FOR PARTS
+      // ============================================
 
-                  taxableAmount: 0,
-                  taxAmount: 0,
-                  totalTaxPer: 0,
+      this.partItems = processedParts;
 
-                  netAmount: labour.labourRate ?? 0,
+      // Keep this only if some other old code needs it.
+      // Do NOT use it for Save/Update.
+      this.materialedJobCarDList = [...this.partItems];
 
-                  issuetypeId: part.issueType,
-                  issuetypeName: '',
+      // ============================================
+      // LABOUR
+      // ============================================
 
-                  isAutoGenerated: true,
-                  partCode: part.partCode
-                });
-
-              }
-
-            });
-
-          }
-
-        });
-      },
-
-      error: (err) => {
-        this.loader.hide();
-        console.error(err);
+      if (!this.isEditMode) {
+        this.labourItems = [];
       }
 
-    });
+      // (res || []).forEach((part: any) => {
 
-  }
+      //   if (
+      //     part.labourCodeDetailslist &&
+      //     part.labourCodeDetailslist.length > 0
+      //   ) {
+
+      //     part.labourCodeDetailslist.forEach((labour: any) => {
+
+      //       const exists = this.labourItems.some(
+      //         x =>
+      //           x.partWiseLabourId &&
+      //           labour.partwiseLabourId &&
+      //           x.partWiseLabourId === labour.partwiseLabourId
+      //       );
+
+      //       if (exists) {
+      //         return;
+      //       }
+
+      //       this.labourItems.push({
+
+      //         partWiseLabourId:
+      //           labour.partwiseLabourId,
+
+      //         labourId:
+      //           labour.labourId || 0,
+
+      //         labourCode:
+      //           labour.labourCode,
+
+      //         description:
+      //           labour.labourName,
+
+      //         qty: 1,
+
+      //         rate:
+      //           Number(labour.labourRate || 0),
+
+      //         waveRate:
+      //           this.waveRate || 0,
+
+      //         labourHsnCode:
+      //           labour.labourHsnCode || '',
+
+      //         discountValue: 0,
+      //         discount: 0,
+
+      //         discountType:
+      //           this.discountType,
+
+      //         igst:
+      //           Number(labour.igst || 0),
+
+      //         igstAmount: 0,
+
+      //         cgst:
+      //           Number(labour.cgst || 0),
+
+      //         cgstAmount: 0,
+
+      //         sgst:
+      //           Number(labour.sgst || 0),
+
+      //         sgstAmount: 0,
+
+      //         taxableAmount:
+      //           Number(labour.labourRate || 0),
+
+      //         taxAmount: 0,
+
+      //         totalTaxPer: 0,
+
+      //         netAmount:
+      //           Number(labour.labourRate || 0),
+
+      //         issuetypeId:
+      //           Number(part.issueType || 0),
+
+      //         issuetypeName:
+      //           this.IssueType.find(
+      //             i =>
+      //               i.id === Number(part.issueType)
+      //           )?.name || '',
+
+      //         isAutoGenerated: true,
+
+      //         partCode:
+      //           part.partCode || null,
+
+      //         dealerState:
+      //           this.dealerState,
+
+      //         custState:
+      //           this.selectedJobCard?.partyState
+      //       });
+
+      //     });
+
+      //   }
+
+      // });
+      (res || []).forEach((part: any) => {
+  // const list = part.labourCodeDetailslist || [];
+  const list = (part.labourCodeDetailslist || []).filter((l: any) =>
+  (l.labourCode || '').trim().toUpperCase().startsWith('WL')
+);
+
+  if (list.length === 0) return;
+
+  // const issueName =
+  //   this.IssueType.find(i => i.id === Number(part.issueType))?.name || '';
+  // const isZeroTax = issueName === 'U/W' || issueName === 'FSC';
+
+ 
+const uwType = this.IssueType.find(i => i.name === 'U/W');
+const partIssueName =
+  this.IssueType.find(i => i.id === Number(part.issueType))?.name || '';
+
+ 
+  const isInterState = Number(part.igst || 0) > 0;
+
+  list.forEach((labour: any) => {
+    const pwId = labour.partwiseLabourId ?? labour.partWiseLabourId ?? 0;
+
+    const exists = this.labourItems.some(x =>
+      x.partWiseLabourId && pwId && x.partWiseLabourId === pwId);
+    if (exists) return;
+
+    const isWarrantyLabour = (labour.labourCode || '').trim().toUpperCase().startsWith('WL');
+    const issueName = isWarrantyLabour ? 'U/W' : partIssueName;
+    const issueId = isWarrantyLabour ? (uwType?.id ?? 0) : Number(part.issueType || 0);
+    const isZeroTax = issueName === 'U/W' || issueName === 'FSC';
+
+    const rate = Number(labour.labourRate || 0);
+    const cgst = Number(labour.cgst || 0);
+    const sgst = Number(labour.sgst || 0);
+    const igst = Number(labour.igst || 0);
+
+    const taxable = isZeroTax ? 0 : rate;
+    const cgstAmount = isZeroTax || isInterState ? 0 : taxable * cgst / 100;
+    const sgstAmount = isZeroTax || isInterState ? 0 : taxable * sgst / 100;
+    const igstAmount = isZeroTax || !isInterState ? 0 : taxable * igst / 100;
+    const taxAmount = cgstAmount + sgstAmount + igstAmount;
+
+    this.labourItems.push({
+      partWiseLabourId: pwId,
+      labourId: 0,
+      
+      labourCode: labour.labourCode,
+      description: labour.labourName ?? '',
+      qty: 1,
+      rate: rate,
+      waveRate: this.waveRate || 0,
+      labourHsnCode: labour.labourHsnCode || '',
+      discountValue: 0,
+      discount: 0,
+      discountType: 'Value',
+      cgst, sgst, igst,
+      cgstAmount, sgstAmount, igstAmount,
+      taxableAmount: taxable,
+      taxAmount: taxAmount,
+      totalTaxPer: isInterState ? igst : cgst + sgst,
+      netAmount: taxable + taxAmount,
+      // issuetypeId: Number(part.issueType || 0),
+      // issuetypeName: issueName,
+      issuetypeId: issueId,
+      issuetypeName: issueName,
+      isAutoGenerated: true,
+      partCode: part.partCode || null,
+      dealerState: this.dealerState,
+      custState: this.selectedJobCard?.partyState
+    } as LabourItem);
+  });
+});
+
+      // ============================================
+      // CALCULATE TOTAL
+      // ============================================
+
+      this.calculateTotals();
+
+    },
+
+    error: (err) => {
+
+      this.loader.hide();
+
+      console.error(
+        'Error loading Material Transfer items',
+        err
+      );
+
+    }
+
+  });
+
+}
+
 
   loadLabourCodelist(): void {
     this.loader.show();
@@ -589,32 +1019,61 @@ export class RepairBill implements OnInit {
     this.customerLedgerId = this.selectedJobCard?.jobCardCustomer?.customerLedgerId
     const dealerCode = this.storageService.getDealerCode();
     this.labourMasterService.getLabourRateDropDown(this.oemmodelName, this.customerLedgerId, dealerCode).subscribe({
-      next: (res) => {
-        this.loader.hide();
-        this.labourCodeList = res;
-      },
-      error: (err) => {
-        this.loader.hide();
-        console.error("error", err)
-      }
-    })
+  //     next: (res) => {
+  //       this.loader.hide();
+  //       this.labourCodeList = res;
+  //     },
+  //     error: (err) => {
+  //       this.loader.hide();
+  //       console.error("error", err)
+  //     }
+
+
+  next: (res) => {
+  this.loader.hide();
+  this.labourCodeList = (res || []).map((x: any) => ({
+    ...x,
+    labourId: x.labourId || 0,
+    partWiseLabourId: x.partWiseLabourId || 0,
+    labourDescription: x.labourDescription || '',
+    hsnCode: x.labourHsnCode || ''
+  }));
+}
+     })
   }
+  
+
+  // onLabourSearch(): void {
+
+  //   if (!this.labourCode?.trim()) {
+  //     this.filteredLabourList = [];
+  //     this.showLabourDropdown = false;
+  //     return;
+  //   }
+
+  //   this.filteredLabourList = this.labourCodeList.filter(x =>
+  //     x.labourCode.toLowerCase().includes(this.labourCode.toLowerCase())
+  //   );
+
+
+  //   this.showLabourDropdown = this.filteredLabourList.length > 0;
+  // }
 
   onLabourSearch(): void {
-
-    if (!this.labourCode?.trim()) {
-      this.filteredLabourList = [];
-      this.showLabourDropdown = false;
-      return;
-    }
-
-    this.filteredLabourList = this.labourCodeList.filter(x =>
-      x.labourCode.toLowerCase().includes(this.labourCode.toLowerCase())
-    );
-
-
-    this.showLabourDropdown = this.filteredLabourList.length > 0;
+  const term = (this.labourCode || '').trim().toLowerCase();
+  if (!term) {
+    this.filteredLabourList = [];
+    this.showLabourDropdown = false;
+    return;
   }
+  this.filteredLabourList = this.labourCodeList
+    .filter(x =>
+      (x.labourCode || '').toLowerCase().includes(term) ||
+      (x.labourDescription || '').toLowerCase().includes(term) ||
+      (x.partCode || '').toLowerCase().includes(term))
+    .slice(0, 50);
+  this.showLabourDropdown = this.filteredLabourList.length > 0;
+}
 
   onPartSearch(): void {
 
@@ -632,16 +1091,26 @@ export class RepairBill implements OnInit {
     this.showPartDropdown = this.filteredPartList.length > 0;
   }
 
+  // selectLabour(item: any): void {
+  //   this.selectedLabour = item;
+  //   this.labourId = item.labourId;
+  //   this.labourCode = item.labourCode;
+  //   this.selectedDescription = item.labourDescription;
+  //   this.selectedRate = item.labourRate;
+
+  //   this.showLabourDropdown = false;
+  // }
+
   selectLabour(item: any): void {
-    this.selectedLabour = item;
-    this.labourId = item.labourId;
-    this.labourCode = item.labourCode;
-    this.selectedDescription = item.labourDescription;
-    this.selectedRate = item.labourRate;
-
-    this.showLabourDropdown = false;
-  }
-
+  this.selectedLabour = item;
+  this.labourId = item.labourId || 0;
+  this.partwiseLabourId = item.partWiseLabourId || 0;
+  this.labourCode = item.labourCode;
+  this.selectedDescription = item.labourDescription;
+  this.selectedRate = item.labourRate ?? 0;
+  this.labourHsnCode = item.hsnCode || '';
+  this.showLabourDropdown = false;
+}
   selectPart(item: any): void {
     this.selectedPart = item;
     this.itemcode = item.itemcode;
@@ -652,10 +1121,25 @@ export class RepairBill implements OnInit {
     this.showPartDropdown = false;
   }
 
+  // addLabour(): void {
+  //   const isSameState =
+  //     (this.selectedLabour?.dealerState || '').trim().toUpperCase() ===
+  //     (this.selectedLabour?.custState).trim().toUpperCase();
   addLabour(): void {
-    const isSameState =
-      (this.selectedLabour?.dealerState || '').trim().toUpperCase() ===
-      (this.selectedLabour?.custState).trim().toUpperCase();
+    if (!this.labourCode) {
+      Swal.fire({ icon: 'warning', title: 'Validation', text: 'Please select a Labour.' });
+      return;
+    }
+
+    if (!this.selectedLabour) {
+      this.selectedLabour = {};
+    }
+
+    const dealerState = (this.selectedLabour?.dealerState || this.dealerState || '').toString().trim().toUpperCase();
+    const custState = (this.selectedLabour?.custState || this.selectedJobCard?.partyState || '').toString().trim().toUpperCase();
+    const isSameState = !!dealerState && dealerState === custState;
+
+
     const grossAmount = this.qty * this.selectedRate;
 
     const selectedIssue = this.IssueType.find(
@@ -780,8 +1264,12 @@ export class RepairBill implements OnInit {
       issuetypeId: this.selectedIssueType,
       issuetypeName: selectedIssue?.name || '',
       // NEW
+      // isAutoGenerated: false,
+      // partCode: null
       isAutoGenerated: false,
-      partCode: null
+      partCode: null,
+      dealerState: this.dealerState,
+      custState: this.selectedJobCard?.partyState
     };
 
     if (this.editIndex !== null) {
@@ -803,87 +1291,261 @@ export class RepairBill implements OnInit {
 
   }
 
-  calculateTotals(): void {
-    // Gross Amount - full pre-discount, pre-tax value regardless of issue type,
-    // so a warranty/FSC line still shows what it would have cost.
-    const labourGross =
-      this.labourItems.reduce((sum, x) => sum + ((x.qty || 0) * (x.rate || 0)), 0);
-    const partGross =
-      this.materialedJobCarDList.reduce((sum, x) => sum + ((x.partQty || 0) * (x.partRate || 0)), 0);
-    this.totalGrossAmount = labourGross + partGross;
+//   calculateTotals(): void {
+//     // Gross Amount - full pre-discount, pre-tax value regardless of issue type,
+//     // so a warranty/FSC line still shows what it would have cost.
+//     const labourGross =
+//       this.labourItems.reduce((sum, x) => sum + ((x.qty || 0) * (x.rate || 0)), 0);
+//     const partGross =
+//       //this.materialedJobCarDList.reduce((sum, x) => sum + ((x.partQty || 0) * (x.partRate || 0)), 0);
+//        this.partItems.reduce((sum, x) => sum + ((x.partQty || 0) * (x.partRate || 0)), 0);
+//     this.totalGrossAmount = labourGross + partGross;
 
-    const labourDiscount =
-      this.labourItems.reduce(
-        (sum, x) => sum + (x.discount || 0),
-        0
-      );
+//     const labourDiscount =
+//       this.labourItems.reduce(
+//         (sum, x) => sum + (x.discount || 0),
+//         0
+//       );
 
-    const partDiscount =
-      this.materialedJobCarDList.reduce(
-        (sum, x) => sum + (x.discount || 0),
-        0
-      );
+//     const partDiscount =
+//       this.materialedJobCarDList.reduce(
+//         (sum, x) => sum + (x.discount || 0),
+//         0
+//       );
 
-    this.totalDiscount =
-      labourDiscount + partDiscount;
+//     this.totalDiscount =
+//       labourDiscount + partDiscount;
 
-    const labourTaxable =
-      this.labourItems.reduce(
-        (sum, x) => sum + (x.taxableAmount || 0),
-        0
-      );
-    const partTaxable =
-      this.materialedJobCarDList.reduce(
-        (sum, x) => sum + (x.taxableAmount || 0),
-        0
-      );
+//     const labourTaxable =
+//       this.labourItems.reduce(
+//         (sum, x) => sum + (x.taxableAmount || 0),
+//         0
+//       );
+//     const partTaxable =
+//       this.materialedJobCarDList.reduce(
+//         (sum, x) => sum + (x.taxableAmount || 0),
+//         0
+//       );
 
-    this.totalTaxableAmount =
-      labourTaxable + partTaxable;
+//     this.totalTaxableAmount =
+//       labourTaxable + partTaxable;
 
-    // CGST/SGST/IGST - Labour items already carry properly-zeroed tax
-    // amounts for U/W/FSC (set at addLabour()/auto-generation time), but
-    // Part items' cgstAmount/sgstAmount come straight from the backend
-    // without that zeroing, so guard them here to stay consistent with
-    // taxableAmount/netAmount, which ARE already zeroed for those rows.
-    const isPartZeroed = (x: any) => x.issuetypeName === 'U/W' || x.issuetypeName === 'FSC';
+//     // CGST/SGST/IGST - Labour items already carry properly-zeroed tax
+//     // amounts for U/W/FSC (set at addLabour()/auto-generation time), but
+//     // Part items' cgstAmount/sgstAmount come straight from the backend
+//     // without that zeroing, so guard them here to stay consistent with
+//     // taxableAmount/netAmount, which ARE already zeroed for those rows.
+//     const isPartZeroed = (x: any) => x.issuetypeName === 'U/W' || x.issuetypeName === 'FSC';
 
-    const labourCgst =
-      this.labourItems.reduce((sum, x) => sum + (x.cgstAmount || 0), 0);
-    const partCgst =
-      this.materialedJobCarDList.reduce((sum, x) => sum + (isPartZeroed(x) ? 0 : (x.cgstAmount || 0)), 0);
-    this.totalCgstAmount = labourCgst + partCgst;
+//     const labourCgst =
+//       this.labourItems.reduce((sum, x) => sum + (x.cgstAmount || 0), 0);
+//     const partCgst =
+//       this.materialedJobCarDList.reduce((sum, x) => sum + (isPartZeroed(x) ? 0 : (x.cgstAmount || 0)), 0);
+//     this.totalCgstAmount = labourCgst + partCgst;
 
-    const labourSgst =
-      this.labourItems.reduce((sum, x) => sum + (x.sgstAmount || 0), 0);
-    const partSgst =
-      this.materialedJobCarDList.reduce((sum, x) => sum + (isPartZeroed(x) ? 0 : (x.sgstAmount || 0)), 0);
-    this.totalSgstAmount = labourSgst + partSgst;
+//     const labourSgst =
+//       this.labourItems.reduce((sum, x) => sum + (x.sgstAmount || 0), 0);
+//     const partSgst =
+//       this.materialedJobCarDList.reduce((sum, x) => sum + (isPartZeroed(x) ? 0 : (x.sgstAmount || 0)), 0);
+//     this.totalSgstAmount = labourSgst + partSgst;
 
-    const labourIgst =
-      this.labourItems.reduce((sum, x) => sum + (x.igstAmount || 0), 0);
-    const partIgst =
-      this.materialedJobCarDList.reduce((sum, x) => sum + (isPartZeroed(x) ? 0 : (x.igstAmount || 0)), 0);
-    this.totalIgstAmount = labourIgst + partIgst;
+//     const labourIgst =
+//       this.labourItems.reduce((sum, x) => sum + (x.igstAmount || 0), 0);
+//     const partIgst =
+//       this.materialedJobCarDList.reduce((sum, x) => sum + (isPartZeroed(x) ? 0 : (x.igstAmount || 0)), 0);
+//     this.totalIgstAmount = labourIgst + partIgst;
 
-    const labourNet =
-      this.labourItems.reduce(
-        (sum, x) => sum + (x.netAmount || 0),
-        0
-      );
+//     const labourNet =
+//       this.labourItems.reduce(
+//         (sum, x) => sum + (x.netAmount || 0),
+//         0
+//       );
 
-    const partNet =
-      this.materialedJobCarDList.reduce(
-        (sum, x) => sum + (x.netAmount || 0),
-        0
-      );
+//     const partNet =
+//       this.materialedJobCarDList.reduce(
+//         (sum, x) => sum + (x.netAmount || 0),
+//         0
+//       );
 
-    this.totalNetAmount =
-      labourNet + partNet;
-    // this.discountValue = partDiscount + labourDiscount;
-    this.amountReceived =
-      this.totalNetAmount;
+//     this.totalNetAmount =
+//       labourNet + partNet;
+//     // this.discountValue = partDiscount + labourDiscount;
+//     this.amountReceived =
+//       this.totalNetAmount;
+// }
+calculateTotals(): void {
+
+  // ============================================
+  // GROSS AMOUNT
+  // ============================================
+
+  const labourGross =
+    this.labourItems.reduce(
+      (sum, x) =>
+        sum +
+        (Number(x.qty || 0) *
+          Number(x.rate || 0)),
+      0
+    );
+
+  const partGross =
+    this.partItems.reduce(
+      (sum, x) =>
+        sum +
+        (Number(x.partQty || 0) *
+          Number(x.partRate || 0)),
+      0
+    );
+
+  this.totalGrossAmount =
+    labourGross + partGross;
+
+
+  // ============================================
+  // DISCOUNT
+  // ============================================
+
+  const labourDiscount =
+    this.labourItems.reduce(
+      (sum, x) =>
+        sum + Number(x.discount || 0),
+      0
+    );
+
+  const partDiscount =
+    this.partItems.reduce(
+      (sum, x) =>
+        sum + Number(x.discount || 0),
+      0
+    );
+
+  this.totalDiscount =
+    labourDiscount + partDiscount;
+
+
+  // ============================================
+  // TAXABLE
+  // ============================================
+
+  const labourTaxable =
+    this.labourItems.reduce(
+      (sum, x) =>
+        sum +
+        Number(x.taxableAmount || 0),
+      0
+    );
+
+  const partTaxable =
+    this.partItems.reduce(
+      (sum, x) =>
+        sum +
+        Number(x.taxableAmount || 0),
+      0
+    );
+
+  this.totalTaxableAmount =
+    labourTaxable + partTaxable;
+
+
+  // ============================================
+  // CGST
+  // ============================================
+
+  const labourCgst =
+    this.labourItems.reduce(
+      (sum, x) =>
+        sum +
+        Number(x.cgstAmount || 0),
+      0
+    );
+
+  const partCgst =
+    this.partItems.reduce(
+      (sum, x) =>
+        sum +
+        Number(x.cgstAmount || 0),
+      0
+    );
+
+  this.totalCgstAmount =
+    labourCgst + partCgst;
+
+
+  // ============================================
+  // SGST
+  // ============================================
+
+  const labourSgst =
+    this.labourItems.reduce(
+      (sum, x) =>
+        sum +
+        Number(x.sgstAmount || 0),
+      0
+    );
+
+  const partSgst =
+    this.partItems.reduce(
+      (sum, x) =>
+        sum +
+        Number(x.sgstAmount || 0),
+      0
+    );
+
+  this.totalSgstAmount =
+    labourSgst + partSgst;
+
+
+  // ============================================
+  // IGST
+  // ============================================
+
+  const labourIgst =
+    this.labourItems.reduce(
+      (sum, x) =>
+        sum +
+        Number(x.igstAmount || 0),
+      0
+    );
+
+  const partIgst =
+    this.partItems.reduce(
+      (sum, x) =>
+        sum +
+        Number(x.igstAmount || 0),
+      0
+    );
+
+  this.totalIgstAmount =
+    labourIgst + partIgst;
+
+
+  // ============================================
+  // NET AMOUNT
+  // ============================================
+
+  const labourNet =
+    this.labourItems.reduce(
+      (sum, x) =>
+        sum +
+        Number(x.netAmount || 0),
+      0
+    );
+
+  const partNet =
+    this.partItems.reduce(
+      (sum, x) =>
+        sum +
+        Number(x.netAmount || 0),
+      0
+    );
+
+  this.totalNetAmount =
+    labourNet + partNet;
+
+  this.amountReceived =
+    this.totalNetAmount;
 }
+
   editLabour(index: number): void {
     const item = this.labourItems[index];
 
@@ -908,6 +1570,13 @@ export class RepairBill implements OnInit {
     this.issuetypeId = item.issuetypeId;
     this.issuetypeName = item.issuetypeName;
     this.selectedIssueType = item.issuetypeId;
+
+    if (!this.selectedLabour) {
+ 
+    this.selectedLabour = { cgst: item.cgst, sgst: item.sgst, igst: item.igst,
+      dealerState: item.dealerState, custState: item.custState };
+  }
+  this.labourHsnCode = item.labourHsnCode;
 
   }
   editPart(index: number) {
@@ -1204,19 +1873,23 @@ export class RepairBill implements OnInit {
   }
   clearLabourForm(): void {
 
-    this.labourCode = '';
+    // this.labourCode = '';
 
-    this.selectedDescription = '';
+    // this.selectedDescription = '';
 
-    this.qty = 1;
+    // this.qty = 1;
 
-    this.selectedRate = 0;
+    // this.selectedRate = 0;
 
-    this.discount = 0;
+    // this.discount = 0;
 
-    this.discountType = 'Value';
+    // this.discountType = 'Value';
 
-    this.selectedIssueType = null;
+    // this.selectedIssueType = null;
+    this.selectedLabour = null;
+    this.labourId = 0;
+    this.partwiseLabourId = 0;
+    this.labourHsnCode = '';
 
   }
   clearPartForm(): void {
@@ -1262,9 +1935,10 @@ export class RepairBill implements OnInit {
 
 
     const payload = {
-      repairBillheader: {
+
+            repairBillheader: {
         id: 0,
-        locationCode: this.selectedLocation,
+        locationCode: this.selectedLocationCode || this.selectedLocation,
         dealerCode: dealerCode,
         prefix: this.RepairBillprefix,
         billNo: this.billNo,
@@ -1287,7 +1961,9 @@ export class RepairBill implements OnInit {
         insuranceId: this.selectedInsuranceId || 0,
         insDescription: this.insuranceDescription || '',
         surveyorName: this.surveyorName || '',
-        contactNumber: this.contactNumber || 0,
+        //contactNumber: this.contactNumber || '',
+        contactNumber: this.contactNumber ? Number(this.contactNumber) : null,
+
 
         policyNo: Array.isArray(this.policyNo)
           ? this.policyNo[0]
@@ -1300,7 +1976,6 @@ export class RepairBill implements OnInit {
         totalTaxableAmount: this.totalTaxableAmount || 0,
         totalNetAmount: this.totalNetAmount || 0,
 
-
         amountRecived: this.amountReceived || 0,
 
         isActive: true,
@@ -1311,74 +1986,125 @@ export class RepairBill implements OnInit {
             ? 'Billed'
             : 'Performa created'
       },
+      // repairBillheader: {
+      //   id: 0,
+      //   locationCode: this.selectedLocation,
+      
+      
+      //   dealerCode: dealerCode,
+      //   prefix: this.RepairBillprefix,
+      //   billNo: this.billNo,
 
+      //   billType: this.billType,
+      //   cashAccount: this.selectedCashAccount || 0,
+
+      //   customerLedgerId:
+      //     this.selectedJobCard?.jobCardCustomer?.customerLedgerId || 0,
+
+      //   jobId:
+      //     this.selectedJobCard?.jobCardHeader?.id || 0,
+
+      //   remarks: this.remarks || '',
+
+      //   totalDiscount: this.totalDiscount || 0,
+      //   taxableAmount: this.totalTaxableAmount || 0,
+      //   netAmount: this.totalNetAmount || 0,
+
+      //   insuranceId: this.selectedInsuranceId || 0,
+      //   insDescription: this.insuranceDescription || '',
+      //   surveyorName: this.surveyorName || '',
+      //   contactNumber: this.contactNumber || 0,
+
+      //   policyNo: Array.isArray(this.policyNo)
+      //     ? this.policyNo[0]
+      //     : this.policyNo,
+
+      //   insValidTill: this.insValidTill || null,
+
+      //   zeroDepo: this.zeroDep === 'Y',
+
+      //   totalTaxableAmount: this.totalTaxableAmount || 0,
+      //   totalNetAmount: this.totalNetAmount || 0,
+
+
+      //   amountRecived: this.amountReceived || 0,
+
+      //   isActive: true,
+      //   isSavedPerforma: true,
+      //   isSavedInvoice: false,
+      //   repairBillStatus:
+      //     this.selectedJobCard?.jobCardHeader?.jobtype == 1
+      //       ? 'Billed'
+      //       : 'Performa created'
+      // },
       repairBillDetail: [
-        // Your Existing Part Mapping
+
+        // ---------- PART ITEMS ----------
         ...this.partItems.map((item: any) => ({
           id: 0,
           itemType: 'Part',
-          partwiseLabourId: item.labourCodeDetailslist?.partwiseLabourId || 0,
-          materialId: item.materialTransferId || 0,
-          partItemId: item.itemId || 0,
+
+          materialId: item.materialTransferId || item.materialId || 0,
+          partItemId: item.itemId || item.partItemId || 0,
+
+          labourId: 0,
+          partWiseLabourId: 0,
 
           qty: 0,
           rate: 0,
           partHsnCode: item.partHsnCode || '',
 
-          discountValue: item.discountValue || 0,
-          discount: item.discount || 0,
+          discountValue: Number(item.discountValue || 0),
+          discount: Number(item.discount || 0),
           discountType: item.discountType || 'Value',
 
-          igstAmount: item.igstAmount || 0,
-          cgstAmount: item.cgstAmount || 0,
-          sgstAmount: item.sgstAmount || 0,
+          igstAmount: Number(item.igstAmount || 0),
+          cgstAmount: Number(item.cgstAmount || 0),
+          sgstAmount: Number(item.sgstAmount || 0),
 
           taxableAmount: 0,
           netAmount: 0,
 
-          issueType: Number(item.issueType) || 0,
+          issueType: Number(item.issuetypeId || item.issueType || 0),
+          isAutoGenerated: item.isAutoGenerated ?? false,
 
-          isAutoGenerated: false,
+          partQty: Number(item.partQty || 0),
+          partRate: Number(item.partRate || 0),
+          fscRate: Number(item.fscRate || 0),
 
-          partQty: item.partQty || 0,
-          partRate: item.partRate || 0,
-          fscRate: item.fscRate || 0,
-
-          partDiscount: item.discount || 0,
-          partTaxbleAmount: item.taxableAmount || 0,
-          partNetAmount: item.netAmount || 0,
-          totalTaxPer: item.igst || 0
-
+          partDiscount: Number(item.discount || 0),
+          partTaxbleAmount: Number(item.taxableAmount || 0),
+          partNetAmount: Number(item.netAmount || 0),
+          totalTaxPer: Number(item.totalTaxPer || 0)
         })),
 
-        // Your Existing Labour Mapping
+        // ---------- LABOUR ITEMS ----------
         ...this.labourItems.map((item: any) => ({
           id: 0,
           itemType: 'Labour',
 
           materialId: 0,
+          partItemId: 0,
 
           labourId: item.labourId || 0,
           partWiseLabourId: item.partWiseLabourId || 0,
 
-          partItemId: 0,
-
-          qty: item.qty || 0,
-          rate: item.rate || 0,
+          qty: Number(item.qty || 0),
+          rate: Number(item.rate || 0),
           labourHsnCode: item.labourHsnCode || '',
-          discountValue: item.discountValue || 0,
-          discount: item.discount || 0,
+
+          discountValue: Number(item.discountValue || 0),
+          discount: Number(item.discount || 0),
           discountType: item.discountType || 'Value',
 
-          igstAmount: item.igstAmount || 0,
-          cgstAmount: item.cgstAmount || 0,
-          sgstAmount: item.sgstAmount || 0,
+          igstAmount: Number(item.igstAmount || 0),
+          cgstAmount: Number(item.cgstAmount || 0),
+          sgstAmount: Number(item.sgstAmount || 0),
 
-          taxableAmount: item.taxableAmount || 0,
-          netAmount: item.netAmount || 0,
+          taxableAmount: Number(item.taxableAmount || 0),
+          netAmount: Number(item.netAmount || 0),
 
-          issueType: item.issuetypeId || 0,
-
+          issueType: Number(item.issuetypeId || 0),
           isAutoGenerated: item.isAutoGenerated || false,
 
           partQty: 0,
@@ -1387,10 +2113,163 @@ export class RepairBill implements OnInit {
 
           partDiscount: 0,
           partTaxbleAmount: 0,
-          partNetAmount: 0
+          partNetAmount: 0,
+          totalTaxPer: Number(item.totalTaxPer || 0)
         }))
       ]
     };
+      // repairBillDetail: [
+      //   // Your Existing Part Mapping
+      //   ...this.partItems.map((item: any) => ({
+      //     id: 0,
+      //     itemType: 'Part',
+      //     partwiseLabourId: item.labourCodeDetailslist?.partwiseLabourId || 0,
+      //     materialId: item.materialTransferId || 0,
+      //     partItemId: item.itemId || 0,
+
+      //     qty: 0,
+      //     rate: 0,
+      //     partHsnCode: item.partHsnCode || '',
+
+      //     discountValue: item.discountValue || 0,
+      //     discount: item.discount || 0,
+      //     discountType: item.discountType || 'Value',
+
+      //     igstAmount: item.igstAmount || 0,
+      //     cgstAmount: item.cgstAmount || 0,
+      //     sgstAmount: item.sgstAmount || 0,
+
+      //     taxableAmount: 0,
+      //     netAmount: 0,
+
+      //     issueType: Number(item.issueType) || 0,
+
+      //     isAutoGenerated: false,
+
+      //     partQty: item.partQty || 0,
+      //     partRate: item.partRate || 0,
+      //     fscRate: item.fscRate || 0,
+
+      //     partDiscount: item.discount || 0,
+      //     partTaxbleAmount: item.taxableAmount || 0,
+      //     partNetAmount: item.netAmount || 0,
+      //     totalTaxPer: item.igst || 0
+
+      //   })),
+
+      //   // Your Existing Labour Mapping
+      //   ...this.labourItems.map((item: any) => ({
+      //     id: 0,
+      //     itemType: 'Labour',
+
+      //     materialId: 0,
+
+      //     labourId: item.labourId || 0,
+      //     partWiseLabourId: item.partWiseLabourId || 0,
+
+      //     partItemId: 0,
+
+      //     qty: item.qty || 0,
+      //     rate: item.rate || 0,
+      //     labourHsnCode: item.labourHsnCode || '',
+      //     discountValue: item.discountValue || 0,
+      //     discount: item.discount || 0,
+      //     discountType: item.discountType || 'Value',
+
+      //     igstAmount: item.igstAmount || 0,
+      //     cgstAmount: item.cgstAmount || 0,
+      //     sgstAmount: item.sgstAmount || 0,
+
+      //     taxableAmount: item.taxableAmount || 0,
+      //     netAmount: item.netAmount || 0,
+
+      //     issueType: item.issuetypeId || 0,
+
+      //     isAutoGenerated: item.isAutoGenerated || false,
+
+      //     partQty: 0,
+      //     partRate: 0,
+      //     fscRate: 0,
+
+      //     partDiscount: 0,
+      //     partTaxbleAmount: 0,
+      //     partNetAmount: 0
+      //   }))
+      // ]
+//       ...this.partItems.map((item: any) => ({
+//   id: 0,
+//   itemType: 'Part',
+
+//   materialId:
+//     item.materialTransferId ||
+//     item.materialId ||
+//     0,
+
+//   partItemId:
+//     item.itemId ||
+//     item.partItemId ||
+//     0,
+
+//   qty: 0,
+//   rate: 0,
+
+//   partHsnCode:
+//     item.partHsnCode || '',
+
+//   discountValue:
+//     item.discountValue || 0,
+
+//   discount:
+//     item.discount || 0,
+
+//   discountType:
+//     item.discountType || 'Value',
+
+//   igstAmount:
+//     item.igstAmount || 0,
+
+//   cgstAmount:
+//     item.cgstAmount || 0,
+
+//   sgstAmount:
+//     item.sgstAmount || 0,
+
+//   taxableAmount: 0,
+//   netAmount: 0,
+
+//   issueType:
+//     Number(
+//       item.issuetypeId ||
+//       item.issueType ||
+//       0
+//     ),
+
+//   isAutoGenerated:
+//     item.isAutoGenerated || true,
+
+//   partQty:
+//     item.partQty || 0,
+
+//   partRate:
+//     item.partRate || 0,
+
+//   fscRate:
+//     item.fscRate || 0,
+
+//   partDiscount:
+//     item.discount || 0,
+
+//   partTaxbleAmount:
+//     item.taxableAmount || 0,
+
+//   partNetAmount:
+//     item.netAmount || 0,
+
+//   totalTaxPer:
+//     item.totalTaxPer || 0
+// }))
+
+    //};
 
     this.loader.show();
 
@@ -1427,19 +2306,38 @@ export class RepairBill implements OnInit {
           ]);
         },
 
-        error: (err) => {
+        // error: (err) => {
 
+        //   this.loader.hide();
+
+        //   console.error(err);
+
+        //   this.toaster.show(
+        //     'Failed to Save Repair Bill',
+        //     {
+        //       classname: 'bg-danger text-dark',
+        //       delay: 5000
+        //     }
+        //   );
+        // }
+                error: (err) => {
           this.loader.hide();
+          console.error('InsertRepairBill error:', err);
 
-          console.error(err);
+          // 400 = validation errors, 500 = Details
+          const validation = err?.error?.errors
+            ? Object.values(err.error.errors).flat().join(' | ')
+            : '';
+          const msg = validation
+            || err?.error?.Details
+            || err?.error?.details
+            || err?.error?.title
+            || 'Failed to Save Repair Bill';
 
-          this.toaster.show(
-            'Failed to Save Repair Bill',
-            {
-              classname: 'bg-danger text-dark',
-              delay: 5000
-            }
-          );
+          this.toaster.show(msg, {
+            classname: 'bg-danger text-dark',
+            delay: 10000
+          });
         }
       });
   }
@@ -1685,7 +2583,8 @@ export class RepairBill implements OnInit {
         insuranceId: this.selectedInsuranceId || 0,
         insDescription: this.insuranceDescription || '',
         surveyorName: this.surveyorName || '',
-        contactNumber: this.contactNumber || 0,
+       // contactNumber: this.contactNumber || 0,
+       contactNumber: this.contactNumber ? Number(this.contactNumber) : null,
         //policyNo: this.policyNo || '',
         policyNo: Array.isArray(this.policyNo) ? this.policyNo[0] : this.policyNo,
 
@@ -1704,58 +2603,187 @@ export class RepairBill implements OnInit {
 
       repairBillDetail: [
 
-        // PART ITEMS
+        // // PART ITEMS
 
-        ...this.materialedJobCarDList.map((item: any) => ({
-          id: item.id,
-          itemType: 'Part',
+        // ...this.materialedJobCarDList.map((item: any) => ({
+        //   id: item.id,
+        //   itemType: 'Part',
 
-          materialId: item.materialTransferId || item.materialId || 0,
-          partItemId: item.itemId || item.partItemId || 0,
+        //   materialId: item.materialTransferId || item.materialId || 0,
+        //   partItemId: item.itemId || item.partItemId || 0,
 
-          labourId: item.labourId || 0,
-          partWiseLabourId: item.partWiseLabourId || 0,
+        //   labourId: item.labourId || 0,
+        //   partWiseLabourId: item.partWiseLabourId || 0,
 
-          //partItemId: item.itemId || 0,
+        //   //partItemId: item.itemId || 0,
 
-          qty: 0,
-          rate: 0,
-          partHsnCode: item.partHsnCode || '',
-          discountValue: item.discountValue || 0,
-          discount: item.discount || 0,
-          discountType: item.discountType || 'Value',
+        //   qty: 0,
+        //   rate: 0,
+        //   partHsnCode: item.partHsnCode || '',
+        //   discountValue: item.discountValue || 0,
+        //   discount: item.discount || 0,
+        //   discountType: item.discountType || 'Value',
 
-          igstAmount: item.igstAmount || 0,
-          cgstAmount: item.cgstAmount || 0,
-          sgstAmount: item.sgstAmount || 0,
+        //   igstAmount: item.igstAmount || 0,
+        //   cgstAmount: item.cgstAmount || 0,
+        //   sgstAmount: item.sgstAmount || 0,
 
-          taxableAmount: 0,
-          netAmount: 0,
+        //   taxableAmount: 0,
+        //   netAmount: 0,
 
 
-          issueType: Number(item.issueType) || 0,
+        //   issueType: Number(item.issueType) || 0,
 
-          isAutoGenerated: false,
+        //   isAutoGenerated: false,
 
-          partQty: item.partQty || 0,
-          partRate: item.partRate || 0,
-          fscRate: item.issuetypeName === 'U/W'
-            ? item.partRate
-            : item.issuetypeName === 'FSC'
-              ? item.fscRate
-              : 0,
+        //   partQty: item.partQty || 0,
+        //   partRate: item.partRate || 0,
+        //   fscRate: item.issuetypeName === 'U/W'
+        //     ? item.partRate
+        //     : item.issuetypeName === 'FSC'
+        //       ? item.fscRate
+        //       : 0,
 
-          partDiscount: item.discount || 0,
+        //   partDiscount: item.discount || 0,
 
-          partTaxbleAmount: item.taxableAmount || 0,
+        //   partTaxbleAmount: item.taxableAmount || 0,
 
-          partNetAmount: item.netAmount || 0,
-          totalTaxPer: item.igst
-        })),
+        //   partNetAmount: item.netAmount || 0,
+        //   totalTaxPer: item.igst
+        // })),
 
-        // LABOUR ITEMS
+        // // LABOUR ITEMS
+        // ...this.labourItems.map((item: any) => ({
+        //   id: item.id,
+        //   itemType: 'Labour',
+
+        //   materialId: 0,
+        //   partItemId: 0,
+
+        //   labourId: item.labourId || 0,
+        //   partWiseLabourId: item.partWiseLabourId || 0,
+
+        //   qty: item.qty || 0,
+        //   rate: item.rate || 0,
+        //   labourHsnCode: item.labourHsnCode || '',
+
+        //   discountValue: item.discountValue || 0,
+        //   discount: item.discount || 0,
+        //   discountType: item.discountType || 'Value',
+
+        //   igstAmount: item.igstAmount || 0,
+        //   cgstAmount: item.cgstAmount || 0,
+        //   sgstAmount: item.sgstAmount || 0,
+
+        //   taxableAmount: item.taxableAmount || 0,
+        //   netAmount: item.netAmount || 0,
+
+        //   issueType: Number(item.issuetypeId) || 0,
+
+        //   isAutoGenerated: item.isAutoGenerated || false,
+
+        //   partQty: 0,
+        //   fscRate: 0,
+
+        //   partDiscount: 0,
+        //   partTaxbleAmount: 0,
+        //   partNetAmount: 0
+        // }))
+        // ============================================
+// PART ITEMS
+// ============================================
+
+...this.partItems.map((item: any) => ({
+
+  id: item.id || 0,
+
+  itemType: 'Part',
+
+  materialId:
+    item.materialTransferId ||
+    item.materialId ||
+    0,
+
+  partItemId:
+    item.itemId ||
+    item.partItemId ||
+    0,
+
+  labourId:
+    item.labourId || 0,
+
+  partWiseLabourId:
+    item.partWiseLabourId || 0,
+
+  qty: 0,
+
+  rate: 0,
+
+  partHsnCode:
+    item.partHsnCode || '',
+
+  discountValue:
+    Number(item.discountValue || 0),
+
+  discount:
+    Number(item.discount || 0),
+
+  discountType:
+    item.discountType || 'Value',
+
+  igstAmount:
+    Number(item.igstAmount || 0),
+
+  cgstAmount:
+    Number(item.cgstAmount || 0),
+
+  sgstAmount:
+    Number(item.sgstAmount || 0),
+
+  taxableAmount: 0,
+
+  netAmount: 0,
+
+  issueType:
+    Number(
+      item.issuetypeId ||
+      item.issueType ||
+      0
+    ),
+
+  isAutoGenerated:
+    item.isAutoGenerated || true,
+
+  partQty:
+    Number(item.partQty || 0),
+
+  partRate:
+    Number(item.partRate || 0),
+
+  fscRate:
+    item.issuetypeName === 'U/W'
+      ? Number(item.partRate || 0)
+      : item.issuetypeName === 'FSC'
+        ? Number(item.fscRate || 0)
+        : 0,
+
+  partDiscount:
+    Number(item.discount || 0),
+
+  partTaxbleAmount:
+    Number(item.taxableAmount || 0),
+
+  partNetAmount:
+    Number(item.netAmount || 0),
+
+  totalTaxPer:
+    Number(item.totalTaxPer || 0)
+
+})),
+
+// ---------- LABOUR ITEMS ----------
         ...this.labourItems.map((item: any) => ({
-          id: item.id,
+          id: item.id || 0,
           itemType: 'Labour',
 
           materialId: 0,
@@ -1764,32 +2792,35 @@ export class RepairBill implements OnInit {
           labourId: item.labourId || 0,
           partWiseLabourId: item.partWiseLabourId || 0,
 
-          qty: item.qty || 0,
-          rate: item.rate || 0,
+          qty: Number(item.qty || 0),
+          rate: Number(item.rate || 0),
           labourHsnCode: item.labourHsnCode || '',
 
-          discountValue: item.discountValue || 0,
-          discount: item.discount || 0,
+          discountValue: Number(item.discountValue || 0),
+          discount: Number(item.discount || 0),
           discountType: item.discountType || 'Value',
 
-          igstAmount: item.igstAmount || 0,
-          cgstAmount: item.cgstAmount || 0,
-          sgstAmount: item.sgstAmount || 0,
+          igstAmount: Number(item.igstAmount || 0),
+          cgstAmount: Number(item.cgstAmount || 0),
+          sgstAmount: Number(item.sgstAmount || 0),
 
-          taxableAmount: item.taxableAmount || 0,
-          netAmount: item.netAmount || 0,
+          taxableAmount: Number(item.taxableAmount || 0),
+          netAmount: Number(item.netAmount || 0),
 
-          issueType: Number(item.issuetypeId) || 0,
-
+          issueType: Number(item.issuetypeId || 0),
           isAutoGenerated: item.isAutoGenerated || false,
 
           partQty: 0,
+          partRate: 0,
           fscRate: 0,
 
           partDiscount: 0,
           partTaxbleAmount: 0,
-          partNetAmount: 0
+          partNetAmount: 0,
+          totalTaxPer: Number(item.totalTaxPer || 0)
         }))
+      
+
       ]
     };
 
@@ -1927,95 +2958,174 @@ export class RepairBill implements OnInit {
     } as PartItem;
 
     this.partItems.push(partItem);
-    this.materialedJobCarDList.push(partItem); // kept in sync — calculateTotals() reads from materialedJobCarDList, the grid renders from partItems
+    //this.materialedJobCarDList.push(partItem); // kept in sync — calculateTotals() reads from materialedJobCarDList, the grid renders from partItems
 
     this.calculatePart(partItem); // computes GST/net, calls calculateTotals(), clears the entry form
 
-    this.loadSuggestedLabourForPart(partCode);
+    //this.loadSuggestedLabourForPart(partCode);
+    this.autoAddLabourForPart(partItem);
   }
 
-  // NEW
-  loadSuggestedLabourForPart(partCode: string): void {
-    const jobId = this.selectedJobCard?.jobCardHeader?.id;
-    if (!jobId) {
-      return;
-    }
+  autoAddLabourForPart(part: PartItem): void {
+  const jobId = this.selectedJobCard?.jobCardHeader?.id;
+  if (!jobId || !part?.partCode) {
+    return;
+  }
 
-    this.jobCardService.getLabourCodesByPart(partCode, jobId).subscribe({
-      next: (res: any[]) => {
-        if (res && res.length > 0) {
-          this.suggestedLabourList = res;
-          // Pre-checked by default — user deselects rather than hunting to select.
-          // Change to `new Set<number>()` if you'd rather they opt in instead.
-          this.selectedSuggestedLabourIds = new Set(res.map(x => x.partwiseLabourId));
-          this.showLabourSuggestionPopup = true;
+  this.jobCardService.getLabourCodesByPart(part.partCode, jobId).subscribe({
+    next: (res: any[]) => {
+      (res || []).forEach(labour => {
+        const pwId = labour.partWiseLabourId ?? labour.partwiseLabourId ?? 0;
+
+        // duplicate nako
+        const exists = this.labourItems.some(x =>
+          (pwId && x.partWiseLabourId === pwId) ||
+          (x.labourCode || '').trim().toLowerCase() ===
+          (labour.labourCode || '').trim().toLowerCase()
+        );
+        if (exists) {
+          return;
         }
-        // No matching labour codes: no popup, nothing interrupts the flow.
-      },
-      error: (err) => {
-        console.error('Error fetching suggested labour codes', err);
-      }
-    });
-  }
 
-  // NEW
-  toggleSuggestedLabour(id: number): void {
-    if (this.selectedSuggestedLabourIds.has(id)) {
-      this.selectedSuggestedLabourIds.delete(id);
-    } else {
-      this.selectedSuggestedLabourIds.add(id);
-    }
-  }
+        const isZeroTax = part.issuetypeName === 'U/W' || part.issuetypeName === 'FSC';
 
-  // NEW
-  confirmAddSuggestedLabour(): void {
-    this.suggestedLabourList
-      .filter(l => this.selectedSuggestedLabourIds.has(l.partwiseLabourId))
-      .forEach(labour => {
-        const exists = this.labourItems.some(x => x.partWiseLabourId === labour.partwiseLabourId);
-        if (exists) return;
+        const rate = Number(labour.labourRate || 0);
+        const cgst = Number(labour.cgst || 0);
+        const sgst = Number(labour.sgst || 0);
+        const igst = Number(labour.igst || 0);
+
+      
+        const dealer = (this.dealerState || '').trim().toUpperCase();
+        const cust = (this.selectedJobCard?.partyState || '').trim().toUpperCase();
+        const isSameState = !!dealer && dealer === cust;
+
+        const taxable = isZeroTax ? 0 : rate;
+        const cgstAmount = isZeroTax || !isSameState ? 0 : taxable * cgst / 100;
+        const sgstAmount = isZeroTax || !isSameState ? 0 : taxable * sgst / 100;
+        const igstAmount = isZeroTax || isSameState ? 0 : taxable * igst / 100;
+        const taxAmount = cgstAmount + sgstAmount + igstAmount;
 
         this.labourItems.push({
-          partWiseLabourId: labour.partwiseLabourId,
+          partWiseLabourId: pwId,
           labourId: 0,
           labourCode: labour.labourCode,
-          description: labour.labourName,
+          description: labour.labourName ?? labour.labourDescription ?? '',
           qty: 1,
-          rate: labour.labourRate ?? 0,
+          rate: rate,
           waveRate: this.waveRate ?? 0,
-          labourHsnCode: labour.labourHsnCode ?? '',
+          labourHsnCode: labour.labourHsnCode ?? labour.hsnCode ?? labour.hsncode ?? '',
           discountValue: 0,
           discount: 0,
-          discountType: this.discountType,
-          igst: labour.igst ?? 0,
-          igstAmount: 0,
-          cgst: labour.cgst ?? 0,
-          cgstAmount: 0,
-          sgst: labour.sgst ?? 0,
-          sgstAmount: 0,
-          taxableAmount: 0,
-          taxAmount: 0,
-          totalTaxPer: 0,
-          netAmount: labour.labourRate ?? 0,
-          issuetypeId: 0,
-          issuetypeName: '',
-          // Deliberately NOT auto-generated: the user explicitly confirmed
-          // this one, unlike the silent Material-Transfer-driven rows — so
-          // it stays editable/deletable like any manually-added labour line.
-          isAutoGenerated: false,
-          partCode: null
-        });
+          discountType: 'Value',
+          cgst: cgst,
+          sgst: sgst,
+          igst: igst,
+          cgstAmount: cgstAmount,
+          sgstAmount: sgstAmount,
+          igstAmount: igstAmount,
+          taxableAmount: taxable,
+          taxAmount: taxAmount,
+          totalTaxPer: isSameState ? cgst + sgst : igst,
+          netAmount: taxable + taxAmount,
+          issuetypeId: part.issuetypeId || 0,
+          issuetypeName: part.issuetypeName || '',
+          isAutoGenerated: true,
+          partCode: part.partCode,
+          dealerState: this.dealerState,
+          custState: this.selectedJobCard?.partyState
+        } as LabourItem);
       });
 
-    this.calculateTotals();
-    this.closeSuggestedLabourPopup();
-  }
+      this.calculateTotals();
+    },
+    error: (err) => {
+      console.error('Error fetching labour for part', err);
+    }
+  });
+}
 
   // NEW
-  closeSuggestedLabourPopup(): void {
-    this.showLabourSuggestionPopup = false;
-    this.suggestedLabourList = [];
-    this.selectedSuggestedLabourIds = new Set<number>();
-  }
+  // loadSuggestedLabourForPart(partCode: string): void {
+  //   const jobId = this.selectedJobCard?.jobCardHeader?.id;
+  //   if (!jobId) {
+  //     return;
+  //   }
+
+  //   this.jobCardService.getLabourCodesByPart(partCode, jobId).subscribe({
+  //     next: (res: any[]) => {
+  //       if (res && res.length > 0) {
+  //         this.suggestedLabourList = res;
+  //         // Pre-checked by default — user deselects rather than hunting to select.
+  //         // Change to `new Set<number>()` if you'd rather they opt in instead.
+  //         this.selectedSuggestedLabourIds = new Set(res.map(x => x.partwiseLabourId));
+  //         this.showLabourSuggestionPopup = true;
+  //       }
+  //       // No matching labour codes: no popup, nothing interrupts the flow.
+  //     },
+  //     error: (err) => {
+  //       console.error('Error fetching suggested labour codes', err);
+  //     }
+  //   });
+  // }
+
+  // // NEW
+  // toggleSuggestedLabour(id: number): void {
+  //   if (this.selectedSuggestedLabourIds.has(id)) {
+  //     this.selectedSuggestedLabourIds.delete(id);
+  //   } else {
+  //     this.selectedSuggestedLabourIds.add(id);
+  //   }
+  // }
+
+  // // NEW
+  // confirmAddSuggestedLabour(): void {
+  //   this.suggestedLabourList
+  //     .filter(l => this.selectedSuggestedLabourIds.has(l.partwiseLabourId))
+  //     .forEach(labour => {
+  //       const exists = this.labourItems.some(x => x.partWiseLabourId === labour.partwiseLabourId);
+  //       if (exists) return;
+
+  //       this.labourItems.push({
+  //         partWiseLabourId: labour.partwiseLabourId,
+  //         labourId: 0,
+  //         labourCode: labour.labourCode,
+  //         description: labour.labourName,
+  //         qty: 1,
+  //         rate: labour.labourRate ?? 0,
+  //         waveRate: this.waveRate ?? 0,
+  //         labourHsnCode: labour.labourHsnCode ?? '',
+  //         discountValue: 0,
+  //         discount: 0,
+  //         discountType: this.discountType,
+  //         igst: labour.igst ?? 0,
+  //         igstAmount: 0,
+  //         cgst: labour.cgst ?? 0,
+  //         cgstAmount: 0,
+  //         sgst: labour.sgst ?? 0,
+  //         sgstAmount: 0,
+  //         taxableAmount: 0,
+  //         taxAmount: 0,
+  //         totalTaxPer: 0,
+  //         netAmount: labour.labourRate ?? 0,
+  //         issuetypeId: 0,
+  //         issuetypeName: '',
+  //         // Deliberately NOT auto-generated: the user explicitly confirmed
+  //         // this one, unlike the silent Material-Transfer-driven rows — so
+  //         // it stays editable/deletable like any manually-added labour line.
+  //         isAutoGenerated: false,
+  //         partCode: null
+  //       });
+  //     });
+
+  //   this.calculateTotals();
+  //   this.closeSuggestedLabourPopup();
+  // }
+
+  // // NEW
+  // closeSuggestedLabourPopup(): void {
+  //   this.showLabourSuggestionPopup = false;
+  //   this.suggestedLabourList = [];
+  //   this.selectedSuggestedLabourIds = new Set<number>();
+  // }
 
 }
