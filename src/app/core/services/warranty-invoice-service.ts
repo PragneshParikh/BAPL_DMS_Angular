@@ -34,6 +34,12 @@ export class WarrantyInvoiceService {
     return this.httpClient.get(`${this.baseUrl}/WarrantyInvoice/GetNextInvoiceNumbers?dealerCode=${dealerCode}`);
   }
 
+  getPendingOrders(dealerCode: string) {
+  return this.httpClient.get<any[]>(
+    `${this.baseUrl}/WarrantyInvoice/GetPendingOrders`,
+    { params: { dealerCode } }
+  );
+}
   // Reuses the already-working, approved-only search on the Order side -
   // this is how the invoice form's own claim/order picker finds orders
   // that are eligible to be batched into an invoice.

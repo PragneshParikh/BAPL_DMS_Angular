@@ -31,13 +31,17 @@
 
                                 <div class="col-md-3">
                                     <label class="form-label mb-0 small">Location</label>
-                                    <select class="form-select form-select-sm border-start border-2" name="location"
+                                     <select class="form-select form-select-sm border-start border-2" name="location"
                                         #location="ngModel" [class.is-invalid]="locationInvalid"
                                         (change)="onLocationChange($event)" [(ngModel)]="partsPOData.selectedLocation">
                                         <option value="">-- Select --</option>
                                         <option *ngFor="let loc of locationList" [value]="loc.loccode">{{loc.locname}}
                                         </option>
-                                    </select>
+                                    </select> 
+                                    <!-- <select class="form-select form-select-sm border-start border-2" name="location"
+                                        #location="ngModel" [class.is-invalid]="locationInvalid"
+                                         (ngModelChange)="onLocationChange($event)" [(ngModel)]="partsPOData.selectedLocation">
+                                     </select>  -->
                                 </div>
 
                                 <div class="col-md-2">

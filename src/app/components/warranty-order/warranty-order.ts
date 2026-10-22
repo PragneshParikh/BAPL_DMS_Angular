@@ -110,50 +110,215 @@ export class WarrantyOrder implements OnInit {
       // Nothing new pending - show the most recently saved order straight
       // from the DB (not sessionStorage, which doesn't survive a fresh
       // session/browser restart) so this always reflects real persisted data.
-      this.loadLatestSavedOrder();
+      //this.loadLatestSavedOrder();
+      this.loadPendingClaims();
     }
   }
 
-  loadLatestSavedOrder(): void {
-    // includeInactive is deliberately omitted (defaults to false) here -
-    // this is the "nothing specific pending, just show something" fallback
-    // for a fresh visit. If it included a just-deleted order, the user
-    // would land on an order they can no longer Save (UpdateWarrantyOrder
-    // requires IsActive=true), blocking them from starting a new batch.
-    // Viewing a specific deleted order on purpose (double-click from the
-    // List) still works fine via viewOrderId + GetWarrantyOrderById, which
-    // has no IsActive filter - only this default landing view is scoped
-    // back to active orders.
-    this.warrantyOrderService.searchWarrantyOrders({ pageNumber: 1, pageSize: 1 }).subscribe({
-      next: (res: any) => {
-        const items = res?.items || [];
-        if (items.length > 0) {
-          this.orderId = items[0].id;
-          this.loadExistingOrder(this.orderId);
-        } else {
-          // No active orders exist right now - still load historical
-          // claims (id 0 = nothing to exclude) so any deleted order's
-          // claim remains visible here for reference/re-batching, even
-          // though the main form itself is starting blank.
-          this.loadNextOrderNumbers();
-          this.loadHistoricalClaims(0);
-        }
-      },
-      error: (err) => {
-        // Surfaced instead of silently falling back to blank - a failed
-        // fetch (auth/network) would otherwise look identical to
-        // genuinely-no-data-saved, which is misleading.
-        console.error('loadLatestSavedOrder failed:', err);
-        const serverMsg = err?.error?.title || err?.error || err?.message || 'Unknown error';
-        this.toaster.show(`Could not load the last saved order (status ${err?.status}): ${serverMsg}`, {
-          classname: 'bg-danger text-white',
-          delay: 5000
-        });
-        this.loadNextOrderNumbers();
-      }
-    });
-  }
+//  loadLatestSavedOrder(): void {
 
+//     // includeInactive is deliberately omitted (defaults to false) here -
+
+//     // this is the "nothing specific pending, just show something" fallback
+
+//     // for a fresh visit. If it included a just-deleted order, the user
+
+//     // would land on an order they can no longer Save (UpdateWarrantyOrder
+
+//     // requires IsActive=true), blocking them from starting a new batch.
+
+//     // Viewing a specific deleted order on purpose (double-click from the
+
+//     // List) still works fine via viewOrderId + GetWarrantyOrderById, which
+
+//     // has no IsActive filter - only this default landing view is scoped
+
+//     // back to active orders.
+
+//     this.warrantyOrderService.searchWarrantyOrders({ pageNumber: 1, pageSize: 1 }).subscribe({
+
+//       next: (res: any) => {
+
+//         const items = res?.items || [];
+
+//         if (items.length > 0) {
+
+//           this.orderId = items[0].id;
+
+//           this.loadExistingOrder(this.orderId);
+
+//         } else {
+
+//           // No active orders exist right now - still load historical
+
+//           // claims (id 0 = nothing to exclude) so any deleted order's
+
+//           // claim remains visible here for reference/re-batching, even
+
+//           // though the main form itself is starting blank.
+
+//           this.loadNextOrderNumbers();
+
+//           this.loadHistoricalClaims(0);
+
+//         }
+
+//       },
+
+//       error: (err) => {
+
+//         // Surfaced instead of silently falling back to blank - a failed
+
+//         // fetch (auth/network) would otherwise look identical to
+
+//         // genuinely-no-data-saved, which is misleading.
+
+//         console.error('loadLatestSavedOrder failed:', err);
+
+//         const serverMsg = err?.error?.title || err?.error || err?.message || 'Unknown error';
+
+//         this.toaster.show(`Could not load the last saved order (status ${err?.status}): ${serverMsg}`, {
+
+//           classname: 'bg-danger text-white',
+
+//           delay: 5000
+
+//         });
+
+//         this.loadNextOrderNumbers();
+
+//       }
+
+//     });
+
+//   }
+
+
+
+// loadLatestSavedOrder(): void {
+//     this.warrantyOrderService.searchWarrantyOrders({ pageNumber: 1, pageSize: 1 }).subscribe({
+//       next: (res: any) => {
+//         const items = res?.items || [];
+//         if (items.length > 0) {
+//           this.orderId = items[0].id;
+//           this.loadExistingOrder(this.orderId);
+//         } else {
+//           this.loadNextOrderNumbers();
+//           this.loadHistoricalClaims(0);
+          
+//          const dealerCode = this.storageService.getDealerCode();
+// this.warrantyOrderService.getAllWarrantyJCClaims(dealerCode).subscribe({
+//   next: (claims: any[]) => {
+//     if (!claims || claims.length === 0) {
+//       this.selectedClaims = [];
+//       return;
+//     }
+
+//     // प्रत्येक क्लेमचे पूर्ण तपशील (पार्ट्स, लेबर, इन्व्हॉइस सह) मिळवण्यासाठी forkJoin वापरूया
+//     const detailRequests = claims.map(c => this.warrantyOrderService.getWarrantyJCClaimById(c.id));
+    
+//     forkJoin(detailRequests).subscribe({
+//       next: (fullClaims: any[]) => {
+//         this.selectedClaims = fullClaims.map((c: any) => ({
+//           ...c,
+//           isApproved: false,
+//           serviceLocation: c.serviceLocation || c.locationCode || c.locationName || '',
+//           locationName: c.locationName || c.serviceLocation || '',
+//           partyName: c.partyName || c.supplierName || 'BGAUSS AUTO PRIVATE LIMITED',
+//           serviceHead: c.serviceHead || c.claimType || '',
+//           kms: c.kms ?? c.kilometers ?? 0,
+//           invoiceNo: c.invoiceNo || c.repBillNo || c.billNo || '',
+//           invoiceDate: c.invoiceDate || c.repBillDate || c.billDate || '',
+//           jobCardNo: c.jobCardNo || c.jobCardNumber || '',
+//           jobCardDate: c.jobCardDate || '',
+//           details: c.details || [] 
+//         }));
+
+//         if (this.selectedClaims.length > 0) {
+//           const firstClaim = this.selectedClaims[0];
+//           if (firstClaim.serviceLocation) {
+//             this.locationList = [{ loccode: firstClaim.serviceLocation, locname: firstClaim.locationName || firstClaim.serviceLocation }];
+//             this.selectedLocation = firstClaim.serviceLocation;
+//           }
+//           if (firstClaim.supplierId) {
+//             this.selectedSupplierId = firstClaim.supplierId;
+//           }
+//         }
+//       },
+//       error: (err) => console.error('Error fetching full claim details', err)
+//     });
+//   },
+//   error: (err) => console.error('Error fetching unlinked claims', err)
+// });
+//         }
+//       },
+//       error: (err) => {
+//         console.error('loadLatestSavedOrder failed:', err);
+//         this.loadNextOrderNumbers();
+//       }
+//     });
+//   }
+
+
+loadPendingClaims(): void {
+  this.loader.show();
+  
+  this.loadNextOrderNumbers();
+  
+  const dealerCode = this.storageService.getDealerCode();
+  this.warrantyOrderService.getAllWarrantyJCClaims(dealerCode).subscribe({
+    next: (claims: any[]) => {
+      this.loader.hide();
+      
+      if (!claims || claims.length === 0) {
+       
+        this.selectedClaims = [];
+        return;
+      }
+
+      const detailRequests = claims.map(c => this.warrantyOrderService.getWarrantyJCClaimById(c.id));
+      
+      forkJoin(detailRequests).subscribe({
+        next: (fullClaims: any[]) => {
+          this.selectedClaims = fullClaims.map((c: any) => ({
+            ...c,
+            isApproved: false, 
+            serviceLocation: c.serviceLocation || c.locationCode || c.locationName || '',
+            locationName: c.locationName || c.serviceLocation || '',
+            partyName: c.partyName || c.supplierName || 'BGAUSS AUTO PRIVATE LIMITED',
+            serviceHead: c.serviceHead || c.claimType || '',
+            kms: c.kms ?? c.kilometers ?? 0,
+            invoiceNo: c.invoiceNo || c.repBillNo || c.billNo || '',
+            invoiceDate: c.invoiceDate || c.repBillDate || c.billDate || '',
+            jobCardNo: c.jobCardNo || c.jobCardNumber || '',
+            jobCardDate: c.jobCardDate || '',
+            details: c.details || []
+          }));
+
+          if (this.selectedClaims.length > 0) {
+            const firstClaim = this.selectedClaims[0];
+            if (firstClaim.serviceLocation) {
+              this.locationList = [{ loccode: firstClaim.serviceLocation, locname: firstClaim.locationName || firstClaim.serviceLocation }];
+              this.selectedLocation = firstClaim.serviceLocation;
+            }
+            if (firstClaim.supplierId) {
+              this.selectedSupplierId = firstClaim.supplierId;
+            }
+          }
+        },
+        error: (err) => {
+          this.loader.hide();
+          console.error('Error fetching claim details:', err);
+        }
+      });
+    },
+    error: (err) => {
+      this.loader.hide();
+      console.error('Error fetching pending claims:', err);
+      this.selectedClaims = [];
+    }
+  });
+}
   // Uses the header's own fields as filter criteria - Batch No / Order No
   // stay read-only (auto-generated), so search works by Date From/To,
   // Location, Claim Type, and Supplier.
@@ -229,6 +394,59 @@ export class WarrantyOrder implements OnInit {
       });
     }
 
+  // loadExistingOrder(id: number): void {
+  //   this.loader.show();
+  //   this.warrantyOrderService.getWarrantyOrderById(id).subscribe({
+  //     next: (res: any) => {
+  //       this.loader.hide();
+  //       this.dateFrom = res.dateFrom?.substring(0, 10);
+  //       this.dateTo = res.dateTo?.substring(0, 10);
+  //       this.batchNo = res.batchNo;
+  //       this.batchDate = res.batchDate?.substring(0, 10);
+  //       this.orderNo = res.orderNo;
+  //       this.orderDate = res.orderDate?.substring(0, 10);
+
+  //       // Resolve against the exact loccode in locationList (case/whitespace
+  //       // tolerant) rather than assigning res.location directly - same
+  //       // safeguard preloadClaimFromQueryParam already uses, now applied
+  //       // here too since this is the second place selectedLocation gets set.
+  //       // Show only this order's own location as the sole dropdown option -
+  //       // not a full dealer-scoped list. Removes the need to "match" against
+  //       // anything, which also sidesteps the cross-dealer mismatch entirely
+  //       // (the code can legitimately belong to a different dealer than the
+  //       // one viewing it).
+  //       if (res.location) {
+  //         this.locationList = [{ loccode: res.location, locname: res.locationName || res.location }];
+  //       } else {
+  //         this.locationList = [];
+  //       }
+  //       this.selectedLocation = res.location;
+
+  //       this.claimType = res.claimType;
+  //       this.selectedSupplierId = res.supplierId;
+
+  //       // Claims now come pre-resolved directly from the backend's
+  //       // WarrantyOrderGridDetail snapshot - no more per-claim follow-up
+  //       // calls, and no live joins on the read path at all.
+  //       this.selectedClaims = res.claims || [];
+  //       this.isEditMode = false;
+
+  //       // Captured BEFORE any checkbox interaction this page load - this
+  //       // is the order's saved approval state from the DB, not affected
+  //       // by anything the user does after this point.
+  //       this.wasApprovedOnLoad = !!res.isApproved;
+
+  //       // Also load recent OTHER orders' claims for read-only display
+  //       // stacked above this one, so multiple orders show on one screen.
+  //       this.loadHistoricalClaims(id);
+  //     },
+  //     error: (err) => {
+  //       this.loader.hide();
+  //       console.error(err);
+  //       this.toaster.show('Failed to load Warranty Order.', { classname: 'bg-danger text-white', delay: 3000 });
+  //     }
+  //   });
+  // }
   loadExistingOrder(id: number): void {
     this.loader.show();
     this.warrantyOrderService.getWarrantyOrderById(id).subscribe({
@@ -241,15 +459,6 @@ export class WarrantyOrder implements OnInit {
         this.orderNo = res.orderNo;
         this.orderDate = res.orderDate?.substring(0, 10);
 
-        // Resolve against the exact loccode in locationList (case/whitespace
-        // tolerant) rather than assigning res.location directly - same
-        // safeguard preloadClaimFromQueryParam already uses, now applied
-        // here too since this is the second place selectedLocation gets set.
-        // Show only this order's own location as the sole dropdown option -
-        // not a full dealer-scoped list. Removes the need to "match" against
-        // anything, which also sidesteps the cross-dealer mismatch entirely
-        // (the code can legitimately belong to a different dealer than the
-        // one viewing it).
         if (res.location) {
           this.locationList = [{ loccode: res.location, locname: res.locationName || res.location }];
         } else {
@@ -260,20 +469,11 @@ export class WarrantyOrder implements OnInit {
         this.claimType = res.claimType;
         this.selectedSupplierId = res.supplierId;
 
-        // Claims now come pre-resolved directly from the backend's
-        // WarrantyOrderGridDetail snapshot - no more per-claim follow-up
-        // calls, and no live joins on the read path at all.
         this.selectedClaims = res.claims || [];
         this.isEditMode = false;
-
-        // Captured BEFORE any checkbox interaction this page load - this
-        // is the order's saved approval state from the DB, not affected
-        // by anything the user does after this point.
         this.wasApprovedOnLoad = !!res.isApproved;
 
-        // Also load recent OTHER orders' claims for read-only display
-        // stacked above this one, so multiple orders show on one screen.
-        this.loadHistoricalClaims(id);
+        this.historicalClaims = []; 
       },
       error: (err) => {
         this.loader.hide();
@@ -635,63 +835,66 @@ export class WarrantyOrder implements OnInit {
   // invoice/chassis/party info on every line. isFirstLineOfClaim marks
   // where to show the per-claim "Remove" button (only ever true for the
   // CURRENT order's own rows - historical rows never show it).
-  private buildRowsFromClaims(claims: any[], startSrNo: number, isHistorical: boolean): any[] {
-    const rows: any[] = [];
-    let srNo = startSrNo;
+ private buildRowsFromClaims(claims: any[], startSrNo: number, isHistorical: boolean): any[] {
+  const rows: any[] = [];
+  let srNo = startSrNo;
 
-    claims.forEach(claim => {
-      const lines = (claim.details && claim.details.length > 0) ? claim.details : [null];
+  claims.forEach(claim => {
+    const lines = (claim.details && claim.details.length > 0) ? claim.details : [null];
 
-      lines.forEach((line: any, i: number) => {
-        rows.push({
-          srNo: srNo++,
-          claimId: claim.id,
-          isFirstLineOfClaim: i === 0,
-          isApproved: !!claim.isApproved,
-          isHistorical,
-          orderId: claim._orderId ?? this.orderId,
-          isOrderDeleted: !!claim._isOrderDeleted,
-          orderNo: claim._orderNo ?? this.orderNo,
-          batchNo: claim._batchNo ?? this.batchNo,
+    lines.forEach((line: any, i: number) => {
+      rows.push({
+        srNo: srNo++,
+        claimId: claim.id,
+        isFirstLineOfClaim: i === 0,
+        isApproved: !!claim.isApproved,
+        isHistorical,
+        orderId: claim._orderId ?? this.orderId,
+        isOrderDeleted: !!claim._isOrderDeleted,
+        orderNo: claim._orderNo ?? this.orderNo,
+        batchNo: claim._batchNo ?? this.batchNo,
 
-          claimNo: `${claim.claimPrefix || ''}${claim.claimNo || ''}`,
-          claimDate: claim.claimDate,
+        claimNo: `${claim.claimPrefix || ''}${claim.claimNo || ''}`,
+        claimDate: claim.claimDate,
 
-          jobCardNo: claim.jobCardNo,       // ASSUMPTION - see chat note
-          jobCardDate: claim.jobCardDate,   // ASSUMPTION - see chat note
+        // 👇 JobCard आणि Invoice साठी अचूक fallbacks दिले आहेत:
+        jobCardNo: claim.jobCardNo || claim.jobCardNumber || '',
+        jobCardDate: claim.jobCardDate || '',
 
-          invoiceNo: claim.invoiceNo,       // ASSUMPTION - see chat note
-          invoiceDate: claim.invoiceDate,   // ASSUMPTION - see chat note
+        invoiceNo: claim.invoiceNo || claim.repBillNo || claim.billNo || '',
+        invoiceDate: claim.invoiceDate || claim.repBillDate || claim.billDate || '',
 
-          serviceHead: claim.serviceHead,
-          kms: claim.kms,
+        // 👇 Service Head आणि KMS साठी fallbacks:
+        serviceHead: claim.serviceHead || claim.claimType || '',
+        kms: claim.kms ?? claim.kilometers ?? claim.distance ?? 0,
 
-          locationName: claim.locationName || '',
+        // 👇 Location आणि Party साठी fallbacks:
+        locationName: claim.locationName || claim.serviceLocation || claim.locationCode || '',
 
-          chassisNo: claim.chassisNo,
-          motorNo: claim.motorNo,           // ASSUMPTION - see chat note
-          partyName: claim.partyName,
+        chassisNo: claim.chassisNo,
+        motorNo: claim.motorNo || '',
+        partyName: claim.partyName || claim.supplierName || 'BGAUSS AUTO PRIVATE LIMITED',
 
-          partName: line?.partName || '',
-          partDescription: line?.partDescription || '',
-          partCode: line?.partCode || '',
-          labourCode: line?.labourCode || '',
-          labourDescription: line?.labourDescription || '',
-          quantity: line?.quantity ?? '',
-          cgstPercent: line?.cgstPercent ?? 0,
-          cgstAmount: line?.cgstAmount ?? 0,
-          sgstPercent: line?.sgstPercent ?? 0,
-          sgstAmount: line?.sgstAmount ?? 0,
-          igstPercent: line?.igstPercent ?? 0,
-          igstAmount: line?.igstAmount ?? 0,
-          totalAmount: line?.totalAmount ?? 0,
-          mrp: line?.mrp ?? 0
-        });
+        partName: line?.partName || '',
+        partDescription: line?.partDescription || '',
+        partCode: line?.partCode || '',
+        labourCode: line?.labourCode || '',
+        labourDescription: line?.labourDescription || '',
+        quantity: line?.quantity ?? '',
+        cgstPercent: line?.cgstPercent ?? 0,
+        cgstAmount: line?.cgstAmount ?? 0,
+        sgstPercent: line?.sgstPercent ?? 0,
+        sgstAmount: line?.sgstAmount ?? 0,
+        igstPercent: line?.igstPercent ?? 0,
+        igstAmount: line?.igstAmount ?? 0,
+        totalAmount: line?.totalAmount ?? 0,
+        mrp: line?.mrp ?? 0
       });
     });
+  });
 
-    return rows;
-  }
+  return rows;
+}
 
   // Historical (other orders') rows first - oldest first, so the current
   // order's own rows render last, i.e. "below the previous entry". Only
@@ -826,58 +1029,105 @@ export class WarrantyOrder implements OnInit {
     const rebatchRequests$ = deletedOrderClaimsToRebatch
       .map(claim => this.createNewOrderForClaim(claim));
 
-    forkJoin([request$, ...historicalUpdateRequests$, ...rebatchRequests$]).subscribe({
+//     forkJoin([request$, ...historicalUpdateRequests$, ...rebatchRequests$]).subscribe({
+//       next: ([res]: any[]) => {
+//         this.saving = false;
+//         this.loader.hide();
+//         this.toaster.show(
+//           savingMainOrder
+//             ? (this.orderId > 0 ? 'Warranty Order updated successfully.' : 'Warranty Order saved successfully.')
+//             : 'Changes saved successfully.',
+//           { classname: 'bg-success text-white', delay: 3000 }
+//         );
+
+//         sessionStorage.removeItem('pendingWarrantyOrderClaim');
+
+//         // Computed up front, not just inside the navigateAfter=false branch
+//         // below - both autoCreateInvoiceForOrder() and sendToErp() need
+//         // the saved order's id regardless of which branch runs.
+//         const savedId = res?.orderId ?? this.orderId;
+//         if (savedId) {
+//           this.orderId = Number(savedId);
+//         }
+
+//         // Only fires when this Save click just created a brand-new order (i.e.
+//         // the user checked a claim's box and clicked Save for the first time) -
+//         // fire-and-forget, doesn't block navigation either way.
+//         const orderJustBecameApproved = savingMainOrder && !this.wasApprovedOnLoad && this.isApproved;
+
+//         if (orderJustBecameApproved && savedId) {
+//           this.autoCreateInvoiceForOrder(Number(savedId));
+//         }
+
+//         // Send to ERP - automatic on every save of the main order, same
+//         // pattern as Warranty Invoice's own Save flow. Bifurcated: skip
+//         // entirely when this order has no Part lines at all (labour-only) -
+//         // BuildErpPayload would return zero PO lines for it regardless, so
+//         // calling the endpoint would only ever produce a "no claim lines to
+//         // send" error for no reason. When Parts and Labour are mixed on the
+//         // same order, the backend's BuildErpPayload already filters down to
+//         // Part-type grid rows only before building the payload - Labour
+//         // lines are never included in what gets sent.
+//         if (savingMainOrder && savedId && this.hasAnyPartLine) {
+//           this.sendToErp(Number(savedId));
+//         }
+
+// // Prevent re-firing invoice creation on a second Save within the same
+// // session (e.g. navigateAfter=false keeps the component alive without a
+// // fresh GET) - the unapproved -> approved transition only happens once.
+// this.wasApprovedOnLoad = this.isApproved;
+
+//         if (navigateAfter) {
+//           this.router.navigate(['/warranty-order-list']);
+//         } else {
+//           this.loadHistoricalClaims(this.orderId);
+//         }
+//       },
+//       error: (err) => {
+//         this.loader.hide();
+//         this.saving = false;
+//         console.error('Validation errors:', err?.error);
+//         const serverMsg = err?.error?.title || err?.error || 'Something went wrong. Check console for details.';
+//         this.toaster.show(serverMsg, { classname: 'bg-danger text-white', delay: 3000 });
+//       }
+//     });
+          forkJoin([request$, ...historicalUpdateRequests$, ...rebatchRequests$]).subscribe({
       next: ([res]: any[]) => {
         this.saving = false;
         this.loader.hide();
-        this.toaster.show(
-          savingMainOrder
-            ? (this.orderId > 0 ? 'Warranty Order updated successfully.' : 'Warranty Order saved successfully.')
-            : 'Changes saved successfully.',
-          { classname: 'bg-success text-white', delay: 3000 }
-        );
+
+       
+        this.toaster.show('Warranty Order saved successfully!', { 
+          classname: 'bg-success text-white', 
+          delay: 3000 
+        });
 
         sessionStorage.removeItem('pendingWarrantyOrderClaim');
 
-        // Computed up front, not just inside the navigateAfter=false branch
-        // below - both autoCreateInvoiceForOrder() and sendToErp() need
-        // the saved order's id regardless of which branch runs.
         const savedId = res?.orderId ?? this.orderId;
         if (savedId) {
           this.orderId = Number(savedId);
         }
 
-        // Only fires when this Save click just created a brand-new order (i.e.
-        // the user checked a claim's box and clicked Save for the first time) -
-        // fire-and-forget, doesn't block navigation either way.
         const orderJustBecameApproved = savingMainOrder && !this.wasApprovedOnLoad && this.isApproved;
 
         if (orderJustBecameApproved && savedId) {
           this.autoCreateInvoiceForOrder(Number(savedId));
         }
 
-        // Send to ERP - automatic on every save of the main order, same
-        // pattern as Warranty Invoice's own Save flow. Bifurcated: skip
-        // entirely when this order has no Part lines at all (labour-only) -
-        // BuildErpPayload would return zero PO lines for it regardless, so
-        // calling the endpoint would only ever produce a "no claim lines to
-        // send" error for no reason. When Parts and Labour are mixed on the
-        // same order, the backend's BuildErpPayload already filters down to
-        // Part-type grid rows only before building the payload - Labour
-        // lines are never included in what gets sent.
         if (savingMainOrder && savedId && this.hasAnyPartLine) {
           this.sendToErp(Number(savedId));
         }
 
-// Prevent re-firing invoice creation on a second Save within the same
-// session (e.g. navigateAfter=false keeps the component alive without a
-// fresh GET) - the unapproved -> approved transition only happens once.
-this.wasApprovedOnLoad = this.isApproved;
+        this.wasApprovedOnLoad = this.isApproved;
 
+       
         if (navigateAfter) {
+         
           this.router.navigate(['/warranty-order-list']);
         } else {
-          this.loadHistoricalClaims(this.orderId);
+          
+          //this.loadPendingClaims();
         }
       },
       error: (err) => {
@@ -888,7 +1138,9 @@ this.wasApprovedOnLoad = this.isApproved;
         this.toaster.show(serverMsg, { classname: 'bg-danger text-white', delay: 3000 });
       }
     });
-  }
+
+}
+ 
 
   // Reports success/failure of the ERP push explicitly, since it's its own
   // request rather than a field bundled into the save response (see
@@ -984,4 +1236,5 @@ this.wasApprovedOnLoad = this.isApproved;
       }
     });
   }
+  
 }
