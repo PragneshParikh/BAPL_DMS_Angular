@@ -376,7 +376,7 @@
         }">{{ item.status }}</span>
     </td>
 
-    <!-- REASON COLUMN -->
+   
     <td>
       <input
         *ngIf="item.status === 'Pending' || editingId === item.id"
@@ -389,9 +389,9 @@
       <span *ngIf="item.status !== 'Pending' && editingId !== item.id" class="text-muted">{{ item.rejectionReason || '' }}</span>
     </td>
 
-    <!-- ACTION BUTTONS / STATUS DISPLAY COLUMN -->
+   
     <td class="text-center">
-      <!-- PENDING STATE ACTIONS -->
+     
       <div class="uw-action-stack" *ngIf="item.status === 'Pending' && canEdit">
         <button
           type="button"
@@ -411,7 +411,7 @@
         </button>
       </div>
 
-      <!-- EDITING / APPROVED STATE ACTIONS -->
+     
       <div class="uw-action-stack" *ngIf="item.status === 'Approved' && editingId === item.id && canEdit">
         <button
           type="button"
@@ -431,14 +431,14 @@
         </button>
       </div>
 
-      <!-- APPROVED DISPLAY (WHEN NOT EDITING) -->
+     
       <div *ngIf="item.status === 'Approved' && editingId !== item.id" class="mt-1">
         <div class="uw-sub"><strong>Approved</strong></div>
         <div class="uw-sub">Date: {{ item.actionDateDisplay || '-' }}</div>
         <div class="uw-sub">Time: {{ item.actionTimeDisplay || '' }}</div>
       </div>
 
-      <!-- REJECTED DISPLAY (WHEN NOT EDITING) -->
+      
       <div *ngIf="item.status === 'Rejected' && editingId !== item.id" class="mt-1">
         <div class="uw-sub"><strong>Rejected:</strong></div>
         <div class="uw-sub">{{ item.actionDateDisplay || '-' }}</div>
@@ -446,7 +446,7 @@
       </div>
     </td>
 
-    <!-- BAKICHE SAGLE COLUMNS SAME RAHIL -->
+    
     <td>{{ item.dealerCompanyName }} <span class="uw-sub">{{ item.locationName }}</span></td>
     <td><span class="uw-link">{{ item.jobCardNo }}</span><span class="uw-sub">{{ item.jobCardDate | date:'dd-MM-yyyy' }}</span></td>
     <td><span class="uw-link">{{ item.claimPrefix }}{{ item.claimNo }}</span><span class="uw-sub">{{ item.claimDate | date:'dd-MM-yyyy' }}</span></td>

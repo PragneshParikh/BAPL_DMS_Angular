@@ -132,14 +132,22 @@
                     </thead>
 
                     <tbody>
-                        <tr *ngFor="let row of claimLineRows">
-                            <td class="text-center">
+                        <!-- <tr *ngFor="let row of claimLineRows"> -->
+                            <!-- <td class="text-center">
                                 <input *ngIf="row.isFirstLineOfClaim" type="checkbox"
                                     class="form-check-input"
                                     [checked]="row.isApproved"
                                     [title]="row.isOrderDeleted ? 'This claim\'s order was deleted - checking this and clicking Save will create a new order for it.' : ''"
                                     (change)="toggleClaimApproval(row.claimId, $any($event.target).checked, row.isHistorical ? row.orderId : undefined)">
-                            </td>
+                            </td> -->
+                            <!-- Parivartan: *ngIf kadhun taka -->
+                               <tr *ngFor="let row of claimLineRows">
+                                <td class="text-center">
+                                    <input type="checkbox"
+                                        class="form-check-input"
+                                        [checked]="row.isApproved"
+                                        (change)="toggleRowApproval(row, $any($event.target).checked)">
+                                </td>
                             <td>{{ row.srNo }}</td>
                             <td>
                                 {{ row.claimNo }}<br>
@@ -212,7 +220,7 @@
 
         <div class="d-flex justify-content-between align-items-center mt-3">
             <div>
-                  <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyOrder()"
+                                <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyOrder()"
                     *ngIf="(!orderId && canCreate) || (orderId > 0 && canEdit)"
                     [disabled]="saving || (!wasApprovedOnLoad && !hasAnyCheckedClaim)">
                     <i class="ri-save-line me-1"></i>
