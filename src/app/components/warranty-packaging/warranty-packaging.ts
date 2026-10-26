@@ -274,6 +274,33 @@ export class WarrantyPackaging implements OnInit {
     });
   }
 
+  // loadInvoices(): void {
+  //   if (!this.selectedDealerCode) return;
+
+  //   const dealerCode = this.selectedDealerCode;
+  //   const fy = this.financialYears.find(f => f.label === this.selectedFinancialYear);
+
+  //   this.loader.show();
+  //   this.warrantyInvoiceService.searchWarrantyInvoices({
+  //     dealerCode,
+  //     isApproved: true,
+  //     dateFrom: fy?.startDate ?? null,
+  //     dateTo: fy?.endDate ?? null,
+  //     pageNumber: 1,
+  //     pageSize: 500
+  //   }).subscribe({
+  //     next: (res: any) => {
+  //       this.loader.hide();
+  //       this.invoiceList = res?.items || [];
+  //     },
+  //     error: (err) => {
+  //       this.loader.hide();
+  //       console.error(err);
+  //       this.toaster.show('Failed to load invoices.', { classname: 'bg-danger text-white', delay: 3000 });
+  //     }
+  //   });
+  // }
+
   loadInvoices(): void {
     if (!this.selectedDealerCode) return;
 
@@ -291,7 +318,12 @@ export class WarrantyPackaging implements OnInit {
     }).subscribe({
       next: (res: any) => {
         this.loader.hide();
-        this.invoiceList = res?.items || [];
+        const allInvoices = res?.items || [];
+        
+        this.invoiceList = allInvoices.filter((inv: any) => {
+          const num = parseInt(inv.invoiceNo, 10);
+          return !isNaN(num) && num % 2 === 0;
+        });
       },
       error: (err) => {
         this.loader.hide();

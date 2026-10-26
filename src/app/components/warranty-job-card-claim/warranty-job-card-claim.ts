@@ -57,6 +57,7 @@ export class WarrantyJobCardClaim implements OnInit {
   viewClaimId: number | null = null;
   isViewMode: boolean = false;
   isDealerUser: boolean = false;
+  failureDate: string = '';
 
   jobSearch: any = {
     jobNo: null,
@@ -110,6 +111,9 @@ export class WarrantyJobCardClaim implements OnInit {
 
     this.fromDate = this.formatDate(lastnintyDayeOfMonth);
     this.toDate = this.formatDate(today);
+
+    //const today = new Date();
+    this.failureDate = this.formatDate(today); 
 
     this.jobSearch.rBillfromDate = this.formatDate(firstDayOfMonth);
     this.jobSearch.rBilltoDate = this.formatDate(today);
@@ -492,9 +496,14 @@ loadJobCarDetails(): void {
 
     this.selectedLocationId = null;
     this.jobSearch.jobNo = null;
-    this.jobSearch.rBillfromDate = '';
-    this.jobSearch.rBilltoDate = '';
+    const today = new Date();
+    const pastDate = new Date();
+    pastDate.setDate(today.getDate() - 90); 
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
+  
+    this.jobSearch.rBillfromDate = this.formatDate(pastDate); 
+    this.jobSearch.rBilltoDate = this.formatDate(today);
     this.loadJobCarDetails();
     this.modalService.open(content, {
       size: 'xl',
@@ -631,6 +640,7 @@ loadJobCarDetails(): void {
       claimAccount: this.claimAccount,
       locationName: this.claimLocationName,
       locationCode: this.claimLocationCode,
+      failureDate: this.failureDate,
       CreatedBy: '',
       repairBillDetails: this.selectedJob?.repairBillDetails
     };

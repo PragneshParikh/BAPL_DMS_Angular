@@ -43,17 +43,18 @@
           <tr>
             <th>Sr.No</th>
             <th>Slip Prefix</th>
-            <th>Doc No</th>
+            <th>Disp No</th>
             <th>Doc Date</th>
             <th>Dispatched Through</th>
             <th>Contact Person</th>
             <th>Mobile No</th>
-            <th>GR No</th>
+            <th>Doc No</th>
+            <th class="text-center" style="width: 80px;">Action</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngIf="dispatchList.length === 0">
-            <td colspan="8" class="text-center text-muted">No dispatch records found.</td>
+            <td colspan="9" class="text-center text-muted">No dispatch records found.</td>
           </tr>
           <!-- <tr *ngFor="let item of dispatchList; let i = index">
             <td>{{ i + 1 }}</td>
@@ -68,12 +69,17 @@
           <tr *ngFor="let item of dispatchList; let i = index" (dblclick)="onRowDoubleClick(item)" style="cursor: pointer;" title="Double click to view/edit">
             <td>{{ i + 1 }}</td>
             <td>{{ item.slipPrefix }}</td>
-            <td>{{ item.docNo }}</td>
+            <td>{{ item.dispNo }}</td>
             <td>{{ item.docDate | date:'dd-MM-yyyy' }}</td>
             <td>{{ item.dispatchedThrough }}</td>
             <td>{{ item.contactPerson }}</td>
             <td>{{ item.mobileNumber }}</td>
-            <td>{{ item.grNo }}</td>
+            <td>{{ item.docNo }}</td>
+           <td class="text-center">
+              <button type="button" class="btn btn-sm btn-danger text-white" (click)="deleteDispatch(item.id || item.Id, $event)" title="Delete Dispatch">
+                <i class="ri-delete-bin-line"></i>
+              </button>
+            </td>
             </tr>
         </tbody>
       </table>

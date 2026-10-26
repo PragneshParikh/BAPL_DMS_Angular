@@ -20,6 +20,7 @@ export class UwLineItem implements OnInit {
   readonly SUBMENU_ID = 115;
   canEdit = false;
   canDelete = false;
+  isAdmin = false;
 
   items: any[] = [];
   totalCount: number = 0;
@@ -58,9 +59,18 @@ export class UwLineItem implements OnInit {
     private uwLineItemService: UwLineItemService,
     private dealerService: DealerService,
     private menuAccess: MenuAccessService
-  ) { 
-    this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
-    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+  ) 
+  
+  // { 
+  //   this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+  //   this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
+  // }
+  { 
+    const role = (this.storageService.getRole() || '').toLowerCase().replace(/\s+/g, '');
+    this.isAdmin = role.includes('admin');
+
+    this.canEdit = this.isAdmin && this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.isAdmin && this.menuAccess.canDelete(this.SUBMENU_ID);
   }
 
   ngOnInit(): void {
@@ -71,6 +81,26 @@ export class UwLineItem implements OnInit {
     this.filter.dateTo = this.formatDate(today);
 
     this.search();
+  }
+
+
+ onEditItem(item: any): void {
+    if (!this.isAdmin) {
+      this.toaster.show('Dealer is not allowed to edit this item.', { classname: 'bg-warning text-dark', delay: 3000 });
+      return;
+    }
+
+    this.startEdit(item.id);
+  }
+
+  onDeleteOrRedirectClaim(item: any): void {
+    if (!this.isAdmin) {
+      this.toaster.show('Dealer is not allowed to delete or modify this claim.', { classname: 'bg-warning text-dark', delay: 3000 });
+      return;
+    }
+
+    sessionStorage.setItem('viewWarrantyJCClaimId', String(item.warrantyJcclaimId));
+    this.router.navigate(['/warranty-job-card-claim']);
   }
 
   formatDate(date: Date): string {

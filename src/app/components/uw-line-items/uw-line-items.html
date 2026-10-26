@@ -278,7 +278,8 @@
               <td>{{ item.partCode }} <span class="uw-sub">{{ item.partDescription }}</span></td>
 
               <td>{{ item.labourCode }} <span class="uw-sub">Labour description: {{ item.labourDescription }}</span></td>
-
+              
+                
               <td>{{ item.qty }}</td>
 
               <td class="text-end">{{ item.rate | number:'1.2-2' }}</td>
@@ -451,8 +452,18 @@
     <td><span class="uw-link">{{ item.jobCardNo }}</span><span class="uw-sub">{{ item.jobCardDate | date:'dd-MM-yyyy' }}</span></td>
     <td><span class="uw-link">{{ item.claimPrefix }}{{ item.claimNo }}</span><span class="uw-sub">{{ item.claimDate | date:'dd-MM-yyyy' }}</span></td>
     <td>{{ item.hsn }}</td>
-    <td>{{ item.partCode }}</td>
-    <td>{{ item.labourCode }}</td>
+    <!-- <td>{{ item.partCode }}</td>
+    <td>{{ item.labourCode }}</td> -->
+    <td>
+      {{ item.partCode }}
+      <span class="uw-sub" *ngIf="item.partDescription">{{ item.partDescription }}</span>
+    </td>
+
+    <td>
+    {{ item.labourCode }}
+    <span class="uw-sub" *ngIf="item.labourDescription">{{ item.labourDescription }}</span>
+    </td>
+
     <td>{{ item.qty }}</td>
     <td class="text-end">{{ item.rate | number:'1.2-2' }}</td>
     <td class="text-end">{{ item.mrp | number:'1.2-2' }}</td>
@@ -479,7 +490,7 @@
     <td>{{ item.actionBy || '-' }}</td>
     <td>{{ item.actionDateDisplay || '-' }}</td>
 
-    <td class="text-center">
+    <!-- <td class="text-center">
       <button
         *ngIf="(item.status === 'Approved' || item.status === 'Rejected') && editingId !== item.id && canEdit"
         type="button"
@@ -494,6 +505,25 @@
         class="btn btn-outline-danger btn-sm uw-icon-btn"
         (click)="deleteItem(item.id)"
         title="Delete">
+        <i class="ri-delete-bin-line"></i>
+      </button>
+    </td> -->
+    
+    <td class="text-center">
+      <button
+        *ngIf="(item.status === 'Approved' || item.status === 'Rejected') && editingId !== item.id"
+        type="button"
+        class="btn btn-outline-secondary btn-sm uw-icon-btn me-1"
+        (click)="onEditItem(item)"
+        title="Edit">
+        <i class="ri-edit-line"></i>
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-outline-danger btn-sm uw-icon-btn"
+        (click)="onDeleteOrRedirectClaim(item)"
+        title="Delete / Warranty Claim">
         <i class="ri-delete-bin-line"></i>
       </button>
     </td>

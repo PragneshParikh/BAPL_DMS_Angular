@@ -183,6 +183,20 @@ export class WarrantyClaimList implements OnInit {
     });
   }
 
+  formatJobCardNo(jobCardNo: string): string {
+  if (!jobCardNo) return '';
+  const parts = jobCardNo.split('/');
+  if (parts.length > 0) {
+    const lastPart = parts[parts.length - 1];
+    const numericValue = Number(lastPart);
+    if (!isNaN(numericValue)) {
+      parts[parts.length - 1] = String(numericValue % 100);
+    }
+    return parts.join('/');
+  }
+  return jobCardNo;
+}
+
   // Deletes a single claim (grid's per-row Action button). No longer
   // blocked by an existing order link - the backend removes that link
   // row itself now rather than rejecting the delete.

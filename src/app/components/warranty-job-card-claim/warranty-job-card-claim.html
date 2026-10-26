@@ -167,11 +167,15 @@
                     [value]="selectedJob?.saleDate | date:'yyyy-MM-dd'" readonly>
             </div>
 
-         <div class="col-md-3">
+         <!-- <div class="col-md-3">
     <label class="form-label">Failure Date</label>
     <input type="date" class="form-control form-control-sm"
         [value]="selectedJob?.failureDate | date:'yyyy-MM-dd'">
-</div>
+</div> -->
+        <div class="col-md-3">
+            <label class="form-label">Failure Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="failureDate">
+        </div>
         <hr>
         <div class="row g-3 mt-1">
 

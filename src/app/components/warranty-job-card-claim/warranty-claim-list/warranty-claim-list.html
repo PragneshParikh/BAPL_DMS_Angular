@@ -91,7 +91,8 @@
                             {{ item.claimPrefix }}{{ item.claimNo }}<br>
                             <small class="text-muted">{{ item.claimDate | date:'dd-MM-yyyy' }}</small>
                         </td>
-                        <td>{{ item.jobCardNo }}</td>
+                        <!-- <td>{{ item.jobCardNo }}</td> -->
+                         <td>{{ formatJobCardNo(item.jobCardNo) }}</td>
                         <td>{{ item.chassisNo }}</td>
                         <td>{{ item.supplierName }}</td>
                         <td class="text-end">{{ item.totalAmount | number:'1.2-2' }}</td>

@@ -107,43 +107,45 @@ export class WarrantyInvoice implements OnInit {
   //   }
   // }
 
-  ngOnInit(): void {
-    const today = new Date();
-    this.invoiceDate = this.formatDate(today);
-    this.batchDate = this.formatDate(today);
+ ngOnInit(): void {
+  const today = new Date();
+  this.invoiceDate = this.formatDate(today);
+  this.batchDate = this.formatDate(today);
 
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    this.dateFrom = this.formatDate(firstDayOfMonth);
-    this.dateTo = this.formatDate(today);
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  this.dateFrom = this.formatDate(firstDayOfMonth);
+  this.dateTo = this.formatDate(today);
 
-    this.loadSuppliers();
+  this.loadSuppliers();
 
-    const routeId = this.route.snapshot.paramMap.get('id');
-    const viewInvoiceId = sessionStorage.getItem('viewWarrantyInvoiceId');
-    const pendingRaw = sessionStorage.getItem('pendingWarrantyInvoiceOrder');
-    const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
+  const routeId = this.route.snapshot.paramMap.get('id');
+  const viewInvoiceId = sessionStorage.getItem('viewWarrantyInvoiceId');
+  const pendingRaw = sessionStorage.getItem('pendingWarrantyInvoiceOrder');
+  const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
 
-    if (viewInvoiceId) {
-      sessionStorage.removeItem('viewWarrantyInvoiceId');
-      this.invoiceId = Number(viewInvoiceId);
-      this.loadExistingInvoice(this.invoiceId);
-    } else if (routeId) {
-      this.invoiceId = Number(routeId);
-      this.loadExistingInvoice(this.invoiceId);
-    } else if (pending?.orderId) {
-      this.wasApprovedOnLoad = false;
-      this.loadNextInvoiceNumbers();
-      this.preloadOrderFromQueryParam(Number(pending.orderId));
-    } else {
-     
-      this.invoiceId = 0;
-      this.selectedOrders = [];
-      this.historicalOrders = [];
-      this.loadNextInvoiceNumbers();
-      this.loadPendingOrders()
-    }
+  if (viewInvoiceId) {
+    sessionStorage.removeItem('viewWarrantyInvoiceId');
+    this.invoiceId = Number(viewInvoiceId);
+    this.loadExistingInvoice(this.invoiceId);
+  } else if (routeId) {
+    this.invoiceId = Number(routeId);
+    this.loadExistingInvoice(this.invoiceId);
+  } else if (pending?.orderId) {
+    this.wasApprovedOnLoad = false;
+    this.loadNextInvoiceNumbers();
+    this.preloadOrderFromQueryParam(Number(pending.orderId));
+  } else {
+    // ---------------------------------------------------------
+    // FIX: Ensure pending orders are loaded automatically when opening
+    // the invoice page fresh after saving an order.
+    // ---------------------------------------------------------
+    this.invoiceId = 0;
+    this.selectedOrders = [];
+    this.historicalOrders = [];
+    this.loadNextInvoiceNumbers();
+    this.loadPendingOrders();
   }
-
+}
   // loadLatestSavedInvoice(): void {
   //   this.warrantyInvoiceService.searchWarrantyInvoices({ pageNumber: 1, pageSize: 1 }).subscribe({
   //     next: (res: any) => {
@@ -228,34 +230,129 @@ export class WarrantyInvoice implements OnInit {
 //   });
 // }
 
-loadPendingOrders(): void {
-  const dealerCode = this.storageService.getDealerCode();
-  this.loader.show();
-  this.warrantyInvoiceService.getPendingOrders(dealerCode).subscribe({
-    next: (res: any) => {
-      this.loader.hide();
-      const orders = Array.isArray(res) ? res : (res?.items || res?.data || []);
+// loadPendingOrders(): void {
+//   const dealerCode = this.storageService.getDealerCode();
+//   this.loader.show();
+//   this.warrantyInvoiceService.getPendingOrders(dealerCode).subscribe({
+//     next: (res: any) => {
+//       this.loader.hide();
+//       const orders = Array.isArray(res) ? res : (res?.items || res?.data || []);
       
-      this.selectedOrders = orders.map((o: any) => ({
-        ...o,
-        isApproved: false,
-        claims: (o.claims || []).map((c: any) => ({ ...c, isApproved: false }))
-      }));
+//       this.selectedOrders = orders.map((o: any) => ({
+//         ...o,
+//         isApproved: false,
+//         claims: (o.claims || []).map((c: any) => ({ ...c, isApproved: false }))
+//       }));
           
-      if (this.selectedOrders.length > 0) {
-        const first = this.selectedOrders[0];
-        this.batchNo = first.batchNo || '';
-        this.setLocationFromOrder(first.location, first.locationName);
-        if (first.supplierId) this.selectedSupplierId = first.supplierId;
+//       if (this.selectedOrders.length > 0) {
+//         const first = this.selectedOrders[0];
+//         this.batchNo = first.batchNo || '';
+//         this.setLocationFromOrder(first.location, first.locationName);
+//         if (first.supplierId) this.selectedSupplierId = first.supplierId;
+//       }
+//     },
+//     error: (err) => {
+//       this.loader.hide();
+//       console.error('Failed to load pending orders:', err);
+//       this.selectedOrders = [];
+//     }
+//   });
+// }
+// loadPendingOrders(): void {
+//     const dealerCode = this.storageService.getDealerCode();
+//     this.loader.show();
+//     this.warrantyInvoiceService.getPendingOrders(dealerCode).subscribe({
+//       next: (res: any) => {
+//         this.loader.hide();
+//         const orders = Array.isArray(res) ? res : (res?.items || res?.data || []);
+        
+//         this.selectedOrders = orders.map((o: any) => ({
+//           ...o,
+//           isApproved: false,
+//           claims: (o.claims || []).map((c: any) => ({ ...c, isApproved: false }))
+//         }));
+            
+//         const locMap = new Map();
+//         this.selectedOrders.forEach(o => {
+//           if (o.location) {
+//             locMap.set(o.location, o.locationName || o.location);
+//           }
+//         });
+//         this.locationList = Array.from(locMap.entries()).map(([loccode, locname]) => ({ loccode, locname }));
+
+//         if (this.selectedOrders.length > 0) {
+//           const first = this.selectedOrders[0];
+//           this.batchNo = first.batchNo || '';
+//           this.selectedLocation = first.location || null;
+//           if (first.supplierId) this.selectedSupplierId = first.supplierId;
+//         } else {
+//           this.selectedLocation = null;
+//         }
+//       },
+//       error: (err) => {
+//         this.loader.hide();
+//         console.error('Failed to load pending orders:', err);
+//         this.selectedOrders = [];
+//         this.locationList = [];
+//         this.selectedLocation = null;
+//       }
+//     });
+//   }
+
+loadPendingOrders(): void {
+    const dealerCode = this.storageService.getDealerCode();
+    this.loader.show();
+    this.warrantyInvoiceService.getPendingOrders(dealerCode).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        const orders = Array.isArray(res) ? res : (res?.items || res?.data || []);
+        
+        this.selectedOrders = orders.map((o: any) => ({
+          ...o,
+          isApproved: false,
+          claims: (o.claims || []).map((c: any) => ({ ...c, isApproved: false }))
+        }));
+            
+        const locMap = new Map();
+        this.selectedOrders.forEach(o => {
+          if (o.location) {
+            locMap.set(o.location, o.locationName || o.location);
+          }
+        });
+        this.locationList = Array.from(locMap.entries()).map(([loccode, locname]) => ({ loccode, locname }));
+
+        if (this.selectedOrders.length > 0) {
+          const first = this.selectedOrders[0];
+          this.batchNo = first.batchNo || '';
+          this.selectedLocation = first.location || null;
+          if (first.supplierId) this.selectedSupplierId = first.supplierId;
+
+          const firstClaim = (first.claims || [])[0];
+          const firstDetail = firstClaim?.details?.[0];
+
+
+          this.repairBillNo = firstClaim?.invoiceNo || firstDetail?.invoiceNo || first.orderNo || '';
+          
+          const rawDate = firstClaim?.invoiceDate || firstDetail?.invoiceDate || first.orderDate;
+          this.repairBillDate = rawDate ? rawDate.substring(0, 10) : this.formatDate(new Date());
+
+          console.log('Loaded Invoice No:', this.repairBillNo);
+          console.log('Loaded Invoice Date:', this.repairBillDate);
+        } else {
+          this.selectedLocation = null;
+          this.repairBillNo = '';
+          this.repairBillDate = '';
+        }
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error('Failed to load pending orders:', err);
+        this.selectedOrders = [];
+        this.locationList = [];
+        this.selectedLocation = null;
       }
-    },
-    error: (err) => {
-      this.loader.hide();
-      console.error('Failed to load pending orders:', err);
-      this.selectedOrders = [];
-    }
-  });
-}
+    });
+  }
 
   formatDate(date: Date): string {
     const year = date.getFullYear();
@@ -303,7 +400,83 @@ loadPendingOrders(): void {
     });
   }
 
-  loadExistingInvoice(id: number): void {
+  // loadExistingInvoice(id: number): void {
+  //   this.loader.show();
+  //   this.warrantyInvoiceService.getWarrantyInvoiceById(id).subscribe({
+  //     next: (res: any) => {
+  //       this.loader.hide();
+  //       this.dateFrom = res.dateFrom?.substring(0, 10);
+  //       this.dateTo = res.dateTo?.substring(0, 10);
+  //       this.batchNo = res.batchNo;
+  //       this.batchDate = res.batchDate?.substring(0, 10);
+  //       this.invoicePrefix = res.invoicePrefix || '';
+  //       this.invoiceNo = res.invoiceNo;
+  //       this.invoiceDate = res.invoiceDate?.substring(0, 10);
+  //       this.claimType = res.claimType;
+  //       this.selectedSupplierId = res.supplierId;
+
+  //       this.selectedOrders = res.orders || [];
+  //       this.setLocationFromOrder(this.selectedOrders[0]?.location, this.selectedOrders[0]?.locationName);
+  //       const firstClaim = this.selectedOrders[0]?.claims?.[0];
+  //       this.repairBillNo = firstClaim?.invoiceNo || null;
+  //       this.repairBillDate = firstClaim?.invoiceDate?.substring(0, 10) || null;
+  //       this.isEditMode = false;
+  //       this.wasApprovedOnLoad = !!res.isApproved;
+
+  //       this.loadHistoricalInvoiceOrders(id);
+  //     },
+  //     error: (err) => {
+  //       this.loader.hide();
+  //       console.error(err);
+  //       this.toaster.show('Failed to load Warranty Invoice.', { classname: 'bg-danger text-white', delay: 3000 });
+  //     }
+  //   });
+  // }
+
+// loadExistingInvoice(id: number): void {
+//     this.loader.show();
+//     this.warrantyInvoiceService.getWarrantyInvoiceById(id).subscribe({
+//       next: (res: any) => {
+//         this.loader.hide();
+//         this.dateFrom = res.dateFrom?.substring(0, 10);
+//         this.dateTo = res.dateTo?.substring(0, 10);
+//         this.batchNo = res.batchNo;
+//         this.batchDate = res.batchDate?.substring(0, 10);
+//         this.invoicePrefix = res.invoicePrefix || '';
+//         this.invoiceNo = res.invoiceNo;
+//         this.invoiceDate = res.invoiceDate?.substring(0, 10);
+//         this.claimType = res.claimType;
+//         this.selectedSupplierId = res.supplierId;
+
+//         this.selectedOrders = res.orders || [];
+
+//         // Existing invoice sathi pan unique locations collect karne
+//         const locMap = new Map();
+//         this.selectedOrders.forEach((o: any) => {
+//           if (o.location) {
+//             locMap.set(o.location, o.locationName || o.location);
+//           }
+//         });
+//         this.locationList = Array.from(locMap.entries()).map(([loccode, locname]) => ({ loccode, locname }));
+//         this.selectedLocation = this.selectedOrders[0]?.location || null;
+
+//         const firstClaim = this.selectedOrders[0]?.claims?.[0];
+//         this.repairBillNo = firstClaim?.invoiceNo || null;
+//         this.repairBillDate = firstClaim?.invoiceDate?.substring(0, 10) || null;
+//         this.isEditMode = false;
+//         this.wasApprovedOnLoad = !!res.isApproved;
+
+//         this.loadHistoricalInvoiceOrders(id);
+//       },
+//       error: (err) => {
+//         this.loader.hide();
+//         console.error(err);
+//         this.toaster.show('Failed to load Warranty Invoice.', { classname: 'bg-danger text-white', delay: 3000 });
+//       }
+//     });
+//   }
+
+loadExistingInvoice(id: number): void {
     this.loader.show();
     this.warrantyInvoiceService.getWarrantyInvoiceById(id).subscribe({
       next: (res: any) => {
@@ -319,7 +492,16 @@ loadPendingOrders(): void {
         this.selectedSupplierId = res.supplierId;
 
         this.selectedOrders = res.orders || [];
-        this.setLocationFromOrder(this.selectedOrders[0]?.location, this.selectedOrders[0]?.locationName);
+
+        const locMap = new Map();
+        this.selectedOrders.forEach((o: any) => {
+          if (o.location) {
+            locMap.set(o.location, o.locationName || o.location);
+          }
+        });
+        this.locationList = Array.from(locMap.entries()).map(([loccode, locname]) => ({ loccode, locname }));
+        this.selectedLocation = this.selectedOrders[0]?.location || null;
+
         const firstClaim = this.selectedOrders[0]?.claims?.[0];
         this.repairBillNo = firstClaim?.invoiceNo || null;
         this.repairBillDate = firstClaim?.invoiceDate?.substring(0, 10) || null;
@@ -336,6 +518,7 @@ loadPendingOrders(): void {
     });
   }
 
+  
   loadHistoricalInvoiceOrders(currentInvoiceId: number): void {
     this.warrantyInvoiceService.searchWarrantyInvoices({
       pageNumber: 1,
@@ -379,12 +562,65 @@ loadPendingOrders(): void {
     });
   }
 
+  // preloadOrderFromQueryParam(orderId: number): void {
+  //   this.loader.show();
+  //   this.loadHistoricalInvoiceOrders(0);
+  //   this.warrantyInvoiceService.getWarrantyOrderById(orderId).subscribe({
+  //     next: (res: any) => {
+  //       this.loader.hide();
+  //       this.selectedOrders.push({
+  //         id: res.id,
+  //         orderNo: res.orderNo,
+  //         orderDate: res.orderDate,
+  //         batchNo: res.batchNo,
+  //         batchDate: res.batchDate,
+  //         location: res.location,
+  //         locationName: res.locationName,
+  //         claimType: res.claimType,
+  //         supplierId: res.supplierId,
+  //         totalClaims: (res.claims || []).length,
+  //         totalAmount: (res.claims || []).flatMap((c: any) => c.details || [])
+  //           .reduce((sum: number, d: any) => sum + (d.totalAmount || 0), 0),
+  //         isApproved: false,
+  //         claims: res.claims || []
+  //       });
+
+  //       this.batchNo = res.batchNo;
+
+  //       this.setLocationFromOrder(res.location, res.locationName);
+  //       const firstClaim = (res.claims || [])[0];
+  //       this.repairBillNo = firstClaim?.invoiceNo || null;
+  //       this.repairBillDate = firstClaim?.invoiceDate?.substring(0, 10) || null;
+
+  //       if (res.supplierId) this.selectedSupplierId = res.supplierId;
+  //     },
+  //     error: (err) => {
+  //       this.loader.hide();
+  //       console.error(err);
+  //       this.toaster.show('Could not load the order just approved.', {
+  //         classname: 'bg-warning text-white',
+  //         delay: 3000
+  //       });
+  //     }
+  //   });
+  // }
   preloadOrderFromQueryParam(orderId: number): void {
     this.loader.show();
     this.loadHistoricalInvoiceOrders(0);
     this.warrantyInvoiceService.getWarrantyOrderById(orderId).subscribe({
       next: (res: any) => {
         this.loader.hide();
+        
+        const firstClaim = (res.claims || [])[0];
+        const firstDetail = firstClaim?.details?.[0];
+
+        this.repairBillNo = firstClaim?.invoiceNo || firstDetail?.invoiceNo || res.orderNo || null;
+        this.repairBillDate = firstClaim?.invoiceDate || firstDetail?.invoiceDate || res.orderDate || null;
+        
+        if (!this.invoiceDate) {
+          this.invoiceDate = this.formatDate(new Date());
+        }
+
         this.selectedOrders.push({
           id: res.id,
           orderNo: res.orderNo,
@@ -399,15 +635,11 @@ loadPendingOrders(): void {
           totalAmount: (res.claims || []).flatMap((c: any) => c.details || [])
             .reduce((sum: number, d: any) => sum + (d.totalAmount || 0), 0),
           isApproved: false,
-          claims: res.claims || []
+          claims: (res.claims || []).map((c: any) => ({ ...c, isApproved: false }))
         });
 
         this.batchNo = res.batchNo;
-
         this.setLocationFromOrder(res.location, res.locationName);
-        const firstClaim = (res.claims || [])[0];
-        this.repairBillNo = firstClaim?.invoiceNo || null;
-        this.repairBillDate = firstClaim?.invoiceDate?.substring(0, 10) || null;
 
         if (res.supplierId) this.selectedSupplierId = res.supplierId;
       },
@@ -595,8 +827,8 @@ private mapToRowObject(srNo: number, order: any, claim: any, line: any, isFirstL
     jobCardNo: claim.jobCardNo || order.jobCardNo || '',
     jobCardDate: claim.jobCardDate || order.jobCardDate,
 
-    invoiceNo: claim.invoiceNo || order.invoiceNo || '',
-    invoiceDate: claim.invoiceDate || order.invoiceDate,
+    invoiceNo: claim.invoiceNo || order.invoiceNo || line?.invoiceNo || '',
+    invoiceDate: claim.invoiceDate || order.invoiceDate || line?.invoiceDate,
     warrantyInvoicePrefix: isHistorical ? order._invoicePrefix : order.invoicePrefix,
     warrantyInvoiceNo: isHistorical ? order._invoiceNo : order.invoiceNo,
     warrantyInvoiceBatchNo: isHistorical ? order._batchNo : order.invoiceBatchNo,
@@ -706,8 +938,13 @@ private mapToRowObject(srNo: number, order: any, claim: any, line: any, isFirstL
               isApproved: this.isApproved,
               // warrantyOrderIds: this.selectedOrders.map(o => o.id),
               // orderApprovals: this.selectedOrders.map(o => ({ orderId: o.id, isApproved: !!o.isApproved }))
-              warrantyOrderIds: this.selectedOrders.filter(o => !!o.isApproved).map(o => o.id),
-              orderApprovals: this.selectedOrders.filter(o => !!o.isApproved).map(o => ({ orderId: o.id, isApproved: true }))
+              // warrantyOrderIds: this.selectedOrders.filter(o => !!o.isApproved).map(o => o.id),
+              // orderApprovals: this.selectedOrders.filter(o => !!o.isApproved).map(o => ({ orderId: o.id, isApproved: true }))
+              warrantyOrderIds: this.selectedOrders.filter(o => (o.claims || []).some((c: any) => c.isApproved) || o.isApproved).map(o => o.id),
+              orderApprovals: this.selectedOrders.filter(o => (o.claims || []).some((c: any) => c.isApproved) || o.isApproved).map(o => ({ 
+                orderId: o.id, 
+                isApproved: true
+                }))
             })
           : this.warrantyInvoiceService.insertWarrantyInvoice({
               id: this.invoiceId,
@@ -724,8 +961,13 @@ private mapToRowObject(srNo: number, order: any, claim: any, line: any, isFirstL
               isApproved: this.isApproved,
               // warrantyOrderIds: this.selectedOrders.map(o => o.id),
               // orderApprovals: this.selectedOrders.map(o => ({ orderId: o.id, isApproved: !!o.isApproved }))
-              warrantyOrderIds: this.selectedOrders.filter(o => !!o.isApproved).map(o => o.id),
-              orderApprovals: this.selectedOrders.filter(o => !!o.isApproved).map(o => ({ orderId: o.id, isApproved: true }))
+              // warrantyOrderIds: this.selectedOrders.filter(o => !!o.isApproved).map(o => o.id),
+              // orderApprovals: this.selectedOrders.filter(o => !!o.isApproved).map(o => ({ orderId: o.id, isApproved: true }))
+              warrantyOrderIds: this.selectedOrders.filter(o => (o.claims || []).some((c: any) => c.isApproved) || o.isApproved).map(o => o.id),
+              orderApprovals: this.selectedOrders.filter(o => (o.claims || []).some((c: any) => c.isApproved) || o.isApproved).map(o => ({ 
+                orderId: o.id, 
+                isApproved: true
+                }))
             }))
       : of(null);
 
