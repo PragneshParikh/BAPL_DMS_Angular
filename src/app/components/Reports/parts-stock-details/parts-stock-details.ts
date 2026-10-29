@@ -9,6 +9,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { DealerService } from '../../../core/services/dealer-service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-parts-stock-details',
   imports: [CommonModule, ReactiveFormsModule, FormsModule, NgbTooltip],
@@ -37,7 +38,8 @@ export class PartsStockDetails implements OnInit {
     private reportService: ReportService,
     private toaster: ToastService,
     private dealerMasterService: DealerService,
-    private menuAccess: MenuAccessService
+    private menuAccess: MenuAccessService,
+    private router: Router
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
@@ -123,5 +125,13 @@ export class PartsStockDetails implements OnInit {
   getTotalRate() {
     return this.partsStockData.reduce((sum, item) => sum + (Number(item.dlrprice) || 0), 0);
   }
+
+  openReportList(): void {
+
+  this.router.navigate(
+    ['/stock-bill-list']
+  );
+  
+}
 
 }

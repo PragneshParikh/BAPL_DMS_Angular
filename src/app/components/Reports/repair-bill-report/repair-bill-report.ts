@@ -37,7 +37,7 @@ export class RepairBillReportComponent implements OnInit, OnDestroy {
   pageSize: number = 100;
   totalRecords: number = 0;
   totalItemRate: number = 0;
-  totalLabourRate: number = 0; 
+  totalLabourRate: number = 0;
   totalCgstAmount: number = 0;
   totalSgstAmount: number = 0;
   totalIgstAmount: number = 0;
@@ -53,6 +53,19 @@ export class RepairBillReportComponent implements OnInit, OnDestroy {
 
   jobStatusOptions = ['Open', 'Closed'];
 
+
+  // Labour dropdown properties
+  showLabourDropdown: boolean = false;
+
+  filteredLabours: {
+    labourCode: string;
+    labourDescription: string;
+  }[] = [];
+
+  allLabours: {
+    labourCode: string;
+    labourDescription: string;
+  }[] = [];
   private issueTypeLabels: Record<number, string> = Object.fromEntries(
     IssueTypes.map((t: any) => [t.id, t.name])
   );
@@ -154,6 +167,37 @@ export class RepairBillReportComponent implements OnInit, OnDestroy {
       });
   }
 
+  filterLabours(): void {
+    const searchValue = String(
+      this.filterForm.get('labourCode')?.value ?? ''
+    ).trim().toLowerCase();
+
+    this.filteredLabours = this.allLabours.filter(labour =>
+      (labour.labourCode ?? '').toLowerCase().includes(searchValue) ||
+      (labour.labourDescription ?? '').toLowerCase().includes(searchValue)
+    );
+
+    this.showLabourDropdown = true;
+  }
+
+  toggleLabourDropdown(): void {
+    if (!this.showLabourDropdown) {
+      this.filterLabours();
+    } else {
+      this.showLabourDropdown = false;
+    }
+  }
+
+  selectLabour(labour: {
+    labourCode: string;
+    labourDescription: string;
+  }): void {
+    this.filterForm.patchValue({
+      labourCode: labour.labourCode
+    });
+
+    this.showLabourDropdown = false;
+  }
   onSearch(): void {
     this.pageIndex = 1;
     this.loadReport();

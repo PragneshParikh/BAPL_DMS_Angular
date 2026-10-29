@@ -1,18 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RepairBillReportComponent } from './repair-bill-report';
 
-import { RepairBillReport } from './repair-bill-report';
-
-describe('RepairBillReport', () => {
-  let component: RepairBillReport;
-  let fixture: ComponentFixture<RepairBillReport>;
+describe('RepairBillReportComponent', () => {
+  let component: RepairBillReportComponent;
+  let fixture: ComponentFixture<RepairBillReportComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RepairBillReport]
-    })
-    .compileComponents();
+      imports: [RepairBillReportComponent]
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(RepairBillReport);
+    fixture = TestBed.createComponent(RepairBillReportComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -133,26 +133,49 @@ export class ReportService {
         map(response => response.data)
       );
   }
+  saveStockAdjustment(payload: any) {
+    return this.http.post(
+      `${environment.apiUrl}/Report/SaveStockAdjustment`,
+      payload
+    );
+  }
+  getStockAdjustmentList(
+    fromDate: string,
+    toDate: string,
+    locationCode?: string
+  ) {
+    return this.http.get(
+      `${environment.apiUrl}/Report/GetStockAdjustmentList`,
+      {
+        params: {
+          fromDate,
+          toDate,
+          locationCode: locationCode ?? ''
+        }
+      }
+    );
+  }
 
-  // Financier dropdown moved to LedgerMasterService.getFinancierLedgers() —
-  // that service already owns every other ledger-master/* call
-  // (getCompanyLedgers, getInsuranceLedgers, etc.); duplicating one call here
-  // was how the wrong URL crept in. See vehicle-sale-report.ts for the
-  // updated call site.
 
-  // =====================================================
-  // STOCK REPORT
-  // =====================================================
+  exportStockAdjustmentExcel(
+    fromDate: string,
+    toDate: string,
+    locationCode: string
+  ) {
+    return this.http.get(
+      `${environment.apiUrl}/Report/ExportStockAdjustmentExcel`,
+      {
+        params: {
+          fromDate,
+          toDate,
+          locationCode
+        },
+        responseType: 'blob'
+      }
+    );
+  }
 
-  // FIX: was building the query string by hand (`?dealerCode=${dealerCode}`),
-  // which only ever supported one param. Switched to HttpParams — the same
-  // pattern every other method in this file already uses — so fromDate/toDate
-  // can be added without another one-off string concat. Dates are passed as
-  // plain strings straight from <input type="date">, matching
-  // getModelWiseSaleCountReport / getTotalSaleReportDealerWise below rather
-  // than the Date+toISOString() convention used by getDealerWiseJobReport —
-  // stock-report.ts never has a Date object, only the string the date input
-  // already gives it.
+  
   getDealerWiseStockReport(
     dealerCode?: string,
     fromDate?: string,
@@ -729,10 +752,12 @@ export class ReportService {
   exportRepairBillReport(
     filter: RepairBillReportFilterModel
   ): Observable<RepairBillReportRow[]> {
+
     return this.http.post<RepairBillReportRow[]>(
       `${this.apiUrl}/repair-bill/export`,
       filter
     );
+
   }
 
   // =====================================================
@@ -756,11 +781,7 @@ export class ReportService {
     );
   }
 
-  // =====================================================
-  // VEHICLE INWARD REPORT
-  // Path confirmed as "vehicle-inward" (not "vehicle-inward-report") via
-  // the existing dedicated VehicleInwardReportService.getInwardReport() call.
-  // =====================================================
+ 
   getVehicleInwardReport(
     filter: VehicleInwardReportFilterModel
   ): Observable<VehicleInwardReportResponse> {
@@ -820,6 +841,50 @@ export class ReportService {
     return this.http.post<WarrantyRegisterViewModel[]>(
       `${this.apiUrl}/warranty-register/export`,
       filter
+    );
+  }
+
+
+
+  getPartBalanceStockForAdjustment(
+    dealerCode: string,
+    locationCode?: string
+  ) {
+    return this.http.get(
+      `${this.apiUrl}/GetPartBalanceStockForAdjustment?dealerCode=${dealerCode}&locationCode=${locationCode}`
+    );
+  }
+  searchStockAdjustmentParts(
+    dealerCode: string,
+    search: string,
+    locationCode?: string
+  ) {
+    return this.http.get(
+      `${this.apiUrl}/SearchStockAdjustmentParts?dealerCode=${dealerCode}&search=${search}&locationCode=${locationCode}`
+    );
+  }
+
+  importStockAdjustmentExcel(file: File) {
+
+    const formData = new FormData();
+
+    formData.append('file', file);
+
+    return this.http.post(
+      `${environment.apiUrl}/Report/ImportStockAdjustmentExcel`,
+      formData
+    );
+  }
+
+  getStockAdjustmentById(id: number) {
+    return this.http.get(
+      `${this.apiUrl}/GetStockAdjustmentById/${id}`
+    );
+  }
+
+  deleteStockAdjustment(id: number) {
+    return this.http.delete(
+      `${this.apiUrl}/DeleteStockAdjustment/${id}`
     );
   }
 

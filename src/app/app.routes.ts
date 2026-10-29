@@ -104,6 +104,9 @@ import { DealerMenuAccessPage } from './components/dealer-creation/dealer-menu-a
 import { LocationEditPage } from './components/dealer-creation/dealer-location-edit/dealer-location-edit';
 import { WarrantyRegister } from './components/Reports/warranty-register/warranty-register';
 import { MenuRight } from './components/menu-right/menu-right';
+import { RoleMenuRights } from './components/role-menu-rights/role-menu-rights';
+import { StockAdjustment } from './components/stock-adjustment/stock-adjustment';
+import { StockAdjustmentReport } from './components/Reports/stock-adjustment-report/stock-adjustment-report';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
@@ -113,6 +116,8 @@ export const routes: Routes = [
     path: '', component: LayoutComponent,
     canActivateChild: [AuthGuard],
     children: [
+      // Landing dashboard after login (AuthGuard always allows '/')
+      { path: '', pathMatch: 'full', loadComponent: () => import('./components/dashboard/dashboard').then(m => m.Dashboard) },
       { path: 'showroom/itemmaster-fg', component: ItemmasterFG, data: [6] },
       { path: 'showroom/form22master', component: Form22master, data: [10] },
       { path: 'workshop/item-master', component: ItemMaster, data: [5] },
@@ -297,8 +302,14 @@ export const routes: Routes = [
       { path: 'part-dispatch-invoice', component : PartInvoiceDispatch, data: [118]},
       { path: 'vehicle-dispatch-invoice', component: VehicleInvoiceDispatch, data:[119]},
       { path: 'warranty-register', component: WarrantyRegister, data:[123] },
-      { path: 'menu-right', component: MenuRight, data:[124]}
-
+      { path: 'menu-right', component: MenuRight, data:[124]},
+      // Role-wise Menu Rights (RoleWiseMenuRights) - data:[15] = MenuMaster 'Access Control'
+      { path: 'role-menu-rights', component: RoleMenuRights, data: [15] },
+      //{ path: 'role-menu-rights', data: [15], loadComponent: () => import('./components/role-menu-rights/role-menu-rights').then(m => m.RoleMenuRights) }
+      { path: 'dealer-analytics', data: [133], loadComponent: () => import('./components/dashboard/dealer-analytics/dealer-analytics').then(m => m.DealerAnalytics) },
+      { path: 'sales-analytics', data: [134], loadComponent: () => import('./components/dashboard/sales-analytics/sales-analytics').then(m => m.SalesAnalytics) },
+      { path: 'stock-analytics', data: [135], loadComponent: () => import('./components/dashboard/stock-analytics/stock-analytics').then(m => m.StockAnalytics) },
+      { path: 'stock-adjustment', component: StockAdjustment, data:[124] },
     ]
   },
   { path: '**', component: WorkInProgress }
