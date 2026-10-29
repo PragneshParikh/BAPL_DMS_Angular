@@ -34,6 +34,12 @@ export class WarrantyClaimList implements OnInit {
     pageSize: 25
   };
 
+    private get listDealerCode(): string | null {
+    const role = (this.storageService.getRole() || '').toLowerCase().replace(/\s+/g, '');
+    const isAdmin = role.includes('admin');
+    return isAdmin ? null : this.storageService.getDealerCode();
+  }
+
   constructor(
     private router: Router,
     private loader: LoaderService,
@@ -64,8 +70,9 @@ export class WarrantyClaimList implements OnInit {
 
   search(): void {
     this.loader.show();
-    const dealerCode = this.storageService.getDealerCode();
-    const payload = { ...this.filter, dealerCode };
+    // const dealerCode = this.storageService.getDealerCode();
+    // const payload = { ...this.filter, dealerCode };
+    const payload = { ...this.filter, dealerCode: this.listDealerCode };
 
     this.warrantyJCClaimService.searchWarrantyJCClaims(payload).subscribe({
       next: (res: any) => {
@@ -109,8 +116,9 @@ export class WarrantyClaimList implements OnInit {
 
     this.printing = true;
     this.loader.show();
-    const dealerCode = this.storageService.getDealerCode();
-    const payload = { ...this.filter, dealerCode };
+    // const dealerCode = this.storageService.getDealerCode();
+    // const payload = { ...this.filter, dealerCode };
+    const payload = { ...this.filter, dealerCode: this.listDealerCode };
 
     this.warrantyJCClaimService.printWarrantyJCClaimList(payload).subscribe({
       next: (blob: Blob) => {

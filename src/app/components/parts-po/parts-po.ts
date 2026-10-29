@@ -77,6 +77,7 @@ export class PartsPo implements OnInit {
     sgst: '',
     igst: '',
 
+    hsnCode: '',
     itemType: 1,
     currentStock: 0,
 
@@ -164,22 +165,48 @@ export class PartsPo implements OnInit {
 
   }
 
+  // generateNewOrderNo(dealerCode: string) {
+  //   // this.orderNo = '1';
+  //   this.loader.show();
+  //   this.prefixService.getPrefixByDealerByModule(dealerCode, 'purchase_order').subscribe({
+  //     next: (res: string) => {
+  //       this.loader.hide();
+  //       this.partsPOData.prefixNo = res;
+  //       this.partsPOData.orderNo = res.split('/').pop();
+  //     }, error: (err) => {
+  //       this.loader.hide();
+  //       console.error('Error fetching prefix:', err);
+  //       this.toaster.show('Could not generate order number. Please check the console for more info.', { classname: 'bg-danger text-white', delay: 5000 });
+  //     }
+  //   });
+  // }
+
   generateNewOrderNo(dealerCode: string) {
-    // this.orderNo = '1';
-    this.loader.show();
-    this.prefixService.getPrefixByDealerByModule(dealerCode, 'purchase_order').subscribe({
-      next: (res: string) => {
-        this.loader.hide();
-        this.partsPOData.prefixNo = res;
-        this.partsPOData.orderNo = res.split('/').pop();
-      }, error: (err) => {
-        this.loader.hide();
-        console.error('Error fetching prefix:', err);
-        this.toaster.show('Could not generate order number. Please check the console for more info.', { classname: 'bg-danger text-white', delay: 5000 });
-      }
-    });
+  this.partsPOData.prefixNo = '';
+  this.partsPOData.orderNo = '';
+
+  if (!dealerCode) {
+    this.toaster.show('Dealer code not found for this location.', { classname: 'bg-danger text-white', delay: 5000 });
+    return;
   }
 
+  this.loader.show();
+  this.prefixService.getPrefixByDealerByModule(dealerCode, 'purchase_order').subscribe({
+    next: (res: string) => {
+      this.loader.hide();
+      this.partsPOData.prefixNo = res;
+      this.partsPOData.orderNo = res.split('/').pop();
+    },
+    error: (err) => {
+      this.loader.hide();
+      console.error('Error fetching prefix:', err);
+      const msg = err.status === 404
+        ? `Prefix not found for dealer ${dealerCode}. Please check Prefix Master.`
+        : 'Could not generate order number.';
+      this.toaster.show(msg, { classname: 'bg-danger text-white', delay: 5000 });
+    }
+  });
+}
   loadShowroomLocations() {
     this.loader.show();
     this.locationService.getLocationByDealerCodeAndAreaId(this.dealerCode, 2).subscribe({
@@ -219,6 +246,8 @@ export class PartsPo implements OnInit {
       });
     });
   }
+  
+
 
   // onLocationChange() {
   //   this.locationInvalid = false;
@@ -315,8 +344,10 @@ export class PartsPo implements OnInit {
   getItemList() {
     this.loader.show();
 
+    // const matchedLocation = this.locationList.find(x => x.loccode === this.partsPOData.selectedLocation);
+    // const dealerCode = matchedLocation?.dealercode;
     const matchedLocation = this.locationList.find(x => x.loccode === this.partsPOData.selectedLocation);
-    const dealerCode = matchedLocation?.dealercode;
+    const dealerCode = this.getDealerCodeFromLocation(matchedLocation);
 
     this.itemmasterService.fetchItemsByHsnTaxAndGroupId(1, dealerCode).subscribe({
       next: (res) => {
@@ -434,6 +465,9 @@ export class PartsPo implements OnInit {
       this.currentItem.cgst = selectedItem.cgstPercentage;
       this.currentItem.sgst = selectedItem.sgstPercentage;
       this.currentItem.igst = selectedItem.igstPercentage;
+
+      console.log('Selected item object:', selectedItem);
+      this.currentItem.hsnCode = selectedItem.hsncode ?? selectedItem.hsnCode ?? selectedItem.hsn ?? '';
     }
 
   }
@@ -825,6 +859,7 @@ export class PartsPo implements OnInit {
       sgst: '',
       igst: '',
 
+      hsnCode: '',
       itemType: 1,
       currentStock: 0,
 
@@ -872,10 +907,13 @@ export class PartsPo implements OnInit {
       }
     });
   }
-
+  
   // ── Grid totals (used by the Total row in the table) ──────────────────────
-  get totalQty(): number {
-    return this.pagedPurchaseDetails.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+  // get totalQty(): number {
+  //   return this.pagedPurchaseDetails.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+  // }
+    get totalQty(): number {
+    return this.pagedPurchaseDetails.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
   }
 
   get totalSgst(): number {
@@ -905,8 +943,11 @@ export class PartsPo implements OnInit {
   this.isSaving = true;
   this.loader.show();
 
+  // const matchedLocation = this.locationList.find(x => x.loccode === this.partsPOData.selectedLocation);
+  // let dealerCode = matchedLocation?.dealercode;
+
   const matchedLocation = this.locationList.find(x => x.loccode === this.partsPOData.selectedLocation);
-  let dealerCode = matchedLocation?.dealercode;
+let dealerCode = this.getDealerCodeFromLocation(matchedLocation);
 
   const userId = this.storageService.getUserId();
 
@@ -1009,16 +1050,20 @@ export class PartsPo implements OnInit {
       }))
     };
 
+    console.log('ERP request:', JSON.stringify(_erpObject, null, 2));
+
     this.purchaseService.sendToERP(_erpObject).subscribe({
       next: (res: any) => {
         this.loader.hide();
+        console.log('ERP raw response:', res);
         let parsed: any = null;
         try {
           parsed = res?.raw ? JSON.parse(res.raw) : res;
         } catch (parseErr) {
           console.error('Could not parse ERP response payload:', parseErr, res);
         }
-
+ 
+        console.log('ERP parsed:', parsed);
         this.isSubmitted = parsed?.Succeed === true; // Disable button after success
 
         if (parsed?.Succeed) {
@@ -1026,7 +1071,15 @@ export class PartsPo implements OnInit {
           this.updatePOStatus(this.partsPOData.prefixNo, true, salesOrderNo, this.partsPOData.selectedLocation);
           this.toaster.show(parsed.ConfirmMessage || 'Submit to ERP successful!', { classname: 'bg-success text-white', delay: 5000 });
         } else {
-          this.toaster.show(parsed?.Exception || 'Submit to ERP failed!', { classname: 'bg-warning text-white', delay: 5000 });
+          //this.toaster.show(parsed?.Exception || 'Submit to ERP failed!', { classname: 'bg-warning text-white', delay: 5000 });
+
+          const errMsg = parsed?.Exception
+              || parsed?.ConfirmMessage
+              || parsed?.ErrorMessage
+              || parsed?.Message
+              || 'Submit to ERP failed!';
+  this.toaster.show(errMsg, { classname: 'bg-warning text-white', delay: 8000 });
+
         }
       },
       error: (err) => {
@@ -1199,20 +1252,51 @@ export class PartsPo implements OnInit {
       item.itemdesc?.toLowerCase().includes(term);
   }
 
-  onLocationChange(event: any) {
-    if (event) {
-      const dealerCode = this.locationList.filter(x => x.loccode === event.target.value)[0].dealercode;
-      this.generateNewOrderNo(dealerCode);
-      this.getItemList();
-    }
-    // Refresh calculations for the current item if a model is already selected
-    // if (this.currentItem.modelNo) {
-    //   this.calculateRowTotals();
-    // }
-  }
+  private getDealerCodeFromLocation(loc: any): string {
+  return loc?.dealercode
+      ?? loc?.dealerCode
+      ?? loc?.dealer_code
+      ?? loc?.DealerCode
+      ?? this.dealerCode
+      ?? '';
+}
 
+  // onLocationChange(event: any) {
+  //   if (event) {
+  //     const dealerCode = this.locationList.filter(x => x.loccode === event.target.value)[0].dealercode;
+  //     this.generateNewOrderNo(dealerCode);
+  //     this.getItemList();
+  //   }
+  //   // Refresh calculations for the current item if a model is already selected
+  //   // if (this.currentItem.modelNo) {
+  //   //   this.calculateRowTotals();
+  //   // }
+  // }
+
+  onLocationChange(event: any) {
+  if (event) {
+    const loc = this.locationList.find(x => x.loccode === event.target.value);
+
+    console.log('Selected location object:', loc);
+
+    if (!loc) {
+      this.partsPOData.prefixNo = '';
+      this.partsPOData.orderNo = '';
+      return;
+    }
+
+    const dealerCode = this.getDealerCodeFromLocation(loc);
+    console.log('Dealer code used:', dealerCode);
+
+    this.generateNewOrderNo(dealerCode);
+    this.getItemList();
+  }
+}
   getPreviousPurchaseDetails(event: any) {
-    const dealerCode = this.locationList.filter(x => x.loccode === this.partsPOData.selectedLocation)[0].dealercode;
+   // const dealerCode = this.locationList.filter(x => x.loccode === this.partsPOData.selectedLocation)[0].dealercode;
+   const loc = this.locationList.find(x => x.loccode === this.partsPOData.selectedLocation);
+if (!loc || !this.currentItem.itemCode) return;
+const dealerCode = this.getDealerCodeFromLocation(loc);
     this.purchaseService.getItemDetailsByItemCode(this.currentItem.itemCode, dealerCode).subscribe({
       next: (res) => {
         if (res) {

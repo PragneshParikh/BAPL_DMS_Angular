@@ -20,6 +20,7 @@ import { TaxService } from '../../../core/services/tax';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { PrefixService } from '../../../core/services/prefix';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { Server } from 'http';
 
 @Component({
   selector: 'app-material-transfer-detail',
@@ -415,7 +416,9 @@ export class MaterialTransferDetail implements OnInit {
 
       this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
 
-      itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
+      //itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
+      itemToSave.amount = Number(taxDetails.finalPrice).toFixed(2);
+
       itemToSave.mrp = this.items[index].mrp;
 
       itemToSave.cgstAmount = this.formData.isSameLocation && totalGST > 0
@@ -451,11 +454,17 @@ export class MaterialTransferDetail implements OnInit {
       const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
       const totalGSTAmount = Number(taxDetails.gstAmount);
 
-      this.newItem.amount = Number(taxDetails.basePrice).toFixed(2);
-      this.newItem.mrp = taxDetails.finalPrice;
+      // this.newItem.amount = Number(taxDetails.basePrice).toFixed(2);
+      // this.newItem.mrp = taxDetails.finalPrice;
 
-      itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
-      itemToSave.mrp = taxDetails.finalPrice;
+      // itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
+      // itemToSave.mrp = taxDetails.finalPrice;
+         
+      this.newItem.amount = taxDetails.finalPrice;
+       this.newItem.mrp = taxDetails.finalPrice;
+
+       itemToSave.amount = taxDetails.finalPrice;
+       itemToSave.mrp = taxDetails.finalPrice;
 
       itemToSave.cgstAmount = this.formData.isSameLocation && totalGST > 0
         ? ((Number(this.newItem.cgst) / totalGST) * totalGSTAmount).toFixed(2)
@@ -590,21 +599,93 @@ export class MaterialTransferDetail implements OnInit {
     };
   }
 
+  // onBlurQuantity(value: number) {
+  //   if (value > 0) {
+  //     const _item = this.itemList.find(x => x.id === Number(this.newItem.itemId));
+
+  //     if (_item.batchClosingQty < value) {
+  //       this.newItem.quantity = 0;
+  //       this.toast.show(`Stock limit exceeded. Please reduce the quantity.`, { classname: 'bg-warning text-white', delay: 5000 });
+  //       return;
+  //     }
+
+  //     let rate = _item ? _item.custprice : 0;
+  //     this.newItem.mrp = Number((rate || 0) * (this.newItem.quantity || 0)).toFixed(2);
+  //     this.newItem.amount = (Number(this.newItem.itemRate) * (this.newItem.quantity || 0)).toFixed(2);
+  //   }
+  // }
+
   onBlurQuantity(value: number) {
-    if (value > 0) {
-      const _item = this.itemList.find(x => x.id === Number(this.newItem.itemId));
+  // if (value > 0) {
+  //   const _item = this.itemList.find(
+  //     x => x.id === Number(this.newItem.itemId)
+  //   );
 
-      if (_item.batchClosingQty < value) {
-        this.newItem.quantity = 0;
-        this.toast.show(`Stock limit exceeded. Please reduce the quantity.`, { classname: 'bg-warning text-white', delay: 5000 });
-        return;
-      }
+  //   if (_item.batchClosingQty < value) {
+  //     this.newItem.quantity = 0;
 
-      let rate = _item ? _item.custprice : 0;
-      this.newItem.mrp = Number((rate || 0) * (this.newItem.quantity || 0)).toFixed(2);
-      this.newItem.amount = (Number(this.newItem.itemRate) * (this.newItem.quantity || 0)).toFixed(2);
+  //     this.toast.show(
+  //       `Stock limit exceeded. Please reduce the quantity.`,
+  //       {
+  //         classname: 'bg-warning text-white',
+  //         delay: 5000
+  //       }
+  //     );
+
+  //     return;
+  //   }
+
+  //   const rate = _item ? Number(_item.custprice) : 0;
+
+  //   const totalGST =
+  //     Number(this.newItem.cgst || 0) +
+  //     Number(this.newItem.sgst || 0) +
+  //     Number(this.newItem.igst || 0);
+
+  //   const finalPrice =
+  //     rate *
+  //     Number(this.newItem.quantity || 0);
+
+  //   const amountWithGST =
+  //     finalPrice * (1 + totalGST / 100);
+
+  //   this.newItem.mrp = amountWithGST.toFixed(2);
+  //   this.newItem.amount = amountWithGST.toFixed(2);
+  // }
+  if (value > 0) {
+    const _item = this.itemList.find(
+      x => x.id === Number(this.newItem.itemId)
+    );
+
+    // if (!_item) {
+    //   return;
+    // }
+
+    if (_item.batchClosingQty < value) {
+      this.newItem.quantity = 0;
+
+      this.toast.show(
+        `Stock limit exceeded. Please reduce the quantity.`,
+        {
+          classname: 'bg-warning text-white',
+          delay: 5000
+        }
+      );
+
+      return;
     }
+
+    const rate = Number(_item.custprice || 0);
+    const quantity = Number(this.newItem.quantity || 0);
+
+    // custprice is already GST-inclusive
+    const amount = rate * quantity;
+
+    this.newItem.mrp = amount.toFixed(2);
+    this.newItem.amount = amount.toFixed(2);
   }
+}
+
 
   onChangeItem(itemId: any) {
     if (!itemId) return;
@@ -616,10 +697,23 @@ export class MaterialTransferDetail implements OnInit {
     if (selectedItem) {
       this.loader.show();
 
-      this.totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage);
+      //this.totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage);
 
-      const totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage);
-      const taxDetails = this.calculateGST(selectedItem.custprice, totalGST);
+      //const totalGST = Number(selectedItem.cgstPercentage) + Number(selectedItem.sgstPercentage);
+      const totalGST = this.formData.isSameLocation
+    ? Number(selectedItem.cgstPercentage || 0) +
+    Number(selectedItem.sgstPercentage || 0)
+  : Number(selectedItem.igstPercentage || 0);
+
+  this.totalGST = totalGST;
+
+const taxDetails = this.calculateGST(
+  Number(selectedItem.custprice),
+  totalGST
+);
+
+
+      //const taxDetails = this.calculateGST(selectedItem.custprice, totalGST);
 
       this.newItem.itemdesc = selectedItem.itemdesc;
       this.newItem.itemcode = selectedItem.itemcode;

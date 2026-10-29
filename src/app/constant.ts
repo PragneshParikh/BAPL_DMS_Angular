@@ -159,6 +159,7 @@ export const ModuleTypes = [
     { name: 'job_card', moduleName: 'Job Card', isAdmin: false },
     { name: 'material_transfer', moduleName: 'Material Transfer', isAdmin: false },
     { name: 'part_inward', moduleName: 'Parts Inward', isAdmin: false },
+    { name: 'warranty_dispatch', moduleName: 'Warranty Dispatch', isAdmin: false },
     { name: 'stock_adjustment', moduleName: 'Stock Adjustment', isAdmin: false },
 ]
 

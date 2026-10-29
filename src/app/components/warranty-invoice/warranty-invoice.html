@@ -117,6 +117,13 @@
                 <table class="table table-bordered table-sm align-middle">
                     <thead class="table-light">
                         <tr>
+                            <!-- <th class="text-center" style="min-width:50px">
+                                <input type="checkbox" class="form-check-input"
+                                    [checked]="allOrdersApproved"
+                                    (change)="toggleSelectAllApproved($any($event.target).checked)"
+                                    title="Select / Deselect all">
+                            </th> -->
+                           
                             <th class="text-center" style="min-width:50px">
                                 <input type="checkbox" class="form-check-input"
                                     [checked]="allOrdersApproved"
@@ -147,97 +154,82 @@
                             <!-- <th style="min-width:110px">Action</th> -->
                         </tr>
                     </thead>
-
-                    <tbody>
-                        <tr *ngFor="let row of invoiceLineRows">
-                            <td class="text-center">
-                                <input *ngIf="row.isFirstLineOfClaim" type="checkbox"
-                                    class="form-check-input"
-                                    [checked]="row.isApproved"
-                                    (change)="toggleOrderApproval(row.orderId, $any($event.target).checked, row.isHistorical ? row.orderId : undefined)">
-                            </td>
-                            <td>{{ row.srNo }}</td>
-                            <!-- <td>
-                                {{ row.warrantyInvoicePrefix }}{{ row.warrantyInvoiceNo }}<br>
-                                <small class="text-muted">Batch: {{ row.warrantyInvoiceBatchNo }}</small>
-                            </td> -->
-                            <td>
-                                {{ row.claimNo }}<br>
-                                <small class="text-muted">{{ row.claimDate | date:'dd-MM-yyyy' }}</small>
-                            </td>
-                            <td>
-                                {{ row.jobCardNo }}<br>
-                                <small class="text-muted">{{ row.jobCardDate | date:'dd-MM-yyyy' }}</small>
-                            </td>
-                            <td>
-                                {{ row.invoiceNo }}<br>
-                                <small class="text-muted">{{ row.invoiceDate | date:'dd-MM-yyyy' }}</small>
-                            </td>
-                            <td>
-                                {{ row.serviceHead }}<br>
-                                <small class="text-muted">{{ row.kms }} km</small>
-                            </td>
-                            <td>{{ row.locationName }}</td>
-                            <td>{{ row.chassisNo }}</td>
-                            <td>{{ row.motorNo }}</td>
-                            <td>{{ row.partyName }}</td>
-                            <td>{{ row.partName }}</td>
-                            <td>{{ row.partDescription }}</td>
-                            <td>{{ row.partCode }}</td>
-                            <td>{{ row.labourCode }}</td>
-                            <td>{{ row.labourDescription }}</td>
-                            <td class="text-center">{{ row.quantity }}</td>
-                            <td class="text-end">{{ row.mrp | number:'1.2-2' }}</td>
-                            <td class="text-end">
-                                {{ row.cgstPercent }}%<br>
-                                <small class="text-muted">{{ row.cgstAmount | number:'1.2-2' }}</small>
-                            </td>
-                            <td class="text-end">
-                                {{ row.sgstPercent }}%<br>
-                                <small class="text-muted">{{ row.sgstAmount | number:'1.2-2' }}</small>
-                            </td>
-                            <td class="text-end">
-                                {{ row.igstPercent }}%<br>
-                                <small class="text-muted">{{ row.igstAmount | number:'1.2-2' }}</small>
-                            </td>
-                            <td class="text-end">{{ row.totalAmount | number:'1.2-2' }}</td>
-                            
-                            <td class="text-center">
-                                <ng-container *ngIf="row.isFirstLineOfClaim && !row.isHistorical">
-                                    <!-- <button *ngIf="!isEditMode" class="btn btn-outline-primary btn-sm me-1"
-                                        (click)="enableEdit()" [disabled]="!(invoiceId > 0)" title="Edit Invoice">
-                                        <i class="ri-edit-line"></i>
-                                    </button>
-                                    <button *ngIf="isEditMode" class="btn btn-outline-danger btn-sm me-1"
-                                        (click)="removeOrder(row.orderId)" title="Remove this order and all its lines">
-                                        <i class="ri-delete-bin-line"></i>
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm"
-                                        (click)="deleteInvoice()" [disabled]="!(invoiceId > 0)" title="Delete Invoice">
-                                        <i class="ri-delete-bin-2-line"></i>
-                                    </button> -->
-                                </ng-container>
-                            </td>
-                        </tr>
-
-                        <tr *ngIf="invoiceLineRows.length === 0">
-                            <td colspan="23" class="text-center text-muted">
-                                No order linked to this invoice.
-                            </td>
-                        </tr>
-                    </tbody>
+<tbody>
+        <tr *ngFor="let row of invoiceLineRows">
+            <td class="text-center">
+                <!-- <input *ngIf="row.isFirstLineOfClaim" type="checkbox"
+                    class="form-check-input"
+                    [checked]="row.isApproved"
+                    (change)="toggleOrderApproval(row.orderId, $any($event.target).checked, row.isHistorical ? row.orderId : undefined)"> -->
+                    <input *ngIf="row.isFirstLineOfClaim" type="checkbox"
+                     class="form-check-input"
+                      [checked]="row.isApproved"
+                     (change)="toggleOrderApproval(row.orderId, $any($event.target).checked, row.isHistorical ? row.orderId : undefined, row.claimId)">
+            </td>
+            <td>{{ row.srNo }}</td>
+            <td>
+                {{ row.claimNo }}<br>
+                <small class="text-muted">{{ row.claimDate | date:'dd-MM-yyyy' }}</small>
+            </td>
+            <td>
+                {{ row.jobCardNo }}<br>
+                <small class="text-muted">{{ row.jobCardDate | date:'dd-MM-yyyy' }}</small>
+            </td>
+            <td>
+                {{ row.invoiceNo }}<br>
+                <small class="text-muted">{{ row.invoiceDate | date:'dd-MM-yyyy' }}</small>
+            </td>
+            <td>
+                {{ row.serviceHead }}<br>
+                <small class="text-muted">{{ row.kms }} km</small>
+            </td>
+            <td>{{ row.locationName }}</td>
+            <td>{{ row.chassisNo }}</td>
+            <td>{{ row.motorNo }}</td>
+            <td>{{ row.partyName }}</td>
+            <td>{{ row.partName }}</td>
+            <td>{{ row.partDescription }}</td>
+            <td>{{ row.partCode }}</td>
+            <td>{{ row.labourCode }}</td>
+            <td>{{ row.labourDescription }}</td>
+            <td class="text-center">{{ row.quantity }}</td>
+            <td class="text-end">{{ row.mrp | number:'1.2-2' }}</td>
+            <td class="text-end">
+                {{ row.cgstPercent }}%<br>
+                <small class="text-muted">{{ row.cgstAmount | number:'1.2-2' }}</small>
+            </td>
+            <td class="text-end">
+                {{ row.sgstPercent }}%<br>
+                <small class="text-muted">{{ row.sgstAmount | number:'1.2-2' }}</small>
+            </td>
+            <td class="text-end">
+                {{ row.igstPercent }}%<br>
+                <small class="text-muted">{{ row.igstAmount | number:'1.2-2' }}</small>
+            </td>
+            <td class="text-end">{{ row.totalAmount | number:'1.2-2' }}</td>
+        </tr>
+    </tbody>
                 </table>
             </div>
+            <div *ngIf="selectedOrders.length === 0 && historicalOrders.length === 0" class="text-center text-muted p-4 border bg-light mt-2">
+            No records found.
+        </div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mt-3">
             <div>
-                <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyInvoice()"
+                        <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyInvoice()"
+                            *ngIf="selectedOrders.length > 0 && ((!invoiceId && canCreate) || (invoiceId > 0 && canEdit))"
+                            [disabled]="saving || (!wasApprovedOnLoad && !hasAnyCheckedOrder)">
+                            <i class="ri-save-line me-1"></i>
+                            {{ saving ? 'Saving...' : 'Save' }}
+                        </button>
+                <!-- <button class="btn btn-primary btn-sm me-2" (click)="saveWarrantyInvoice()"
                     *ngIf="(!invoiceId && canCreate) || (invoiceId > 0 && canEdit)"
                     [disabled]="saving || (!wasApprovedOnLoad && !hasAnyCheckedOrder)">
                     <i class="ri-save-line me-1"></i>
                     {{ saving ? 'Saving...' : 'Save' }}
-                </button>
+                </button> -->
                 <!-- <button *ngIf="isEditMode" class="btn btn-light btn-sm" (click)="cancelEdit()">
                     <i class="ri-close-line me-1"></i>
                     Cancel Edit

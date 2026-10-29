@@ -61,8 +61,19 @@ export class WarrantyOrderService {
       params: { dealerCode }
     });
   }
-  
+  getAllWarrantyJCClaims(dealerCode: string): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/WarrantyJCClaim/GetAllWarrantyJCClaims`, {
+      params: { dealerCode }
+    });
+  }
+  getPendingWarrantyJCClaims(dealerCode: string) {
+  return this.httpClient.get<any[]>(
+    `${this.baseUrl}/WarrantyJobCardClaim/GetPendingWarrantyJCClaims`,
+    { params: { dealerCode } }
+  );
+}
   UATWarrantyData(orderId: number): Observable<any> {
     return this.httpClient.post(`${this.baseUrl}/WarrantyOrder/UATWarrantyData`, { orderId });
   }
+  
 }

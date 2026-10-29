@@ -94,6 +94,8 @@ import { WarrantyInvoiceList } from './components/warranty-invoice/warranty-invo
 import { UwLineItem } from './components/uw-line-items/uw-line-items';
 import { WarrantyClaimList } from './components/warranty-job-card-claim/warranty-claim-list/warranty-claim-list';
 import { WarrantyPackaging } from './components/warranty-packaging/warranty-packaging';
+import { WarrantyDispatch } from './components/warranty-dispatch/warranty-dispatch';
+import { WarrantyDispatchList } from './components/warranty-dispatch/warranty-dispatch-list/warranty-dispatch-list';
 import { WarrantyPackagingList } from './components/warranty-packaging/warranty-packaging-list/warranty-packaging-list';
 import { DispatchMaster } from './components/dispatch-master/dispatch-master';
 import { PartInvoiceDispatch } from './components/part-invoice-dispatch/part-invoice-dispatch';
@@ -102,8 +104,10 @@ import { DealerMenuAccessPage } from './components/dealer-creation/dealer-menu-a
 import { LocationEditPage } from './components/dealer-creation/dealer-location-edit/dealer-location-edit';
 import { WarrantyRegister } from './components/Reports/warranty-register/warranty-register';
 import { MenuRight } from './components/menu-right/menu-right';
+import { RoleMenuRights } from './components/role-menu-rights/role-menu-rights';
 import { StockAdjustment } from './components/stock-adjustment/stock-adjustment';
 import { StockAdjustmentReport } from './components/Reports/stock-adjustment-report/stock-adjustment-report';
+
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
   { path: 'forgot-password', loadComponent: () => import('./components/account/forgot-password/forgot-password').then(m => m.ForgotPassword) },
@@ -112,6 +116,8 @@ export const routes: Routes = [
     path: '', component: LayoutComponent,
     canActivateChild: [AuthGuard],
     children: [
+      // Landing dashboard after login (AuthGuard always allows '/')
+      { path: '', pathMatch: 'full', loadComponent: () => import('./components/dashboard/dashboard').then(m => m.Dashboard) },
       { path: 'showroom/itemmaster-fg', component: ItemmasterFG, data: [6] },
       { path: 'showroom/form22master', component: Form22master, data: [10] },
       { path: 'workshop/item-master', component: ItemMaster, data: [5] },
@@ -211,13 +217,6 @@ export const routes: Routes = [
       { path: 'comparison-report', data: [90], loadComponent: () => import('./components/Reports/comparision-report/comparision-report').then(m => m.ComparisonReportComponent) },
       { path: 'material-transfer-report', data: [91], loadComponent: () => import('./components/Reports/material-transfer-report/material-transfer-report').then(m => m.MaterialTransferReportComponent) },
       { path: 'repair-bill-report', data: [92], loadComponent: () => import('./components/Reports/repair-bill-report/repair-bill-report').then(m => m.RepairBillReportComponent) },
-      {
-  path: 'stock-bill-list',
-  data: [93],
-  loadComponent: () =>
-    import('./components/Reports/stock-bill-list/stock-bill-list')
-      .then(m => m.StockBillListComponent)
-},
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
 
       { path: 'repair-bill-performa/:repairBillId', component: RepairBillPerforma, data: [51] },
@@ -295,16 +294,22 @@ export const routes: Routes = [
       { path: 'warranty-invoice-list', component: WarrantyInvoiceList, data: [113] },
       { path: 'uw-line-item', component: UwLineItem, data: [115] },
       { path: 'warranty-packaging', component: WarrantyPackaging, data: [116] },
+      { path: 'warranty-dispatch', component: WarrantyDispatch, data: [125]},
+      { path: 'warranty-dispatch/:id', component: WarrantyDispatch, data: [125] },
+      { path: 'warranty-dispatch-list', component: WarrantyDispatchList, data: [125] },
       { path: 'warranty-packaging-list', component: WarrantyPackagingList, data: [116]},
       { path: 'dispatch-master', component : DispatchMaster, data: [117]},
       { path: 'part-dispatch-invoice', component : PartInvoiceDispatch, data: [118]},
       { path: 'vehicle-dispatch-invoice', component: VehicleInvoiceDispatch, data:[119]},
       { path: 'warranty-register', component: WarrantyRegister, data:[123] },
       { path: 'menu-right', component: MenuRight, data:[124]},
+      // Role-wise Menu Rights (RoleWiseMenuRights) - data:[15] = MenuMaster 'Access Control'
+      { path: 'role-menu-rights', component: RoleMenuRights, data: [15] },
+      //{ path: 'role-menu-rights', data: [15], loadComponent: () => import('./components/role-menu-rights/role-menu-rights').then(m => m.RoleMenuRights) }
+      { path: 'dealer-analytics', data: [133], loadComponent: () => import('./components/dashboard/dealer-analytics/dealer-analytics').then(m => m.DealerAnalytics) },
+      { path: 'sales-analytics', data: [134], loadComponent: () => import('./components/dashboard/sales-analytics/sales-analytics').then(m => m.SalesAnalytics) },
+      { path: 'stock-analytics', data: [135], loadComponent: () => import('./components/dashboard/stock-analytics/stock-analytics').then(m => m.StockAnalytics) },
       { path: 'stock-adjustment', component: StockAdjustment, data:[124] },
-      //  {path: 'stock-adjustment-report', component: StockAdjustmentReport, data:[136], loadComponent: () => import('./components/Reports/stock-adjustment-report/stock-adjustment-report').then(m => m.StockAdjustmentReport) }
-      // {path: 'stock-adjustment-report', component: StockAdjustmentReport, data:[136], loadComponent: () => import('./components/Reports/stock-adjustment-report/stock-adjustment-report').then(m => m.StockAdjustmentReport) }
-
     ]
   },
   { path: '**', component: WorkInProgress }

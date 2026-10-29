@@ -16,6 +16,7 @@ import { WarrantyOrderService } from '../../core/services/warranty-order-service
 import { DealerService } from '../../core/services/dealer-service';
 import { locationAreaMaster } from '../../constant';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+
 @Component({
   selector: 'app-warranty-job-card-claim',
   standalone: true,
@@ -27,6 +28,7 @@ export class WarrantyJobCardClaim implements OnInit {
   readonly SUBMENU_ID = 74;
   canCreate = true;
   canEdit = true;
+
   jobCardList: any[] = [];
   WjobClaimprefix: string = '';
   supplierList: any[] = [];
@@ -87,18 +89,11 @@ export class WarrantyJobCardClaim implements OnInit {
     private router: Router,
     private menuAccess: MenuAccessService
   ) {
-    // Initial synchronous read from whatever was cached at login — this
-    // is a fast first paint, but it's the STALE value if rights changed
-    // after login. ngOnInit's refreshMenuRights().subscribe() below is
-    // what corrects it once the fresh data actually arrives.
     this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
     this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
   }
 
   ngOnInit(): void {
-    // FIX: refreshMenuRights() is async — subscribe to it and re-derive
-    // canCreate/canEdit once the fresh rights actually land, instead of
-    // firing it and leaving the constructor's stale snapshot in place.
     this.menuAccess.refreshMenuRights().subscribe({
       next: () => {
         this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
@@ -106,29 +101,19 @@ export class WarrantyJobCardClaim implements OnInit {
       },
       error: (err) => {
         console.error('Failed to refresh menu rights, using cached values.', err);
-        // canCreate/canEdit stay at whatever the constructor already set —
-        // fail-safe rather than fail-blank.
       }
     });
 
     const today = new Date();
-
-    const firstDayOfMonth = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      1
-    );
-    const lastnintyDayeOfMonth = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      90
-    )
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastnintyDayeOfMonth = new Date(today.getFullYear(), today.getMonth(), 90);
 
     this.fromDate = this.formatDate(lastnintyDayeOfMonth);
     this.toDate = this.formatDate(today);
 
     this.jobSearch.rBillfromDate = this.formatDate(firstDayOfMonth);
     this.jobSearch.rBilltoDate = this.formatDate(today);
+    
     const viewClaimIdRaw = sessionStorage.getItem('viewWarrantyJCClaimId');
     if (viewClaimIdRaw) {
       sessionStorage.removeItem('viewWarrantyJCClaimId');
@@ -139,84 +124,56 @@ export class WarrantyJobCardClaim implements OnInit {
 
     this.loadDealers();
     this.loadSuplier();
-    // this.loadJobCarDetails();
-
   }
 
-    private get workshopAreaId(): number | null {
-      const match = locationAreaMaster.find(
-        (a: any) => (a.name || '').toString().trim().toLowerCase() === 'workshop'
-      );
-      return match ? match.id : null;
+  private get workshopAreaId(): number | null {
+    const match = locationAreaMaster.find(
+      (a: any) => (a.name || '').toString().trim().toLowerCase() === 'workshop'
+    );
+    return match ? match.id : null;
   }
-  // Populates the Dealer dropdown, then defaults the selection to the
-  // logged-in user's own dealer - the dropdown lets them override it.
-    loadDealers(): void {
-      this.loader.show();
-      this.dealerService.getDealerDropdown(null).subscribe({
-        next: (res: any) => {
-          this.loader.hide();
-          this.dealerList = res?.data || [];
 
-          // ASSUMPTION: role matched case-insensitively via .includes('admin')
-          // so both "Admin" and "SuperAdmin"/"Super Admin" are covered -
-          // adjust if your app uses a different exact role string.
-          const role = (this.storageService.getRole() || '').toLowerCase().replace(/\s+/g, '');
-          const isAdminRole = role.includes('admin');
-          this.isDealerUser = !isAdminRole;
+  loadDealers(): void {
+    this.loader.show();
+    this.dealerService.getDealerDropdown(null).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        this.dealerList = res?.data || [];
 
-          if (this.isDealerUser) {
-            const currentDealerCode = this.storageService.getDealerCode();
-            if (currentDealerCode) {
-              // A dealer-logged-in user only ever files as themselves - use
-              // their own code regardless of whether this particular
-              // dropdown list happens to include it.
-              this.selectedDealerCode = currentDealerCode;
-            }
+        const role = (this.storageService.getRole() || '').toLowerCase().replace(/\s+/g, '');
+        const isAdminRole = role.includes('admin');
+        this.isDealerUser = !isAdminRole;
+
+        if (this.isDealerUser) {
+          const currentDealerCode = this.storageService.getDealerCode();
+          if (currentDealerCode) {
+            this.selectedDealerCode = currentDealerCode;
           }
-
-          // FIX: while viewing an existing claim, loadClaimForView() owns
-          // selectedDealerCode - defaulting/overriding it here would
-          // overwrite the correct values the moment this response lands.
-          if (this.isViewMode) {
-            return;
-          }
-
-          this.applyDefaultDealerSelection();
-        },
-        error: (err) => {
-          this.loader.hide();
-          console.error(err);
-          this.toaster.show('Failed to load dealer list.', { classname: 'bg-danger text-white', delay: 3000 });
         }
-      });
+
+        if (this.isViewMode) {
+          return;
+        }
+
+        this.applyDefaultDealerSelection();
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toaster.show('Failed to load dealer list.', { classname: 'bg-danger text-white', delay: 3000 });
+      }
+    });
   }
 
   private applyDefaultDealerSelection(): void {
-      // Only defaults from storage for admin logins - a dealer login's
-      // selectedDealerCode was already set (to their own code) above in
-      // loadDealers(), and shouldn't be re-derived or overridden here.
-      // if (!this.isDealerUser) {
-      //   const currentDealerCode = this.storageService.getDealerCode();
-      //   if (currentDealerCode && this.dealerList.some((d: any) => d.dealerCode === currentDealerCode)) {
-      //     this.selectedDealerCode = currentDealerCode;
-      //   }
-      // }
-
-      this.onDealerChange();
+    this.onDealerChange();
   }
 
-// Display text for the fixed Dealer field when isDealerUser is true -
-// falls back to the raw code if this dealer isn't in dealerList for
-// some reason (e.g. the dropdown endpoint scopes differently).
   get loggedInDealerDisplay(): string {
-      const match = this.dealerList.find((d: any) => d.dealerCode === this.selectedDealerCode);
-      return match ? `${match.dealerName} (${match.dealerCode})` : (this.selectedDealerCode || '');
+    const match = this.dealerList.find((d: any) => d.dealerCode === this.selectedDealerCode);
+    return match ? `${match.dealerName} (${match.dealerCode})` : (this.selectedDealerCode || '');
   }
 
-  // Re-runs everything scoped to a single dealer whenever the selection
-  // changes - Claim Prefix and the location lookup catalog. Skips
-  // clearing the selected job while in view mode.
   onDealerChange(): void {
     if (!this.isViewMode) {
       this.selectedJob = {};
@@ -231,7 +188,6 @@ export class WarrantyJobCardClaim implements OnInit {
       this.lastRawJobCards = [];
     }
 
-    // Dealer-independent catalog - load regardless of dealer selection.
     this.loadAllLocations();
 
     if (!this.selectedDealerCode) {
@@ -239,7 +195,7 @@ export class WarrantyJobCardClaim implements OnInit {
     }
 
     this.loadPrefix();
-}
+  }
 
   loadClaimForView(id: number): void {
     this.loader.show();
@@ -255,8 +211,6 @@ export class WarrantyJobCardClaim implements OnInit {
         this.selectedSupplierId = res.supplierId ?? this.selectedSupplierId;
         this.selectedLocationId = res.serviceLocation ?? this.selectedLocationId;
 
-        // Location was already resolved (Workshop-scoped) and persisted
-        // at InsertWarrantyJCClaim time - read it straight back.
         this.claimLocationName = res.locationName ?? this.claimLocationName;
         this.claimLocationCode = res.locationCode ?? this.claimLocationCode;
 
@@ -277,25 +231,20 @@ export class WarrantyJobCardClaim implements OnInit {
           repairBillDetails: (res.details || []).map((d: any) => ({
             detailId: d.id,
             itemType: d.itemType,
-
             partitemName: d.partName,
             partitemDesc: d.partDescription,
             partItemQty: d.quantity,
             partItemRate: d.rate ?? 0,
-
             labourName: d.labourCode,
             labourDesc: d.labourDescription,
             labourQty: d.quantity,
             labourRate: d.rate ?? 0,
-
             igstAmount: d.igstAmount,
             mrp: d.mrp,
             amount: d.totalAmount,
             totalWithTax: d.totalAmount,
-
             inwardSerial: '',
             outwardSerial: '',
-
             dealerObservation: d.dealerObservation ?? '',
             rootCauseAnalysis: d.rootCauseAnalysis ?? '',
             claimType: 'Warranty Claim'
@@ -329,7 +278,6 @@ export class WarrantyJobCardClaim implements OnInit {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-
     return `${year}-${month}-${day}`;
   }
 
@@ -342,7 +290,6 @@ export class WarrantyJobCardClaim implements OnInit {
     this.prefixService.getPrefixByDealerByModule(dealerCode, module).subscribe({
       next: (res: string) => {
         this.loader.hide();
-
         const parts = res.split('/');
         const lastSegment = parts.pop() ?? '';
         this.WjobClaimprefix = parts.join('/') + '/';
@@ -351,17 +298,15 @@ export class WarrantyJobCardClaim implements OnInit {
         this.loader.hide();
         console.error(err);
       }
-    })
+    });
   }
 
   loadSuplier(): void {
-
     this.loader.show();
     this.ledgerService.getCompanyLedgers().subscribe({
       next: (res: any) => {
         this.loader.hide();
         this.supplierList = res;
-
         if (!this.isViewMode && this.supplierList.length === 1) {
           this.selectedSupplierId = this.supplierList[0].id;
         }
@@ -369,26 +314,21 @@ export class WarrantyJobCardClaim implements OnInit {
         this.loader.hide();
         console.error(err);
       }
-    })
-
+    });
   }
 
   private getAreaName(locareaidno: number): string {
-      const match = locationAreaMaster.find((a: any) => a.id === locareaidno);
-      return match?.name || '';
+    const match = locationAreaMaster.find((a: any) => a.id === locareaidno);
+    return match?.name || '';
   }
+
   private loadAllLocations(): void {
     this.locationService.getAllLocationMaster().subscribe({
       next: (res: any) => {
         this.allLocations = res?.data || res || [];
-
-        // Rebuild the popup's dropdown labels now that codes may be
-        // available, in case job cards were already searched before
-        // this lookup finished loading.
         if (this.lastRawJobCards.length > 0) {
           this.locationList = this.buildLocationOptionsFromJobCards(this.lastRawJobCards);
         }
-
         if (this.selectedJob?.jobLocation) {
           this.resolveWorkshopLocation(this.selectedJob.jobLocation);
         }
@@ -400,30 +340,20 @@ export class WarrantyJobCardClaim implements OnInit {
     });
   }
 
-  // The Locareaidno that represents "Workshop" specifically, resolved by
-  // name from locationAreaMaster rather than a hardcoded id.
   private resolveLocationByCode(loccode: string | null | undefined): { locname: string | null; areaName: string | null; dealerCode: string | null } {
-      if (!loccode) return { locname: null, areaName: null, dealerCode: null };
-
-      const match = this.allLocations.find((loc: any) => loc.loccode === loccode);
-      if (!match) {
-        console.warn(`No LocationMaster row found for Loccode "${loccode}" - this job card's Serviceloc may be stale or invalid.`);
-        return { locname: null, areaName: null, dealerCode: null };
-      }
-
-      return {
-        locname: match.locname,
-        areaName: this.getAreaName(match.locareaidno),
-        dealerCode: match.dealercode
-      };
+    if (!loccode) return { locname: null, areaName: null, dealerCode: null };
+    const match = this.allLocations.find((loc: any) => loc.loccode === loccode);
+    if (!match) {
+      return { locname: null, areaName: null, dealerCode: null };
+    }
+    return {
+      locname: match.locname,
+      areaName: this.getAreaName(match.locareaidno),
+      dealerCode: match.dealercode
+    };
   }
     
-  // Builds the popup's Location dropdown options directly from the
-  // CURRENT job card search results only - each distinct jobLocation
-  // name becomes exactly one option, with its Workshop code resolved
-  // (if found). This is the only source the dropdown ever shows - it
-  // can never display a location unrelated to an actual job card.
-private buildLocationOptionsFromJobCards(jobCards: any[]): { locname: string; loccode: string | null; areaName: string | null }[] {
+  private buildLocationOptionsFromJobCards(jobCards: any[]): { locname: string; loccode: string | null; areaName: string | null }[] {
     const seen = new Set<string>();
     const options: { locname: string; loccode: string | null; areaName: string | null }[] = [];
 
@@ -441,109 +371,130 @@ private buildLocationOptionsFromJobCards(jobCards: any[]): { locname: string; lo
     }
 
     return options;
-}
+  }
 
-  // Called once a job card is selected - resolves and retains its
-  // Workshop location (name always exact from the job card; code
-private resolveWorkshopLocation(jobLocationName: string | null | undefined): void {
+  private resolveWorkshopLocation(jobLocationName: string | null | undefined): void {
     const name = (jobLocationName || '').toString().trim();
     this.claimLocationName = name || null;
-
     if (!name) {
       this.claimLocationCode = null;
       this.claimLocationArea = null;
       return;
     }
-
     const resolved = this.resolveLocationByCode(name);
-    //this.claimLocationCode = resolved.loccode;
     this.claimLocationArea = resolved.areaName;
-}
+  }
 
-  // e.g. "RR Test, Karvenagar (CUS0487W1) [Workshop]"
   getJobCardLocationLabel(item: any): string {
-      const resolved = this.resolveLocationByCode(item.jobLocationCode);
-      const name = resolved.locname || item.jobLocation || '';
-      if (!item.jobLocationCode) return name;
-      let label = `${name} (${item.jobLocationCode})`;
-      if (resolved.areaName) label += ` [${resolved.areaName}]`;
-      return label;
+    const resolved = this.resolveLocationByCode(item.jobLocationCode);
+    const name = resolved.locname || item.jobLocation || '';
+    if (!item.jobLocationCode) return name;
+    let label = `${name} (${item.jobLocationCode})`;
+    if (resolved.areaName) label += ` [${resolved.areaName}]`;
+    return label;
   }
 
-  // e.g. "RR TEST (CUS0487)" - lets a superadmin see which dealer each
-  // returned job card actually belongs to, derived from its own location
-  // code rather than a guessed job-card field.
   getJobCardDealerLabel(item: any): string {
-      const code = this.resolveLocationByCode(item.jobLocationCode).dealerCode;
-      if (!code) return '';
-      const name = this.dealerList.find((d: any) => d.dealerCode === code)?.dealerName;
-      return name ? `${name} (${code})` : code;
+    const code = this.resolveLocationByCode(item.jobLocationCode).dealerCode;
+    if (!code) return '';
+    const name = this.dealerList.find((d: any) => d.dealerCode === code)?.dealerName;
+    return name ? `${name} (${code})` : code;
   }
-    loadJobCarDetails(): void {
-      if (this.isDealerUser && !this.selectedDealerCode) {
-        this.toaster.show('Please select a Dealer first.', { classname: 'bg-warning text-white', delay: 3000 });
-        return;
-      }
+loadJobCarDetails(): void {
+    if (this.isDealerUser && !this.selectedDealerCode) {
+      this.toaster.show('Please select a Dealer first.', { classname: 'bg-warning text-white', delay: 3000 });
+      return;
+    }
 
-      this.loader.show();
-      const dealerCode = this.selectedDealerCode || null;
+    this.loader.show();
+    const dealerCode = this.selectedDealerCode || null;
 
-      let jobNo = this.jobSearch.jobNo;
-      if (jobNo === null || jobNo === undefined || jobNo === '') {
-        jobNo = 0;
-      } else {
-        jobNo = Number(jobNo);
-        if (isNaN(jobNo)) jobNo = 0;
-      }
+    let jobNo = this.jobSearch.jobNo;
+    if (jobNo === null || jobNo === undefined || jobNo === '') {
+      jobNo = 0;
+    } else {
+      jobNo = Number(jobNo);
+      if (isNaN(jobNo)) jobNo = 0;
+    }
 
-      let fromDate = this.jobSearch.rBillfromDate;
-      let toDate = this.jobSearch.rBilltoDate;
+    const fromDate = this.jobSearch.rBillfromDate || null;
+    const toDate = this.jobSearch.rBilltoDate || null;
 
-      this.jobcardService.getIssueTypebasedJobDetails(dealerCode, jobNo, null, fromDate, toDate).subscribe({
-        next: (res: any) => {
-          this.loader.hide();
-          const rawResults = res || [];
-          this.lastRawJobCards = rawResults;
+    this.jobcardService.getIssueTypebasedJobDetails(dealerCode, jobNo, null, fromDate, toDate).subscribe({
+      next: (jobCardsRes: any) => {
+        this.warrantyJCClaimService.searchWarrantyJCClaims({ 
+          dealerCode: dealerCode, 
+          pageNumber: 1, 
+          pageSize: 10000 
+        }).subscribe({
+          next: (claimsRes: any) => {
+            this.loader.hide();
+            let rawResults = jobCardsRes || [];
+            const existingClaims = claimsRes?.items || claimsRes?.data || claimsRes || [];
 
-          this.locationList = this.buildLocationOptionsFromJobCards(rawResults);
-
-          let results = rawResults;
-
-          if (this.selectedLocationId) {
-            const selectedLocName = this.selectedLocationId.toString().trim().toUpperCase();
-            results = rawResults.filter((item: any) =>
-              (item.jobLocation || '').toString().trim().toUpperCase() === selectedLocName
+            
+            const claimedJobNos = new Set(
+              existingClaims.map((c: any) => (c.jobCardNo || c.JobCardNo || '').toString().trim().toLowerCase())
+                .filter((no: string) => no.length > 0)
             );
-          }
 
-          this.jobCardList = results;
+          
+            rawResults = rawResults.filter((item: any) => {
+              const fullJobNo = `${item.jobprefix || item.Jobprefix || ''}${item.jobNo || item.JobNo || ''}`.trim().toLowerCase();
+              const numericJobNo = (item.jobNo || item.JobNo || '').toString().trim().toLowerCase();
 
-          if (this.jobCardList.length === 0) {
-            this.toaster.show('No job cards found for the given search.', {
-              classname: 'bg-warning text-white',
-              delay: 3000
+              const isMatched = Array.from(claimedJobNos).some((cNo: any) => {
+                const strCNo = String(cNo || '').trim().toLowerCase();
+                return strCNo === fullJobNo || strCNo === numericJobNo || strCNo.endsWith(numericJobNo);
+              });
+
+              return !isMatched;
             });
-          }
 
-          // FIX: parts/labour grids (and their Total row) must only ever
-          // reflect the job the user actually picks in selectJob() - not
-          // whichever job happened to load first in this search result list.
-          // Populating them here, before any selection, is what let one
-          // job's totals leak onto a different selected job's form.
-        }, error: (err) => {
-          this.loader.hide();
-          console.error(err)
-        }
-      })
+            this.lastRawJobCards = rawResults;
+            this.locationList = this.buildLocationOptionsFromJobCards(rawResults);
+
+            let results = rawResults;
+            if (this.selectedLocationId) {
+              const selectedLocName = this.selectedLocationId.toString().trim().toUpperCase();
+              results = rawResults.filter((item: any) =>
+                (item.jobLocation || '').toString().trim().toUpperCase() === selectedLocName
+              );
+            }
+
+            this.jobCardList = results;
+
+            if (this.jobCardList.length === 0) {
+              this.toaster.show('No job cards found for the given search.', {
+                classname: 'bg-warning text-white',
+                delay: 3000
+              });
+            }
+          },
+          error: (err) => {
+            this.loader.hide();
+            console.error('Failed to fetch existing claims:', err);
+          }
+        });
+      }, 
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+      }
+    });
   }
 
-openJobSearch(content: any) {
+  openJobSearch(content: any) {
     if (this.isDealerUser && !this.selectedDealerCode) {
       this.toaster.show('Please select a Dealer first.', { classname: 'bg-warning text-white', delay: 3000 });
       return;
     }
 
     this.selectedLocationId = null;
+    this.jobSearch.jobNo = null;
+    this.jobSearch.rBillfromDate = '';
+    this.jobSearch.rBilltoDate = '';
+
     this.loadJobCarDetails();
     this.modalService.open(content, {
       size: 'xl',
@@ -551,46 +502,44 @@ openJobSearch(content: any) {
       centered: true,
       scrollable: true
     });
-}
+  }
 
   goToClaimList(): void {
     this.router.navigate(['/warranty-claim-list']);
   }
-calculatePartsTotal() {
+
+  calculatePartsTotal() {
     this.totalPartsQty = this.partsGridData.reduce((sum, item) => sum + (item.partItemQty || 0), 0);
     this.totalPartsRate = this.partsGridData.reduce((sum, item) => sum + (item.partItemRate || 0), 0);
     this.totalPartsIgst = this.partsGridData.reduce((sum, item) => sum + (item.igstAmount || 0), 0);
-    // FIX: was summing item.rowSubTotal (the PRE-tax subtotal, qty * rate),
-    // so the footer Total excluded IGST entirely and undercounted every row
-    // by its tax amount. Sum the post-tax total instead, the same way
-    // calculateLabourTotal() already does.
     this.totalPartsAmount = this.partsGridData.reduce((sum, item) => {
       const base = (item.partItemQty || 0) * (item.partItemRate || 0);
       const gst = item.igstAmount || 0;
       return sum + (item.totalWithTax ?? (base + gst));
     }, 0);
-}
- calculateLabourTotal() {
-  this.totalLabourQty = this.labourGridData.reduce((sum, item) => sum + (item.labourQty || 0), 0);
-  this.totalLabourRate = this.labourGridData.reduce((sum, item) => sum + (item.labourRate || 0), 0);
-  this.totalLabourIgst = this.labourGridData.reduce((sum, item) => sum + (item.igstAmount || 0), 0);
-  this.totalLabourAmount = this.labourGridData.reduce((sum, item) => {
-    const base = (item.labourQty || 0) * (item.labourRate || 0);
-    const gst = item.igstAmount || 0;
-    return sum + (item.totalWithTax ?? (base + gst));
-  }, 0);
-}
-    selectJob(item: any, modal: any) {
+  }
+
+  calculateLabourTotal() {
+    this.totalLabourQty = this.labourGridData.reduce((sum, item) => sum + (item.labourQty || 0), 0);
+    this.totalLabourRate = this.labourGridData.reduce((sum, item) => sum + (item.labourRate || 0), 0);
+    this.totalLabourIgst = this.labourGridData.reduce((sum, item) => sum + (item.igstAmount || 0), 0);
+    this.totalLabourAmount = this.labourGridData.reduce((sum, item) => {
+      const base = (item.labourQty || 0) * (item.labourRate || 0);
+      const gst = item.igstAmount || 0;
+      return sum + (item.totalWithTax ?? (base + gst));
+    }, 0);
+  }
+
+  selectJob(item: any, modal: any) {
     this.selectedJob = { ...item };
+    this.selectedJob.failureDate = this.formatDate(new Date());
+
     this.selectedJob.repairBillDetails?.forEach((x: any) => {
       x.dealerObservation = '';
       x.rootCauseAnalysis = '';
       if (x.itemType === 'Labour' && !x.mrp) {
         x.mrp = x.labourRate ?? 0;
       }
-      // FIX: Part rows never had `mrp` populated at all - the backend now
-      // returns it as partMRP; fall back to the billed rate if that
-      // resolves to 0 (e.g. PartItemId didn't match an ItemMaster row).
       if (x.itemType === 'Part' && !x.mrp) {
         x.mrp = x.partMRP || x.partItemRate || 0;
       }
@@ -613,7 +562,8 @@ calculatePartsTotal() {
     }
 
     modal.close();
-}
+  }
+
   get partDetails() {
     return this.selectedJob?.repairBillDetails?.filter(x => x.itemType === 'Part') || [];
   }
@@ -623,7 +573,6 @@ calculatePartsTotal() {
   }
 
   saveWarrantyClaim() {
-
     if (this.isViewMode) {
       this.updateExistingClaim();
       return;
@@ -674,17 +623,14 @@ calculatePartsTotal() {
       claimNo: this.claimNo,
       claimDate: this.toDate,
       chassisNo: this.selectedJob?.chassisNo,
-
       supplierId: this.selectedSupplierId,
-      jobCardHeaderId: this.selectedJob?.jobcardId,
+      jobCardHeaderId: this.selectedJob?.jobcardId || this.selectedJob?.jobcardHeaderId,
       customerLedgerId: this.selectedJob?.customerLedgerId,
       repairBillHeaderId: this.selectedJob?.repairBillHeaderId,
       ffirId: this.selectedJob?.ffirId,
       claimAccount: this.claimAccount,
-
       locationName: this.claimLocationName,
       locationCode: this.claimLocationCode,
-
       CreatedBy: '',
       repairBillDetails: this.selectedJob?.repairBillDetails
     };
@@ -697,9 +643,7 @@ calculatePartsTotal() {
 
         if (res?.claimId > 0) {
           this.toaster.show('Warranty Claim Saved Successfully.', { classname: 'bg-success text-white', delay: 3000 });
-
           this.resetForm();
-
           this.router.navigate(['/uw-line-item']);
         } else {
           this.toaster.show('Failed to save Warranty Claim.', { classname: 'bg-danger text-white', delay: 3000 });
@@ -712,7 +656,6 @@ calculatePartsTotal() {
         this.toaster.show(serverMsg, { classname: 'bg-danger text-white', delay: 3000 });
       }
     });
-
   }
 
   updateExistingClaim(): void {
@@ -751,20 +694,15 @@ calculatePartsTotal() {
   }
 
   resetForm() {
-
     this.selectedSupplierId = null;
-
     this.claimType = '';
-
     this.selectedJob = {};
-
     this.claimLocationName = null;
     this.claimLocationCode = null;
     this.claimLocationArea = null;  
-
   }
 
-    cancel(): void {
+  cancel(): void {
     if (this.isViewMode) {
       this.router.navigate(['/warranty-claim-list']);
       return;
@@ -775,5 +713,4 @@ calculatePartsTotal() {
     this.partsGridData = [];
     this.labourGridData = [];
   }
-
 }
