@@ -1,0 +1,255 @@
+<div class="container-fluid mt-4">
+  <div class="card shadow-sm">
+
+    <div class="card-header">
+      <div class="d-sm-flex align-items-center justify-content-between">
+
+        <h4>Stock Adjustment</h4>
+
+        <button class="btn btn-light btn-sm" (click)="openReportList()">
+          <i class="ri-menu-line"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Adjustment Details -->
+      <div class="row mb-3">
+
+        <div class="col-md-4">
+          <label>Adj. Date</label>
+          <input type="date" class="form-control form-control-sm" [(ngModel)]="fromDate" (change)="onDateRangeChange()">
+        </div>
+
+        <div class="col-md-2">
+          <label>Prefix No.</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="prefixNo" readonly>
+        </div>
+
+
+        <div class="col-md-1">
+          <label>Sr.No.</label>
+          <input type="text" class="form-control form-control-sm" [value]="serialNo" readonly>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label mb-1">Location</label>
+          <select class="form-select form-select-sm" name="location" [(ngModel)]="selectedLocation"
+            (change)="onChangeLocation($event)" [disabled]="isLoadingLocations">
+
+            <option value="ALL">All Locations</option>
+            <option *ngIf="isLoadingLocations" value="" disabled>
+              Loading locations...
+            </option>
+
+            <option *ngFor="let location of lstLocations" [value]="getLocationCode(location)">
+              {{ location.locname ?? location.locName }}
+            </option>
+
+          </select>
+          <small *ngIf="locationError" class="text-danger d-block">
+            {{ locationError }}
+          </small>
+        </div>
+
+      </div>
+
+      <hr>
+
+      <h5>Item Details</h5>
+
+      <div class="row mb-2 align-items-end">
+
+        <!-- Part No -->
+        <div class="col-md-3">
+          <label class="form-label">Part No.</label>
+          <ng-select class="ng-select-sm" [items]="partOptions" bindLabel="partNo" [searchFn]="customSearchFn"
+            [(ngModel)]="selectedPart" (change)="selectPart($event)" (open)="onPartNoFocus()" [loading]="isLoadingParts"
+            [clearable]="false" [searchable]="true" [virtualScroll]="true"
+            [notFoundText]="partSearchError || 'No matching part numbers found.'"
+            placeholder="Search Part No. or Description" name="partNo">
+
+            <ng-template ng-label-tmp let-item="item">
+              <span [title]="item.partNo + ' - ' + item.description">
+                {{ item.partNo }} - {{ item.description }}
+              </span>
+            </ng-template>
+
+            <ng-template ng-option-tmp let-item="item">
+              <span [title]="item.partNo + ' - ' + item.description">
+                {{ item.partNo }} - {{ item.description }}
+              </span>
+
+              <br>
+
+              <small>
+                Stock : {{ item.currentStock ?? 0 }}
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                Rate : {{ item.rateStock ?? 0 }}
+              </small>
+            </ng-template>
+          </ng-select>
+
+          <small *ngIf="partSearchError" class="text-danger d-block mt-1">
+            {{ partSearchError }}
+            <button *ngIf="dealerCode" type="button" class="btn btn-link btn-sm p-0 ms-2" (click)="retryPartSearch()">
+              Retry
+            </button>
+          </small>
+        </div>
+
+        <!-- Description -->
+        <div class="col-md-3">
+          <label class="form-label">Description</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="description" readonly>
+        </div>
+
+        <!-- Rate Stock -->
+        <div class="col-md-2">
+          <label class="form-label">Rate </label>
+          <input type="number" class="form-control form-control-sm" [ngModel]="rateStock" readonly>
+        </div>
+
+        <!-- Current Stock -->
+        <div class="col-md-2">
+          <label class="form-label">C.Stock</label>
+          <input type="number" class="form-control form-control-sm" [(ngModel)]="currentQty"
+            (ngModelChange)="onCurrentStockChange($event)" readonly>
+        </div>
+
+        <!-- Update Stock -->
+        <div class="col-md-2">
+          <label class="form-label">Up. Stock</label>
+          <input type="number" step="any" class="form-control form-control-sm" [(ngModel)]="updateQty"
+            (ngModelChange)="onUpdateStockChange($event)">
+        </div>
+      </div>
+
+      <div class="row mb-4 align-items-end">
+        <!-- Staged Adjustment Quantity -->
+        <div class="col-md-2">
+          <label class="form-label">Up. Qty</label>
+          <input type="number" class="form-control form-control-sm" [ngModel]="upQty" readonly>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Stg</label>
+          <input type="number" class="form-control form-control-sm" [ngModel]="stg" readonly>
+        </div>
+
+        <!-- Final Stock -->
+        <div class="col-md-2">
+          <label class="form-label">F.Qty</label>
+          <input type="number" class="form-control form-control-sm" [ngModel]="finalQty" readonly>
+        </div>
+
+        <!-- Add Button -->
+        <div class="col-md-2 ms-md-auto d-flex justify-content-md-end">
+          <button type="button" class="btn btn-primary btn-sm stock-adjustment-add-button"
+            [attr.title]="editingIndex === null ? 'Add Item' : 'Update Item'"
+            [attr.aria-label]="editingIndex === null ? 'Add Item' : 'Update Item'" (click)="addStockAdjustmentItem()">
+            <i [class.ri-add-line]="editingIndex === null" [class.ri-check-line]="editingIndex !== null"
+              class="align-middle me-1">
+            </i>
+            {{ isEditMode ? 'Update Item' : 'Add Item' }}
+            <!-- {{ editingIndex === null ? 'Add Item' : 'Update Item' }} -->
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Remarks -->
+      <div class="mt-4">
+        <label>Remarks</label>
+        <textarea class="form-control" rows="2" maxlength="250" [(ngModel)]="remarks">
+        </textarea>
+      </div>
+
+      <!-- Stock Adjustment Table -->
+      <h5 class="mt-4">Stock Adjustment Details</h5>
+
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+
+          <thead class="table-light">
+            <tr>
+              <th>Sr. No.</th>
+              <th>Part No.</th>
+              <th>Description</th>
+              <th>Rate</th>
+              <th>C.Stock</th>
+              <th>Up.Stock</th>
+              <th>Up.Qty</th>
+              <th>Stg</th>
+              <th>F.Qty</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let item of stockAdjustmentList; let i = index">
+
+              <td>{{ i + 1 }}</td>
+              <td>{{ item.partNo }}</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.rateStock }}</td>
+              <td>{{ item.currentStock }}</td>
+              <td>{{ item.updateStock }}</td>
+              <td>{{ item.upQty }}</td>
+              <td>{{ item.stg }}</td>
+              <td>{{ item.finalQty }}</td>
+
+              <td>
+                <div class="d-flex align-items-center gap-1 flex-nowrap">
+                  <button type="button" class="btn btn-soft-info btn-sm" aria-label="Edit item"
+                    (click)="editStockAdjustmentItem(i)">
+                    <i class="ri-pencil-line"></i>
+                  </button>
+                  <button type="button" class="btn btn-danger btn-sm" aria-label="Delete item"
+                    (click)="removeStockAdjustmentItem(i)">
+                    <i class="ri-delete-bin-line"></i>
+                  </button>
+                </div>
+              </td>
+
+            </tr>
+
+            <tr *ngIf="stockAdjustmentList.length === 0">
+              <td colspan="10" class="text-center">
+                No records found
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+      </div>
+
+      <!-- Bottom Buttons -->
+      <div class="d-flex justify-content-between flex-wrap gap-2 mt-3">
+
+        <div>
+          <button type="button" class="btn btn-outline-primary me-2" (click)="exportGridToExcel()">
+            <i class="ri-upload-2-line"></i>
+          </button>
+
+          <input #excelFile type="file" accept=".xlsx,.xls" hidden (change)="importExcel($event)" />
+
+          <button type="button" class="btn btn-outline-success" (click)="excelFile.click()">
+            <i class="ri-file-excel-2-line"></i>
+          </button>
+        </div>
+
+        <div>
+          <button type="button" class="btn btn-primary btn-sm" (click)="saveStockAdjustment()">
+            Save
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>

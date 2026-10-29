@@ -30,8 +30,8 @@
 
             <div class="col-xl-3 col-md-6" *ngIf="isDealer">
               <label class="form-label">Dealer</label>
-              <input type="text" class="form-control form-control-sm bg-light fw-semibold"
-                [value]="loggedInDealerCode" readonly>
+              <input type="text" class="form-control form-control-sm bg-light fw-semibold" [value]="loggedInDealerCode"
+                readonly>
             </div>
 
             <div class="col-xl-3 col-md-6">
@@ -46,32 +46,69 @@
 
             <div class="col-xl-3 col-md-6">
               <label class="form-label">Bill No.</label>
-              <input type="number" formControlName="billNo" class="form-control form-control-sm" placeholder="Enter bill number">
+              <input type="number" formControlName="billNo" class="form-control form-control-sm"
+                placeholder="Enter bill number">
             </div>
 
             <div class="col-xl-3 col-md-6">
               <label class="form-label">Job No.</label>
-              <input type="number" formControlName="jobNo" class="form-control form-control-sm" placeholder="Enter job number">
+              <input type="number" formControlName="jobNo" class="form-control form-control-sm"
+                placeholder="Enter job number">
             </div>
 
             <div class="col-xl-3 col-md-6">
               <label class="form-label">Chassis No.</label>
-              <input type="text" formControlName="chassisNo" class="form-control form-control-sm" placeholder="Enter chassis number">
+              <input type="text" formControlName="chassisNo" class="form-control form-control-sm"
+                placeholder="Enter chassis number">
             </div>
 
             <div class="col-xl-3 col-md-6">
               <label class="form-label">Customer Name</label>
-              <input type="text" formControlName="partyName" class="form-control form-control-sm" placeholder="Enter customer name">
+              <input type="text" formControlName="partyName" class="form-control form-control-sm"
+                placeholder="Enter customer name">
             </div>
 
             <div class="col-xl-3 col-md-6">
               <label class="form-label">Part Code</label>
-              <input type="text" formControlName="partCode" class="form-control form-control-sm" placeholder="Enter part code">
+              <input type="text" formControlName="partCode" class="form-control form-control-sm"
+                placeholder="Enter part code">
             </div>
 
-            <div class="col-xl-3 col-md-6">
+
+            <!-- Labour Code Search Dropdown -->
+            <div class="col-xl-3 col-md-6 position-relative">
               <label class="form-label">Labour Code</label>
-              <input type="text" formControlName="labourCode" class="form-control form-control-sm" placeholder="Enter labour code">
+
+              <div class="input-group input-group-sm">
+                <input type="text" formControlName="labourCode" class="form-control"
+                  placeholder="Search Labour Code / Description" autocomplete="off" (focus)="filterLabours()"
+                  (input)="filterLabours()" />
+
+                <button type="button" class="btn btn-outline-secondary" (click)="toggleLabourDropdown()">
+                  <i class="fas fa-chevron-down"></i>
+                </button>
+              </div>
+
+              <!-- Labour Dropdown -->
+              <div class="labour-dropdown" *ngIf="showLabourDropdown">
+
+                <div class="labour-option" *ngFor="let labour of filteredLabours" (click)="selectLabour(labour)">
+
+                  <div class="fw-semibold">
+                    {{ labour.labourCode }}
+                  </div>
+
+                  <div class="text-muted small">
+                    {{ labour.labourDescription }}
+                  </div>
+
+                </div>
+
+                <div class="text-center text-muted p-2" *ngIf="filteredLabours.length === 0">
+                  No Labour Found
+                </div>
+
+              </div>
             </div>
 
             <div class="col-xl-3 col-md-6">
@@ -97,11 +134,11 @@
             <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">
               <i class="fas fa-redo me-1"></i>Reset
             </button>
-            <button type="button" class="btn btn-success btn-sm" *ngIf="canDownload"
-              (click)="exportToExcel()" [disabled]="exporting || isLoading">
+            <button type="button" class="btn btn-success btn-sm" *ngIf="canDownload" (click)="exportToExcel()"
+              [disabled]="exporting || isLoading">
               <span *ngIf="exporting" class="spinner-border spinner-border-sm me-1"></span>
               {{ exporting ? 'Exporting...' : 'Export to Excel' }}
-          </button>
+            </button>
           </div>
         </form>
       </div>
@@ -116,28 +153,36 @@
   <div class="col-12" *ngIf="!isLoading && reportData.length > 0">
     <div class="row g-3">
       <div class="col-xl-3 col-md-6">
-        <div class="card h-100"><div class="card-body">
-          <p class="text-muted text-uppercase fw-semibold mb-1">Total Item Rate</p>
-          <h5 class="mb-0">{{ formatCurrency(totalItemRate) }}</h5>
-        </div></div>
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-muted text-uppercase fw-semibold mb-1">Total Item Rate</p>
+            <h5 class="mb-0">{{ formatCurrency(totalItemRate) }}</h5>
+          </div>
+        </div>
       </div>
       <div class="col-xl-3 col-md-6">
-        <div class="card h-100"><div class="card-body">
-          <p class="text-muted text-uppercase fw-semibold mb-1">Total GST (C+S+I)</p>
-          <h5 class="mb-0">{{ formatCurrency(totalGstAmount) }}</h5>
-        </div></div>
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-muted text-uppercase fw-semibold mb-1">Total GST (C+S+I)</p>
+            <h5 class="mb-0">{{ formatCurrency(totalGstAmount) }}</h5>
+          </div>
+        </div>
       </div>
       <div class="col-xl-3 col-md-6">
-        <div class="card h-100"><div class="card-body">
-          <p class="text-muted text-uppercase fw-semibold mb-1">Total Discount</p>
-          <h5 class="mb-0">{{ formatCurrency(totalDiscount) }}</h5>
-        </div></div>
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-muted text-uppercase fw-semibold mb-1">Total Discount</p>
+            <h5 class="mb-0">{{ formatCurrency(totalDiscount) }}</h5>
+          </div>
+        </div>
       </div>
       <div class="col-xl-3 col-md-6">
-        <div class="card h-100"><div class="card-body">
-          <p class="text-muted text-uppercase fw-semibold mb-1">Line Items</p>
-          <h5 class="mb-0">{{ totalRecords }}</h5>
-        </div></div>
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-muted text-uppercase fw-semibold mb-1">Line Items</p>
+            <h5 class="mb-0">{{ totalRecords }}</h5>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -163,7 +208,7 @@
 
         <div class="table-responsive" *ngIf="reportData.length > 0">
           <table class="table table-bordered table-striped table-sm">
-        <thead class="table-light">
+            <thead class="table-light">
               <tr>
                 <th class="sortable" (click)="onSort('srNo')">
                   Sr.No
@@ -236,7 +281,7 @@
                 <th>Labour Description</th>
                 <th>Technician Name</th>
               </tr>
-            </thead>            
+            </thead>
             <tbody>
               <tr *ngFor="let item of reportData">
                 <td>{{ item.srNo }}</td>
@@ -277,51 +322,51 @@
               </tr>
             </tbody>
             <tfoot>
-                <tr class="table-warning fw-bold">
+              <tr class="table-warning fw-bold">
 
-                  <!-- Cols 1–21: Sr.No, Dealer Code, Dealer Name, Dealer Location, City,
+                <!-- Cols 1–21: Sr.No, Dealer Code, Dealer Name, Dealer Location, City,
                       State, Job Date, Job No., Job Type, Service Head, Service Type,
                       Customer Name, Customer Mobile, Chassis No., Model Details,
                       Job Status, Repair Bill No., Repair Bill Date, Part Code,
                       Part Code Description, Issue Type -->
-                  <td colspan="21" class="text-end">TOTAL (this page)</td>
+                <td colspan="21" class="text-end">TOTAL (this page)</td>
 
-                  <!-- Col 22: Item Rate -->
-                  <td class="text-end text-nowrap">{{ formatCurrency(totalItemRate) }}</td>
+                <!-- Col 22: Item Rate -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalItemRate) }}</td>
 
-                  <!-- Col 23: Labour Rate -->
-                  <td class="text-end text-nowrap">{{ formatCurrency(totalLabourRate) }}</td>
+                <!-- Col 23: Labour Rate -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalLabourRate) }}</td>
 
-                  <!-- Col 24: CGST % — no total shown; it's a rate, not a summable amount -->
-                  <td></td>
+                <!-- Col 24: CGST % — no total shown; it's a rate, not a summable amount -->
+                <td></td>
 
-                  <!-- Col 25: CGST Amt -->
-                  <td class="text-end text-nowrap">{{ formatCurrency(totalCgstAmount) }}</td>
+                <!-- Col 25: CGST Amt -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalCgstAmount) }}</td>
 
-                  <!-- Col 26: SGST % -->
-                  <td></td>
+                <!-- Col 26: SGST % -->
+                <td></td>
 
-                  <!-- Col 27: SGST Amt -->
-                  <td class="text-end text-nowrap">{{ formatCurrency(totalSgstAmount) }}</td>
+                <!-- Col 27: SGST Amt -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalSgstAmount) }}</td>
 
-                  <!-- Col 28: IGST % -->
-                  <td></td>
+                <!-- Col 28: IGST % -->
+                <td></td>
 
-                  <!-- Col 29: IGST Amt -->
-                  <td class="text-end text-nowrap">{{ formatCurrency(totalIgstAmount) }}</td>
+                <!-- Col 29: IGST Amt -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalIgstAmount) }}</td>
 
-                  <!-- Col 30: Total GST -->
-                  <td class="text-end text-nowrap">{{ formatCurrency(totalGstAmount) }}</td>
+                <!-- Col 30: Total GST -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalGstAmount) }}</td>
 
-                  <!-- Col 31: Discount -->
-                  <td class="text-end text-nowrap">{{ formatCurrency(totalDiscount) }}</td>
+                <!-- Col 31: Discount -->
+                <td class="text-end text-nowrap">{{ formatCurrency(totalDiscount) }}</td>
 
-                  <!-- Cols 32–35: Discount Type, Labour Code, Labour Description,
+                <!-- Cols 32–35: Discount Type, Labour Code, Labour Description,
                       Technician Name — no totals applicable -->
-                  <td colspan="4"></td>
+                <td colspan="4"></td>
 
-                </tr>
-              </tfoot>
+              </tr>
+            </tfoot>
           </table>
         </div>
 

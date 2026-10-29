@@ -159,6 +159,7 @@ export const ModuleTypes = [
     { name: 'job_card', moduleName: 'Job Card', isAdmin: false },
     { name: 'material_transfer', moduleName: 'Material Transfer', isAdmin: false },
     { name: 'part_inward', moduleName: 'Parts Inward', isAdmin: false },
+    { name: 'stock_adjustment', moduleName: 'Stock Adjustment', isAdmin: false },
 ]
 
 export const EmployeeDesignations = [
@@ -250,4 +251,3 @@ export const batteryMake = [
     { Id: 1, value: 'Trontek Electronics ltd' },
     { Id: 2, value: 'Trontek Electronics Pvt ltd' }
 ];
-

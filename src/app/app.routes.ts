@@ -102,6 +102,8 @@ import { DealerMenuAccessPage } from './components/dealer-creation/dealer-menu-a
 import { LocationEditPage } from './components/dealer-creation/dealer-location-edit/dealer-location-edit';
 import { WarrantyRegister } from './components/Reports/warranty-register/warranty-register';
 import { MenuRight } from './components/menu-right/menu-right';
+import { StockAdjustment } from './components/stock-adjustment/stock-adjustment';
+import { StockAdjustmentReport } from './components/Reports/stock-adjustment-report/stock-adjustment-report';
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
   { path: 'forgot-password', loadComponent: () => import('./components/account/forgot-password/forgot-password').then(m => m.ForgotPassword) },
@@ -209,6 +211,13 @@ export const routes: Routes = [
       { path: 'comparison-report', data: [90], loadComponent: () => import('./components/Reports/comparision-report/comparision-report').then(m => m.ComparisonReportComponent) },
       { path: 'material-transfer-report', data: [91], loadComponent: () => import('./components/Reports/material-transfer-report/material-transfer-report').then(m => m.MaterialTransferReportComponent) },
       { path: 'repair-bill-report', data: [92], loadComponent: () => import('./components/Reports/repair-bill-report/repair-bill-report').then(m => m.RepairBillReportComponent) },
+      {
+  path: 'stock-bill-list',
+  data: [93],
+  loadComponent: () =>
+    import('./components/Reports/stock-bill-list/stock-bill-list')
+      .then(m => m.StockBillListComponent)
+},
       { path: 'circular', data: [53], loadComponent: () => import('./components/circular/circular').then(m => m.Circular) },
 
       { path: 'repair-bill-performa/:repairBillId', component: RepairBillPerforma, data: [51] },
@@ -291,7 +300,10 @@ export const routes: Routes = [
       { path: 'part-dispatch-invoice', component : PartInvoiceDispatch, data: [118]},
       { path: 'vehicle-dispatch-invoice', component: VehicleInvoiceDispatch, data:[119]},
       { path: 'warranty-register', component: WarrantyRegister, data:[123] },
-      { path: 'menu-right', component: MenuRight, data:[124]}
+      { path: 'menu-right', component: MenuRight, data:[124]},
+      { path: 'stock-adjustment', component: StockAdjustment, data:[124] },
+      //  {path: 'stock-adjustment-report', component: StockAdjustmentReport, data:[136], loadComponent: () => import('./components/Reports/stock-adjustment-report/stock-adjustment-report').then(m => m.StockAdjustmentReport) }
+      // {path: 'stock-adjustment-report', component: StockAdjustmentReport, data:[136], loadComponent: () => import('./components/Reports/stock-adjustment-report/stock-adjustment-report').then(m => m.StockAdjustmentReport) }
 
     ]
   },

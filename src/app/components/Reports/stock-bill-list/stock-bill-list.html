@@ -1,0 +1,181 @@
+<div class="container-fluid">
+
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+        <h4 class="mb-sm-0">Stock Adj.</h4>
+    </div>
+
+    <div class="card">
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-3">
+                    <label class="form-label">Date From</label>
+                    <input type="date" class="form-control" [(ngModel)]="fromDate">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Date To</label>
+                    <input type="date" class="form-control" [(ngModel)]="toDate">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label mb-1">Location</label>
+                    <select class="form-select" [(ngModel)]="selectedLocation">
+
+                        <option value="">
+                            Select Location
+                        </option>
+
+                        <option *ngFor="let item of locationList" [value]="item.loccode">
+
+                            {{ item.locname ?? item.locName }}
+
+                        </option>
+
+                    </select>
+                    <!-- <small *ngIf="locationError" class="text-danger d-block">
+            {{ locationError }}
+          </small> -->
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end gap-2">
+
+                    <button type="button" class="btn btn-primary" (click)="search()">
+
+                        Search
+
+                    </button>
+
+                    <button type="button" class="btn btn-success" (click)="exportExcel()">
+
+                        <i class="ri-file-excel-2-line"></i>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card mt-3">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th>Action</th>
+                            <th>Sr.No</th>
+                            <th>Prifix No</th>
+                            <th>Date</th>
+                            <th>Location</th>
+                            <th>Part No</th>
+                            <th>Description</th>
+                            <th>Current Stock</th>
+                            <th>Update Stock</th>
+                            <th>Final Qty</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <!-- <tr *ngFor="let item of stockBillList; let i = index"> -->
+                        <tr *ngFor="let item of paginatedStockBillList; let i = index">
+
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-info" (click)="editItem(item)">
+                                        <i class="ri-pencil-line"></i>
+                                    </button>
+
+                                    <button type="button" class="btn btn-sm btn-danger" (click)="deleteItem(item)">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                            </td>
+
+                            <td>{{ ((currentPage - 1) * pageSize) + i + 1 }}</td>
+                            <td>{{ item.prefixNo }}</td>
+                            <td>{{ item.adjustmentDate }}</td>
+                            <td>
+                                <a href="javascript:void(0)" (click)="editItem(item)" style="text-decoration: none;">
+                                    {{ item.locationCode }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="javascript:void(0)" (click)="editItem(item)" style="text-decoration: none;">
+                                    {{ item.partNo }}
+                                </a>
+                            </td>
+                            <td>{{ item.description }}</td>
+                            <td>{{ item.currentStock }}</td>
+                            <td>{{ item.updateStock }}</td>
+                            <td>{{ item.finalQty }}</td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+
+                    <div>
+                        Showing
+                        {{ stockBillList.length === 0 ? 0 : ((currentPage - 1) * pageSize) + 1 }}
+                        to
+                        {{
+                        (((currentPage - 1) * pageSize) + pageSize) > stockBillList.length
+                        ? stockBillList.length
+                        : (((currentPage - 1) * pageSize) + pageSize)
+                        }}
+                        of {{ stockBillList.length }} records
+                    </div>
+
+                    <div class="btn-group">
+
+                        <button class="btn btn-outline-secondary btn-sm" (click)="goToFirstPage()"
+                            [disabled]="currentPage === 1">
+                            First
+                        </button>
+
+                        <button class="btn btn-outline-secondary btn-sm" (click)="goToPreviousPage()"
+                            [disabled]="currentPage === 1">
+                            Previous
+                        </button>
+
+                        <button class="btn btn-primary btn-sm" disabled>
+                            Page {{ currentPage }} of {{ totalPages }}
+                        </button>
+
+                        <button class="btn btn-outline-secondary btn-sm" (click)="goToNextPage()"
+                            [disabled]="currentPage === totalPages">
+                            Next
+                        </button>
+
+                        <button class="btn btn-outline-secondary btn-sm" (click)="goToLastPage()"
+                            [disabled]="currentPage === totalPages">
+                            Last
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
