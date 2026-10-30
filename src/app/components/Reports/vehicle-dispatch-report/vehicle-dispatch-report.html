@@ -1,0 +1,244 @@
+<!-- src\app\components\Reports\vehicle-dispatch-report\vehicle-dispatch-report.html -->
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+  <h4 class="mb-sm-0">Vehicle Dispatch Report</h4>
+</div>
+
+@if (!isSuperAdmin) {
+  <div class="alert alert-warning"><i class="ri-lock-line me-1"></i>Only SuperAdmin can view the Vehicle Dispatch Report.</div>
+} @else {
+<div class="row">
+  <div class="col-lg-12">
+
+    <!-- FILTERS -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Filters</h5>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="filterForm" (ngSubmit)="onSearch()">
+          <div class="row g-2 align-items-end">
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Dealer</label>
+              <select formControlName="dealerCode" class="form-select form-select-sm">
+                <option value="">-- All Dealers --</option>
+                <option *ngFor="let d of dealerList" [value]="d.dealerCode">{{ d.dealerCode }} - {{ d.dealerName }}</option>
+              </select>
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Invoice From</label>
+              <input type="date" formControlName="fromDate" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Invoice To</label>
+              <input type="date" formControlName="toDate" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Received by Dealer</label>
+              <select formControlName="status" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option value="accepted">Received</option>
+                <option value="pending">Pending</option>
+              </select>
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Sale Status</label>
+              <select formControlName="saleStatus" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option value="sold">Sold</option>
+                <option value="unsold">Not Sold</option>
+              </select>
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Source</label>
+              <select formControlName="source" class="form-select form-select-sm">
+                <option value="">-- All --</option>
+                <option value="dms">DMS / ERP</option>
+                <option value="cogxim">Cogxim Import</option>
+              </select>
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Invoice No</label>
+              <input type="text" formControlName="invoiceNo" class="form-control form-control-sm" placeholder="Invoice No">
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Chassis No</label>
+              <input type="text" formControlName="chassisNo" class="form-control form-control-sm" placeholder="Chassis No">
+            </div>
+
+            <div class="col-xl-2 col-md-4">
+              <label class="form-label">Search</label>
+              <input type="text" formControlName="search" class="form-control form-control-sm" placeholder="Dealer, model, motor, battery...">
+            </div>
+
+            <div class="col-xl-3 col-md-6 d-flex gap-2 mt-1 align-items-end">
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="ri-search-line me-1"></i>Search
+              </button>
+              <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">Reset</button>
+              <button type="button" class="btn btn-success btn-sm" (click)="exportToCSV()"
+                      [disabled]="!totals?.totalRecords || exporting" title="Export all matching rows to CSV">
+                <i class="ri-file-excel-2-line" [class.ri-loader-4-line]="exporting"></i>
+              </button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger"><i class="ri-error-warning-line me-1"></i>{{ errorMessage }}</div>
+
+    <!-- TOTALS CARDS -->
+    <div *ngIf="!isLoading && totals && totals.totalRecords > 0" class="row g-2 mb-2">
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">Vehicles Dispatched</p>
+          <h6 class="mb-0 fw-semibold text-primary">{{ num(totals.totalRecords) }}</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">Invoices</p>
+          <h6 class="mb-0">{{ num(totals.totalInvoices) }}</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">Dealers</p>
+          <h6 class="mb-0">{{ num(totals.totalDealers) }}</h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">Received / Pending</p>
+          <h6 class="mb-0">{{ num(totals.totalAccepted) }} / <span class="text-warning">{{ num(totals.totalPending) }}</span></h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">Sold / Not Sold</p>
+          <h6 class="mb-0">{{ num(totals.totalSold) }} / <span class="text-success">{{ num(totals.totalUnsold) }}</span></h6>
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="card card-body py-2 px-3">
+          <p class="text-muted mb-1" style="font-size:11px">From Cogxim Import</p>
+          <h6 class="mb-0">{{ num(totals.totalCogxim) }}</h6>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card">
+      <div class="card-body p-0">
+
+        <div *ngIf="isLoading" class="text-center p-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="text-muted mt-2">Loading report data...</p>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading" style="max-height: 65vh;">
+          <table class="table table-bordered table-hover table-striped align-middle text-nowrap mb-0" style="font-size:11px">
+            <thead class="table-dark" style="position: sticky; top: 0; z-index: 1;">
+              <tr>
+                <th>Sr</th>
+                <th>Invoice Date</th>
+                <th>Invoice No</th>
+                <th>Dealer Code</th>
+                <th>Dealer Name</th>
+                <th>Dealer City</th>
+                <th>Dealer State</th>
+                <th>Location</th>
+                <th>Item Code</th>
+                <th>Model</th>
+                <th>Colour</th>
+                <th>Mfg</th>
+                <th>Chassis No</th>
+                <th>Motor No</th>
+                <th>Battery No</th>
+                <th>Battery No 2</th>
+                <th>Charger No</th>
+                <th>Controller No</th>
+                <th>Reg Number</th>
+                <th>PO Number</th>
+                <th>Received</th>
+                <th>Source</th>
+                <th>Sale Bill No</th>
+                <th>Sale Date</th>
+                <th>Customer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let x of reportData">
+                <td>{{ x.srNo }}</td>
+                <td>{{ formatDate(x.invoiceDate) }}</td>
+                <td>{{ x.invoiceNo || '-' }}</td>
+                <td>{{ x.dealerCode || '-' }}</td>
+                <td>{{ x.dealerName || '-' }}</td>
+                <td>{{ x.dealerCity || '-' }}</td>
+                <td>{{ x.dealerState || '-' }}</td>
+                <td [title]="x.locCode || ''">{{ x.locationName || x.locCode || '-' }}</td>
+                <td>{{ x.itemCode || '-' }}</td>
+                <td>{{ x.modelName || '-' }}</td>
+                <td>{{ x.colourName || x.colrCode || '-' }}</td>
+                <td>{{ x.mfgMonth ? x.mfgMonth + '/' : '' }}{{ x.mfgYear || '-' }}</td>
+                <td class="fw-medium">{{ x.chassisNo || '-' }}</td>
+                <td>{{ x.motorNo || '-' }}</td>
+                <td>{{ x.batteryNo || '-' }}</td>
+                <td>{{ x.batteryNo2 || '-' }}</td>
+                <td>{{ x.chargerNo || '-' }}</td>
+                <td>{{ x.controllerNo || '-' }}</td>
+                <td>{{ x.regNumber || '-' }}</td>
+                <td>{{ x.poNumber || '-' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="x.isAccepted ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'">
+                    {{ x.isAccepted ? 'Received' : 'Pending' }}</span>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="x.source === 'DMS' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary'">{{ x.source }}</span>
+                </td>
+                <td>{{ x.saleBillNo || '-' }}</td>
+                <td>{{ formatDate(x.saleDate) }}</td>
+                <td>{{ x.customerName || '-' }}</td>
+              </tr>
+              <tr *ngIf="!reportData.length && !errorMessage">
+                <td colspan="25" class="text-center text-muted py-4">No vehicle dispatch found for the selected filters.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div *ngIf="!isLoading && totals && totals.totalRecords > 0"
+             class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-2 border-top">
+          <small class="text-muted">
+            Showing {{ num((pageIndex - 1) * pageSize + 1) }}–{{ num((pageIndex - 1) * pageSize + reportData.length) }} of {{ num(totals.totalRecords) }}
+          </small>
+          <div class="d-flex align-items-center gap-2">
+            <select class="form-select form-select-sm" style="width: auto;" [(ngModel)]="pageSize" [ngModelOptions]="{ standalone: true }" (change)="onPageSizeChange()">
+              <option *ngFor="let s of pageSizes" [ngValue]="s">{{ s }} / page</option>
+            </select>
+            <button type="button" class="btn btn-light btn-sm border" (click)="goTo(1)" [disabled]="pageIndex === 1">&laquo;</button>
+            <button type="button" class="btn btn-light btn-sm border" (click)="goTo(pageIndex - 1)" [disabled]="pageIndex === 1">&lsaquo;</button>
+            <small>Page {{ pageIndex }} of {{ totalPages }}</small>
+            <button type="button" class="btn btn-light btn-sm border" (click)="goTo(pageIndex + 1)" [disabled]="pageIndex >= totalPages">&rsaquo;</button>
+            <button type="button" class="btn btn-light btn-sm border" (click)="goTo(totalPages)" [disabled]="pageIndex >= totalPages">&raquo;</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+}

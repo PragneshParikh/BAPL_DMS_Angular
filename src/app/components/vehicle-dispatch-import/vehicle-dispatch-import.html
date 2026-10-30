@@ -1,0 +1,181 @@
+<!-- src\app\components\vehicle-dispatch-import\vehicle-dispatch-import.html -->
+<div class="db-head">
+  <div>
+    <h4 class="db-title">Vehicle Dispatch Import</h4>
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a routerLink="/">Dashboard</a></li>
+      <li class="breadcrumb-item"><a routerLink="/vehicle-dispatch-report">Vehicle Dispatch Report</a></li>
+      <li class="breadcrumb-item active">Cogxim Import</li>
+    </ol>
+  </div>
+  <div class="db-head-actions">
+    <button type="button" class="btn btn-success" (click)="importAll()" [disabled]="busy || reading || !queue.length">
+      <i class="ri-upload-cloud-2-line me-1"></i>Validate &amp; Import All Sheets
+    </button>
+  </div>
+</div>
+<p class="db-range"><i class="ri-information-line me-1"></i>Cogxim vehicle dispatch report (VehicleDispatchReport2021–2027-cogxi) → Vehicle Inward. One row = one chassis dispatched to a dealer. Stock, chassis master and ERP are not changed.</p>
+
+@if (successMessage) {
+  <div class="alert alert-success alert-dismissible d-flex align-items-center" role="alert">
+    <i class="ri-checkbox-circle-fill fs-4 me-2"></i><div class="flex-grow-1">{{ successMessage }}</div>
+    <button type="button" class="btn-close" (click)="successMessage = null" aria-label="Close"></button>
+  </div>
+}
+
+@if (!isSuperAdmin) {
+  <div class="alert alert-warning"><i class="ri-lock-line me-1"></i>Only SuperAdmin can import vehicle dispatch data.</div>
+} @else {
+
+<div class="row g-4">
+  <!-- ============================== LEFT: files / sheets ============================== -->
+  <div class="col-xl-3">
+    <div class="card db-card mb-4">
+      <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-file-excel-2-line"></i>1. Excel Files</h4></div>
+      <div class="card-body">
+        <label class="imp-drop" [class.over]="dragOver"
+               (dragover)="$event.preventDefault(); dragOver = true" (dragleave)="dragOver = false" (drop)="onDrop($event)">
+          <input type="file" accept=".xlsx,.xlsm" multiple hidden (change)="onPick($event)" [disabled]="reading || busy">
+          <i class="ri-upload-cloud-2-line" [class.db-spin]="reading"></i>
+          <span class="fw-medium">{{ reading ? 'Reading workbook…' : 'Drop .xlsx files here' }}</span>
+          <small class="text-muted">or click to browse · every year sheet of the workbook is added</small>
+        </label>
+
+        @for (q of queue; track q) {
+          <div class="imp-file" [class.active]="q === active" (click)="select(q)">
+            <i class="ri-file-excel-2-fill text-success"></i>
+            <div class="flex-grow-1 min-w-0">
+              <div class="text-truncate fw-medium" [title]="q.sheet.name">{{ q.sheet.name }}</div>
+              <div class="text-truncate small text-muted" [title]="q.file.name">{{ q.file.name }}</div>
+              <small class="text-muted">{{ size(q.file.size) }} · {{ num(q.sheet.rows) }} rows</small>
+            </div>
+            <span class="badge {{ stateClass(q.state) }}">{{ q.state }}</span>
+            <button type="button" class="btn btn-sm btn-link text-muted p-0 ms-1" (click)="remove(q, $event)" [disabled]="busy" title="Remove"><i class="ri-close-line"></i></button>
+          </div>
+        } @empty {
+          <p class="text-muted text-center small mb-0 mt-3">No files added yet.</p>
+        }
+      </div>
+    </div>
+
+    <div class="card db-card mb-0">
+      <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-settings-3-line"></i>Options</h4></div>
+      <div class="card-body">
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" id="dspAcc" [(ngModel)]="markAsAccepted" [disabled]="busy">
+          <label class="form-check-label" for="dspAcc">Mark as received by dealer
+            <small class="text-muted d-block">Historic dispatches are saved as accepted, so they do not appear in the dealer's pending inward list. Off = accepted only when Cogxim has a Dealer Invoice Receive Date.</small></label>
+        </div>
+        <div class="form-check form-switch mb-0">
+          <input class="form-check-input" type="checkbox" id="dspUpd" [(ngModel)]="updateExisting" [disabled]="busy">
+          <label class="form-check-label" for="dspUpd">Update chassis already imported
+            <small class="text-muted d-block">Re-import refreshes chassis from an earlier Cogxim import. Chassis dispatched in DMS / ERP are never changed.</small></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== RIGHT: actions + result ============================== -->
+  <div class="col-xl-9">
+    @if (!active) {
+      <div class="card db-card"><div class="card-body db-empty-block">
+        <i class="ri-file-upload-line"></i>
+        <p class="mb-0">Add the Cogxim vehicle dispatch Excel file to start.</p>
+      </div></div>
+    } @else {
+      @if (active.error) {
+        <div class="alert alert-danger"><i class="ri-error-warning-line me-1"></i>{{ active.error }}</div>
+      }
+
+      <div class="card db-card mb-4">
+        <div class="card-header db-card-head">
+          <h4 class="card-title mb-0"><i class="ri-file-list-3-line"></i>{{ active.sheet.name }}
+            <small class="text-muted fw-normal ms-2">{{ active.file.name }} · {{ num(active.sheet.rows) }} rows</small></h4>
+        </div>
+        <div class="card-footer d-flex justify-content-end align-items-center flex-wrap gap-2">
+          <button type="button" class="btn btn-primary" (click)="validate()" [disabled]="busy">
+            <i class="ri-shield-check-line me-1" [class.db-spin]="active.state === 'Validating'"></i>2. Validate
+          </button>
+          <button type="button" class="btn btn-success" (click)="importNow()"
+                  [disabled]="busy || !result?.dryRun || !work(result)">
+            <i class="ri-database-2-line me-1" [class.db-spin]="active.state === 'Importing'"></i>3. Import {{ result?.dryRun && work(result) ? num(work(result)) + ' chassis' : '' }}
+          </button>
+        </div>
+      </div>
+
+      @if (result; as r) {
+      <div class="card db-card mb-0">
+        <div class="card-header db-card-head">
+          <h4 class="card-title mb-0">
+            <i [class]="r.dryRun ? 'ri-file-search-line' : 'ri-checkbox-circle-line'"></i>
+            {{ r.dryRun ? 'Validation Result' : 'Import Result' }}
+            <small class="text-muted fw-normal ms-2">{{ r.sheetName }} · {{ date(r.fromDate) }} – {{ date(r.toDate) }}</small>
+            @if (r.engine) { <span class="badge bg-success-subtle text-success ms-2">{{ r.engine }}</span> }
+          </h4>
+          <button type="button" class="btn btn-sm btn-light" (click)="downloadIssues()" [disabled]="!r.issues.length"><i class="ri-download-2-line me-1"></i>Issues CSV</button>
+        </div>
+        <div class="card-body">
+          <div class="imp-stats">
+            <div><span>Rows in sheet</span><strong>{{ num(r.totalRows) }}</strong></div>
+            <div><span>Invoices in sheet</span><strong>{{ num(r.invoicesInFile) }}</strong></div>
+            @if (r.dryRun) {
+              <div class="ok"><span>New chassis</span><strong>{{ num(r.vehiclesReady) }}</strong></div>
+              <div class="ok"><span>Chassis to refresh</span><strong>{{ num(r.vehiclesToUpdate) }}</strong></div>
+            } @else {
+              <div class="ok"><span>Chassis added</span><strong>{{ num(r.vehiclesImported) }}</strong></div>
+              <div class="ok"><span>Chassis refreshed</span><strong>{{ num(r.vehiclesUpdated) }}</strong></div>
+            }
+            <div><span>Dealers</span><strong>{{ num(r.dealers.length) }}</strong></div>
+            <div class="skip"><span>Rows skipped</span><strong>{{ num(r.rowsSkipped) }}</strong></div>
+            <div class="bad"><span>Rows with errors</span><strong>{{ num(r.rowsWithErrors) }}</strong></div>
+          </div>
+
+          @if (r.dealers.length) {
+            <div class="table-responsive mt-3" style="max-height: 18rem; overflow: auto;">
+              <table class="table table-sm table-hover align-middle mb-0">
+                <thead><tr><th>Dealer</th><th>Name</th><th class="text-end">Invoices</th><th class="text-end">Chassis</th></tr></thead>
+                <tbody>
+                  @for (d of r.dealers; track d.dealerCode) {
+                    <tr><td class="fw-medium">{{ d.dealerCode }}</td><td>{{ d.dealerName || '—' }}</td><td class="text-end">{{ num(d.invoices) }}</td><td class="text-end">{{ num(d.vehicles) }}</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          <div class="d-flex align-items-center justify-content-between mt-4 mb-2 flex-wrap gap-2">
+            <h6 class="mb-0">Issues</h6>
+            <div class="db-seg">
+              <button type="button" [class.active]="issueFilter === ''" (click)="issueFilter = ''">All ({{ r.issues.length }})</button>
+              <button type="button" [class.active]="issueFilter === 'Error'" (click)="issueFilter = 'Error'">Errors ({{ count('Error') }})</button>
+              <button type="button" [class.active]="issueFilter === 'Skipped'" (click)="issueFilter = 'Skipped'">Skipped ({{ count('Skipped') }})</button>
+              <button type="button" [class.active]="issueFilter === 'Warning'" (click)="issueFilter = 'Warning'">Warnings ({{ count('Warning') }})</button>
+              <button type="button" [class.active]="issueFilter === 'Info'" (click)="issueFilter = 'Info'">Info ({{ count('Info') }})</button>
+            </div>
+          </div>
+          @if (r.issuesTruncated) { <small class="text-muted d-block mb-2">Showing the first 1,000 issues. Counts above are complete.</small> }
+          <div class="table-responsive imp-issues">
+            <table class="table table-sm align-middle mb-0">
+              <thead><tr><th style="width:5rem">Row</th><th style="width:7rem">Level</th><th>Invoice No</th><th>Chassis No</th><th>Message</th></tr></thead>
+              <tbody>
+                @for (i of issues; track $index) {
+                  <tr>
+                    <td>{{ i.rowNo }}</td>
+                    <td><span class="badge {{ levelClass(i.level) }}">{{ i.level }}</span></td>
+                    <td>{{ i.invoiceNo || '—' }}</td>
+                    <td>{{ i.chassisNo || '—' }}</td>
+                    <td class="text-wrap">{{ i.message }}</td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="5" class="text-center text-muted py-3"><i class="ri-checkbox-circle-line text-success me-1"></i>No issues.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      }
+    }
+  </div>
+</div>
+}

@@ -276,7 +276,7 @@ export class JobCard {
 
     this.searchTimeout = setTimeout(() => {
       this.search();
-    }, 500); // 500ms delay
+    }, 200); // search as you type
   }
   // setUserRole() {
   //   const dealerCode = this.storageService.getDealerCode();

@@ -255,34 +255,112 @@ export class SidebarComponent implements OnInit {
     document.body.classList.remove('vertical-sidebar-enable');
   }
 
+  /**
+   * Maps the /menu API response to the MenuItem shape the template expects.
+   * Accepts common alternative field names so a backend naming change
+   * (menuName, subMenus, children, moduleName, url ...) does not blank the sidebar.
+   */
+  private normalizeMenu(items: any[]): MenuItem[] {
+    if (!Array.isArray(items)) return [];
+    return items.map((m: any) => {
+      const children = m.subItems ?? m.subMenus ?? m.subMenu ?? m.children ?? m.SubItems;
+      return {
+        ...m,
+        id: m.id ?? m.menuId ?? m.Id,
+        label: m.label ?? m.menuName ?? m.name ?? m.title ?? m.Label,
+        icon: m.icon ?? m.menuIcon ?? m.iconClass ?? m.Icon,
+        link: m.link ?? m.url ?? m.route ?? m.path ?? m.Link,
+        module: m.module ?? m.moduleName ?? m.Module,
+        isTitle: m.isTitle ?? m.IsTitle ?? false,
+        isCollapsed: m.isCollapsed ?? true,
+        subItems: Array.isArray(children) ? this.normalizeMenu(children) : undefined
+      } as MenuItem;
+    });
+  }
+
+  /** Distinct AutoDash-style icon per top-level menu (API sends one generic icon). */
+  private static readonly MENU_ICONS: { [key: string]: string } = {
+    'dashboard': 'ri-dashboard-3-line',   // ADDED — real "Dashboard" group now comes from MenuMaster
+    'master': 'ri-database-2-line',
+    'process': 'ri-loop-right-line',
+    'reports': 'ri-bar-chart-2-line',
+    'services': 'ri-customer-service-2-line',
+    'utility': 'ri-tools-line',
+    'accounts': 'ri-wallet-3-line',
+    'warranty claim': 'ri-shield-check-line',
+    'stocks': 'ri-archive-line',
+    'ebw process': 'ri-battery-2-charge-line',
+    'bg warranty': 'ri-award-line',
+    'access control': 'ri-shield-user-line',
+    'role menu rights': 'ri-shield-user-line'
+  };
+
+  private iconFor(item: MenuItem): string | undefined {
+    const generic = !item.icon || item.icon === 'ri-dashboard-2-line';
+    if (!generic || item.isTitle) return item.icon;
+    const key = (item.label ?? '').toString().trim().toLowerCase();
+    return SidebarComponent.MENU_ICONS[key] ?? 'ri-apps-2-line';
+  }
+  
+
+  /** 'Work Shop', 'work_shop', 'WORKSHOP' -> 'workshop' */
+  private moduleKey(value: any): string {
+    return (value ?? '').toString().toLowerCase().replace(/[\s_-]/g, '');
+  }
+
+  // ADDED — recursively checks whether a real menu entry (at any depth) already
+// provides this route, so the fallback below never duplicates the DB-driven
+// "Dashboard > Overview" entry added via the MenuMaster SQL script.
+private hasRouteRecursive(items: MenuItem[] | undefined, path: string): boolean {
+  if (!items) return false;
+  return items.some(m => m.link === path || this.hasRouteRecursive(m.subItems, path));
+}
+
   private filterMenuByModule(module: string) {
     if (!this.menuItems) return;
+    const selected = this.moduleKey(module);
 
     const filteredMenu = JSON.parse(JSON.stringify(this.menuItems)) // deep copy
-    
       .map((menu: any) => {
         if (menu.subItems) {
           menu.subItems = menu.subItems.filter((sub: any) => {
-            return !sub.module || sub.module.toLowerCase() === module.toLowerCase();
+            return !sub.module || this.moduleKey(sub.module) === selected;
           });
         }
         return menu;
       })
       .filter((menu: any) => {
-        // Always keep section titles
         if (menu.isTitle) {
           return true;
         }
-        // If this item originally had a subItems array (i.e. it's a dropdown parent),
-        // only keep it if at least one child survived the filter
         if (Array.isArray(menu.subItems)) {
           return menu.subItems.length > 0;
         }
-        // Plain leaf items (no subItems at all) stay as-is
         return true;
       });
 
+    filteredMenu.forEach((m: MenuItem) => (m.icon = this.iconFor(m)));
+    const titleIndex = filteredMenu.findIndex((m: MenuItem) => m.isTitle);
+
+    // FIXED — only inject the synthetic fallback Dashboard link if nothing in
+    // the real menu tree (at any depth, e.g. "Dashboard > Overview" from the
+    // DB) already provides route '/'. Prevents a duplicate Dashboard entry
+    // once the MenuMaster rows above are in place.
+    const hasDashboard = this.hasRouteRecursive(filteredMenu, '/');
+    if (!hasDashboard) {
+      filteredMenu.splice(titleIndex + 1, 0, { id: -1, label: 'Dashboard', icon: 'ri-dashboard-3-line', link: '/' } as MenuItem);
+    }
+
     this.filteredMenuItems = filteredMenu;
+
+    if (this.menuItems.length && !filteredMenu.some((m: any) => !m.isTitle)) {
+      const modules = Array.from(new Set(
+        this.menuItems.flatMap((m: any) => (m.subItems ?? []).map((s: any) => s.module ?? '(none)'))
+      ));
+      console.warn(`[Sidebar] No menu items for module "${module}". ` +
+        `Items from /menu: ${this.menuItems.length}. Module values found: ${JSON.stringify(modules)}`,
+        this.menuItems);
+    }
 
     setTimeout(() => this.initActiveMenu());
   }
@@ -292,7 +370,9 @@ export class SidebarComponent implements OnInit {
       this.loader.show();
       this.menuService.getMenu().subscribe({
         next: (menu: any) => {
-          this.menuItems = menu;
+          // API may return a plain array or a wrapped object ({ data: [...] })
+          const raw = Array.isArray(menu) ? menu : (menu?.data ?? menu?.result ?? menu?.items ?? []);
+          this.menuItems = this.normalizeMenu(raw);
           resolve(menu);
           this.loader.hide();
         }, error: (err) => {

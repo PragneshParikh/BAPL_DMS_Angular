@@ -8,6 +8,7 @@ import { CounterBillService } from '../../core/services/counter-bill-service';
 import { StorageService } from '../../core/services/storage';
 import { DealerService } from '../../core/services/dealer-service';
 import { LoaderService } from '../../core/services/loader';
+import { filterRows } from '../../shared/search/table-search';
 
 @Component({
   selector: 'app-counter-bill',
@@ -116,15 +117,10 @@ export class CounterBill implements OnInit {
   }
 
   onSearchChange(): void {
-    const term = this.searchTerm.toLowerCase();
-
-    this.filteredCounterBills = this.counterBills.filter(item =>
-      item.header?.billNo?.toLowerCase().includes(term) ||
-      item.header?.partyName?.toLowerCase().includes(term) ||
-      (item.header?.mobileNo ?? '').toString().includes(term) ||
-      item.header?.locCode?.toLowerCase().includes(term)
-    );
-
+    this.filteredCounterBills = filterRows(this.counterBills, this.searchTerm, [
+      'header.billNo', 'header.billDate', 'header.billType', 'header.partyName', 'header.mobileNo',
+      'header.dealerCode', 'header.dealerName', 'header.locName', 'header.locCode', 'header.billAmount'
+    ]);
     this.page = 1;
     this.updatePagination();
   }

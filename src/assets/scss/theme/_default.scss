@@ -6,8 +6,8 @@
         //Typography
 
         // Font Family
-        --#{$prefix}font-family-primary:                                     'hkgrotesk', sans-serif;
-        --#{$prefix}font-family-secondary:                                   'Poppins', sans-serif;
+        --#{$prefix}font-family-primary:                                     'Inter', 'hkgrotesk', sans-serif; // BGAUSS AutoDash
+        --#{$prefix}font-family-secondary:                                   'Inter', 'Poppins', sans-serif; // BGAUSS AutoDash
         
         $font-sizes: (
             "10":          0.625rem,
@@ -15,7 +15,7 @@
             "12":          0.75rem,
             "13":          0.8125rem,
             "14":          0.875rem,
-            "base":        0.8125rem, //13px
+            "base":        0.875rem, //14px - BGAUSS AutoDash (was 13px)
             "15":          0.9375rem,
             "16":          1rem,
             "17":          1.0625rem,
@@ -40,7 +40,7 @@
 
         --#{$prefix}grid-gutter-width:                              1.5rem;
 
-        --#{$prefix}headings-font-weight:                           500;
+        --#{$prefix}headings-font-weight:                           600; // BGAUSS AutoDash
 
         --#{$prefix}element-shadow:                                 none;
 

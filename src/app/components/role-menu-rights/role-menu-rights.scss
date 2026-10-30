@@ -1,0 +1,120 @@
+// src\app\components\role-menu-rights\role-menu-rights.scss
+
+/* ---------- summary tiles (self-contained; breakpoint fixed at lg, not xl,
+   so 4 tiles stay on one row on a real laptop screen at 100% zoom once the
+   sidebar width is subtracted — xl (1200px) was too high for this layout) ---------- */
+.rmr-kpis { margin-bottom: 1.25rem; }
+
+.rmr-kpi {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: .75rem;
+  height: 100%;
+  min-height: 108px;
+  padding: 1.1rem 1.25rem;
+  background: #fff;
+  border: 1px solid rgba(226, 232, 240, .8);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .06), 0 1px 2px rgba(15, 23, 42, .04);
+  transition: transform .18s ease, box-shadow .18s ease;
+
+  &:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15, 23, 42, .08); }
+}
+.rmr-kpi-body { display: flex; flex-direction: column; min-width: 0; }
+.rmr-kpi-label {
+  color: #64748b;
+  font-size: .8125rem;
+  font-weight: 500;
+  margin-bottom: .4rem;
+  white-space: nowrap;      // the actual fix for the 2-line wrap seen at 100% zoom
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rmr-kpi-value {
+  color: #0f172a;
+  font-size: clamp(1.25rem, 1rem + .7vw, 1.75rem);   // scales down gracefully, never wraps
+  font-weight: 700;
+  letter-spacing: -.01em;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.rmr-kpi-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+.kpi-primary { background: rgba(99, 102, 241, .12); color: #6366f1; }
+.kpi-success { background: rgba(52, 211, 153, .15); color: #16a34a; }
+.kpi-warning { background: rgba(251, 191, 36, .18); color: #d97706; }
+.kpi-purple  { background: rgba(167, 139, 250, .15); color: #7c3aed; }
+
+/* ---------- toolbar row (module filter / search / assigned-only) ---------- */
+.card-header.d-flex.flex-wrap {
+  row-gap: .6rem;
+}
+
+.rmr-search {
+  min-width: 200px;
+  flex: 0 1 240px;
+
+  .rmr-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+  }
+}
+
+/* ---------- table: sticky header + internal scroll so the full matrix is
+   visible without needing to zoom the browser out ---------- */
+.rmr-table-wrap {
+  max-height: 62vh;
+  overflow-y: auto;
+}
+
+.rmr-table {
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8fafc;
+  }
+
+  .rmr-group > td {
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .rmr-changed > td {
+    background-color: rgba(99, 102, 241, 0.06);
+  }
+
+  .rmr-changed > td:first-child {
+    box-shadow: inset 3px 0 0 #6366f1;
+  }
+
+  .form-check-input {
+    float: none;
+    margin-left: 0;
+    cursor: pointer;
+  }
+}
+
+:host-context([data-bs-theme="dark"]) {
+  .rmr-kpi { background: #111827; border-color: #1f2937; }
+  .rmr-kpi-value { color: #f1f5f9; }
+  .rmr-table thead th, .rmr-table .rmr-group > td { background-color: #0f172a; border-color: #1f2937; }
+}
+
+@media (max-width: 575.98px) {
+  .rmr-kpi { min-height: 92px; padding: .9rem 1rem; }
+  .rmr-search { flex: 1 1 100%; min-width: 0; }
+}

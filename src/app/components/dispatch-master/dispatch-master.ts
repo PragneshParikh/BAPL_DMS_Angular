@@ -9,6 +9,7 @@ import { DispatchMasterListViewModel, DispatchMasterViewModel } from '../../View
 import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { SearchDebouncer } from '../../shared/search/table-search';
 @Component({
   selector: 'app-dispatch-master',
   standalone: true,
@@ -31,6 +32,7 @@ export class DispatchMaster implements OnInit {
 
   selectedMasterType = 'Dispatch Thru Master';
   searchName = '';
+  private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
   perPageRecords = 25;
 
   page = 1;
@@ -80,8 +82,10 @@ export class DispatchMaster implements OnInit {
   }
 
   onSearch(): void {
-    this.page = 1;
-    this.loadRecords();
+    this.searchDebounce.run(() => {
+      this.page = 1;
+      this.loadRecords();
+    });
   }
 
   onPageChange(page: number): void {

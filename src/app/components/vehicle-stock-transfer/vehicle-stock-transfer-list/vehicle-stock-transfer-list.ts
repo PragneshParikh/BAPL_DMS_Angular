@@ -11,6 +11,7 @@ import { NgbHighlight, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstr
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { filterRows } from '../../../shared/search/table-search';
 @Component({
   selector: 'app-vehicle-stock-transfer-list',
   imports: [CommonModule, FormsModule, NgbHighlight, NgbPaginationModule, FlatpickrModule, RouterOutlet, NgbTooltipModule],
@@ -108,8 +109,11 @@ let dealerCode = '';
   }
 
   onSearchChange() {
-    const term = this.searchTerm.toLowerCase();
-    this.filteredTransfers = this.transferList.filter(x => JSON.stringify(x).toLowerCase().includes(term));
+    this.filteredTransfers = filterRows(this.transferList, this.searchTerm, [
+      'transferNo', 'transferDate', 'issuingLocationName', 'issuingStaffName', 'receivingLocationName',
+      'receivingStaffName', 'remarks', 'transferTotal',
+      'vehicleStockTransferDetailsViewModel.chassisNo', 'vehicleStockTransferDetailsViewModel.modelName'
+    ]);
     this.page = 1;
     this.updatePagination();
   }

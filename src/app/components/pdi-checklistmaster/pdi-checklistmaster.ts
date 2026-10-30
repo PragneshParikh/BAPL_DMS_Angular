@@ -10,6 +10,7 @@ import { Form22MasterService } from '../../core/services/form22masterservice';
 import * as bootstrap from 'bootstrap';
 import { StorageService } from '../../core/services/storage';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { SearchDebouncer } from '../../shared/search/table-search';
 
 @Component({
   selector: 'app-pdi-checklistmaster',
@@ -21,6 +22,7 @@ import { MenuAccessService } from '../../core/services/menu-access.service';
 export class PdiChecklistmaster implements OnInit {
   checklistList: any[] = [];
   searchText: string = '';
+  private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
   isEditMode: boolean = false;
   isLoading: boolean = false;
   oemModelList: any[] = [];
@@ -120,7 +122,10 @@ export class PdiChecklistmaster implements OnInit {
   }
 
   onSearch() {
-    this.loadPdiChecklistList();
+    this.searchDebounce.run(() => {
+      this.page = 1;
+      this.loadPdiChecklistList();
+    });
   }
 
   savePdiChecklistmaster(form: any) {

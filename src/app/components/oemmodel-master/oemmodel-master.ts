@@ -8,6 +8,7 @@ import { OemModelViewModel } from '../../ViewModels/OemModelViewModel';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 declare var bootstrap: any;
 
 @Component({
@@ -84,17 +85,7 @@ export class OemmodelMasterComponent implements OnInit {
   // ================= SEARCH =================
 
   searchModel() {
-    let filtered = this.originalModelList;
-
-    if (this.searchTerm?.trim()) {
-      const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(x =>
-        (x.modelName?.toLowerCase().includes(term)) ||
-        (x.modelShortName?.toLowerCase().includes(term))
-      );
-    }
-
-    this.modelList = filtered;
+    this.modelList = filterRows(this.originalModelList, this.searchTerm, ['modelName', 'modelShortName']);
     this.page = 1;
     this.loadPage();
   }

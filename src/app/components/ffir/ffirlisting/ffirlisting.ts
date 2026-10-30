@@ -266,7 +266,7 @@ export class Ffirlisting {
 
       this.search();
 
-    }, 500);
+    }, 200);
 
   }
 

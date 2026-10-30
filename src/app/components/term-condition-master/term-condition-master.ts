@@ -9,6 +9,7 @@ import { TermConditionService } from '../../core/services/term-condition-service
 import { conditionModule } from '../../constant';
 import Swal from 'sweetalert2';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 @Component({
   selector: 'app-term-condition-master',
   standalone: true,
@@ -33,6 +34,7 @@ export class TermConditionMaster implements OnInit {
 
   conditionList: any[] = [];
   pagedData: any[] = [];
+  searchTerm = '';
 
   moduleList: any[] = conditionModule;
   selectedCondition: any = {};
@@ -202,13 +204,19 @@ export class TermConditionMaster implements OnInit {
   }
 
   refreshGrid(): void {
+    const rows = filterRows(this.conditionList, this.searchTerm, ['conditionModuleName', 'termCondition', 'conditionEffectiveDate']);
 
-    this.collectionSize = this.conditionList.length;
+    this.collectionSize = rows.length;
 
-    this.pagedData = this.conditionList.slice(
+    this.pagedData = rows.slice(
       (this.page - 1) * this.pageSize,
       (this.page - 1) * this.pageSize + this.pageSize
     );
+  }
+
+  onSearch(): void {
+    this.page = 1;
+    this.refreshGrid();
   }
 
   sort(column: string): void {

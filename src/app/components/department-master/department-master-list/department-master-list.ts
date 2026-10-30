@@ -8,6 +8,7 @@ import { DepartmentModel } from '../../../ViewModels/models/DepartmentModel';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { filterRows } from '../../../shared/search/table-search';
 @Component({
   selector: 'app-department-master-list',
   imports: [CommonModule, FormsModule],
@@ -55,13 +56,7 @@ export class DepartmentMasterList {
   }
 
   applyFilter() {
-    const text = this.searchText.trim().toLowerCase();
-    this.filteredList = !text
-      ? [...this.departmentList]
-      : this.departmentList.filter(d =>
-          d.abbreviation?.toLowerCase().includes(text) ||
-          d.departmentName?.toLowerCase().includes(text)
-        );
+    this.filteredList = filterRows(this.departmentList, this.searchText, ['departmentName', 'abbreviation']);
   }
 
   onAdd() {

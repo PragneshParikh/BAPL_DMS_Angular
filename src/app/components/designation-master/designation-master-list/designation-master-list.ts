@@ -8,6 +8,7 @@ import { DesignationModel } from '../../../ViewModels/models/DesignationModel';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { filterRows } from '../../../shared/search/table-search';
 @Component({
   selector: 'app-designation-master-list',
   imports: [CommonModule, FormsModule],
@@ -54,14 +55,8 @@ export class DesignationMasterList {
     });
   }
 
-applyFilter() {
-    const text = this.searchText.trim().toLowerCase();
-    this.filteredList = !text
-      ? [...this.designationList]
-      : this.designationList.filter(d =>
-          d.designationName?.toLowerCase().includes(text) ||
-          d.abbreviation?.toLowerCase().includes(text)
-        );
+  applyFilter() {
+    this.filteredList = filterRows(this.designationList, this.searchText, ['designationName', 'abbreviation']);
   }
 
   onAdd() {

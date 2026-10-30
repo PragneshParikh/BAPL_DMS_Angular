@@ -12,6 +12,7 @@ import { LoaderService } from '../../core/services/loader';
 import { Occupation, OccupationApiResponse } from '../../ViewModels/OccupationMasterViewModel';
 import { OccupationService } from '../../core/services/occupation-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 @Component({
   selector: 'app-occupation-master',
   imports: [CommonModule, FormsModule, NgbPaginationModule, NgbHighlight, NgbTooltipModule],
@@ -85,12 +86,7 @@ export class OccupationMaster implements OnInit {
 
   /* ================= SEARCH ================= */
   onSearchChange(): void {
-    if (!this.searchTerm) {
-      this.filteredOccupations = [...this.allOccupations];
-      this.page = 1;
-      return;
-    }
-    this.filteredOccupations = this.allOccupations.filter(x => x.occupationName?.toLowerCase().includes(this.searchTerm.toLowerCase()));
+    this.filteredOccupations = filterRows(this.allOccupations, this.searchTerm, ['occupationName']);
     this.page = 1;
   }
 

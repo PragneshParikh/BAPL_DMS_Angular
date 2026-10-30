@@ -9,6 +9,7 @@ import { ReportService } from '../../../core/services/report.service';
 import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model';
 import { VehicleQuotation } from '../../vehicle-quotation/vehicle-quotation';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { filterRows } from '../../../shared/search/table-search';
 
 // =====================================
 // PRINT STYLES
@@ -269,15 +270,9 @@ export class VehicleQuotationListComponent implements OnInit {
   }
 
   search(): void {
-    const txt = this.searchText.toLowerCase();
-
-    this.filteredData = this.quotations.filter(x =>
-      (x.quotationNo ?? '').toLowerCase().includes(txt) ||
-      (x.customerName ?? '').toLowerCase().includes(txt) ||
-      (x.mobileNo ?? '').toLowerCase().includes(txt) ||
-      (x.dealerName ?? '').toLowerCase().includes(txt) ||
-      (x.modelName ?? '').toLowerCase().includes(txt)
-    );
+    this.filteredData = filterRows(this.quotations, this.searchText, [
+      'quotationNo', 'quotationDate', 'customerName', 'mobileNo', 'dealerName', 'modelName', 'status', 'totalAmount'
+    ]);
   }
 
   addNew(): void {

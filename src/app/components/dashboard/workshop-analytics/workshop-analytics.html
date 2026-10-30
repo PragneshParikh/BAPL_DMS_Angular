@@ -1,0 +1,138 @@
+<div class="db-head">
+  <div>
+    <h4 class="db-title">Workshop Analytics</h4>
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a routerLink="/">Dashboard</a></li>
+      <li class="breadcrumb-item active">Workshop Analytics</li>
+    </ol>
+  </div>
+  <div class="db-head-actions">
+    <div class="db-seg" role="group" aria-label="Period">
+      @for (p of periods; track p.key) {
+        <button type="button" [class.active]="period === p.key" (click)="setPeriod(p.key)" [disabled]="loading">{{ p.label }}</button>
+      }
+    </div>
+    <a class="btn btn-outline-success" [routerLink]="links.jobCards"><i class="ri-file-chart-line me-1"></i>Full Report</a>
+  </div>
+</div>
+<p class="db-range"><i class="ri-calendar-line me-1"></i>{{ periodLabel }}</p>
+
+@if (failed) {
+  <div class="alert alert-warning py-2"><i class="ri-error-warning-line me-1"></i>Job card data could not be loaded. Try again or open the full report.</div>
+}
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.jobCards">
+      <div class="db-kpi-body"><span class="db-kpi-label">Job Cards</span><span class="db-kpi-value">{{ loading ? '…' : num(totalJobs) }}</span>
+        <span class="db-kpi-sub">{{ num(activeDealers) }} dealers with jobs</span></div>
+      <span class="db-kpi-icon kpi-blue"><i class="ri-tools-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.jobCards">
+      <div class="db-kpi-body"><span class="db-kpi-label">Closed Jobs</span><span class="db-kpi-value">{{ loading ? '…' : num(completed) }}</span>
+        <span class="db-kpi-sub">{{ closurePct }}% closure rate</span></div>
+      <span class="db-kpi-icon kpi-success"><i class="ri-checkbox-circle-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.jobCards">
+      <div class="db-kpi-body"><span class="db-kpi-label">Open Jobs</span><span class="db-kpi-value">{{ loading ? '…' : num(pending) }}</span>
+        <span class="db-kpi-sub">Pending closure</span></div>
+      <span class="db-kpi-icon kpi-warning"><i class="ri-time-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.jobCards">
+      <div class="db-kpi-body"><span class="db-kpi-label">Service Revenue</span><span class="db-kpi-value">{{ loading ? '…' : inr(revenue) }}</span>
+        <span class="db-kpi-sub">Avg. {{ inr(avgJobValue) }} per job</span></div>
+      <span class="db-kpi-icon kpi-purple"><i class="ri-money-rupee-circle-line"></i></span>
+    </a>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-8">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head">
+        <h4 class="card-title mb-0"><i class="ri-line-chart-line"></i>Jobs Opened vs Closed</h4>
+        <a [routerLink]="links.jobCards" class="db-link">View report <i class="ri-arrow-right-up-line"></i></a>
+      </div>
+      <div class="card-body db-chart-body">
+        <div #trend class="db-chart db-clickable"></div>
+        @if (!jobs.length) { <div class="db-empty">{{ loading ? 'Loading…' : 'No job cards in this period.' }}</div> }
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-donut-chart-line"></i>Closure Rate</h4></div>
+      <div class="card-body db-chart-body">
+        <div #closure class="db-chart db-clickable"></div>
+        @if (!hasData) { <div class="db-empty">{{ loading ? 'Loading…' : 'No job cards in this period.' }}</div> }
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-4">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-pie-chart-2-line"></i>Jobs by Service Type</h4></div>
+      <div class="card-body db-chart-body">
+        <div #byService class="db-chart db-clickable"></div>
+        @if (!jobs.length) { <div class="db-empty">{{ loading ? 'Loading…' : 'No job cards in this period.' }}</div> }
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-list-check-2"></i>Jobs by Status</h4></div>
+      <div class="card-body db-chart-body">
+        <div #status class="db-chart db-clickable"></div>
+        @if (!jobs.length) { <div class="db-empty">{{ loading ? 'Loading…' : 'No job cards in this period.' }}</div> }
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-user-settings-line"></i>Top Mechanics</h4></div>
+      <div class="card-body db-chart-body">
+        <div #byMechanic class="db-chart db-clickable"></div>
+        @if (!jobs.length) { <div class="db-empty">{{ loading ? 'Loading…' : 'No job cards in this period.' }}</div> }
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card db-card">
+  <div class="card-header db-card-head">
+    <h4 class="card-title mb-0"><i class="ri-table-line"></i>Recent Job Cards</h4>
+    <div class="db-search"><i class="ri-search-line"></i>
+      <input type="text" class="form-control" placeholder="Search job no, reg no, dealer…" [(ngModel)]="search">
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 db-table">
+        <thead><tr><th>Job In</th><th>Job No</th><th>Reg No</th><th>Dealer</th><th>Service Type</th><th>Mechanic</th><th>Status</th></tr></thead>
+        <tbody>
+          @for (j of recentJobs; track $index) {
+            <tr class="db-clickable" (click)="open()">
+              <td>{{ jobDate(j) }}</td>
+              <td class="fw-medium">{{ j.jobNo }}</td>
+              <td>{{ j.regNo || '—' }}</td>
+              <td>{{ j.dealerName || j.dealerCode }} <small class="text-muted">{{ j.city }}</small></td>
+              <td>{{ j.serviceType || j.jobType || '—' }}</td>
+              <td>{{ j.mechanicName || '—' }}</td>
+              <td><span class="badge {{ statusClass(j) }}">{{ j.jobStatus || '—' }}</span></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="text-center text-muted">{{ loading ? 'Loading…' : 'No matching job cards.' }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

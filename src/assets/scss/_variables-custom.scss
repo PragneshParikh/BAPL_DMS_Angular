@@ -3,7 +3,7 @@
 //
 
 // Vertical menu
-$vertical-menu-width:                             260px;
+$vertical-menu-width:                             220px; // BGAUSS compact UI (was 260px)
 $vertical-menu-width-md:                          180px;
 $vertical-menu-width-sm:                          70px;
 
@@ -21,7 +21,7 @@ $navbar-brand-box-width:                          240px;
 $semibox-width:                                   110px;
 
 //topbar
-$header-height:                                   50px;
+$header-height:                                   56px; // BGAUSS compact UI (AutoDash look at 75%)
 
 //sidebar gradient
 $vertical-menu-item-color-gradient:               rgba($white, .5);

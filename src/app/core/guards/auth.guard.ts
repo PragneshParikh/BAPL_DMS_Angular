@@ -29,6 +29,13 @@ export class AuthGuard {
             return true;
         }
 
+        // SuperAdmin / Admin can open every page - same rule the API applies
+        // to the sidebar (/api/menu), so menu and page access stay consistent.
+        const role = (this.storageService.getRole() || '').toLowerCase().trim();
+        if (role === 'superadmin' || role === 'admin') {
+            return true;
+        }
+
         let menuRights: any[] = [];
 
         try {

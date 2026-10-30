@@ -7,6 +7,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { TaxCodeMasterService } from '../../core/services/taxcode-master-service';
 import { LoaderService } from '../../core/services/loader';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 declare var bootstrap: any;
 
 @Component({
@@ -132,19 +133,8 @@ export class TaxCodeMasterComponent implements OnInit {
   }
 
   searchTaxCode() {
-    let distinctList = this.getDistinctTaxCodes(this.originalTaxCodeList);
-    let filtered = [...distinctList];
-
-    if (this.searchTerm?.trim()) {
-      const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(x => {
-        return Object.values(x).some(val =>
-          val !== null && val !== undefined && val.toString().toLowerCase().includes(term)
-        );
-      });
-    }
-
-    this.taxCodeList = filtered;
+    const distinctList = this.getDistinctTaxCodes(this.originalTaxCodeList);
+    this.taxCodeList = filterRows(distinctList, this.searchTerm, ['taxcode', 'description', 'taxRate', 'effectiveDate']);
     this.page = 1;
     this.loadPage();
   }

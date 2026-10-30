@@ -28,9 +28,10 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Location Name</label>
+                    <label class="form-label">Search</label>
                     <input type="text" class="form-control form-control-sm" [(ngModel)]="locationName"
-                        (input)="checkKeywordReset()" (keyup.enter)="searchLocation()" />
+                        placeholder="Code, name, dealer, form type..."
+                        (input)="searchLocation()" (keyup.enter)="searchLocation()" />
                 </div>
                 <div class="col-md-3 d-flex align-items-end gap-2">
                     <button class="btn btn-primary btn-sm" (click)="searchLocation()">

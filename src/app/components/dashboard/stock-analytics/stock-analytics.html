@@ -1,0 +1,116 @@
+<!-- src\app\components\dashboard\stock-analytics\stock-analytics.html -->
+<div class="db-head">
+  <div>
+    <h4 class="db-title">Stock Analytics</h4>
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a routerLink="/">Dashboard</a></li>
+      <li class="breadcrumb-item active">Stock Analytics</li>
+    </ol>
+  </div>
+  <div class="db-head-actions">
+    <button type="button" class="btn btn-light" (click)="load()" [disabled]="loading"><i class="ri-refresh-line me-1" [class.db-spin]="loading"></i>Refresh</button>
+    <a class="btn btn-outline-success" [routerLink]="links.modelStock"><i class="ri-file-chart-line me-1"></i>Full Report</a>
+  </div>
+</div>
+<p class="db-range"><i class="ri-time-line me-1"></i>Current stock{{ lastUpdated ? ' as of ' + (lastUpdated | date: 'dd.MM.yyyy, HH:mm') : '' }}</p>
+
+@if (failed) {
+  <div class="alert alert-warning py-2"><i class="ri-error-warning-line me-1"></i>Stock data could not be loaded. Click Refresh to retry.</div>
+}
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.modelStock">
+      <div class="db-kpi-body"><span class="db-kpi-label">Vehicles in Stock</span><span class="db-kpi-value">{{ loading ? '…' : num(totalStock) }}</span>
+        <span class="db-kpi-sub">All dealers, all models</span></div>
+      <span class="db-kpi-icon kpi-blue"><i class="ri-store-2-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.modelStock">
+      <div class="db-kpi-body"><span class="db-kpi-label">Models in Stock</span><span class="db-kpi-value">{{ loading ? '…' : num(modelCount) }}</span>
+        <span class="db-kpi-sub">Top: {{ topModel?.label || '—' }} ({{ topModelPct }}%)</span></div>
+      <span class="db-kpi-icon kpi-success"><i class="ri-apps-2-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.modelStock">
+      <div class="db-kpi-body"><span class="db-kpi-label">Dealers Holding Stock</span><span class="db-kpi-value">{{ loading ? '…' : num(dealerCount) }}</span>
+        <span class="db-kpi-sub">With at least one vehicle</span></div>
+      <span class="db-kpi-icon kpi-warning"><i class="ri-building-2-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.modelStock">
+      <div class="db-kpi-body"><span class="db-kpi-label">Avg. Stock / Dealer</span><span class="db-kpi-value">{{ loading ? '…' : num(avgPerDealer) }}</span>
+        <span class="db-kpi-sub">Vehicles per stocking dealer</span></div>
+      <span class="db-kpi-icon kpi-purple"><i class="ri-bar-chart-box-line"></i></span>
+    </a>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-8">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head">
+        <h4 class="card-title mb-0"><i class="ri-apps-2-line"></i>Stock by Model</h4>
+        <a [routerLink]="links.modelStock" class="db-link">View report <i class="ri-arrow-right-up-line"></i></a>
+      </div>
+      <div class="card-body db-chart-body">
+        <div #byModel class="db-chart db-clickable"></div>
+        @if (!hasData) { <div class="db-empty">{{ loading ? 'Loading…' : 'No stock on hand.' }}</div> }
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-pie-chart-2-line"></i>Model Share</h4></div>
+      <div class="card-body db-chart-body">
+        <div #share class="db-chart db-clickable"></div>
+        @if (!hasData) { <div class="db-empty">{{ loading ? 'Loading…' : 'No stock on hand.' }}</div> }
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-5">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-building-2-line"></i>Top Dealers by Stock</h4></div>
+      <div class="card-body db-chart-body">
+        <div #byDealer class="db-chart db-clickable"></div>
+        @if (!hasData) { <div class="db-empty">{{ loading ? 'Loading…' : 'No stock on hand.' }}</div> }
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-7">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head">
+        <h4 class="card-title mb-0"><i class="ri-table-line"></i>Dealer Stock</h4>
+        <div class="db-search"><i class="ri-search-line"></i>
+          <input type="text" class="form-control" placeholder="Search dealer…" [(ngModel)]="search">
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 db-table">
+            <thead><tr><th>Dealer</th><th>Top Models</th><th class="text-end">Stock</th><th class="text-end">Share</th></tr></thead>
+            <tbody>
+              @for (r of dealerRows; track r.dealerCode; let i = $index) {
+                <tr class="db-clickable" (click)="open()">
+                  <td><div class="d-flex align-items-center gap-2"><span class="db-rank">{{ i + 1 }}</span>
+                    <div><div class="fw-medium">{{ r.dealerName }}</div><small class="text-muted">{{ r.dealerCode }}</small></div></div></td>
+                  <td class="text-muted">{{ topModelsOf(r) }}</td>
+                  <td class="text-end fw-semibold">{{ num(r.total) }}</td>
+                  <td class="text-end">{{ sharePct(r) }}%</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="text-center text-muted">{{ loading ? 'Loading…' : 'No dealers match.' }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

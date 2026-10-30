@@ -13,6 +13,7 @@ import { LocationMasterService } from '../../core/services/location-master-servi
 import * as XLSX from 'xlsx';
 import { NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 
 @Component({
   selector: 'app-ebw-invoice-list',
@@ -117,10 +118,9 @@ export class EbwInvoiceList implements OnInit {
     let result = this.gridData;
 
     if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      result = result.filter((r) =>
-        (r.partyName || '').toLowerCase().includes(term) || String(r.billNo).includes(term)
-      );
+      result = filterRows(result, this.searchTerm, [
+        'billNo', 'invoiceDate', 'billType', 'partyName', 'chassisNo', 'locationName', 'locationCode', 'cashAccName', 'netAmount'
+      ]);
     }
 
     if (this.filter.billNo) {

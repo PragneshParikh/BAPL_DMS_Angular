@@ -7,6 +7,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { JobsourceMasterService } from '../../core/services/jobsource-master-service';
 import Swal from 'sweetalert2';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 @Component({
   selector: 'app-job-source-master',
   standalone: true,
@@ -261,17 +262,7 @@ export class JobSourceMaster implements OnInit {
 
   //search method
   applySearch(): void {
-
-    const search = this.searchText.toLowerCase().trim();
-
-    if (!search) {
-      this.filteredList = [...this.JobSourceNameList];
-    } else {
-      this.filteredList = this.JobSourceNameList.filter(x =>
-        x.jobSourceName?.toLowerCase().includes(search)
-      );
-    }
-
+    this.filteredList = filterRows(this.JobSourceNameList, this.searchText, ['jobSourceName', 'jobTypeName']);
     this.page = 1;
     this.refreshGrid();
   }

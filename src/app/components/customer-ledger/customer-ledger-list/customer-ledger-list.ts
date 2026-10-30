@@ -13,6 +13,7 @@ import { DealerService } from '../../../core/services/dealer-service';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
 import { LedgerTypes } from '../../../constant';
+import { SearchDebouncer } from '../../../shared/search/table-search';
 @Component({
   selector: 'app-customer-ledger-list',
   imports: [RouterOutlet, SharedModule, NgbPaginationModule, CommonModule, FormsModule, NgbTooltipModule, NgSelectModule],
@@ -21,6 +22,7 @@ import { LedgerTypes } from '../../../constant';
 })
 export class CustomerLedgerList implements OnInit {
   public searchTerm: string = '';
+  private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
   dataSource: any[] = [];
   selectedDealerCode = '';
   sortColumn = '';
@@ -163,7 +165,10 @@ export class CustomerLedgerList implements OnInit {
   }
 
   onSearchChange() {
-    this.getCustomerLedgerDetails();
+    this.searchDebounce.run(() => {
+      this.page = 1;
+      this.getCustomerLedgerDetails();
+    });
   }
 
 

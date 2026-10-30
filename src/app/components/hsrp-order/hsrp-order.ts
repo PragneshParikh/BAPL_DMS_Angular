@@ -13,6 +13,7 @@ import { ActivatedRoute, Route, Router } from '@angular/router';
 import { PrefixService } from '../../core/services/prefix';
 import { log } from 'console';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 @Component({
   selector: 'app-hsrp-order',
   imports: [CommonModule, NgbModule, FormsModule, FlatpickrModule],
@@ -207,22 +208,10 @@ export class HSRPOrder implements OnInit {
 
   // ---------------- SEARCH ----------------
   onSearchChange(): void {
-
-    const term = this.searchTerm.toLowerCase();
-
-    this.filteredOrders = this.orders.filter(x =>
-      x.saleBillNo?.toLowerCase().includes(term) ||
-      x.customerName?.toLowerCase().includes(term) ||
-      x.chassisNo?.toLowerCase().includes(term) ||
-      x.regNo?.toLowerCase().includes(term) ||
-      x.invoiceNo?.toLowerCase().includes(term) ||
-      x.supplierName?.toLowerCase().includes(term) ||
-      x.orderNo?.toLowerCase().includes(term) ||
-      x.hsrpstatus?.toLowerCase().includes(term) ||
-      x.colour?.toLowerCase().includes(term) ||
-      x.customerMobile?.toLowerCase().includes(term)
-    );
-
+    this.filteredOrders = filterRows(this.orders, this.searchTerm, [
+      'chassisNo', 'regNo', 'invoiceNo', 'invoiceDate', 'saleBillNo', 'customerName', 'customerMobile', 'modelName',
+      'colour', 'hsrpStatus', 'hsrpstatus', 'hsrpResponse', 'supplierName', 'orderNo'
+    ]);
     this.page = 1;
     this.updatePagination();
   }

@@ -11,6 +11,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 
 @Component({
   selector: 'app-city-master',
@@ -92,15 +93,7 @@ loadData() {
 
   //    SEARCH
   onSearch() {
-    const term = this.searchTerm.toLowerCase();
-
-    this.filteredList = this.fullList.filter(item =>
-      item.countryname?.toLowerCase().includes(term) ||
-      item.statename?.toLowerCase().includes(term) ||
-      item.cityname?.toLowerCase().includes(term) ||
-      item.abbreviation?.toLowerCase().includes(term)
-    );
-
+    this.filteredList = filterRows(this.fullList, this.searchTerm, ['cityname', 'statename', 'countryname', 'abbreviation']);
     this.page = 1;
     this.refreshData();
   }

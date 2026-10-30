@@ -6,7 +6,7 @@
 // Global colors
 //
 
-$body-bg-dark:                                                      #1a1d21;
+$body-bg-dark:                                                      #0b1120; // BGAUSS AutoDash
 
 // scss-docs-start sass-dark-mode-vars
 // scss-docs-start theme-text-dark-variables
@@ -44,7 +44,7 @@ $dark-border-subtle-dark:                                           tint-color($
 
 $body-color-dark:                                                   #ced4da;
 $body-secondary-color-dark:                                         #878a99;
-$body-secondary-bg-dark:                                            #212529;
+$body-secondary-bg-dark:                                            #111827; // BGAUSS AutoDash
 $body-tertiary-color-dark:                                          rgba($body-color-dark, .75);
 $body-tertiary-bg-dark:                                             tint-color($body-bg-dark, 7%);
 $body-emphasis-color-dark:                                          $white;

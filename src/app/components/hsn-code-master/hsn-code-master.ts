@@ -169,7 +169,7 @@ export class HsnCodeMaster implements OnInit {
   // ================= SEARCH =================
   setupSearch() {
     this.searchSubject.pipe(
-      debounceTime(400),
+      debounceTime(200),
       distinctUntilChanged(),
       switchMap(search =>
         this.hsnService.getHSNCodeMasterList(search || '')

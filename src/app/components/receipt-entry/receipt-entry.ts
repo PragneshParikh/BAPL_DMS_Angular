@@ -13,6 +13,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { debounceTime, Subject, switchMap } from 'rxjs';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 @Component({
   selector: 'app-receipt-entry',
   templateUrl: './receipt-entry.html',
@@ -323,23 +324,12 @@ downloadReceiptExcel(): void {
 
  
   onSearchChange() {
-  const term = this.searchTerm?.toLowerCase() || '';
-
-  this.filteredReceipts = this.receiptEntries.filter((item: any) => {
-    return Object.values(item).some((val: any) => {
-      if (!val) return false;
-
-      // handle date separately
-      if (val instanceof Date) {
-        return val.toLocaleDateString().toLowerCase().includes(term);
-      }
-
-      return val.toString().toLowerCase().includes(term);
-    });
-  });
-
-  this.page = 1;
-  this.updatePagination();
-}
+    this.filteredReceipts = filterRows(this.receiptEntries, this.searchTerm, [
+      'receiptNo', 'receiptDate', 'partyName', 'mobileNo', 'email', 'location', 'productName', 'saleType',
+      'financier', 'salesExecutive', 'bookingId', 'refNo', 'narration', 'totalAmount'
+    ]);
+    this.page = 1;
+    this.updatePagination();
+  }
 
 }

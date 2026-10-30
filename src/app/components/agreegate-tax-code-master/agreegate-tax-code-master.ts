@@ -7,6 +7,7 @@ import { AgreegateTaxCodeMasterService } from '../../core/services/agreegate-tax
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { SearchDebouncer } from '../../shared/search/table-search';
 
 @Component({
   selector: 'app-agreegate-tax-code-master',
@@ -63,6 +64,7 @@ export class AgreegateTaxCodeMaster implements OnInit {
 
   selectedagreegateitem: any;
   searchTerm: string = '';
+  private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
 
   //  PAGINATION
   page = 1;
@@ -119,7 +121,10 @@ export class AgreegateTaxCodeMaster implements OnInit {
   //  SEARCH
   searchItems(event: any) {
     this.searchTerm = event.target.value || '';
-    this.loadAggreegateTaxCode();
+    this.searchDebounce.run(() => {
+      this.page = 1;
+      this.loadAggreegateTaxCode();
+    });
   }
   //  OPEN VIEW MODAL
   openDetails(modal: any, item: any) {

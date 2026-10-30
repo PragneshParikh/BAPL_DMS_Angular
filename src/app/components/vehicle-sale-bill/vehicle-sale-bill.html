@@ -93,6 +93,7 @@
                         <!-- Buttons -->
                         <div class="d-flex gap-2">
                             <button class="btn btn-primary btn-sm" *ngIf="canCreate" (click)="navigateToAdd()">Add</button>
+                            <button class="btn btn-soft-primary btn-sm" *ngIf="isSuperAdmin" (click)="navigateToImport()" ngbTooltip="Import Cogxim sale register (Excel)"><i class="ri-file-upload-line me-1"></i>Import Cogxim</button>
                             <button class="btn btn-success btn-sm" *ngIf="canDownload" (click)="downloadSelectedBills()" [disabled]="!hasAnySelection">
                                 <i class="ri-download-2-line"></i> Download Selected
                             </button>
