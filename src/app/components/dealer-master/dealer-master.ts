@@ -1,6 +1,6 @@
 // src\app\components\dealer-master\dealer-master.ts
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { NgbModal, NgbModalRef, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DealerService } from '../../core/services/dealer-service';
 import { FormsModule } from '@angular/forms';
@@ -19,7 +19,7 @@ import { MenuAccessService } from '../../core/services/menu-access.service';
   styleUrl: './dealer-master.scss',
 })
 
-export class DealerMaster implements OnInit {
+export class DealerMaster implements OnInit, OnDestroy {
 
   @ViewChild('dealerModal') dealerModal!: TemplateRef<unknown>;
   @ViewChild('importFileInput') importFileInput!: ElementRef<HTMLInputElement>;
@@ -41,7 +41,9 @@ export class DealerMaster implements OnInit {
   searchTerm = '';
   modalRef!: NgbModalRef;
 
-  // private searchSubject = new Subject<string>();
+  // search: wait until typing pauses, then ask the server (searches all pages, not only the visible one)
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastSearch = '';
 
   isSuperAdmin: boolean = false;
   dealerCode: string = '';
@@ -66,6 +68,10 @@ export class DealerMaster implements OnInit {
     this.loadDealers();
   }
 
+  ngOnDestroy(): void {
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+  }
+
   /* ================= LOAD ================= */
 
   loadDealers(): void {
@@ -74,15 +80,21 @@ export class DealerMaster implements OnInit {
 
     const dealer = this.isSuperAdmin ? null : this.dealerCode;
 
-    this.dealerService.getDealerByPaged(this.searchTerm, this.page, this.pageSize, dealer).subscribe({
+    const search = (this.searchTerm || '').trim();
+    this.lastSearch = search;
+
+    this.dealerService.getDealerByPaged(search || null, this.page, this.pageSize, dealer).subscribe({
       next: (res) => {
+
+        // a newer search was typed while this one was loading - ignore this result
+        if (search !== (this.searchTerm || '').trim()) { this.loader.hide(); return; }
 
         const dealerData = res.data;
         this.collectionSize = res.totalRecords;
 
         this.dealerList = dealerData.map((dealer, index) => ({
           ...dealer,
-          slNo: index + 1
+          slNo: (this.page - 1) * this.pageSize + index + 1
         }));
 
         this.loader.hide();
@@ -219,13 +231,11 @@ export class DealerMaster implements OnInit {
         // NOTE: assumes the API returns camelCase JSON (insertedCount/updatedCount/
         // failedCount) — adjust the property names below if your API uses PascalCase.
         const summary = res?.data;
-        const message = summary
-          ? `Import complete: ${summary.insertedCount} added, ${summary.updatedCount} updated, ${summary.failedCount} failed.`
-          : 'Dealer data imported successfully';
+        const message = this.importMessage(summary, 'Dealer data imported successfully');
 
         this.toaster.show(message, {
           classname: summary?.failedCount ? 'bg-warning text-dark' : 'bg-success text-light',
-          delay: 5000
+          delay: summary?.failedCount ? 20000 : 5000
         });
 
         this.loadDealers();
@@ -235,7 +245,7 @@ export class DealerMaster implements OnInit {
         input.value = '';
         console.error(err);
 
-        this.toaster.show('Failed to import dealer data!', {
+        this.toaster.show(this.importError(err, 'Failed to import dealer data!'), {
           classname: 'bg-danger text-white',
           delay: 5000
         });
@@ -243,13 +253,15 @@ export class DealerMaster implements OnInit {
     });
   }
 
-  onSearchChange(): void {
-
-    if (!this.searchTerm || this.searchTerm.trim() === '') {
+  onSearchChange(immediate = false): void {
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    const run = () => {
+      this.searchTimer = null;
+      if ((this.searchTerm || '').trim() === this.lastSearch) return;   // nothing changed
+      this.page = 1;                                                     // results start on page 1
       this.loadDealers();
-      return;
-    }
-
+    };
+    if (immediate) run(); else this.searchTimer = setTimeout(run, 400);
   }
 
   updateTradeCertificate() {
@@ -283,4 +295,30 @@ export class DealerMaster implements OnInit {
     });
   }
 
+
+  // ADDED — turns the import API response / error into a readable message (row errors + server reason)
+  private importMessage(summary: any, okText: string): string {
+    if (!summary) return okText;
+    let msg = `Import complete: ${summary.insertedCount} added, ${summary.updatedCount} updated, ${summary.failedCount} failed.`;
+    const errs: any[] = summary.errors ?? [];
+    if (errs.length) {
+      console.table(errs);
+      msg += ' ' + errs.slice(0, 5).map(e => `Row ${e.rowNumber} (${e.dealerCode ?? e.loccode ?? ''}): ${e.message}`).join(' | ');
+      if (errs.length > 5) msg += ` | ... ${errs.length - 5} more (see browser console)`;
+    }
+    const notes: string[] = summary.notes ?? [];
+    if (notes.length) {
+      console.table(notes);
+      msg += ` Note: ${notes.length} new dealer(s) had no Reg Date - set to today's date, please correct in Dealer Master (list in browser console).`;
+    }
+    return msg;
+  }
+
+  private importError(err: any, fallback: string): string {
+    const e = err?.error;
+    if (typeof e === 'string' && e.trim()) return `${fallback} ${e}`;
+    if (e?.message) return `${fallback} ${e.message}`;
+    if (e?.title) return `${fallback} ${e.title}`;
+    return `${fallback} (HTTP ${err?.status ?? '?'} - see browser console)`;
+  }
 }

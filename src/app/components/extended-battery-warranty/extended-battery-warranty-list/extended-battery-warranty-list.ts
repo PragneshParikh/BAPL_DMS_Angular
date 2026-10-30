@@ -12,6 +12,7 @@ import { DurationTypes, RateTypes } from '../../../constant';
 import { GetDurationTypePipe } from '../../../core/pipes/get-duration-type-pipe';
 import { GetRateTypePipe } from '../../../core/pipes/get-rate-type-pipe';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { SearchDebouncer } from '../../../shared/search/table-search';
 @Component({
   selector: 'app-extended-battery-warranty-list',
   imports: [
@@ -37,6 +38,7 @@ export class ExtendedBatteryWarrantyList implements OnInit {
   canDownload = false;
 
   searchTerm: string = '';
+  private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
 
   dataSource: any[] = [];
 
@@ -85,8 +87,10 @@ export class ExtendedBatteryWarrantyList implements OnInit {
   }
 
   onSearchChange() {
-    this.page = 1; // Reset to first page on new search
-    this.getExtendedBatteryWarrantyList();
+    this.searchDebounce.run(() => {
+      this.page = 1; // Reset to first page on new search
+      this.getExtendedBatteryWarrantyList();
+    });
   }
 
   onSort(column: string) {

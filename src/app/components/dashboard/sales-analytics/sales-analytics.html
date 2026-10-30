@@ -1,0 +1,139 @@
+<!-- src\app\components\dashboard\sales-analytics\sales-analytics.html -->
+<div class="db-head">
+  <div>
+    <h4 class="db-title">Sales Analytics</h4>
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a routerLink="/">Dashboard</a></li>
+      <li class="breadcrumb-item active">Sales Analytics</li>
+    </ol>
+  </div>
+  <div class="db-head-actions">
+    <div class="db-seg" role="group" aria-label="Period">
+      @for (p of periods; track p.key) {
+        <button type="button" [class.active]="period === p.key" (click)="setPeriod(p.key)" [disabled]="loading">{{ p.label }}</button>
+      }
+    </div>
+    <a class="btn btn-outline-success" [routerLink]="links.vehicleSale"><i class="ri-file-chart-line me-1"></i>Full Report</a>
+  </div>
+</div>
+<p class="db-range"><i class="ri-calendar-line me-1"></i>{{ periodLabel }}</p>
+
+@if (failed) {
+  <div class="alert alert-warning py-2"><i class="ri-error-warning-line me-1"></i>Sales data could not be loaded. Try again or open the full report.</div>
+}
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.vehicleSale">
+      <div class="db-kpi-body"><span class="db-kpi-label">Vehicles Billed</span><span class="db-kpi-value">{{ loading ? '…' : num(units) }}</span>
+        <span class="db-kpi-sub">{{ num(modelsSold) }} models · {{ num(dealersBilling) }} dealers</span></div>
+      <span class="db-kpi-icon kpi-blue"><i class="ri-motorbike-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.totalSale">
+      <div class="db-kpi-body"><span class="db-kpi-label">Sales Value</span><span class="db-kpi-value">{{ loading ? '…' : inr(revenue) }}</span>
+        <span class="db-kpi-sub">Final billed amount</span></div>
+      <span class="db-kpi-icon kpi-success"><i class="ri-money-rupee-circle-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.vehicleSale">
+      <div class="db-kpi-body"><span class="db-kpi-label">Avg. Ticket Size</span><span class="db-kpi-value">{{ loading ? '…' : inr(avgTicket) }}</span>
+        <span class="db-kpi-sub">Per vehicle</span></div>
+      <span class="db-kpi-icon kpi-warning"><i class="ri-price-tag-3-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.vehicleSale">
+      <div class="db-kpi-body"><span class="db-kpi-label">Financed Sales</span><span class="db-kpi-value">{{ loading ? '…' : financedPct + '%' }}</span>
+        <span class="db-kpi-sub">{{ num(financedCount) }} of {{ num(units) }} vehicles</span></div>
+      <span class="db-kpi-icon kpi-purple"><i class="ri-bank-line"></i></span>
+    </a>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-8">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head">
+        <h4 class="card-title mb-0"><i class="ri-line-chart-line"></i>Sales Trend</h4>
+        <a [routerLink]="links.vehicleSale" class="db-link">View report <i class="ri-arrow-right-up-line"></i></a>
+      </div>
+      <div class="card-body db-chart-body">
+        <div #trend class="db-chart db-clickable"></div>
+        @if (!hasData) { <div class="db-empty">{{ loading ? 'Loading…' : 'No sales in this period.' }}</div> }
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head">
+        <h4 class="card-title mb-0"><i class="ri-bank-card-line"></i>Payment / Finance Mix</h4>
+      </div>
+      <div class="card-body db-chart-body">
+        <div #finance class="db-chart db-clickable"></div>
+        @if (!hasData) { <div class="db-empty">{{ loading ? 'Loading…' : 'No sales in this period.' }}</div> }
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-6">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head">
+        <h4 class="card-title mb-0"><i class="ri-apps-2-line"></i>Sales by Model</h4>
+        <a [routerLink]="links.modelSale" class="db-link">View <i class="ri-arrow-right-up-line"></i></a>
+      </div>
+      <div class="card-body db-chart-body">
+        <div #byModel class="db-chart db-clickable"></div>
+        @if (!hasData) { <div class="db-empty">{{ loading ? 'Loading…' : 'No sales in this period.' }}</div> }
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-6">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head">
+        <h4 class="card-title mb-0"><i class="ri-map-pin-line"></i>Sales by State</h4>
+        <a [routerLink]="links.totalSale" class="db-link">View <i class="ri-arrow-right-up-line"></i></a>
+      </div>
+      <div class="card-body db-chart-body">
+        <div #byState class="db-chart db-clickable"></div>
+        @if (!hasData) { <div class="db-empty">{{ loading ? 'Loading…' : 'No sales in this period.' }}</div> }
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card db-card">
+  <div class="card-header db-card-head">
+    <h4 class="card-title mb-0"><i class="ri-table-line"></i>Top Sales</h4>
+    <div class="db-search"><i class="ri-search-line"></i>
+      <input type="text" class="form-control" placeholder="Search invoice, dealer, model…" [(ngModel)]="search">
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 db-table">
+        <thead>
+          <tr><th>Date</th><th>Invoice</th><th>Dealer</th><th>Model</th><th>Colour</th><th class="text-end">Amount</th></tr>
+        </thead>
+        <tbody>
+          @for (r of topSales; track $index) {
+            <tr class="db-clickable" (click)="openReport()">
+              <td>{{ saleDate(r) }}</td>
+              <td class="fw-medium">{{ r.invoiceNo || r.saleBillNo || '—' }}</td>
+              <td>{{ r.dealerName || r.dealerCode }} <small class="text-muted">{{ r.dealerCity }}</small></td>
+              <td>{{ r.modelName || r.oemModelName || '—' }}</td>
+              <td>{{ r.colour || '—' }}</td>
+              <td class="text-end fw-semibold">{{ inr(amountOf(r)) }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="text-center text-muted">{{ loading ? 'Loading…' : 'No matching sales.' }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

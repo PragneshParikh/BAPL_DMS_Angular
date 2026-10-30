@@ -7,6 +7,48 @@ import { UpdateSaleDetailsVM, VehicleSaleChasisRequest, VehicleSaleChasisRespons
 import { VehicleSaleListChasisResponse } from '../../ViewModels/VehicleSaleChasisResponse';
 import { Form22SlipViewModel } from '../../ViewModels/Form22SlipViewModel';
 
+// ---------- Cogxim (old DMS) sale register Excel import ----------
+export interface ImportField {
+  key: string; label: string; group: 'Header' | 'Detail'; required: boolean; target: string; aliases: string[];
+}
+export interface ImportPreview {
+  fileName: string;
+  sheets: { name: string; rows: number }[];
+  sheetName: string;
+  headerRow: number;
+  totalRows: number;
+  headers: string[];
+  suggestedMapping: { [key: string]: string };
+  sampleRows: { [header: string]: string | null }[];
+  fields: ImportField[];
+}
+export interface ImportOptions {
+  sheetName?: string | null;
+  headerRow: number;
+  mapping: { [key: string]: string };
+  defaultDealerCode?: string | null;
+  defaultLocation?: string | null;
+  prefixDealerCodeOnBillNo: boolean;
+  createMissingCustomers: boolean;
+  updateExisting: boolean;
+  generateSaleBillNo: boolean;
+  createMissingMasters: boolean;
+  dryRun: boolean;
+}
+export interface ImportIssue { rowNo: number; saleBillNo?: string; chassisNo?: string; level: 'Error' | 'Skipped' | 'Warning' | 'Info'; message: string; }
+export interface ImportResult {
+  dryRun: boolean; fileName: string; sheetName: string; totalRows: number;
+  billsInFile: number; billsReady: number; vehiclesReady: number;
+  billsImported: number; vehiclesImported: number; customersCreated: number;
+  billsToUpdate: number; billsUpdated: number; vehiclesUpdated: number; customersUpdated: number;
+  oemModelsCreated: number; itemModelsCreated: number; financiersCreated: number; citiesCreated: number; occupationsCreated: number;
+  mastersCreated: string[]; engine?: string;
+  rowsSkipped: number; rowsWithErrors: number; warnings: number; totalAmount: number;
+  fromDate?: string; toDate?: string;
+  dealers: { dealerCode: string; bills: number; vehicles: number; amount: number }[];
+  issues: ImportIssue[]; issuesTruncated: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -176,5 +218,25 @@ export class VehicleSaleBillService {
       { form22Ids, invoiceIds },
       { responseType: 'blob' }
     );
+  }
+
+  // ---------- Cogxim sale register import (Admin / SuperAdmin) ----------
+  getCogximImportFields(): Observable<ImportField[]> {
+    return this.http.get<ImportField[]>(`${this.apiUrl}/VehicleSaleBill/import/fields`);
+  }
+
+  previewCogximImport(file: File, sheetName?: string | null, headerRow = 1): Observable<ImportPreview> {
+    const fd = new FormData();
+    fd.append('file', file);
+    if (sheetName) fd.append('sheetName', sheetName);
+    fd.append('headerRow', String(headerRow || 1));
+    return this.http.post<ImportPreview>(`${this.apiUrl}/VehicleSaleBill/import/preview`, fd);
+  }
+
+  importCogximSales(file: File, options: ImportOptions): Observable<ImportResult> {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('options', JSON.stringify(options));
+    return this.http.post<ImportResult>(`${this.apiUrl}/VehicleSaleBill/import`, fd);
   }
 }

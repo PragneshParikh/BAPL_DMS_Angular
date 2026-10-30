@@ -8,6 +8,7 @@ import { Form22MasterModel } from '../../../ViewModels/Form22MasterModel';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { LoaderService } from '../../../core/services/loader';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { SearchDebouncer } from '../../../shared/search/table-search';
 @Component({
   selector: 'app-form22master',
   standalone: true,
@@ -47,6 +48,7 @@ export class Form22master implements OnInit {
   oemModelnameList: any[] = [];
 
   searchTerm: string = '';
+  private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
   selectedForm22Item: any;
 
   pagedData: any[] = [];
@@ -119,7 +121,10 @@ export class Form22master implements OnInit {
   //  SEARCH FUNCTION
   searchItems(event: any) {
     this.searchTerm = event.target.value || '';
-    this.loadForm22Items(this.searchTerm);
+    this.searchDebounce.run(() => {
+      this.page = 1;
+      this.loadForm22Items(this.searchTerm);
+    });
   }
 
   //add oem details

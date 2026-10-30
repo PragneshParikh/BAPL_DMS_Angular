@@ -8,6 +8,7 @@ import { ServiceHeadService } from '../../core/services/service-head-service';
 import { ServiceTypeService } from '../../core/services/service-type-service';
 import Swal from 'sweetalert2';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 @Component({
   selector: 'app-service-type-master',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbPagination],
@@ -283,17 +284,7 @@ export class ServiceTypeMaster implements OnInit {
 
   //search method
   applySearch(): void {
-
-    const search = this.searchText.toLowerCase().trim();
-
-    if (!search) {
-      this.filteredList = [...this.serviceTypeList];
-    } else {
-      this.filteredList = this.serviceTypeList.filter(x =>
-        x.serviceTypeName?.toLowerCase().includes(search)
-      );
-    }
-
+    this.filteredList = filterRows(this.serviceTypeList, this.searchText, ['serviceTypeName', 'serviceHeadName']);
     this.page = 1;
     this.refreshGrid();
   }

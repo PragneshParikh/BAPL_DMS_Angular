@@ -16,7 +16,7 @@
             </div>
             <div class="col-md-3">
                 <label>Search any value</label>
-                <input type="text" class="form-control form-control-sm" name="search" [(ngModel)]="searchText">
+                <input type="text" class="form-control form-control-sm" name="search" [(ngModel)]="searchText" (input)="onSearch()" (keyup.enter)="onSearch()">
             </div>
 
             <div class="col-auto d-flex gap-2">

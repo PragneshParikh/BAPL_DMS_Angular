@@ -8,6 +8,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { filterRows } from '../../../shared/search/table-search';
 @Component({
   selector: 'app-hsrporder-list',
   imports: [CommonModule, NgbModule, FormsModule, FlatpickrModule],
@@ -97,26 +98,10 @@ export class HSRPOrderList implements OnInit {
 
   // SEARCH
   onSearchChange(): void {
-
-    const term = this.searchTerm.toLowerCase();
-
-    this.filteredOrders = this.orders.filter(x =>
-      x.saleBillNo?.toLowerCase().includes(term) ||
-      x.chassisNo?.toLowerCase().includes(term) ||
-      x.regNo?.toLowerCase().includes(term) ||
-      x.invoiceNo?.toLowerCase().includes(term) ||
-      x.hsrpstatus?.toLowerCase().includes(term) ||
-      x.customerName?.toLowerCase().includes(term) ||
-      x.supplierName?.toLowerCase().includes(term) ||
-      x.orderNo?.toLowerCase().includes(term) ||
-      x.colour?.toLowerCase().includes(term) ||
-      x.customerMobile?.toLowerCase().includes(term) ||
-      x.hsrpResponse?.toLowerCase().includes(term) ||
-      x.inwardStatus?.toLowerCase().includes(term) ||
-      x.inwardResponse?.toLowerCase().includes(term) ||
-      x.supplierName?.toLowerCase().includes(term)
-    );
-
+    this.filteredOrders = filterRows(this.orders, this.searchTerm, [
+      'chassisNo', 'regNo', 'orderNo', 'orderDate', 'saleBillNo', 'invoiceNo', 'customerName', 'customerMobile',
+      'supplierName', 'colour', 'hsrpStatus', 'hsrpstatus', 'hsrpResponse', 'inwardStatus', 'inwardResponse'
+    ]);
     this.page = 1;
     this.updatePagination();
   }

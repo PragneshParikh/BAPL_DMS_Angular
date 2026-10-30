@@ -1,0 +1,188 @@
+<!-- src\app\components\dashboard\dashboard.html -->
+<div class="db-head">
+  <div>
+    <h4 class="db-title">Dashboard</h4>
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a routerLink="/">Home</a></li>
+      <li class="breadcrumb-item active">Dashboard</li>
+    </ol>
+  </div>
+  <div class="db-head-actions">
+    <div class="db-seg" role="group" aria-label="Period">
+      @for (p of periods; track p.key) {
+        <button type="button" [class.active]="period === p.key" (click)="setPeriod(p.key)" [disabled]="loading">{{ p.label }}</button>
+      }
+    </div>
+    <button type="button" class="btn btn-outline-success" (click)="load()" [disabled]="loading">
+      <i class="ri-refresh-line me-1" [class.db-spin]="loading"></i>Refresh
+    </button>
+  </div>
+</div>
+<p class="db-range"><i class="ri-calendar-line me-1"></i>{{ periodLabel }}</p>
+
+@if (anyFailed) {
+  <div class="alert alert-warning py-2">
+    <i class="ri-error-warning-line me-1"></i>Some figures could not be loaded. Showing what is available — click Refresh to retry.
+  </div>
+}
+
+<!-- KPI tiles: equal height, every tile opens its report -->
+<div class="row g-4 mb-4">
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.totalSale" title="Open Total Sale Report">
+      <div class="db-kpi-body">
+        <span class="db-kpi-label">Units Sold</span>
+        <span class="db-kpi-value">{{ num(unitsSold) }}</span>
+        <span class="db-kpi-sub">{{ num(cashCount) }} cash · {{ num(creditCount) }} credit</span>
+      </div>
+      <span class="db-kpi-icon kpi-blue"><i class="ri-motorbike-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.totalSale" title="Open Total Sale Report">
+      <div class="db-kpi-body">
+        <span class="db-kpi-label">Sales Value</span>
+        <span class="db-kpi-value">{{ inr(salesValue) }}</span>
+        <span class="db-kpi-sub">Avg. {{ inr(avgTicket) }} / unit</span>
+      </div>
+      <span class="db-kpi-icon kpi-success"><i class="ri-money-rupee-circle-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.modelStock" title="Open Model-wise Current Stock">
+      <div class="db-kpi-body">
+        <span class="db-kpi-label">Vehicles in Stock</span>
+        <span class="db-kpi-value">{{ num(stockUnits) }}</span>
+        <span class="db-kpi-sub">Across {{ num(modelCount) }} models</span>
+      </div>
+      <span class="db-kpi-icon kpi-warning"><i class="ri-store-2-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="links.jobCards" title="Open Job Card Report">
+      <div class="db-kpi-body">
+        <span class="db-kpi-label">Job Cards</span>
+        <span class="db-kpi-value">{{ num(jobs?.totalJobs) }}</span>
+        <span class="db-kpi-sub">{{ jobCompletionPct }}% completed</span>
+      </div>
+      <span class="db-kpi-icon kpi-purple"><i class="ri-tools-line"></i></span>
+    </a>
+  </div>
+</div>
+
+<!-- Charts row 1 -->
+<div class="row g-4 mb-4">
+  <div class="col-xl-8">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head">
+        <h4 class="card-title mb-0">Sales vs Stock by Model</h4>
+        <a [routerLink]="links.modelSale" class="db-link">View report <i class="ri-arrow-right-up-line"></i></a>
+      </div>
+      <div class="card-body db-chart-body">
+        <div #salesChart class="db-chart" [class.db-clickable]="hasSalesChart"></div>
+        @if (!hasSalesChart) {
+          <div class="db-empty">{{ loading ? 'Loading…' : (failed.modelSale ? 'Sales data unavailable.' : 'No sales or stock for this period.') }}</div>
+        }
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head">
+        <h4 class="card-title mb-0">Stock by Model</h4>
+        <a [routerLink]="links.modelStock" class="db-link">View <i class="ri-arrow-right-up-line"></i></a>
+      </div>
+      <div class="card-body db-chart-body">
+        <div #stockChart class="db-chart" [class.db-clickable]="hasStockChart"></div>
+        @if (!hasStockChart) {
+          <div class="db-empty">{{ loading ? 'Loading…' : (failed.stock ? 'Stock data unavailable.' : 'No stock on hand.') }}</div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Row 2: dealers + payment + jobs -->
+<div class="row g-4">
+  <div class="col-xl-6">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head">
+        <h4 class="card-title mb-0">Top Dealers by Units</h4>
+        <a [routerLink]="links.totalSale" class="db-link">View all <i class="ri-arrow-right-up-line"></i></a>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 db-table">
+            <thead>
+              <tr>
+                <th>Dealer</th>
+                <th class="text-end">Units</th>
+                <th class="text-end">Sales Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of topDealers; track d.dealerCode; let i = $index) {
+                <tr class="db-clickable" (click)="openDealer(d)">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="db-rank">{{ i + 1 }}</span>
+                      <div class="text-truncate">
+                        <div class="fw-medium text-truncate">{{ d.dealerName }}</div>
+                        <small class="text-muted">{{ d.dealerCode }}{{ d.dealerCity ? ' · ' + d.dealerCity : '' }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-end fw-semibold">{{ num(d.totalUnitsSold) }}</td>
+                  <td class="text-end">{{ inr(d.totalFinalAmount) }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="3" class="text-center text-muted py-5">
+                  {{ loading ? 'Loading…' : (failed.sale ? 'Sales data unavailable.' : 'No sales in this period.') }}
+                </td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head">
+        <h4 class="card-title mb-0">Payment Mix</h4>
+        <a [routerLink]="links.totalSale" class="db-link"><i class="ri-arrow-right-up-line"></i></a>
+      </div>
+      <div class="card-body db-chart-body">
+        <div #paymentChart class="db-chart db-clickable"></div>
+        @if ((cashCount + creditCount) === 0) {
+          <div class="db-empty">{{ loading ? 'Loading…' : 'No sales in this period.' }}</div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head">
+        <h4 class="card-title mb-0">Job Card Status</h4>
+        <a [routerLink]="links.jobCards" class="db-link"><i class="ri-arrow-right-up-line"></i></a>
+      </div>
+      <div class="card-body db-chart-body">
+        <div #jobChart class="db-chart db-clickable"></div>
+        @if (jobs) {
+          <div class="db-mini">
+            <div><span>Pending</span><strong>{{ num(jobs.pendingJobs) }}</strong></div>
+            <div><span>Revenue</span><strong>{{ inr(jobs.totalRevenue) }}</strong></div>
+          </div>
+        } @else {
+          <div class="db-empty">{{ loading ? 'Loading…' : 'Job card data unavailable.' }}</div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (lastUpdated) {
+  <p class="text-muted small text-end mt-3 mb-0">Last updated {{ lastUpdated | date: 'dd.MM.yyyy, HH:mm' }}</p>
+}

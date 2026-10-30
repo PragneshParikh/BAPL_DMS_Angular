@@ -13,6 +13,7 @@ import { locationAreaMaster } from '../../constant';
 import { DealerService } from '../../core/services/dealer-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
 import { ElementRef, ViewChild } from '@angular/core';
+import { filterRows } from '../../shared/search/table-search';
 
 declare var bootstrap: any;
 
@@ -120,10 +121,8 @@ export class LocationMasterComponent implements OnInit {
       );
     }
 
-    if (this.locationName) {
-      filtered = filtered.filter((x: any) =>
-        x.locname?.toLowerCase().includes(this.locationName.toLowerCase())
-      );
+    if (this.locationName?.trim()) {
+      filtered = filterRows(filtered, this.locationName, ['loccode', 'locname', 'dealercode', 'formtype', 'rrglocationidno']);
     }
 
     this.locationList = filtered;
@@ -312,13 +311,11 @@ export class LocationMasterComponent implements OnInit {
         input.value = '';
 
         const summary = res?.data;
-        const message = summary
-          ? `Import complete: ${summary.insertedCount} added, ${summary.updatedCount} updated, ${summary.failedCount} failed.`
-          : 'Location data imported successfully';
+        const message = this.importMessage(summary, 'Location data imported successfully');
 
         this.toastr.show(message, {
           classname: summary?.failedCount ? 'bg-warning text-dark' : 'bg-success text-white',
-          delay: 5000
+          delay: summary?.failedCount ? 20000 : 5000
         });
 
         this.loadLocations();
@@ -327,11 +324,32 @@ export class LocationMasterComponent implements OnInit {
         this.loader.hide();
         input.value = '';
         console.error(err);
-        this.toastr.show('Failed to import location data!', {
+        this.toastr.show(this.importError(err, 'Failed to import location data!'), {
           classname: 'bg-danger text-white',
           delay: 5000
         });
       }
     });
+  }
+
+  // ADDED — turns the import API response / error into a readable message (row errors + server reason)
+  private importMessage(summary: any, okText: string): string {
+    if (!summary) return okText;
+    let msg = `Import complete: ${summary.insertedCount} added, ${summary.updatedCount} updated, ${summary.failedCount} failed.`;
+    const errs: any[] = summary.errors ?? [];
+    if (errs.length) {
+      console.table(errs);
+      msg += ' ' + errs.slice(0, 5).map(e => `Row ${e.rowNumber} (${e.dealerCode ?? e.loccode ?? ''}): ${e.message}`).join(' | ');
+      if (errs.length > 5) msg += ` | ... ${errs.length - 5} more (see browser console)`;
+    }
+    return msg;
+  }
+
+  private importError(err: any, fallback: string): string {
+    const e = err?.error;
+    if (typeof e === 'string' && e.trim()) return `${fallback} ${e}`;
+    if (e?.message) return `${fallback} ${e.message}`;
+    if (e?.title) return `${fallback} ${e.title}`;
+    return `${fallback} (HTTP ${err?.status ?? '?'} - see browser console)`;
   }
 }

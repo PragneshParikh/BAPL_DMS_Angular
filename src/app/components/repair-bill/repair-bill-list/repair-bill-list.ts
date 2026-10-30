@@ -120,7 +120,7 @@ export class RepairBillList implements OnInit {
   // Search Delay
   onSearchChange(): void {
     clearTimeout(this.searchTimeout);
-    this.searchTimeout = setTimeout(() => { this.search(); }, 500);
+    this.searchTimeout = setTimeout(() => { this.search(); }, 200);
   }
 
   search(): void {

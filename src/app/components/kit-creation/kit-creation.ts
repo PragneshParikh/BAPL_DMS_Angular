@@ -11,6 +11,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { Router, RouterOutlet } from "@angular/router";
 import { error } from 'console';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { SearchDebouncer } from '../../shared/search/table-search';
 @Component({
   selector: 'app-kit-creation',
   imports: [CommonModule, ReactiveFormsModule, FormsModule, SharedModule, NgbModule, RouterOutlet],
@@ -20,6 +21,7 @@ import { MenuAccessService } from '../../core/services/menu-access.service';
 export class KitCreation implements OnInit {
 
   public searchTerm: string = '';
+  private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
   kitData: any[] = [];
   readonly SUBMENU_ID = 24;
   canCreate = false;
@@ -111,8 +113,10 @@ export class KitCreation implements OnInit {
     this.router.navigate(['/kit-creation', 0]);
   }
   onSearchChange() {
-    this.page = 1; // Reset to first page on new search
-    this.getKitCreationData();
+    this.searchDebounce.run(() => {
+      this.page = 1; // Reset to first page on new search
+      this.getKitCreationData();
+    });
   }
   onKitClick(rowData: any) {
     if (rowData) {

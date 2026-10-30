@@ -10,6 +10,7 @@ import { AuthenticationService } from '../../core/services/auth.service';
 import { AccessRoles } from '../../constant';
 import { LoaderService } from '../../core/services/loader';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 
 @Component({
   selector: 'app-battery-capacity-master',
@@ -96,18 +97,8 @@ this.loader.hide();
   /* ================= SEARCH ================= */
 
   onSearchChange(): void {
-
-    if (!this.searchTerm) {
-      this.filteredBatteryCapacities = [...this.allBatteryCapacities];
-      return;
-    }
-
-    this.filteredBatteryCapacities = this.allBatteryCapacities.filter(x =>
-      x.batteryCapacity.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
-
+    this.filteredBatteryCapacities = filterRows(this.allBatteryCapacities, this.searchTerm, ['batteryCapacity']);
     this.page = 1;
-
   }
 
   /* ================= MODAL ================= */

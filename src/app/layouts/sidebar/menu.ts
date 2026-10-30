@@ -1,4 +1,3 @@
-import { link } from 'fs';
 import { MenuItem } from './menu.model';
 
 export const MENU: MenuItem[] = [

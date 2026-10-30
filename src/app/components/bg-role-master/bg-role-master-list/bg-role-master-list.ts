@@ -8,6 +8,7 @@ import { BgRoleMappingModel } from '../../../ViewModels/models/BgRoleMappingMode
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { filterRows } from '../../../shared/search/table-search';
 
 @Component({
   selector: 'app-bg-role-master-list',
@@ -58,13 +59,8 @@ export class BgRoleMasterList {
   }
 
   applyFilter() {
-    const text = this.searchText.trim().toLowerCase();
-    this.filteredList = !text
-      ? [...this.roleList]
-      : this.roleList.filter(r =>
-          r.roleName?.toLowerCase().includes(text)
-        );
-}
+    this.filteredList = filterRows(this.roleList, this.searchText, ['roleName']);
+  }
   onAdd() {
     this.router.navigate(['/bg-role-master/add']);
   }

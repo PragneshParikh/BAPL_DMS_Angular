@@ -87,7 +87,7 @@
             <a href="javascript:void(0);" class="is-parent nav-link menu-link"
               [ngClass]="{'has-arrow': !item.badge, 'has-dropdown': item.badge}" data-bs-toggle="collapse"
               [attr.aria-expanded]="!item.isCollapsed" (click)="toggleItem(item)">
-              <i class="{{ item.icon }} icon nav-icon" class=""></i>
+              <i class="{{ item.icon }} icon nav-icon"></i>
               <span class=""> {{ item.label | translate }}</span>
               @if(item.badge){<span class="badge badge-pill {{item.badge.variant}}">{{item.badge.text
                 | translate}}</span>}
@@ -160,8 +160,8 @@
               </ul>
             </div>
             }@else {
-            <a [routerLink]="item.link" routerLinkActive="active" class="side-nav-link-ref nav-link menu-link">
-              @if(item.icon){<i class="bx {{ item.icon }} icon nav-icon" class=""></i>}
+            <a [routerLink]="item.link" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.link === '/' }" class="side-nav-link-ref nav-link menu-link">
+              @if(item.icon){<i class="bx {{ item.icon }} icon nav-icon"></i>}
               <span class=""> {{ item.label | translate }} </span>
               @if(item.badge){<span class="badge {{item.badge.variant}} float-end">{{item.badge.text |
                 translate}}</span>}

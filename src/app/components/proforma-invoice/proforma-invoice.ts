@@ -7,6 +7,7 @@ import { NgbPaginationModule, NgbHighlight } from '@ng-bootstrap/ng-bootstrap';
 import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
 import { RouterOutlet } from '@angular/router';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 @Component({
   selector: 'app-proforma-invoice',
   imports: [CommonModule, FormsModule, NgbPaginationModule,
@@ -74,14 +75,9 @@ export class ProformaInvoice implements OnInit {
 
   //    GLOBAL SEARCH
   onSearchChange() {
-    const term = this.searchTerm.toLowerCase();
-
-    this.filteredInvoices = this.invoices.filter(x =>
-      Object.values(x).some(val =>
-        val?.toString().toLowerCase().includes(term)
-      )
-    );
-
+    this.filteredInvoices = filterRows(this.invoices, this.searchTerm, [
+      'documentNo', 'createdDate', 'customerName', 'invoiceType', 'serviceType', 'status', 'taxAmount', 'netAmount', 'totalAmount'
+    ]);
     this.page = 1;
     this.updatePagination();
   }

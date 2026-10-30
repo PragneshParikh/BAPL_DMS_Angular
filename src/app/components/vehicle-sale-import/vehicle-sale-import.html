@@ -1,0 +1,291 @@
+<!-- src\app\components\vehicle-sale-import\vehicle-sale-import.html -->
+<div class="db-head">
+  <div>
+    <h4 class="db-title">Vehicle Sale Import</h4>
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a routerLink="/">Dashboard</a></li>
+      <li class="breadcrumb-item"><a routerLink="/vehicle-sale-bill">Vehicle Sale Bill</a></li>
+      <li class="breadcrumb-item active">Cogxim Import</li>
+    </ol>
+  </div>
+  <div class="db-head-actions">
+    <a class="btn btn-light" href="assets/templates/Cogxim_SaleRegister_Import_Template.xlsx" download="Cogxim_SaleRegister_Import_Template.xlsx">
+      <i class="ri-file-download-line me-1"></i>Download Template
+    </a>
+    <button type="button" class="btn btn-success" (click)="importAll()" [disabled]="busy || !queue.length || missingRequired.length > 0">
+      <i class="ri-upload-cloud-2-line me-1"></i>Validate &amp; Import All Files
+    </button>
+  </div>
+</div>
+<p class="db-range"><i class="ri-information-line me-1"></i>Old DMS sale register (tblSaleRegister2021–2027-Cogxim) → VehicleSaleBillHeader + VehicleSaleBillDetails. One row = one vehicle; rows with the same Bill No = one bill.</p>
+
+@if (successMessage) {
+  <div class="alert alert-success alert-dismissible d-flex align-items-center" role="alert">
+    <i class="ri-checkbox-circle-fill fs-4 me-2"></i><div class="flex-grow-1">{{ successMessage }}</div>
+    <button type="button" class="btn-close" (click)="successMessage = null" aria-label="Close"></button>
+  </div>
+}
+
+@if (!isAdmin) {
+  <div class="alert alert-warning"><i class="ri-lock-line me-1"></i>Only Admin / SuperAdmin can import sale data.</div>
+} @else {
+
+<div class="row g-4">
+  <!-- ============================== LEFT: files ============================== -->
+  <div class="col-xl-3">
+    <div class="card db-card mb-4">
+      <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-file-excel-2-line"></i>1. Excel Files</h4></div>
+      <div class="card-body">
+        <label class="imp-drop" [class.over]="dragOver"
+               (dragover)="$event.preventDefault(); dragOver = true" (dragleave)="dragOver = false" (drop)="onDrop($event)">
+          <input type="file" accept=".xlsx,.xlsm" multiple hidden (change)="onPick($event)">
+          <i class="ri-upload-cloud-2-line"></i>
+          <span class="fw-medium">Drop .xlsx files here</span>
+          <small class="text-muted">or click to browse · the original Cogxim workbook (all year sheets) or the DMS template</small>
+        </label>
+
+        @for (q of queue; track q) {
+          <div class="imp-file" [class.active]="q === active" (click)="select(q)">
+            <i class="ri-file-excel-2-fill text-success"></i>
+            <div class="flex-grow-1 min-w-0">
+              <div class="text-truncate fw-medium" [title]="q.file.name">{{ q.file.name }}</div>
+              @if (q.sheet) { <div class="text-truncate small text-primary" [title]="q.sheet">{{ q.sheet }}</div> }
+              <small class="text-muted">{{ size(q.file.size) }}@if (q.preview) { · {{ num(q.preview.totalRows) }} rows }</small>
+            </div>
+            <span class="badge {{ stateClass(q.state) }}">{{ q.state }}</span>
+            <button type="button" class="btn btn-sm btn-link text-muted p-0 ms-1" (click)="remove(q, $event)" [disabled]="busy" title="Remove"><i class="ri-close-line"></i></button>
+          </div>
+        } @empty {
+          <p class="text-muted text-center small mb-0 mt-3">No files added yet.</p>
+        }
+      </div>
+    </div>
+
+    <div class="card db-card mb-0">
+      <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-settings-3-line"></i>Options</h4></div>
+      <div class="card-body">
+        <label class="form-label">Default Dealer <small class="text-muted">(when no Dealer Code column)</small></label>
+        <select class="form-select mb-3" [(ngModel)]="defaultDealerCode" (change)="onDealerChange()" [disabled]="busy">
+          <option value="">— From file —</option>
+          @for (d of dealers; track d.dealerCode) { <option [value]="d.dealerCode">{{ d.dealerCode }} - {{ d.dealerName }}</option> }
+        </select>
+
+        <label class="form-label">Default Location <small class="text-muted">(when location not matched)</small></label>
+        <select class="form-select mb-3" [(ngModel)]="defaultLocation" [disabled]="busy || !defaultDealerCode">
+          <option value="">— Dealer's showroom —</option>
+          @for (l of locations; track l.loccode) { <option [value]="l.loccode">{{ l.locname }} ({{ l.loccode }})</option> }
+        </select>
+
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" id="impGen" [(ngModel)]="generateSaleBillNo" [disabled]="busy">
+          <label class="form-check-label" for="impGen">Sale Bill No from Prefix Master <small class="text-muted d-block">Dealer's sale_bill format for the bill's own year (e.g. VSB/435/20-21/001). Cogxim Bill No is kept as Invoice No.</small></label>
+        </div>
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" id="impUpd" [(ngModel)]="updateExisting" [disabled]="busy">
+          <label class="form-check-label" for="impUpd">Update bills already imported <small class="text-muted d-block">Re-import refreshes Cogxim bills and fills blank customer City / State / Gender / DOB. DMS bills are never changed.</small></label>
+        </div>
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" id="impCust" [(ngModel)]="createMissingCustomers" [disabled]="busy">
+          <label class="form-check-label" for="impCust">Create missing customers in Ledger Master</label>
+        </div>
+        <div class="form-check form-switch mb-2">
+          <input class="form-check-input" type="checkbox" id="impMst" [(ngModel)]="createMissingMasters" [disabled]="busy">
+          <label class="form-check-label" for="impMst">Create missing masters <small class="text-muted d-block">OEM Model, Item Master model (inactive), Financier, City and Occupation are added automatically - no SQL needed.</small></label>
+        </div>
+        <div class="form-check form-switch mb-0">
+          <input class="form-check-input" type="checkbox" id="impPrefix" [(ngModel)]="prefixDealerCodeOnBillNo" [disabled]="busy || generateSaleBillNo">
+          <label class="form-check-label" for="impPrefix">Prefix dealer code on Bill No <small class="text-muted d-block">Sale Bill No is unique across all dealers</small></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== RIGHT: mapping + result ============================== -->
+  <div class="col-xl-9">
+    @if (!active) {
+      <div class="card db-card"><div class="card-body db-empty-block">
+        <i class="ri-file-upload-line"></i>
+        <p class="mb-0">Add the Cogxim sale register Excel files to start.</p>
+      </div></div>
+    } @else {
+      @if (active.error) {
+        <div class="alert alert-danger"><i class="ri-error-warning-line me-1"></i>{{ active.error }}</div>
+      }
+
+      @if (active.state === 'Reading') {
+        <div class="card db-card"><div class="card-body db-empty-block"><i class="ri-loader-4-line db-spin"></i><p class="mb-0">Reading {{ active.file.name }}…</p></div></div>
+      }
+
+      @if (active.preview; as p) {
+      <!-- ---------- 2. mapping ---------- -->
+      <div class="card db-card mb-4">
+        <div class="card-header db-card-head">
+          <h4 class="card-title mb-0"><i class="ri-git-merge-line"></i>2. Map Columns <small class="text-muted fw-normal ms-2">{{ mappedCount }} of {{ fields.length }} fields mapped</small></h4>
+          <div class="d-flex gap-2 align-items-center flex-wrap">
+            <select class="form-select form-select-sm w-auto" [(ngModel)]="sheetName" (change)="onSheetChange()" [disabled]="busy" title="Sheet">
+              @for (s of p.sheets; track s.name) { <option [value]="s.name">{{ s.name }} ({{ num(s.rows) }})</option> }
+            </select>
+            <div class="input-group input-group-sm w-auto" title="Row that holds the column titles">
+              <span class="input-group-text">Header row</span>
+              <input type="number" min="1" class="form-control" style="width:4.5rem" [(ngModel)]="headerRow" (change)="onHeaderRowChange()" [disabled]="busy">
+            </div>
+            <button type="button" class="btn btn-sm btn-light" (click)="autoMap()" [disabled]="busy"><i class="ri-magic-line me-1"></i>Auto</button>
+            <button type="button" class="btn btn-sm btn-light" (click)="clearMap()" [disabled]="busy"><i class="ri-eraser-line me-1"></i>Clear</button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          @if (missingRequired.length) {
+            <div class="alert alert-warning rounded-0 border-0 border-bottom mb-0 py-2">
+              <i class="ri-alert-line me-1"></i>Map: @for (m of missingRequired; track m.key; let last = $last) { <b>{{ m.label }}</b>@if (!last) {, } }
+            </div>
+          }
+          <div class="row g-0">
+            @for (grp of [ { name: 'Bill (Header)', list: headerFields }, { name: 'Vehicle (Detail)', list: detailFields } ]; track grp.name) {
+              <div class="col-xxl-6">
+                <div class="imp-map-title">{{ grp.name }}</div>
+                <div class="table-responsive imp-map">
+                  <table class="table table-sm align-middle mb-0">
+                    <thead><tr><th>DMS Field</th><th>Excel Column</th><th>Sample</th></tr></thead>
+                    <tbody>
+                      @for (f of grp.list; track f.key) {
+                        <tr [class.imp-missing]="f.required && !mapping[f.key]">
+                          <td>
+                            <div class="fw-medium">{{ f.label }}@if (f.required) { <span class="text-danger">*</span> }</div>
+                            <small class="text-muted">{{ f.target }}</small>
+                          </td>
+                          <td style="min-width: 12rem">
+                            <select class="form-select form-select-sm" [(ngModel)]="mapping[f.key]" [disabled]="busy" [class.is-valid]="!!mapping[f.key]">
+                              <option value="">— not mapped —</option>
+                              @for (h of p.headers; track h) {
+                                <option [value]="h" [disabled]="isUsedElsewhere(h, f.key)">{{ h }}</option>
+                              }
+                            </select>
+                          </td>
+                          <td class="text-muted imp-sample" [title]="sample(f)">{{ sample(f) || '—' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            }
+          </div>
+          @if (unmappedHeaders.length) {
+            <div class="imp-unmapped">
+              <small class="text-muted me-1">Not imported:</small>
+              @for (h of unmappedHeaders; track h) { <span class="badge bg-light text-muted fw-normal">{{ h }}</span> }
+            </div>
+          }
+        </div>
+        <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <small class="text-muted"><i class="ri-shield-check-line me-1"></i>Validate never writes to the database. Imported bills: Status <b>Invoiced</b>, Bill From <b>Cogxim Import</b>; stock, chassis and invoices are not touched.</small>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-primary" (click)="validate()" [disabled]="busy || missingRequired.length > 0">
+              <i class="ri-checkbox-multiple-line me-1" [class.db-spin]="active.state === 'Validating'"></i>3. Validate
+            </button>
+            <button type="button" class="btn btn-success" (click)="importNow()"
+                    [disabled]="busy || !result?.dryRun || !work(result)">
+              <i class="ri-database-2-line me-1" [class.db-spin]="active.state === 'Importing'"></i>4. Import {{ result?.dryRun && work(result) ? num(work(result)) + ' bills' : '' }}
+            </button>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- ---------- result ---------- -->
+      @if (result; as r) {
+      <div class="card db-card mb-0">
+        <div class="card-header db-card-head">
+          <h4 class="card-title mb-0">
+            <i [class]="r.dryRun ? 'ri-file-search-line' : 'ri-checkbox-circle-line'"></i>
+            {{ r.dryRun ? 'Validation Result' : 'Import Result' }}
+            <small class="text-muted fw-normal ms-2">{{ r.fileName }} · {{ r.sheetName }} · {{ date(r.fromDate) }} – {{ date(r.toDate) }}</small>
+            @if (r.engine) { <span class="badge bg-success-subtle text-success ms-2">{{ r.engine }}</span> }
+            @else { <span class="badge bg-danger-subtle text-danger ms-2">OLD API BUILD - rebuild &amp; restart the API</span> }
+          </h4>
+          <button type="button" class="btn btn-sm btn-light" (click)="downloadIssues()" [disabled]="!r.issues.length"><i class="ri-download-2-line me-1"></i>Issues CSV</button>
+        </div>
+        <div class="card-body">
+          <div class="imp-stats">
+            <div><span>Rows in sheet</span><strong>{{ num(r.totalRows) }}</strong></div>
+            <div><span>Bills in file</span><strong>{{ num(r.billsInFile) }}</strong></div>
+            @if (r.dryRun) {
+              <div class="ok"><span>New bills</span><strong>{{ num(r.billsReady) }}</strong></div>
+              <div class="ok"><span>Bills to update</span><strong>{{ num(r.billsToUpdate) }}</strong></div>
+              <div class="ok"><span>Vehicles</span><strong>{{ num(r.vehiclesReady) }}</strong></div>
+            } @else {
+              <div class="ok"><span>Bills imported</span><strong>{{ num(r.billsImported) }}</strong></div>
+              <div class="ok"><span>Bills updated</span><strong>{{ num(r.billsUpdated) }}</strong></div>
+              <div class="ok"><span>Vehicles saved</span><strong>{{ num(r.vehiclesImported + r.vehiclesUpdated) }}</strong></div>
+            }
+            <div><span>Value</span><strong>{{ inr(r.totalAmount) }}</strong></div>
+            <div><span>{{ r.dryRun ? 'New customers' : 'Customers created' }}</span><strong>{{ num(r.customersCreated) }}</strong></div>
+            <div><span>{{ r.dryRun ? 'Customers to complete' : 'Customers completed' }}</span><strong>{{ num(r.customersUpdated) }}</strong></div>
+            <div><span>{{ r.dryRun ? 'Masters to create' : 'Masters created' }}</span><strong>{{ num(mastersTotal(r)) }}</strong></div>
+            <div class="skip"><span>Rows skipped</span><strong>{{ num(r.rowsSkipped) }}</strong></div>
+            <div class="bad"><span>Rows with errors</span><strong>{{ num(r.rowsWithErrors) }}</strong></div>
+          </div>
+
+          @if (mastersTotal(r) > 0) {
+            <div class="alert alert-info py-2 mt-3 mb-0 small">
+              <strong>{{ r.dryRun ? 'Masters that will be created on import' : 'Masters created' }}:</strong>
+              OEM Models {{ num(r.oemModelsCreated) }} &middot; Item models {{ num(r.itemModelsCreated) }} &middot;
+              Financiers {{ num(r.financiersCreated) }} &middot; Cities {{ num(r.citiesCreated) }} &middot; Occupations {{ num(r.occupationsCreated) }}
+              <button type="button" class="btn btn-link btn-sm p-0 ms-2 align-baseline" (click)="showMasters = !showMasters">{{ showMasters ? 'Hide list' : 'Show list' }}</button>
+              @if (showMasters) {
+                <ul class="mb-0 mt-2 ps-3" style="max-height: 220px; overflow: auto;">
+                  @for (m of r.mastersCreated; track $index) { <li>{{ m }}</li> }
+                </ul>
+              }
+            </div>
+          }
+
+          @if (r.dealers.length) {
+            <div class="table-responsive mt-3">
+              <table class="table table-sm table-hover align-middle mb-0">
+                <thead><tr><th>Dealer</th><th class="text-end">Bills</th><th class="text-end">Vehicles</th><th class="text-end">Value</th></tr></thead>
+                <tbody>
+                  @for (d of r.dealers; track d.dealerCode) {
+                    <tr><td class="fw-medium">{{ d.dealerCode }}</td><td class="text-end">{{ num(d.bills) }}</td><td class="text-end">{{ num(d.vehicles) }}</td><td class="text-end">{{ inr(d.amount) }}</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          <div class="d-flex align-items-center justify-content-between mt-4 mb-2 flex-wrap gap-2">
+            <h6 class="mb-0">Issues</h6>
+            <div class="db-seg">
+              <button type="button" [class.active]="issueFilter === ''" (click)="issueFilter = ''">All ({{ r.issues.length }})</button>
+              <button type="button" [class.active]="issueFilter === 'Error'" (click)="issueFilter = 'Error'">Errors ({{ count('Error') }})</button>
+              <button type="button" [class.active]="issueFilter === 'Skipped'" (click)="issueFilter = 'Skipped'">Skipped ({{ count('Skipped') }})</button>
+              <button type="button" [class.active]="issueFilter === 'Warning'" (click)="issueFilter = 'Warning'">Warnings ({{ count('Warning') }})</button>
+              <button type="button" [class.active]="issueFilter === 'Info'" (click)="issueFilter = 'Info'">Info ({{ count('Info') }})</button>
+            </div>
+          </div>
+          @if (r.issuesTruncated) { <small class="text-muted d-block mb-2">Showing the first 1,000 issues. Counts above are complete.</small> }
+          <div class="table-responsive imp-issues">
+            <table class="table table-sm align-middle mb-0">
+              <thead><tr><th style="width:5rem">Row</th><th style="width:7rem">Level</th><th>Bill No</th><th>Chassis No</th><th>Message</th></tr></thead>
+              <tbody>
+                @for (i of issues; track $index) {
+                  <tr>
+                    <td>{{ i.rowNo }}</td>
+                    <td><span class="badge {{ levelClass(i.level) }}">{{ i.level }}</span></td>
+                    <td>{{ i.saleBillNo || '—' }}</td>
+                    <td>{{ i.chassisNo || '—' }}</td>
+                    <td class="text-wrap">{{ i.message }}</td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="5" class="text-center text-muted py-3"><i class="ri-checkbox-circle-line text-success me-1"></i>No issues.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      }
+    }
+  </div>
+</div>
+}

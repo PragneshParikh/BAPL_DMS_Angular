@@ -11,6 +11,7 @@ import { StorageService } from '../../core/services/storage';
 import { JobCardService } from '../../core/services/job-card-service';
 import { debug } from 'console';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { SearchDebouncer } from '../../shared/search/table-search';
 @Component({
   selector: 'app-labour-rate-master',
   imports: [FormsModule, CommonModule],
@@ -59,6 +60,7 @@ export class LabourRateMaster implements OnInit {
   selectedServiceHead: any;
   selectedServiceType: string;
   searchText: string = '';
+  private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
 
   isSuperAdmin: boolean = false;
 
@@ -85,8 +87,11 @@ export class LabourRateMaster implements OnInit {
     });
   }
   onSearch(): void {
-    this.loadModelWiseLabourRateList(this.searchText);
-    this.loadPartWiseLabourRateList(this.searchText);
+    this.searchDebounce.run(() => {
+      this.page = 1;
+      this.loadModelWiseLabourRateList(this.searchText);
+      this.loadPartWiseLabourRateList(this.searchText);
+    });
   }
   loadModelWiseLabourRateList(searchText: string): void {
     this.loader.show();

@@ -9,6 +9,7 @@ import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
 import { Route, Router } from '@angular/router';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { filterRows } from '../../../shared/search/table-search';
 @Component({
   selector: 'app-hsrp-inward',
   imports: [CommonModule, NgbModule, FormsModule, FlatpickrModule],
@@ -134,18 +135,10 @@ export class HsrpInward implements OnInit {
     );
   }
   onSearchChange(): void {
-
-    const term = this.searchTerm.toLowerCase();
-
-    this.filteredOrders = this.orders.filter(x =>
-      x.saleBillNo?.toLowerCase().includes(term) ||
-      x.chassisNo?.toLowerCase().includes(term) ||
-      x.regNo?.toLowerCase().includes(term) ||
-      x.invoiceNo?.toLowerCase().includes(term) ||
-      x.customerName?.toLowerCase().includes(term) ||
-      x.supplierName?.toLowerCase().includes(term)
-    );
-
+    this.filteredOrders = filterRows(this.orders, this.searchTerm, [
+      'chassisNo', 'regNo', 'orderNo', 'orderDate', 'saleBillNo', 'invoiceNo', 'customerName', 'customerNumber',
+      'supplierName', 'inwardStatus', 'inwardResponse'
+    ]);
     this.page = 1;
     this.updatePagination();
   }

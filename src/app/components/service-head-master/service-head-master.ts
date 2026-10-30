@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { JobTypeService } from '../../core/services/job-type-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 @Component({
   selector: 'app-service-head-master',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbPagination],
@@ -282,19 +283,7 @@ export class ServiceHeadMaster implements OnInit {
 
   //search method
   applySearch(): void {
-
-    const search = this.searchText.toLowerCase().trim();
-
-    if (!search) {
-      this.filteredList = [...this.serviceHeadNameList];
-
-    } else {
-      this.filteredList = this.serviceHeadNameList.filter(x =>
-        x.serviceHeadName?.toLowerCase().includes(search) ||
-        x.jobTypeName?.toLowerCase().includes(search)
-      );
-    }
-
+    this.filteredList = filterRows(this.serviceHeadNameList, this.searchText, ['serviceHeadName', 'jobTypeName']);
     this.page = 1;
     this.refreshGrid();
   }

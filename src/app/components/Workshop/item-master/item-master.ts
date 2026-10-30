@@ -11,6 +11,7 @@ import { StorageService } from '../../../core/services/storage';
 import { subscribe } from 'diagnostics_channel';
 import { LedgerMasterService } from '../../../core/services/ledger-master';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { SearchDebouncer } from '../../../shared/search/table-search';
 
 @Component({
   selector: 'app-item-master',
@@ -29,6 +30,7 @@ export class ItemMaster implements OnInit {
   pagedData: any[] = [];
 
   searchTerm: string = '';
+  private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
   selectedItem: any;
 
   readonly SUBMENU_ID = 5;
@@ -109,10 +111,11 @@ export class ItemMaster implements OnInit {
 
   //  SEARCH
   searchItems(event: any) {
-
     this.searchTerm = event.target.value || '';
-    this.loadItems(this.searchTerm);
-
+    this.searchDebounce.run(() => {
+      this.page = 1;
+      this.loadItems(this.searchTerm);
+    });
   }
 
   // pagination

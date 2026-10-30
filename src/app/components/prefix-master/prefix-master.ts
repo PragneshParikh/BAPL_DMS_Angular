@@ -12,6 +12,7 @@ import { StorageService } from '../../core/services/storage';
 import { ModuleTypes } from '../../constant';
 import { GetPrefixModuleNamePipe } from '../../core/pipes/get-prefix-module-name-pipe';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { SearchDebouncer } from '../../shared/search/table-search';
 
 @Component({
   selector: 'app-prefix-master',
@@ -32,6 +33,7 @@ import { MenuAccessService } from '../../core/services/menu-access.service';
 export class PrefixMaster implements OnInit {
   lstModule = ModuleTypes;
   public searchTerm: string = '';
+  private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
   sequenceList: any[] = [];
 
   readonly SUBMENU_ID = 26;
@@ -77,8 +79,10 @@ export class PrefixMaster implements OnInit {
   }
 
   onSearchChange() {
-    this.page = 1
-    this.loadSequences();
+    this.searchDebounce.run(() => {
+      this.page = 1;
+      this.loadSequences();
+    });
   }
 
   onSort(column: string) {

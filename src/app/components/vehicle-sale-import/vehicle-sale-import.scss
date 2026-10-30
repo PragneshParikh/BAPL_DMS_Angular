@@ -1,0 +1,47 @@
+// src\app\components\vehicle-sale-import\vehicle-sale-import.scss
+.imp-drop {
+  display: flex; flex-direction: column; align-items: center; gap: .25rem; cursor: pointer;
+  padding: 1.5rem 1rem; margin-bottom: 1rem; text-align: center;
+  border: 2px dashed #c7d2fe; border-radius: .9rem; background: #f8faff; transition: all .15s ease;
+  i { font-size: 2.2rem; color: #6366f1; }
+  &:hover, &.over { border-color: #6366f1; background: #eef2ff; }
+}
+.imp-file {
+  display: flex; align-items: center; gap: .6rem; padding: .6rem .7rem; margin-bottom: .4rem;
+  border: 1px solid #e2e8f0; border-radius: .7rem; cursor: pointer; transition: all .15s ease;
+  > i { font-size: 1.5rem; }
+  .min-w-0 { min-width: 0; }
+  &:hover { border-color: #c7d2fe; }
+  &.active { border-color: #6366f1; background: #eef2ff; }
+}
+.imp-map-title {
+  padding: .65rem 1rem; font-size: .8rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  color: #64748b; background: #f8fafc; border-bottom: 1px solid #eef2f7;
+}
+.imp-map {
+  max-height: 34rem; overflow: auto; border-radius: 0 !important; border: 0 !important;
+  td { vertical-align: middle; }
+  small { font-size: .78rem; }
+  tr.imp-missing td { background: #fff7ed; }
+}
+.col-xxl-6 + .col-xxl-6 { border-left: 1px solid #eef2f7; }
+.imp-sample { max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.imp-unmapped { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; padding: .75rem 1rem; border-top: 1px solid #eef2f7; }
+.imp-stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .75rem;
+  > div {
+    display: flex; flex-direction: column; gap: .2rem; padding: .85rem 1rem;
+    border-radius: .8rem; background: #f8fafc; border: 1px solid #eef2f7;
+    span { font-size: .82rem; color: #64748b; }
+    strong { font-size: 1.35rem; color: #0f172a; }
+    &.ok   { background: #ecfdf5; border-color: #bbf7d0; strong { color: #047857; } }
+    &.skip { background: #f1f5f9; }
+    &.bad  { background: #fef2f2; border-color: #fecaca; strong { color: #b91c1c; } }
+  }
+}
+.imp-issues { max-height: 26rem; overflow: auto; }
+.db-empty-block {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem;
+  min-height: 18rem; color: #94a3b8;
+  i { font-size: 3rem; color: #c7d2fe; }
+}

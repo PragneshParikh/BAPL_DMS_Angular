@@ -136,6 +136,9 @@ File: Main Css File
 
 @import "./angular-custom.scss";
 
+// BGAUSS AutoDash look & feel - keep LAST so it wins over theme defaults
+@import "./bgauss-autodash";
+
 // RTL Set
 
 // @import "rtl/components-rtl";

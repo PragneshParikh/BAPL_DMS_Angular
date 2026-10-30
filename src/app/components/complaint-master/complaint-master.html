@@ -75,7 +75,7 @@
                     </button>
                     <!-- Search Box -->
                     <div class="search-box">
-                        <input type="text" class="form-control search" placeholder="Search..." />
+                        <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm" [ngModelOptions]="{ standalone: true }" (input)="onSearch()" />
                         <i class="ri-search-line search-icon"></i>
                     </div>
                 </div>

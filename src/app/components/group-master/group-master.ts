@@ -7,6 +7,7 @@ import { GroupMasterService } from '../../core/services/group-master-service';
 import Swal from 'sweetalert2';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 @Component({
   selector: 'app-group-master',
   standalone: true,
@@ -258,17 +259,7 @@ export class GroupMaster implements OnInit {
   //#endregion
 
   applySearch(): void {
-
-    const search = this.searchText.toLowerCase().trim();
-
-    if (!search) {
-      this.filteredList = [...this.groupNameList];
-    } else {
-      this.filteredList = this.groupNameList.filter(x =>
-        x.groupName?.toLowerCase().includes(search)
-      );
-    }
-
+    this.filteredList = filterRows(this.groupNameList, this.searchText, ['groupName']);
     this.page = 1;
     this.refreshGrid();
   }

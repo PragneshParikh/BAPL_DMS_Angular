@@ -99,7 +99,7 @@ export class VehicleSaleBill {
     this.filter.fromDate = sevenDaysBefore;
     this.filter.toDate = today;
 
-    this.searchChanged.pipe(debounceTime(400)).subscribe(() => {
+    this.searchChanged.pipe(debounceTime(200)).subscribe(() => {
       this.loadData();
     });
     this.loadData();
@@ -239,6 +239,10 @@ export class VehicleSaleBill {
     });
 
     this.updatePagination();
+  }
+
+  navigateToImport() {
+    this.router.navigate(['/vehicle-sale-import']);
   }
 
   navigateToAdd() {

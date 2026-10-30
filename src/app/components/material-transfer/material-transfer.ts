@@ -82,7 +82,7 @@ export class MaterialTransfer implements OnInit, OnDestroy {
     }
 
     this.searchSubscription = this.searchSubject.pipe(
-      debounceTime(400),
+      debounceTime(200),
       distinctUntilChanged()
     ).subscribe(() => {
       this.page = 1;

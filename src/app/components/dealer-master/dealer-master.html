@@ -27,7 +27,7 @@
                     <!-- Search Box -->
                     <div class="search-box">
                         <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm"
-                            (input)="onSearchChange()" (keyup.enter)="onSearchChange()" />
+                            (input)="onSearchChange()" (keyup.enter)="onSearchChange(true)" />
                         <i class="ri-search-line search-icon"></i>
                     </div>
 

@@ -10,6 +10,7 @@ import { ToastService } from '../../../shared/toaster/toast-service';
 import { StorageService } from '../../../core/services/storage';
 import { FormsModule } from '@angular/forms';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { SearchDebouncer } from '../../../shared/search/table-search';
 
 @Component({
   selector: 'app-itemmaster-fg',
@@ -113,6 +114,7 @@ export class ItemmasterFG implements OnInit {
   pagedData: any[] = [];
   selectedItem: any;      // data for current page
   searchTerm: string = '';
+  private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
   itemObj: any = this.getEmptyItem();
 
   // pagination
@@ -176,10 +178,11 @@ export class ItemmasterFG implements OnInit {
   }
   //  SEARCH FUNCTION
   searchItems(event: any) {
-
     this.searchTerm = event.target.value || '';
-    this.loadItems(this.searchTerm);
-
+    this.searchDebounce.run(() => {
+      this.page = 1;
+      this.loadItems(this.searchTerm);
+    });
   }
 
   // download excel

@@ -85,10 +85,12 @@
 
 // #region Customized styles for BGauss DMS
 /* Custom styles for BGauss DMS */
-table>thead>tr>th {
-    background-color: #747CA0 !important;
-    color: white !important;
-}
+// Disabled for AutoDash theme (table headers now styled in assets/scss/_bgauss-autodash.scss).
+// To restore the old purple-grey header, uncomment:
+// table>thead>tr>th {
+//     background-color: #747CA0 !important;
+//     color: white !important;
+// }
 
 .fixed-table {
     height: 350px;

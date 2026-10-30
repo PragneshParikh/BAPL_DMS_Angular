@@ -12,6 +12,7 @@ import { error } from 'console';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { SearchDebouncer } from '../../shared/search/table-search';
 @Component({
   selector: 'app-color',
   imports: [
@@ -32,6 +33,7 @@ import { MenuAccessService } from '../../core/services/menu-access.service';
 })
 export class Color implements OnInit {
   searchTerm: string = '';
+  private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
   dataSource: any[] = [];
   rowData: any = {};
 
@@ -141,8 +143,10 @@ export class Color implements OnInit {
     this.loadColorData();
   }
   onSearch() {
-    this.page = 1; // Reset to first page on new search
-    this.loadColorData();
+    this.searchDebounce.run(() => {
+      this.page = 1; // Reset to first page on new search
+      this.loadColorData();
+    });
   }
 
   downloadColorExcel() {

@@ -22,6 +22,7 @@ import {
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { SearchDebouncer } from '../../shared/search/table-search';
 
 
 @Component({
@@ -126,6 +127,7 @@ export class Hsnwisetaxcode implements OnInit {
   filteredData: any[] = [];
 
   searchTerm: string = '';
+  private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
 
 
   // ==========================================
@@ -367,16 +369,12 @@ export class Hsnwisetaxcode implements OnInit {
   // ==========================================
 
   searchItems(event: Event): void {
-
-    const input =
-      event.target as HTMLInputElement;
-
-    this.searchTerm =
-      input.value || '';
-
-    this.page = 1;
-
-    this.getHsnwiseTaxcodedetails();
+    const input = event.target as HTMLInputElement;
+    this.searchTerm = input.value || '';
+    this.searchDebounce.run(() => {
+      this.page = 1;
+      this.getHsnwiseTaxcodedetails();
+    });
   }
 
 

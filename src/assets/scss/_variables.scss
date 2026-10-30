@@ -54,15 +54,16 @@ $auth-bg-cover:                                   linear-gradient(-45deg, var(--
 
 // scss-docs-start gray-color-variables
 $white:    #fff;
-$gray-100: #f3f6f9;
-$gray-200: #eff2f7;
-$gray-300: #e9ebec;
-$gray-400: #ced4da;
-$gray-500: #adb5bd;
-$gray-600: #878a99;
-$gray-700: #495057;
-$gray-800: #343a40;
-$gray-900: #212529;
+// BGAUSS AutoDash theme: slate gray scale
+$gray-100: #f8fafc;
+$gray-200: #f1f5f9;
+$gray-300: #e2e8f0;
+$gray-400: #cbd5e1;
+$gray-500: #94a3b8;
+$gray-600: #64748b;
+$gray-700: #334155;
+$gray-800: #1e293b;
+$gray-900: #0f172a;
 $black:    #000;
 
 // fusv-disable
@@ -82,16 +83,17 @@ $grays: (
 // fusv-enable
 
 // scss-docs-start color-variables
-$blue:       #3577f1;
-$indigo:     #405189;
-$purple:     #6559cc;
-$pink:       #f672a7;
-$red:        #f06548;
-$orange:     #f1963b;
-$yellow:     #f7b84b;
-$green:      #0ab39c;
-$teal:       #02a8b5;
-$cyan:       #299cdb;
+// BGAUSS AutoDash theme palette
+$blue:       #3b82f6;
+$indigo:     #6366f1;
+$purple:     #8b5cf6;
+$pink:       #ec4899;
+$red:        #ef4444;
+$orange:     #f97316;
+$yellow:     #f59e0b;
+$green:      #10b981;
+$teal:       #14b8a6;
+$cyan:       #0ea5e9;
 // scss-docs-end color-variables
 
 // scss-docs-start colors-map
@@ -476,7 +478,7 @@ $position-values: (
 //
 // Settings for the `<body>` element.
 
-$body-bg:                   #f3f3f9;
+$body-bg:                   #f1f5f9; // BGAUSS AutoDash
 $body-color:                $gray-900;
 $body-text-align:           null;
 
@@ -586,9 +588,9 @@ $border-color-translucent:    $gray-400;
 // scss-docs-end border-variables
 
 // scss-docs-start border-radius-variables
-$border-radius:               .25rem;
-$border-radius-sm:            .2rem;
-$border-radius-lg:            .3rem;
+$border-radius:               .625rem; // BGAUSS AutoDash: 10px
+$border-radius-sm:            .5rem;
+$border-radius-lg:            1rem;
 $border-radius-xl:            1rem;
 $border-radius-xxl:           2rem;
 $border-radius-pill:          50rem;
@@ -598,9 +600,9 @@ $border-radius-2xl:           $border-radius-xxl; // Deprecated in v5.3.0
 // fusv-enable
 
 // scss-docs-start box-shadow-variables
-$box-shadow:                  0 1px 2px rgba(56,65,74,0.15);
+$box-shadow:                  0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04); // BGAUSS AutoDash
 $box-shadow-sm:               0 .125rem .25rem rgba($black, .075);
-$box-shadow-lg:               0 5px 10px rgba(30, 32, 37, 0.12);
+$box-shadow-lg:               0 10px 30px rgba(15, 23, 42, 0.10);
 $box-shadow-inset:            inset 0 1px 2px rgba($black, .075);
 $element-shadow:              var(--#{$prefix}element-shadow);
 // scss-docs-end box-shadow-variables

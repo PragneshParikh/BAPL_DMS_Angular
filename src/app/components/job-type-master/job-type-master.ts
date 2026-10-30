@@ -7,6 +7,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import Swal from 'sweetalert2';
 import { JobTypeService } from '../../core/services/job-type-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 @Component({
   selector: 'app-job-type-master',
   standalone: true,
@@ -266,17 +267,7 @@ export class JobTypeMaster implements OnInit {
 
   //search method
   applySearch(): void {
-
-    const search = this.searchText.toLowerCase().trim();
-
-    if (!search) {
-      this.filteredList = [...this.JobTypeNameList];
-    } else {
-      this.filteredList = this.JobTypeNameList.filter(x =>
-        x.jobTypeName?.toLowerCase().includes(search)
-      );
-    }
-
+    this.filteredList = filterRows(this.JobTypeNameList, this.searchText, ['jobTypeName']);
     this.page = 1;
     this.refreshGrid();
   }

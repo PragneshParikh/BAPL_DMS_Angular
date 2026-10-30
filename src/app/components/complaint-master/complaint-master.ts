@@ -7,6 +7,7 @@ import { NgbModal, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { ComplaintmasterService } from '../../core/services/complaintmaster-service';
 import { GroupMasterService } from '../../core/services/group-master-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { filterRows } from '../../shared/search/table-search';
 
 @Component({
   selector: 'app-complaint-master',
@@ -31,6 +32,7 @@ export class ComplaintMaster implements OnInit {
 
   complaintMasterModelList: ComplaintMasterModel[] = [];
   pagedData: ComplaintMasterModel[] = [];
+  searchTerm = '';
 
   page = 1;
   pageSize = 10;
@@ -172,13 +174,19 @@ export class ComplaintMaster implements OnInit {
   }
 
   refreshGrid(): void {
+    const rows = filterRows(this.complaintMasterModelList, this.searchTerm, ['complaintName', 'complaintGroupName', 'groupName']);
 
-    this.collectionSize = this.complaintMasterModelList.length;
+    this.collectionSize = rows.length;
 
-    this.pagedData = this.complaintMasterModelList.slice(
+    this.pagedData = rows.slice(
       (this.page - 1) * this.pageSize,
       (this.page - 1) * this.pageSize + this.pageSize
     );
+  }
+
+  onSearch(): void {
+    this.page = 1;
+    this.refreshGrid();
   }
 
   sortColumn: string = '';
