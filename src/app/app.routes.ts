@@ -309,7 +309,9 @@ export const routes: Routes = [
       { path: 'dealer-analytics', data: [133], loadComponent: () => import('./components/dashboard/dealer-analytics/dealer-analytics').then(m => m.DealerAnalytics) },
       { path: 'sales-analytics', data: [134], loadComponent: () => import('./components/dashboard/sales-analytics/sales-analytics').then(m => m.SalesAnalytics) },
       { path: 'stock-analytics', data: [135], loadComponent: () => import('./components/dashboard/stock-analytics/stock-analytics').then(m => m.StockAnalytics) },
+      // Job Card Dashboard (MenuMaster 138, WorkShop) and Account Dashboard (MenuMaster 144, Account) - both under Dashboard (131)
       { path: 'workshop-analytics', data: [138], loadComponent: () => import('./components/dashboard/workshop-analytics/workshop-analytics').then(m => m.WorkshopAnalytics) },
+      { path: 'account-dashboard', data: [144], loadComponent: () => import('./components/dashboard/account-analytics/account-analytics').then(m => m.AccountAnalytics) },
       // Cogxim (old DMS) sale register Excel import - MenuMaster 137 (Utility). API allows Admin/SuperAdmin only.
       { path: 'vehicle-sale-import', data: [137], loadComponent: () => import('./components/vehicle-sale-import/vehicle-sale-import').then(m => m.VehicleSaleImport) },
       // Vehicle Dispatch (MenuMaster 139 parent): Cogxim dispatch import (140) + dispatch report (141). SuperAdmin only.

@@ -21,6 +21,7 @@ $soft: #f1f5f9;
 .db-title { font-size: 1.75rem; font-weight: 700; letter-spacing: -.02em; color: $ink; margin: 0 0 .35rem; }
 .db-head-actions { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
 .db-range { color: $muted; font-size: .875rem; margin: .5rem 0 1.5rem; }
+.db-note { color: $muted; font-size: .8125rem; margin: -.75rem 0 1.25rem; }
 
 .db-seg {
   display: inline-flex;
@@ -119,8 +120,13 @@ $soft: #f1f5f9;
   white-space: nowrap;
   &:hover { color: #4f46e5; }
 }
-.db-chart-body { position: relative; min-height: 300px; padding: 1rem 1.25rem; }
-.db-chart { width: 100%; }
+.db-chart-body { position: relative; min-height: 300px; padding: 1rem 1.25rem; min-width: 0; }
+.db-chart { width: 100%; min-width: 0; max-width: 100%; }
+/* bootstrap columns holding cards: allow shrinking so a chart/table never pushes into the next column */
+.row > [class*="col-"] { min-width: 0; }
+.db-card { min-width: 0; }
+.db-card-head .card-title { display: flex; align-items: center; gap: .5rem; min-width: 0; font-size: 1rem; font-weight: 600; }
+.db-card-head .card-title i { color: #6366f1; font-size: 1.15rem; }
 .db-clickable { cursor: pointer; }
 .db-empty {
   position: absolute;
@@ -175,14 +181,49 @@ $soft: #f1f5f9;
   }
 }
 
-/* ---------- dealer / sales / stock tables ---------- */
+/* ---------- dashboard tables ----------
+   Columns size to their content (no fixed 55% first column), header and figures never wrap,
+   long text (dealer, party, models) is cut with "…" inside its own column and shown in full on
+   hover. On narrow screens the table scrolls sideways instead of columns running into each other. */
 .db-table {
-  table-layout: fixed;
+  table-layout: auto;
+  width: 100%;
+  min-width: 640px;
 
-  th:first-child, td:first-child { padding-left: 1.5rem; width: 55%; }
+  th {
+    white-space: nowrap;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    color: $muted;
+    background: #f8fafc;
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+  }
+  td { white-space: nowrap; vertical-align: middle; }
+  th, td { padding-left: .75rem; padding-right: .75rem; }
+  th:first-child, td:first-child { padding-left: 1.5rem; }
   th:last-child, td:last-child { padding-right: 1.5rem; }
   tbody tr:last-child td { border-bottom: 0; }
+
+  /* text column that may be long: takes the free width, cuts with … */
+  .db-cell {
+    display: block;
+    max-width: 280px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .db-cell-sm { max-width: 160px; }
+  .db-cell-lg { max-width: 360px; }
+  .db-sub { display: block; font-size: .75rem; color: $muted; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .db-name { display: flex; align-items: center; gap: .6rem; min-width: 0; }
+  .db-name > div { min-width: 0; }
 }
+/* 3-column summary table inside a narrow card (Overview "Top Dealers") */
+.db-table-sm { min-width: 420px; }
 .db-rank {
   width: 28px;
   height: 28px;
@@ -209,6 +250,7 @@ $soft: #f1f5f9;
 
 /* dark mode */
 :host-context([data-bs-theme="dark"]) {
+  .db-table th { background: #0f172a; }
   .db-title, .db-kpi-value, .db-mini strong { color: #f1f5f9; }
   .db-kpi, .db-seg, .db-search .form-control { background: #111827; border-color: #1f2937; color: #e2e8f0; }
   .db-seg button:hover:not(.active) { background: #1f2937; color: #fff; }

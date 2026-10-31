@@ -8,15 +8,11 @@
     </ol>
   </div>
   <div class="db-head-actions">
-    <div class="db-seg" role="group" aria-label="Period">
-      @for (p of periods; track p.key) {
-        <button type="button" [class.active]="period === p.key" (click)="setPeriod(p.key)" [disabled]="loading">{{ p.label }}</button>
-      }
-    </div>
+    <button type="button" class="btn btn-light" (click)="load()" [disabled]="loading"><i class="ri-refresh-line me-1" [class.db-spin]="loading"></i>Refresh</button>
     <a class="btn btn-outline-success" [routerLink]="links.totalSale"><i class="ri-file-chart-line me-1"></i>Full Report</a>
   </div>
 </div>
-<p class="db-range"><i class="ri-calendar-line me-1"></i>{{ periodLabel }}</p>
+<app-db-filter [from]="from" [to]="to" [loading]="loading" (rangeChange)="onRange($event)"></app-db-filter>
 
 @if (failed) {
   <div class="alert alert-warning py-2"><i class="ri-error-warning-line me-1"></i>Dealer data could not be loaded. Try again or open the full report.</div>
@@ -91,7 +87,7 @@
     <div class="card db-card h-100 mb-0">
       <div class="card-header db-card-head">
         <h4 class="card-title mb-0"><i class="ri-table-line"></i>Dealer Ranking</h4>
-        <div class="d-flex gap-2 align-items-center">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
           <div class="db-seg">
             <button type="button" [class.active]="sortBy === 'units'" (click)="sortBy = 'units'">Units</button>
             <button type="button" [class.active]="sortBy === 'value'" (click)="sortBy = 'value'">Value</button>
@@ -108,9 +104,9 @@
             <tbody>
               @for (r of tableRows; track r.dealerCode; let i = $index) {
                 <tr class="db-clickable" (click)="open(r)">
-                  <td><div class="d-flex align-items-center gap-2"><span class="db-rank">{{ i + 1 }}</span>
-                    <div><div class="fw-medium">{{ r.dealerName }}</div><small class="text-muted">{{ r.dealerCode }}</small></div></div></td>
-                  <td>{{ r.dealerCity || '—' }}<small class="text-muted d-block">{{ r.dealerState }}</small></td>
+                  <td><div class="db-name"><span class="db-rank">{{ i + 1 }}</span>
+                    <div><span class="db-cell fw-medium" [title]="r.dealerName">{{ r.dealerName }}</span><span class="db-sub">{{ r.dealerCode }}</span></div></div></td>
+                  <td><span class="db-cell db-cell-sm" [title]="r.dealerCity || ''">{{ r.dealerCity || '—' }}</span><span class="db-sub">{{ r.dealerState }}</span></td>
                   <td class="text-end fw-semibold">{{ num(r.totalUnitsSold) }}</td>
                   <td class="text-end">{{ share(r) }}%</td>
                   <td class="text-end">{{ inr(r.totalFinalAmount) }}</td>

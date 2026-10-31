@@ -15,8 +15,8 @@ import { TotalSaleReportDealerWiseResponse, TotalSaleReportDealerWiseRow } from 
 import { ModelWiseSalePivotResponse } from '../../ViewModels/models/model-wise-sale-countModel';
 import { ModelWiseStockPivotResponse } from '../../ViewModels/models/Model wise stock count.model';
 import { JobReportSummaryStats } from '../../ViewModels/models/job-report.model';
-
-type PeriodKey = 'mtd' | 'qtd' | 'fytd';
+import { DashboardFilter } from './dashboard-filter';
+import { DateRange, defaultRange, fmtRange } from './dashboard-kit';
 
 /** Report pages each dashboard element drills into (existing routes). */
 export const DASHBOARD_LINKS = {
@@ -36,7 +36,7 @@ const PALETTE = [C.blue, C.green, C.amber, C.purple, C.pink, C.teal, C.orange, C
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, DashboardFilter],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
@@ -47,14 +47,9 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('jobChart') jobChartEl?: ElementRef<HTMLDivElement>;
 
   readonly links = DASHBOARD_LINKS;
-  readonly periods: { key: PeriodKey; label: string }[] = [
-    { key: 'mtd', label: 'This Month' },
-    { key: 'qtd', label: 'This Quarter' },
-    { key: 'fytd', label: 'This FY' }
-  ];
-  period: PeriodKey = 'mtd';
-  fromDate = '';
-  toDate = '';
+  /** Selected range (yyyy-MM-dd) - default 01.01.2020 - today. */
+  from = defaultRange().from;
+  to = defaultRange().to;
 
   loading = false;
   lastUpdated: Date | null = null;
@@ -82,7 +77,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.setPeriod('mtd');
+    this.load();
   }
 
   ngAfterViewInit(): void {
@@ -95,39 +90,19 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // ---------------------------------------------------------------- period
-  setPeriod(key: PeriodKey): void {
-    this.period = key;
-    const today = new Date();
-    const y = today.getFullYear();
-    const m = today.getMonth(); // 0 = Jan
-    let from: Date;
-    if (key === 'mtd') {
-      from = new Date(y, m, 1);
-    } else if (key === 'qtd') {
-      // Indian FY quarters: Apr-Jun, Jul-Sep, Oct-Dec, Jan-Mar
-      from = m < 3 ? new Date(y, 0, 1) : new Date(y, m - ((m - 3) % 3), 1);
-    } else {
-      from = m >= 3 ? new Date(y, 3, 1) : new Date(y - 1, 3, 1);
-    }
-    this.fromDate = this.iso(from);
-    this.toDate = this.iso(today);
+  onRange(r: DateRange): void {
+    this.from = r.from;
+    this.to = r.to;
     this.load();
   }
 
-  private iso(d: Date): string {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }
-
-  get periodLabel(): string {
-    const f = (s: string) => s.split('-').reverse().join('.');
-    return `${f(this.fromDate)} – ${f(this.toDate)}`;
-  }
+  get periodLabel(): string { return fmtRange(this.from, this.to); }
 
   // ---------------------------------------------------------------- data
   load(): void {
     this.loading = true;
     this.failed = { sale: false, modelSale: false, stock: false, jobs: false };
-    const range = { fromDate: this.fromDate, toDate: this.toDate };
+    const range = { fromDate: this.from, toDate: this.to };
     const dealerCode = this.storage.getDealerCode() || '';
 
     forkJoin({
@@ -137,7 +112,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
         .pipe(catchError(() => { this.failed.modelSale = true; return of(null); })),
       modelStock: this.report.getModelWiseStockCountReport({})          // current stock
         .pipe(catchError(() => { this.failed.stock = true; return of(null); })),
-      jobs: this.report.getJobReportSummaryStats(dealerCode, new Date(this.fromDate), new Date(this.toDate + 'T23:59:59'))
+      jobs: this.report.getJobReportSummaryStats(dealerCode, new Date(this.from), new Date(this.to + 'T23:59:59'))
         .pipe(catchError(() => { this.failed.jobs = true; return of(null); }))
     }).subscribe(res => {
       this.sale = res.sale;

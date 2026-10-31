@@ -7,13 +7,14 @@ import { Router, RouterModule } from '@angular/router';
 import { ReportService } from '../../../core/services/report.service';
 import { TotalSaleReportDealerWiseRow } from '../../../ViewModels/models/total-sale-reportModel';
 import { DashboardBase, PeriodKey, periodRange, fmtRange, groupSum, pct, barChart, hBarChart, donutChart, COLORS } from '../dashboard-kit';
+import { DashboardFilter } from '../dashboard-filter';
 
 type SortKey = 'units' | 'value';
 
 @Component({
   selector: 'app-dealer-analytics',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, DashboardFilter],
   templateUrl: './dealer-analytics.html',
   styleUrl: './dealer-analytics.scss'
 })
@@ -22,9 +23,6 @@ export class DealerAnalytics extends DashboardBase implements OnInit, AfterViewI
   @ViewChild('byState') stateEl?: ElementRef<HTMLDivElement>;
   @ViewChild('payment') paymentEl?: ElementRef<HTMLDivElement>;
 
-  period: PeriodKey = 'fytd';
-  from = '';
-  to = '';
   loading = false;
   failed = false;
   rows: TotalSaleReportDealerWiseRow[] = [];
@@ -38,18 +36,8 @@ export class DealerAnalytics extends DashboardBase implements OnInit, AfterViewI
     super(zone, router);
   }
 
-  ngOnInit(): void { this.setPeriod(this.period); }
+  ngOnInit(): void { this.load(); }
   ngAfterViewInit(): void { this.viewReady = true; this.render(); }
-
-  get periodLabel(): string { return fmtRange(this.from, this.to); }
-
-  setPeriod(key: PeriodKey): void {
-    this.period = key;
-    const r = periodRange(key);
-    this.from = r.from;
-    this.to = r.to;
-    this.load();
-  }
 
   load(): void {
     this.loading = true;
