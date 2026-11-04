@@ -1,21 +1,17 @@
 <div class="db-head">
   <div>
-    <h4 class="db-title">Workshop Analytics</h4>
+    <h4 class="db-title">Job Card Dashboard</h4>
     <ol class="breadcrumb m-0">
       <li class="breadcrumb-item"><a routerLink="/">Dashboard</a></li>
-      <li class="breadcrumb-item active">Workshop Analytics</li>
+      <li class="breadcrumb-item active">Job Card Dashboard</li>
     </ol>
   </div>
   <div class="db-head-actions">
-    <div class="db-seg" role="group" aria-label="Period">
-      @for (p of periods; track p.key) {
-        <button type="button" [class.active]="period === p.key" (click)="setPeriod(p.key)" [disabled]="loading">{{ p.label }}</button>
-      }
-    </div>
+    <button type="button" class="btn btn-light" (click)="load()" [disabled]="loading"><i class="ri-refresh-line me-1" [class.db-spin]="loading"></i>Refresh</button>
     <a class="btn btn-outline-success" [routerLink]="links.jobCards"><i class="ri-file-chart-line me-1"></i>Full Report</a>
   </div>
 </div>
-<p class="db-range"><i class="ri-calendar-line me-1"></i>{{ periodLabel }}</p>
+<app-db-filter [from]="from" [to]="to" [loading]="loading" (rangeChange)="onRange($event)"></app-db-filter>
 
 @if (failed) {
   <div class="alert alert-warning py-2"><i class="ri-error-warning-line me-1"></i>Job card data could not be loaded. Try again or open the full report.</div>
@@ -123,9 +119,12 @@
               <td>{{ jobDate(j) }}</td>
               <td class="fw-medium">{{ j.jobNo }}</td>
               <td>{{ j.regNo || '—' }}</td>
-              <td>{{ j.dealerName || j.dealerCode }} <small class="text-muted">{{ j.city }}</small></td>
-              <td>{{ j.serviceType || j.jobType || '—' }}</td>
-              <td>{{ j.mechanicName || '—' }}</td>
+              <td>
+                <span class="db-cell" [title]="j.dealerName || j.dealerCode || ''">{{ j.dealerName || j.dealerCode }}</span>
+                @if (j.city) { <span class="db-sub">{{ j.city }}</span> }
+              </td>
+              <td><span class="db-cell db-cell-sm" [title]="j.serviceType || j.jobType || ''">{{ j.serviceType || j.jobType || '—' }}</span></td>
+              <td><span class="db-cell db-cell-sm" [title]="j.mechanicName || ''">{{ j.mechanicName || '—' }}</span></td>
               <td><span class="badge {{ statusClass(j) }}">{{ j.jobStatus || '—' }}</span></td>
             </tr>
           } @empty {

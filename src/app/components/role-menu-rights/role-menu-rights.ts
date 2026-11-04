@@ -1,5 +1,7 @@
 // src\app\components\role-menu-rights\role-menu-rights.ts
-// Assign menu rights (RoleWiseMenuRights) to a role.
+// Role-wise Menu Rights - two tabs:
+//   Role Rights    : tick what a role can do on every page (RoleWiseMenuRights)
+//   Menus & Pages  : create / edit / delete menus and pages (MenuMaster) and pick roles per page
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +12,7 @@ import {
 } from '../../core/services/role-menu-rights.service';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
+import { MenuMasterPanel } from './menu-master-panel/menu-master-panel';
 
 export const PERM = { View: 1, Create: 2, Edit: 4, Delete: 8, Print: 16 } as const;
 
@@ -31,11 +34,12 @@ interface ViewGroup extends RoleMenuGroup {
 @Component({
   selector: 'app-role-menu-rights',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MenuMasterPanel],
   templateUrl: './role-menu-rights.html',
   styleUrl: './role-menu-rights.scss'
 })
 export class RoleMenuRights implements OnInit {
+  tab: 'rights' | 'menus' = 'rights';
   roles: RoleModel[] = [];
   selectedRoleId = '';
   copyFromRoleId = '';
@@ -151,6 +155,16 @@ export class RoleMenuRights implements OnInit {
         return true;
       });
     });
+  }
+
+  /** Menus tab changed MenuMaster / rights: refresh the open role (unless the user has unsaved ticks). */
+  onMenusChanged(): void {
+    if (this.selectedRoleId && !this.isDirty) this.loadMatrix(this.selectedRoleId, true);
+  }
+
+  setTab(t: 'rights' | 'menus'): void {
+    if (t === 'menus' && this.isDirty && !confirm('You have unsaved rights for this role. Leave them unsaved and open Menus & Pages?')) return;
+    this.tab = t;
   }
 
   setModule(key: ModuleFilter): void {
@@ -286,6 +300,8 @@ export class RoleMenuRights implements OnInit {
           this.original = new Map(this.allSubs().map(s => [s.subMenuId, s.permission]));
           this.applyFilters();
           this.toast.show(res.message || 'Menu rights saved.', { classname: 'bg-success text-white', delay: 3000 });
+          // Re-read from the database so the screen shows exactly what was stored.
+          this.loadMatrix(this.selectedRoleId, true);
         } else {
           this.toast.show(res?.message || 'Save failed.', { classname: 'bg-warning text-dark', delay: 5000 });
         }
@@ -293,7 +309,10 @@ export class RoleMenuRights implements OnInit {
       error: err => {
         this.loader.hide();
         console.error(err);
-        this.toastError('Failed to save menu rights.');
+        const msg = err?.status === 0 ? 'API not reachable.'
+          : err?.status === 401 ? 'Session expired. Please log in again.'
+          : (err?.error?.message || 'Failed to save menu rights.');
+        this.toastError(msg);
       }
     });
   }

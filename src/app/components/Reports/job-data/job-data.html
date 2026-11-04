@@ -1,0 +1,153 @@
+<!-- src\app\components\Reports\job-data\job-data.html -->
+<div class="db-head">
+  <div>
+    <h4 class="db-title">Job Data</h4>
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a routerLink="/">Dashboard</a></li>
+      <li class="breadcrumb-item">Reports</li>
+      <li class="breadcrumb-item active">Job Data</li>
+    </ol>
+  </div>
+  <div class="db-head-actions">
+    <button type="button" class="btn btn-success" (click)="exportExcel()" [disabled]="!data?.total || exporting || loading">
+      <i class="ri-file-excel-2-line me-1" [class.db-spin]="exporting"></i>{{ exporting ? 'Exporting…' : 'Export to Excel' }}
+    </button>
+  </div>
+</div>
+<p class="db-range"><i class="ri-information-line me-1"></i>Imported job card service history, dealer-wise, by Job Date. The Excel export has all 63 columns (up to 2,00,000 records per export).</p>
+
+@if (!isAdmin) {
+  <div class="alert alert-warning"><i class="ri-lock-line me-1"></i>Only Admin / SuperAdmin can view job data.</div>
+} @else {
+
+<div class="card db-card mb-4">
+  <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-filter-3-line"></i>Filters</h4></div>
+  <div class="card-body">
+    <form class="row g-3 align-items-end" (ngSubmit)="apply()">
+      <div class="col-md-5">
+        <label class="form-label">Dealer</label>
+        <select class="form-select" name="dealer" [(ngModel)]="dealerCode" [disabled]="loading">
+          <option value="">All Dealers</option>
+          @for (d of dealers; track d.dealerCode) { <option [value]="d.dealerCode">{{ d.dealerCode }} - {{ d.dealerName }} ({{ num(d.jobs) }})</option> }
+        </select>
+      </div>
+      <div class="col-md-2 col-6">
+        <label class="form-label">Start Date</label>
+        <input type="date" class="form-control" name="from" [(ngModel)]="fromDate" [disabled]="loading">
+      </div>
+      <div class="col-md-2 col-6">
+        <label class="form-label">End Date</label>
+        <input type="date" class="form-control" name="to" [(ngModel)]="toDate" [disabled]="loading">
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100" [disabled]="!!dateError || loading">
+          <i class="ri-search-line me-1" [class.db-spin]="loading"></i>Show Jobs
+        </button>
+      </div>
+      @if (dateError && (fromDate || toDate)) { <div class="col-12"><small class="text-danger">{{ dateError }}</small></div> }
+    </form>
+  </div>
+</div>
+
+@if (error) { <div class="alert alert-danger"><i class="ri-error-warning-line me-1"></i>{{ error }}</div> }
+
+@if (data; as d) {
+  <!-- ---------- dealer-wise totals ---------- -->
+  <div class="card db-card mb-4">
+    <div class="card-header db-card-head">
+      <h4 class="card-title mb-0"><i class="ri-store-2-line"></i>Dealer-wise
+        <small class="text-muted fw-normal ms-2">{{ applied?.dealerCode || 'All Dealers' }} · {{ date(applied?.fromDate) }} – {{ date(applied?.toDate) }}</small></h4>
+      @if (applied?.dealerCode) { <button type="button" class="btn btn-sm btn-light" (click)="pickDealer('')" [disabled]="loading"><i class="ri-arrow-go-back-line me-1"></i>All Dealers</button> }
+    </div>
+    <div class="card-body">
+      <div class="imp-stats">
+        <div class="ok"><span>Jobs</span><strong>{{ num(d.total) }}</strong></div>
+        <div><span>Dealers</span><strong>{{ num(d.dealers.length) }}</strong></div>
+        <div><span>Net Total</span><strong>{{ inr(d.netTotal) }}</strong></div>
+      </div>
+      @if (d.dealers.length) {
+        <div class="table-responsive mt-3" style="max-height: 18rem; overflow: auto;">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead><tr><th>Dealer</th><th class="text-end">Jobs</th><th class="text-end">Vehicles</th><th class="text-end">Net Total</th><th>First Job</th><th>Last Job</th></tr></thead>
+            <tbody>
+              @for (x of d.dealers; track x.dealerCode) {
+                <tr role="button" (click)="pickDealer(x.dealerCode)" [class.table-primary]="applied?.dealerCode === x.dealerCode" title="Show only this dealer">
+                  <td><span class="fw-medium">{{ x.dealerCode }}</span> <small class="text-muted">{{ x.dealerName }}</small></td>
+                  <td class="text-end">{{ num(x.jobs) }}</td>
+                  <td class="text-end">{{ num(x.vehicles) }}</td>
+                  <td class="text-end">{{ amt(x.netTotal) }}</td>
+                  <td>{{ date(x.firstJobDate) }}</td>
+                  <td>{{ date(x.lastJobDate) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ---------- job records ---------- -->
+  <div class="card db-card mb-0">
+    <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-file-list-3-line"></i>Job Records</h4></div>
+    <div class="table-responsive rpt-table">
+      <table class="table table-sm table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Dealer</th><th>Job Date</th><th class="text-end">Job No</th><th>Location</th><th>Job Type</th><th>Service Head</th><th>Category</th>
+            <th>Model</th><th>Chassis No</th><th>Reg No</th><th class="text-end">KMS</th><th>Party</th><th>Technician</th>
+            <th>Doc</th><th>Invoice Date</th><th class="text-end">Parts</th><th class="text-end">Labour</th><th class="text-end">Net Total</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of d.rows; track r['Id']) {
+            <tr>
+              <td class="fw-medium">{{ r['DealerCode'] }}</td>
+              <td>{{ date(r['JobDate']) }}</td>
+              <td class="text-end">{{ r['JobNo'] }}</td>
+              <td class="text-truncate" style="max-width: 14rem" [title]="r['Location'] || ''">{{ r['Location'] || '—' }}</td>
+              <td>{{ r['JobType'] || '—' }}</td>
+              <td>{{ r['ServiceHead'] || '—' }}</td>
+              <td>{{ r['JobCategory'] || '—' }}</td>
+              <td>{{ r['Model'] || '—' }}</td>
+              <td>{{ r['ChassisNo'] || '—' }}</td>
+              <td>{{ r['RegNo'] || '—' }}</td>
+              <td class="text-end">{{ r['KMS'] != null ? num(r['KMS']) : '—' }}</td>
+              <td class="text-truncate" style="max-width: 12rem" [title]="r['PartyName'] || ''">{{ r['PartyName'] || '—' }}</td>
+              <td>{{ r['Technician'] || '—' }}</td>
+              <td>{{ r['DocType'] || '—' }} @if (r['DocNo']) { <small class="text-muted">#{{ r['DocNo'] }}</small> }</td>
+              <td>{{ date(r['InvoiceDate']) }}</td>
+              <td class="text-end">{{ amt(r['Parts']) }}</td>
+              <td class="text-end">{{ amt(r['Labour']) }}</td>
+              <td class="text-end fw-medium">{{ amt(r['NetTotal']) }}</td>
+              <td><span class="badge" [class]="r['JobStatus'] === 'Closed' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'">{{ r['JobStatus'] || '—' }}</span></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="19" class="text-center text-muted py-4"><i class="ri-calendar-close-line me-1"></i>No jobs for this dealer and date range.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (d.total > 0) {
+      <div class="rpt-pager">
+        <small class="text-muted">Showing {{ num(first()) }}–{{ num(last()) }} of {{ num(d.total) }}</small>
+        <div class="d-flex align-items-center gap-2">
+          <select class="form-select form-select-sm w-auto" [(ngModel)]="pageSize" (change)="onPageSizeChange()" [disabled]="loading">
+            @for (s of pageSizes; track s) { <option [ngValue]="s">{{ s }} / page</option> }
+          </select>
+          <button type="button" class="btn btn-light btn-sm border" (click)="goTo(1)" [disabled]="loading || page === 1">&laquo;</button>
+          <button type="button" class="btn btn-light btn-sm border" (click)="goTo(page - 1)" [disabled]="loading || page === 1">&lsaquo;</button>
+          <small>Page {{ num(page) }} of {{ num(totalPages) }}</small>
+          <button type="button" class="btn btn-light btn-sm border" (click)="goTo(page + 1)" [disabled]="loading || page >= totalPages">&rsaquo;</button>
+          <button type="button" class="btn btn-light btn-sm border" (click)="goTo(totalPages)" [disabled]="loading || page >= totalPages">&raquo;</button>
+        </div>
+      </div>
+    }
+  </div>
+} @else if (!error) {
+  <div class="card db-card"><div class="card-body db-empty-block">
+    <i class="ri-filter-3-line"></i>
+    <p class="mb-0">Choose a dealer (or All Dealers) and a date range, then Show Jobs.</p>
+  </div></div>
+}
+}

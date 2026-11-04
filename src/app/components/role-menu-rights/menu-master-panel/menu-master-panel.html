@@ -1,0 +1,220 @@
+<!-- src\app\components\role-menu-rights\menu-master-panel\menu-master-panel.html -->
+<div class="row g-3">
+  <!-- ============ left: top-level menus ============ -->
+  <div class="col-lg-4">
+    <div class="card mm-card h-100 mb-0">
+      <div class="mm-card-head">
+        <h5 class="mm-title">Menus</h5>
+        <button type="button" class="btn btn-sm btn-primary" (click)="newMenu()"><i class="ri-add-line me-1"></i>New Menu</button>
+      </div>
+      <div class="px-3 pb-2">
+        <div class="mm-search"><i class="ri-search-line"></i>
+          <input type="text" class="form-control form-control-sm" placeholder="Search menu or page…" [(ngModel)]="menuSearch">
+        </div>
+      </div>
+      <div class="mm-list">
+        @for (m of filteredMenus; track m.id) {
+          <div class="mm-item" [class.active]="m.id === selectedMenuId" (click)="selectMenu(m)" role="button" tabindex="0" (keydown.enter)="selectMenu(m)">
+            <div class="mm-item-main">
+              <span class="mm-item-name">{{ m.menuName }}</span>
+              <span class="mm-item-sub">#{{ m.id }} · {{ m.childCount }} page(s)</span>
+            </div>
+            <div class="mm-item-actions">
+              <button type="button" class="btn btn-icon" title="Edit menu" (click)="$event.stopPropagation(); edit(m)"><i class="ri-pencil-line"></i></button>
+              <button type="button" class="btn btn-icon text-danger" title="Delete menu" [disabled]="m.childCount > 0"
+                      (click)="$event.stopPropagation(); remove(m)"><i class="ri-delete-bin-line"></i></button>
+            </div>
+          </div>
+        } @empty {
+          <div class="text-center text-muted py-4 small">No menus found.</div>
+        }
+      </div>
+      @if (orphans.length) {
+        <div class="alert alert-warning m-3 mb-3 py-2 small">
+          {{ orphans.length }} page(s) point to a parent that no longer exists (ids: {{ orphanIds }}). Edit them and pick a parent.
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ============ right: pages + form / roles panel ============ -->
+  <div class="col-lg-8">
+    <!-- create / edit form -->
+    @if (form) {
+      <div class="card mm-card mm-form mb-3">
+        <div class="mm-card-head">
+          <h5 class="mm-title">
+            {{ form.id === null ? (isPageForm ? 'New Page' : 'New Menu') : (isPageForm ? 'Edit Page' : 'Edit Menu') }}
+            @if (form.id !== null) { <span class="text-muted fw-normal">#{{ form.id }}</span> }
+          </h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="cancelForm()"></button>
+        </div>
+        <div class="card-body pt-0">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="mmName">Name <span class="text-danger">*</span></label>
+              <input id="mmName" type="text" class="form-control" maxlength="100" [(ngModel)]="form.menuName"
+                     [placeholder]="isPageForm ? 'e.g. Vehicle Sale Report' : 'e.g. Reports'">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="mmParent">Type / Parent menu</label>
+              <select id="mmParent" class="form-select" [(ngModel)]="form.parentMenuId" [disabled]="lockTopLevel">
+                <option [ngValue]="null">Top-level menu (sidebar group)</option>
+                @for (p of parentOptions; track p.id) { <option [ngValue]="p.id">Page under: {{ p.menuName }}</option> }
+              </select>
+              @if (lockTopLevel) { <small class="text-muted">Has pages, so it stays a top-level menu.</small> }
+            </div>
+            @if (isPageForm) {
+              <div class="col-md-6">
+                <label class="form-label" for="mmPath">Page path <span class="text-danger">*</span></label>
+                <input id="mmPath" type="text" class="form-control" [(ngModel)]="form.pathName" (blur)="onPathBlur()" placeholder="/vehicle-sale-report">
+                <small class="text-muted">Same as the route in app.routes.ts.</small>
+              </div>
+            }
+            <div [class]="isPageForm ? 'col-md-3' : 'col-md-6'">
+              <label class="form-label" for="mmModule">Module</label>
+              <select id="mmModule" class="form-select" [(ngModel)]="form.moduleName">
+                @for (m of modules; track m.key) { <option [value]="m.key">{{ m.label }}</option> }
+              </select>
+            </div>
+            <div [class]="isPageForm ? 'col-md-3' : 'col-md-6'">
+              <label class="form-label" for="mmSerial">Order</label>
+              <input id="mmSerial" type="number" min="0" class="form-control" [(ngModel)]="form.serialNo" placeholder="Last">
+            </div>
+
+            <!-- new page: who can open it -->
+            @if (isPageForm && form.id === null) {
+              <div class="col-12">
+                <label class="form-label mb-1">Give access to roles <span class="text-muted fw-normal">({{ newRoleCount }} selected)</span></label>
+                <div class="mm-role-grid">
+                  @for (r of roles; track r.id) {
+                    <div class="mm-role-pick">
+                      <span class="mm-role-name" [title]="r.name">{{ r.name }}</span>
+                      <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn" [class.btn-primary]="newPageRoles[r.id ?? ''] === 1" [class.btn-light]="newPageRoles[r.id ?? ''] !== 1"
+                                (click)="toggleNewRole(r.id ?? '', 1)">View</button>
+                        <button type="button" class="btn" [class.btn-success]="newPageRoles[r.id ?? ''] === allRights" [class.btn-light]="newPageRoles[r.id ?? ''] !== allRights"
+                                (click)="toggleNewRole(r.id ?? '', allRights)">Full</button>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <small class="text-muted">View = open the page only. Full = view, add, edit, delete, print. Fine-tune later with "Roles".</small>
+              </div>
+            }
+          </div>
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="button" class="btn btn-light" (click)="cancelForm()">Cancel</button>
+            <button type="button" class="btn btn-primary" (click)="saveForm()" [disabled]="saving">
+              <i class="ri-save-3-line me-1"></i>{{ form.id === null ? 'Create' : 'Save' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- created page: route hint -->
+    @if (lastCreated) {
+      <div class="alert alert-success d-flex flex-wrap align-items-center gap-2 mm-created">
+        <i class="ri-checkbox-circle-line fs-5"></i>
+        <div class="flex-grow-1 min-w-0">
+          Page <strong>{{ lastCreated.menuName }}</strong> created with id <strong>{{ lastCreated.id }}</strong>. Use this id in app.routes.ts:
+          <code class="d-block text-truncate">{{ routeSnippet(lastCreated) }}</code>
+        </div>
+        <button type="button" class="btn btn-sm btn-light" (click)="copy(routeSnippet(lastCreated))"><i class="ri-file-copy-line me-1"></i>Copy</button>
+        <button type="button" class="btn-close" aria-label="Close" (click)="lastCreated = null"></button>
+      </div>
+    }
+
+    <!-- roles of one page -->
+    @if (rolesFor) {
+      <div class="card mm-card mb-3">
+        <div class="mm-card-head">
+          <h5 class="mm-title">Roles for "{{ rolesFor.menuName }}" <span class="text-muted fw-normal">#{{ rolesFor.id }}</span></h5>
+          <div class="d-flex align-items-center gap-2">
+            <div class="mm-search mm-search-sm"><i class="ri-search-line"></i>
+              <input type="text" class="form-control form-control-sm" placeholder="Search role…" [(ngModel)]="roleSearch">
+            </div>
+            <button type="button" class="btn-close" aria-label="Close" (click)="rolesFor = null"></button>
+          </div>
+        </div>
+        <div class="table-responsive mm-roles-wrap">
+          <table class="table table-sm align-middle mb-0 mm-table">
+            <thead>
+              <tr>
+                <th>Role</th>
+                @for (b of rights; track b.value) { <th class="text-center">{{ b.short }}</th> }
+                <th class="text-center">All</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of visibleRoleRights; track r.roleId) {
+                <tr [class.mm-changed]="r.permission !== r.original">
+                  <td class="fw-medium">{{ r.roleName }}</td>
+                  @for (b of rights; track b.value) {
+                    <td class="text-center"><input type="checkbox" class="form-check-input" [checked]="has(r, b.value)" (change)="toggleBit(r, b.value)"
+                                                   [attr.aria-label]="b.label + ' - ' + r.roleName"></td>
+                  }
+                  <td class="text-center"><input type="checkbox" class="form-check-input" [checked]="r.permission === allRights" (change)="toggleAll(r)"
+                                                 [attr.aria-label]="'All rights - ' + r.roleName"></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+          <small class="text-muted">Any right also gives View. Untick View to remove the role.</small>
+          <button type="button" class="btn btn-primary btn-sm" (click)="saveRoles()" [disabled]="saving || !roleChanges">
+            <i class="ri-save-3-line me-1"></i>Save Roles @if (roleChanges) { <span class="badge bg-light text-primary ms-1">{{ roleChanges }}</span> }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- pages of selected menu -->
+    <div class="card mm-card mb-0">
+      <div class="mm-card-head">
+        <h5 class="mm-title">{{ selectedMenu ? 'Pages in ' + selectedMenu.menuName : 'Pages' }}</h5>
+        <div class="d-flex align-items-center gap-2">
+          <div class="mm-search mm-search-sm"><i class="ri-search-line"></i>
+            <input type="text" class="form-control form-control-sm" placeholder="Search page…" [(ngModel)]="pageSearch">
+          </div>
+          <button type="button" class="btn btn-sm btn-primary" (click)="newPage()" [disabled]="!selectedMenu"><i class="ri-add-line me-1"></i>New Page</button>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 mm-table">
+          <thead>
+            <tr><th class="text-center">Order</th><th>Page</th><th>Module</th><th class="text-center">Roles</th><th class="text-end">Actions</th></tr>
+          </thead>
+          <tbody>
+            @for (p of pages; track p.id) {
+              <tr>
+                <td class="text-center text-muted">{{ p.serialNo ?? '—' }}</td>
+                <td>
+                  <span class="mm-cell fw-medium" [title]="p.menuName">{{ p.menuName }}</span>
+                  <span class="mm-sub">#{{ p.id }} · {{ p.pathName || 'no path' }}</span>
+                </td>
+                <td><span class="mm-badge {{ moduleClass(p.moduleName) }}">{{ moduleLabel(p.moduleName) }}</span></td>
+                <td class="text-center">
+                  <button type="button" class="btn btn-sm mm-count" [class.mm-count-zero]="!p.roleCount" (click)="openRoles(p)" title="Choose roles">
+                    <i class="ri-team-line me-1"></i>{{ p.roleCount }}
+                  </button>
+                </td>
+                <td class="text-end text-nowrap">
+                  <button type="button" class="btn btn-icon" title="Roles" (click)="openRoles(p)"><i class="ri-shield-user-line"></i></button>
+                  <button type="button" class="btn btn-icon" title="Edit" (click)="edit(p)"><i class="ri-pencil-line"></i></button>
+                  <button type="button" class="btn btn-icon text-danger" title="Delete" (click)="remove(p)"><i class="ri-delete-bin-line"></i></button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="text-center text-muted py-5">
+                {{ selectedMenu ? 'No pages in this menu yet. Click "New Page".' : 'Select a menu on the left.' }}
+              </td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

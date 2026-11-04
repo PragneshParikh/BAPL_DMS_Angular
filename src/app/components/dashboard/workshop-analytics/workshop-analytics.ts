@@ -13,11 +13,12 @@ import {
   DashboardBase, PeriodKey, periodRange, fmtRange, buildBuckets, toIsoDay, groupSum, pct,
   hBarChart, trendChart, donutChart, radialChart, COLORS
 } from '../dashboard-kit';
+import { DashboardFilter } from '../dashboard-filter';
 
 @Component({
   selector: 'app-workshop-analytics',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, DashboardFilter],
   templateUrl: './workshop-analytics.html',
   styleUrl: './workshop-analytics.scss'
 })
@@ -28,9 +29,6 @@ export class WorkshopAnalytics extends DashboardBase implements OnInit, AfterVie
   @ViewChild('closure') closureEl?: ElementRef<HTMLDivElement>;
   @ViewChild('byMechanic') mechanicEl?: ElementRef<HTMLDivElement>;
 
-  period: PeriodKey = 'fytd';
-  from = '';
-  to = '';
   loading = false;
   failed = false;
   dealers: DealerWiseJobReportSummary[] = [];
@@ -44,18 +42,8 @@ export class WorkshopAnalytics extends DashboardBase implements OnInit, AfterVie
     super(zone, router);
   }
 
-  ngOnInit(): void { this.setPeriod(this.period); }
+  ngOnInit(): void { this.load(); }
   ngAfterViewInit(): void { this.viewReady = true; this.render(); }
-
-  get periodLabel(): string { return fmtRange(this.from, this.to); }
-
-  setPeriod(key: PeriodKey): void {
-    this.period = key;
-    const r = periodRange(key);
-    this.from = r.from;
-    this.to = r.to;
-    this.load();
-  }
 
   load(): void {
     this.loading = true;

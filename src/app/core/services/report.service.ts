@@ -888,4 +888,21 @@ export class ReportService {
     );
   }
 
+    getStockAdjustmentReport(
+  fromDate: Date,
+  toDate: Date,
+  dealerCode: string | null
+) {
+  return this.http.get<any[]>(
+    `${this.apiUrl}/GetStockAdjustmentReport`,
+    {
+      params: {
+        fromDate: fromDate.toISOString(),
+        toDate: toDate.toISOString(),
+        dealerCode: dealerCode ?? ''
+      }
+    }
+  );
+
+}
 }

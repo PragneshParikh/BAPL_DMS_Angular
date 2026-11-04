@@ -8,17 +8,11 @@
     </ol>
   </div>
   <div class="db-head-actions">
-    <div class="db-seg" role="group" aria-label="Period">
-      @for (p of periods; track p.key) {
-        <button type="button" [class.active]="period === p.key" (click)="setPeriod(p.key)" [disabled]="loading">{{ p.label }}</button>
-      }
-    </div>
-    <button type="button" class="btn btn-outline-success" (click)="load()" [disabled]="loading">
-      <i class="ri-refresh-line me-1" [class.db-spin]="loading"></i>Refresh
-    </button>
+    <button type="button" class="btn btn-light" (click)="load()" [disabled]="loading"><i class="ri-refresh-line me-1" [class.db-spin]="loading"></i>Refresh</button>
+    <a class="btn btn-outline-success" [routerLink]="links.totalSale"><i class="ri-file-chart-line me-1"></i>Full Report</a>
   </div>
 </div>
-<p class="db-range"><i class="ri-calendar-line me-1"></i>{{ periodLabel }}</p>
+<app-db-filter [from]="from" [to]="to" [loading]="loading" (rangeChange)="onRange($event)"></app-db-filter>
 
 @if (anyFailed) {
   <div class="alert alert-warning py-2">
@@ -112,7 +106,7 @@
       </div>
       <div class="card-body p-0">
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0 db-table">
+          <table class="table table-hover align-middle mb-0 db-table db-table-sm">
             <thead>
               <tr>
                 <th>Dealer</th>
@@ -124,11 +118,11 @@
               @for (d of topDealers; track d.dealerCode; let i = $index) {
                 <tr class="db-clickable" (click)="openDealer(d)">
                   <td>
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="db-name">
                       <span class="db-rank">{{ i + 1 }}</span>
-                      <div class="text-truncate">
-                        <div class="fw-medium text-truncate">{{ d.dealerName }}</div>
-                        <small class="text-muted">{{ d.dealerCode }}{{ d.dealerCity ? ' · ' + d.dealerCity : '' }}</small>
+                      <div>
+                        <span class="db-cell fw-medium" [title]="d.dealerName">{{ d.dealerName }}</span>
+                        <span class="db-sub">{{ d.dealerCode }}{{ d.dealerCity ? ' · ' + d.dealerCity : '' }}</span>
                       </div>
                     </div>
                   </td>

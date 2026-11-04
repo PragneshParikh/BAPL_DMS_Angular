@@ -1,5 +1,6 @@
 // src\app\components\dashboard\stock-analytics\stock-analytics.ts
-// Stock Analytics - current vehicle stock from GET Report/model-wise-stock-count (dealer x model pivot).
+// Stock Analytics - unsold vehicle stock from GET Report/model-wise-stock-count (dealer x model pivot),
+// for vehicles inwarded (invoice date) in the selected range. Default 01.01.2020 - today = all stock.
 import { AfterViewInit, Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,11 +8,12 @@ import { Router, RouterModule } from '@angular/router';
 import { ReportService } from '../../../core/services/report.service';
 import { ModelWiseStockPivotResponse, ModelWiseStockPivotRow } from '../../../ViewModels/models/Model wise stock count.model';
 import { DashboardBase, barChart, hBarChart, donutChart, COLORS, pct } from '../dashboard-kit';
+import { DashboardFilter } from '../dashboard-filter';
 
 @Component({
   selector: 'app-stock-analytics',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, DashboardFilter],
   templateUrl: './stock-analytics.html',
   styleUrl: './stock-analytics.scss'   // ADDED
 })
@@ -38,7 +40,7 @@ export class StockAnalytics extends DashboardBase implements OnInit, AfterViewIn
   load(): void {
     this.loading = true;
     this.failed = false;
-    this.report.getModelWiseStockCountReport({}).subscribe({
+    this.report.getModelWiseStockCountReport({ fromDate: this.from, toDate: this.to } as any).subscribe({
       next: d => { this.data = d; this.loading = false; this.lastUpdated = new Date(); setTimeout(() => this.render()); },
       error: () => { this.data = null; this.failed = true; this.loading = false; setTimeout(() => this.render()); }
     });

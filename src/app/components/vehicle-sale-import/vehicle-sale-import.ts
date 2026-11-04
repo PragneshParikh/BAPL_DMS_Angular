@@ -13,6 +13,8 @@ import { DealerService } from '../../core/services/dealer-service';
 import { LocationMasterService } from '../../core/services/location-master-service';
 import { StorageService } from '../../core/services/storage';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { ImportProgressInfo, ImportProgressService } from '../../shared/import-progress/import-progress.service';
+import { ImportProgressPanel } from '../../shared/import-progress/import-progress';
 
 type FileState = 'Waiting' | 'Reading' | 'Ready' | 'Validating' | 'Validated' | 'Importing' | 'Imported' | 'Failed';
 
@@ -24,12 +26,14 @@ interface QueueItem {
   preview?: ImportPreview;
   result?: ImportResult;
   error?: string;
+  /** live status of the running / last validate or import (step, rows, bills saved, batch n of m) */
+  progress?: ImportProgressInfo | null;
 }
 
 @Component({
   selector: 'app-vehicle-sale-import',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ImportProgressPanel],
   templateUrl: './vehicle-sale-import.html',
   styleUrl: './vehicle-sale-import.scss'
 })
@@ -67,7 +71,8 @@ export class VehicleSaleImport implements OnInit {
     private dealerService: DealerService,
     private locationService: LocationMasterService,
     private storage: StorageService,
-    private toaster: ToastService
+    private toaster: ToastService,
+    private progressApi: ImportProgressService
   ) { }
 
   ngOnInit(): void {
@@ -279,8 +284,12 @@ export class VehicleSaleImport implements OnInit {
     this.busy = true;
     item.state = dryRun ? 'Validating' : 'Importing';
     item.error = undefined;
+    // live status: the API reports step / rows / bills saved / batch while this request is running
+    const progressId = this.progressApi.newId();
+    item.progress = null;
+    const watch = this.progressApi.watch(progressId, p => item.progress = p);
     try {
-      item.result = await firstValueFrom(this.api.importCogximSales(item.file, this.options(dryRun, item)));
+      item.result = await firstValueFrom(this.api.importCogximSales(item.file, { ...this.options(dryRun, item), progressId }));
       item.state = dryRun ? 'Validated' : 'Imported';
       if (!dryRun) this.toast(`${this.label(item)}: ${this.num(item.result.billsImported)} bills imported, ${this.num(item.result.billsUpdated)} updated, ${this.num(item.result.customersUpdated)} customers completed, ${this.num(this.mastersTotal(item.result))} masters created.`, 'success');
     } catch (e: any) {
@@ -288,6 +297,9 @@ export class VehicleSaleImport implements OnInit {
       item.error = this.err(e);
       this.toast(`${item.file.name}: ${item.error}`, 'danger');
     } finally {
+      watch.unsubscribe();
+      // final status (complete / failed) for the panel
+      this.progressApi.get(progressId).subscribe(p => { if (p) item.progress = p; });
       this.busy = false;
     }
   }
