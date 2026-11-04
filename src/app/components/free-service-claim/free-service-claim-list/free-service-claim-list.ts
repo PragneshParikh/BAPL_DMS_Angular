@@ -1,4 +1,3 @@
-// src\app\components\free-service-claim\free-service-claim-list\free-service-claim-list.ts
 import { Component, OnInit } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { CommonModule } from '@angular/common';
@@ -8,11 +7,10 @@ import { StorageService } from '../../../core/services/storage';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { LocationMasterService } from '../../../core/services/location-master-service';
-import { FreeServiceClaim } from '../free-service-claim';
 import { FreeServiceClaimService } from '../../../core/services/free-service-claim';
-import { error } from 'console';
-import { Route, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+
 @Component({
   selector: 'app-free-service-claim-list',
   imports: [SharedModule, CommonModule, NgbPagination, FormsModule, ReactiveFormsModule, NgbTooltip],
@@ -43,7 +41,8 @@ export class FreeServiceClaimList implements OnInit {
     dateTo: '',
     location: '',
     claimNo: '',
-  }
+    status: ''
+  };
 
   constructor(
     private storageService: StorageService,
@@ -66,6 +65,7 @@ export class FreeServiceClaimList implements OnInit {
   ngOnInit(): void {
     this.loadWorkShopLocations();
     this.initDefaultDates();
+    this.getSubmittedClaimByDealer(); 
   }
 
   initDefaultDates() {
@@ -82,15 +82,28 @@ export class FreeServiceClaimList implements OnInit {
   }
 
   onSearch() {
+    this.page = 1;
     this.getSubmittedClaimByDealer();
   }
 
+  getLocationName(code: string): string {
+    return this.locationList.find(x => x.loccode === code)?.locname || code;
+  }
+
   getSubmittedClaimByDealer() {
-    const _dealerCode = this.locationList.filter(x => x.loccode === this.filterFormData.location)[0].dealerCode;
+    const selectedLoc = this.locationList.find(x => x.loccode === this.filterFormData.location);
+    const _dealerCode = selectedLoc ? selectedLoc.dealerCode : this.dealerCode;
+
     this.loader.show();
     this.freeServiceClaimService.getByDealerCode(_dealerCode, this.pageSize, this.page).subscribe({
-      next: (res) => {
-        this.dataSource = res.data;
+      next: (res: any) => {
+        let allData = res.data || [];
+
+        if (this.filterFormData.status) {
+          allData = allData.filter((item: any) => item.status === this.filterFormData.status);
+        }
+
+        this.dataSource = allData;
         this.collectionSize = res.totalRecords;
         this.loader.hide();
       },
@@ -123,13 +136,10 @@ export class FreeServiceClaimList implements OnInit {
         console.error(err);
         this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
       }
-    })
+    });
   }
 
   onDoubleClick(row: any) {
-    const Id = row?.id || '0';
-    const value = Date.now() + '|' + Id;
-    const encClaimId = btoa(value);
-    this.router.navigate(['/free-service-claim', encClaimId]);
+    this.router.navigate(['/bg-free-service'], { queryParams: { claimId: row?.id } });
   }
 }

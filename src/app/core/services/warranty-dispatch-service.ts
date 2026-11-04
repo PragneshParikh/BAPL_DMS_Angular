@@ -29,5 +29,9 @@ export class WarrantyDispatchService {
   searchWarrantyDispatch(filter: any): Observable<any> {
     return this.httpClient.post(`${this.baseUrl}/WarrantyDispatch/SearchWarrantyDispatch`, filter);
   }
+
+  deleteWarrantyDispatch(id: number): Observable<any> {
+    return this.httpClient.delete(`${this.baseUrl}/WarrantyDispatch/DeleteWarrantyDispatch/${id}`);
+  }
  
 }

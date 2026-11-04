@@ -72,11 +72,28 @@ export class WarrantyOrderList implements OnInit {
   }
 
   ngOnInit(): void {
+    this.setCurrentMonthDates();
     this.loadSuppliers();
     this.loadLocations();
     this.search();
   }
 
+
+  setCurrentMonthDates(): void {
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    this.filter.dateFrom = this.formatDate(firstDay);
+    this.filter.dateTo = this.formatDate(today);
+  }
+
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  
   loadSuppliers(): void {
     this.ledgerService.getCompanyLedgers().subscribe({
       next: (res: any) => this.supplierList = res,

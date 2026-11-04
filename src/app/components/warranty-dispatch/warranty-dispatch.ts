@@ -35,13 +35,13 @@ export class WarrantyDispatch implements OnInit {
     this.dispatchForm = this.fb.group({
       slipPrefix: [{ value: '', disabled: true }], 
       boxCount: [''],
-      docNo: [''],
+      dispNo: [''], 
       docDate: [today],
       dispatchedThrough: [''],
       contactPerson: [''],
       mobileNumber: [''],
       courierCharges: [''],
-      grNo: ['']
+      docNo: ['']  
     });
 
     this.loadWarrantyDispatchPrefix();
@@ -178,13 +178,13 @@ export class WarrantyDispatch implements OnInit {
           x.sequenceName === 'warranty_dispatch' || x.sequenceName === 'Warranty Dispatch'
         );
         if (match) {
-          // Slip Prefix set karne
+         
           if (match.sequenceCode) {
             let cleanPrefix = match.sequenceCode.replace(/###/g, ''); 
             this.dispatchForm.patchValue({ slipPrefix: cleanPrefix });
           }
           if (match.nextNo || match.currentNo || match.runningNo) {
-            this.dispatchForm.patchValue({ docNo: match.nextNo || match.currentNo || match.runningNo });
+            this.dispatchForm.patchValue({ dispNo: match.nextNo || match.currentNo || match.runningNo });
           }
         }
       }
@@ -255,13 +255,13 @@ onSubmit() {
     dealerCode: dealerCode,
     slipPrefix: formData.slipPrefix,
     boxCount: Number(formData.boxCount) || 0,
-    docNo: Number(formData.docNo) || 0,
+    dispNo: Number(formData.dispNo) || 0,
     docDate: formData.docDate,
     dispatchedThrough: formData.dispatchedThrough,
     contactPerson: formData.contactPerson,
     mobileNumber: formData.mobileNumber,
     courierCharges: Number(formData.courierCharges) || 0,
-    grNo: formData.grNo,
+    docNo: formData.docNo,
     packingSlipIds: selectedSlips.map(s => s.id)
   };
 

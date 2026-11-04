@@ -1,0 +1,208 @@
+<!-- src/app/components/bg-free-service/bg-free-service.html -->
+<div class="card shadow-sm">
+    <div class="card-header bg-primary bg-gradient text-white py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-white">
+                <i class="ri-file-list-3-line me-1"></i>
+                Free Service
+            </h6>
+
+           
+            <button *ngIf="claimId > 0" class="btn btn-sm btn-light" (click)="onBack()"
+                title="Back to Free Service Claim list">
+                <i class="ri-arrow-left-line"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        <!-- Row 1-->
+        <div class="row g-2" *ngIf="claimId > 0">
+            <div class="col-md-4">
+                <label class="form-label">Claim Prefix</label>
+                <input type="text" class="form-control form-control-sm bg-light text-muted"
+                    [(ngModel)]="claimFormData.claimPrefix" name="prefix" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Claim No</label>
+                <input type="text" class="form-control form-control-sm bg-light text-muted"
+                    [(ngModel)]="claimFormData.claimNo" name="claimNo" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Claim Date</label>
+                <input type="date" class="form-control form-control-sm bg-light text-muted"
+                    [(ngModel)]="claimFormData.claimDate" name="claimDate" readonly>
+            </div>
+        </div>
+
+       <!-- Row 2: Location, Service Type, Supplier & Search Button in same row -->
+<div class="row g-2 align-items-end">
+    <div class="col-md-3">
+        <label class="form-label">Location</label>
+        <select class="form-select form-select-sm" [(ngModel)]="selectedLocation" name="location"
+            [disabled]="claimId > 0">
+            <option value="">{{ claimId > 0 ? '--Select--' : '-- All --' }}</option>
+            <option *ngFor="let loc of locationList" [value]="loc.loccode">{{ loc.locname }}</option>
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Service Type</label>
+        <input type="text" class="form-control form-control-sm bg-light text-muted"
+            [(ngModel)]="claimFormData.serviceType" name="serviceType" readonly>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Supplier</label>
+        <select class="form-select form-select-sm" [(ngModel)]="claimFormData.supplier" name="supplier"
+            disabled>
+            <option value="">--Select--</option>
+            <option *ngFor="let supplier of supplierList" [value]="supplier.ledgerCode">
+                {{ supplier.ledgerName }}
+            </option>
+        </select>
+    </div>
+
+    <div class="col-md-3" *ngIf="claimId === 0">
+        <button class="btn btn-primary btn-sm" (click)="onSearch()">
+            <i class="ri-search-line me-1"></i>
+            Search
+        </button>
+    </div>
+</div>
+
+<hr>
+
+        
+
+        <!-- Grid -->
+        <div class="row g-3 mt-1">
+            <h6>
+                Free Service Claims ({{ pendingClaims.length }})
+            </h6>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center" style="min-width:90px">Action</th>
+                            <th style="min-width:160px">Reject Reason</th>
+                            <th style="min-width:45px">Sr.No</th>
+                            <th style="min-width:150px">Claim No / Date</th>
+                            <th style="min-width:130px">Location</th>
+                            <th style="min-width:115px">Job No / Date</th>
+                            <th style="min-width:125px">Rbill No / Date</th>
+                            <th style="min-width:150px">Reg No / Chassis No</th>
+                            <th style="min-width:130px">Motor No / KMS</th>
+                            <th style="min-width:160px">Party Name / Mobile</th>
+                            <th style="min-width:140px">Sale Date / Days</th>
+                            <th style="min-width:150px">Supervisor / Technician</th>
+                            <th style="min-width:150px">Model Name</th>
+                            <th style="min-width:80px">Copn No</th>
+                            <th style="min-width:150px">Service Head / Type</th>
+                            <th class="text-end" style="min-width:110px">Rate / GST</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let claim of pendingClaims; let i = index">
+                            <td class="text-center">
+                                <!-- Pending row: Approve / Reject buttons -->
+                                <ng-container *ngIf="claim.isApproved == null; else decided">
+                                    <button type="button" class="btn btn-sm" [ngbTooltip]="'Approve'"
+                                        [ngClass]="claim.decision === 'approve' ? 'btn-success' : 'btn-outline-success'"
+                                        (click)="onDecision(claim, 'approve')">
+                                        <i class="ri-thumb-up-fill"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm ms-1" [ngbTooltip]="'Reject'"
+                                        [ngClass]="claim.decision === 'reject' ? 'btn-danger' : 'btn-outline-danger'"
+                                        (click)="onDecision(claim, 'reject')">
+                                        <i class="ri-thumb-down-fill"></i>
+                                    </button>
+                                </ng-container>
+
+                                <!-- Already approved / rejected row -->
+                                <ng-template #decided>
+                                    <span class="badge" [ngClass]="claim.isApproved ? 'bg-success' : 'bg-danger'">
+                                        {{ claim.isApproved ? 'Approved' : 'Rejected' }}
+                                    </span>
+                                </ng-template>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control form-control-sm"
+                                    [(ngModel)]="claim.rejectReason" [name]="'reason' + i"
+                                    [disabled]="claim.isApproved != null || claim.decision !== 'reject'">
+                            </td>
+                            <td>{{ i + 1 }}</td>
+                            <td>
+                                {{ claim?.claimPrefix }}<br>
+                                <small class="text-muted">{{ claim?.claimDate | date:'dd-MM-yyyy' }}</small>
+                            </td>
+                            <!-- <td>{{ claim?.locationCode }}</td> -->
+                             <td>{{ getLocationName(claim?.locationCode) }}</td>
+                            <td>
+                                {{ claim?.jobNo }}<br>
+                                <small class="text-muted">{{ claim?.jobDate | date:'dd-MM-yyyy' }}</small>
+                            </td>
+                            <td>
+                                {{ claim?.repairBillNo }}<br>
+                                <small class="text-muted">{{ claim?.repairBillDate | date:'dd-MM-yyyy' }}</small>
+                            </td>
+                            <td>
+                                {{ claim?.registrationNo }}<br>
+                                <small class="text-muted">{{ claim?.chassisNo }}</small>
+                            </td>
+                            <td>
+                                {{ claim?.motorNo }}<br>
+                                <small class="text-muted">{{ claim?.vehicleKMs }} km</small>
+                            </td>
+                            <td>
+                                {{ claim?.partyName }}<br>
+                                <small class="text-muted">{{ claim?.mobileNo }}</small>
+                            </td>
+                            <td>
+                                {{ claim?.saleDate | date:'dd-MM-yyyy' }}<br>
+                                <small class="text-muted">{{ claim?.days }} days</small>
+                            </td>
+                            <td>
+                                {{ claim?.supervisor }}<br>
+                                <small class="text-muted">{{ claim?.technician }}</small>
+                            </td>
+                            <td>{{ claim?.modelName }}</td>
+                            <td>{{ claim?.couponNo }}</td>
+                            <td>
+                                {{ claim?.serviceHead }}<br>
+                                <small class="text-muted">{{ claim?.serviceType }}</small>
+                            </td>
+                            <td class="text-end">
+                                {{ claim?.rate | number:'1.2-2' }}<br>
+                                <small class="text-muted">{{ claim?.gstAmount | number:'1.2-2' }}</small>
+                            </td>
+                        </tr>
+
+                        <tr *ngIf="pendingClaims.length === 0">
+                            <td colspan="16" class="text-center text-muted">
+                                No Data Available
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div>
+                <button class="btn btn-primary btn-sm me-2" *ngIf="canEdit" (click)="onSubmit()">
+                    <i class="ri-save-line me-1"></i>
+                    Submit
+                </button>
+                <button class="btn btn-secondary btn-sm" *ngIf="claimId > 0" (click)="onBack()">
+                    Back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

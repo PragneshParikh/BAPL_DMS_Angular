@@ -222,4 +222,10 @@ export class JobCardService {
 
     return this.httpClient.get<any[]>(`${this.baseUrl}/JobCard/GetLabourCodesByPart`, { params });
   }
+
+  getFreeServiceLabour(jobId: number, dealerCode: string) {
+  return this.httpClient.get<any[]>(
+    `${this.baseUrl}/JobCard/GetFreeServiceLabour?jobId=${jobId}&dealerCode=${dealerCode}`
+  );
+}
 }

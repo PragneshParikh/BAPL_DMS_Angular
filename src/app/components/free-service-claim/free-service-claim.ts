@@ -1,6 +1,6 @@
-// src\app\components\free-service-claim\free-service-claim.ts
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Route, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { concatMap, from, toArray } from 'rxjs';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { FreeServiceClaimService } from '../../core/services/free-service-claim';
@@ -13,6 +13,7 @@ import { PrefixService } from '../../core/services/prefix';
 import { SharedModule } from '../../shared/shared.module';
 import { LedgerMasterService } from '../../core/services/ledger-master';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+
 @Component({
   selector: 'app-free-service-claim',
   imports: [CommonModule, NgbTooltip, ReactiveFormsModule, FormsModule, SharedModule],
@@ -25,20 +26,21 @@ export class FreeServiceClaim implements OnInit {
   canCreate = false;
   canEdit = false;
   canDownload = false;
-  claimId: Number = 0;
+  claimId: number = 0;
   isEdit: boolean = false;
   dealerCode: string | null = null;
 
   pendingClaimjobCardList: any[] = [];
+  filteredJobList: any[] = [];
+  filterStatus: string = '';
   locationList: any[] = [];
   supplierList: any[] = [];
-
   claimSubmitList: any[] = [];
 
   isSuperAdmin: boolean;
   user: any;
 
-  claimFormData = {
+  claimFormData: any = {
     id: 0,
     locationCode: '',
     dealerCode: '',
@@ -51,7 +53,7 @@ export class FreeServiceClaim implements OnInit {
     createdDate: '',
     updatedBy: null,
     updatedDate: null,
-  }
+  };
 
   constructor(
     private route: ActivatedRoute,
@@ -80,33 +82,33 @@ export class FreeServiceClaim implements OnInit {
     this.getSupplierList();
 
     this.route.params.subscribe(params => {
-
       const encClaim = params['id'];
-      const decoded = atob(encClaim);
-
-      this.claimId = Number(decoded.split('|')[1]);
+      if (encClaim) {
+        const decoded = atob(encClaim);
+        this.claimId = Number(decoded.split('|')[1]);
+      }
 
       if (this.claimId && this.claimId !== 0) {
         this.isEdit = true;
         this.getDetailsByclaimId();
       } else {
         this.isEdit = false;
-        const to = new Date();
-        this.claimFormData.claimDate = to.toISOString().split('T')[0];
-      }
+        this.claimFormData.claimDate = new Date().toISOString().split('T')[0];
 
+        this.getPendingApprovedJobCard(this.dealerCode);
+      }
     });
   }
 
   getDetailsByclaimId() {
     this.loader.show();
     this.freeServiceClaimService.getClaimById(this.claimId).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.claimFormData = {
           locationCode: res.LocationCode,
           dealerCode: res.DealerCode,
           claimPrefix: res.ClaimPrefix,
-          claimDate: res.ClaimDate,
+          claimDate: (res.ClaimDate || '').toString().substring(0, 10),
           claimNo: res.ClaimNo,
           supplier: 'LED1',
           serviceType: 'Free Service',
@@ -117,12 +119,13 @@ export class FreeServiceClaim implements OnInit {
           updatedDate: res.updatedDate
         };
         this.pendingClaimjobCardList = res.ItemDetails;
+        this.applyStatusFilter();
         this.loader.hide();
       },
       error: (err) => {
         console.error(err);
         this.loader.hide();
-        this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 })
+        this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
       }
     });
   }
@@ -133,13 +136,19 @@ export class FreeServiceClaim implements OnInit {
       next: (res: any) => {
         this.locationList = res;
         this.loader.hide();
+
+        if (!this.isEdit && res && res.length === 1) {
+          this.claimFormData.locationCode = res[0].loccode;
+          this.claimFormData.dealerCode = res[0].dealerCode;
+          this.generateNewClaimNo(res[0].dealerCode);
+        }
       },
       error: (err) => {
         this.loader.hide();
         console.error(err);
         this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
       }
-    })
+    });
   }
 
   getSupplierList() {
@@ -162,7 +171,18 @@ export class FreeServiceClaim implements OnInit {
 
   onChangeLocation(event: Event) {
     const locCode = (event.target as HTMLSelectElement).value;
-    const _dealerCode = this.locationList.filter(x => x.loccode === locCode)[0].dealerCode;
+
+    if (!locCode) {
+      this.claimFormData.dealerCode = '';
+      this.claimFormData.claimPrefix = '';
+      this.claimFormData.claimNo = '';
+      this.getPendingApprovedJobCard(this.dealerCode);
+      return;
+    }
+
+    const selectedLoc = this.locationList.find(x => x.loccode === locCode);
+    const _dealerCode = selectedLoc ? selectedLoc.dealerCode : this.dealerCode;
+
     this.claimFormData.dealerCode = _dealerCode;
     this.generateNewClaimNo(_dealerCode);
     this.getPendingApprovedJobCard(_dealerCode);
@@ -171,7 +191,7 @@ export class FreeServiceClaim implements OnInit {
   generateNewClaimNo(dealerCode: string) {
     this.loader.show();
     this.prefixMasterService.getPrefixByDealerByModule(dealerCode, 'free_service_claim').subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.claimFormData.claimPrefix = res;
         this.claimFormData.claimNo = res.split('/').pop();
         this.loader.hide();
@@ -184,11 +204,13 @@ export class FreeServiceClaim implements OnInit {
     });
   }
 
-  getPendingApprovedJobCard(dealerCode: string) {
+  getPendingApprovedJobCard(dealerCode: string | null) {
     this.loader.show();
     this.freeServiceClaimService.getPendingApprovalJobCard(dealerCode).subscribe({
-      next: (res) => {
-        this.pendingClaimjobCardList = res;
+      next: (res: any) => {
+        this.pendingClaimjobCardList = res || [];
+        this.claimSubmitList = [];
+        this.applyStatusFilter();      
         this.loader.hide();
       },
       error: (err) => {
@@ -199,9 +221,36 @@ export class FreeServiceClaim implements OnInit {
     });
   }
 
-  onClaimCheckBoxChange(event: Event, claim: any) {
-    const isChecked = (event.target as HTMLInputElement).checked;
+  onFilterRecords() {
+    if (this.isEdit) {
+      this.applyStatusFilter();
+      return;
+    }
 
+    const selectedLoc = this.locationList.find(x => x.loccode === this.claimFormData.locationCode);
+    const _dealerCode = selectedLoc ? selectedLoc.dealerCode : this.dealerCode;
+    this.getPendingApprovedJobCard(_dealerCode);
+  }
+
+  applyStatusFilter() {
+    if (!this.filterStatus) {
+      this.filteredJobList = [...this.pendingClaimjobCardList];
+      return;
+    }
+
+    this.filteredJobList = this.pendingClaimjobCardList.filter(item => {
+      const statusStr = item.isClaimed === false ? 'Not Submitted'
+        : item.isApproved === true ? 'Approved'
+        : item.isApproved === false ? 'Rejected'
+        : 'Pending';
+      return statusStr === this.filterStatus;
+    });
+  }
+
+  onClaimCheckBoxChange(event: Event, claim: any) {
+    if (claim.isClaimed) return;
+
+    const isChecked = (event.target as HTMLInputElement).checked;
     const jobCardIndex = this.claimSubmitList.findIndex(
       x => x.jobCardId === claim.jobCardId
     );
@@ -218,26 +267,13 @@ export class FreeServiceClaim implements OnInit {
   }
 
   onSubmitClaim() {
-    if (this.claimSubmitList.length === 0) {
-      this.toaster.show("Please select at lease one claim.", { classname: 'bg-warning text-white', delay: 5000 });
-      return;
-    }
-
-    const rejectedWithoutReason = this.claimSubmitList.some(
-      item => item.isApproved === false &&
-        (!item.rejectReason || item.rejectReason.trim() === '')
-    );
-
-    if (rejectedWithoutReason) {
-      this.toaster.show("Reject reason cannot be left blank.", { classname: 'bg-warning text-white', delay: 5000 });
-      return;
-    }
-
     const userId = this.storageService.getUserId();
+
+    
     if (this.claimFormData.id > 0) {
       const claimDetails = {
         ...this.claimFormData,
-        itemDetails: this.claimSubmitList.map(item => ({
+        itemDetails: this.pendingClaimjobCardList.map(item => ({
           ...item,
           updatedBy: userId,
           updatedDate: new Date()
@@ -246,9 +282,9 @@ export class FreeServiceClaim implements OnInit {
 
       this.loader.show();
       this.freeServiceClaimService.update(claimDetails).subscribe({
-        next: (res) => {
+        next: () => {
           this.loader.hide();
-          this.toaster.show("Records updated sucessfully.", { classname: 'bg-success text-white', delay: 5000 });
+          this.toaster.show("Records updated successfully.", { classname: 'bg-success text-white', delay: 5000 });
           this.goBack();
         },
         error: (err) => {
@@ -257,62 +293,85 @@ export class FreeServiceClaim implements OnInit {
           this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
         }
       });
-    } else {
-      const claimDetails = {
-        createdBy: userId,
-        createdDate: new Date(),
-        ...this.claimFormData,
-        itemDetails: this.claimSubmitList.map(item => ({
-          ...item,
-          isApproved: null,
-          createdBy: userId,
-          createdDate: new Date()
-        }))
-      };
-
-      this.loader.show();
-      this.freeServiceClaimService.insert(claimDetails).subscribe({
-        next: (res) => {
-          this.loader.hide();
-          this.toaster.show("Records save sucessfully.", { classname: 'bg-success text-white', delay: 5000 });
-          this.goBack();
-        },
-        error: (err) => {
-          console.error(err);
-          this.loader.hide();
-          this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
-        }
-      });
+      return;
     }
 
+    const selected = this.claimSubmitList.filter(x => !x.isClaimed);
+    if (selected.length === 0) {
+      this.toaster.show("Please select at least one claim.", { classname: 'bg-warning text-white', delay: 5000 });
+      return;
+    }
+
+    const groups: { dealer: string; loc: string; rows: any[] }[] = [];
+    for (const row of selected) {
+      const dealer = row.dealerCode || this.claimFormData.dealerCode || this.dealerCode || '';
+      if (!dealer) {
+        this.toaster.show("Dealer code sapadla nahi.", { classname: 'bg-warning text-white', delay: 5000 });
+        return;
+      }
+      const loc = row.locationCode || this.getDefaultLocation(dealer);
+
+      let g = groups.find(x => x.dealer === dealer && x.loc === loc);
+      if (!g) {
+        g = { dealer, loc, rows: [] };
+        groups.push(g);
+      }
+      g.rows.push(row);
+    }
+
+    this.loader.show();
+    from(groups).pipe(
+      concatMap(g =>
+        this.prefixMasterService.getPrefixByDealerByModule(g.dealer, 'free_service_claim').pipe(
+          concatMap((prefix: any) =>
+            this.freeServiceClaimService.insert(this.buildClaim(g, prefix, userId))
+          )
+        )
+      ),
+      toArray()
+    ).subscribe({
+      next: () => {
+        this.loader.hide();
+        this.toaster.show("Records saved successfully.", { classname: 'bg-success text-white', delay: 5000 });
+        this.goBack();
+      },
+      error: (err) => {
+        console.error(err);
+        this.loader.hide();
+        this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  }
+
+  private buildClaim(g: { dealer: string; loc: string; rows: any[] }, prefix: string, userId: any) {
+    return {
+      ...this.claimFormData,
+      id: 0,
+      dealerCode: g.dealer,
+      locationCode: g.loc,
+      claimPrefix: prefix,                     
+      claimNo: prefix.split('/').pop(),
+      claimDate: this.claimFormData.claimDate || new Date().toISOString().split('T')[0],
+      createdBy: userId,
+      createdDate: new Date(),
+      itemDetails: g.rows.map(item => ({
+        ...item,
+        isApproved: null,
+        createdBy: userId,
+        createdDate: new Date()
+      }))
+    };
+  }
+
+  private getDefaultLocation(dealer: string): string {
+    return this.locationList.find(l => l.dealerCode === dealer)?.loccode
+      || this.claimFormData.locationCode
+      || '';
   }
 
   goBack() {
     this.router.navigate(['/free-service-claim']);
   }
 
-  onFilterRecords() {
-    this.claimFilterForm.control.markAllAsTouched();
-
-    if (this.claimFilterForm.invalid) {
-      this.toaster.show("Please fill all required fields.", { classname: 'bg-warning text-white', delay: 5000 });
-      return;
-    }
-  }
-
   downloadExcel() { }
-
-  onApproveRejectClick(row: any, isApproved: boolean) {
-
-    row.isApproved = isApproved;
-    row.approvedRejectDate = new Date();
-    row.approvedRejectBy = this.user.userId;
-
-    const jobCardIndex = this.claimSubmitList.findIndex(
-      x => x.id === row.id
-    );
-
-    this.claimSubmitList.push(row);
-
-  }
 }

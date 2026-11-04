@@ -20,7 +20,25 @@ export class FreeServiceClaimService {
     return this.httpClient.get(`${this.baseUrl}/free-service-claim/${id}`);
   }
 
-  getPendingApprovalJobCard(dealerCode: string): Observable<any> {
+  // getPendingApprovalJobCard(dealerCode: string): Observable<any> {
+  //   let params = new HttpParams();
+  //   if (dealerCode) {
+  //     params = params.set("dealerCode", dealerCode);
+  //   }
+
+  //   return this.httpClient.get(`${this.baseUrl}/free-service-claim/GetPendingApprovalJobCard`, { params });
+  // }
+
+  // getByDealerCode(dealerCode: string, pageSize: Number, pageIndex: Number): Observable<any> {
+  //   let params = new HttpParams()
+  //     .set("dealerCode", dealerCode)
+  //     .set("pageSize", pageSize.toString())
+  //     .set("pageIndex", pageIndex.toString());
+
+  //   return this.httpClient.get(`${this.baseUrl}/free-service-claim/GetWarrantyClaimByDealerCode`, { params });
+  // }
+
+    getPendingApprovalJobCard(dealerCode: string | null): Observable<any> {
     let params = new HttpParams();
     if (dealerCode) {
       params = params.set("dealerCode", dealerCode);
@@ -29,11 +47,15 @@ export class FreeServiceClaimService {
     return this.httpClient.get(`${this.baseUrl}/free-service-claim/GetPendingApprovalJobCard`, { params });
   }
 
-  getByDealerCode(dealerCode: string, pageSize: Number, pageIndex: Number): Observable<any> {
+  getByDealerCode(dealerCode: string | null, pageSize: Number, pageIndex: Number): Observable<any> {
     let params = new HttpParams()
-      .set("dealerCode", dealerCode)
       .set("pageSize", pageSize.toString())
       .set("pageIndex", pageIndex.toString());
+
+    
+    if (dealerCode) {
+      params = params.set("dealerCode", dealerCode);
+    }
 
     return this.httpClient.get(`${this.baseUrl}/free-service-claim/GetWarrantyClaimByDealerCode`, { params });
   }
@@ -44,5 +66,17 @@ export class FreeServiceClaimService {
 
   update(data: any): Observable<any> {
     return this.httpClient.put(`${this.baseUrl}/free-service-claim`, data);
+  }
+
+    getPendingApprovalClaims(dealerCode?: string | null): Observable<any> {
+    let params = new HttpParams();
+    if (dealerCode) {
+      params = params.set("dealerCode", dealerCode);
+    }
+    return this.httpClient.get(`${this.baseUrl}/free-service-claim/GetPendingApprovalClaims`, { params });
+  }
+
+  approveRejectClaimDetails(items: any[]): Observable<any> {
+    return this.httpClient.put(`${this.baseUrl}/free-service-claim/ApproveRejectClaimDetails`, items);
   }
 }

@@ -873,6 +873,91 @@ loadPendingClaims(): void {
 //         isOrderDeleted: !!claim._isOrderDeleted,
 //         orderNo: claim._orderNo ?? this.orderNo,
 //         batchNo: claim._batchNo ?? this.batchNo,
+// private buildRowsFromClaims(claims: any[], startSrNo: number, isHistorical: boolean): any[] {
+//   const rows: any[] = [];
+//   let srNo = startSrNo;
+
+//   claims.forEach(claim => {
+//     const lines = (claim.details && claim.details.length > 0) ? claim.details : [null];
+
+//     lines.forEach((line: any, i: number) => {
+//       if (line && line.isApproved === undefined) {
+//         line.isApproved = !!claim.isApproved;
+//       }
+
+//       rows.push({
+//         srNo: srNo++,
+//         claimId: claim.id,
+//         lineRef: line, 
+//         isFirstLineOfClaim: true, 
+//         isApproved: line ? !!line.isApproved : !!claim.isApproved,
+//         isHistorical,
+//         orderId: claim._orderId ?? this.orderId,
+//         isOrderDeleted: !!claim._isOrderDeleted,
+//         orderNo: claim._orderNo ?? this.orderNo,
+//         batchNo: claim._batchNo ?? this.batchNo,
+
+
+//         claimNo: `${claim.claimPrefix || ''}${claim.claimNo || ''}`,
+//         claimDate: claim.claimDate,
+
+       
+//         jobCardNo: claim.jobCardNo || claim.jobCardNumber || '',
+//         jobCardDate: claim.jobCardDate || '',
+
+//         invoiceNo: claim.invoiceNo || claim.repBillNo || claim.billNo || '',
+//         invoiceDate: claim.invoiceDate || claim.repBillDate || claim.billDate || '',
+
+       
+//         serviceHead: claim.serviceHead || claim.claimType || '',
+//         kms: claim.kms ?? claim.kilometers ?? claim.distance ?? 0,
+
+       
+//         locationName: claim.locationName || claim.serviceLocation || claim.locationCode || '',
+
+//         chassisNo: claim.chassisNo,
+//         motorNo: claim.motorNo || '',
+//         partyName: claim.partyName || claim.supplierName || 'BGAUSS AUTO PRIVATE LIMITED',
+
+//         partName: line?.partName || '',
+//         partDescription: line?.partDescription || '',
+//         partCode: line?.partCode || '',
+//         labourCode: line?.labourCode || '',
+//         labourDescription: line?.labourDescription || '',
+//         quantity: line?.quantity ?? '',
+//         cgstPercent: line?.cgstPercent ?? 0,
+//         cgstAmount: line?.cgstAmount ?? 0,
+//         sgstPercent: line?.sgstPercent ?? 0,
+//         sgstAmount: line?.sgstAmount ?? 0,
+//         igstPercent: line?.igstPercent ?? 0,
+//         igstAmount: line?.igstAmount ?? 0,
+//         totalAmount: line?.totalAmount ?? 0,
+//         mrp: line?.mrp ?? 0
+//       });
+//     });
+//   });
+
+//   return rows;
+// }
+
+// toggleRowApproval(row: any, checked: boolean): void {
+//   row.isApproved = checked;
+//   if (row.lineRef) {
+//     row.lineRef.isApproved = checked;
+//   }
+
+//   const targetClaim = row.isHistorical 
+//     ? this.historicalClaims.find(c => c.id === row.claimId)
+//     : this.selectedClaims.find(c => c.id === row.claimId);
+    
+//   if (targetClaim) {
+//     if (targetClaim.details && targetClaim.details.length > 0) {
+//       targetClaim.isApproved = targetClaim.details.some((d: any) => !!d.isApproved);
+//     } else {
+//       targetClaim.isApproved = checked;
+//     }
+//   }
+// }
 private buildRowsFromClaims(claims: any[], startSrNo: number, isHistorical: boolean): any[] {
   const rows: any[] = [];
   let srNo = startSrNo;
@@ -889,7 +974,7 @@ private buildRowsFromClaims(claims: any[], startSrNo: number, isHistorical: bool
         srNo: srNo++,
         claimId: claim.id,
         lineRef: line, 
-        isFirstLineOfClaim: true, 
+        isFirstLineOfClaim: i === 0, 
         isApproved: line ? !!line.isApproved : !!claim.isApproved,
         isHistorical,
         orderId: claim._orderId ?? this.orderId,
@@ -897,22 +982,18 @@ private buildRowsFromClaims(claims: any[], startSrNo: number, isHistorical: bool
         orderNo: claim._orderNo ?? this.orderNo,
         batchNo: claim._batchNo ?? this.batchNo,
 
-
         claimNo: `${claim.claimPrefix || ''}${claim.claimNo || ''}`,
         claimDate: claim.claimDate,
 
-       
         jobCardNo: claim.jobCardNo || claim.jobCardNumber || '',
         jobCardDate: claim.jobCardDate || '',
 
         invoiceNo: claim.invoiceNo || claim.repBillNo || claim.billNo || '',
         invoiceDate: claim.invoiceDate || claim.repBillDate || claim.billDate || '',
 
-       
         serviceHead: claim.serviceHead || claim.claimType || '',
         kms: claim.kms ?? claim.kilometers ?? claim.distance ?? 0,
 
-       
         locationName: claim.locationName || claim.serviceLocation || claim.locationCode || '',
 
         chassisNo: claim.chassisNo,
@@ -952,6 +1033,7 @@ toggleRowApproval(row: any, checked: boolean): void {
     
   if (targetClaim) {
     if (targetClaim.details && targetClaim.details.length > 0) {
+     
       targetClaim.isApproved = targetClaim.details.some((d: any) => !!d.isApproved);
     } else {
       targetClaim.isApproved = checked;
@@ -967,242 +1049,151 @@ toggleRowApproval(row: any, checked: boolean): void {
     return [...historicalRows, ...currentRows];
   }
 
-  saveWarrantyOrder(navigateAfter: boolean = true): void {
+  
 
-    if (this.saving) return;
+// src/app/components/warranty-order/warranty-order.ts
 
-    // Computed up front, before validation - a checked historical claim
-    // from a deleted order (re-batch) or an approval change on a still-
-    // active historical order can be valid to save even when the CURRENT
-    // order has zero claims of its own (e.g. landed on a blank form
-    // specifically to re-batch something). The validations below only
-    // apply to the main/current order when it actually has something to save.
-    const updatesByOrderId = new Map<number, { claimId: number; isApproved: boolean }[]>();
-    const deletedOrderClaimsToRebatch: any[] = [];
+saveWarrantyOrder(navigateAfter: boolean = true): void {
+  if (this.saving) return;
 
-    this.historicalClaims.forEach(c => {
-      const histOrderId = c._orderId;
-      if (!histOrderId) return;
+  const updatesByOrderId = new Map<number, { claimId: number; isApproved: boolean }[]>();
+  const deletedOrderClaimsToRebatch: any[] = [];
 
-      if (c._isOrderDeleted) {
-        if (c.isApproved) {
-          deletedOrderClaimsToRebatch.push(c);
-        }
-        return;
+  this.historicalClaims.forEach(c => {
+    const histOrderId = c._orderId;
+    if (!histOrderId) return;
+
+    if (c._isOrderDeleted) {
+      if (c.isApproved) {
+        deletedOrderClaimsToRebatch.push(c);
       }
-
-      if (!updatesByOrderId.has(histOrderId)) updatesByOrderId.set(histOrderId, []);
-      updatesByOrderId.get(histOrderId)!.push({ claimId: c.id, isApproved: !!c.isApproved });
-    });
-
-    const hasHistoricalWork = updatesByOrderId.size > 0 || deletedOrderClaimsToRebatch.length > 0;
-    const savingMainOrder = this.selectedClaims.length > 0;
-    const isNewOrderInsert = savingMainOrder && this.orderId === 0;
-
-    if (!savingMainOrder && !hasHistoricalWork) {
-      this.toaster.show('No Warranty Claim is linked to this order.', { classname: 'bg-warning text-white', delay: 3000 });
       return;
     }
 
-    // The main order's own field validations only matter if we're actually
-    // going to insert/update it - skipped entirely when only historical
-    // work (re-batch/approval updates) is being saved.
-    if (savingMainOrder) {
-      if (!this.dateFrom || !this.dateTo) {
-        this.toaster.show('Please select Date From and Date To.', { classname: 'bg-warning text-white', delay: 3000 });
-        return;
-      }
-      if (!this.batchNo || !this.batchDate) {
-        this.toaster.show('Batch No / Batch Date missing - please refresh the page.', { classname: 'bg-warning text-white', delay: 3000 });
-        return;
-      }
-      if (!this.orderNo || !this.orderDate) {
-        this.toaster.show('Order No / Order Date missing - please refresh the page.', { classname: 'bg-warning text-white', delay: 3000 });
-        return;
-      }
-      if (!this.selectedLocation) {
-        this.toaster.show('Please select a Location.', { classname: 'bg-warning text-white', delay: 3000 });
-        return;
-      }
-      if (!this.claimType) {
-        this.toaster.show('Please select a Claim Type.', { classname: 'bg-warning text-white', delay: 3000 });
-        return;
-      }
-      if (!this.selectedSupplierId) {
-        this.toaster.show('Please select a Supplier.', { classname: 'bg-warning text-white', delay: 3000 });
-        return;
-      }
+    if (!updatesByOrderId.has(histOrderId)) updatesByOrderId.set(histOrderId, []);
+    updatesByOrderId.get(histOrderId)!.push({ claimId: c.id, isApproved: !!c.isApproved });
+  });
+
+  const hasHistoricalWork = updatesByOrderId.size > 0 || deletedOrderClaimsToRebatch.length > 0;
+  const savingMainOrder = this.selectedClaims.length > 0;
+
+  if (!savingMainOrder && !hasHistoricalWork) {
+    this.toaster.show('No Warranty Claim is linked to this order.', { classname: 'bg-warning text-white', delay: 3000 });
+    return;
+  }
+
+  if (savingMainOrder) {
+    if (!this.dateFrom || !this.dateTo) {
+      this.toaster.show('Please select Date From and Date To.', { classname: 'bg-warning text-white', delay: 3000 });
+      return;
     }
+    if (!this.batchNo || !this.batchDate) {
+      this.toaster.show('Batch No / Batch Date missing - please refresh the page.', { classname: 'bg-warning text-white', delay: 3000 });
+      return;
+    }
+    if (!this.orderNo || !this.orderDate) {
+      this.toaster.show('Order No / Order Date missing - please refresh the page.', { classname: 'bg-warning text-white', delay: 3000 });
+      return;
+    }
+    if (!this.selectedLocation) {
+      this.toaster.show('Please select a Location.', { classname: 'bg-warning text-white', delay: 3000 });
+      return;
+    }
+    if (!this.claimType) {
+      this.toaster.show('Please select a Claim Type.', { classname: 'bg-warning text-white', delay: 3000 });
+      return;
+    }
+    if (!this.selectedSupplierId) {
+      this.toaster.show('Please select a Supplier.', { classname: 'bg-warning text-white', delay: 3000 });
+      return;
+    }
+  }
 
-    const dealerCode = this.storageService.getDealerCode();
+  const dealerCode = this.storageService.getDealerCode();
 
-    this.saving = true;
-    this.loader.show();
+  this.saving = true;
+  this.loader.show();
 
-    // Only insert/update the main order when it actually has claims of its
-    // own - an empty order isn't meaningful to save, and the backend's own
-    // validation would reject it anyway.
-    const request$: Observable<any> = savingMainOrder
-      ? (this.orderId > 0
-          ? this.warrantyOrderService.updateWarrantyOrder({
-              id: this.orderId,
-              dealerCode: dealerCode,
-              dateFrom: this.dateFrom,
-              dateTo: this.dateTo,
-              batchNo: this.batchNo,
-              batchDate: this.batchDate,
-              orderNo: this.orderNo,
-              orderDate: this.orderDate,
-              location: this.selectedLocation,
-              claimType: this.claimType,
-              supplierId: this.selectedSupplierId,
-              isApproved: this.isApproved,
-              warrantyClaimIds: this.selectedClaims.map(c => c.id),
-              claimApprovals: this.selectedClaims.map(c => ({ claimId: c.id, isApproved: !!c.isApproved }))
-            })
-          : this.warrantyOrderService.insertWarrantyOrder({
-              id: this.orderId,
-              dealerCode: dealerCode,
-              dateFrom: this.dateFrom,
-              dateTo: this.dateTo,
-              batchNo: this.batchNo,
-              batchDate: this.batchDate,
-              orderNo: this.orderNo,
-              orderDate: this.orderDate,
-              location: this.selectedLocation,
-              claimType: this.claimType,
-              supplierId: this.selectedSupplierId,
-              isApproved: this.isApproved,
-              warrantyClaimIds: this.selectedClaims.map(c => c.id),
-              claimApprovals: this.selectedClaims.map(c => ({ claimId: c.id, isApproved: !!c.isApproved }))
-            }))
-      : of(null); // nothing to save for the main order this time
+  const processedClaims = this.selectedClaims.map(claim => {
+    const approvedDetails = (claim.details || []).filter((d: any) => !!d.isApproved);
+    return {
+      ...claim,
+      details: approvedDetails,
+      isApproved: approvedDetails.length > 0
+    };
+  }).filter(c => c.details && c.details.length > 0);
 
-    // Historical claims split two ways:
-    // 1. From a still-active order -> update that order in place, same as
-    //    before, batched one request per distinct order.
-    // 2. From a DELETED order, and now checked -> that order can't be
-    //    updated (UpdateWarrantyOrder requires IsActive=true), so instead
-    //    a brand-new order is created for just that one claim. Unchecked
-    //    deleted-order claims are skipped entirely - nothing to do for them.
-    const historicalUpdateRequests$ = Array.from(updatesByOrderId.entries())
-      .map(([histOrderId, updates]) => this.saveHistoricalOrderApprovals(histOrderId, updates));
+  const orderPayload = {
+    id: this.orderId,
+    dealerCode: dealerCode,
+    dateFrom: this.dateFrom,
+    dateTo: this.dateTo,
+    batchNo: this.batchNo,
+    batchDate: this.batchDate,
+    orderNo: this.orderNo,
+    orderDate: this.orderDate,
+    location: this.selectedLocation,
+    claimType: this.claimType,
+    supplierId: this.selectedSupplierId,
+    isApproved: this.isApproved,
+    warrantyClaimIds: processedClaims.map(c => c.id),
+    claimApprovals: processedClaims.map(c => ({ 
+      claimId: c.id, 
+      isApproved: true 
+    })),
+    claims: processedClaims 
+  };
 
-    const rebatchRequests$ = deletedOrderClaimsToRebatch
-      .map(claim => this.createNewOrderForClaim(claim));
+  const request$: Observable<any> = savingMainOrder
+    ? (this.orderId > 0
+        ? this.warrantyOrderService.updateWarrantyOrder(orderPayload)
+        : this.warrantyOrderService.insertWarrantyOrder(orderPayload))
+    : of(null);
 
-//     forkJoin([request$, ...historicalUpdateRequests$, ...rebatchRequests$]).subscribe({
-//       next: ([res]: any[]) => {
-//         this.saving = false;
-//         this.loader.hide();
-//         this.toaster.show(
-//           savingMainOrder
-//             ? (this.orderId > 0 ? 'Warranty Order updated successfully.' : 'Warranty Order saved successfully.')
-//             : 'Changes saved successfully.',
-//           { classname: 'bg-success text-white', delay: 3000 }
-//         );
+  const historicalUpdateRequests$ = Array.from(updatesByOrderId.entries())
+    .map(([histOrderId, updates]) => this.saveHistoricalOrderApprovals(histOrderId, updates));
 
-//         sessionStorage.removeItem('pendingWarrantyOrderClaim');
+  const rebatchRequests$ = deletedOrderClaimsToRebatch
+    .map(claim => this.createNewOrderForClaim(claim));
 
-//         // Computed up front, not just inside the navigateAfter=false branch
-//         // below - both autoCreateInvoiceForOrder() and sendToErp() need
-//         // the saved order's id regardless of which branch runs.
-//         const savedId = res?.orderId ?? this.orderId;
-//         if (savedId) {
-//           this.orderId = Number(savedId);
-//         }
+  forkJoin([request$, ...historicalUpdateRequests$, ...rebatchRequests$]).subscribe({
+    next: ([res]: any[]) => {
+      this.saving = false;
+      this.loader.hide();
 
-//         // Only fires when this Save click just created a brand-new order (i.e.
-//         // the user checked a claim's box and clicked Save for the first time) -
-//         // fire-and-forget, doesn't block navigation either way.
-//         const orderJustBecameApproved = savingMainOrder && !this.wasApprovedOnLoad && this.isApproved;
+      this.toaster.show('Warranty Order saved successfully!', { 
+        classname: 'bg-success text-white', 
+        delay: 3000 
+      });
 
-//         if (orderJustBecameApproved && savedId) {
-//           this.autoCreateInvoiceForOrder(Number(savedId));
-//         }
+      sessionStorage.removeItem('pendingWarrantyOrderClaim');
 
-//         // Send to ERP - automatic on every save of the main order, same
-//         // pattern as Warranty Invoice's own Save flow. Bifurcated: skip
-//         // entirely when this order has no Part lines at all (labour-only) -
-//         // BuildErpPayload would return zero PO lines for it regardless, so
-//         // calling the endpoint would only ever produce a "no claim lines to
-//         // send" error for no reason. When Parts and Labour are mixed on the
-//         // same order, the backend's BuildErpPayload already filters down to
-//         // Part-type grid rows only before building the payload - Labour
-//         // lines are never included in what gets sent.
-//         if (savingMainOrder && savedId && this.hasAnyPartLine) {
-//           this.sendToErp(Number(savedId));
-//         }
-
-// // Prevent re-firing invoice creation on a second Save within the same
-// // session (e.g. navigateAfter=false keeps the component alive without a
-// // fresh GET) - the unapproved -> approved transition only happens once.
-// this.wasApprovedOnLoad = this.isApproved;
-
-//         if (navigateAfter) {
-//           this.router.navigate(['/warranty-order-list']);
-//         } else {
-//           this.loadHistoricalClaims(this.orderId);
-//         }
-//       },
-//       error: (err) => {
-//         this.loader.hide();
-//         this.saving = false;
-//         console.error('Validation errors:', err?.error);
-//         const serverMsg = err?.error?.title || err?.error || 'Something went wrong. Check console for details.';
-//         this.toaster.show(serverMsg, { classname: 'bg-danger text-white', delay: 3000 });
-//       }
-//     });
-          forkJoin([request$, ...historicalUpdateRequests$, ...rebatchRequests$]).subscribe({
-      next: ([res]: any[]) => {
-        this.saving = false;
-        this.loader.hide();
-
-       
-        this.toaster.show('Warranty Order saved successfully!', { 
-          classname: 'bg-success text-white', 
-          delay: 3000 
-        });
-
-        sessionStorage.removeItem('pendingWarrantyOrderClaim');
-
-        const savedId = res?.orderId ?? this.orderId;
-        if (savedId) {
-          this.orderId = Number(savedId);
-        }
-
-        const orderJustBecameApproved = savingMainOrder && !this.wasApprovedOnLoad && this.isApproved;
-
-        if (orderJustBecameApproved && savedId) {
-          this.autoCreateInvoiceForOrder(Number(savedId));
-        }
-
-        if (savingMainOrder && savedId && this.hasAnyPartLine) {
-          this.sendToErp(Number(savedId));
-        }
-
-        this.wasApprovedOnLoad = this.isApproved;
-
-       
-        if (navigateAfter) {
-         
-          this.router.navigate(['/warranty-order-list']);
-        } else {
-          
-          //this.loadPendingClaims();
-        }
-      },
-      error: (err) => {
-        this.loader.hide();
-        this.saving = false;
-        console.error('Validation errors:', err?.error);
-        const serverMsg = err?.error?.title || err?.error || 'Something went wrong. Check console for details.';
-        this.toaster.show(serverMsg, { classname: 'bg-danger text-white', delay: 3000 });
+      if (savingMainOrder && (res?.orderId || this.orderId) && this.hasAnyPartLine) {
+        this.sendToErp(Number(res?.orderId || this.orderId));
       }
-    });
 
+      this.wasApprovedOnLoad = this.isApproved;
+
+      this.selectedClaims = [];
+      this.orderId = 0;
+
+      if (navigateAfter) {
+        this.router.navigate(['/warranty-order-list']);
+      } else {
+        
+        this.loadNextOrderNumbers();
+        this.loadPendingClaims();
+      }
+    },
+    error: (err) => {
+      this.loader.hide();
+      this.saving = false;
+      console.error('Validation errors:', err?.error);
+      const serverMsg = err?.error?.title || err?.error || 'Something went wrong. Check console for details.';
+      this.toaster.show(serverMsg, { classname: 'bg-danger text-white', delay: 3000 });
+    }
+  });
 }
- 
 
   // Reports success/failure of the ERP push explicitly, since it's its own
   // request rather than a field bundled into the save response (see

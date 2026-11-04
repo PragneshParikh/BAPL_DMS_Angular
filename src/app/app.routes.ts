@@ -326,6 +326,7 @@ export const routes: Routes = [
       { path: 'stock-adjustment', component: StockAdjustment, data: [136] },
       { path: 'stock-bill-list', component: StockBillListComponent, data: [136] },
       { path: 'stock-adjustment-report', component: StockAdjustmentReport, data: [136] },
+      { path: 'bg-free-service', data: [145], loadComponent: () => import('./components/bg-free-service/bg-free-service').then(m => m.BgFreeService) },
     ]
   },
   { path: '**', component: WorkInProgress }
