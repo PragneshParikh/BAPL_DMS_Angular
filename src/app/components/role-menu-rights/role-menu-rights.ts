@@ -300,6 +300,8 @@ export class RoleMenuRights implements OnInit {
           this.original = new Map(this.allSubs().map(s => [s.subMenuId, s.permission]));
           this.applyFilters();
           this.toast.show(res.message || 'Menu rights saved.', { classname: 'bg-success text-white', delay: 3000 });
+          // Re-read from the database so the screen shows exactly what was stored.
+          this.loadMatrix(this.selectedRoleId, true);
         } else {
           this.toast.show(res?.message || 'Save failed.', { classname: 'bg-warning text-dark', delay: 5000 });
         }
@@ -307,7 +309,10 @@ export class RoleMenuRights implements OnInit {
       error: err => {
         this.loader.hide();
         console.error(err);
-        this.toastError('Failed to save menu rights.');
+        const msg = err?.status === 0 ? 'API not reachable.'
+          : err?.status === 401 ? 'Session expired. Please log in again.'
+          : (err?.error?.message || 'Failed to save menu rights.');
+        this.toastError(msg);
       }
     });
   }

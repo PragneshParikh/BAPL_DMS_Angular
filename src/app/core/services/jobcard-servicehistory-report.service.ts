@@ -19,6 +19,13 @@ export interface JcshReportPage {
   dealers: JcshJobDataDealerRow[];
 }
 export interface JcshDealerOption { dealerCode: string; dealerName?: string | null; jobs: number; }
+export interface JcshSuggestion {
+  /** matched value - goes into the search box when picked */
+  value: string;
+  kind: 'Chassis No' | 'Reg No';
+  chassisNo?: string | null; regNo?: string | null; model?: string | null; dealerCode?: string | null;
+  jobs: number; lastJobDate?: string | null;
+}
 
 @Injectable({ providedIn: 'root' })
 export class JobcardServicehistoryReportService {
@@ -32,8 +39,14 @@ export class JobcardServicehistoryReportService {
     return p;
   }
 
-  serviceHistory(search: string, page: number, pageSize: number): Observable<JcshReportPage> {
-    return this.http.get<JcshReportPage>(`${this.baseUrl}/service-history`, { params: this.params({ search, page, pageSize }) });
+  /** exact = value picked from the type-ahead (matched exactly); otherwise a "starts with" search */
+  serviceHistory(search: string, page: number, pageSize: number, exact = false): Observable<JcshReportPage> {
+    return this.http.get<JcshReportPage>(`${this.baseUrl}/service-history`, { params: this.params({ search, page, pageSize, exact: exact || null }) });
+  }
+
+  /** type-ahead: chassis / reg numbers starting with term (min 2 letters/digits) */
+  suggest(term: string): Observable<JcshSuggestion[]> {
+    return this.http.get<JcshSuggestion[]>(`${this.baseUrl}/service-history/suggest`, { params: this.params({ term }) });
   }
 
   jobData(dealerCode: string | null, fromDate: string, toDate: string, page: number, pageSize: number): Observable<JcshReportPage> {
@@ -44,8 +57,8 @@ export class JobcardServicehistoryReportService {
     return this.http.get<JcshDealerOption[]>(`${this.baseUrl}/dealers`);
   }
 
-  exportServiceHistory(search: string): Observable<HttpResponse<Blob>> {
-    return this.http.get(`${this.baseUrl}/service-history/export`, { params: this.params({ search }), responseType: 'blob', observe: 'response' });
+  exportServiceHistory(search: string, exact = false): Observable<HttpResponse<Blob>> {
+    return this.http.get(`${this.baseUrl}/service-history/export`, { params: this.params({ search, exact: exact || null }), responseType: 'blob', observe: 'response' });
   }
 
   exportJobData(dealerCode: string | null, fromDate: string, toDate: string): Observable<HttpResponse<Blob>> {

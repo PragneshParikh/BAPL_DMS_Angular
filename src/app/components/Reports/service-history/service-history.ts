@@ -5,15 +5,16 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { JcshReportPage, JobcardServicehistoryReportService } from '../../../core/services/jobcard-servicehistory-report.service';
+import { NgbTypeaheadModule, NgbTypeaheadSelectItemEvent } from '@ng-bootstrap/ng-bootstrap';
+import { Observable, OperatorFunction, catchError, debounceTime, distinctUntilChanged, firstValueFrom, of, switchMap, tap } from 'rxjs';
+import { JcshReportPage, JcshSuggestion, JobcardServicehistoryReportService } from '../../../core/services/jobcard-servicehistory-report.service';
 import { StorageService } from '../../../core/services/storage';
 import { ToastService } from '../../../shared/toaster/toast-service';
 
 @Component({
   selector: 'app-service-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, NgbTypeaheadModule],
   templateUrl: './service-history.html',
   styleUrl: './service-history.scss'
 })
@@ -22,6 +23,45 @@ export class ServiceHistory implements OnInit {
   search = '';
   /** the search the table is showing (paging / export use this, not the box while typing) */
   searched = '';
+  /** true when the table shows a value picked from the suggestions (exact match on the stored value) */
+  searchedExact = false;
+  /** the last value picked from the suggestions - Search on that same text stays an exact match */
+  private picked: string | null = null;
+  /** type-ahead state for the spinner / "no match" hint */
+  suggesting = false;
+  noSuggestions = false;
+
+  /** type-ahead: after 2 letters/digits, 200 ms after the last keystroke, ask the API (latest request wins) */
+  suggestFn: OperatorFunction<string, readonly JcshSuggestion[]> = (text$: Observable<string>) =>
+    text$.pipe(
+      debounceTime(200),
+      distinctUntilChanged(),
+      switchMap(term => {
+        const t = (term || '').replace(/[^a-z0-9]/gi, '');
+        this.noSuggestions = false;
+        if (t.length < 2) return of([] as JcshSuggestion[]);
+        this.suggesting = true;
+        return this.api.suggest(term).pipe(
+          catchError(() => of([] as JcshSuggestion[])),
+          tap(list => { this.suggesting = false; this.noSuggestions = list.length === 0; })
+        );
+      })
+    );
+
+  /** keep the box showing plain text (the model stays a string) */
+  formatInput = (x: JcshSuggestion | string) => typeof x === 'string' ? x : x.value;
+
+  /** a suggestion was picked: put its value in the box and show its service history straight away */
+  onPick(ev: NgbTypeaheadSelectItemEvent<JcshSuggestion>): void {
+    ev.preventDefault();          // keep the model a string, not the suggestion object
+    this.search = ev.item.value;
+    this.picked = ev.item.value;
+    this.noSuggestions = false;
+    this.searched = ev.item.value;
+    this.searchedExact = true;
+    this.page = 1;
+    this.load();
+  }
   page = 1;
   pageSize = 50;
   readonly pageSizes = [25, 50, 100, 200];
@@ -39,17 +79,23 @@ export class ServiceHistory implements OnInit {
   }
 
   get cleaned(): string { return (this.search || '').replace(/[^a-z0-9]/gi, '').toUpperCase(); }
-  get canSearch(): boolean { return this.cleaned.length >= 3 && !this.loading; }
+  get isPicked(): boolean { return !!this.picked && this.search === this.picked; }
+  get canSearch(): boolean { return (this.isPicked || this.cleaned.length >= 3) && !this.loading; }
   get totalPages(): number { return this.data ? Math.max(1, Math.ceil(this.data.total / this.pageSize)) : 1; }
 
+  /** Search button / Enter: exact match if the box still holds a picked suggestion, otherwise "starts with" */
   find(): void {
     if (!this.canSearch) return;
-    this.searched = this.cleaned;
+    this.searchedExact = this.isPicked;
+    this.searched = this.searchedExact ? this.search : this.cleaned;
     this.page = 1;
     this.load();
   }
 
-  clear(): void { this.search = ''; this.searched = ''; this.data = null; this.error = null; }
+  clear(): void {
+    this.search = ''; this.searched = ''; this.searchedExact = false; this.picked = null;
+    this.data = null; this.error = null; this.noSuggestions = false;
+  }
 
   goTo(p: number): void {
     if (!this.searched || p < 1 || p > this.totalPages || p === this.page) return;
@@ -63,7 +109,7 @@ export class ServiceHistory implements OnInit {
     this.loading = true;
     this.error = null;
     try {
-      this.data = await firstValueFrom(this.api.serviceHistory(this.searched, this.page, this.pageSize));
+      this.data = await firstValueFrom(this.api.serviceHistory(this.searched, this.page, this.pageSize, this.searchedExact));
     } catch (e: any) {
       this.error = await this.api.errorText(e);
       this.data = null;
@@ -76,7 +122,7 @@ export class ServiceHistory implements OnInit {
     if (!this.searched || !this.data?.total || this.exporting) return;
     this.exporting = true;
     try {
-      const res = await firstValueFrom(this.api.exportServiceHistory(this.searched));
+      const res = await firstValueFrom(this.api.exportServiceHistory(this.searched, this.searchedExact));
       this.api.save(res, `Service_History_${this.searched}.xlsx`);
       this.toast(`${this.num(Number(res.headers.get('X-Row-Count') ?? this.data.total))} records exported.`, 'success');
     } catch (e: any) {

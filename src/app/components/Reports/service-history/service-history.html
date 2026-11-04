@@ -14,7 +14,7 @@
     </button>
   </div>
 </div>
-<p class="db-range"><i class="ri-information-line me-1"></i>Imported job card service history (Jobcard Servicehistory Import). Search by Chassis No or Registration No - the start of the number is enough.</p>
+<!-- <p class="db-range"><i class="ri-information-line me-1"></i>Imported job card service history (Jobcard Servicehistory Import). Search by Chassis No or Registration No - the start of the number is enough.</p> -->
 
 @if (!isAdmin) {
   <div class="alert alert-warning"><i class="ri-lock-line me-1"></i>Only Admin / SuperAdmin can view service history.</div>
@@ -23,17 +23,40 @@
 <div class="card db-card mb-4">
   <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-search-line"></i>Search</h4></div>
   <div class="card-body">
+    <!-- one suggestion in the dropdown: matched number (typed part highlighted) + the vehicle's other number, model, dealer, jobs -->
+    <ng-template #suggestionTpl let-s="result" let-t="term">
+      <div class="sh-sugg">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge" [class]="s.kind === 'Chassis No' ? 'bg-primary-subtle text-primary' : 'bg-info-subtle text-info'">{{ s.kind }}</span>
+          <span class="fw-semibold"><ngb-highlight [result]="s.value" [term]="t"></ngb-highlight></span>
+          <span class="ms-auto small text-muted">{{ num(s.jobs) }} job{{ s.jobs === 1 ? '' : 's' }}</span>
+        </div>
+        <small class="text-muted d-block text-truncate">
+          @if (s.kind === 'Chassis No') { Reg {{ s.regNo || '—' }} } @else { Chassis {{ s.chassisNo || '—' }} }
+          · {{ s.model || '—' }} · {{ s.dealerCode || '—' }} · last {{ date(s.lastJobDate) }}
+        </small>
+      </div>
+    </ng-template>
+
     <form class="rpt-search" (ngSubmit)="find()">
       <div class="input-group">
-        <span class="input-group-text"><i class="ri-motorbike-line"></i></span>
+        <span class="input-group-text">
+          @if (suggesting) { <i class="ri-loader-4-line db-spin"></i> } @else { <i class="ri-motorbike-line"></i> }
+        </span>
         <input type="text" class="form-control" name="search" [(ngModel)]="search" maxlength="40" autocomplete="off"
-               placeholder="Chassis No. or Registration No. (e.g. P6DEVFMEPAM000608 or MH12ZH4503)">
+               [ngbTypeahead]="suggestFn" [resultTemplate]="suggestionTpl" [inputFormatter]="formatInput"
+               [focusFirst]="false" [editable]="true" popupClass="sh-sugg-popup" (selectItem)="onPick($event)"
+               placeholder="Start typing a Chassis No. or Registration No. (e.g. P6 or MH12)">
         @if (search) { <button type="button" class="btn btn-light border" (click)="clear()" title="Clear"><i class="ri-close-line"></i></button> }
         <button type="submit" class="btn btn-primary" [disabled]="!canSearch">
           <i class="ri-search-line me-1" [class.db-spin]="loading"></i>Search
         </button>
       </div>
-      <small class="text-muted">Spaces and dashes are ignored. Enter at least 3 letters / digits.</small>
+      <!-- @if (noSuggestions && !suggesting) {
+        <small class="text-warning d-block"><i class="ri-information-line me-1"></i>No chassis or registration number starts with "{{ search }}".</small>
+      } @else {
+        <small class="text-muted">Suggestions appear after 2 letters / digits - pick one, or press Search for everything starting with what you typed (min 3).</small>
+      } -->
     </form>
   </div>
 </div>
@@ -43,7 +66,8 @@
 @if (data; as d) {
 <div class="card db-card mb-0">
   <div class="card-header db-card-head">
-    <h4 class="card-title mb-0"><i class="ri-history-line"></i>Results <small class="text-muted fw-normal ms-2">"{{ searched }}"</small></h4>
+    <h4 class="card-title mb-0"><i class="ri-history-line"></i>Results
+      <small class="text-muted fw-normal ms-2">{{ searchedExact ? '' : 'starting with ' }}"{{ searched }}"</small></h4>
   </div>
   <div class="card-body pb-0">
     <div class="imp-stats mb-3">
