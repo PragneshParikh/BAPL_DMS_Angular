@@ -34,6 +34,8 @@ export interface ImportOptions {
   generateSaleBillNo: boolean;
   createMissingMasters: boolean;
   dryRun: boolean;
+  /** live status id - polled at api/import-progress/{id} while the import runs */
+  progressId?: string | null;
 }
 export interface ImportIssue { rowNo: number; saleBillNo?: string; chassisNo?: string; level: 'Error' | 'Skipped' | 'Warning' | 'Info'; message: string; }
 export interface ImportResult {

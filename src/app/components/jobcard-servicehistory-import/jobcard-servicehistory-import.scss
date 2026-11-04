@@ -1,0 +1,11 @@
+// src\app\components\jobcard-servicehistory-import\jobcard-servicehistory-import.scss
+// Same look as Vehicle Sale Import: reuse its styles, add only the progress bar.
+@use '../vehicle-sale-import/vehicle-sale-import.scss';
+
+.imp-progress {
+  height: .6rem; border-radius: 1rem; background: #eef2ff; overflow: hidden;
+  .bar { height: 100%; background: #6366f1; border-radius: 1rem; transition: width .4s ease; }
+  &.done .bar { background: #10b981; }
+  &.bad .bar { background: #ef4444; }
+}
+.imp-stats > div.warn { background: #fffbeb; border-color: #fde68a; strong { color: #b45309; } }
