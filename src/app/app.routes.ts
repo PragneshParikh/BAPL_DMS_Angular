@@ -293,6 +293,7 @@ export const routes: Routes = [
       { path: 'warranty-invoice', component: WarrantyInvoice, data: [113] }, 
       { path: 'warranty-invoice-list', component: WarrantyInvoiceList, data: [113] },
       { path: 'uw-line-item', component: UwLineItem, data: [115] },
+      { path: 'bg-free-service', data: [145], loadComponent: () => import('./components/bg-free-service/bg-free-service').then(m => m.BgFreeService) },
       { path: 'warranty-packaging', component: WarrantyPackaging, data: [116] },
       { path: 'warranty-dispatch', component: WarrantyDispatch, data: [129] },
       { path: 'warranty-dispatch/:id', component: WarrantyDispatch, data: [129] },
