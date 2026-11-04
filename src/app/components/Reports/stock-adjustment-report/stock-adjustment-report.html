@@ -1,1 +1,172 @@
-<p>stock-adjustment-report works!</p>
+<div class="page-title-box d-sm-flex align-items-center justify-content-between">
+
+    <h4 class="mb-sm-0">
+        STOCK ADJUSTMENT REPORT
+    </h4>
+
+</div>
+
+<div class="card">
+
+    <div class="card-header">
+        <h5 class="card-title mb-0">Filters</h5>
+    </div>
+
+    <div class="card-body">
+
+        <form #reportFilterForm="ngForm">
+
+            <div class="row g-3">
+
+                <div class="col-md-3">
+                    <label>Dealer</label>
+
+                    <select
+                        class="form-select form-select-sm"
+                        name="dealerCode"
+                        [(ngModel)]="reportFilterFormData.selectedDealerCode">
+
+                        <option value="">
+                            -- Select --
+                        </option>
+
+                        <option
+                            *ngFor="let dealer of dealerList"
+                            [value]="dealer.dealerCode">
+
+                            {{ dealer.dealerName }}
+
+                        </option>
+
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label>From Date</label>
+
+                    <input
+                        type="date"
+                        class="form-control form-control-sm"
+                        name="fromDate"
+                        [(ngModel)]="reportFilterFormData.fromDate">
+                </div>
+
+                <div class="col-md-2">
+                    <label>To Date</label>
+
+                    <input
+                        type="date"
+                        class="form-control form-control-sm"
+                        name="toDate"
+                        [(ngModel)]="reportFilterFormData.toDate">
+                </div>
+
+                <div class="col-md-5">
+
+                    <label class="d-block">&nbsp;</label>
+
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm me-2"
+                        (click)="onFilterRecords(reportFilterForm)">
+
+                        Search
+
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        (click)="resetForm()">
+
+                        Reset
+
+                    </button>
+
+                    
+
+                   <button type="button"
+        class="btn btn-success mx-2 btn-sm"
+        *ngIf="canDownload"
+        [ngbTooltip]="'Export To Excel'"
+        (click)="exportExcel()">
+
+    <i class="ri-file-excel-2-line"></i>
+
+</button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<div class="card">
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-striped">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Sr No</th>
+                        <th>Prefix No</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Part No</th>
+                        <th>Description</th>
+                        <th>Rate</th>
+                        <th>Current Stock</th>
+                        <th>Update Stock</th>
+                        <th>Adjustment Qty</th>
+                        <th>Final Qty</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr *ngIf="stockAdjustmentData.length === 0">
+
+                        <td colspan="11" class="text-center">
+
+                            No Data Available
+
+                        </td>
+
+                    </tr>
+
+                    <tr *ngFor="let item of stockAdjustmentData; let i=index">
+
+                        <td>{{ i + 1 }}</td>
+                       <td>{{ formatPrefix(item.prefixNo) }}</td>
+                        <td>{{ item.adjustmentDate | date:'dd/MM/yyyy' }}</td>
+                        <td>{{ item.locationCode }}</td>
+                        <td>{{ item.partNo }}</td>
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.rateStock }}</td>
+                        <td>{{ item.currentStock }}</td>
+                        <td>{{ item.updateStock }}</td>
+                        <td>{{ item.upQuantityStg }}</td>
+                        <td>{{ item.finalQty }}</td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

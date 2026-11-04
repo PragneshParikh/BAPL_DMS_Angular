@@ -158,7 +158,8 @@ export class StockAdjustment implements OnInit, OnDestroy {
             return;
           }
           console.log('Location API Response', res);
-          this.lstLocations = this.getActiveLocations(responseLocations);
+          this.lstLocations = this.getActiveLocations(responseLocations)
+          .filter(location => Number(location.locareaidno) === 2);
           this.isLoadingLocations = false;
           this.loader.hide();
         },

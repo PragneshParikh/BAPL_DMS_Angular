@@ -105,6 +105,7 @@ import { LocationEditPage } from './components/dealer-creation/dealer-location-e
 import { WarrantyRegister } from './components/Reports/warranty-register/warranty-register';
 import { MenuRight } from './components/menu-right/menu-right';
 import { RoleMenuRights } from './components/role-menu-rights/role-menu-rights';
+import { StockBillListComponent } from './components/Reports/stock-bill-list/stock-bill-list';
 import { StockAdjustment } from './components/stock-adjustment/stock-adjustment';
 import { StockAdjustmentReport } from './components/Reports/stock-adjustment-report/stock-adjustment-report';
 
@@ -317,6 +318,14 @@ export const routes: Routes = [
       // Vehicle Dispatch (MenuMaster 139 parent): Cogxim dispatch import (140) + dispatch report (141). SuperAdmin only.
       { path: 'vehicle-dispatch-import', data: [140], loadComponent: () => import('./components/vehicle-dispatch-import/vehicle-dispatch-import').then(m => m.VehicleDispatchImport) },
       { path: 'vehicle-dispatch-report', data: [141], loadComponent: () => import('./components/Reports/vehicle-dispatch-report/vehicle-dispatch-report').then(m => m.VehicleDispatchReportComponent) },
+      // Jobcard Servicehistory Excel import -> BAPLDMSvad.dbo.JobCardServiceHistory - MenuMaster 146 (Utility). API allows Admin/SuperAdmin only.
+      // Reports (MenuMaster parent 21): imported service history - Service History 147, Job Data 148. API allows Admin/SuperAdmin only.
+      { path: 'service-history', data: [147], loadComponent: () => import('./components/Reports/service-history/service-history').then(m => m.ServiceHistory) },
+      { path: 'job-data', data: [148], loadComponent: () => import('./components/Reports/job-data/job-data').then(m => m.JobData) },
+      { path: 'jobcard-servicehistory-import', data: [146], loadComponent: () => import('./components/jobcard-servicehistory-import/jobcard-servicehistory-import').then(m => m.JobcardServicehistoryImport) },
+      { path: 'stock-adjustment', component: StockAdjustment, data: [136] },
+      { path: 'stock-bill-list', component: StockBillListComponent, data: [136] },
+      { path: 'stock-adjustment-report', component: StockAdjustmentReport, data: [136] },
     ]
   },
   { path: '**', component: WorkInProgress }
