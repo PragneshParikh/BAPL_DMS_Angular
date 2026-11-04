@@ -1,0 +1,11 @@
+// src\app\components\Reports\service-history\service-history.scss
+// Same look as the Jobcard Servicehistory Import page (which reuses Vehicle Sale Import's styles).
+@use '../../jobcard-servicehistory-import/jobcard-servicehistory-import.scss';
+
+.rpt-table {
+  max-height: 34rem; overflow: auto;
+  th { position: sticky; top: 0; background: #f8fafc; z-index: 1; white-space: nowrap; font-size: .8rem; color: #64748b; }
+  td { white-space: nowrap; font-size: .85rem; }
+}
+.rpt-pager { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem; padding: .75rem 1rem; border-top: 1px solid #eef2f7; }
+.rpt-search { max-width: 34rem; }

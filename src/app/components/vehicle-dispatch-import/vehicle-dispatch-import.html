@@ -103,6 +103,9 @@
         </div>
       </div>
 
+      <!-- live status (step, rows read, chassis saved, batch n of m) -->
+      <app-import-progress [progress]="active.progress"></app-import-progress>
+
       @if (result; as r) {
       <div class="card db-card mb-0">
         <div class="card-header db-card-head">
