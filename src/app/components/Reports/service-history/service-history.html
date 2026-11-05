@@ -1,5 +1,5 @@
 <!-- src\app\components\Reports\service-history\service-history.html -->
-<div class="db-head">
+<div class="db-head d-print-none">
   <div>
     <h4 class="db-title">Service History</h4>
     <ol class="breadcrumb m-0">
@@ -9,6 +9,10 @@
     </ol>
   </div>
   <div class="db-head-actions">
+    <button type="button" class="btn btn-primary" (click)="printCard()" [disabled]="!data?.total || printing || cardLoading || loading"
+            title="Print the Vehicle History Card - choose 'Save as PDF' in the print dialog for a PDF">
+      <i class="ri-printer-line me-1" [class.db-spin]="printing"></i>{{ printing ? 'Preparing…' : 'Print / PDF' }}
+    </button>
     <button type="button" class="btn btn-success" (click)="exportExcel()" [disabled]="!data?.total || exporting || loading">
       <i class="ri-file-excel-2-line me-1" [class.db-spin]="exporting"></i>{{ exporting ? 'Exporting…' : 'Export to Excel' }}
     </button>
@@ -20,7 +24,7 @@
   <div class="alert alert-warning"><i class="ri-lock-line me-1"></i>Only Admin / SuperAdmin can view service history.</div>
 } @else {
 
-<div class="card db-card mb-4">
+<div class="card db-card mb-4 d-print-none">
   <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-search-line"></i>Search</h4></div>
   <div class="card-body">
     <!-- one suggestion in the dropdown: matched number (typed part highlighted) + the vehicle's other number, model, dealer, jobs -->
@@ -61,13 +65,21 @@
   </div>
 </div>
 
-@if (error) { <div class="alert alert-danger"><i class="ri-error-warning-line me-1"></i>{{ error }}</div> }
+@if (error) { <div class="alert alert-danger d-print-none"><i class="ri-error-warning-line me-1"></i>{{ error }}</div> }
 
 @if (data; as d) {
-<div class="card db-card mb-0">
-  <div class="card-header db-card-head">
+<div class="card db-card mb-0 d-print-none">
+  <div class="card-header db-card-head d-flex align-items-center justify-content-between flex-wrap gap-2">
     <h4 class="card-title mb-0"><i class="ri-history-line"></i>Results
       <small class="text-muted fw-normal ms-2">{{ searchedExact ? '' : 'starting with ' }}"{{ searched }}"</small></h4>
+    @if (d.total > 0) {
+      <div class="btn-group btn-group-sm" role="group" aria-label="Results view">
+        <button type="button" class="btn" [class.btn-primary]="view === 'table'" [class.btn-light]="view !== 'table'" (click)="setView('table')">
+          <i class="ri-table-line me-1"></i>Table</button>
+        <button type="button" class="btn" [class.btn-primary]="view === 'card'" [class.btn-light]="view !== 'card'" (click)="setView('card')">
+          <i class="ri-file-list-3-line me-1"></i>History Card</button>
+      </div>
+    }
   </div>
   <div class="card-body pb-0">
     <div class="imp-stats mb-3">
@@ -75,6 +87,22 @@
       <div><span>Net Total</span><strong>{{ inr(d.netTotal) }}</strong></div>
     </div>
   </div>
+  @if (view === 'card') {
+    <div class="card-body pt-0">
+      @if (cardLoading) {
+        <div class="text-muted py-3"><i class="ri-loader-4-line db-spin me-1"></i>Loading history card…</div>
+      } @else if (card) {
+        <small class="text-muted d-block">
+          <i class="ri-information-line me-1"></i>Imported service history holds job totals only - line-wise parts / labour, colour (unless sold in DMS), remarks, lead
+          and battery voltages are not in the data, so those cells stay blank. Use <strong>Print / PDF</strong> and choose "Save as PDF".
+        </small>
+        @if (card.truncated) {
+          <div class="alert alert-warning py-2 mt-2 mb-0">Showing the first {{ num(card.limit) }} of {{ num(card.totalJobs) }} jobs - pick one vehicle from the suggestions to print its full card.</div>
+        }
+      }
+    </div>
+  }
+  @if (view === 'table') {
   <div class="table-responsive rpt-table">
     <table class="table table-sm table-hover align-middle mb-0">
       <thead>
@@ -127,9 +155,87 @@
       </div>
     </div>
   }
+  }
 </div>
+
+<!-- Vehicle History Card (JC-Print format) - on screen in "History Card" view, and the only thing printed -->
+@if (view === 'card' && card && !cardLoading) {
+<div class="hc-sheet">
+  <!-- print frame: thead/tfoot repeat on every printed page and act as the top/bottom page margin
+       (the @page margin is 0 so the browser prints no URL / title / date header-footer) -->
+  <table class="hc-frame">
+    <thead><tr><td><div class="hc-frame-top">@if (printedAt) { Printed on: {{ printedAt }} }</div></td></tr></thead>
+    <tfoot><tr><td><div class="hc-frame-bottom"></div></td></tr></tfoot>
+    <tbody><tr><td>
+  @for (v of card.vehicles; track v.chassisNo) {
+  <div class="hc-vehicle">
+    <table class="hc-table hc-info">
+      <colgroup><col style="width:13%"><col style="width:19%"><col style="width:10%"><col style="width:30%"><col style="width:14%"><col style="width:14%"></colgroup>
+      <tr><th colspan="6" class="hc-title">Vehicle Info</th></tr>
+      <tr><td class="hc-l">Sold Through</td><td>{{ v.soldThrough }}</td><td class="hc-l">Sold On</td><td>{{ soldOn(v) }}</td><td class="hc-l">Lead Date</td><td></td></tr>
+      <tr><td class="hc-l">Lead Source</td><td></td><td class="hc-l">Booking</td><td>{{ v.bookingId }}</td><td class="hc-l">Booking Date</td><td></td></tr>
+    </table>
+
+    @for (j of v.jobs; track j['Id']; let last = $last) {
+    <div class="hc-job">
+      <table class="hc-table">
+        <colgroup><col style="width:13%"><col style="width:19%"><col style="width:16%"><col style="width:15%"><col style="width:8%"><col style="width:6%"><col style="width:8%"><col style="width:15%"></colgroup>
+        <tr><th colspan="8" class="hc-title">Vehicle History Card</th></tr>
+        <tr>
+          <td class="hc-l">Name of the Dealership</td><td>{{ txt(j['CompName']) }}</td>
+          <td class="hc-l">Party Name</td><td>{{ party(j) }}</td>
+          <td class="hc-l">Job No.</td><td>{{ txt(j['JobNo']) }}</td>
+          <td class="hc-l">Job Date</td><td>{{ dmy(j['JobDate']) }}</td>
+        </tr>
+        <tr>
+          <td class="hc-l">Chassis No.</td><td>{{ txt(j['ChassisNo']) }}</td>
+          <td class="hc-l">Reg No.</td><td>{{ txt(j['RegNo']) }}</td>
+          <td class="hc-l">KMS</td><td colspan="3">{{ j['KMS'] != null ? num(j['KMS']) : '' }}</td>
+        </tr>
+        <tr><td class="hc-l">Job Head</td><td colspan="3">{{ txt(j['ServiceHead']) }}</td><td class="hc-l" colspan="2">Job Type</td><td colspan="2">{{ txt(j['JobType']) }}</td></tr>
+        <tr><td class="hc-l">Model</td><td colspan="3">{{ txt(j['Model']) }}</td><td class="hc-l" colspan="2">Color</td><td colspan="2">{{ v.colour }}</td></tr>
+        <tr><td class="hc-l">Bill No.</td><td colspan="3">{{ isBilled(j) ? txt(j['DocNo']) : '' }}</td><td class="hc-l" colspan="2">Bill Date</td><td colspan="2">{{ isBilled(j) ? dmy(j['InvoiceDate']) : '' }}</td></tr>
+        <tr><td class="hc-l">Mechanic</td><td colspan="3">{{ txt(j['Technician']) }}</td><td class="hc-l" colspan="2">Supervisor</td><td colspan="2">{{ txt(j['Supervisor']) }}</td></tr>
+        <tr><td class="hc-l">Job Remark</td><td colspan="3"></td><td class="hc-l" colspan="2">Repair Remark</td><td colspan="2"></td></tr>
+      </table>
+
+      <table class="hc-table hc-lines">
+        <tr><th colspan="10" class="hc-sub">Item Detail</th></tr>
+        <tr class="hc-head"><td>Item Name</td><td>Description</td><td>HSN Code</td><td>Qty</td><td>UOM</td><td>Rate</td><td>Disc</td><td>TAX</td><td>Amount</td><td>Remark</td></tr>
+        <tr class="hc-head"><td>Total</td><td colspan="6"></td><td class="text-end"></td><td class="text-end">{{ money(sum(j, 'Parts', 'Accessory', 'Oil')) }}</td><td></td></tr>
+      </table>
+
+      @if (sum(j, 'Labour', 'OutsideWork') > 0) {
+      <table class="hc-table hc-lines">
+        <tr><th colspan="9" class="hc-sub">Labour Detail</th></tr>
+        <tr class="hc-head"><td>Labour</td><td>Description</td><td>SAC Code</td><td>Qty</td><td>UOM</td><td>Rate</td><td>Disc</td><td>TAX</td><td>Amount</td></tr>
+        <tr class="hc-head"><td>Total</td><td colspan="6"></td><td class="text-end"></td><td class="text-end">{{ money(sum(j, 'Labour', 'OutsideWork')) }}</td></tr>
+      </table>
+      }
+
+      <table class="hc-table hc-lines">
+        <tr><th colspan="8" class="hc-sub">Amount Summary</th></tr>
+        <tr class="hc-head"><td>Parts</td><td>Accessory</td><td>Oil</td><td>Labour</td><td>Outside Work</td><td>Total w/o Tax</td><td>GST</td><td>Net Total</td></tr>
+        <tr class="text-end"><td>{{ money(j['Parts']) }}</td><td>{{ money(j['Accessory']) }}</td><td>{{ money(j['Oil']) }}</td><td>{{ money(j['Labour']) }}</td>
+          <td>{{ money(j['OutsideWork']) }}</td><td>{{ money(j['TotalWOTax']) }}</td><td>{{ money(sum(j, 'GSTAmount', 'IGSTAmount')) }}</td><td class="fw-bold">{{ money(j['NetTotal']) }}</td></tr>
+      </table>
+
+      <table class="hc-table hc-lines">
+        <tr><th colspan="5" class="hc-sub">Battery Detail</th></tr>
+        <tr class="hc-head"><td>Serial No</td><td>Volt. Full Charge</td><td>Volt. Discharged</td><td>Battery Ah Capacity</td><td>Battery Set Voltage</td></tr>
+        @for (b of batteries(j); track $index) { <tr><td>{{ b.serial }}</td><td></td><td></td><td>{{ b.ah }}</td><td></td></tr> }
+      </table>
+    </div>
+    @if (!last) { <hr class="hc-sep"> }
+    }
+  </div>
+  }
+    </td></tr></tbody>
+  </table>
+</div>
+}
 } @else if (!error) {
-  <div class="card db-card"><div class="card-body db-empty-block">
+  <div class="card db-card d-print-none"><div class="card-body db-empty-block">
     <i class="ri-search-line"></i>
     <p class="mb-0">Enter a Chassis No. or Registration No. to see its service history.</p>
   </div></div>

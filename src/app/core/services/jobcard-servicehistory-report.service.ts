@@ -27,6 +27,17 @@ export interface JcshSuggestion {
   jobs: number; lastJobDate?: string | null;
 }
 
+/** Vehicle History Card (JC-Print format) */
+export interface JcshCardVehicle {
+  chassisNo?: string | null; regNo?: string | null; model?: string | null;
+  /** 'DMS' = DMS vehicle sale bill; 'Import' = sale date from the imported history only */
+  saleSource?: 'DMS' | 'Import' | null;
+  soldThrough?: string | null; saleInvoiceNo?: string | null; saleDate?: string | null;
+  colour?: string | null; bookingId?: string | null;
+  jobs: JcshReportRow[];
+}
+export interface JcshHistoryCard { vehicles: JcshCardVehicle[]; totalJobs: number; truncated: boolean; limit: number; }
+
 @Injectable({ providedIn: 'root' })
 export class JobcardServicehistoryReportService {
   private baseUrl = `${environment.apiUrl}/jobcard-servicehistory-report`;
@@ -42,6 +53,11 @@ export class JobcardServicehistoryReportService {
   /** exact = value picked from the type-ahead (matched exactly); otherwise a "starts with" search */
   serviceHistory(search: string, page: number, pageSize: number, exact = false): Observable<JcshReportPage> {
     return this.http.get<JcshReportPage>(`${this.baseUrl}/service-history`, { params: this.params({ search, page, pageSize, exact: exact || null }) });
+  }
+
+  /** Vehicle History Card for the same search (all jobs of the vehicle(s), newest first) */
+  historyCard(search: string, exact = false): Observable<JcshHistoryCard> {
+    return this.http.get<JcshHistoryCard>(`${this.baseUrl}/service-history/card`, { params: this.params({ search, exact: exact || null }) });
   }
 
   /** type-ahead: chassis / reg numbers starting with term (min 2 letters/digits) */

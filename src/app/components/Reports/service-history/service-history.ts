@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgbTypeaheadModule, NgbTypeaheadSelectItemEvent } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, OperatorFunction, catchError, debounceTime, distinctUntilChanged, firstValueFrom, of, switchMap, tap } from 'rxjs';
-import { JcshReportPage, JcshSuggestion, JobcardServicehistoryReportService } from '../../../core/services/jobcard-servicehistory-report.service';
+import { JcshCardVehicle, JcshHistoryCard, JcshReportPage, JcshReportRow, JcshSuggestion, JobcardServicehistoryReportService } from '../../../core/services/jobcard-servicehistory-report.service';
 import { StorageService } from '../../../core/services/storage';
 import { ToastService } from '../../../shared/toaster/toast-service';
 
@@ -71,6 +71,15 @@ export class ServiceHistory implements OnInit {
   exporting = false;
   error: string | null = null;
 
+  /** results shown as the table or as the Vehicle History Card (JC-Print format) */
+  view: 'table' | 'card' = 'table';
+  card: JcshHistoryCard | null = null;
+  private cardKey = '';
+  cardLoading = false;
+  printing = false;
+  /** "Printed on" text at the top of each printed page (DD.MM.YYYY hh:mm AM/PM) */
+  printedAt = '';
+
   constructor(private api: JobcardServicehistoryReportService, private storage: StorageService, private toaster: ToastService) { }
 
   ngOnInit(): void {
@@ -95,6 +104,7 @@ export class ServiceHistory implements OnInit {
   clear(): void {
     this.search = ''; this.searched = ''; this.searchedExact = false; this.picked = null;
     this.data = null; this.error = null; this.noSuggestions = false;
+    this.card = null; this.cardKey = ''; this.view = 'table';
   }
 
   goTo(p: number): void {
@@ -110,12 +120,89 @@ export class ServiceHistory implements OnInit {
     this.error = null;
     try {
       this.data = await firstValueFrom(this.api.serviceHistory(this.searched, this.page, this.pageSize, this.searchedExact));
+      if (this.view === 'card' && this.data.total) this.loadCard();   // keep the card in step with a new search
     } catch (e: any) {
       this.error = await this.api.errorText(e);
       this.data = null;
     } finally {
       this.loading = false;
     }
+  }
+
+  // ------------------------------------------------------------ History Card (JC-Print format)
+  async setView(v: 'table' | 'card'): Promise<void> {
+    this.view = v;
+    if (v === 'card') await this.loadCard();
+  }
+
+  /** loads the card for the current search once (cached until the search changes) */
+  private async loadCard(): Promise<boolean> {
+    const key = `${this.searchedExact ? '=' : '^'}${this.searched}`;
+    if (this.card && this.cardKey === key) return true;
+    this.cardLoading = true;
+    try {
+      this.card = await firstValueFrom(this.api.historyCard(this.searched, this.searchedExact));
+      this.cardKey = key;
+      return true;
+    } catch (e: any) {
+      this.card = null;
+      this.toast(await this.api.errorText(e), 'danger');
+      return false;
+    } finally {
+      this.cardLoading = false;
+    }
+  }
+
+  /** Print → browser print dialog of the History Card ("Save as PDF" gives the PDF) */
+  async printCard(): Promise<void> {
+    if (!this.searched || !this.data?.total || this.printing) return;
+    this.printing = true;
+    try {
+      if (!(await this.loadCard())) return;
+      this.view = 'card';
+      this.printedAt = this.stamp(new Date());
+      const title = document.title;
+      document.title = `History_Card_${(this.card?.vehicles.length === 1 ? this.card.vehicles[0].chassisNo : this.searched) || this.searched}`.replace(/[^A-Za-z0-9_-]/g, '');
+      setTimeout(() => {           // let the card render first
+        window.print();
+        document.title = title;
+        this.printing = false;
+      }, 300);
+    } catch {
+      this.printing = false;
+    } finally {
+      if (!this.card) this.printing = false;
+    }
+  }
+
+  /** DD.MM.YYYY hh:mm AM/PM (12-hour, system time) */
+  private stamp(d: Date): string {
+    const p = (n: number) => String(n).padStart(2, '0');
+    const h = d.getHours() % 12 || 12;
+    return `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()} ${p(h)}:${p(d.getMinutes())} ${d.getHours() < 12 ? 'AM' : 'PM'}`;
+  }
+
+  // card helpers
+  txt(v: any): string { return v == null ? '' : String(v).trim(); }
+  dmy(v?: string | null): string { const d = this.date(v); return d === '—' ? '' : d; }
+  money(v: any): string { return v == null || v === '' ? '' : new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(v) || 0); }
+  sum(r: JcshReportRow, ...keys: string[]): number { return keys.reduce((a, k) => a + (Number(r[k]) || 0), 0); }
+  party(r: JcshReportRow): string { return [this.txt(r['PartyName']), this.txt(r['MobileNumber'])].filter(x => x).join(' - '); }
+  /** bill no / date only for invoiced jobs (job-closed / in-queue rows carry DocNo 0) */
+  isBilled(r: JcshReportRow): boolean { return this.txt(r['DocType']).toLowerCase() === 'invoice' && Number(r['DocNo']) > 0; }
+  batteries(r: JcshReportRow): { serial: string; ah: string }[] {
+    const list: { serial: string; ah: string }[] = [];
+    for (let i = 1; i <= 6; i++) {
+      const serial = this.txt(r['BatterySerialNo' + i]), ah = this.txt(r['IndividualAHBattery' + i]);
+      if (serial || ah) list.push({ serial, ah });
+    }
+    return list;
+  }
+  soldOn(v: JcshCardVehicle): string {
+    const parts = [];
+    if (v.saleInvoiceNo) parts.push(`Invoice No : ${v.saleInvoiceNo}`);
+    if (v.saleDate) parts.push(`Date : ${this.dmy(v.saleDate)}`);
+    return parts.join('  ');
   }
 
   async exportExcel(): Promise<void> {
