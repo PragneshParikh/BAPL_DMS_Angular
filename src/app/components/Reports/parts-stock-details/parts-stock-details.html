@@ -4,10 +4,6 @@
     <h4 class="mb-sm-0">
         PARTS STOCK DETAILS
     </h4>
-
-    <button class="btn btn-light btn-sm" (click)="openReportList()">
-        <i class="ri-menu-line"></i>
-    </button>
 </div>
 
 <div class="row">
@@ -72,11 +68,6 @@
                                     [ngbTooltip]="'Export To Excel'">
                                     <i class="ri-file-excel-2-line"></i>
                                 </button>
-                                <button type="button" class="btn btn-info btn-sm" [ngbTooltip]="'Report List'"
-                                    (click)="openReportList()">
-                                    <i class="ri-list-check-2"></i>
-                                </button>
-
                             </div>
                         </div>
 
@@ -148,7 +139,9 @@
                                 <!-- FIXED — now bound to the real, newly-added
                                      backend field: net TI/TO quantity from
                                      PartsInventory in the selected date range. -->
-                                <td>{{ item.batchClosingQty }}</td>
+                                <!-- <td>{{ item.batchClosingQty }}</td>
+                                <td class="text-end">{{ item.batchClosingQty }}</td> -->
+                                <td>{{ item.stockAdjustmentQty }}</td>
                                 <td class="text-end">{{ item.batchClosingQty }}</td>
                                 <td>{{ item.hsncode }}</td>
                                 <td class="text-end">{{ item.dlrprice | number:'1.2-2' }}</td>

@@ -124,14 +124,5 @@ export class PartsStockDetails implements OnInit {
 
   getTotalRate() {
     return this.partsStockData.reduce((sum, item) => sum + (Number(item.dlrprice) || 0), 0);
-  }
-
-  openReportList(): void {
-
-  this.router.navigate(
-    ['/stock-bill-list']
-  );
-  
-}
-
+  } 
 }
