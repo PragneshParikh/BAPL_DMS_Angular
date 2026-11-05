@@ -4,7 +4,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router } from '@angular/router';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { MaterialTransferService } from '../../core/services/material-transfer';
@@ -22,9 +22,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     ReactiveFormsModule,
     FormsModule,
     CommonModule,
-    NgbPaginationModule,
-    RouterOutlet
-  ],
+    NgbPaginationModule],
   templateUrl: './material-transfer.html',
   styleUrl: './material-transfer.scss',
 })

@@ -5,16 +5,16 @@ import { FormsModule } from '@angular/forms';
 import { VehicleStockTransferService } from '../../../core/services/vehicle-stock-transfer-service';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 import { StorageService } from '../../../core/services/storage';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router } from '@angular/router';
 import { FlatpickrModule } from 'angularx-flatpickr';
-import { NgbHighlight, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { LoaderService } from '../../../core/services/loader';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
 import { filterRows } from '../../../shared/search/table-search';
 @Component({
   selector: 'app-vehicle-stock-transfer-list',
-  imports: [CommonModule, FormsModule, NgbHighlight, NgbPaginationModule, FlatpickrModule, RouterOutlet, NgbTooltipModule],
+  imports: [CommonModule, FormsModule, NgbPaginationModule, FlatpickrModule, NgbTooltipModule],
   templateUrl: './vehicle-stock-transfer-list.html',
   styleUrl: './vehicle-stock-transfer-list.scss',
 })

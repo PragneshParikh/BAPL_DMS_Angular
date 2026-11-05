@@ -3,7 +3,7 @@ import { Component, OnInit, EventEmitter, Output, Inject, ViewChild, TemplateRef
 
 //Logout
 import { AuthenticationService } from '../../core/services/auth.service';
-import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 
 // Language
 import { CookieService } from 'ngx-cookie-service';
@@ -35,9 +35,7 @@ import { NotificationService } from '../../core/services/notification-service';
     FormsModule,
     ReactiveFormsModule,
     SimplebarAngularModule,
-    NgbDropdownModule,
-    RouterLink
-  ],
+    NgbDropdownModule],
   standalone: true
 })
 export class TopbarComponent implements OnInit {

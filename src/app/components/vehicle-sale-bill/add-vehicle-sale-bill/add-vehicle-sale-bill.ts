@@ -28,8 +28,7 @@ import { MenuAccessService } from '../../../core/services/menu-access.service';
 
 @Component({
   selector: 'app-add-vehicle-sale-bill',
-  imports: [FormsModule, CommonModule, NgbPaginationModule, NgbTooltipModule,
-    VehicleRegistrationdetails, NgbModalModule, NgbDropdownModule],
+  imports: [FormsModule, CommonModule, NgbPaginationModule, NgbTooltipModule, NgbModalModule, NgbDropdownModule],
   templateUrl: './add-vehicle-sale-bill.html',
   styleUrl: './add-vehicle-sale-bill.scss',
 })

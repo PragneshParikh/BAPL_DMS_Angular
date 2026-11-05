@@ -559,12 +559,12 @@
                                             <!-- <td>
                                                 {{ row.extWarranty }}
                                             </td> -->
-                                            <td>{{ row.sgstPer || row.sgstper ?? 0}}%</td>
-                                            <td>{{row.sgst || row.sgstamnt ||row.sgstamnt ?? 0}}</td>
-                                            <td>{{row.cgstPer || row.cgstper ?? 0 }}%</td>
-                                            <td>{{ row.cgst || row.cgstamnt ?? 0}}</td>
-                                            <td>{{ row.igstPer || row.igstper ?? 0 }}%</td>
-                                            <td>{{ row.igst || row.igstamnt ?? 0 }}</td>
+                                            <td>{{ row.sgstPer || (row.sgstper ?? 0) }}%</td>
+                                            <td>{{ row.sgst || row.sgstamnt || (row.sgstamnt ?? 0) }}</td>
+                                            <td>{{ row.cgstPer || (row.cgstper ?? 0) }}%</td>
+                                            <td>{{ row.cgst || (row.cgstamnt ?? 0) }}</td>
+                                            <td>{{ row.igstPer || (row.igstper ?? 0) }}%</td>
+                                            <td>{{ row.igst || (row.igstamnt ?? 0) }}</td>
                                             <td>{{ row.postGstDiscount }}</td>
                                             <td>{{ row.finalAmount }}</td>
                                             <!-- <td>{{ row.cess }}</td>

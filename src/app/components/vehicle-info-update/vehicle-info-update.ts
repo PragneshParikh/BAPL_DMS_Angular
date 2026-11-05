@@ -2,8 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterOutlet } from '@angular/router';
-import { NgbHighlight, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
 import { VehicleInfoService } from '../../core/services/vehicle-info-service';
 import { ChassisSearchService } from '../../core/services/chassis-search-service';
@@ -15,7 +14,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-vehicle-info-update',
-  imports: [CommonModule, FormsModule, NgbHighlight, NgbPaginationModule, FlatpickrModule, RouterOutlet, NgbTooltipModule
+  imports: [CommonModule, FormsModule, NgbPaginationModule, FlatpickrModule, NgbTooltipModule
   ],
   templateUrl: './vehicle-info-update.html',
   styleUrl: './vehicle-info-update.scss',

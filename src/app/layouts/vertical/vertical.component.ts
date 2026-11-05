@@ -8,13 +8,12 @@ import { CommonModule } from '@angular/common';
 import { FooterComponent } from '../footer/footer.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
-import { RightsidebarComponent } from '../rightsidebar/rightsidebar.component';
 
 @Component({
   selector: 'app-vertical',
   templateUrl: './vertical.component.html',
   styleUrls: ['./vertical.component.scss'],
-  imports: [CommonModule, FooterComponent, RouterOutlet, SidebarComponent, TopbarComponent, RightsidebarComponent],
+  imports: [CommonModule, FooterComponent, RouterOutlet, SidebarComponent, TopbarComponent],
   standalone: true
 })
 export class VerticalComponent implements OnInit {

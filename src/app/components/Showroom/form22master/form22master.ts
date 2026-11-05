@@ -2,7 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Form22MasterService } from '../../../core/services/form22masterservice';
-import { NgbHighlight, NgbModal, NgbPagination, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbPagination, NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { Form22MasterModel } from '../../../ViewModels/Form22MasterModel';
 import { ToastService } from '../../../shared/toaster/toast-service';
@@ -12,7 +12,7 @@ import { SearchDebouncer } from '../../../shared/search/table-search';
 @Component({
   selector: 'app-form22master',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbHighlight, NgbPagination, NgbTooltipModule],
+  imports: [CommonModule, FormsModule, NgbPagination, NgbTooltipModule],
   templateUrl: './form22master.html',
   styleUrl: './form22master.scss',
 })
