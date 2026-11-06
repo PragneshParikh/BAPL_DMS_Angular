@@ -105,6 +105,10 @@ import {
   WarrantyRegisterPagedResponse,
   WarrantyRegisterViewModel
 } from '../../ViewModels/models/WarrantyRegisterViewModel';
+import {
+  PartsStockDetailsReportRow,
+  StockAdjustmentReportRow
+} from '../../ViewModels/models/stock-reports.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -808,7 +812,14 @@ export class ReportService {
     );
   }
 
-  getPartsStockDetailsByDealer(groupId: number, fromDate: Date, toDate: Date, dealerCode: string | null): Observable<any> {
+  getPartsStockDetailsByDealer(
+    groupId: number,
+    fromDate: Date,
+    toDate: Date,
+    dealerCode: string | null,
+    locationCode: string | null,
+    locationDealerCode: string | null
+  ): Observable<PartsStockDetailsReportRow[]> {
     let params = new HttpParams();
     params = params.set("groupId", groupId);
     params = params.set("fromDate", fromDate.toISOString());
@@ -817,8 +828,14 @@ export class ReportService {
     if (dealerCode) {
       params = params.set("dealerCode", dealerCode)
     }
+    if (locationCode) {
+      params = params.set('locationCode', locationCode);
+    }
+    if (locationDealerCode) {
+      params = params.set('locationDealerCode', locationDealerCode);
+    }
 
-    return this.http.get(`${this.apiUrl}/GetPartsStockDetailsByDealer`, { params });
+    return this.http.get<PartsStockDetailsReportRow[]>(`${this.apiUrl}/GetPartsStockDetailsByDealer`, { params });
   }
 
   // =====================================================
@@ -889,20 +906,24 @@ export class ReportService {
   }
 
     getStockAdjustmentReport(
-  fromDate: Date,
-  toDate: Date,
-  dealerCode: string | null
-) {
-  return this.http.get<any[]>(
-    `${this.apiUrl}/GetStockAdjustmentReport`,
-    {
-      params: {
-        fromDate: fromDate.toISOString(),
-        toDate: toDate.toISOString(),
-        dealerCode: dealerCode ?? ''
-      }
-    }
-  );
+      fromDate: Date,
+      toDate: Date,
+      dealerCode: string | null,
+      locationCode: string | null,
+      locationDealerCode: string | null
+    ) {
+    let params = new HttpParams()
+      .set('fromDate', fromDate.toISOString())
+      .set('toDate', toDate.toISOString());
+
+    if (dealerCode) params = params.set('dealerCode', dealerCode);
+    if (locationCode) params = params.set('locationCode', locationCode);
+    if (locationDealerCode) params = params.set('locationDealerCode', locationDealerCode);
+
+    return this.http.get<StockAdjustmentReportRow[]>(
+      `${this.apiUrl}/GetStockAdjustmentReport`,
+      { params }
+    );
 
 }
 }

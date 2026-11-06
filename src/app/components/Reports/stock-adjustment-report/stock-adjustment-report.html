@@ -24,7 +24,8 @@
                     <select
                         class="form-select form-select-sm"
                         name="dealerCode"
-                        [(ngModel)]="reportFilterFormData.selectedDealerCode">
+                        [(ngModel)]="reportFilterFormData.selectedDealerCode"
+                        (ngModelChange)="onDealerChange()">
 
                         <option value="">
                             -- Select --
@@ -36,6 +37,25 @@
 
                             {{ dealer.dealerName }}
 
+                        </option>
+
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label>Location</label>
+
+                    <select
+                        class="form-select form-select-sm"
+                        name="location"
+                        [(ngModel)]="reportFilterFormData.selectedLocation">
+
+                        <option [ngValue]="null">All Locations</option>
+
+                        <option
+                            *ngFor="let location of locationList"
+                            [ngValue]="location">
+                            {{ getLocationLabel(location) }}
                         </option>
 
                     </select>
@@ -118,9 +138,12 @@
                     <tr>
 
                         <th>Sr No</th>
+                        <th>Dealer Name</th>
+                        <th>Dealer Code</th>
                         <th>Prefix No</th>
                         <th>Date</th>
-                        <th>Location</th>
+                        <th>Location Name</th>
+                        <th>Location Code</th>
                         <th>Part No</th>
                         <th>Description</th>
                         <th>Rate</th>
@@ -137,7 +160,7 @@
 
                     <tr *ngIf="stockAdjustmentData.length === 0">
 
-                        <td colspan="11" class="text-center">
+                        <td colspan="14" class="text-center">
 
                             No Data Available
 
@@ -148,8 +171,11 @@
                     <tr *ngFor="let item of stockAdjustmentData; let i=index">
 
                         <td>{{ i + 1 }}</td>
+                       <td>{{ item.dealerName || 'Unknown' }}</td>
+                       <td>{{ item.dealerCode }}</td>
                        <td>{{ formatPrefix(item.prefixNo) }}</td>
                         <td>{{ item.adjustmentDate | date:'dd/MM/yyyy' }}</td>
+                        <td>{{ item.locationName || 'Unknown' }}</td>
                         <td>{{ item.locationCode }}</td>
                         <td>{{ item.partNo }}</td>
                         <td>{{ item.description }}</td>

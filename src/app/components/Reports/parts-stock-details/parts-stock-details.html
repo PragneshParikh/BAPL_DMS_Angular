@@ -26,7 +26,8 @@
                         <div class="col-xl-3 col-lg-3 col-md-6">
                             <label class="form-label">Dealer</label>
                             <select class="form-select form-select-sm" #dealerCode="ngModel" name="dealerCode"
-                                [(ngModel)]="stockReportFilterFormData.selectedDealerCode" required>
+                                [(ngModel)]="stockReportFilterFormData.selectedDealerCode"
+                                (ngModelChange)="onDealerChange()" required>
                                 <option value="">-- Select --</option>
                                 <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
                                     {{ dealer.dealerName }}
@@ -37,6 +38,17 @@
                                 Dealer is required
                             </small>
                             }
+                        </div>
+
+                        <div class="col-xl-3 col-lg-3 col-md-6">
+                            <label class="form-label">Location</label>
+                            <select class="form-select form-select-sm" name="location"
+                                [(ngModel)]="stockReportFilterFormData.selectedLocation">
+                                <option [ngValue]="null">All Locations</option>
+                                <option *ngFor="let location of locationList" [ngValue]="location">
+                                    {{ getLocationLabel(location) }}
+                                </option>
+                            </select>
                         </div>
 
                         <!-- From Date -->
@@ -65,6 +77,7 @@
                                     Reset
                                 </button>
                                 <button type="button" class="btn btn-success btn-sm" *ngIf="canDownload"
+                                    (click)="exportExcel()"
                                     [ngbTooltip]="'Export To Excel'">
                                     <i class="ri-file-excel-2-line"></i>
                                 </button>
@@ -90,6 +103,7 @@
                         <thead class="table-light sticky-top" style="z-index: 1;">
                             <tr>
                                 <th>Sr No</th>
+                                <th>Dealer Name</th>
                                 <th>Dealer Code</th>
                                 <th>Location Code</th>
                                 <th>Location Name</th>
@@ -117,9 +131,9 @@
 
                         <tbody>
 
-                            <!-- No Data — colspan matches the 17 headers above -->
+                            <!-- No Data — colspan matches the 18 headers above -->
                             <tr *ngIf="partsStockData.length === 0">
-                                <td colspan="17" class="text-center">
+                                <td colspan="18" class="text-center">
                                     No data available
                                 </td>
                             </tr>
@@ -127,6 +141,7 @@
                             <!-- Data Rows -->
                             <tr *ngFor="let item of partsStockData">
                                 <td>{{ item.srNo }}</td>
+                                <td>{{ item.dealerName || 'Unknown' }}</td>
                                 <td>{{ item.vendorCode }}</td>
                                 <td>{{ item.dealerLocation }}</td>
                                 <td>{{ item.locname }}</td>
@@ -152,7 +167,7 @@
                         </tbody>
                         <tfoot class="table-secondary">
                             <tr>
-                                <td class="text-end" colspan="13"><strong>Total</strong></td>
+                                <td class="text-end" colspan="14"><strong>Total</strong></td>
                                 <td class="text-end"><strong>{{getTotalRate() | number:'1.2-2'}}</strong></td>
                                 <td></td>
                                 <td></td>
