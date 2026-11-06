@@ -6,10 +6,12 @@ import { LoaderService } from '../../../core/services/loader';
 import { ReportService } from '../../../core/services/report.service';
 import { ToastService } from '../../../shared/toaster/toast-service';
 import { DealerService } from '../../../core/services/dealer-service';
+import { LocationMasterService } from '../../../core/services/location-master-service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
 import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
+import { ReportDealerOption, ReportLocationOption, StockAdjustmentReportRow } from '../../../ViewModels/models/stock-reports.model';
 
 
 @Component({
@@ -36,15 +38,22 @@ export class StockAdjustmentReport implements OnInit {
 
   canDownload = false;
 
-  stockAdjustmentData: any[] = [];
+  stockAdjustmentData: StockAdjustmentReportRow[] = [];
 
-  dealerList: any[] = [];
+  dealerList: ReportDealerOption[] = [];
+  locationList: ReportLocationOption[] = [];
 
-  reportFilterFormData: any = {
-    selectedDealerCode: '',
-    fromDate: '',
-    toDate: ''
-  };
+  reportFilterFormData: {
+    selectedDealerCode: string;
+    selectedLocation: ReportLocationOption | null;
+    fromDate: string;
+    toDate: string;
+  } = {
+      selectedDealerCode: '',
+      selectedLocation: null,
+      fromDate: '',
+      toDate: ''
+    };
 
   constructor(
     private storageService: StorageService,
@@ -52,6 +61,7 @@ export class StockAdjustmentReport implements OnInit {
     private reportService: ReportService,
     private toaster: ToastService,
     private dealerMasterService: DealerService,
+    private locationMasterService: LocationMasterService,
     private menuAccess: MenuAccessService,
     private router: Router
   ) {
@@ -104,6 +114,9 @@ export class StockAdjustmentReport implements OnInit {
               dealerName: 'All'
             });
           }
+          this.reportFilterFormData.selectedDealerCode =
+            this.dealerCode || (this.isSuperAdmin ? 'ALL' : '');
+          this.loadLocationList();
         },
         error: (err) => {
 
@@ -121,12 +134,51 @@ export class StockAdjustmentReport implements OnInit {
       });
   }
 
+  onDealerChange(): void {
+    this.reportFilterFormData.selectedLocation = null;
+    this.loadLocationList();
+  }
+
+  private loadLocationList(): void {
+    const selectedDealerCode = this.reportFilterFormData.selectedDealerCode;
+    const dealerCode = selectedDealerCode && selectedDealerCode !== 'ALL'
+      ? selectedDealerCode
+      : null;
+
+    this.locationList = [];
+    this.loader.show();
+    this.locationMasterService.getLocationDropdownByDealerCode(dealerCode).subscribe({
+      next: (locations: ReportLocationOption[]) => {
+        this.loader.hide();
+        this.locationList = (locations ?? [])
+          .filter(location => Number(location.locareaidno) === 2)
+          .map(location => ({
+            ...location,
+            dealerName: this.dealerList.find(dealer => dealer.dealerCode === location.dealercode)?.dealerName
+          }));
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toaster.show('Unable to load locations.', { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  }
+
+  getLocationLabel(location: ReportLocationOption): string {
+    const name = location.locname || location.loccode || 'Unknown location';
+    return this.reportFilterFormData.selectedDealerCode === 'ALL'
+      ? `${location.dealerName || location.dealercode} - ${name}`
+      : name;
+  }
+
   getStockAdjustmentReport(): void {
 
     const dealerCode =
       this.reportFilterFormData.selectedDealerCode === 'ALL'
         ? null
         : this.reportFilterFormData.selectedDealerCode;
+    const selectedLocation = this.reportFilterFormData.selectedLocation;
 
     const fromDate = new Date(
       this.reportFilterFormData.fromDate
@@ -142,7 +194,9 @@ export class StockAdjustmentReport implements OnInit {
       .getStockAdjustmentReport(
         fromDate,
         toDate,
-        dealerCode
+        dealerCode,
+        selectedLocation?.loccode ?? null,
+        selectedLocation?.dealercode ?? null
       )
       .subscribe({
         next: (res: any) => {
@@ -154,12 +208,10 @@ export class StockAdjustmentReport implements OnInit {
             res
           );
 
-         this.stockAdjustmentData = (res ?? [])
-  .filter((x: any) => Number(x.locareaidno) === 2);
-       
-       
+          this.stockAdjustmentData = (res ?? [])
+            .filter((x: any) => Number(x.locareaidno) === 2);
         },
-        
+
 
         error: (err: any) => {
 
@@ -175,7 +227,7 @@ export class StockAdjustmentReport implements OnInit {
             }
           );
         }
-        
+
       });
   }
 
@@ -192,14 +244,16 @@ export class StockAdjustmentReport implements OnInit {
   resetForm(): void {
 
     this.reportFilterFormData = {
-      selectedDealerCode: '',
-      fromDate: '',
-      toDate: ''
+      selectedDealerCode: this.dealerCode || (this.isSuperAdmin ? 'ALL' : ''),
+      selectedLocation: null,
+      fromDate: this.reportFilterFormData.fromDate,
+      toDate: this.reportFilterFormData.toDate
     };
 
     this.initDefaultDates();
 
     this.reportFilterForm?.control.markAsUntouched();
+    this.loadLocationList();
   }
 
   openReportList(): void {
@@ -211,66 +265,69 @@ export class StockAdjustmentReport implements OnInit {
 
   exportExcel(): void {
 
-  if (!this.stockAdjustmentData ||
+    if (!this.stockAdjustmentData ||
       this.stockAdjustmentData.length === 0) {
 
-    this.toaster.show(
-      'No data available to export.',
-      {
-        classname: 'bg-warning text-dark',
-        delay: 3000
-      }
+      this.toaster.show(
+        'No data available to export.',
+        {
+          classname: 'bg-warning text-dark',
+          delay: 3000
+        }
+      );
+
+      return;
+    }
+
+    const excelData = this.stockAdjustmentData.map(
+      (item: any, index: number) => ({
+        'Sr No': index + 1,
+        'Dealer Name': item.dealerName || 'Unknown',
+        'Dealer Code': item.dealerCode || '',
+        'Prefix No': item.prefixNo,
+        'Date': item.adjustmentDate,
+        'Location Name': item.locationName || 'Unknown',
+        'Location Code': item.locationCode || '',
+        'Part No': item.partNo,
+        'Description': item.description,
+        'Rate': item.rateStock,
+        'Current Stock': item.currentStock,
+        'Update Stock': item.updateStock,
+        'Adjustment Qty': item.upQuantityStg,
+        'Final Qty': item.finalQty
+      })
     );
 
-    return;
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      'Stock Adjustment Report'
+    );
+
+    XLSX.writeFile(
+      workbook,
+      'StockAdjustmentReport.xlsx'
+    );
   }
 
-  const excelData = this.stockAdjustmentData.map(
-    (item: any, index: number) => ({
-      'Sr No': index + 1,
-      'Prefix No': item.prefixNo,
-      'Date': item.adjustmentDate,
-      'Location': item.locationCode,
-      'Part No': item.partNo,
-      'Description': item.description,
-      'Rate': item.rateStock,
-      'Current Stock': item.currentStock,
-      'Update Stock': item.updateStock,
-      'Adjustment Qty': item.upQuantityStg,
-      'Final Qty': item.finalQty
-    })
-  );
 
-  const worksheet = XLSX.utils.json_to_sheet(excelData);
+  formatPrefix(prefixNo: string): string {
+    if (!prefixNo) {
+      return '';
+    }
 
-  const workbook = XLSX.utils.book_new();
+    const parts = prefixNo.split('/');
 
-  XLSX.utils.book_append_sheet(
-    workbook,
-    worksheet,
-    'Stock Adjustment Report'
-  );
+    if (parts.length > 0) {
+      parts[parts.length - 1] = String(Number(parts[parts.length - 1]));
+    }
 
-  XLSX.writeFile(
-    workbook,
-    'StockAdjustmentReport.xlsx'
-  );
-}
-
-
-formatPrefix(prefixNo: string): string {
-  if (!prefixNo) {
-    return '';
+    return parts.join('/');
   }
 
-  const parts = prefixNo.split('/');
 
-  if (parts.length > 0) {
-    parts[parts.length - 1] = String(Number(parts[parts.length - 1]));
-  }
-
-  return parts.join('/');
-}
-  
-  
 }
