@@ -156,11 +156,13 @@
                       <i class="ri-search-line"></i>
                     </button>
                   </div>
+                    <div *ngIf="chassisLoading" class="small text-muted mt-1">Loading chassis...</div>
 
-                  <div class="dropdown-menu dropdown-menu-chassis show w-100" *ngIf="filteredChassisList.length > 0">
+                 <div class="dropdown-menu dropdown-menu-chassis show w-100" *ngIf="filteredChassisList.length > 0">
                     <button type="button" class="dropdown-item" *ngFor="let item of filteredChassisList"
                       (mousedown)="selectChassis(item)">
-                      {{ item.chassisNumber }}
+                      <div>{{ item.chassisNumber }}</div>
+                      <small class="text-muted">Reg No: {{ item.registerNo || '-' }}</small>
                     </button>
                   </div>
 
@@ -838,7 +840,7 @@
 </ng-template>
 
 <!-- =======================Global Chassis Search Modal ============================== -->
-<ng-template #globalChassisSearchModal let-modal>
+<!-- <ng-template #globalChassisSearchModal let-modal>
 
   <div class="modal-header">
     <h5 class="modal-title">Search Chassis Across All Dealers</h5>
@@ -880,6 +882,95 @@
           <tr>
             <td class="text-muted small">Register No</td>
             <td>{{ globalSaleData.registerNo || '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small">Sold By Dealer</td>
+            <td>{{ globalSaleData.dealerCode || '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small">Sale Date</td>
+            <td>{{ globalSaleData.saleDate | date:'dd-MM-yyyy' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-3" *ngIf="globalSearchNotFound">
+      <span class="text-danger small">No sale record found for this chassis in any dealership.</span>
+    </div>
+
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-success btn-sm" [disabled]="!globalSaleData"
+      (click)="applyGlobalChassisResult()">
+      Use This Chassis
+    </button>
+    <button type="button" class="btn btn-light btn-sm" (click)="closeGlobalSearchModal()">Close</button>
+  </div>
+
+</ng-template> -->
+
+
+<ng-template #globalChassisSearchModal let-modal>
+
+  <div class="modal-header">
+    <h5 class="modal-title">Search Chassis Across All Dealers</h5>
+    <button type="button" class="btn-close" (click)="closeGlobalSearchModal()"></button>
+  </div>
+
+  <div class="modal-body">
+
+    <div class="row g-2 align-items-end">
+      <div class="col-md-8 position-relative">
+        <label class="form-label mb-0 small">Chassis No / Reg No</label>
+        <input type="text" class="form-control form-control-sm" [(ngModel)]="globalChassisSearchTerm"
+          name="globalChassisSearchTerm" placeholder="Type 3+ characters..." autocomplete="off"
+          (input)="onGlobalChassisInput()" (keyup.enter)="searchGlobalChassis()">
+        <small class="text-muted" *ngIf="globalSuggestLoading">Searching...</small>
+
+        <div class="list-group position-absolute w-100 shadow-sm"
+             style="z-index:1056; max-height:260px; overflow-y:auto;"
+             *ngIf="globalChassisSuggestions.length > 0">
+          <button type="button" class="list-group-item list-group-item-action py-1"
+            *ngFor="let s of globalChassisSuggestions" (click)="selectGlobalChassis(s)">
+            <div class="small fw-semibold">{{ s.chassisNo }}</div>
+            <div class="text-muted" style="font-size:11px;">
+              Reg No: {{ s.regNo || '-' }} | {{ s.customerName || '-' }} | Dealer: {{ s.dealerCode }}
+            </div>
+          </button>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <button type="button" class="btn btn-primary btn-sm w-100" [disabled]="globalSearching"
+          (click)="searchGlobalChassis()">
+          {{ globalSearching ? 'Searching...' : 'Search' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-3" *ngIf="globalSaleData">
+      <table class="table table-sm table-bordered mb-0">
+        <tbody>
+          <tr>
+            <td class="text-muted small" style="width:30%;">Chassis No</td>
+            <td>{{ globalSaleData.chassisNo || '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small">Register No</td>
+            <td>{{ globalSaleData.registerNo || '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small">Customer Name</td>
+            <td>{{ globalSaleData.customerName || '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small">Mobile No.</td>
+            <td>{{ globalSaleData.mobileNo || '-' }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small">Model</td>
+            <td>{{ globalSaleData.modelName || '-' }}</td>
           </tr>
           <tr>
             <td class="text-muted small">Sold By Dealer</td>

@@ -148,6 +148,18 @@
             No records found. Please adjust your filters and try again.
           </div>
 
+           <div class="d-flex justify-content-between align-items-center mb-2"
+               *ngIf="isSuperAdmin && reportData.length > 0">
+            <span class="text-muted small">{{ selectedChassis.size }} vehicle(s) selected</span>
+            <button type="button" class="btn btn-danger btn-sm"
+                    [disabled]="selectedChassis.size === 0 || deletingSelected"
+                    (click)="onDeleteSelected()">
+              <span *ngIf="deletingSelected" class="spinner-border spinner-border-sm me-1"></span>
+              <i *ngIf="!deletingSelected" class="ri-delete-bin-line me-1"></i>
+              Delete Selected
+            </button>
+          </div>
+
           <div class="table-responsive" *ngIf="reportData.length > 0">
             <table class="table table-bordered table-striped table-sm table-hover align-middle">
               <thead class="table-light">
@@ -199,7 +211,28 @@
                   <th class="text-end">SGST</th>
                   <th class="text-end">CGST</th>
                   <th class="text-end">IGST</th>
+                  <th>Sale Status</th>
+                  <th>Sale Date</th>
+                 <!-- <th *ngIf="isSuperAdmin" class="text-center">Action</th> -->
                   <!-- <th class="text-end">HST</th> -->
+                  <!-- <th *ngIf="isSuperAdmin" class="text-center">
+                     <input type="checkbox" class="form-check-input"
+                           [checked]="allSelectableSelected"
+                           [disabled]="anySoldOnPage || selectableRows.length === 0 || deletingSelected"
+                           (change)="toggleAll($any($event.target).checked)"
+                           [title]="anySoldOnPage
+                                      ? 'Some vehicles are sold - select all is disabled'
+                                      : 'Select all'">
+                  </th> -->
+                    <th *ngIf="isSuperAdmin" class="text-center">
+                      <input type="checkbox" class="form-check-input"
+                           [checked]="allSelectableSelected"
+                           [disabled]="masterDisabled"
+                           (change)="toggleAll($any($event.target).checked)"
+                           [title]="masterDisabled
+                                      ? 'No unsold vehicles available to select'
+                                      : 'Select all unsold vehicles (sold vehicles are skipped)'">
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -230,7 +263,23 @@
                   <td class="text-end text-nowrap">{{ formatCurrency(item.sgst) }}</td>
                   <td class="text-end text-nowrap">{{ formatCurrency(item.cgst) }}</td>
                   <td class="text-end text-nowrap">{{ formatCurrency(item.igst) }}</td>
+                  <td>
+                    <span *ngIf="item.saleStatus" class="badge bg-danger">{{ item.saleStatus }}</span>
+                    <span *ngIf="!item.saleStatus">-</span>
+                  </td>
+                  <td class="text-nowrap">{{ formatDate(item.saleDate) }}</td>
                   <!-- <td class="text-end text-nowrap">{{ formatCurrency(item.hst) }}</td> -->
+                   <td *ngIf="isSuperAdmin" class="text-center">
+                    <input type="checkbox" class="form-check-input"
+                           [checked]="isRowSelected(item)"
+                           [disabled]="!isRowSelectable(item)"
+                           (change)="toggleRow(item, $any($event.target).checked)"
+                           [title]="item.saleStatus === 'Sold'
+                                      ? 'Vehicle already sold'
+                                      : (invoiceSoldCount(item.bgInvoiceNo) > 0
+                                          ? 'Another vehicle of this invoice is sold - delete will be blocked'
+                                          : 'Select to delete')">
+                  </td>
                 </tr>
               </tbody>
               <tfoot>
@@ -252,6 +301,8 @@
                   <!-- Col 26: IGST -->
                   <td class="text-end text-nowrap">{{ formatCurrency(totalIgst) }}</td>
                   <!-- HST column removed — commented out above in thead/tbody too -->
+                   <td colspan="2"></td>
+                   <td *ngIf="isSuperAdmin"></td>
                 </tr>
               </tfoot>
             </table>
