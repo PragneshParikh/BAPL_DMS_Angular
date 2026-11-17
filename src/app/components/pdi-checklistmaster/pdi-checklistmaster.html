@@ -14,18 +14,29 @@
                     <div class="col-md-3">
                         <label class="form-label">PDI Check Name</label>
                         <input type="text" class="form-control form-control-sm" name="searchPdicheck"
-                            [(ngModel)]="searchText" (input)="onSearch()">
+                            [(ngModel)]="searchText" (ngModelChange)="onSearch($event)">
                         <!-- [(ngModel)]="searchPdiCheckname" (ngModelChange)="onSearchChange()" -->
                     </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-primary btn-sm me-2">
+                    <div class="col-md-3 d-flex flex-wrap align-items-center gap-2">
+                        <button type="button" class="btn btn-primary btn-sm" (click)="loadPdiChecklistList()">
                             <i class="ri-search-line"></i>
                         </button>
-                        <!-- (click)="search()" -->
-                        <button class="btn btn-primary btn-sm" *ngIf="canCreate" (click)="openAddpdiChecklist()" data-bs-toggle="modal"
-                            data-bs-target="#pdiChecklistmasterModal">
+                        <button type="button" class="btn btn-primary btn-sm" *ngIf="canCreate"
+                            (click)="openAddpdiChecklist()">
                             <i class="ri-add-line"></i>
                         </button>
+                    </div>
+                    <div class="col-md-6 ms-auto d-flex flex-wrap justify-content-end align-items-center gap-2">
+                        <button type="button" class="btn btn-outline-primary btn-sm" *ngIf="canCreate"
+                            (click)="downloadPdiChecklistSample($event)">
+                            <i class="ri-download-2-line"></i> Sample Excel
+                        </button>
+                        <button type="button" class="btn btn-outline-success btn-sm" *ngIf="canCreate"
+                            [disabled]="isImportingExcel" (click)="pdiExcelFileInput.click()">
+                            <i class="ri-upload-2-line"></i> Upload Excel
+                        </button>
+                        <input #pdiExcelFileInput type="file" accept=".xlsx,.xls" hidden
+                            (change)="uploadPdiChecklistExcel($event)">
                         <!--   -->
                     </div>
                 </div>
@@ -122,7 +133,7 @@
                         <div class="col-md-3 dropdown-wrapper">
                             <label class="form-label">OEM Model Name</label>
                             <span class="text-danger">*</span>
-                            <select class="form-select form-select-sm" name="oemmodelId"
+                            <select class="form-select form-select-sm" name="oemmodelId" required
                                 [(ngModel)]="PdiChecklistmastermodel.oemmodelId">
 
                                 <option [ngValue]="null">-- Select Oemmodel name --</option>

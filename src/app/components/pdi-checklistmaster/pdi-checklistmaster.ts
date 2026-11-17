@@ -2,9 +2,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { NgbModal, NgbModule, NgbPagination } from '@ng-bootstrap/ng-bootstrap';
 import { PdiChecklistMasterService } from '../../core/services/pdi-checklistmaster-service';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
+import * as XLSX from 'xlsx';
 import { LoaderService } from '../../core/services/loader';
 import { Form22MasterService } from '../../core/services/form22masterservice';
 import * as bootstrap from 'bootstrap';
@@ -25,6 +28,7 @@ export class PdiChecklistmaster implements OnInit {
   private searchDebounce = new SearchDebouncer(200);   // search runs as you type (one request per pause)
   isEditMode: boolean = false;
   isLoading: boolean = false;
+  isImportingExcel = false;
   oemModelList: any[] = [];
   selectedOemModelId: number | null = null;
   readonly SUBMENU_ID = 36;
@@ -73,10 +77,16 @@ export class PdiChecklistmaster implements OnInit {
     this.isEditMode = false;
 
     this.PdiChecklistmastermodel = {
-      oemmodelId: 0,
+      oemmodelId: null,
       checklistName: '',
+      description: '',
       isActive: true
     };
+
+    const modal = document.getElementById('pdiChecklistmasterModal');
+    if (modal) {
+      bootstrap.Modal.getOrCreateInstance(modal).show();
+    }
 
   }
   openEdit(item: any) {
@@ -89,8 +99,7 @@ export class PdiChecklistmaster implements OnInit {
 
     const modal = document.getElementById('pdiChecklistmasterModal');
     if (modal) {
-      const bsModal = new bootstrap.Modal(modal);
-      bsModal.show();
+      bootstrap.Modal.getOrCreateInstance(modal).show();
     }
   }
 
@@ -121,7 +130,164 @@ export class PdiChecklistmaster implements OnInit {
       });
   }
 
-  onSearch() {
+  downloadPdiChecklistSample(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      ['S.no', 'OEM Model Name', 'PDI Check list']
+    ]);
+    worksheet['!cols'] = [{ wch: 10 }, { wch: 25 }, { wch: 30 }];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'PDI Checklist');
+
+    const fileContents = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const file = new Blob([fileContents], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    const url = URL.createObjectURL(file);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    downloadLink.download = 'PDI_ChecklistMaster_Sample.xlsx';
+    downloadLink.style.display = 'none';
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  async uploadPdiChecklistExcel(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.isImportingExcel = true;
+    this.loader.show();
+
+    let importedCount = 0;
+    let fileError = '';
+    const rowErrors: string[] = [];
+
+    try {
+      const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+      const firstSheetName = workbook.SheetNames[0];
+      if (!firstSheetName) {
+        throw new Error('The workbook does not contain a worksheet.');
+      }
+
+      const worksheet = workbook.Sheets[firstSheetName];
+      const rows = XLSX.utils.sheet_to_json<unknown[]>(worksheet, {
+        header: 1,
+        defval: '',
+        raw: false
+      });
+      if (!rows.length) {
+        throw new Error('The worksheet is empty.');
+      }
+
+      const normalize = (value: unknown) =>
+        String(value ?? '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+      const headers = rows[0].map(normalize);
+      const serialIndex = headers.indexOf('sno');
+      const oemModelIndex = headers.indexOf('oemmodelname');
+      const checklistIndex = headers.indexOf('pdichecklist');
+
+      if (serialIndex < 0 || oemModelIndex < 0 || checklistIndex < 0) {
+        throw new Error('Required columns: S.no, OEM Model Name, and PDI Check list.');
+      }
+      if (!this.oemModelList.length) {
+        throw new Error('OEM models are not loaded. Please try again in a moment.');
+      }
+
+      const dataRows = rows.slice(1)
+        .map((row, index) => ({ row, rowNumber: index + 2 }))
+        .filter(({ row }) => row.some(value => String(value ?? '').trim() !== ''));
+
+      if (!dataRows.length) {
+        throw new Error('The worksheet has no data rows to upload.');
+      }
+
+      for (const { row, rowNumber } of dataRows) {
+        const serialNumber = String(row[serialIndex] ?? '').trim();
+        const oemModelName = String(row[oemModelIndex] ?? '').trim();
+        const checklistName = String(row[checklistIndex] ?? '').trim();
+
+        if (!oemModelName || !checklistName) {
+          rowErrors.push(`Row ${rowNumber}: OEM Model Name and PDI Check list are required.`);
+          continue;
+        }
+
+        const oemModel = this.oemModelList.find(model =>
+          normalize(model.oemModelName) === normalize(oemModelName)
+        );
+        if (!oemModel) {
+          rowErrors.push(`Row ${rowNumber}${serialNumber ? ` (S.no ${serialNumber})` : ''}: OEM model "${oemModelName}" was not found.`);
+          continue;
+        }
+
+        try {
+          const result = await firstValueFrom(
+            this.Pdichecklistmasterservice.insertPdiChecklistMaster({
+              oemmodelId: oemModel.oemmodelId,
+              checklistName,
+              description: checklistName,
+              isactive: true
+            })
+          );
+          if (result?.success === false || result?.Success === false) {
+            throw new Error(result.message ?? result.Message ?? 'The API rejected this row.');
+          }
+          importedCount++;
+        } catch (error) {
+          rowErrors.push(`Row ${rowNumber}${serialNumber ? ` (S.no ${serialNumber})` : ''}: ${this.getExcelImportErrorMessage(error)}`);
+        }
+      }
+    } catch (error) {
+      fileError = this.getExcelImportErrorMessage(error);
+    } finally {
+      this.loader.hide();
+      this.isImportingExcel = false;
+      input.value = '';
+    }
+
+    if (importedCount > 0) {
+      this.loadPdiChecklistList();
+    }
+
+    const hasErrors = Boolean(fileError) || rowErrors.length > 0;
+    const title = importedCount > 0
+      ? hasErrors ? 'Import partially completed' : 'Import successful'
+      : 'Import failed';
+    const details = [
+      `Added: ${importedCount}`,
+      `Failed: ${rowErrors.length + (fileError ? 1 : 0)}`,
+      ...(fileError ? [`File: ${fileError}`] : []),
+      ...rowErrors.slice(0, 10),
+      ...(rowErrors.length > 10 ? [`...and ${rowErrors.length - 10} more row errors.`] : [])
+    ].join('\n');
+
+    await Swal.fire({
+      icon: importedCount > 0 ? hasErrors ? 'warning' : 'success' : 'error',
+      title,
+      text: details
+    });
+  }
+
+  private getExcelImportErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const responseBody = error.error;
+      if (typeof responseBody === 'string') {
+        return responseBody.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() || error.message;
+      }
+      return responseBody?.message ?? responseBody?.title ?? error.message;
+    }
+
+    return error instanceof Error ? error.message : 'Unknown error.';
+  }
+
+  onSearch(searchText: string) {
+    this.searchText = searchText;
     this.searchDebounce.run(() => {
       this.page = 1;
       this.loadPdiChecklistList();
@@ -146,9 +312,9 @@ export class PdiChecklistmaster implements OnInit {
           this.loader.hide();
           this.afterSave(form, 'Updated successfully');
         },
-        error: () => {
+        error: (error: HttpErrorResponse) => {
           this.loader.hide();
-          this.showError()
+          this.showError(error);
         }
       });
     } else {
@@ -159,9 +325,9 @@ export class PdiChecklistmaster implements OnInit {
           this.loader.hide();
           this.afterSave(form, 'Inserted successfully');
         },
-        error: () => {
+        error: (error: HttpErrorResponse) => {
           this.loader.hide();
-          this.showError()
+          this.showError(error);
         }
       });
     }
@@ -178,13 +344,8 @@ export class PdiChecklistmaster implements OnInit {
       const modalEl = document.getElementById('pdiChecklistmasterModal');
 
       if (modalEl) {
-        const modal = bootstrap.Modal.getInstance(modalEl);
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         modal?.hide();
-
-        document.body.classList.remove('modal-open');
-
-        document.querySelectorAll('.modal-backdrop')
-          .forEach(el => el.remove());
       }
 
       form.resetForm();
@@ -193,11 +354,17 @@ export class PdiChecklistmaster implements OnInit {
       this.loadPdiChecklistList();
     });
   }
-  showError() {
+  showError(error: HttpErrorResponse) {
+    const responseBody = error.error;
+    const serverMessage = typeof responseBody === 'string'
+      ? responseBody.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+      : responseBody?.message ?? responseBody?.title;
+    const message = serverMessage || error.message || `Request failed (HTTP ${error.status}).`;
+
     Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: 'Something went wrong'
+      text: message.slice(0, 500)
     });
   }
   deletePdiCheclistMaster(pdicheckId: number, event: Event) {

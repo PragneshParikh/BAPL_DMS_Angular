@@ -263,8 +263,7 @@ export class TopbarComponent implements OnInit {
     const search = filter.toLowerCase();
     let results: any[] = [];
 
-    const matches =
-      item.label?.toLowerCase().includes(search) && item.link != null && item.module.toLowerCase() === this.selectedOption.toLowerCase();
+    const matches = item.label?.toLowerCase().includes(search) && item.link != null;
 
     // Include item ONLY if it has link and matches
     if (matches) {
@@ -295,8 +294,25 @@ export class TopbarComponent implements OnInit {
     searchInputReponsive.value = "";
 
     if (selectedForm) {
+      const moduleOption = this.moduleOptionFor(selectedForm.module);
+      if (moduleOption && moduleOption !== this.selectedOption) {
+        this.selectedOption = moduleOption;
+        this.storageService.setSelectedModule(moduleOption);
+        this.menuService.filterMenu(moduleOption);
+      }
+
       this.router.navigate([selectedForm.link]);
     }
+  }
+
+  private moduleOptionFor(module: string | undefined): string | null {
+    const normalizedModule = (module ?? '').toLowerCase().replace(/[^a-z]/g, '');
+
+    if (normalizedModule.includes('showroom')) return 'ShowRoom';
+    if (normalizedModule.includes('workshop')) return 'WorkShop';
+    if (normalizedModule.includes('account')) return 'Account';
+
+    return null;
   }
 
   // Remove Notification
