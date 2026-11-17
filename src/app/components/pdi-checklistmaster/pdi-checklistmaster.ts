@@ -47,8 +47,9 @@ export class PdiChecklistmaster implements OnInit {
   sortColumn: string;
   sortDirection: string;
   filteredData: any;
-  pagedData: any;
+  pagedData: any[] = [];
   userRole: string = '';
+  readonly pageSizeOptions = [10, 25, 50, 100];
 
 
   constructor(
@@ -71,7 +72,15 @@ export class PdiChecklistmaster implements OnInit {
   //pagination
   page = 1;
   pageSize = 10;
-  collectionSize = 1;
+  collectionSize = 0;
+
+  get firstVisibleRecord(): number {
+    return this.collectionSize === 0 ? 0 : (this.page - 1) * this.pageSize + 1;
+  }
+
+  get lastVisibleRecord(): number {
+    return Math.min(this.page * this.pageSize, this.collectionSize);
+  }
 
   openAddpdiChecklist() {
     this.isEditMode = false;
@@ -122,6 +131,7 @@ export class PdiChecklistmaster implements OnInit {
         next: (res: any[]) => {
           this.loader.hide();
           this.checklistList = res;
+          this.refreshTable();
         },
         error: (err) => {
           this.loader.hide();
@@ -130,12 +140,42 @@ export class PdiChecklistmaster implements OnInit {
       });
   }
 
+  downloadPdiChecklistExcel(): void {
+    if (!this.checklistList.length) {
+      void Swal.fire({
+        icon: 'info',
+        title: 'No records to download',
+        text: 'There are no PDI checklist records to export.'
+      });
+      return;
+    }
+
+    const rows = this.checklistList.map((item, index) => [
+      index + 1,
+      item.oemModelName ?? '',
+      item.checklistName ?? '',
+      item.isActive ? 'Yes' : 'No'
+    ]);
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      ['Sr. No.', 'OEM Model Name', 'PDI Checkpoint', 'Status'],
+      ...rows
+    ]);
+    worksheet['!cols'] = [{ wch: 10 }, { wch: 25 }, { wch: 60 }, { wch: 12 }];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'PDI Checklist');
+    XLSX.writeFile(
+      workbook,
+      `PDI_ChecklistMaster_${new Date().toISOString().slice(0, 10)}.xlsx`
+    );
+  }
+
   downloadPdiChecklistSample(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
 
     const worksheet = XLSX.utils.aoa_to_sheet([
-      ['S.no', 'OEM Model Name', 'PDI Check list']
+      ['S.no', 'OEM Model Name', 'PDI Checkpoint']
     ]);
     worksheet['!cols'] = [{ wch: 10 }, { wch: 25 }, { wch: 30 }];
 
@@ -191,10 +231,12 @@ export class PdiChecklistmaster implements OnInit {
       const headers = rows[0].map(normalize);
       const serialIndex = headers.indexOf('sno');
       const oemModelIndex = headers.indexOf('oemmodelname');
-      const checklistIndex = headers.indexOf('pdichecklist');
+      const checklistIndex = headers.indexOf('pdicheckpoint') >= 0
+        ? headers.indexOf('pdicheckpoint')
+        : headers.indexOf('pdichecklist');
 
       if (serialIndex < 0 || oemModelIndex < 0 || checklistIndex < 0) {
-        throw new Error('Required columns: S.no, OEM Model Name, and PDI Check list.');
+        throw new Error('Required columns: S.no, OEM Model Name, and PDI Checkpoint.');
       }
       if (!this.oemModelList.length) {
         throw new Error('OEM models are not loaded. Please try again in a moment.');
@@ -433,15 +475,24 @@ export class PdiChecklistmaster implements OnInit {
     this.refreshTable();
   }
 
-  refreshTable() {
+  onPageSizeChange(pageSize: number): void {
+    this.pageSize = Number(pageSize);
+    this.page = 1;
+    this.refreshTable();
+  }
 
+  refreshTable() {
     if (!Array.isArray(this.checklistList)) {
-      this.filteredData = [];
+      this.pagedData = [];
+      this.collectionSize = 0;
+      return;
     }
 
+    this.collectionSize = this.checklistList.length;
+    const lastPage = Math.max(1, Math.ceil(this.collectionSize / this.pageSize));
+    this.page = Math.min(this.page, lastPage);
     const start = (this.page - 1) * this.pageSize;
     const end = start + this.pageSize;
-
     this.pagedData = this.checklistList.slice(start, end);
   }
 
