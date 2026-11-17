@@ -27,6 +27,10 @@
                         </button>
                     </div>
                     <div class="col-md-6 ms-auto d-flex flex-wrap justify-content-end align-items-center gap-2">
+                        <button type="button" class="btn btn-outline-success btn-sm"
+                            (click)="downloadPdiChecklistExcel()">
+                            <i class="ri-file-excel-2-line"></i> Export To Excel
+                        </button>
                         <button type="button" class="btn btn-outline-primary btn-sm" *ngIf="canCreate"
                             (click)="downloadPdiChecklistSample($event)">
                             <i class="ri-download-2-line"></i> Sample Excel
@@ -57,24 +61,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let item of checklistList; let i = index" (dblclick)="canEdit ? openEdit(item) : null"
-                                style="cursor:pointer">
-                                <td>{{i + 1}}</td>
+                            <tr *ngFor="let item of pagedData; let i = index">
+                                <td>{{(page - 1) * pageSize + i + 1}}</td>
                                 <td>{{item.oemModelName }}</td>
                                 <td>{{item.checklistName}}</td>
                                 <td>{{item.isActive ? 'Yes' : 'No'}}</td>
-                                 <!-- <td> -->
-                                 <!--<button class="btn btn-sm btn-soft-sm btn-soft-primary me-1" data-bs-toggle="modal"
-                                        data-bs-target="#pdiChecklistmasterModal" (click)="openEdit(item)">
-                                        <i class="ri-pencil-line"></i>
-                                    </button> -->
-                                    <!-- (click)="edit(item)" -->
-                                    <!-- <button class="btn btn-sm btn-soft-sm btn-soft-danger me-1"
-                                        (click)="deletePdiCheclistMaster(item.id,$event)">
-                                        <i class="ri-delete-bin-line"></i>
-                                    </button>
-                                </td> -->
                                 <td>
+                                    <button type="button" class="btn btn-sm btn-soft-primary me-1" *ngIf="canEdit"
+                                        aria-label="Edit PDI checklist" title="Edit" (click)="openEdit(item)">
+                                        <i class="ri-pencil-line"></i>
+                                    </button>
                                     <button class="btn btn-sm btn-soft-sm btn-soft-danger me-1" *ngIf="canDelete"
                                         (click)="deletePdiCheclistMaster(item.id,$event)">
                                         <i class="ri-delete-bin-line"></i>
@@ -90,16 +86,24 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="row justify-content-md-center align-items-md-center">
-                    <!-- Pagination -->
-                    <div class="col-sm-12 col-md-12">
-                        <div class="text-md-right float-md-end gridjs-pagination">
-                            <ngb-pagination [(page)]="page" [pageSize]="pageSize" [collectionSize]="collectionSize" [maxSize]="5" [boundaryLinks]="true">
-                            </ngb-pagination>
-                            <!--  (pageChange)="pageChange($event)" -->
-                        </div>
+                <div class="pdi-table-footer d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <label for="pdiPageSize" class="mb-0 text-muted">Show</label>
+                        <select id="pdiPageSize" class="form-select form-select-sm pdi-page-size"
+                            [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange($event)">
+                            <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{size}}</option>
+                        </select>
+                        <span class="text-muted">entries</span>
+                        <span class="pdi-record-summary">
+                            Showing {{firstVisibleRecord}}–{{lastVisibleRecord}} of {{collectionSize}}
+                        </span>
                     </div>
-                    <!-- End Pagination -->
+                    <div class="pdi-pagination">
+                        <ngb-pagination [(page)]="page" [pageSize]="pageSize"
+                            [collectionSize]="collectionSize" (pageChange)="refreshTable()"
+                            [maxSize]="5" [rotate]="true" [ellipses]="true" [boundaryLinks]="true" size="sm">
+                        </ngb-pagination>
+                    </div>
                 </div>
             </div>
         </div>
