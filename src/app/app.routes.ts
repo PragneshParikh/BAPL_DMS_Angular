@@ -321,6 +321,7 @@ export const routes: Routes = [
       // Jobcard Servicehistory Excel import -> BAPLDMSvad.dbo.JobCardServiceHistory - MenuMaster 146 (Utility). API allows Admin/SuperAdmin only.
       // Reports (MenuMaster parent 21): imported service history - Service History 147, Job Data 148. API allows Admin/SuperAdmin only.
       { path: 'service-history', data: [147], loadComponent: () => import('./components/Reports/service-history/service-history').then(m => m.ServiceHistory) },
+      {path: 'line-order-report',data: [149],loadComponent: () => import('./components/Reports/line-order-report/line-order-report').then(m => m.LineOrderReport)},
       { path: 'job-data', data: [148], loadComponent: () => import('./components/Reports/job-data/job-data').then(m => m.JobData) },
       { path: 'jobcard-servicehistory-import', data: [146], loadComponent: () => import('./components/jobcard-servicehistory-import/jobcard-servicehistory-import').then(m => m.JobcardServicehistoryImport) },
       { path: 'stock-adjustment', component: StockAdjustment, data: [136] },
