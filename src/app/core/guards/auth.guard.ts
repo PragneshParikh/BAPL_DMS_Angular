@@ -58,9 +58,13 @@ export class AuthGuard {
             return false;
         }
 
-        const right = menuRights.find(r => r.subMenuId === subMenuId);
+        // A user can have more than one rights row for a page (two roles, or legacy
+        // duplicate rows). Combine them - a 0-permission row must not hide a grant.
+        const permission = (menuRights || [])
+            .filter(r => Number(r?.subMenuId) === Number(subMenuId))
+            .reduce((acc, r) => acc | (Number(r?.permission) || 0), 0);
 
-        const hasAccess = right && right.permission > 0;
+        const hasAccess = permission > 0;
 
         if (!hasAccess) {
             this.router.navigate(['/']);

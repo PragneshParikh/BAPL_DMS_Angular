@@ -5,13 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { ProformaInvoiceService } from '../../core/services/proforma-invoice-service';
 import { NgbPaginationModule, NgbHighlight } from '@ng-bootstrap/ng-bootstrap';
 import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
-import { RouterOutlet } from '@angular/router';
 import { MenuAccessService } from '../../core/services/menu-access.service';
 import { filterRows } from '../../shared/search/table-search';
 @Component({
   selector: 'app-proforma-invoice',
   imports: [CommonModule, FormsModule, NgbPaginationModule,
-    NgbHighlight, FlatpickrModule, RouterOutlet],
+    NgbHighlight, FlatpickrModule],
   templateUrl: './proforma-invoice.html',
   styleUrl: './proforma-invoice.scss',
   providers: [FlatpickrDefaults]

@@ -31,7 +31,7 @@ interface StockAdjustmentItem {
   updateStock: number;
   upQty: number;
   finalQty: number;
-  stg: number;
+  Sdj: number;
   remarks: string;
 }
 
@@ -67,7 +67,7 @@ export class StockAdjustment implements OnInit, OnDestroy {
   currentQty: number | null = null;
   updateQty: number | null = null;
   upQty: number | null = null;
-  stg: number | null = null;
+  Sdj: number | null = null;
   finalQty: number | null = null;
   remarks = '';
 
@@ -158,7 +158,8 @@ export class StockAdjustment implements OnInit, OnDestroy {
             return;
           }
           console.log('Location API Response', res);
-          this.lstLocations = this.getActiveLocations(responseLocations);
+          this.lstLocations = this.getActiveLocations(responseLocations)
+          .filter(location => Number(location.locareaidno) === 2);
           this.isLoadingLocations = false;
           this.loader.hide();
         },
@@ -428,7 +429,7 @@ export class StockAdjustment implements OnInit, OnDestroy {
       this.currentQty = null;
       this.updateQty = null;
       this.upQty = null;
-      this.stg = null;
+      this.Sdj = null;
       this.finalQty = null;
       return;
     }
@@ -439,7 +440,7 @@ export class StockAdjustment implements OnInit, OnDestroy {
     this.currentQty = part.currentStock ?? 0;
     this.updateQty = null;
     this.upQty = null;
-    this.stg = null;
+    this.Sdj = null;
     this.finalQty = null;
     this.refreshSelectedPartStock(part.partNo);
   }
@@ -511,14 +512,14 @@ export class StockAdjustment implements OnInit, OnDestroy {
       this.updateQty !== null && this.currentQty !== null
         ? this.updateQty - this.currentQty
         : null;
-    this.stg =
+    this.Sdj =
       this.upQty !== null && this.currentQty !== null
         ? this.upQty
         : null;
 
     this.finalQty =
-      this.stg !== null && this.currentQty !== null
-        ? this.currentQty + this.stg
+      this.Sdj !== null && this.currentQty !== null
+        ? this.currentQty + this.Sdj
         : null;
   }
 
@@ -561,7 +562,7 @@ export class StockAdjustment implements OnInit, OnDestroy {
       currentStock: this.currentQty,
       updateStock: this.updateQty,
       upQty: this.upQty ?? 0,
-      stg: this.stg ?? 0,
+      Sdj: this.Sdj ?? 0,
       finalQty: this.finalQty ?? this.currentQty,
       remarks: this.remarks.trim()
     };
@@ -595,7 +596,7 @@ export class StockAdjustment implements OnInit, OnDestroy {
     this.currentQty = item.currentStock;
     this.updateQty = item.updateStock;
     this.upQty = item.upQty;
-    this.stg = item.stg;
+    this.Sdj = item.Sdj;
     this.finalQty = item.finalQty;
     this.remarks = item.remarks;
   }
@@ -671,7 +672,7 @@ export class StockAdjustment implements OnInit, OnDestroy {
               rateStock: latestPart.rateStock ?? item.rateStock,
               currentStock,
               upQty: adjustmentQty,
-              stg: adjustmentQty,
+              Sdj: adjustmentQty,
               finalQty: item.updateStock
             });
           }
@@ -710,9 +711,9 @@ export class StockAdjustment implements OnInit, OnDestroy {
         currentStock: item.currentStock,
         finalStock: item.finalQty,
         updateQty: item.updateStock,
-        stockAdjustmentQty: item.stg,
+        stockAdjustmentQty: item.Sdj,
         updateStock: item.updateStock,
-        upQuantityStg: item.stg,
+        upQuantityStg: item.Sdj,
         finalQty: item.finalQty
       }))
     };
@@ -758,7 +759,7 @@ export class StockAdjustment implements OnInit, OnDestroy {
     this.currentQty = null;
     this.updateQty = null;
     this.upQty = null;
-    this.stg = null;
+    this.Sdj = null;
     this.finalQty = null;
     this.partSearchError = '';
     this.editingIndex = null;
@@ -1020,7 +1021,7 @@ export class StockAdjustment implements OnInit, OnDestroy {
               currentStock: currentStock,
               updateStock: updateStock,
               upQty: diff,
-              stg: diff,
+              Sdj: diff,
               finalQty: updateStock,
               remarks: x.remarks ?? ''
             };
@@ -1038,7 +1039,7 @@ export class StockAdjustment implements OnInit, OnDestroy {
             this.currentQty = first.currentStock;
             this.updateQty = first.updateStock;
             this.upQty = first.upQty;
-            this.stg = first.stg;
+            this.Sdj = first.Sdj;
             this.finalQty = first.finalQty;
 
             // IMPORTANT
@@ -1087,7 +1088,7 @@ export class StockAdjustment implements OnInit, OnDestroy {
               updateStock: x.updateStock,
 
               upQty: x.upQuantityStg,
-              stg: x.upQuantityStg,
+              Sdj: x.upQuantityStg,
 
               finalQty: x.finalQty,
 

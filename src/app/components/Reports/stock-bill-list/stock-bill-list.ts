@@ -82,7 +82,8 @@ export class StockBillListComponent implements OnInit {
           ? res
           : res?.data;
 
-        this.locationList = responseLocations || [];
+       this.locationList = (responseLocations || [])
+    .filter((location: any) => Number(location.locareaidno) === 2);
 
       },
       error: (err: any) => {

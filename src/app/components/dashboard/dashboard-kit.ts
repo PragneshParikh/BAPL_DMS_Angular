@@ -38,6 +38,28 @@ export function isoDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+/** Every dashboard opens on 01.01.2020 - today. */
+export const DEFAULT_FROM = '2020-01-01';
+export const FIRST_FY = 2020;            // FY 2020-21 is the first one in the list
+export interface DateRange { from: string; to: string; }
+export interface FyOption { key: string; label: string; from: string; to: string; }
+
+export function defaultRange(today = new Date()): DateRange {
+  return { from: DEFAULT_FROM, to: isoDate(today) };
+}
+
+/** FY 2020-21 ... current FY (Apr-Mar); the current FY ends today. Newest first. */
+export function fyOptions(today = new Date()): FyOption[] {
+  const now = isoDate(today);
+  const current = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1;
+  const list: FyOption[] = [];
+  for (let y = current; y >= FIRST_FY; y--) {
+    const end = `${y + 1}-03-31`;
+    list.push({ key: String(y), label: `FY ${y}-${String(y + 1).slice(2)}`, from: `${y}-04-01`, to: end < now ? end : now });
+  }
+  return list;
+}
+
 /** Indian FY periods: FY = 1 Apr - 31 Mar, quarters Apr-Jun, Jul-Sep, Oct-Dec, Jan-Mar. */
 export function periodRange(key: PeriodKey, today = new Date()): { from: string; to: string } {
   const y = today.getFullYear();
@@ -188,8 +210,9 @@ export function hBarChart(labels: string[], data: number[], opts: {
 }
 
 /** Area/line trend with optional second axis (e.g. units + revenue). */
-export function trendChart(labels: string[], primary: { name: string; data: number[] }, secondary?: { name: string; data: number[]; money?: boolean },
+export function trendChart(labels: string[], primary: { name: string; data: number[]; money?: boolean }, secondary?: { name: string; data: number[]; money?: boolean },
                            opts: { height?: number; onClick?: ClickFn } = {}): any {
+  const pf = primary.money ? inr : num;
   const series: any[] = [{ ...primary, type: 'column' }];
   if (secondary) series.push({ name: secondary.name, data: secondary.data, type: 'area' });
   return {
@@ -204,12 +227,13 @@ export function trendChart(labels: string[], primary: { name: string; data: numb
     xaxis: { categories: labels, labels: { ...axisLabel, rotate: -30, hideOverlappingLabels: true }, axisBorder: { color: COLORS.grid }, axisTicks: { show: false },
              tickAmount: labels.length > 16 ? 12 : undefined },
     yaxis: secondary ? [
-      { seriesName: primary.name, min: 0, forceNiceScale: true, labels: { ...axisLabel, formatter: (v: number) => num(v) }, title: { text: primary.name, style: { color: COLORS.axis, fontWeight: 500 } } },
+      { seriesName: primary.name, min: 0, forceNiceScale: true, labels: { ...axisLabel, formatter: (v: number) => pf(v) }, title: { text: primary.name, style: { color: COLORS.axis, fontWeight: 500 } } },
       { seriesName: secondary.name, opposite: true, min: 0, forceNiceScale: true, labels: { ...axisLabel, formatter: (v: number) => secondary.money ? inr(v) : num(v) },
         title: { text: secondary.name, style: { color: COLORS.axis, fontWeight: 500 } } }
-    ] : { min: 0, forceNiceScale: true, labels: { ...axisLabel, formatter: (v: number) => num(v) } },
+    ] : { min: 0, forceNiceScale: true, labels: { ...axisLabel, formatter: (v: number) => pf(v) } },
     grid, legend,
-    tooltip: { shared: true, intersect: false, y: { formatter: (v: number, o: any) => (o?.seriesIndex === 1 && secondary?.money) ? inr(v) : num(v) } }
+    tooltip: { shared: true, intersect: false, y: { formatter: (v: number, o: any) =>
+      o?.seriesIndex === 1 ? (secondary?.money ? inr(v) : num(v)) : pf(v) } }
   };
 }
 
@@ -251,6 +275,9 @@ export function radialChart(value: number, label: string, opts: { height?: numbe
 export abstract class DashboardBase implements OnDestroy {
   readonly periods = PERIODS;
   readonly links = REPORT_LINKS;
+  /** Selected date range (yyyy-MM-dd); default 01.01.2020 - today. */
+  from = defaultRange().from;
+  to = defaultRange().to;
   readonly num = num;
   readonly inr = inr;
   private charts: ApexCharts[] = [];
@@ -274,6 +301,17 @@ export abstract class DashboardBase implements OnDestroy {
       this.charts.push(chart);
     });
   }
+
+  get periodLabel(): string { return fmtRange(this.from, this.to); }
+
+  /** Called by <app-db-filter> when the FY or dates change. */
+  onRange(r: DateRange): void {
+    this.from = r.from;
+    this.to = r.to;
+    this.load();
+  }
+
+  abstract load(): void;
 
   ngOnDestroy(): void {
     this.resetCharts();

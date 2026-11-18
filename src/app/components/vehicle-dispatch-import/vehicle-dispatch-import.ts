@@ -11,6 +11,8 @@ import {
 } from '../../core/services/vehicle-dispatch.service';
 import { StorageService } from '../../core/services/storage';
 import { ToastService } from '../../shared/toaster/toast-service';
+import { ImportProgressInfo, ImportProgressService } from '../../shared/import-progress/import-progress.service';
+import { ImportProgressPanel } from '../../shared/import-progress/import-progress';
 
 type SheetState = 'Waiting' | 'Validating' | 'Validated' | 'Importing' | 'Imported' | 'Failed';
 
@@ -20,12 +22,14 @@ interface QueueItem {
   state: SheetState;
   result?: DispatchImportResult;
   error?: string;
+  /** live status of the running / last validate or import (step, rows, chassis saved, batch n of m) */
+  progress?: ImportProgressInfo | null;
 }
 
 @Component({
   selector: 'app-vehicle-dispatch-import',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ImportProgressPanel],
   templateUrl: './vehicle-dispatch-import.html',
   styleUrl: '../vehicle-sale-import/vehicle-sale-import.scss'
 })
@@ -47,7 +51,8 @@ export class VehicleDispatchImport implements OnInit {
   constructor(
     private api: VehicleDispatchService,
     private storage: StorageService,
-    private toaster: ToastService
+    private toaster: ToastService,
+    private progressApi: ImportProgressService
   ) { }
 
   ngOnInit(): void {
@@ -158,8 +163,12 @@ export class VehicleDispatchImport implements OnInit {
     this.busy = true;
     item.state = dryRun ? 'Validating' : 'Importing';
     item.error = undefined;
+    // live status: the API reports step / rows / chassis saved / batch while this request is running
+    const progressId = this.progressApi.newId();
+    item.progress = null;
+    const watch = this.progressApi.watch(progressId, p => item.progress = p);
     try {
-      item.result = await firstValueFrom(this.api.importSheet(item.file, this.options(dryRun, item)));
+      item.result = await firstValueFrom(this.api.importSheet(item.file, { ...this.options(dryRun, item), progressId }));
       item.state = dryRun ? 'Validated' : 'Imported';
       if (!dryRun) this.toast(`${this.label(item)}: ${this.num(item.result.vehiclesImported)} chassis added, ${this.num(item.result.vehiclesUpdated)} refreshed.`, 'success');
     } catch (e: any) {
@@ -167,6 +176,9 @@ export class VehicleDispatchImport implements OnInit {
       item.error = this.err(e);
       this.toast(`${this.label(item)}: ${item.error}`, 'danger');
     } finally {
+      watch.unsubscribe();
+      // final status (complete / failed) for the panel
+      this.progressApi.get(progressId).subscribe(p => { if (p) item.progress = p; });
       this.busy = false;
     }
   }

@@ -1,0 +1,133 @@
+<!-- src\app\components\dashboard\account-analytics\account-analytics.html -->
+<div class="db-head">
+  <div>
+    <h4 class="db-title">Account Dashboard</h4>
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a routerLink="/">Dashboard</a></li>
+      <li class="breadcrumb-item active">Account Dashboard</li>
+    </ol>
+  </div>
+  <div class="db-head-actions">
+    <button type="button" class="btn btn-light" (click)="load()" [disabled]="loading"><i class="ri-refresh-line me-1" [class.db-spin]="loading"></i>Refresh</button>
+    <a class="btn btn-outline-success" [routerLink]="acc.receipts"><i class="ri-file-list-3-line me-1"></i>Receipt Entry</a>
+  </div>
+</div>
+<app-db-filter [from]="from" [to]="to" [loading]="loading" (rangeChange)="onRange($event)"></app-db-filter>
+
+@if (anyFailed) {
+  <div class="alert alert-warning py-2">
+    <i class="ri-error-warning-line me-1"></i>{{ failed.receipts ? 'Receipt data' : 'Billed (sale) data' }} could not be loaded. Showing what is available — click Refresh to retry.
+  </div>
+}
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="acc.receipts">
+      <div class="db-kpi-body"><span class="db-kpi-label">Receipts Collected</span><span class="db-kpi-value">{{ loading ? '…' : inr(receiptValue) }}</span>
+        <span class="db-kpi-sub">{{ num(receiptCount) }} receipts · {{ num(partyCount) }} parties</span></div>
+      <span class="db-kpi-icon kpi-success"><i class="ri-hand-coin-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="acc.receipts">
+      <div class="db-kpi-body"><span class="db-kpi-label">Avg. Receipt</span><span class="db-kpi-value">{{ loading ? '…' : inr(avgReceipt) }}</span>
+        <span class="db-kpi-sub">{{ num(financedReceipts) }} receipts with financier</span></div>
+      <span class="db-kpi-icon kpi-blue"><i class="ri-receipt-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="acc.vehicleSale">
+      <div class="db-kpi-body"><span class="db-kpi-label">Vehicle Sales Billed</span><span class="db-kpi-value">{{ loading ? '…' : inr(billedValue) }}</span>
+        <span class="db-kpi-sub">{{ num(billedUnits) }} vehicles billed</span></div>
+      <span class="db-kpi-icon kpi-warning"><i class="ri-file-text-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi" [routerLink]="acc.ledger">
+      <div class="db-kpi-body"><span class="db-kpi-label">Receipts vs Billed</span><span class="db-kpi-value">{{ loading ? '…' : receiptToBilledPct + '%' }}</span>
+        <span class="db-kpi-sub">Receipt value as % of billed value</span></div>
+      <span class="db-kpi-icon kpi-purple"><i class="ri-scales-3-line"></i></span>
+    </a>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-8">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head">
+        <h4 class="card-title mb-0"><i class="ri-line-chart-line"></i>Receipts vs Billed Value</h4>
+        <a [routerLink]="acc.receipts" class="db-link">View receipts <i class="ri-arrow-right-up-line"></i></a>
+      </div>
+      <div class="card-body db-chart-body">
+        <div #trend class="db-chart db-clickable"></div>
+        @if (!receipts.length && !sales.length) { <div class="db-empty">{{ loading ? 'Loading…' : 'No receipts or bills in this period.' }}</div> }
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-pie-chart-2-line"></i>Receipts by Sale Type</h4></div>
+      <div class="card-body db-chart-body">
+        <div #bySaleType class="db-chart db-clickable"></div>
+        @if (!hasReceipts) { <div class="db-empty">{{ loading ? 'Loading…' : 'No receipts in this period.' }}</div> }
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-6">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-bank-line"></i>Receipts by Financier</h4></div>
+      <div class="card-body db-chart-body">
+        <div #byFinancier class="db-chart db-clickable"></div>
+        @if (!hasFinancier) { <div class="db-empty">{{ loading ? 'Loading…' : 'No financier receipts in this period.' }}</div> }
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-6">
+    <div class="card db-card h-100 mb-0">
+      <div class="card-header db-card-head"><h4 class="card-title mb-0"><i class="ri-map-pin-line"></i>Receipts by Location</h4></div>
+      <div class="card-body db-chart-body">
+        <div #byLocation class="db-chart db-clickable"></div>
+        @if (!hasReceipts) { <div class="db-empty">{{ loading ? 'Loading…' : 'No receipts in this period.' }}</div> }
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card db-card">
+  <div class="card-header db-card-head">
+    <h4 class="card-title mb-0"><i class="ri-table-line"></i>Recent Receipts</h4>
+    <div class="db-search"><i class="ri-search-line"></i>
+      <input type="text" class="form-control" placeholder="Search receipt no, party, financier…" [(ngModel)]="search">
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 db-table">
+        <thead>
+          <tr><th>Date</th><th>Receipt No</th><th>Party</th><th>Sale Type</th><th>Financier</th><th>Location</th><th class="text-end">Amount</th></tr>
+        </thead>
+        <tbody>
+          @for (r of recentReceipts; track r.id) {
+            <tr class="db-clickable" (click)="open()">
+              <td>{{ receiptDate(r) }}</td>
+              <td><span class="db-cell db-cell-sm fw-medium" [title]="r.receiptNo">{{ r.receiptNo || '—' }}</span></td>
+              <td>
+                <span class="db-cell" [title]="r.partyName || ''">{{ r.partyName || '—' }}</span>
+                @if (r.bookingId) { <span class="db-sub">Booking {{ r.bookingId }}</span> }
+              </td>
+              <td>{{ r.saleType || '—' }}</td>
+              <td><span class="db-cell db-cell-sm" [title]="r.financier || ''">{{ r.financier || '—' }}</span></td>
+              <td><span class="db-cell db-cell-sm" [title]="r.location || ''">{{ r.location || r.dealerCode || '—' }}</span></td>
+              <td class="text-end fw-semibold">{{ inr(amountOf(r)) }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="text-center text-muted py-4">{{ loading ? 'Loading…' : 'No matching receipts.' }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

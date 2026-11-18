@@ -105,6 +105,7 @@ import { LocationEditPage } from './components/dealer-creation/dealer-location-e
 import { WarrantyRegister } from './components/Reports/warranty-register/warranty-register';
 import { MenuRight } from './components/menu-right/menu-right';
 import { RoleMenuRights } from './components/role-menu-rights/role-menu-rights';
+import { StockBillListComponent } from './components/Reports/stock-bill-list/stock-bill-list';
 import { StockAdjustment } from './components/stock-adjustment/stock-adjustment';
 import { StockAdjustmentReport } from './components/Reports/stock-adjustment-report/stock-adjustment-report';
 
@@ -293,7 +294,6 @@ export const routes: Routes = [
       { path: 'warranty-invoice', component: WarrantyInvoice, data: [113] }, 
       { path: 'warranty-invoice-list', component: WarrantyInvoiceList, data: [113] },
       { path: 'uw-line-item', component: UwLineItem, data: [115] },
-      { path: 'bg-free-service', data: [145], loadComponent: () => import('./components/bg-free-service/bg-free-service').then(m => m.BgFreeService) },
       { path: 'warranty-packaging', component: WarrantyPackaging, data: [116] },
       { path: 'warranty-dispatch', component: WarrantyDispatch, data: [129] },
       { path: 'warranty-dispatch/:id', component: WarrantyDispatch, data: [129] },
@@ -310,12 +310,23 @@ export const routes: Routes = [
       { path: 'dealer-analytics', data: [133], loadComponent: () => import('./components/dashboard/dealer-analytics/dealer-analytics').then(m => m.DealerAnalytics) },
       { path: 'sales-analytics', data: [134], loadComponent: () => import('./components/dashboard/sales-analytics/sales-analytics').then(m => m.SalesAnalytics) },
       { path: 'stock-analytics', data: [135], loadComponent: () => import('./components/dashboard/stock-analytics/stock-analytics').then(m => m.StockAnalytics) },
+      // Job Card Dashboard (MenuMaster 138, WorkShop) and Account Dashboard (MenuMaster 144, Account) - both under Dashboard (131)
       { path: 'workshop-analytics', data: [138], loadComponent: () => import('./components/dashboard/workshop-analytics/workshop-analytics').then(m => m.WorkshopAnalytics) },
+      { path: 'account-dashboard', data: [144], loadComponent: () => import('./components/dashboard/account-analytics/account-analytics').then(m => m.AccountAnalytics) },
       // Cogxim (old DMS) sale register Excel import - MenuMaster 137 (Utility). API allows Admin/SuperAdmin only.
       { path: 'vehicle-sale-import', data: [137], loadComponent: () => import('./components/vehicle-sale-import/vehicle-sale-import').then(m => m.VehicleSaleImport) },
       // Vehicle Dispatch (MenuMaster 139 parent): Cogxim dispatch import (140) + dispatch report (141). SuperAdmin only.
       { path: 'vehicle-dispatch-import', data: [140], loadComponent: () => import('./components/vehicle-dispatch-import/vehicle-dispatch-import').then(m => m.VehicleDispatchImport) },
       { path: 'vehicle-dispatch-report', data: [141], loadComponent: () => import('./components/Reports/vehicle-dispatch-report/vehicle-dispatch-report').then(m => m.VehicleDispatchReportComponent) },
+      // Jobcard Servicehistory Excel import -> BAPLDMSvad.dbo.JobCardServiceHistory - MenuMaster 146 (Utility). API allows Admin/SuperAdmin only.
+      // Reports (MenuMaster parent 21): imported service history - Service History 147, Job Data 148. API allows Admin/SuperAdmin only.
+      { path: 'service-history', data: [147], loadComponent: () => import('./components/Reports/service-history/service-history').then(m => m.ServiceHistory) },
+      { path: 'job-data', data: [148], loadComponent: () => import('./components/Reports/job-data/job-data').then(m => m.JobData) },
+      { path: 'jobcard-servicehistory-import', data: [146], loadComponent: () => import('./components/jobcard-servicehistory-import/jobcard-servicehistory-import').then(m => m.JobcardServicehistoryImport) },
+      { path: 'stock-adjustment', component: StockAdjustment, data: [136] },
+      { path: 'stock-bill-list', component: StockBillListComponent, data: [136] },
+      { path: 'stock-adjustment-report', component: StockAdjustmentReport, data: [136] },
+      { path: 'bg-free-service', data: [145], loadComponent: () => import('./components/bg-free-service/bg-free-service').then(m => m.BgFreeService) },
     ]
   },
   { path: '**', component: WorkInProgress }

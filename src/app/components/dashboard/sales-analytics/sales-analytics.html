@@ -8,15 +8,11 @@
     </ol>
   </div>
   <div class="db-head-actions">
-    <div class="db-seg" role="group" aria-label="Period">
-      @for (p of periods; track p.key) {
-        <button type="button" [class.active]="period === p.key" (click)="setPeriod(p.key)" [disabled]="loading">{{ p.label }}</button>
-      }
-    </div>
+    <button type="button" class="btn btn-light" (click)="load()" [disabled]="loading"><i class="ri-refresh-line me-1" [class.db-spin]="loading"></i>Refresh</button>
     <a class="btn btn-outline-success" [routerLink]="links.vehicleSale"><i class="ri-file-chart-line me-1"></i>Full Report</a>
   </div>
 </div>
-<p class="db-range"><i class="ri-calendar-line me-1"></i>{{ periodLabel }}</p>
+<app-db-filter [from]="from" [to]="to" [loading]="loading" (rangeChange)="onRange($event)"></app-db-filter>
 
 @if (failed) {
   <div class="alert alert-warning py-2"><i class="ri-error-warning-line me-1"></i>Sales data could not be loaded. Try again or open the full report.</div>
@@ -123,10 +119,13 @@
           @for (r of topSales; track $index) {
             <tr class="db-clickable" (click)="openReport()">
               <td>{{ saleDate(r) }}</td>
-              <td class="fw-medium">{{ r.invoiceNo || r.saleBillNo || '—' }}</td>
-              <td>{{ r.dealerName || r.dealerCode }} <small class="text-muted">{{ r.dealerCity }}</small></td>
-              <td>{{ r.modelName || r.oemModelName || '—' }}</td>
-              <td>{{ r.colour || '—' }}</td>
+              <td><span class="db-cell db-cell-sm fw-medium" [title]="r.invoiceNo || r.saleBillNo || ''">{{ r.invoiceNo || r.saleBillNo || '—' }}</span></td>
+              <td>
+                <span class="db-cell" [title]="r.dealerName || r.dealerCode || ''">{{ r.dealerName || r.dealerCode }}</span>
+                @if (r.dealerCity) { <span class="db-sub">{{ r.dealerCity }}</span> }
+              </td>
+              <td><span class="db-cell db-cell-sm" [title]="r.modelName || r.oemModelName || ''">{{ r.modelName || r.oemModelName || '—' }}</span></td>
+              <td><span class="db-cell db-cell-sm" [title]="r.colour || ''">{{ r.colour || '—' }}</span></td>
               <td class="text-end fw-semibold">{{ inr(amountOf(r)) }}</td>
             </tr>
           } @empty {

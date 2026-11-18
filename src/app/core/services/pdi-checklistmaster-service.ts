@@ -14,7 +14,8 @@ export class PdiChecklistMasterService {
 
   getPdiChecklistMasterList(pdicheckName?: string): Observable<any> {
     let params: any = {};
-    if (pdicheckName) params.pdiCheckName = pdicheckName;
+    const searchText = pdicheckName?.trim();
+    if (searchText) params.pdicheckName = searchText;
 
     return this.httpClient.get<any[]>(`${this.baseUrl}/PdiCheclistMaster/GetPdiChecklistMasterList`, { params });
   }

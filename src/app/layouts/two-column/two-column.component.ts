@@ -5,14 +5,13 @@ import { RouterOutlet } from '@angular/router';
 import { FooterComponent } from '../footer/footer.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
-import { RightsidebarComponent } from '../rightsidebar/rightsidebar.component';
 import { TwoColumnSidebarComponent } from '../two-column-sidebar/two-column-sidebar.component';
 
 @Component({
   selector: 'app-two-column',
   templateUrl: './two-column.component.html',
   styleUrls: ['./two-column.component.scss'],
-  imports: [CommonModule, RouterOutlet, FooterComponent, SidebarComponent, TwoColumnSidebarComponent, TopbarComponent, RightsidebarComponent],
+  imports: [CommonModule, RouterOutlet, FooterComponent, SidebarComponent, TwoColumnSidebarComponent, TopbarComponent],
   standalone: true
 })
 

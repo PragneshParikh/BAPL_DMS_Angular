@@ -43,10 +43,12 @@ export class MenuAccessService {
       return true; // fail-open safeguard: a Dealer with no configured rights sees everything
     }
 
-    const match = rights.find((r: any) => r.subMenuId === subMenuId);
-    if (!match) return false;
+    // Several rows can exist for one page (two roles / legacy duplicates): combine them.
+    const matches = rights.filter((r: any) => Number(r?.subMenuId) === Number(subMenuId));
+    if (!matches.length) return false;
 
-    return (Number(match.permission) & bit) === bit;
+    const permission = matches.reduce((acc: number, r: any) => acc | (Number(r?.permission) || 0), 0);
+    return (permission & bit) === bit;
   }
 
   canView(subMenuId: number): boolean { return this.hasPermission(subMenuId, MenuPermissionBit.View); }

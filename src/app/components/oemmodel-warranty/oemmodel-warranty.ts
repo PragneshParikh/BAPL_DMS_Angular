@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbHighlight, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router } from '@angular/router';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
@@ -18,7 +18,6 @@ import { SearchDebouncer } from '../../shared/search/table-search';
     NgbHighlight,
     NgbPaginationModule,
     FlatpickrModule,
-    RouterOutlet,
     NgbTooltipModule
   ],
   templateUrl: './oemmodel-warranty.html',

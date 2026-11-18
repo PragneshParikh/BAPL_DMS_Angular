@@ -106,7 +106,7 @@
 
                             <td>{{ ((currentPage - 1) * pageSize) + i + 1 }}</td>
                             <td>{{ item.prefixNo }}</td>
-                            <td>{{ item.adjustmentDate }}</td>
+                            <td>{{ item.adjustmentDate | date:'dd/MM/yyyy' }}</td>
                             <td>
                                 <a href="javascript:void(0)" (click)="editItem(item)" style="text-decoration: none;">
                                     {{ item.locationCode }}

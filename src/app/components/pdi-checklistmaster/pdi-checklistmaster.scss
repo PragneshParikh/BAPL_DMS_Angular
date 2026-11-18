@@ -5,6 +5,27 @@
 table th {
   white-space: nowrap;
 }
+
+.pdi-table-footer {
+  padding-top: 1rem;
+}
+
+.pdi-page-size {
+  width: 96px;
+  min-width: 96px;
+  padding-right: 2rem;
+}
+
+.pdi-record-summary {
+  margin-left: 0.5rem;
+  color: #747ca0;
+  font-size: 0.875rem;
+}
+
+.pdi-pagination {
+  min-height: 31px;
+}
+
 .modal-header{
   background-color: #747CA0;  
 }

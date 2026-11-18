@@ -12,7 +12,8 @@
     <a class="btn btn-outline-success" [routerLink]="links.modelStock"><i class="ri-file-chart-line me-1"></i>Full Report</a>
   </div>
 </div>
-<p class="db-range"><i class="ri-time-line me-1"></i>Current stock{{ lastUpdated ? ' as of ' + (lastUpdated | date: 'dd.MM.yyyy, HH:mm') : '' }}</p>
+<app-db-filter [from]="from" [to]="to" [loading]="loading" (rangeChange)="onRange($event)"></app-db-filter>
+<p class="db-note"><i class="ri-information-line me-1"></i>Unsold stock of vehicles inwarded (invoice date) in the selected range{{ lastUpdated ? ' · updated ' + (lastUpdated | date: 'dd.MM.yyyy, HH:mm') : '' }}</p>
 
 @if (failed) {
   <div class="alert alert-warning py-2"><i class="ri-error-warning-line me-1"></i>Stock data could not be loaded. Click Refresh to retry.</div>
@@ -98,9 +99,9 @@
             <tbody>
               @for (r of dealerRows; track r.dealerCode; let i = $index) {
                 <tr class="db-clickable" (click)="open()">
-                  <td><div class="d-flex align-items-center gap-2"><span class="db-rank">{{ i + 1 }}</span>
-                    <div><div class="fw-medium">{{ r.dealerName }}</div><small class="text-muted">{{ r.dealerCode }}</small></div></div></td>
-                  <td class="text-muted">{{ topModelsOf(r) }}</td>
+                  <td><div class="db-name"><span class="db-rank">{{ i + 1 }}</span>
+                    <div><span class="db-cell fw-medium" [title]="r.dealerName">{{ r.dealerName }}</span><span class="db-sub">{{ r.dealerCode }}</span></div></div></td>
+                  <td><span class="db-cell db-cell-lg text-muted" [title]="topModelsOf(r)">{{ topModelsOf(r) }}</span></td>
                   <td class="text-end fw-semibold">{{ num(r.total) }}</td>
                   <td class="text-end">{{ sharePct(r) }}%</td>
                 </tr>

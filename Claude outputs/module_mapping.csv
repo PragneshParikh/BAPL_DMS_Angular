@@ -1,0 +1,179 @@
+area,route,subMenuId,component,angular_file,services,service_link,controllers,android_screen,status
+Admin & Access Control,/access-control,9,AccessControl,src/app/components/access-control/access-control.ts,,source,,,Pending
+Admin & Access Control,/api-tracking,7,ApiTracking,src/app/components/api-tracking/api-tracking.ts,api-tracking.Service.ts,source,APITracking,,Pending
+Admin & Access Control,/bg-role-master,100,BgRoleMasterList,src/app/components/bg-role-master/bg-role-master-list/bg-role-master-list.ts,bg-role.ts,inferred,BgRole,,Pending
+Admin & Access Control,/bg-role-master/add,100,BgRoleMaster,src/app/components/bg-role-master/bg-role-master.ts,bg-role.ts,source,BgRole,,Pending
+Admin & Access Control,/bg-role-master/edit/:id,100,BgRoleMaster,src/app/components/bg-role-master/bg-role-master.ts,bg-role.ts,source,BgRole,,Pending
+Admin & Access Control,/bgemployee-master,76,BgemployeeMasterList,src/app/components/bgemployee-master/bgemployee-master-list/bgemployee-master-list.ts,bgemployee-master.service.ts,inferred,BgEmployee,,Pending
+Admin & Access Control,/bgemployee-master/add,76,BgemployeeMaster,src/app/components/bgemployee-master/bgemployee-master.ts,"bgemployee-master.service.ts, dealer-service.ts, location-master-service.ts, department.ts, state.ts, employee-profile-master-service.ts, zone-master.service.ts, Deptrole.ts",source,"BgEmployee, BgRole, DealerMaster, Department, EmployeeProfileMaster, LocationMaster, Role, State, ZoneMaster",,Pending
+Admin & Access Control,/bgemployee-master/edit/:id,76,BgemployeeMaster,src/app/components/bgemployee-master/bgemployee-master.ts,"bgemployee-master.service.ts, dealer-service.ts, location-master-service.ts, department.ts, state.ts, employee-profile-master-service.ts, zone-master.service.ts, Deptrole.ts",source,"BgEmployee, BgRole, DealerMaster, Department, EmployeeProfileMaster, LocationMaster, Role, State, ZoneMaster",,Pending
+Admin & Access Control,/dealer-creation-manager,101,DealerCreationManagerList,src/app/components/dealer-creation/dealer-creation-manager-list/dealer-creation-manager-list.ts,dealer-creation-manager.ts,inferred,DealerManager,,Pending
+Admin & Access Control,/dealer-menu-access/:dealerId,101,DealerMenuAccessPage,src/app/components/dealer-creation/dealer-menu-access-page/dealer-menu-access-page.ts,menu-access.service.ts,inferred,MenuRights,,Pending
+Admin & Access Control,/department-master,63,DepartmentMasterList,src/app/components/department-master/department-master-list/department-master-list.ts,department.ts,inferred,Department,,Pending
+Admin & Access Control,/department-master/add,63,DepartmentMaster,src/app/components/department-master/department-master.ts,department.ts,source,Department,,Pending
+Admin & Access Control,/department-master/edit/:id,63,DepartmentMaster,src/app/components/department-master/department-master.ts,department.ts,source,Department,,Pending
+Admin & Access Control,/designation-master,64,DesignationMasterList,src/app/components/designation-master/designation-master-list/designation-master-list.ts,designation.ts,inferred,Designation,,Pending
+Admin & Access Control,/designation-master/add,64,DesignationMaster,src/app/components/designation-master/designation-master.ts,"designation.ts, department.ts",source,"Department, Designation",,Pending
+Admin & Access Control,/designation-master/edit/:id,64,DesignationMaster,src/app/components/designation-master/designation-master.ts,"designation.ts, department.ts",source,"Department, Designation",,Pending
+Admin & Access Control,/employee,49,EmployeeMasterList,src/app/components/employee-master/employee-master-list/employee-master-list.ts,employee-master.ts,inferred,"Auth, City, Employee, LocationMaster, MaterialTransfer, State",,Pending
+Admin & Access Control,/employee/add,49,EmployeeMasterComponent,src/app/components/employee-master/employee-master.ts,"employee-master.ts, dealer-service.ts, location-master-service.ts, department.ts, designation.ts, Deptrole.ts",source,"Auth, BgRole, City, DealerMaster, Department, Designation, Employee, LocationMaster, MaterialTransfer, Role, State",,Pending
+Admin & Access Control,/employee/edit/:id,49,EmployeeMasterComponent,src/app/components/employee-master/employee-master.ts,"employee-master.ts, dealer-service.ts, location-master-service.ts, department.ts, designation.ts, Deptrole.ts",source,"Auth, BgRole, City, DealerMaster, Department, Designation, Employee, LocationMaster, MaterialTransfer, Role, State",,Pending
+Admin & Access Control,/location-edit/:locationId,101,LocationEditPage,src/app/components/dealer-creation/dealer-location-edit/dealer-location-edit.ts,circular-dealer-assignment.ts,inferred,CircularDealerAssignment,,Pending
+Admin & Access Control,/menu-right,124,MenuRight,src/app/components/menu-right/menu-right.ts,menu-right.service.ts,inferred,MenuRights,,Pending
+Admin & Access Control,/prefix,26,PrefixMaster,src/app/components/prefix-master/prefix-master.ts,prefix.ts,inferred,Prefix,,Pending
+Admin & Access Control,/prefix/:id,26,PrefixMasterDetails,src/app/components/prefix-master/prefix-master-details/prefix-master-details.ts,prefix.ts,inferred,Prefix,,Pending
+Admin & Access Control,/role-master,75,RoleMasterList,src/app/components/role-master/role-list-master/role-list-master.ts,bg-role.ts,inferred,BgRole,,Pending
+Admin & Access Control,/role-master/add,75,RoleMaster,src/app/components/role-master/role-master.ts,bg-role.ts,inferred,BgRole,,Pending
+Admin & Access Control,/role-master/edit/:id,75,RoleMaster,src/app/components/role-master/role-master.ts,bg-role.ts,inferred,BgRole,,Pending
+Admin & Access Control,/role-menu-rights,15,RoleMenuRights,src/app/components/role-menu-rights/role-menu-rights.ts,role-menu-rights.service.ts,inferred,MenuRights,,Pending
+Admin & Access Control,/who-am-i,122,WhoAmI,src/app/components/who-am-i/who-am-i.ts,,inferred,,,Pending
+Authentication,/forgot-password,,ForgotPassword,src/app/components/account/forgot-password/forgot-password.ts,,inferred,,,Pending
+Authentication,/login,,Login,src/app/components/account/login/login.ts,,inferred,,,Pending
+Authentication,/reset-password,,ResetPassword,src/app/components/account/reset-password/reset-password.ts,,inferred,,,Pending
+Circulars (Documents),/circular,53,Circular,src/app/components/circular/circular.ts,"circular.ts, circular-dealer-assignment.ts",source,"Circular, CircularDealerAssignment",,Pending
+Dashboard & Reports,/,,Dashboard,src/app/components/dashboard/dashboard.ts,report.service.ts,source,Report,,Pending
+Dashboard & Reports,/account-dashboard,144,AccountAnalytics,src/app/components/dashboard/account-analytics/account-analytics.ts,,inferred,,,Pending
+Dashboard & Reports,/comparison-report,90,ComparisonReportComponent,src/app/components/Reports/comparision-report/comparision-report.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Dashboard & Reports,/dealer-analytics,133,DealerAnalytics,src/app/components/dashboard/dealer-analytics/dealer-analytics.ts,circular-dealer-assignment.ts,inferred,CircularDealerAssignment,,Pending
+Dashboard & Reports,/ebw-report,111,EBWReports,src/app/components/ebw-reports/ebw-reports.ts,"dealer-service.ts, ebw-invoice-service.ts",source,"DealerMaster, EbwInvoice",,Pending
+Dashboard & Reports,/job-card-report,42,JobReportComponent,src/app/components/Reports/job-report/job-report.ts,job-card-service.ts,inferred,JobCard,,Pending
+Dashboard & Reports,/material-transfer-report,91,MaterialTransferReportComponent,src/app/components/Reports/material-transfer-report/material-transfer-report.ts,material-transfer.ts,inferred,MaterialTransfer,,Pending
+Dashboard & Reports,/model-wise-current-stock,80,ModelWiseCurrentStockComponent,src/app/components/Reports/model-wise-current-stock/model-wise-current-stock.ts,vehicle-open-stock-service.ts,inferred,VehicleOpeningStock,,Pending
+Dashboard & Reports,/model-wise-sale-report,79,ModelWiseSaleReportComponent,src/app/components/Reports/model-wise-sale-report/model-wise-sale-report.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Dashboard & Reports,/model-wise-variant-stock,86,ModelWiseVariantStockComponent,src/app/components/Reports/model-wise-variant-report/model-wise-variant-report.ts,stock-report.service.ts,inferred,,,Pending
+Dashboard & Reports,/part-dispatch-kit-report,52,PartDispatchKitReport,src/app/components/Reports/part-dispatch-kit-report/part-dispatch-kit-report.ts,kit-creation.service.ts,inferred,KitHeader,,Pending
+Dashboard & Reports,/parts-dispatch-report,50,PartsDispatchReport,src/app/components/Reports/parts-dispatch-report/parts-dispatch-report.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Dashboard & Reports,/parts-stock-details,93,PartsStockDetails,src/app/components/Reports/parts-stock-details/parts-stock-details.ts,vehicle-open-stock-service.ts,inferred,VehicleOpeningStock,,Pending
+Dashboard & Reports,/po-tracking-report,47,POTrackingReportComponent,src/app/components/Reports/po-tracking-report/po-tracking-report.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Dashboard & Reports,/repair-bill-report,92,RepairBillReportComponent,src/app/components/Reports/repair-bill-report/repair-bill-report.ts,repair-bill-service.ts,inferred,RepairBill,,Pending
+Dashboard & Reports,/sales-analytics,134,SalesAnalytics,src/app/components/dashboard/sales-analytics/sales-analytics.ts,,inferred,,,Pending
+Dashboard & Reports,/stock-analytics,135,StockAnalytics,src/app/components/dashboard/stock-analytics/stock-analytics.ts,vehicle-open-stock-service.ts,inferred,VehicleOpeningStock,,Pending
+Dashboard & Reports,/stock-report,41,StockReportComponent,src/app/components/stock-reports/stock-report.ts,stock-report.service.ts,inferred,,,Pending
+Dashboard & Reports,/stock-summary-detail,58,StockSummaryDetail,src/app/components/stock-summary-detail/stock-summary-detail.ts,vehicle-open-stock-service.ts,inferred,VehicleOpeningStock,,Pending
+Dashboard & Reports,/total-sale-dealer-wise,81,TotalSaleDealerWiseComponent,src/app/components/Reports/total-sale-report/total-sale-report.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Dashboard & Reports,/vehicle-dispatch-report,141,VehicleDispatchReportComponent,src/app/components/Reports/vehicle-dispatch-report/vehicle-dispatch-report.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Dashboard & Reports,/vehicle-inward-report,78,VehicleInwardReport,src/app/components/Reports/vehicle-inward-report/vehicle-inward-report.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Dashboard & Reports,/vehicle-sale-d2d-report,61,VehicleSaleD2dReport,src/app/components/Reports/vehicle-sale-d2d-report/vehicle-sale-d2d-report.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Dashboard & Reports,/vehicle-sale-report,43,VehicleSaleReportComponent,src/app/components/Reports/vehicle-sale-report/vehicle-sale-report.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Dashboard & Reports,/vehicle-stocks-report,46,VehicleStockReportComponent,src/app/components/Reports/vehicle-stock-report/vehicle-stock-report.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Dashboard & Reports,/workshop-analytics,138,WorkshopAnalytics,src/app/components/dashboard/workshop-analytics/workshop-analytics.ts,,inferred,,,Pending
+Masters,/**,,WorkInProgress,src/app/components/work-in-progress/work-in-progress.ts,,inferred,,,Pending
+Masters,/agreegate-tax-code-master,12,AgreegateTaxCodeMaster,src/app/components/agreegate-tax-code-master/agreegate-tax-code-master.ts,agreegate-tax-code-masterservice.ts,source,AgreegateTaxCode,,Pending
+Masters,/battery-capacity-master,8,BatteryCapacityMaster,src/app/components/battery-capacity-master/battery-capacity-master.ts,"battery-capacity-master-service.ts, auth.service.ts",source,"Auth, BatteryCapacityMaster",,Pending
+Masters,/city-master,35,CityMaster,src/app/components/city-master/city-master.ts,city.ts,source,City,,Pending
+Masters,/city-master/add,35,AddCityMaster,src/app/components/city-master/add-city-master/add-city-master.ts,city.ts,inferred,City,,Pending
+Masters,/city-master/edit/:id,35,AddCityMaster,src/app/components/city-master/add-city-master/add-city-master.ts,city.ts,inferred,City,,Pending
+Masters,/color,2,Color,src/app/components/color/color.ts,color-master.service.ts,source,ColorMaster,,Pending
+Masters,/dealer-account-master,128,DealerAccountMaster,src/app/components/dealer-account-master/dealer-account-master.ts,,source,,,Pending
+Masters,/dealer-master,4,DealerMaster,src/app/components/dealer-master/dealer-master.ts,dealer-service.ts,source,DealerMaster,,Pending
+Masters,/dispatch-master,117,DispatchMaster,src/app/components/dispatch-master/dispatch-master.ts,dispatch-master-service.ts,source,DispatchMaster,,Pending
+Masters,/group-master,59,GroupMaster,src/app/components/group-master/group-master.ts,group-master-service.ts,inferred,GroupMaster,,Pending
+Masters,/hsnCode-master,13,HsnCodeMaster,src/app/components/hsn-code-master/hsn-code-master.ts,hsn-code-master-service.ts,inferred,HSNCodeMaster,,Pending
+Masters,/hsnwisetaxcode,16,Hsnwisetaxcode,src/app/components/hsnwisetaxcode/hsnwisetaxcode.ts,,inferred,,,Pending
+Masters,/location-master,3,LocationMasterComponent,src/app/components/location-master/location-master.ts,location-master-service.ts,inferred,"BgRole, LocationMaster",,Pending
+Masters,/occupation-master,62,OccupationMaster,src/app/components/occupation-master/occupation-master.ts,occupation-service.ts,inferred,OccupationMaster,,Pending
+Masters,/oemmodel-master,11,OemmodelMasterComponent,src/app/components/oemmodel-master/oemmodel-master.ts,oemmodel-master-service.ts,inferred,OEMModelMaster,,Pending
+Masters,/taxcode-master,14,TaxCodeMasterComponent,src/app/components/taxcode-master/taxcode-master.ts,taxcode-master-service.ts,inferred,TaxCodeMaster,,Pending
+Masters,/term-condition-master,60,TermConditionMaster,src/app/components/term-condition-master/term-condition-master.ts,term-condition-service.ts,inferred,TermCondition,,Pending
+Masters,/upload,127,DealerMasterBulkDataDipatch,src/app/components/department-master/dealer-master-bulk-data-dipatch/dealer-master-bulk-data-dipatch.ts,blob-upload.ts,inferred,Files,,Pending
+Parts & Inventory,/kit-creation,24,KitCreation,src/app/components/kit-creation/kit-creation.ts,kit-creation.service.ts,inferred,KitHeader,,Pending
+Parts & Inventory,/kit-creation/:id,24,KitCreationDetails,src/app/components/kit-creation/kit-creation-details/kit-creation-details.ts,kit-creation.service.ts,inferred,KitHeader,,Pending
+Parts & Inventory,/material-transfer,29,MaterialTransfer,src/app/components/material-transfer/material-transfer.ts,material-transfer.ts,inferred,MaterialTransfer,,Pending
+Parts & Inventory,/material-transfer/:id,29,MaterialTransferDetail,src/app/components/material-transfer/material-transfer-detail/material-transfer-detail.ts,material-transfer.ts,inferred,MaterialTransfer,,Pending
+Parts & Inventory,/part-dispatch-invoice,118,PartInvoiceDispatch,src/app/components/part-invoice-dispatch/part-invoice-dispatch.ts,proforma-invoice-service.ts,inferred,"APITracking, MaterialTransfer, PerformaInvoice",,Pending
+Parts & Inventory,/parts-inward,99,PartInwardList,src/app/components/part-inward/part-inward-list/part-inward-list.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Parts & Inventory,/parts-inward/:invoiceNo,99,PartInward,src/app/components/part-inward/part-inward.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Parts & Inventory,/parts-po,33,PartsPo,src/app/components/parts-po/parts-po.ts,,inferred,,,Pending
+Parts & Inventory,/parts-po-list,33,PartsPoList,src/app/components/parts-po-list/parts-po-list.ts,,inferred,,,Pending
+Parts & Inventory,/parts-po/:ponumber,33,PartsPo,src/app/components/parts-po/parts-po.ts,,inferred,,,Pending
+Parts & Inventory,/workshop/item-master,5,ItemMaster,src/app/components/Workshop/item-master/item-master.ts,item-master-service.ts,inferred,ItemMaster,,Pending
+Sales / Showroom,/add-vehicle-sale-bill/delivery-certificate/:id,22,DeliveryCertificate,src/app/components/Reports/delivery-certificate/delivery-certificate.ts,vehicle-sale-bill-service.ts,inferred,VehicleSaleBill,,Pending
+Sales / Showroom,/add-vehicle-sale-bill/performaInvoice/:saleBillNo,27,PerformaInvoice,src/app/components/Reports/performa-invoice/performa-invoice.ts,vehicle-sale-bill-service.ts,inferred,VehicleSaleBill,,Pending
+Sales / Showroom,/add-vehicle-stock-transfer,57,AddVehicleStockTransfer,src/app/components/vehicle-stock-transfer/add-vehicle-stock-transfer.ts,vehicle-stock-transfer-service.ts,inferred,VehicleStockTransfer,,Pending
+Sales / Showroom,/chassis-search,39,ChassisSearch,src/app/components/chassis-search/chassis-search.ts,chassis-search-service.ts,source,"Chassis, ChassisDetails",,Pending
+Sales / Showroom,/customer-ledger,20,CustomerLedgerList,src/app/components/customer-ledger/customer-ledger-list/customer-ledger-list.ts,ledger-master.ts,inferred,LedgerMaster,,Pending
+Sales / Showroom,/customer-ledger/:id,20,CustomerLedger,src/app/components/customer-ledger/customer-ledger.ts,"ledger-master.ts, city.ts, state.ts, auth.service.ts, occupation-service.ts, chassis-detail.ts",source,"Auth, ChassisDetails, City, LedgerMaster, OccupationMaster, State",,Pending
+Sales / Showroom,/delivery-certificate,22,DeliveryCertificate,src/app/components/Reports/delivery-certificate/delivery-certificate.ts,,inferred,,,Pending
+Sales / Showroom,/delivery-checkList/:saleBillId,22,DeliveryChecklist,src/app/components/Reports/delivery-checklist/delivery-checklist.ts,,inferred,,,Pending
+Sales / Showroom,/delivery-slip,22,DeliverySlip,src/app/components/Reports/delivery-slip/delivery-slip.ts,,inferred,,,Pending
+Sales / Showroom,/form22-certificate/:saleBillId/:chassisNo,22,Form22Certificate,src/app/components/Reports/form22-certificate/form22-certificate.ts,,inferred,,,Pending
+Sales / Showroom,/hsrp-inward,48,HsrpInward,src/app/components/hsrp-order/hsrp-inward/hsrp-inward.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Sales / Showroom,/hsrp-order,48,HSRPOrder,src/app/components/hsrp-order/hsrp-order.ts,warranty-order-service.ts,inferred,"WarrantyJCClaim, WarrantyOrder",,Pending
+Sales / Showroom,/hsrp-order-list,48,HSRPOrderList,src/app/components/hsrp-order/hsrporder-list/hsrporder-list.ts,warranty-order-service.ts,inferred,"WarrantyJCClaim, WarrantyOrder",,Pending
+Sales / Showroom,/hsrp-order/:id,48,HSRPOrder,src/app/components/hsrp-order/hsrp-order.ts,warranty-order-service.ts,inferred,"WarrantyJCClaim, WarrantyOrder",,Pending
+Sales / Showroom,/lot-inspection-details/:invoiceNo,18,LotInspectionDetails,src/app/components/lotinspection/lot-inspection-details/lot-inspection-details/lot-inspection-details.ts,lot-inspection-details-service.ts,inferred,,,Pending
+Sales / Showroom,/lotinspection,18,Lotinspection,src/app/components/lotinspection/lotinspection.ts,,inferred,,,Pending
+Sales / Showroom,/proforma-invoice,22,ProformaInvoice,src/app/components/proforma-invoice/proforma-invoice.ts,proforma-invoice-service.ts,inferred,"APITracking, MaterialTransfer, PerformaInvoice",,Pending
+Sales / Showroom,/receipt-entry,19,ReceiptEntry,src/app/components/receipt-entry/receipt-entry.ts,receipt-entry-service.ts,inferred,ReceiptEntry,,Pending
+Sales / Showroom,/receipt-entry/add,19,AddReceiptEntry,src/app/components/receipt-entry/add-receipt-entry/add-receipt-entry.ts,receipt-entry-service.ts,inferred,ReceiptEntry,,Pending
+Sales / Showroom,/receipt-entry/edit/:id,19,AddReceiptEntry,src/app/components/receipt-entry/add-receipt-entry/add-receipt-entry.ts,receipt-entry-service.ts,inferred,ReceiptEntry,,Pending
+Sales / Showroom,/repo-billing,88,RepoBilling,src/app/components/repo-billing/repo-billing.ts,repo-billing.ts,inferred,RepoBilling,,Pending
+Sales / Showroom,/sale-Letter/:saleBillNo,22,SaleLetter,src/app/components/Reports/sale-letter/sale-letter.ts,vehicle-sale-import.service.ts,inferred,VehicleSaleImport,,Pending
+Sales / Showroom,/showroom/form22master,10,Form22master,src/app/components/Showroom/form22master/form22master.ts,,inferred,,,Pending
+Sales / Showroom,/showroom/itemmaster-fg,6,ItemmasterFG,src/app/components/Showroom/itemmaster-fg/itemmaster-fg.ts,,inferred,,,Pending
+Sales / Showroom,/vehicle-dispatch-import,140,VehicleDispatchImport,src/app/components/vehicle-dispatch-import/vehicle-dispatch-import.ts,vehicle-dispatch.service.ts,inferred,VehicleDispatch,,Pending
+Sales / Showroom,/vehicle-dispatch-invoice,119,VehicleInvoiceDispatch,src/app/components/vehicle-invoice-dispatch/vehicle-invoice-dispatch.ts,vehicle-dispatch.service.ts,inferred,VehicleDispatch,,Pending
+Sales / Showroom,/vehicle-open-stock,89,VehicleOpenStock,src/app/components/vehicle-open-stock/vehicle-open-stock.ts,vehicle-open-stock-service.ts,inferred,VehicleOpeningStock,,Pending
+Sales / Showroom,/vehicle-po,17,VehiclePO,src/app/components/vehicle-po/vehicle-po.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Sales / Showroom,/vehicle-po-list,17,VehiclePoList,src/app/components/vehicle-po-list/vehicle-po-list.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Sales / Showroom,/vehicle-po/:ponumber,17,VehiclePO,src/app/components/vehicle-po/vehicle-po.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Sales / Showroom,/vehicle-quotation,87,VehicleQuotationListComponent,src/app/components/vehicle-quotation/vehicle-quotation-list/vehicle-quotation-list.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Sales / Showroom,/vehicle-quotation/add,87,VehicleQuotation,src/app/components/vehicle-quotation/vehicle-quotation.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Sales / Showroom,/vehicle-quotation/edit/:id,87,VehicleQuotation,src/app/components/vehicle-quotation/vehicle-quotation.ts,vehicle-inward-report.service.ts,inferred,Report,,Pending
+Sales / Showroom,/vehicle-sale-bill,27,VehicleSaleBill,src/app/components/vehicle-sale-bill/vehicle-sale-bill.ts,vehicle-sale-bill-service.ts,inferred,VehicleSaleBill,,Pending
+Sales / Showroom,/vehicle-sale-bill/add,27,AddVehicleSaleBill,src/app/components/vehicle-sale-bill/add-vehicle-sale-bill/add-vehicle-sale-bill.ts,vehicle-sale-bill-service.ts,inferred,VehicleSaleBill,,Pending
+Sales / Showroom,/vehicle-sale-bill/edit/:id,27,AddVehicleSaleBill,src/app/components/vehicle-sale-bill/add-vehicle-sale-bill/add-vehicle-sale-bill.ts,vehicle-sale-bill-service.ts,inferred,VehicleSaleBill,,Pending
+Sales / Showroom,/vehicle-sale-import,137,VehicleSaleImport,src/app/components/vehicle-sale-import/vehicle-sale-import.ts,vehicle-sale-import.service.ts,inferred,VehicleSaleImport,,Pending
+Sales / Showroom,/vehicle-stock-transfer,57,VehicleStockTransferList,src/app/components/vehicle-stock-transfer/vehicle-stock-transfer-list/vehicle-stock-transfer-list.ts,vehicle-stock-transfer-service.ts,inferred,VehicleStockTransfer,,Pending
+Sales / Showroom,/vehicle-stock-transfer/edit/:id,57,AddVehicleStockTransfer,src/app/components/vehicle-stock-transfer/add-vehicle-stock-transfer.ts,vehicle-stock-transfer-service.ts,inferred,VehicleStockTransfer,,Pending
+Warranty & Claims,/ebw-invoice,106,EBWInvoice,src/app/components/ebw-invoice/ebw-invoice.ts,"location-master-service.ts, extended-battery-warranty.ts, chassis-search-service.ts, ebw-invoice-service.ts, ebw-report-service.ts, partsinwardservice.ts",source,"BgRole, Chassis, ChassisDetails, EbwInvoice, ExtendedBatteryWarranty, LocationMaster, PartInward",,Pending
+Warranty & Claims,/ebw-invoice-list,111,EbwInvoiceList,src/app/components/ebw-invoice-list/ebw-invoice-list.ts,"ebw-invoice-service.ts, term-condition-service.ts, location-master-service.ts",source,"BgRole, EbwInvoice, LocationMaster, TermCondition",,Pending
+Warranty & Claims,/extended-battery-warranty,37,ExtendedBatteryWarrantyList,src/app/components/extended-battery-warranty/extended-battery-warranty-list/extended-battery-warranty-list.ts,extended-battery-warranty.ts,inferred,ExtendedBatteryWarranty,,Pending
+Warranty & Claims,/extended-battery-warranty/:id,37,ExtendedBatteryWarranty,src/app/components/extended-battery-warranty/extended-battery-warranty.ts,extended-battery-warranty.ts,inferred,ExtendedBatteryWarranty,,Pending
+Warranty & Claims,/ffir,40,FFIR,src/app/components/ffir/ffir.ts,,inferred,,,Pending
+Warranty & Claims,/ffir/:id,40,FFIR,src/app/components/ffir/ffir.ts,,inferred,,,Pending
+Warranty & Claims,/ffirlisting,40,Ffirlisting,src/app/components/ffir/ffirlisting/ffirlisting.ts,,inferred,,,Pending
+Warranty & Claims,/free-service-claim,66,FreeServiceClaimList,src/app/components/free-service-claim/free-service-claim-list/free-service-claim-list.ts,free-service-claim.ts,inferred,FreeServiceClaim,,Pending
+Warranty & Claims,/free-service-claim/:id,66,FreeServiceClaim,src/app/components/free-service-claim/free-service-claim.ts,free-service-claim.ts,inferred,FreeServiceClaim,,Pending
+Warranty & Claims,/free-service-rate,67,FreeServiceRateList,src/app/components/free-service-rate/free-service-rate-list/free-service-rate-list.ts,free-service-rate.ts,inferred,FreeServiceRate,,Pending
+Warranty & Claims,/free-service-rate/:id,67,FreeServiceRate,src/app/components/free-service-rate/free-service-rate.ts,free-service-rate.ts,inferred,FreeServiceRate,,Pending
+Warranty & Claims,/oemmodel-warranty,34,OemmodelWarranty,src/app/components/oemmodel-warranty/oemmodel-warranty.ts,oemmodel-warranty-service.ts,inferred,OEMModelWarranty,,Pending
+Warranty & Claims,/oemmodel-warranty/add,34,AddOemmodelWarranty,src/app/components/oemmodel-warranty/add-oemmodel-warranty/add-oemmodel-warranty.ts,oemmodel-warranty-service.ts,inferred,OEMModelWarranty,,Pending
+Warranty & Claims,/oemmodel-warranty/edit/:id,34,AddOemmodelWarranty,src/app/components/oemmodel-warranty/add-oemmodel-warranty/add-oemmodel-warranty.ts,oemmodel-warranty-service.ts,inferred,OEMModelWarranty,,Pending
+Warranty & Claims,/uw-line-item,115,UwLineItem,src/app/components/uw-line-items/uw-line-items.ts,uw-line-item-service.ts,inferred,UwLineItem,,Pending
+Warranty & Claims,/warranty-claim-list,74,WarrantyClaimList,src/app/components/warranty-job-card-claim/warranty-claim-list/warranty-claim-list.ts,extended-battery-warranty.ts,inferred,ExtendedBatteryWarranty,,Pending
+Warranty & Claims,/warranty-dispatch,129,WarrantyDispatch,src/app/components/warranty-dispatch/warranty-dispatch.ts,warranty-dispatch-service.ts,inferred,"WarrantyDispatch, WarrantyPacking",,Pending
+Warranty & Claims,/warranty-dispatch-list,129,WarrantyDispatchList,src/app/components/warranty-dispatch/warranty-dispatch-list/warranty-dispatch-list.ts,warranty-dispatch-service.ts,inferred,"WarrantyDispatch, WarrantyPacking",,Pending
+Warranty & Claims,/warranty-dispatch/:id,129,WarrantyDispatch,src/app/components/warranty-dispatch/warranty-dispatch.ts,warranty-dispatch-service.ts,inferred,"WarrantyDispatch, WarrantyPacking",,Pending
+Warranty & Claims,/warranty-invoice,113,WarrantyInvoice,src/app/components/warranty-invoice/warranty-invoice.ts,warranty-invoice-service.ts,inferred,"WarrantyInvoice, WarrantyOrder",,Pending
+Warranty & Claims,/warranty-invoice-list,113,WarrantyInvoiceList,src/app/components/warranty-invoice/warranty-invoice-list/warranty-invoice-list.ts,warranty-invoice-service.ts,inferred,"WarrantyInvoice, WarrantyOrder",,Pending
+Warranty & Claims,/warranty-job-card-claim,74,WarrantyJobCardClaim,src/app/components/warranty-job-card-claim/warranty-job-card-claim.ts,job-card-service.ts,inferred,JobCard,,Pending
+Warranty & Claims,/warranty-order,112,WarrantyOrder,src/app/components/warranty-order/warranty-order.ts,warranty-order-service.ts,inferred,"WarrantyJCClaim, WarrantyOrder",,Pending
+Warranty & Claims,/warranty-order-list,112,WarrantyOrderList,src/app/components/warranty-order/warranty-order-list/warranty-order-list.ts,warranty-order-service.ts,inferred,"WarrantyJCClaim, WarrantyOrder",,Pending
+Warranty & Claims,/warranty-packaging,116,WarrantyPackaging,src/app/components/warranty-packaging/warranty-packaging.ts,warranty-packaging-service.ts,inferred,WarrantyPacking,,Pending
+Warranty & Claims,/warranty-packaging-list,116,WarrantyPackagingList,src/app/components/warranty-packaging/warranty-packaging-list/warranty-packaging-list.ts,warranty-packaging-service.ts,inferred,WarrantyPacking,,Pending
+Warranty & Claims,/warranty-register,123,WarrantyRegister,src/app/components/Reports/warranty-register/warranty-register.ts,extended-battery-warranty.ts,inferred,ExtendedBatteryWarranty,,Pending
+Workshop / Service,/add-counter-bill,77,AddCounterBill,src/app/components/counter-bill/add-counter-bill/add-counter-bill.ts,counter-bill-service.ts,inferred,CounterBill,,Pending
+Workshop / Service,/complaint-master,56,ComplaintMaster,src/app/components/complaint-master/complaint-master.ts,"complaintmaster-service.ts, group-master-service.ts",source,"ComplaintMaster, GroupMaster",,Pending
+Workshop / Service,/counter-bill,77,CounterBill,src/app/components/counter-bill/counter-bill.ts,"counter-bill-service.ts, dealer-service.ts",source,"CounterBill, DealerMaster",,Pending
+Workshop / Service,/counter-bill/edit,77,AddCounterBill,src/app/components/counter-bill/add-counter-bill/add-counter-bill.ts,counter-bill-service.ts,inferred,CounterBill,,Pending
+Workshop / Service,/estimate,98,EstimateList,src/app/components/estimate/estimate-list/estimate-list.ts,estimate.service.ts,inferred,Estimate,,Pending
+Workshop / Service,/estimate/add,98,Estimate,src/app/components/estimate/estimate.ts,estimate.service.ts,inferred,Estimate,,Pending
+Workshop / Service,/estimate/edit/:id,98,Estimate,src/app/components/estimate/estimate.ts,estimate.service.ts,inferred,Estimate,,Pending
+Workshop / Service,/job-card,23,JobCard,src/app/components/job-card/job-card.ts,job-card-service.ts,inferred,JobCard,,Pending
+Workshop / Service,/job-card-addForm/:test,23,JobCardAddForm,src/app/components/job-card/job-card-addForm/job-card-add-form/job-card-add-form.ts,job-card-service.ts,inferred,JobCard,,Pending
+Workshop / Service,/job-source-master,71,JobSourceMaster,src/app/components/job-source-master/job-source-master.ts,job-type-service.ts,inferred,JobType,,Pending
+Workshop / Service,/job-type-master,68,JobTypeMaster,src/app/components/job-type-master/job-type-master.ts,job-type-service.ts,inferred,JobType,,Pending
+Workshop / Service,/labour-master-import,54,LabourMaster,src/app/components/labour-master-import/labour-master-import.ts,vehicle-sale-import.service.ts,inferred,VehicleSaleImport,,Pending
+Workshop / Service,/labour-rate-master,55,LabourRateMaster,src/app/components/labour-rate-master/labour-rate-master.ts,free-service-rate.ts,inferred,FreeServiceRate,,Pending
+Workshop / Service,/modelwise-service-schedule,36,ModelwiseServiceSchedule,src/app/components/modelwise-service-schedule/modelwise-service-schedule.ts,,inferred,,,Pending
+Workshop / Service,/pdiChecklistmaster,38,PdiChecklistmaster,src/app/components/pdi-checklistmaster/pdi-checklistmaster.ts,pdi-checklistmaster-service.ts,inferred,PdiCheclistMaster,,Pending
+Workshop / Service,/print-counter-bill/:id,77,CounterBillPrint,src/app/components/Reports/counter-bill-print/counter-bill-print.ts,counter-bill-service.ts,inferred,CounterBill,,Pending
+Workshop / Service,/repair-bill,51,RepairBill,src/app/components/repair-bill/repair-bill.ts,repair-bill-service.ts,inferred,RepairBill,,Pending
+Workshop / Service,/repair-bill-invoice/:id,51,RepairBillInvoiceComponent,src/app/components/repair-bill-invoice/repair-bill-invoice.ts,repair-bill-service.ts,inferred,RepairBill,,Pending
+Workshop / Service,/repair-bill-list,51,RepairBillList,src/app/components/repair-bill/repair-bill-list/repair-bill-list.ts,repair-bill-service.ts,inferred,RepairBill,,Pending
+Workshop / Service,/repair-bill-performa/:repairBillId,51,RepairBillPerforma,src/app/components/Reports/repair-bill-performa/repair-bill-performa.ts,repair-bill-service.ts,inferred,RepairBill,,Pending
+Workshop / Service,/repair-bill/:id,51,RepairBill,src/app/components/repair-bill/repair-bill.ts,repair-bill-service.ts,inferred,RepairBill,,Pending
+Workshop / Service,/service-head-master,69,ServiceHeadMaster,src/app/components/service-head-master/service-head-master.ts,service-head-service.ts,inferred,ServiceHead,,Pending
+Workshop / Service,/service-type-master,70,ServiceTypeMaster,src/app/components/service-type-master/service-type-master.ts,job-type-service.ts,inferred,JobType,,Pending
+Workshop / Service,/vehicle-info,73,VehicleInfoUpdate,src/app/components/vehicle-info-update/vehicle-info-update.ts,vehicle-info-service.ts,inferred,VehicleInfo,,Pending

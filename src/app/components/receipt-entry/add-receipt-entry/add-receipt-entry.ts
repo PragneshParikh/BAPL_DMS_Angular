@@ -1,12 +1,12 @@
 // src\app\components\receipt-entry\add-receipt-entry\add-receipt-entry.ts
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ReceiptEntryService } from '../../../core/services/receipt-entry-service';
 import { LocationName, ReceiptEntryAddViewModel, ReceiptEntryEditModel } from '../../../ViewModels/ReceiptEntryModel';
 import { StorageService } from '../../../core/services/storage';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgbHighlight, NgbModal, NgbPaginationModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbPaginationModule, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { FlatpickrModule } from 'angularx-flatpickr';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { LedgerMaster } from '../../../ViewModels/LedgerMasterViewModel';
@@ -27,10 +27,8 @@ import { MenuAccessService } from '../../../core/services/menu-access.service';
   styleUrl: './add-receipt-entry.scss',
   imports: [CommonModule,
     FormsModule,
-    NgbHighlight,
     NgbPaginationModule,
     FlatpickrModule,
-    RouterOutlet,
     NgSelectModule,
     NgbTooltip
   ],

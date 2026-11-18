@@ -13,6 +13,8 @@ export interface DispatchImportOptions {
   dryRun: boolean;
   updateExisting: boolean;
   markAsAccepted: boolean;
+  /** live status id - polled at api/import-progress/{id} while the import runs */
+  progressId?: string | null;
 }
 export interface DispatchImportIssue {
   rowNo: number; level: 'Error' | 'Skipped' | 'Warning' | 'Info'; invoiceNo?: string; chassisNo?: string; message: string;

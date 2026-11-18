@@ -20,10 +20,16 @@
           "options": {
             "browser": "src/main.ts",
             "polyfills": [
-              "zone.js"
+              "zone.js",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "stylePreprocessorOptions": {
+              "sass": {
+                "silenceDeprecations": ["import", "global-builtin", "color-functions", "mixed-decls"]
+              }
+            },
             "assets": [
               "src/favicon.ico",
               "src/assets"
@@ -46,6 +52,7 @@
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
             "allowedCommonJsDependencies": [
+              "apexcharts",
               "ev-emitter/ev-emitter",
               "can-use-dom",
               "core-js/modules/es.array.filter.js",
@@ -129,7 +136,8 @@
           "options": {
             "polyfills": [
               "zone.js",
-              "zone.js/testing"
+              "zone.js/testing",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",

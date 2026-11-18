@@ -6,7 +6,7 @@ import { FormsModule, NgModel } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NgbHighlight, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FlatpickrDefaults, FlatpickrModule } from 'angularx-flatpickr';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router } from '@angular/router';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { debounceTime, Subject } from 'rxjs';
@@ -23,7 +23,6 @@ import { MenuAccessService } from '../../core/services/menu-access.service';
     NgbHighlight,
     NgbPaginationModule,
     FlatpickrModule,
-    RouterOutlet,
     NgbTooltipModule
   ],
   templateUrl: './vehicle-sale-bill.html',

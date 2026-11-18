@@ -1,0 +1,60 @@
+// src\app\components\Reports\service-history\service-history.scss
+// Same look as the Jobcard Servicehistory Import page (which reuses Vehicle Sale Import's styles).
+@use '../../jobcard-servicehistory-import/jobcard-servicehistory-import.scss';
+
+.rpt-table {
+  max-height: 34rem; overflow: auto;
+  th { position: sticky; top: 0; background: #f8fafc; z-index: 1; white-space: nowrap; font-size: .8rem; color: #64748b; }
+  td { white-space: nowrap; font-size: .85rem; }
+}
+.rpt-pager { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem; padding: .75rem 1rem; border-top: 1px solid #eef2f7; }
+.rpt-search { max-width: 40rem; }
+
+// type-ahead dropdown (rendered inside this component, next to the input)
+:host ::ng-deep .sh-sugg-popup {
+  max-height: 24rem; overflow-y: auto; min-width: 100%; max-width: 40rem; padding: .25rem 0;
+  border: 1px solid #c7d2fe; border-radius: .7rem; box-shadow: 0 10px 25px rgba(15, 23, 42, .12);
+  .dropdown-item { padding: .45rem .85rem; white-space: normal; }
+  .dropdown-item.active, .dropdown-item:active { background: #eef2ff; color: inherit; }
+  .ngb-highlight { color: #4f46e5; font-weight: 700; }
+}
+.sh-sugg { min-width: 0; }
+
+// ───────────────────────── Vehicle History Card (JC-Print.pdf format)
+.hc-sheet {
+  background: #fff; padding: 1rem; margin-top: 1rem; border-radius: .5rem;
+  font-family: Arial, Helvetica, sans-serif; color: #000; font-size: 12px;
+}
+.hc-vehicle + .hc-vehicle { margin-top: 2rem; padding-top: 1rem; border-top: 3px double #555; }
+.hc-table {
+  width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 14px;
+  th, td { border: 1px solid #000; padding: 4px 6px; vertical-align: top; word-wrap: break-word; }
+  .hc-title { text-align: center; font-size: 17px; font-weight: 700; padding: 6px; }
+  .hc-sub { text-align: center; font-size: 12px; font-weight: 700; }
+  .hc-l { font-weight: 700; }
+  .hc-head td { font-weight: 700; }
+}
+.hc-lines { table-layout: auto; }
+.hc-job { break-inside: avoid; page-break-inside: avoid; }
+.hc-sep { border: 0; border-top: 2px solid #bbb; margin: 18px 0 22px; opacity: 1; }
+
+// print frame (see the template): only used when printing
+.hc-frame { width: 100%; border-collapse: collapse;
+  > tbody > tr > td, > thead > tr > td, > tfoot > tr > td { padding: 0; border: 0; }
+  > thead, > tfoot { display: none; }
+}
+.hc-frame-top { height: 10mm; text-align: right; font-size: 10px; color: #333; padding-top: 3mm; }
+.hc-frame-bottom { height: 10mm; }
+
+@media print {
+  // print only the history card - hide the rest of the app (header, sidebar, search, table, toasts)
+  ::ng-deep body * { visibility: hidden !important; }
+  .hc-sheet, .hc-sheet * { visibility: visible !important; }
+  .hc-sheet { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0 10mm; border-radius: 0; box-sizing: border-box; }
+  .hc-frame > thead { display: table-header-group; }
+  .hc-frame > tfoot { display: table-footer-group; }
+  .hc-sep { border-top-color: #999; }
+  // margin 0 = no room for the browser's own header/footer (page URL, title, date-time);
+  // the frame's thead/tfoot give every page its 10 mm top/bottom space instead
+  @page { size: A4 portrait; margin: 0; }
+}
