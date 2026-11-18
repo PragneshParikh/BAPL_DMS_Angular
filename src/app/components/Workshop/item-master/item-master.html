@@ -50,10 +50,13 @@
                 <th class="sort" (click)="sort('itemcode')" data-sort="itemcode">Part Code</th>
                 <th class="sort" (click)="sort('itemdesc')" data-sort="itemdesc">Item Description</th>
                 <th class="sort" (click)="sort('iselectric')" data-sort="iselectric"> Is OEM Part</th>
+                <th class="sort" (click)="sort('uom')" data-sort="uom">UOM</th>
                 <th class="sort" (click)="sort('hsncode')" data-sort="hsncode">HSNCode</th>
-                <!-- <th class="sort" (click)="sort('custprice')" style="cursor:pointer" data-sort="custprice">Customer Price</th>
-                <th class="sort" (click)="sort('dlrprice')" style="cursor:pointer" data-sort="dlrprice">Dealer Price</th> -->
+                <th class="sort" (click)="sort('custprice')" data-sort="custprice">Sale Rate</th>
+                <th class="sort" (click)="sort('sgst')" data-sort="sgst">SGST</th>
+                <th class="sort" (click)="sort('cgst')" data-sort="cgst">CGST</th>
                 <th class="sort" (click)="sort('igst')" data-sort="igst"> IGST </th>
+                <th class="sort" (click)="sort('ugst')" data-sort="ugst">UGST</th>
                 <th class="sort" (click)="sort('status')" data-sort="status"> Status </th>
               </tr>
             </thead>
@@ -67,7 +70,7 @@
                 </td>
 
                 <td>
-                  <ngb-highlight [result]="data?.grpid == 1 ? 'Vehicle' : 'Parts'" [term]="searchTerm">
+                  <ngb-highlight [result]="getItemTypeName(data?.itemtype)" [term]="searchTerm">
                   </ngb-highlight>
                 </td>
 
@@ -92,16 +95,21 @@
                   </span>
                 </td>
 
+                <td>{{ getUomName(data.uom) }}</td>
+
                 <td>
                   <ngb-highlight [result]="data.hsncode" [term]="searchTerm">
                   </ngb-highlight>
                 </td>
 
+                <td>{{ data.custprice }}</td>
+                <td>{{ data.sgst }}</td>
+                <td>{{ data.cgst }}</td>
                 <td>
                   <ngb-highlight [result]="data.igst" [term]="searchTerm">
                   </ngb-highlight>
                 </td>
-
+                <td>{{ data.ugst }}</td>
                 <td>
                   <span class="badge" [ngClass]="data.status ? 'bg-success' : 'bg-danger'">
                     {{ data.status ? 'Active' : 'Inactive' }}
@@ -156,6 +164,10 @@
   </div>
 
   <div class="modal-body">
+    <div class="alert alert-info py-2" *ngIf="isDealer && !isSelectedItemOwner">
+      This item was created by another user and is view-only.
+    </div>
+    <fieldset class="item-details-fields border-0 p-0 m-0" [disabled]="!canEditSelectedItem">
     <div class="row">
       <!-- Single Item Type field, bound to selectedItem — the second, disconnected
            readonly-style "Item Type" field has been removed. -->
@@ -434,9 +446,10 @@
       </div>
       <!-- end checkbox -->
     </div>
+    </fieldset>
   </div>
   <div class="modal-footer">
-    <button class="btn btn-primary btn-sm" (click)="updateItem()" [disabled]="!isSuperAdmin && !canEdit">Update</button>
+    <button class="btn btn-primary btn-sm" (click)="updateItem()" [disabled]="!canEditSelectedItem">Update</button>
     <button class="btn btn-danger btn-sm" (click)="modal.close()">Close</button>
   </div>
 </ng-template>

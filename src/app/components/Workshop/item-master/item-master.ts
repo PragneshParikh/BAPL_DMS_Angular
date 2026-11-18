@@ -36,7 +36,11 @@ export class ItemMaster implements OnInit {
   readonly SUBMENU_ID = 5;
   canCreate = false;
   canEdit = false;
+  canEditSelectedItem = false;
   canDownload = false;
+  isDealer = false;
+  isSelectedItemOwner = false;
+  private currentUserId = '';
 
   // pagination
   page = 1;
@@ -62,7 +66,10 @@ export class ItemMaster implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    const role = (this.storageService.getRole() || '').trim().toLowerCase().replace(/\s+/g, '');
+    this.isSuperAdmin = role === 'superadmin';
+    this.isDealer = role === 'dealer';
+    this.currentUserId = String(this.storageService.getUserId() ?? '').trim();
     this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
     this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
     this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
@@ -233,17 +240,49 @@ export class ItemMaster implements OnInit {
   }
 
   openDetails(modal: any, item: any) {
-    this.selectedItem = { ...item };   // CHANGED — clone so edits don't leak into pagedData until saved
+    this.isSelectedItemOwner = this.isItemCreatedByCurrentUser(item);
+    this.canEditSelectedItem = this.isDealer
+      ? this.canEdit && this.isSelectedItemOwner
+      : this.canEdit || this.isSuperAdmin;
+
+    this.selectedItem = this.canEditSelectedItem
+      ? {
+          ...item,
+          itemtype: 4,
+          iselectric: true,
+          uom: 56,
+          custprice: 120,
+          sgst: 2.5,
+          cgst: 2.5,
+          igst: 5,
+          ugst: 2.5
+        }
+      : { ...item };
     this.modalService.open(modal, { size: 'xl' });
   }
 
+  private isItemCreatedByCurrentUser(item: any): boolean {
+    const createdBy = String(item?.createdBy ?? '').trim();
+    return !!this.currentUserId && createdBy.toLowerCase() === this.currentUserId.toLowerCase();
+  }
+
   updateItem() {
+    if (!this.canEditSelectedItem) {
+      this.toaster.show('You do not have permission to edit this item.', {
+        classname: 'bg-warning text-dark',
+        delay: 5000
+      });
+      return;
+    }
+
     this.loader.show();
     this.selectedItem.dealerCode = this.storageService.getDealerCode();
     this.selectedItem.updatedBy = this.storageService.getUserId();
     this.selectedItem.updatedDate = new Date();
     this.itemService.updateItem(this.selectedItem).subscribe({
       next: (res) => {
+        const savedItem = { ...this.selectedItem, ...(res?.data ?? res ?? {}) };
+        this.syncUpdatedItemInGrid(savedItem);
         this.loader.hide();
         this.loadItems();
         this.modalService.dismissAll();
@@ -255,6 +294,16 @@ export class ItemMaster implements OnInit {
         this.toaster.show('something went wrong', { classname: 'bg-danger text-light', delay: 5000 });
       }
     });
+  }
+
+  private syncUpdatedItemInGrid(updatedItem: any): void {
+    const mergeUpdatedItem = (items: any[]) => items.map(item =>
+      item.id === updatedItem.id ? { ...item, ...updatedItem } : item
+    );
+
+    this.griddata = mergeUpdatedItem(this.griddata);
+    this.filteredData = mergeUpdatedItem(this.filteredData);
+    this.pagedData = mergeUpdatedItem(this.pagedData);
   }
 
   // ===============================
@@ -281,7 +330,15 @@ export class ItemMaster implements OnInit {
 
   itemTypeList = [
     { id: 1, title: 'Vehicle' },
-    { id: 2, title: 'Parts' }
+    { id: 2, title: 'Parts' },
+    { id: 3, title: 'Labour' },
+    { id: 4, title: 'Accessory' },
+    { id: 6, title: 'Outside Work' },
+    { id: 7, title: 'Complain' },
+    { id: 8, title: 'Tyre' },
+    { id: 9, title: 'Oil' },
+    { id: 10, title: 'Gift' },
+    { id: 12, title: 'Battery/E-Device' }
   ];
 
   uomList = [
@@ -290,6 +347,20 @@ export class ItemMaster implements OnInit {
     'SET',
     'BOX'
   ];
+
+  getItemTypeName(itemType: number): string {
+    return this.itemTypeList.find(type => type.id === Number(itemType))?.title ?? '';
+  }
+
+  getUomName(uom: number | string): string {
+    const uomNames: Record<number, string> = {
+      39: 'Kit',
+      40: 'Make',
+      42: 'PCS',
+      56: 'Unit'
+    };
+    return uomNames[Number(uom)] ?? '';
+  }
 
 
 
