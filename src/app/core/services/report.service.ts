@@ -905,6 +905,22 @@ export class ReportService {
     );
   }
 
+  deleteVehicleInwardInvoice(invoiceNo: string): Observable<any> {
+    const params = new HttpParams().set('invoiceNo', invoiceNo);
+    return this.http.post<any>(
+      `${environment.apiUrl}/vehicle-inward/DeleteInvoice`,
+      null,
+      { params }
+    );
+  }
+  
+    deleteVehicleInwardVehicles(chassisNos: string[]): Observable<any> {
+    return this.http.post<any>(
+      `${environment.apiUrl}/vehicle-inward/DeleteVehicles`,
+      { chassisNos }
+    );
+  }
+
     getStockAdjustmentReport(
       fromDate: Date,
       toDate: Date,

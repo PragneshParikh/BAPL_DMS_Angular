@@ -62,4 +62,8 @@ export class ChassisSearchService {
    getAllSoldChassis() {
     return this.httpClient.get<any[]>(`${this.baseUrl}/chassis-details/soldChassis`);
   }
+
+    searchGlobalChassisList(term: string): Observable<any[]> {
+    return this.httpClient.get<any[]>(`${this.baseUrl}/chassis/global-list`,{ params: { term } });
+  }
 }

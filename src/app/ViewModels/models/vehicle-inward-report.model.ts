@@ -35,6 +35,8 @@ export interface VehicleInwardReportViewModel {
   cgst: number;
   igst: number;
   hst: number;
+  saleStatus?: string;                   
+  saleDate?: string | Date | null;
 }
 
 export interface VehicleInwardReportFilterModel {

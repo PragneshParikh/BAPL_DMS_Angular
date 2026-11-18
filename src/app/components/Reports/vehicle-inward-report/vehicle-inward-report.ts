@@ -29,7 +29,12 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
   Math = Math;
 
   isDealer: boolean = false;
+  isSuperAdmin: boolean = false;
+  deletingInvoiceNo: string | null = null;
   loggedInDealerCode: string = '';
+
+  selectedChassis = new Set<string>();
+  deletingSelected: boolean = false;
 
   pageIndex: number = 1;
   pageSize: number = 100;
@@ -46,6 +51,7 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
   isLoading: boolean = false;
   exporting: boolean = false;
   errorMessage: string = '';
+
 
   sortColumn: string = 'invoiceDate';
   sortDirection: 'asc' | 'desc' = 'desc';
@@ -83,6 +89,7 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
     this.loggedInDealerCode = this.storageService.getDealerCode() ?? '';
 
     const adminRoles = ['superadmin', 'admin', 'administrator'];
+    this.isSuperAdmin = storedRole === 'superadmin';
     this.isDealer = !adminRoles.includes(storedRole);
 
     if (this.isDealer) {
@@ -140,6 +147,7 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
   }
 
   loadReport(): void {
+    this.selectedChassis.clear();
     this.isLoading = true;
     this.errorMessage = '';
     const filter = this.buildFilterModel();
@@ -202,6 +210,169 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
     this.loadReport();
   }
 
+ 
+  invoiceVehicleCount(invoiceNo: string): number {
+    return this.reportData.filter(r => r.bgInvoiceNo === invoiceNo).length;
+  }
+
+  invoiceSoldCount(invoiceNo: string): number {
+    return this.reportData.filter(r => r.bgInvoiceNo === invoiceNo && r.saleStatus === 'Sold').length;
+  }
+
+
+    
+     isRowSelectable(item: VehicleInwardReportViewModel): boolean {
+    return !!item.chassisNo
+        && !this.deletingSelected
+        && item.saleStatus !== 'Sold';
+  }
+
+  isRowSelected(item: VehicleInwardReportViewModel): boolean {
+    return this.selectedChassis.has(item.chassisNo);
+  }
+
+  toggleRow(item: VehicleInwardReportViewModel, checked: boolean): void {
+    if (!this.isRowSelectable(item)) return;
+    if (checked) this.selectedChassis.add(item.chassisNo);
+    else this.selectedChassis.delete(item.chassisNo);
+  }
+
+  // get selectableRows(): VehicleInwardReportViewModel[] {
+  //   return this.reportData.filter(r => this.isRowSelectable(r));
+  // }
+  // get anySoldOnPage(): boolean {
+  //   return this.reportData.some(r => r.saleStatus === 'Sold');
+  // }
+
+  // get allSelectableSelected(): boolean {
+  //   const rows = this.selectableRows;
+  //   return rows.length > 0 && rows.every(r => this.selectedChassis.has(r.chassisNo));
+  // }
+
+  // toggleAll(checked: boolean): void {
+  //   this.selectableRows.forEach(r => {
+  //     if (checked) this.selectedChassis.add(r.chassisNo);
+  //     else this.selectedChassis.delete(r.chassisNo);
+  //   });
+  // }
+
+  isInvoiceDeletable(invoiceNo: string): boolean {
+    return this.invoiceSoldCount(invoiceNo) === 0;
+  }
+
+ get masterSelectableRows(): VehicleInwardReportViewModel[] {
+    return this.reportData.filter(r => !!r.chassisNo && r.saleStatus !== 'Sold');
+  }
+
+  get allSelectableSelected(): boolean {
+    const rows = this.masterSelectableRows;
+    return rows.length > 0 && rows.every(r => this.selectedChassis.has(r.chassisNo));
+  }
+
+  get masterDisabled(): boolean {
+    return this.deletingSelected || this.masterSelectableRows.length === 0;
+  }
+
+  toggleAll(checked: boolean): void {
+    this.masterSelectableRows.forEach(r => {
+      if (checked) this.selectedChassis.add(r.chassisNo);
+      else this.selectedChassis.delete(r.chassisNo);
+    });
+  }
+
+   onDeleteSelected(): void {
+    if (!this.isSuperAdmin || this.selectedChassis.size === 0) return;
+
+    const chassisNos = Array.from(this.selectedChassis);
+
+    const selectedInvoices = Array.from(new Set(
+      this.reportData
+        .filter(r => this.selectedChassis.has(r.chassisNo))
+        .map(r => r.bgInvoiceNo)
+    ));
+
+    const blockedInvoice = selectedInvoices.find(inv => this.invoiceSoldCount(inv) > 0);
+    if (blockedInvoice) {
+      alert(
+        `Vehicle already sold (${this.invoiceSoldCount(blockedInvoice)} of ` +
+        `${this.invoiceVehicleCount(blockedInvoice)} vehicle(s) in invoice ${blockedInvoice}). Cannot delete.`
+      );
+      return;
+    }
+
+    const confirmed = confirm(
+      `Delete ${chassisNos.length} selected vehicle(s) from ${selectedInvoices.length} invoice(s)?\n\n` +
+      `They will be removed from Lot Inspection and Vehicle Inward. This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    this.deletingSelected = true;
+    this.errorMessage = '';
+
+    this.reportService.deleteVehicleInwardVehicles(chassisNos)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.deletingSelected = false;
+          if (response && response.valid) {
+            alert(response.description || 'Selected vehicle(s) deleted successfully.');
+            this.loadReport();
+          } else {
+            alert(response?.description || 'Failed to delete selected vehicle(s).');
+          }
+        },
+        error: (error) => {
+          this.deletingSelected = false;
+          alert(error?.error?.description || error?.error?.message || 'An error occurred while deleting.');
+        }
+      });
+  }
+
+  onDeleteInvoice(invoiceNo: string): void {
+    if (!invoiceNo || !this.isSuperAdmin) return;
+
+    const total = this.invoiceVehicleCount(invoiceNo);
+    const sold = this.invoiceSoldCount(invoiceNo);
+
+    if (sold > 0) {
+      const msg = `Vehicle already sold (${sold} of ${total} vehicle(s)). Invoice cannot be deleted.`;
+     // this.errorMessage = msg;
+      alert(msg);
+      return;
+    }
+
+    const confirmed = confirm(
+      `Delete full Invoice "${invoiceNo}" (${total} vehicle(s))?\n\n` +
+      `It will be removed from Lot Inspection and Vehicle Inward. This cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    this.deletingInvoiceNo = invoiceNo;
+    this.errorMessage = '';
+
+    this.reportService.deleteVehicleInwardInvoice(invoiceNo)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.deletingInvoiceNo = null;
+          if (response && response.valid) {
+            alert(response.description || `Invoice ${invoiceNo} deleted successfully.`);
+            this.loadReport();
+          } else {
+            this.errorMessage = response?.description || 'Failed to delete invoice.';
+            alert(this.errorMessage);
+          }
+        },
+        error: (error) => {
+          this.deletingInvoiceNo = null;
+          const msg = error?.error?.description || error?.error?.message || 'An error occurred while deleting the invoice.';
+          this.errorMessage = msg;
+          alert(msg);
+        }
+      });
+  }
+
   onSort(column: string): void {
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
@@ -252,7 +423,7 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
       'Model Name', 'Quantity', 'Chassis No', 'Motor No', 'Colour', 'Mfg Year',
       'Battery No', 'Battery Make', 'Battery Capacity', 'Battery Chemical',
       'Charger No', 'Controller No', 'Rate', 'FAME2 Subsidy',
-      'SGST', 'CGST', 'IGST', 'HST'
+      'SGST', 'CGST', 'IGST', 'HST', 'Sale Status', 'Sale Date'
     ];
 
     const fmt = (d: any) => d ? new Date(d).toLocaleDateString('en-IN') : '';
@@ -265,7 +436,7 @@ export class VehicleInwardReport implements OnInit, OnDestroy {
         row.modelName, row.quantity, row.chassisNo, row.motorNo, row.colour, row.mfgYear,
         row.batteryNo, row.batteryMake, row.batteryCapacity, row.batteryChemical,
         row.chargerNo, row.controllerNo, row.rate, row.subsidyAmountFame2,
-        row.sgst, row.cgst, row.igst, row.hst
+        row.sgst, row.cgst, row.igst, row.hst, row.saleStatus, fmt(row.saleDate)
       ])
     ];
 

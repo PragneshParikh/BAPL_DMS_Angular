@@ -95,10 +95,14 @@ export class JobCardAddForm {
   chassiseditData: any = null;
   repairBillStatus: string;
   fromEstimateData: any = null;
+  chassisLoading = false;
 
   // ===== Global chassis search (modal) — logic reused from ebw-invoice.ts,
   // presented as a modal via NgbModal rather than an inline collapsible box =====
   globalChassisSearchTerm: string = '';
+  globalChassisSuggestions: any[] = [];
+  globalSuggestLoading = false;
+  private globalSuggestTimer: any;
   globalSaleData: any = null;
   globalSearchNotFound: boolean = false;
   globalSearching: boolean = false;
@@ -288,15 +292,26 @@ export class JobCardAddForm {
     });
   }
 
-  filterChassis() {
-    const value = (this.selectedChassis || '').toLowerCase();
+  // filterChassis() {
+  //   const value = (this.selectedChassis || '').toLowerCase();
 
-    this.filteredChassisList = this.chassisList
-      .filter(x =>
-        x.chassisNumber?.toLowerCase().includes(value)
-      )
-      .slice(0, 10);
-  }
+  //   this.filteredChassisList = this.chassisList
+  //     .filter(x =>
+  //       x.chassisNumber?.toLowerCase().includes(value)
+  //     )
+  //     .slice(0, 10);
+  // }
+
+
+filterChassis() {
+  const value = (this.selectedChassis || '').toLowerCase().trim();
+
+  this.filteredChassisList = this.chassisList
+    .filter(x =>
+      x.chassisNumber?.toLowerCase().includes(value) ||
+      x.registerNo?.toLowerCase().includes(value))
+    .sort((a, b) => a.chassisNumber.localeCompare(b.chassisNumber));
+}
 
   selectChassis(item: any) {
     this.selectedChassis = item.chassisNumber;
@@ -316,10 +331,53 @@ export class JobCardAddForm {
   // Checklist popup) so the user can look up a chassis that isn't in this
   // dealer's own inspected-lot list — e.g. a vehicle sold by another dealer.
 
-  openGlobalChassisSearch(content: any) {
+  // openGlobalChassisSearch(content: any) {
+  //   this.globalChassisSearchTerm = this.selectedChassis || '';
+  //   this.globalSaleData = null;
+  //   this.globalSearchNotFound = false;
+
+  //   this.globalSearchModalRef = this.modalService.open(content, {
+  //     size: 'lg',
+  //     centered: true,
+  //     backdrop: 'static'
+  //   });
+  // }
+
+  // closeGlobalSearchModal() {
+  //   this.globalSearchModalRef?.dismiss();
+  //   this.globalSearchModalRef = null;
+  //   this.globalChassisSearchTerm = '';
+  //   this.globalSaleData = null;
+  //   this.globalSearchNotFound = false;
+  // }
+
+  // searchGlobalChassis() {
+  //   if (!this.globalChassisSearchTerm) {
+  //     this.toaster.show('Enter a Chassis No to search.', { classname: 'bg-warning text-white', delay: 4000 });
+  //     return;
+  //   }
+  //   this.globalSearching = true;
+  //   this.globalSaleData = null;
+  //   this.globalSearchNotFound = false;
+
+  //   this.chassisSearchService.getGlobalChassisDetails(this.globalChassisSearchTerm).subscribe({
+  //     next: (res: any) => {
+  //       this.globalSearching = false;
+  //       this.globalSaleData = res;
+  //     },
+  //     error: (err) => {
+  //       this.globalSearching = false;
+  //       console.error(err);
+  //       this.globalSearchNotFound = true;
+  //     },
+  //   });
+  // }
+  
+    openGlobalChassisSearch(content: any) {
     this.globalChassisSearchTerm = this.selectedChassis || '';
     this.globalSaleData = null;
     this.globalSearchNotFound = false;
+    this.globalChassisSuggestions = [];
 
     this.globalSearchModalRef = this.modalService.open(content, {
       size: 'lg',
@@ -329,11 +387,45 @@ export class JobCardAddForm {
   }
 
   closeGlobalSearchModal() {
+    clearTimeout(this.globalSuggestTimer);
+    this.globalChassisSuggestions = [];
     this.globalSearchModalRef?.dismiss();
     this.globalSearchModalRef = null;
     this.globalChassisSearchTerm = '';
     this.globalSaleData = null;
     this.globalSearchNotFound = false;
+  }
+
+  onGlobalChassisInput() {
+    this.globalSaleData = null;
+    this.globalSearchNotFound = false;
+    clearTimeout(this.globalSuggestTimer);
+
+    const term = (this.globalChassisSearchTerm || '').trim();
+    if (term.length < 3) {
+      this.globalChassisSuggestions = [];
+      return;
+    }
+
+    this.globalSuggestTimer = setTimeout(() => {
+      this.globalSuggestLoading = true;
+      this.chassisSearchService.searchGlobalChassisList(term).subscribe({
+        next: (res: any) => {
+          this.globalChassisSuggestions = res || [];
+          this.globalSuggestLoading = false;
+        },
+        error: () => {
+          this.globalChassisSuggestions = [];
+          this.globalSuggestLoading = false;
+        }
+      });
+    }, 300);
+  }
+
+  selectGlobalChassis(item: any) {
+    this.globalChassisSearchTerm = item.chassisNo;
+    this.globalChassisSuggestions = [];
+    this.searchGlobalChassis();
   }
 
   searchGlobalChassis() {
@@ -342,6 +434,7 @@ export class JobCardAddForm {
       return;
     }
 
+    this.globalChassisSuggestions = [];
     this.globalSearching = true;
     this.globalSaleData = null;
     this.globalSearchNotFound = false;
@@ -573,20 +666,51 @@ export class JobCardAddForm {
     });
   }
 
+  // loadChassisList() {
+
+  //   this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+
+  //   if (!this.isSuperAdmin) {
+  //     this.dealerCode = this.storageService.getDealerCode();
+  //   } else {
+  //     this.dealerCode = null;
+  //   }
+  //   this.jobTypeId = this.selectedJobtype
+
+  //   this.jobCardService.getAllInspectedChassis(this.dealerCode, this.jobTypeId).subscribe(res => {
+  //     this.chassisList = res;
+  //     //console.log("Chassislist bind", this.chassisList);
+
+  //     if (this.isEditMode && this.chassiseditData) {
+  //       this.customerObj.saleDate = this.chassisList[0].saleDate?.split('T')[0];
+  //       this.customerObj.insuranceExpDate = this.chassisList[0].insuranceExpDate?.split('T')[0];
+  //       this.customerObj.nextServiceDueDate = this.chassisList[0].nextserviceDueDate?.split('T')[0];
+  //       this.selectedChassis = this.chassiseditData.jobCardHeader.chassisno;
+
+  //       setTimeout(() => {
+  //         this.onChassisChange();
+  //       }, 0);
+  //     }
+
+  //   });
+  // }
+
   loadChassisList() {
 
-    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+  this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
-    if (!this.isSuperAdmin) {
-      this.dealerCode = this.storageService.getDealerCode();
-    } else {
-      this.dealerCode = null;
-    }
-    this.jobTypeId = this.selectedJobtype
+  if (!this.isSuperAdmin) {
+    this.dealerCode = this.storageService.getDealerCode();
+  } else {
+    this.dealerCode = null;
+  }
+  this.jobTypeId = this.selectedJobtype;
 
-    this.jobCardService.getAllInspectedChassis(this.dealerCode, this.jobTypeId).subscribe(res => {
+  this.chassisLoading = true;                                  
+  this.jobCardService.getAllInspectedChassis(this.dealerCode, this.jobTypeId).subscribe({
+    next: res => {
       this.chassisList = res;
-      //console.log("Chassislist bind", this.chassisList);
+      this.chassisLoading = false;                             
 
       if (this.isEditMode && this.chassiseditData) {
         this.customerObj.saleDate = this.chassisList[0].saleDate?.split('T')[0];
@@ -598,9 +722,10 @@ export class JobCardAddForm {
           this.onChassisChange();
         }, 0);
       }
-
-    });
-  }
+    },
+    error: () => { this.chassisLoading = false; }               
+  });
+}
 
   loadPdiData(oemModelId: number) {
 
@@ -622,103 +747,160 @@ export class JobCardAddForm {
   }
 
 
-  onJobType(isEdit = false, isFromEstimate: boolean = false) {
-    if (!this.selectedJobtype) return;
+//   onJobType(isEdit = false, isFromEstimate: boolean = false) {
+//     if (!this.selectedJobtype) return;
 
-    // FIXED: this method never branched on isSuperAdmin like every other
-    // chassis/location loader in this component does (fetchLocations,
-    // loadChassisList). It always sent the logged-in user's own dealerCode,
-    // so even a true SuperAdmin session got scoped to their own dealer and
-    // never saw other dealers' chassis (e.g. isSuperAdmin bypass in
-    // GetAllInspectedLotChassisAsync's "isSuperAdmin || v.DealerId == dealerCode"
-    // check never actually triggered because dealerCode was never null here).
-    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
-    if (!this.isSuperAdmin) {
-      this.dealerCode = this.storageService.getDealerCode();
-    } else {
-      this.dealerCode = null;
-    }
+//     // FIXED: this method never branched on isSuperAdmin like every other
+//     // chassis/location loader in this component does (fetchLocations,
+//     // loadChassisList). It always sent the logged-in user's own dealerCode,
+//     // so even a true SuperAdmin session got scoped to their own dealer and
+//     // never saw other dealers' chassis (e.g. isSuperAdmin bypass in
+//     // GetAllInspectedLotChassisAsync's "isSuperAdmin || v.DealerId == dealerCode"
+//     // check never actually triggered because dealerCode was never null here).
+//     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+//     if (!this.isSuperAdmin) {
+//       this.dealerCode = this.storageService.getDealerCode();
+//     } else {
+//       this.dealerCode = null;
+//     }
 
-    // Load chassis
-    this.jobCardService
-      .getAllInspectedChassis(this.dealerCode, this.selectedJobtype)
-      .subscribe(res => {
-        this.chassisList = res;
-      });
+//     // Load chassis
+//     this.jobCardService
+//       .getAllInspectedChassis(this.dealerCode, this.selectedJobtype)
+//       .subscribe(res => {
+//         this.chassisList = res;
+//       });
 
-    // Load service heads
-    this.jobCardService
-      .getServiceHead(this.selectedJobtype)
-      .subscribe((res: any[]) => {
+//     // Load service heads
+//     this.jobCardService
+//       .getServiceHead(this.selectedJobtype)
+//       .subscribe((res: any[]) => {
 
-        this.serviceHeadList = res;
+//         this.serviceHeadList = res;
 
-        // EDIT MODE
-        if (isEdit) {
+//         // EDIT MODE
+//         if (isEdit) {
 
-          this.selectedServiceHead =
-            this.chassiseditData.jobCardHeader.servicehead;
+//           this.selectedServiceHead =
+//             this.chassiseditData.jobCardHeader.servicehead;
 
-          this.loadServiceType(this.selectedServiceHead, true);
+//           this.loadServiceType(this.selectedServiceHead, true);
 
-          return;
+//           return;
+//         }
+
+//         // FIXED: same missing branch here — this second dealerCode
+//         // assignment (used for the chassis reload just below) also ignored
+//         // isSuperAdmin.
+//         if (!this.isSuperAdmin) {
+//           this.dealerCode = this.storageService.getDealerCode();
+//         } else {
+//           this.dealerCode = null;
+//         }
+
+//         // Load chassis
+//         this.jobCardService
+//           .getAllInspectedChassis(this.dealerCode, this.selectedJobtype)
+//           .subscribe(res => {
+//             this.chassisList = res;
+
+//             if (isFromEstimate && this.fromEstimateData?.chassisNo) {
+//               const match = this.chassisList.find(
+//                 x => x.chassisNumber == this.fromEstimateData.chassisNo
+//               );
+
+//               if (match) {
+//                 // Found in the inspected-lot list — reuse the normal path so we
+//                 // get full battery/motor/warranty data, same as edit mode.
+//                 this.selectedChassis = this.fromEstimateData.chassisNo;
+//                 this.onChassisChange();
+//               } else {
+//                 // Estimate chassis isn't in this dealer's inspected-lot list
+//                 // (e.g. a walk-in) — fall back to what Estimate already resolved.
+//                 this.applyEstimateVehicleFallback();
+//               }
+//             }
+//           });
+
+//         // Load service heads
+//         this.jobCardService
+//           .getServiceHead(this.selectedJobtype)
+//           .subscribe((res: any[]) => {
+//             this.serviceHeadList = res;
+
+//             if (isEdit) {
+//               this.selectedServiceHead = this.chassiseditData.jobCardHeader.servicehead;
+//               this.loadServiceType(this.selectedServiceHead, true);
+//               return;
+//             }
+
+//             if (this.serviceHeadList.length > 0) {
+//               this.selectedServiceHead = this.serviceHeadList[0].serviceHeadId;
+//               this.loadServiceType(this.selectedServiceHead);
+//             } else {
+//               this.selectedServiceHead = '';
+//               this.selectedServiceType = '';
+//               this.serviceTypeList = [];
+//             }
+//           });
+//       });
+// }
+
+onJobType(isEdit = false, isFromEstimate: boolean = false) {
+  if (!this.selectedJobtype) return;
+
+  this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+  this.dealerCode = this.isSuperAdmin ? null : this.storageService.getDealerCode();
+
+  // ===== 1) Chassis load =====
+  this.chassisLoading = true;
+  this.jobCardService
+    .getAllInspectedChassis(this.dealerCode, this.selectedJobtype)
+    .subscribe({
+      next: res => {
+        this.chassisList = res || [];
+        this.chassisLoading = false;
+        this.filterChassis();   
+
+        if (!isEdit && isFromEstimate && this.fromEstimateData?.chassisNo) {
+          const match = this.chassisList.find(
+            x => x.chassisNumber == this.fromEstimateData.chassisNo
+          );
+
+          if (match) {
+            this.selectedChassis = this.fromEstimateData.chassisNo;
+            this.onChassisChange();
+          } else {
+            this.applyEstimateVehicleFallback();
+          }
         }
+      },
+      error: () => {
+        this.chassisLoading = false;
+      }
+    });
 
-        // FIXED: same missing branch here — this second dealerCode
-        // assignment (used for the chassis reload just below) also ignored
-        // isSuperAdmin.
-        if (!this.isSuperAdmin) {
-          this.dealerCode = this.storageService.getDealerCode();
-        } else {
-          this.dealerCode = null;
-        }
+  // ===== 2) Service heads =====
+  this.jobCardService
+    .getServiceHead(this.selectedJobtype)
+    .subscribe((res: any[]) => {
+      this.serviceHeadList = res;
 
-        // Load chassis
-        this.jobCardService
-          .getAllInspectedChassis(this.dealerCode, this.selectedJobtype)
-          .subscribe(res => {
-            this.chassisList = res;
+      if (isEdit) {
+        this.selectedServiceHead = this.chassiseditData.jobCardHeader.servicehead;
+        this.loadServiceType(this.selectedServiceHead, true);
+        return;
+      }
 
-            if (isFromEstimate && this.fromEstimateData?.chassisNo) {
-              const match = this.chassisList.find(
-                x => x.chassisNumber == this.fromEstimateData.chassisNo
-              );
-
-              if (match) {
-                // Found in the inspected-lot list — reuse the normal path so we
-                // get full battery/motor/warranty data, same as edit mode.
-                this.selectedChassis = this.fromEstimateData.chassisNo;
-                this.onChassisChange();
-              } else {
-                // Estimate chassis isn't in this dealer's inspected-lot list
-                // (e.g. a walk-in) — fall back to what Estimate already resolved.
-                this.applyEstimateVehicleFallback();
-              }
-            }
-          });
-
-        // Load service heads
-        this.jobCardService
-          .getServiceHead(this.selectedJobtype)
-          .subscribe((res: any[]) => {
-            this.serviceHeadList = res;
-
-            if (isEdit) {
-              this.selectedServiceHead = this.chassiseditData.jobCardHeader.servicehead;
-              this.loadServiceType(this.selectedServiceHead, true);
-              return;
-            }
-
-            if (this.serviceHeadList.length > 0) {
-              this.selectedServiceHead = this.serviceHeadList[0].serviceHeadId;
-              this.loadServiceType(this.selectedServiceHead);
-            } else {
-              this.selectedServiceHead = '';
-              this.selectedServiceType = '';
-              this.serviceTypeList = [];
-            }
-          });
-      });
+      if (this.serviceHeadList.length > 0) {
+        this.selectedServiceHead = this.serviceHeadList[0].serviceHeadId;
+        this.loadServiceType(this.selectedServiceHead);
+      } else {
+        this.selectedServiceHead = '';
+        this.selectedServiceType = '';
+        this.serviceTypeList = [];
+      }
+    });
 }
   onServiceHeadChange() {
     this.loadServiceType(this.selectedServiceHead);
