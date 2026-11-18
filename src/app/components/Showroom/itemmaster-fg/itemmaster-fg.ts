@@ -22,6 +22,7 @@ import { SearchDebouncer } from '../../../shared/search/table-search';
 export class ItemmasterFG implements OnInit {
   durationTypes = DurationTypes;
   isSuperAdmin: boolean;
+  canEditAdminFields = false;
 
   readonly SUBMENU_ID = 6;
   canEdit = false;
@@ -137,7 +138,9 @@ export class ItemmasterFG implements OnInit {
 
 
   ngOnInit() {
-    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    const role = (this.storageService.getRole() || '').trim().toLowerCase().replace(/\s+/g, '');
+    this.isSuperAdmin = role === 'superadmin';
+    this.canEditAdminFields = role === 'admin' || role === 'superadmin';
     this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
     this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     this.loadItems();
@@ -252,7 +255,6 @@ export class ItemmasterFG implements OnInit {
     this.loader.show();
     this.selectedItem.dealerCode = this.storageService.getDealerCode();
     this.selectedItem.uom = this.itemObj.uom;
-    this.selectedItem.warrantyDurationType = this.itemObj.warrantyDurationType;
     this.selectedItem.fame2amount = this.itemObj.fame2amount;
     this.itemObj.status = this.selectedItem.status
     this.selectedItem.updatedBy = this.storageService.getUserId();
