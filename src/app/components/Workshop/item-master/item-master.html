@@ -268,10 +268,10 @@
         </label>
         <!-- FIXED — was itemObj.uom (belongs to the Add modal, never saved) -->
         <select class="form-select form-select-sm" [(ngModel)]="selectedItem.uom" name="uom">
-          <option value="39">Kit</option>
-          <option value="40">Make</option>
-          <option value="42">PCS</option>
-          <option value="56">Unit</option>
+          <option [ngValue]="39">Kit</option>
+          <option [ngValue]="40">Make</option>
+          <option [ngValue]="42">PCS</option>
+          <option [ngValue]="56">Unit</option>
         </select>
       </div>
 
@@ -505,7 +505,7 @@
       <!-- Part Code -->
       <div class="col-md-2">
         <label class="form-label">
-          Part Code
+          Part Code <span class="text-danger">*</span>
         </label>
         <input type="text" class="form-control form-control-sm" [(ngModel)]="itemObj.itemcode" name="itemcode">
       </div>
@@ -608,10 +608,10 @@
 
         <select class="form-select form-select-sm" [(ngModel)]="itemObj.uom" name="uom">
 
-          <option value="39">Kit</option>
-          <option value="40">Make</option>
-          <option value="42">PCS</option>
-          <option value="56">Unit</option>
+          <option [ngValue]="39">Kit</option>
+          <option [ngValue]="40">Make</option>
+          <option [ngValue]="42">PCS</option>
+          <option [ngValue]="56">Unit</option>
 
         </select>
 
