@@ -1,0 +1,206 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="row align-items-center mb-3">
+        <div class="col">
+          <h4 class="mb-0">{{ isTransactionEditFlow ? 'Edit Local Parts Transaction' : 'Add Local Parts' }}</h4>
+        </div>
+        <div class="col-auto text-end">
+          <button type="button" class="btn btn-primary btn-sm text-white" style="background-color:#0d6efd;border-color:#0d6efd" aria-label="View local parts transactions" title="View transactions" (click)="openTransactions()">
+            <i class="ri-menu-line"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div *ngIf="errorMessage && !isTransactionEditFlow" class="alert alert-danger" role="alert">
+        {{ errorMessage }}
+      </div>
+      <div *ngIf="successMessage && !isTransactionEditFlow" class="alert alert-success" role="status">
+        {{ successMessage }}
+      </div>
+
+      <div class="row g-3 align-items-end mb-4">
+        <div class="col-md-4">
+          <label for="localPartsPrefix" class="form-label">Prefix <span class="text-muted">(optional)</span></label>
+          <input
+            id="localPartsPrefix"
+            class="form-control"
+            name="prefix"
+            [(ngModel)]="prefix"
+            maxlength="100"
+            placeholder="Enter prefix or bill number">
+        </div>
+        <div class="col-md-3">
+          <label for="localPartsDate" class="form-label">Date</label>
+          <input
+            id="localPartsDate"
+            class="form-control"
+            type="date"
+            name="entryDate"
+            [(ngModel)]="entryDate"
+            [disabled]="isLoadingTransaction"
+            required>
+        </div>
+        <div class="col-md-5">
+          <label for="localPartsLocation" class="form-label">Workshop Location</label>
+          <select
+            id="localPartsLocation"
+            class="form-select"
+            name="locationId"
+            [ngModel]="locationId"
+            (ngModelChange)="onLocationChange($event ? +$event : null)"
+            [disabled]="isLoadingLocations || isLoadingTransaction || editingTransactionId !== null || draftLines.length > 0"
+            required>
+            <option [ngValue]="null">Select workshop location</option>
+            <option *ngFor="let location of locations" [ngValue]="location.locationId">
+              {{ location.locationName }} ({{ location.locationCode }})
+            </option>
+          </select>
+          <small *ngIf="draftLines.length > 0" class="text-muted">
+            Remove the draft lines before changing location.
+          </small>
+        </div>
+      </div>
+
+      <div class="border rounded p-3 mb-4">
+        <h5 class="mb-3">Part Details</h5>
+        <div class="row g-3 align-items-end">
+          <div class="col-xl-4 col-lg-5">
+            <label for="localPartsPart" class="form-label">Part Code</label>
+            <select
+              id="localPartsPart"
+              class="form-select"
+              name="partCode"
+              [(ngModel)]="partCode"
+              (ngModelChange)="onPartChange($event)"
+              [disabled]="!locationId || isLoadingParts || editingTransactionId !== null"
+              required>
+              <option value="">Select dealer Spares part</option>
+              <option *ngFor="let part of parts" [value]="part.partCode">
+                {{ part.partCode }} — {{ part.description }}{{ part.displayName ? ' — ' + part.displayName : '' }}
+              </option>
+            </select>
+            <small *ngIf="isLoadingParts" class="text-muted">Loading parts…</small>
+          </div>
+          <div class="col-xl-5 col-lg-4">
+            <label class="form-label">Description</label>
+            <input class="form-control" [value]="selectedPart?.description ?? ''" readonly>
+          </div>
+          <div class="col-xl-1 col-md-3">
+            <label class="form-label">Current Stock</label>
+            <input class="form-control text-end" [value]="selectedPart?.currentStock ?? ''" readonly>
+          </div>
+          <div class="col-xl-1 col-md-3">
+            <label for="localPartsPurchaseQty" class="form-label">Purchase Qty</label>
+            <input
+              id="localPartsPurchaseQty"
+              class="form-control text-end"
+              type="number"
+              min="1"
+              step="1"
+              name="purchaseQuantity"
+              [(ngModel)]="purchaseQuantity"
+              required>
+          </div>
+          <div class="col-xl-1 col-md-3">
+            <label class="form-label">Total Qty</label>
+            <input
+              class="form-control text-end"
+              [value]="selectedPart && purchaseQuantity ? calculatedTotal : ''"
+              readonly>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button
+            *ngIf="editingIndex !== null"
+            type="button"
+            class="btn btn-light"
+            (click)="cancelEdit()">
+            Cancel Edit
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            *ngIf="editingTransactionId === null || editingIndex !== null"
+            [disabled]="!locationId || !partCode || !purchaseQuantity || isSaving"
+            (click)="addOrUpdateLine()">
+            {{ editingIndex !== null ? 'Update Line' : 'Add' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h5 class="mb-0">Parts to Add</h5>
+        <span *ngIf="selectedLocation" class="text-muted">
+          {{ selectedLocation.locationName }}
+        </span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Part Code</th>
+              <th>Part Name</th>
+              <th>Description</th>
+              <th>Location</th>
+              <th class="text-end">Current Stock</th>
+              <th class="text-end">Purchase Qty</th>
+              <th class="text-end">Total Qty</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let line of draftLines; let i = index; trackBy: trackByPartCode">
+              <td>{{ line.partCode }}</td>
+              <td>{{ line.partName }}</td>
+              <td>{{ line.description }}</td>
+              <td>{{ selectedLocation?.locationName }}</td>
+              <td class="text-end">{{ line.currentStock }}</td>
+              <td class="text-end">{{ line.purchaseQuantity }}</td>
+              <td class="text-end">{{ line.totalQuantity }}</td>
+              <td class="text-center text-nowrap">
+                <button type="button" class="btn btn-sm btn-outline-primary me-1" [disabled]="isSaving" (click)="editLine(i)">
+                  Edit
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="isSaving" (click)="deleteLine(i)">
+                  Delete
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="draftLines.length === 0">
+              <td colspan="8" class="text-center text-muted py-4">
+                Add a part above to start this receipt.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-end mt-3">
+        <button
+          type="button"
+          class="btn btn-success"
+          [disabled]="isSaving || isLoadingTransaction || !entryDate || !locationId || draftLines.length === 0 || (editingTransactionId !== null && editingIndex !== null)"
+          (click)="save()">
+          {{ isSaving ? (editingTransactionId !== null ? 'Updating…' : 'Saving…') : (editingTransactionId !== null ? 'Update Stock' : 'Save and Update Stock') }}
+        </button>
+      </div>
+      <div *ngIf="errorMessage && isTransactionEditFlow" class="alert alert-danger mt-3 mb-0" role="alert">
+        {{ errorMessage }}
+      </div>
+      <div *ngIf="successMessage && isTransactionEditFlow" class="alert alert-success mt-3 mb-0" role="status">
+        {{ successMessage }}
+      </div>
+
+      <div class="alert alert-info mt-4 mb-0" role="note">
+        Note: Saving posts the purchase quantities shown above to stock at the selected workshop.
+        Duplicate part codes in this draft are combined into one receipt line.
+      </div>
+    </div>
+  </div>
+</div>

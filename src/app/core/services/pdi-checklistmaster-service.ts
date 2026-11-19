@@ -31,9 +31,10 @@ export class PdiChecklistMasterService {
     );
   }
 
-  deletePdiChecklistMaster(pdicheckId: number): Observable<any> {
-    return this.httpClient.delete<any>(
-      `${this.baseUrl}/PdiCheclistMaster/DeletePdiChecklistMaster/${pdicheckId}`
+  deletePdiChecklistMaster(pdicheckId: number): Observable<string> {
+    return this.httpClient.delete(
+      `${this.baseUrl}/PdiCheclistMaster/DeletePdiChecklistMaster/${pdicheckId}`,
+      { responseType: 'text' }
     );
   }
 

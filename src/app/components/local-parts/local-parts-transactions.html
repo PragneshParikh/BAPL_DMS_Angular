@@ -1,0 +1,118 @@
+<div class="container-fluid">
+  <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+    <h4 class="mb-sm-0">Local Parts Transactions</h4>
+    <button type="button" class="btn btn-primary btn-sm text-white" style="background-color:#0d6efd;border-color:#0d6efd" (click)="openEntryPage()">
+      <i class="ri-arrow-left-line me-1"></i>
+      Add Local Parts
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    {{ errorMessage }}
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label for="localPartsFromDate" class="form-label">Date From</label>
+          <input id="localPartsFromDate" type="date" class="form-control" [(ngModel)]="fromDate">
+        </div>
+        <div class="col-md-3">
+          <label for="localPartsToDate" class="form-label">Date To</label>
+          <input id="localPartsToDate" type="date" class="form-control" [(ngModel)]="toDate">
+        </div>
+        <div class="col-md-4">
+          <label for="localPartsHistoryLocation" class="form-label">Workshop Location</label>
+          <select id="localPartsHistoryLocation" class="form-select" [ngModel]="locationId" (ngModelChange)="onLocationChange($event)">
+            <option [ngValue]="null">Select workshop location</option>
+            <option *ngFor="let location of locations" [ngValue]="location.locationId">
+              {{ location.locationName }} ({{ location.locationCode }})
+            </option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+          <button type="button" class="btn btn-primary" [disabled]="isLoading || locationId === null" (click)="search()">
+            {{ isLoading ? 'Loading…' : 'Search' }}
+          </button>
+          <button type="button" class="btn btn-success" [disabled]="locationId === null || transactions.length === 0" title="Export to Excel" aria-label="Export to Excel" (click)="exportExcel()">
+            <i class="ri-file-excel-2-line"></i>
+          </button>
+        </div>
+      </div>
+      <small *ngIf="isDealer && locationId === null" class="text-muted d-block mt-2">
+        Select a workshop location, then click Search to view its transactions.
+      </small>
+    </div>
+  </div>
+
+  <div class="card mt-3">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Sr. No.</th>
+              <th>Prefix / Receipt No.</th>
+              <th>Date</th>
+              <th>Part Code</th>
+              <th>Part Name</th>
+              <th>Description</th>
+              <th>Dealer</th>
+              <th>Workshop Location</th>
+              <th class="text-end">Current Stock</th>
+              <th class="text-end">Purchase Qty</th>
+              <th class="text-end">Total Qty</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="!isLoading && locationId === null">
+              <td colspan="11" class="text-center text-muted py-4">
+                {{ isDealer ? 'Select a workshop location, then click Search.' : 'Select a workshop location to view transactions.' }}
+              </td>
+            </tr>
+            <tr *ngIf="!isLoading && locationId !== null && transactions.length === 0">
+              <td colspan="11" class="text-center text-muted py-4">No local-parts transactions found.</td>
+            </tr>
+            <tr
+              *ngFor="let transaction of paginatedTransactions; let i = index"
+              title="Double-click to edit this transaction"
+              style="cursor: pointer"
+              (dblclick)="editTransaction(transaction)">
+              <td>{{ ((currentPage - 1) * pageSize) + i + 1 }}</td>
+              <td>{{ transaction.receiptNumber }}</td>
+              <td>{{ transaction.date | date:'dd/MM/yyyy' }}</td>
+              <td>{{ transaction.partCode }}</td>
+              <td>{{ transaction.partName }}</td>
+              <td>{{ transaction.description }}</td>
+              <td>{{ transaction.dealerName }} ({{ transaction.dealerCode }})</td>
+              <td>{{ transaction.locationName }} ({{ transaction.locationCode }})</td>
+              <td class="text-end">{{ transaction.previousStock }}</td>
+              <td class="text-end">{{ transaction.purchaseQuantity }}</td>
+              <td class="text-end">{{ transaction.totalStock }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+          Showing
+          {{ transactions.length === 0 ? 0 : ((currentPage - 1) * pageSize) + 1 }}
+          to
+          {{ (((currentPage - 1) * pageSize) + pageSize) > transactions.length
+            ? transactions.length
+            : (((currentPage - 1) * pageSize) + pageSize) }}
+          of {{ transactions.length }} records
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="currentPage === 1" (click)="goToFirstPage()">First</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="currentPage === 1" (click)="goToPreviousPage()">Previous</button>
+          <button type="button" class="btn btn-primary btn-sm" disabled>Page {{ currentPage }} of {{ totalPages }}</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="currentPage === totalPages" (click)="goToNextPage()">Next</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="currentPage === totalPages" (click)="goToLastPage()">Last</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

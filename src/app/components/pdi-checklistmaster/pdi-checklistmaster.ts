@@ -435,13 +435,7 @@ export class PdiChecklistmaster implements OnInit {
           },
           error: (err) => {
             this.loader.hide();
-            Swal.fire({
-              icon: 'warning',
-              title: 'Deleted successfully'
-              //text: err.error
-            });
-            this.loadPdiChecklistList();
-
+            this.showError(err);
           }
         });
 

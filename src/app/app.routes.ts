@@ -108,7 +108,6 @@ import { RoleMenuRights } from './components/role-menu-rights/role-menu-rights';
 import { StockBillListComponent } from './components/Reports/stock-bill-list/stock-bill-list';
 import { StockAdjustment } from './components/stock-adjustment/stock-adjustment';
 import { StockAdjustmentReport } from './components/Reports/stock-adjustment-report/stock-adjustment-report';
-
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
   { path: 'forgot-password', loadComponent: () => import('./components/account/forgot-password/forgot-password').then(m => m.ForgotPassword) },
@@ -162,6 +161,9 @@ export const routes: Routes = [
       { path: 'customer-ledger/:id', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger').then(m => m.CustomerLedger) },
       { path: 'delivery-certificate', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
       { path: 'stock-report', data: [41], loadComponent: () => import('./components/stock-reports/stock-report').then(m => m.StockReportComponent) },
+      { path: 'add-local-parts', data: [0], loadComponent: () => import('./components/local-parts/add-local-parts').then(m => m.AddLocalParts) },
+      { path: 'workshop/add-local-parts', data: [0], loadComponent: () => import('./components/local-parts/add-local-parts').then(m => m.AddLocalParts) },
+      { path: 'add-local-parts-transactions', data: [0], loadComponent: () => import('./components/local-parts/local-parts-transactions').then(m => m.LocalPartsTransactions) },
       { path: 'job-card-report', data: [42], loadComponent: () => import('./components/Reports/job-report/job-report').then(m => m.JobReportComponent) },
       { path: 'job-card', component: JobCard, data: [23] },
       { path: 'job-card-addForm/:test', component: JobCardAddForm, data: [23] },
