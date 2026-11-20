@@ -24,7 +24,7 @@ export interface LocalPartOption {
 }
 
 export interface LocalPartsSaveRequest {
-  prefix: string | null;
+  prefix: string;
   date: string;
   locationId: number;
   items: Array<{
@@ -48,8 +48,7 @@ export interface LocalPartsSaveResponse {
 }
 
 export interface LocalPartsTransactionUpdateRequest {
-  prefix: string | null;
-  date: string;
+  prefix: string;
   purchaseQuantity: number;
 }
 

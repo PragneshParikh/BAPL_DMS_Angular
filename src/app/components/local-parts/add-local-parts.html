@@ -25,13 +25,14 @@
 
       <div class="row g-3 align-items-end mb-4">
         <div class="col-md-4">
-          <label for="localPartsPrefix" class="form-label">Prefix <span class="text-muted">(optional)</span></label>
+          <label for="localPartsPrefix" class="form-label">Prefix <span class="text-danger">*</span></label>
           <input
             id="localPartsPrefix"
             class="form-control"
             name="prefix"
             [(ngModel)]="prefix"
             maxlength="100"
+            required
             placeholder="Enter prefix or bill number">
         </div>
         <div class="col-md-3">
@@ -42,7 +43,7 @@
             type="date"
             name="entryDate"
             [(ngModel)]="entryDate"
-            [disabled]="isLoadingTransaction"
+            disabled
             required>
         </div>
         <div class="col-md-5">
@@ -185,7 +186,7 @@
         <button
           type="button"
           class="btn btn-success"
-          [disabled]="isSaving || isLoadingTransaction || !entryDate || !locationId || draftLines.length === 0 || (editingTransactionId !== null && editingIndex !== null)"
+          [disabled]="isSaving || isLoadingTransaction || !prefix.trim() || !entryDate || !locationId || draftLines.length === 0 || (editingTransactionId !== null && editingIndex !== null)"
           (click)="save()">
           {{ isSaving ? (editingTransactionId !== null ? 'Updating…' : 'Saving…') : (editingTransactionId !== null ? 'Update Stock' : 'Save and Update Stock') }}
         </button>

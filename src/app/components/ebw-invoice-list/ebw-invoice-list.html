@@ -32,11 +32,15 @@
           </div>
           <div class="filter-field">
             <label class="form-label mb-0 small">Location</label>
-            <select class="form-select form-select-sm" [(ngModel)]="filter.locationCode" (ngModelChange)="onFilterChange()">
+            <select class="form-select form-select-sm" [(ngModel)]="filter.locationCode" (ngModelChange)="onLocationChange()" [disabled]="isLoading">
               <option value="">--Select--</option>
               <option *ngFor="let loc of locationList" [value]="loc.loccode">{{ loc.locname }}</option>
             </select>
           </div>
+
+          <button type="button" class="btn btn-primary btn-sm" [disabled]="isLoading || !filter.locationCode" (click)="search()">
+            {{ isLoading ? 'Loading…' : 'Search' }}
+          </button>
 
           <!-- <div class="filter-field filter-search">
             <input type="text" class="form-control form-control-sm" placeholder="Search..."
@@ -53,56 +57,58 @@
       </div>
 
       <div class="card-body">
-        <div class="mb-2 text-muted">Total Record(s): {{ filteredGrid.length }}</div>
-        <table class="table table-sm table-bordered table-striped">
-          <thead class="table-light">
-            <tr>
-              <th>S.No</th>
-              <th>Bill No</th>
-              <th>Date</th>
-              <th>Chassis No</th>
-              <th>Party Name</th>
-              <th>Location</th>
-              <th>Bill Type</th>
-              <th>Mode</th>
-              <th>Bill Amount</th>
-              <!-- CHANGED — Print column header gated on Download permission -->
-              <th *ngIf="canDownload">Print</th>
-              <th *ngIf="canManageInvoices">Manage</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let row of pagedGrid; let i = index" (dblclick)="openInvoice(row)" style="cursor:pointer;">
-              <td>{{ (page - 1) * pageSize + i + 1 }}</td>
-              <td>{{ row.billNo }}</td>
-              <td>{{ row.invoiceDate | date:'dd-MMM-yyyy' }}</td>
-              <td>{{ row.chassisNo }}</td>
-              <td>{{ row.partyName }}</td>
-              <td>{{ row.locationName || row.locationCode }}</td>
-              <td>{{ row.billType }}</td>
-              <td>{{ row.cashAccName }}</td>
-              <td class="text-end">{{ row.netAmount | number:'1.2-2' }}</td>
-              <!-- CHANGED — Print button gated on Download permission -->
-              <td *ngIf="canDownload" (dblclick)="$event.stopPropagation()">
-                <button class="btn btn-sm btn-soft-primary py-0 px-1" (click)="openPrintPopup(row)" title="Print">
-                  <i class="ri-printer-line"></i>
-                </button>
-              </td>
-              <td *ngIf="canManageInvoices" (dblclick)="$event.stopPropagation()">
-                <!-- CHANGED — Edit/Delete individually gated -->
-                <button *ngIf="canEdit" class="btn btn-sm btn-soft-info py-0 px-1 me-1" (click)="editRow(row)" title="Edit">
-                  <i class="ri-pencil-line"></i>
-                </button>
-                <button *ngIf="canDelete" class="btn btn-sm btn-soft-danger py-0 px-1" (click)="deleteRow(row)" title="Delete">
-                  <i class="ri-delete-bin-line"></i>
-                </button>
-              </td>
-            </tr>
-            <tr *ngIf="pagedGrid.length === 0">
-              <td [attr.colspan]="canManageInvoices ? 11 : 10" class="text-center p-3">No Records Found</td>
-            </tr>
-        </tbody>
-        </table>
+        <div class="mb-2 text-muted">Total Record(s): {{ hasSearched ? filteredGrid.length : 0 }}</div>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered table-striped">
+            <thead class="table-light">
+              <tr>
+                <th>S.No</th>
+                <th>Bill No</th>
+                <th>Date</th>
+                <th>Chassis No</th>
+                <th>Party Name</th>
+                <th>Location</th>
+                <th>Bill Type</th>
+                <th>Mode</th>
+                <th>Bill Amount</th>
+                <th *ngIf="canDownload" class="text-nowrap">Print</th>
+                <th *ngIf="canManageInvoices" class="text-nowrap">Manage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of pagedGrid; let i = index" (dblclick)="openInvoice(row)" style="cursor:pointer;">
+                <td>{{ (page - 1) * pageSize + i + 1 }}</td>
+                <td>{{ row.billNo }}</td>
+                <td>{{ row.invoiceDate | date:'dd-MMM-yyyy' }}</td>
+                <td>{{ row.chassisNo }}</td>
+                <td>{{ row.partyName }}</td>
+                <td>{{ row.locationName || row.locationCode }}</td>
+                <td>{{ row.billType }}</td>
+                <td>{{ row.cashAccName }}</td>
+                <td class="text-end">{{ row.netAmount | number:'1.2-2' }}</td>
+                <td *ngIf="canDownload" (dblclick)="$event.stopPropagation()" class="text-nowrap">
+                  <button class="btn btn-sm btn-soft-primary py-0 px-1" (click)="openPrintPopup(row)" title="Print">
+                    <i class="ri-printer-line"></i>
+                  </button>
+                </td>
+                <td *ngIf="canManageInvoices" (dblclick)="$event.stopPropagation()" class="text-nowrap">
+                  <button *ngIf="canEdit" class="btn btn-sm btn-soft-info py-0 px-1 me-1" (click)="editRow(row)" title="Edit">
+                    <i class="ri-pencil-line"></i>
+                  </button>
+                  <button *ngIf="canDelete" class="btn btn-sm btn-soft-danger py-0 px-1" (click)="deleteRow(row)" title="Delete">
+                    <i class="ri-delete-bin-line"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="!hasSearched && !isLoading">
+                <td [attr.colspan]="9 + (canDownload ? 1 : 0) + (canManageInvoices ? 1 : 0)" class="text-center p-3">Select a location, then click Search to view invoices.</td>
+              </tr>
+              <tr *ngIf="hasSearched && !isLoading && pagedGrid.length === 0">
+                <td [attr.colspan]="9 + (canDownload ? 1 : 0) + (canManageInvoices ? 1 : 0)" class="text-center p-3">No Records Found</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <div class="d-flex justify-content-end align-items-center gap-3 mt-2" *ngIf="filteredGrid.length > 0">
           <div class="d-flex align-items-center gap-2">

@@ -190,6 +190,10 @@ export class AddLocalParts implements OnInit {
   }
 
   save(): void {
+    if (!this.prefix.trim()) {
+      this.errorMessage = 'Prefix is required.';
+      return;
+    }
     if (!this.entryDate || !this.locationId) {
       this.errorMessage = 'Date and workshop location are required.';
       return;
@@ -209,7 +213,7 @@ export class AddLocalParts implements OnInit {
     this.successMessage = '';
 
     this.localPartsService.save({
-      prefix: this.prefix.trim() || null,
+      prefix: this.prefix.trim(),
       date: `${this.entryDate}T00:00:00Z`,
       locationId: this.locationId,
       items: this.draftLines.map(line => ({
@@ -342,8 +346,7 @@ export class AddLocalParts implements OnInit {
     this.isSaving = true;
     this.errorMessage = '';
     this.localPartsService.updateTransaction(transactionId, {
-      prefix: this.prefix.trim() || null,
-      date: `${this.entryDate}T00:00:00Z`,
+      prefix: this.prefix.trim(),
       purchaseQuantity: quantity
     }).subscribe({
       next: updated => {

@@ -26,6 +26,8 @@ export class EbwInvoiceList implements OnInit {
   gridData: any[] = [];
   searchTerm: string = '';
   canManageInvoices: boolean = false;
+  hasSearched = false;
+  isLoading = false;
 
   private readonly EBW_INVOICE_MODULE_ID = 8;
   private readonly WORKSHOP_AREA_ID = 2;
@@ -86,7 +88,6 @@ export class EbwInvoiceList implements OnInit {
 
   ngOnInit(): void {
     this.getLocationList();
-    this.loadList();
   }
 
   getLocationList() {
@@ -95,23 +96,47 @@ export class EbwInvoiceList implements OnInit {
       next: (res: any) => {
         this.locationList = res || [];
       },
-      error: (err) => console.error(err),
+      error: (err) => {
+        console.error(err);
+        this.toast.show('Failed to load workshop locations.', { classname: 'bg-danger text-white', delay: 5000 });
+      },
     });
   }
 
   loadList() {
+    if (!this.filter.locationCode) {
+      this.hasSearched = false;
+      this.gridData = [];
+      return;
+    }
+
+    this.isLoading = true;
     this.loader.show();
     this.ebwInvoiceService.getAll(undefined, this.filter.fromDate, this.filter.toDate).subscribe({
       next: (res: any) => {
         this.gridData = res.data || [];
-        this.page = 1; // reset to first page on every new load/search
+        this.hasSearched = true;
+        this.page = 1;
+        this.isLoading = false;
         this.loader.hide();
       },
       error: (err) => {
         console.error(err);
+        this.isLoading = false;
         this.loader.hide();
+        this.toast.show('Failed to load invoices.', { classname: 'bg-danger text-white', delay: 5000 });
       },
     });
+  }
+
+  search() {
+    if (!this.filter.locationCode) {
+      this.hasSearched = false;
+      this.gridData = [];
+      return;
+    }
+
+    this.loadList();
   }
 
   get filteredGrid() {
@@ -153,6 +178,12 @@ export class EbwInvoiceList implements OnInit {
   }
 
   onFilterChange() {
+    this.page = 1;
+  }
+
+  onLocationChange() {
+    this.hasSearched = false;
+    this.gridData = [];
     this.page = 1;
   }
 

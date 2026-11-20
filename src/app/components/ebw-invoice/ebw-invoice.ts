@@ -132,6 +132,29 @@ export class EBWInvoice implements OnInit {
     this.canDelete = this.menuAccess.canDelete(this.EBW_INVOICE_SUBMENU_ID);
   }
 
+  private loadSerialsForCurrentScheme(): void {
+    const scheme = this.selectedScheme;
+    const itemCode = scheme?.partCode || scheme?.batteryPartCode || '';
+    if (itemCode) {
+      this.loadSerialsForItemCode(itemCode);
+    }
+  }
+
+  private loadChassisOptions(): void {
+    this.loader.show();
+    this.chassisSearchService.getAllSoldChassis().subscribe({
+      next: (res: any) => {
+        this.chassisList = (res || []).map((c: any) => c.chassisNo || c.chasisNo || c);
+        this.loader.hide();
+      },
+      error: (err) => {
+        this.loader.hide();
+        console.error(err);
+        this.toast.show('Something went wrong loading chassis list.', { classname: 'bg-danger text-white', delay: 5000 });
+      },
+    });
+  }
+
   ngOnInit(): void {
     this.getLocationList();
     this.getSchemeList();
@@ -167,6 +190,9 @@ export class EBWInvoice implements OnInit {
     this.extendedBatteryWarrantyService.getByPaged('', 0, 1000).subscribe({
       next: (res: any) => {
         this.schemeList = (res.data || []).filter((s: any) => s.isActive === true);
+        if (this.isEditMode && this.formData.schemeId) {
+          this.loadSerialsForCurrentScheme();
+        }
         this.loader.hide();
       },
       error: (err) => {
@@ -214,6 +240,7 @@ export class EBWInvoice implements OnInit {
           serialNo: res.serialNo,
           remarks: res.remarks,
         };
+        this.dealerState = res.dealerState || '';
 
         this.chassisSearchTerm = res.chassisNo || '';
         this.serialSearchTerm = res.serialNo || '';
@@ -227,11 +254,8 @@ export class EBWInvoice implements OnInit {
           this.isChassisExpired = this.daysRemaining < 0;
         }
 
-        const scheme = this.schemeList.find((s) => s.id === res.schemeId);
-        const itemCode = scheme?.partCode || scheme?.batteryPartCode || '';
-        if (itemCode) {
-          this.loadSerialsForItemCode(itemCode);
-        }
+        this.loadSerialsForCurrentScheme();
+        this.loadChassisOptions();
 
         this.itemsList = (res.ebwInvoiceDetails || []).map((d: any) => ({
           itemCode: d.itemCode,
@@ -252,6 +276,7 @@ export class EBWInvoice implements OnInit {
           discountType: d.discountType,
           amount: d.amount,
         }));
+        this.calculateSummary();
       },
       error: (err) => {
         this.loader.hide();
@@ -294,18 +319,7 @@ export class EBWInvoice implements OnInit {
       }
     }
 
-    this.loader.show();
-    this.chassisSearchService.getAllSoldChassis().subscribe({
-      next: (res: any) => {
-        this.chassisList = (res || []).map((c: any) => c.chassisNo || c.chasisNo || c);
-        this.loader.hide();
-      },
-      error: (err) => {
-        this.loader.hide();
-        console.error(err);
-        this.toast.show('Something went wrong loading chassis list.', { classname: 'bg-danger text-white', delay: 5000 });
-      },
-    });
+    this.loadChassisOptions();
   }
 
   loadSerialsForItemCode(itemCode: string) {
@@ -501,7 +515,7 @@ export class EBWInvoice implements OnInit {
 
     this.isChassisExpired = this.daysRemaining < 0;
 
-    if (this.isChassisExpired) {
+    if (this.isChassisExpired && !this.isEditMode) {
       this.toast.show(
         `EBW purchase validity expired on ${expiry.toLocaleDateString('en-GB')}. This chassis is not eligible for this scheme.`,
         { classname: 'bg-danger text-white', delay: 7000 }
