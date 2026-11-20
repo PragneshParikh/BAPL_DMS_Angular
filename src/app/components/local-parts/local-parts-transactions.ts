@@ -117,7 +117,7 @@ export class LocalPartsTransactions implements OnInit {
 
     const rows = this.transactions.map((transaction, index) => ({
       'Sr. No.': index + 1,
-      'Prefix / Receipt No.': transaction.receiptNumber,
+      Prefix: transaction.receiptNumber,
       Date: transaction.date,
       'Part Code': transaction.partCode,
       'Part Name': transaction.partName,
