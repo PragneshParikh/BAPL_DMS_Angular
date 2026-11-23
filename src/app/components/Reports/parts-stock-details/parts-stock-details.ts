@@ -27,6 +27,7 @@ export class PartsStockDetails implements OnInit {
   @ViewChild('stockReportFilterForm') stockReportFilterForm!: NgForm
   dealerCode: string = '';
   isSuperAdmin: boolean = false;
+  isDealer: boolean = false;
   readonly SUBMENU_ID = 93;
   canDownload = false; 
 
@@ -56,7 +57,9 @@ export class PartsStockDetails implements OnInit {
     private menuAccess: MenuAccessService,
     private router: Router
   ) {
-    this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
+    const role = (this.storageService.getRole() || '').trim().toLowerCase();
+    this.isSuperAdmin = role === 'superadmin';
+    this.isDealer = role === 'dealer';
     this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
 
     if (!this.isSuperAdmin) {
@@ -66,8 +69,8 @@ export class PartsStockDetails implements OnInit {
   }
 
   ngOnInit(): void {
-    this.getDealerList();
     this.initDefaultDates();
+    this.getDealerList();
   }
 
   initDefaultDates() {
@@ -121,6 +124,9 @@ export class PartsStockDetails implements OnInit {
           ...location,
           dealerName: this.dealerList.find(dealer => dealer.dealerCode === location.dealercode)?.dealerName
         }));
+        if (this.isDealer) {
+          this.getPartsStockDetails();
+        }
       },
       error: (err) => {
         this.loader.hide();

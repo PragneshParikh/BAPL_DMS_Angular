@@ -1,0 +1,67 @@
+<div class="page-header d-flex justify-content-between align-items-center">
+  <div>
+    <h4 class="db-title">Job Report</h4>
+    <ol class="breadcrumb m-0">
+      <li class="breadcrumb-item"><a routerLink="/">Dashboard</a></li>
+      <li class="breadcrumb-item">Historical</li>
+      <li class="breadcrumb-item active">Job Report</li>
+    </ol>
+  </div>
+  <button class="btn btn-success" (click)="exportExcel()" [disabled]="!totalCount || exporting">
+    {{ exporting ? 'Downloading...' : 'Export to Excel' }}
+  </button>
+</div>
+
+<div class="card p-3 mb-3">
+  <div class="d-flex flex-wrap gap-3 align-items-end">
+    <div>
+      <label class="form-label">From Date</label>
+      <input type="date" class="form-control" [(ngModel)]="fromDate">
+    </div>
+    <div>
+      <label class="form-label">To Date</label>
+      <input type="date" class="form-control" [(ngModel)]="toDate">
+    </div>
+    <button class="btn btn-primary" (click)="onSearch()">Search</button>
+  </div>
+</div>
+
+<div class="card p-3">
+  <div class="mb-2">Total Records: <b>{{ totalCount }}</b></div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-sm job-report-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th *ngFor="let c of columns">{{ c.label }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="loading"><td [attr.colspan]="columns.length + 1">Loading...</td></tr>
+        <tr *ngIf="!loading && rows.length === 0"><td [attr.colspan]="columns.length + 1">No data found</td></tr>
+        <tr *ngFor="let r of rows; let i = index">
+          <td>{{ (page - 1) * pageSize + i + 1 }}</td>
+          <td *ngFor="let c of columns" [class.text-end]="c.type === 'num' || c.type === 'int'">{{ cell(r, c) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center">
+    <span>Showing {{ rows.length ? (page-1)*pageSize+1 : 0 }}–{{ (page-1)*pageSize + rows.length }} of {{ totalCount }}</span>
+    <div class="d-flex gap-2 align-items-center">
+      <select class="form-select form-select-sm" style="width:90px" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="20">20</option>
+        <option [ngValue]="50">50</option>
+        <option [ngValue]="100">100</option>
+      </select>
+      <button class="btn btn-sm btn-outline-secondary" (click)="goTo(1)" [disabled]="page===1">«</button>
+      <button class="btn btn-sm btn-outline-secondary" (click)="goTo(page-1)" [disabled]="page===1">‹</button>
+      <span>Page {{ page }} of {{ totalPages }}</span>
+      <button class="btn btn-sm btn-outline-secondary" (click)="goTo(page+1)" [disabled]="page===totalPages">›</button>
+      <button class="btn btn-sm btn-outline-secondary" (click)="goTo(totalPages)" [disabled]="page===totalPages">»</button>
+    </div>
+  </div>
+</div>

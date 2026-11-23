@@ -276,7 +276,6 @@ export class ItemMaster implements OnInit {
     }
 
     this.loader.show();
-    this.selectedItem.dealerCode = this.storageService.getDealerCode();
     this.selectedItem.updatedBy = this.storageService.getUserId();
     this.selectedItem.updatedDate = new Date();
     this.itemService.updateItem(this.selectedItem).subscribe({
@@ -389,7 +388,7 @@ export class ItemMaster implements OnInit {
       grpidno: 1,
       oemModelId: null,
 
-    uom: '',
+    uom: 56,
 
       hsncode: '',
 
@@ -440,7 +439,7 @@ export class ItemMaster implements OnInit {
     isInventory: false,
     isInEligibleInput: false,
     dealerCode:'',
-    status:false,
+    status:true,
     supplierId:0
 
     };
@@ -477,6 +476,10 @@ export class ItemMaster implements OnInit {
   // ===============================
 
   validateItem(): boolean {
+    if (!this.itemObj.itemcode?.trim()) {
+      this.toaster.show('Enter Part Code', { classname: 'bg-warning text-light', delay: 5000 });
+      return false;
+    }
 
     if (!this.itemObj.itemname?.trim()) {
       this.toaster.show('Enter Part NO.', { classname: 'bg-warning text-light', delay: 5000 });
@@ -535,7 +538,13 @@ export class ItemMaster implements OnInit {
 
         console.error(err);
 
-        this.toaster.show('something went wrong', { classname: 'bg-danger text-light', delay: 5000 });
+        const validationMessages = Object.values(err?.error?.errors ?? {})
+          .flatMap(messages => Array.isArray(messages) ? messages : []);
+        const message = validationMessages.length
+          ? validationMessages.join(' ')
+          : err?.error?.title ?? 'Something went wrong.';
+
+        this.toaster.show(message, { classname: 'bg-danger text-light', delay: 5000 });
 
       }
 

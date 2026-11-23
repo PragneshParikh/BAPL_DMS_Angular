@@ -1,11 +1,11 @@
 <!--BAPL_DMS_Angular\src\app\components\ebw-invoice\ebw-invoice.html-->
-<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+<div class="page-title-box d-flex align-items-center justify-content-between bg-galaxy-transparent">
   <h4 class="mb-sm-0">
     <i class="ri-car-line me-2"></i>
     EBW Invoice
   </h4>
-  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="goToList()" title="View List">
-    <i class="ri-list-check-2"></i>
+  <button type="button" class="btn btn-primary btn-sm text-white ms-auto" style="background-color:#0d6efd;border-color:#0d6efd" (click)="goToList()" title="View List" aria-label="View List">
+    <i class="ri-menu-line"></i>
   </button>
 </div>
 
@@ -49,7 +49,7 @@
           <div class="col-md-2">
             <label class="form-label mb-1">Cash Acc.</label>
             <select class="form-select form-select-sm" name="cashAccountId" [(ngModel)]="formData.cashAccountId">
-              <option *ngFor="let acc of cashAccounts" [value]="acc.id">{{ acc.name }}</option>
+              <option *ngFor="let acc of cashAccounts" [ngValue]="acc.id">{{ acc.name }}</option>
             </select>
           </div>
         </div>
@@ -295,7 +295,7 @@
         <!-- CHANGED — Save button only shows if the user has the right action
             permission: Create for a new invoice, Edit for an existing one -->
         <button *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
-                class="btn btn-primary btn-sm" (click)="onSave()" [disabled]="isChassisExpired">
+                class="btn btn-primary btn-sm" (click)="onSave()" [disabled]="isChassisExpired && !isEditMode">
           {{ isEditMode ? 'Update' : 'Save' }}
         </button>
         <button class="btn btn-light btn-sm" (click)="backToList()">Cancel</button>

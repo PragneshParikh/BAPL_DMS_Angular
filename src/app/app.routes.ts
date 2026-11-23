@@ -108,7 +108,6 @@ import { RoleMenuRights } from './components/role-menu-rights/role-menu-rights';
 import { StockBillListComponent } from './components/Reports/stock-bill-list/stock-bill-list';
 import { StockAdjustment } from './components/stock-adjustment/stock-adjustment';
 import { StockAdjustmentReport } from './components/Reports/stock-adjustment-report/stock-adjustment-report';
-
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
   { path: 'forgot-password', loadComponent: () => import('./components/account/forgot-password/forgot-password').then(m => m.ForgotPassword) },
@@ -162,6 +161,9 @@ export const routes: Routes = [
       { path: 'customer-ledger/:id', data: [20], loadComponent: () => import('./components/customer-ledger/customer-ledger').then(m => m.CustomerLedger) },
       { path: 'delivery-certificate', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
       { path: 'stock-report', data: [41], loadComponent: () => import('./components/stock-reports/stock-report').then(m => m.StockReportComponent) },
+      { path: 'add-local-parts', data: [0], loadComponent: () => import('./components/local-parts/add-local-parts').then(m => m.AddLocalParts) },
+      { path: 'workshop/add-local-parts', data: [0], loadComponent: () => import('./components/local-parts/add-local-parts').then(m => m.AddLocalParts) },
+      { path: 'add-local-parts-transactions', data: [0], loadComponent: () => import('./components/local-parts/local-parts-transactions').then(m => m.LocalPartsTransactions) },
       { path: 'job-card-report', data: [42], loadComponent: () => import('./components/Reports/job-report/job-report').then(m => m.JobReportComponent) },
       { path: 'job-card', component: JobCard, data: [23] },
       { path: 'job-card-addForm/:test', component: JobCardAddForm, data: [23] },
@@ -285,10 +287,10 @@ export const routes: Routes = [
       { path: 'estimate', component: EstimateList, data: [98] },
       { path: 'estimate/add', component: Estimate, data: [98] },
       { path: 'estimate/edit/:id', component: Estimate, data: [98] },
+      { path: 'ebw-invoice/:id', data: [106], loadComponent: () => import('./components/ebw-invoice/ebw-invoice').then(m => m.EBWInvoice) },
       { path: 'ebw-invoice', data: [106], loadComponent: () => import('./components/ebw-invoice/ebw-invoice').then(m => m.EBWInvoice) },
       { path: 'ebw-report', data: [111], loadComponent: () => import('./components/ebw-reports/ebw-reports').then(m => m.EBWReports) },
       { path: 'ebw-invoice-list', data: [111], loadComponent: () => import('./components/ebw-invoice-list/ebw-invoice-list').then(m => m.EbwInvoiceList) },
-      //{ path: 'ebw-invoice/:id', data: [106], loadComponent: () => import('./components/ebw-invoice/ebw-invoice').then(m => m.EBWInvoice) },
       { path: 'warranty-order', component: WarrantyOrder, data: [112] },
       { path: 'warranty-order-list', component: WarrantyOrderList, data: [112] },
       { path: 'warranty-invoice', component: WarrantyInvoice, data: [113] }, 
@@ -322,6 +324,10 @@ export const routes: Routes = [
       // Reports (MenuMaster parent 21): imported service history - Service History 147, Job Data 148. API allows Admin/SuperAdmin only.
       { path: 'service-history', data: [147], loadComponent: () => import('./components/Reports/service-history/service-history').then(m => m.ServiceHistory) },
       {path: 'line-order-report',data: [149],loadComponent: () => import('./components/Reports/line-order-report/line-order-report').then(m => m.LineOrderReport)},
+      { path: 'historical-repair-bill', data: [151], loadComponent: () => import('./components/Historical/historical-repair-bill/historical-repair-bill').then(m => m.HistoricalRepairBill) },
+      { path: 'historical-material-transfer', data: [152], loadComponent: () => import('./components/Historical/historical-material-transfer/historical-material-transfer').then(m => m.HistoricalMaterialTransfer) },
+      { path: 'historical-job-report', data: [154], loadComponent: () => import('./components/Historical/historical-job-report/historical-job-report').then(m => m.HistoricalJobReport) },
+      { path: 'historical-vehicle-warranty', data: [155], loadComponent: () => import('./components/Historical/vehicle-warranty/vehicle-warranty').then(m => m.VehicleWarrantyComponent) },
       { path: 'job-data', data: [148], loadComponent: () => import('./components/Reports/job-data/job-data').then(m => m.JobData) },
       { path: 'jobcard-servicehistory-import', data: [146], loadComponent: () => import('./components/jobcard-servicehistory-import/jobcard-servicehistory-import').then(m => m.JobcardServicehistoryImport) },
       { path: 'stock-adjustment', component: StockAdjustment, data: [136] },

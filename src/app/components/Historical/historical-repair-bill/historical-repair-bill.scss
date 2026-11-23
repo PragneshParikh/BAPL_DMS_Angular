@@ -1,0 +1,28 @@
+.historical-repair-bill-container {
+  .historical-table {
+    font-size: 12px;
+
+    th {
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+  }
+
+  .summary-card {
+    margin-bottom: 0;
+  }
+
+  .detail-row > td {
+    background: #f8f9fb;
+  }
+
+  .detail-panel {
+    padding: 8px 4px;
+  }
+
+  .summary-table {
+    max-width: 900px;
+  }
+}

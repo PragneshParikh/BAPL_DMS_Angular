@@ -1,0 +1,197 @@
+<div class="historical-repair-bill-container">
+
+  <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+    <h4 class="mb-sm-0">Historical &gt; Repair Bill</h4>
+    <span class="badge bg-light text-dark border px-3 py-2 fs-6">
+      Total Records: {{ totalRecords }}
+    </span>
+  </div>
+
+  <div class="row g-3">
+
+    <!-- Filters -->
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <form [formGroup]="filterForm">
+            <div class="row g-2 align-items-end">
+
+              <div class="col-md-4" *ngIf="!isDealer">
+                <label class="form-label mb-1">Dealer</label>
+                <select formControlName="dealerCode" class="form-select form-select-sm">
+                  <option value="">-- All Dealers --</option>
+                  <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
+                    {{ dealer.dealerName }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-4" *ngIf="isDealer">
+                <label class="form-label mb-1">Dealer</label>
+                <input type="text" class="form-control form-control-sm bg-light fw-semibold"
+                       [value]="loggedInDealerCode" readonly>
+              </div>
+
+              <div class="col-md-2">
+                <label class="form-label mb-1">From Date</label>
+                <input type="date" formControlName="fromDate" class="form-control form-control-sm">
+              </div>
+
+              <div class="col-md-2">
+                <label class="form-label mb-1">To Date</label>
+                <input type="date" formControlName="toDate" class="form-control form-control-sm">
+              </div>
+
+              <!-- Search, Reset & Export to Excel buttons together -->
+              <div class="col-md-4 d-flex gap-2">
+                <button type="button" class="btn btn-primary btn-sm" (click)="onSearch()" [disabled]="isLoading">
+                  Search
+                </button>
+                <button type="button" class="btn btn-light btn-sm" (click)="onReset()" [disabled]="isLoading">
+                  Reset
+                </button>
+                <button type="button"
+                        class="btn btn-success btn-sm px-3"
+                        (click)="exportToExcel()"
+                        [disabled]="isLoading || isExporting || totalRecords === 0">
+                  {{ isExporting ? 'Exporting...' : 'Export to Excel' }}
+                </button>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12" *ngIf="errorMessage">
+      <div class="alert alert-danger mb-0">{{ errorMessage }}</div>
+    </div>
+
+    <!-- Grid -->
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+
+          <div class="text-center py-4" *ngIf="isLoading">
+            <div class="spinner-border text-primary" role="status"></div>
+          </div>
+
+          <div class="text-center text-muted py-4" *ngIf="!isLoading && rows.length === 0 && !errorMessage">
+            No records found.
+          </div>
+
+          <div class="table-responsive" *ngIf="!isLoading && rows.length > 0">
+            <table class="table table-sm table-hover align-middle mb-0 historical-table">
+              <thead class="table-light">
+                <tr>
+                  <th></th>
+                  <th>S.No</th>
+                  <th>Invoice Date</th>
+                  <th>Invoice No</th>
+                  <th *ngIf="!isDealer">Dealer</th>
+                  <th>Job No.</th>
+                  <th>Location</th>
+                  <th>Customer Name</th>
+                  <th>Bill Type</th>
+                  <th>Cash Type</th>
+                  <th>Reg No</th>
+                  <th>Chassis No</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let r of rows; let i = index; trackBy: trackById">
+                  <tr>
+                    <td>
+                      <button type="button" class="btn btn-link btn-sm p-0" (click)="toggleDetail(r)"
+                              [title]="expandedId === r.id ? 'Hide items' : 'Show bill items detail'">
+                        {{ expandedId === r.id ? '▼' : '▶' }}
+                      </button>
+                    </td>
+                    <td>{{ (pageIndex - 1) * pageSize + i + 1 }}</td>
+                    <td class="text-nowrap">{{ r.invoiceDate | date:'dd-MM-yyyy' }}</td>
+                    <td>{{ r.invoiceNo }}</td>
+                    <td *ngIf="!isDealer">{{ dealerName(r.dealerCode) }}</td>
+                    <td>{{ r.jobNo || '-' }}</td>
+                    <td>{{ r.location }}</td>
+                    <td>{{ r.partyName }}</td>
+                    <td>{{ r.billType }}</td>
+                    <td>{{ r.cashType }}</td>
+                    <td class="text-nowrap">{{ r.regNo }}</td>
+                    <td class="text-nowrap">{{ r.chassisNo }}</td>
+                  </tr>
+
+                  <!-- Expand Row: Bill Items Detail -->
+                  <tr class="detail-row" *ngIf="expandedId === r.id">
+                    <td [attr.colspan]="isDealer ? 10 : 11">
+                      <div class="detail-panel p-2">
+                        <div *ngIf="detailLoading[r.id]" class="text-muted small">Loading bill items...</div>
+
+                        <div *ngIf="!detailLoading[r.id]">
+                          <h6 class="mb-2 text-primary">Bill Items & Labour Detail</h6>
+                          <table class="table table-sm table-bordered mb-0 bg-white">
+                            <thead class="table-light">
+                              <tr>
+                                <th>Item Code</th>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th class="text-end">Qty</th>
+                                <th class="text-end">Rate</th>
+                                <th class="text-end">SGST</th>
+                                <th class="text-end">CGST</th>
+                                <th class="text-end">IGST</th>
+                                <th class="text-end">Total Amount</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr *ngFor="let item of detailItems[r.id]">
+                                <td>{{ item.itemCode }}</td>
+                                <td>{{ item.itemDesc }}</td>
+                                <td>{{ item.itemType }}</td>
+                                <td class="text-end">{{ item.qty }}</td>
+                                <td class="text-end">{{ item.rate | number:'1.2-2' }}</td>
+                                <td class="text-end">{{ item.sgstAmount | number:'1.2-2' }}</td>
+                                <td class="text-end">{{ item.cgstAmount | number:'1.2-2' }}</td>
+                                <td class="text-end">{{ item.igstAmount | number:'1.2-2' }}</td>
+                                <td class="text-end fw-semibold">{{ item.totAmnt | number:'1.2-2' }}</td>
+                              </tr>
+                              <tr *ngIf="!detailItems[r.id] || detailItems[r.id].length === 0">
+                                <td colspan="9" class="text-muted text-center">No items found for this repair bill.</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="row mt-3" *ngIf="!isLoading && rows.length > 0">
+            <div class="col-md-6 d-flex align-items-center mb-2 mb-md-0">
+              <p class="text-muted mb-0">
+                Showing {{ (pageIndex - 1) * pageSize + 1 }} to
+                {{ Math.min(pageIndex * pageSize, totalRecords) }} of
+                {{ totalRecords }} records
+              </p>
+            </div>
+            <div class="col-md-6 d-flex justify-content-md-end">
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex === 1" (click)="firstPage()">First</button>
+                <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex === 1" (click)="previousPage()">Previous</button>
+                <span class="badge bg-light text-dark border px-3 py-2">Page {{ pageIndex }} of {{ totalPages }}</span>
+                <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex >= totalPages" (click)="nextPage()">Next</button>
+                <button class="btn btn-outline-primary btn-sm" [disabled]="pageIndex >= totalPages" (click)="lastPage()">Last</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
