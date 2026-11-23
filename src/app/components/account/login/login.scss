@@ -102,39 +102,44 @@
 @keyframes ringSpinA { from { transform: translateZ(60px) rotateX(68deg) rotateZ(0); }   to { transform: translateZ(60px) rotateX(68deg) rotateZ(360deg); } }
 @keyframes ringSpinB { from { transform: translateZ(120px) rotateY(62deg) rotateZ(0); } to { transform: translateZ(120px) rotateY(62deg) rotateZ(360deg); } }
 
-/* 3D battery cell: front face + top face */
-.cell {
+/* glowing glass charging badges (lightning bolt in a ring) */
+.charge {
   position: absolute;
-  width: 34px;
+  width: 64px;
   height: 64px;
-  border-radius: 8px;
-  background: linear-gradient(90deg, #0d9f5a, #19e086 45%, #0b8a4e);
-  box-shadow: 0 10px 30px rgba(0, 230, 118, .35);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, .22), rgba(0, 230, 118, .1) 45%, rgba(10, 37, 64, .35) 75%);
+  border: 1.5px solid rgba(0, 230, 118, .65);
+  box-shadow: 0 0 24px rgba(0, 230, 118, .35), inset 0 0 18px rgba(0, 230, 118, .2);
   transform-style: preserve-3d;
   i {
-    position: absolute;
-    left: 9px; right: 9px; top: -7px;
-    height: 7px;
-    border-radius: 3px 3px 0 0;
-    background: #c7f9df;
+    font-size: 30px;
+    line-height: 1;
+    color: #6ef7b0;
+    text-shadow: 0 0 12px rgba(0, 230, 118, .9);
+    animation: boltPulse 2.4s ease-in-out infinite;
   }
-  &::after {      // charge level
+  &::after {            // thin orbit ring around the badge
     content: '';
     position: absolute;
-    left: 5px; right: 5px; bottom: 6px;
-    height: 46%;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, .55);
-    animation: charge 2.6s ease-in-out infinite;
+    inset: -10px;
+    border-radius: 50%;
+    border: 1px dashed rgba(0, 230, 118, .45);
+    animation: orbitSpin 9s linear infinite;
   }
 }
-.cell-a { left: 14%; bottom: 26%; animation: floatA 6s ease-in-out infinite; }
-.cell-b { right: 13%; top: 46%; width: 26px; height: 50px; animation: floatB 7s ease-in-out infinite; }
-@keyframes floatA { 0%, 100% { transform: translateZ(90px) rotateY(-28deg) rotateZ(-14deg) translateY(0); }
-                    50%      { transform: translateZ(90px) rotateY(-28deg) rotateZ(-14deg) translateY(-14px); } }
-@keyframes floatB { 0%, 100% { transform: translateZ(140px) rotateY(32deg) rotateZ(16deg) translateY(0); }
-                    50%      { transform: translateZ(140px) rotateY(32deg) rotateZ(16deg) translateY(12px); } }
-@keyframes charge { 0%, 100% { height: 30%; } 50% { height: 72%; } }
+.charge-a { left: 13%; bottom: 24%; animation: floatA 6s ease-in-out infinite; }
+.charge-b { right: 12%; top: 44%; width: 48px; height: 48px; animation: floatB 7s ease-in-out infinite;
+            i { font-size: 22px; } }
+@keyframes floatA { 0%, 100% { transform: translateZ(90px) translateY(0); }
+                    50%      { transform: translateZ(90px) translateY(-14px); } }
+@keyframes floatB { 0%, 100% { transform: translateZ(140px) translateY(0); }
+                    50%      { transform: translateZ(140px) translateY(12px); } }
+@keyframes boltPulse { 0%, 100% { opacity: .75; transform: scale(.94); } 50% { opacity: 1; transform: scale(1.06); } }
+@keyframes orbitSpin { to { transform: rotate(360deg); } }
 
 .spark {
   position: absolute;
@@ -452,7 +457,7 @@
 
 /* ============================================================ motion off */
 @media (prefers-reduced-motion: reduce) {
-  .login-3d-grid, .ring, .cell, .cell::after, .spark, .login-scooty-img, .login-scooty-pad, .login-card { animation: none !important; }
+  .login-3d-grid, .ring, .charge, .charge i, .charge::after, .spark, .login-scooty-img, .login-scooty-pad, .login-card { animation: none !important; }
   .login-3d-objects, .login-brand-inner, .login-card { transition: none; }
 }
 
@@ -481,7 +486,7 @@
   .login-3d-objects { transform: none; }
   .login-3d-floor { height: 48%; }
   .ring-a { width: 120px; height: 120px; left: auto; right: -20px; top: 8px; }
-  .ring-b, .ring-c, .cell-a, .cell-b, .spark-c { display: none; }
+  .ring-b, .ring-c, .charge-a, .charge-b, .spark-c { display: none; }
   .login-logo { justify-content: flex-start; margin-bottom: 1rem; }
   .login-logo-img { width: 190px; }
   .login-brand-headline { font-size: 1.7rem; text-align: left; max-width: 62%; }
