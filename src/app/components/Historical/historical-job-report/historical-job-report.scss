@@ -1,0 +1,14 @@
+.job-report-table {
+  font-size: 12px;
+
+  th {
+    white-space: nowrap;
+  }
+
+  td {
+    white-space: nowrap;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

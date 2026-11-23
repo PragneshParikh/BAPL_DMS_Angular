@@ -322,6 +322,10 @@ export const routes: Routes = [
       // Reports (MenuMaster parent 21): imported service history - Service History 147, Job Data 148. API allows Admin/SuperAdmin only.
       { path: 'service-history', data: [147], loadComponent: () => import('./components/Reports/service-history/service-history').then(m => m.ServiceHistory) },
       {path: 'line-order-report',data: [149],loadComponent: () => import('./components/Reports/line-order-report/line-order-report').then(m => m.LineOrderReport)},
+      { path: 'historical-repair-bill', data: [151], loadComponent: () => import('./components/Historical/historical-repair-bill/historical-repair-bill').then(m => m.HistoricalRepairBill) },
+      { path: 'historical-material-transfer', data: [152], loadComponent: () => import('./components/Historical/historical-material-transfer/historical-material-transfer').then(m => m.HistoricalMaterialTransfer) },
+      { path: 'historical-job-report', data: [154], loadComponent: () => import('./components/Historical/historical-job-report/historical-job-report').then(m => m.HistoricalJobReport) },
+      { path: 'historical-vehicle-warranty', data: [155], loadComponent: () => import('./components/Historical/vehicle-warranty/vehicle-warranty').then(m => m.VehicleWarrantyComponent) },
       { path: 'job-data', data: [148], loadComponent: () => import('./components/Reports/job-data/job-data').then(m => m.JobData) },
       { path: 'jobcard-servicehistory-import', data: [146], loadComponent: () => import('./components/jobcard-servicehistory-import/jobcard-servicehistory-import').then(m => m.JobcardServicehistoryImport) },
       { path: 'stock-adjustment', component: StockAdjustment, data: [136] },

@@ -1,0 +1,129 @@
+.historical-material-transfer-container {
+  .historical-table {
+    font-size: 12px;
+
+    th,
+    td {
+      padding: 0.3rem 0.45rem;
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .col-expand {
+      width: 24px;
+      padding-left: 0.3rem;
+      padding-right: 0.2rem;
+    }
+
+    // .action-cell {
+    //   max-width: 180px;
+    //   overflow: hidden;
+    //   text-overflow: ellipsis;
+    //   white-space: nowrap;
+    // }
+
+    .action-cell {
+      max-width: 180px;
+      position: relative;
+
+      .action-hover-wrapper {
+        position: relative;
+        display: block;
+      }
+
+      .action-preview {
+        display: block;
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: text;
+      }
+
+      .action-popover {
+        display: none;
+        position: absolute;
+        top: calc(100% + 4px);
+        right: 0;
+        z-index: 2000;
+        width: 480px;
+        max-width: 55vw;
+        max-height: 260px;
+        background: #ffffff;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+        padding: 8px 10px;
+        text-align: left;
+      }
+
+      .action-hover-wrapper:hover .action-popover,
+      .action-popover:hover {
+        display: block;
+      }
+
+      .action-popover-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 5px;
+        margin-bottom: 6px;
+
+        .action-copy-btn {
+          flex-shrink: 0;
+        }
+      }
+
+      .action-popover-body {
+        font-family: Consolas, monospace;
+        font-size: 11px;
+        line-height: 1.45;
+        color: #212529;
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 205px;
+        overflow-y: auto;
+        user-select: text;
+        cursor: text;
+      }
+    }
+  }
+
+  .detail-row > td {
+    background: #f8f9fb;
+    padding: 0.4rem;
+  }
+
+  .detail-panel {
+    padding: 0.25rem;
+  }
+
+  .detail-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+
+  .compact-detail-table {
+    width: auto;
+    font-size: 11.5px;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: 0.22rem 0.45rem;
+      white-space: nowrap;
+      text-align: left;
+    }
+  }
+}

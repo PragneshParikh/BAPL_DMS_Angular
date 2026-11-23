@@ -1,0 +1,158 @@
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h5 class="mb-0 fw-semibold">Vehicle Warranty (Historical)</h5>
+
+    <div class="d-flex gap-2">
+      <label class="btn btn-primary btn-sm mb-0" [class.disabled]="importing">
+        <i class="bi bi-upload me-1"></i>
+        {{ importing ? 'Importing...' : 'Import Excel' }}
+        <input type="file" accept=".xlsx,.xls" hidden (change)="onFileSelected($event)" [disabled]="importing" />
+      </label>
+
+      <button type="button" class="btn btn-success btn-sm" (click)="exportExcel()" [disabled]="loading || totalRecords === 0">
+        <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Card -->
+  <div class="card shadow-sm mb-3">
+    <div class="card-body py-2">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3" *ngIf="isAdmin">
+          <label class="form-label small mb-1">Dealer</label>
+          <select class="form-select form-select-sm" [(ngModel)]="dealerCode">
+            <option value="">All Dealers</option>
+            <option *ngFor="let d of dealers" [value]="d.dealerCode">
+              {{ d.dealerCode }} - {{ d.dealerName }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label small mb-1">From Date (Sales)</label>
+          <input type="date" class="form-control form-control-sm" [(ngModel)]="fromDate" />
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label small mb-1">To Date (Sales)</label>
+          <input type="date" class="form-control form-control-sm" [(ngModel)]="toDate" />
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label small mb-1">Search</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Chasis No, Customer Name, Mobile No., Item..."
+            [(ngModel)]="searchText"
+            (keyup.enter)="search(true)"
+          />
+        </div>
+
+        <div class="col-md-2 d-flex gap-1">
+          <button type="button" class="btn btn-primary btn-sm" (click)="search(true)" [disabled]="loading">
+            {{ loading ? 'Loading...' : 'Search' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Grid (All 25 Excel Columns) -->
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover table-sm align-middle mb-0 text-nowrap">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Dealer Name</th>
+            <th>Chasis No</th>
+            <th>Item Code</th>
+            <th>Display Name</th>
+            <th>City</th>
+            <th>State</th>
+            <th>Item Name</th>
+            <th>Item Description</th>
+            <th>Customer Name</th>
+            <th>Mobile No.</th>
+            <th>Date of Sales</th>
+            <th>Device Group</th>
+            <th>Device Type</th>
+            <th>Vehicle Standard Warranty (Months)</th>
+            <th>Vehicle Standard Warranty (ODO Reading)</th>
+            <th>Vehicle Ext. Warranty Scheme</th>
+            <th>Vehicle Extended Warranty (Months)</th>
+            <th>Vehicle Extended Warranty (ODO Reading)</th>
+            <th>Date of Standard Warranty Expiry (as per Date)</th>
+            <th>Date of Extended Warranty Expiry (as per Date)</th>
+            <th>Last ODO Reading Date</th>
+            <th>ODO Reading as per last date</th>
+            <th>Current Warranty Status (As per date)</th>
+            <th>Current Warranty Status (As per ODO Reading)</th>
+            <th>Final Warranty Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="loading">
+            <td colspan="26" class="text-center py-4">Loading records...</td>
+          </tr>
+          <tr *ngIf="!loading && rows.length === 0">
+            <td colspan="26" class="text-center py-4 text-muted">No records found.</td>
+          </tr>
+          <tr *ngFor="let r of rows; let i = index">
+            <td>{{ (pageIndex - 1) * pageSize + i + 1 }}</td>
+            <td>{{ r.dealerName || '-' }}</td>
+            <td class="fw-semibold">{{ r.chasisNo || '-' }}</td>
+            <td>{{ r.itemCode || '-' }}</td>
+            <td>{{ r.displayName || '-' }}</td>
+            <td>{{ r.city || '-' }}</td>
+            <td>{{ r.state || '-' }}</td>
+            <td>{{ r.itemName || '-' }}</td>
+            <td>{{ r.itemDescription || '-' }}</td>
+            <td>{{ r.customerName || '-' }}</td>
+            <td>{{ r.mobileNo || '-' }}</td>
+            <td>{{ r.dateOfSales ? (r.dateOfSales | date:'dd-MM-yyyy') : '-' }}</td>
+            <td>{{ r.deviceGroup || '-' }}</td>
+            <td>{{ r.deviceType || '-' }}</td>
+            <td class="text-end">{{ r.vehicleStandardWarrantyMonths ?? '-' }}</td>
+            <td class="text-end">{{ r.vehicleStandardWarrantyOdo != null ? (r.vehicleStandardWarrantyOdo | number) : '-' }}</td>
+            <td>{{ r.vehicleExtWarrantyScheme || '-' }}</td>
+            <td class="text-end">{{ r.vehicleExtendedWarrantyMonths ?? '-' }}</td>
+            <td class="text-end">{{ r.vehicleExtendedWarrantyOdo != null ? (r.vehicleExtendedWarrantyOdo | number) : '-' }}</td>
+            <td>{{ r.dateOfStandardWarrantyExpiry ? (r.dateOfStandardWarrantyExpiry | date:'dd-MM-yyyy') : '-' }}</td>
+            <td>{{ r.dateOfExtendedWarrantyExpiry ? (r.dateOfExtendedWarrantyExpiry | date:'dd-MM-yyyy') : '-' }}</td>
+            <td>{{ r.lastOdoReadingDate ? (r.lastOdoReadingDate | date:'dd-MM-yyyy') : '-' }}</td>
+            <td class="text-end">{{ r.odoReadingAsPerLastDate != null ? (r.odoReadingAsPerLastDate | number) : '-' }}</td>
+            <td>{{ r.currentWarrantyStatusAsPerDate || '-' }}</td>
+            <td>{{ r.currentWarrantyStatusAsPerOdo || '-' }}</td>
+            <td>
+              <span
+                *ngIf="r.finalWarrantyStatus; else dashStatus"
+                class="badge"
+                [ngClass]="r.finalWarrantyStatus === 'Active' ? 'bg-success' : 'bg-secondary'"
+              >
+                {{ r.finalWarrantyStatus }}
+              </span>
+              <ng-template #dashStatus>-</ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="card-footer d-flex justify-content-between align-items-center py-2">
+      <small class="text-muted">Total Records: {{ totalRecords | number }}</small>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-outline-secondary btn-sm" (click)="changePage(pageIndex - 1)" [disabled]="pageIndex <= 1">
+          Prev
+        </button>
+        <span class="small">Page {{ pageIndex }} of {{ totalPages }}</span>
+        <button class="btn btn-outline-secondary btn-sm" (click)="changePage(pageIndex + 1)" [disabled]="pageIndex >= totalPages">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
