@@ -9,3 +9,74 @@
 .toggle-icon.active {
   color: #fff;
 }
+/* ---------------------------------------------------------------- footer: user + logout
+   The theme keeps ~95px free at the bottom of .navbar-menu (padding-bottom), the footer sits there. */
+.sidebar-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .75rem .9rem;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  background: var(--vz-vertical-menu-bg, #0b1626);
+}
+.sidebar-footer-user {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.sidebar-footer-avatar {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(145deg, #6366f1, #4338ca);
+}
+.sidebar-footer-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.sidebar-footer-name {
+  color: #e2e8f0;
+  font-size: .82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar-footer-code { color: #94a3b8; font-size: .72rem; }
+.sidebar-logout {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  height: 36px;
+  padding: 0 .75rem;
+  border: 1px solid rgba(248, 113, 113, .35);
+  border-radius: 10px;
+  background: rgba(248, 113, 113, .1);
+  color: #fca5a5;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+  i { font-size: 1.05rem; }
+  &:hover { background: #ef4444; border-color: #ef4444; color: #fff; }
+  &:focus-visible { outline: 2px solid #fca5a5; outline-offset: 2px; }
+}
+
+/* collapsed sidebar (icons only): just the avatar-less logout icon; full footer again on hover */
+:host-context([data-sidebar-size="sm-hover"]) .app-menu:not(:hover),
+:host-context([data-sidebar-size="sm"]) .app-menu:not(:hover) {
+  .sidebar-footer { justify-content: center; padding: .75rem .4rem; }
+  .sidebar-footer-user, .sidebar-logout-text { display: none; }
+  .sidebar-logout { padding: 0; width: 40px; justify-content: center; }
+}

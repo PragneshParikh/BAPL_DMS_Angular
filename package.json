@@ -110,6 +110,7 @@
     "simplebar-angular": "^3.2.6",
     "slick-carousel": "^1.8.1",
     "sweetalert2": "^11.12.0",
+    "tesseract.js": "^5.1.1",
     "tslib": "^2.6.3",
     "xlsx": "^0.18.5",
     "zone.js": "^0.15.1"

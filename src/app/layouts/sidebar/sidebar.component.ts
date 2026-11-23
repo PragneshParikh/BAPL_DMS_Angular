@@ -14,6 +14,7 @@ import { BehaviorSubject, filter } from 'rxjs';
 import { RolewiseMenuService } from '../../core/services/rolewisemenu-service';
 import { LoaderService } from '../../core/services/loader';
 import { StorageService } from '../../core/services/storage';
+import { AuthenticationService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
@@ -36,7 +37,8 @@ export class SidebarComponent implements OnInit {
     private roleWiseMenuService: RolewiseMenuService,
     private loader: LoaderService,
     private storageService: StorageService,
-    private router: Router
+    private router: Router,
+    private authService: AuthenticationService
   ) {
     translate.setDefaultLang('en');
   }
@@ -382,6 +384,23 @@ private hasRouteRecursive(items: MenuItem[] | undefined, path: string): boolean 
         }
       });
     });
+  }
+
+  // ---------------------------------------------------------------- footer: user + logout
+  get userName(): string {
+    const u: any = this.authService.currentUserValue ?? {};
+    return (u.compName || u.userName || u.firstName || 'User').toString();
+  }
+  get userCode(): string {
+    const u: any = this.authService.currentUserValue ?? {};
+    return (u.dealerCode || this.storageService.getDealerCode() || u.employeeCode || '').toString();
+  }
+  get userInitial(): string { return this.userName.charAt(0).toUpperCase() || 'U'; }
+
+  logout(): void {
+    if (!confirm('Log out of BGauss DMS?')) return;
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
   loadRoleWiseMenuRights() {

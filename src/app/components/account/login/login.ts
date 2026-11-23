@@ -1,5 +1,5 @@
 //src\app\components\account\login\login.ts
-import { Component, EventEmitter, Output } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, NgZone, OnDestroy, Output, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { AuthenticationService } from '../../../core/services/auth.service';
 import { Router, RouterLink } from '@angular/router';
@@ -14,7 +14,13 @@ import { MenuService } from '../../../core/services/menu-service';
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class Login {
+export class Login implements AfterViewInit, OnDestroy {
+  // 3D scene: page parallax (--mx/--my on the root) and card tilt (--rx/--ry/--gx/--gy on the card)
+  @ViewChild('root') private rootRef?: ElementRef<HTMLElement>;
+  @ViewChild('stage') private stageRef?: ElementRef<HTMLElement>;
+  @ViewChild('card') private cardRef?: ElementRef<HTMLElement>;
+  private removeListeners: (() => void)[] = [];
+  private frame = 0;
 
   @Output() loginStatus = new EventEmitter<boolean>();
   // Login Form
@@ -26,6 +32,7 @@ export class Login {
   isLoading = false;
 
   constructor(private formBuilder: UntypedFormBuilder,
+    private zone: NgZone,
     private authenticationService: AuthenticationService,
     private router: Router,
     public toastService: ToastService,
@@ -47,6 +54,76 @@ export class Login {
       username: ['', [Validators.required]],
       password: ['', [Validators.required]],
     });
+  }
+
+  // ---------------------------------------------------------------- 3D effect
+  ngAfterViewInit(): void {
+    const root = this.rootRef?.nativeElement;
+    const stage = this.stageRef?.nativeElement;
+    const card = this.cardRef?.nativeElement;
+    if (!root || !stage || !card || typeof window === 'undefined') return;
+    // no movement for "reduce motion" users or on touch-only screens
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    if (!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches) return;
+
+    const MAX_TILT = 10; // degrees
+    let last: PointerEvent | null = null;
+
+    const paint = () => {
+      this.frame = 0;
+      const e = last;
+      if (!e) return;
+      // page parallax
+      root.style.setProperty('--mx', (e.clientX / window.innerWidth - 0.5).toFixed(3));
+      root.style.setProperty('--my', (e.clientY / window.innerHeight - 0.5).toFixed(3));
+      // card tilt + glare while the pointer is near the card
+      const r = stage.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      const near = px > -0.25 && px < 1.25 && py > -0.25 && py < 1.25;
+      if (near) {
+        const cx = Math.min(Math.max(px, 0), 1) - 0.5;
+        const cy = Math.min(Math.max(py, 0), 1) - 0.5;
+        card.style.setProperty('--ry', `${(cx * 2 * MAX_TILT).toFixed(2)}deg`);
+        card.style.setProperty('--rx', `${(-cy * 2 * MAX_TILT).toFixed(2)}deg`);
+        card.style.setProperty('--gx', `${(px * 100).toFixed(1)}%`);
+        card.style.setProperty('--gy', `${(py * 100).toFixed(1)}%`);
+        card.classList.add('is-tilting');
+      } else {
+        this.resetTilt(card);
+      }
+    };
+
+    this.zone.runOutsideAngular(() => {
+      const onMove = (e: PointerEvent) => {
+        if (e.pointerType !== 'mouse') return;
+        last = e;
+        if (!this.frame) this.frame = requestAnimationFrame(paint);
+      };
+      const onLeave = () => {
+        root.style.setProperty('--mx', '0');
+        root.style.setProperty('--my', '0');
+        this.resetTilt(card);
+      };
+      root.addEventListener('pointermove', onMove, { passive: true });
+      root.addEventListener('pointerleave', onLeave);
+      this.removeListeners.push(
+        () => root.removeEventListener('pointermove', onMove),
+        () => root.removeEventListener('pointerleave', onLeave)
+      );
+    });
+  }
+
+  private resetTilt(card: HTMLElement): void {
+    card.style.setProperty('--rx', '0deg');
+    card.style.setProperty('--ry', '0deg');
+    card.classList.remove('is-tilting');
+  }
+
+  ngOnDestroy(): void {
+    this.removeListeners.forEach(off => off());
+    this.removeListeners = [];
+    if (this.frame) cancelAnimationFrame(this.frame);
   }
 
   // convenience getter for easy access to form fields

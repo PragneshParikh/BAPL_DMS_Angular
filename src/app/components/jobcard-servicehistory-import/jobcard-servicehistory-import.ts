@@ -1,6 +1,6 @@
 // src\app\components\jobcard-servicehistory-import\jobcard-servicehistory-import.ts
 // Import "Jobcard servicehistory.xlsx" (DMS_ServiceHistory export, 63 columns, lakhs of rows) into
-// BAPLDMSvad.dbo.JobCardServiceHistory.  Flow: Upload -> Map columns -> Validate (dry run) -> Import.
+// dbo.DMS_ServiceHistory (the JobCardScanner Service History table; was BAPLDMSvad.dbo.JobCardServiceHistory until 23.11.2026).  Flow: Upload -> Map columns -> Validate (dry run) -> Import.
 // Same UI as Vehicle Sale Import; validate / import run as background jobs on the API (batched) and this
 // page polls their progress. Existing rows (same UniqueKey) are never overwritten. Admin / SuperAdmin only.
 import { Component, OnDestroy, OnInit } from '@angular/core';
@@ -199,8 +199,8 @@ export class JobcardServicehistoryImport implements OnInit, OnDestroy {
       `Skipped - duplicate inside file: ${this.num(v.skippedDuplicateInFile)}\n` +
       `Skipped - already in database: ${this.num(v.skippedExisting)}\n` +
       `Rows with errors (not imported): ${this.num(v.rowsWithErrors)}\n\n` +
-      `Rows are inserted into BAPLDMSvad.dbo.JobCardServiceHistory in batches of ${this.num(this.options(false).batchSize)}. ` +
-      `Existing records are never overwritten. Job Cards are not touched. Continue?`);
+      `Rows are inserted into dbo.DMS_ServiceHistory in batches of ${this.num(this.options(false).batchSize)}. ` +
+      `Rows whose UniqueKey is already there are skipped - existing records are never overwritten. Job Cards are not touched. Continue?`);
     if (!ok) return;
     await this.run(item, false);
     if (item.state === 'Imported' && item.job) {

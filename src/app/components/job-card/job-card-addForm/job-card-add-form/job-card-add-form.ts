@@ -25,6 +25,10 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { MenuAccessService } from '../../../../core/services/menu-access.service';
 import { ChassisSearchService } from '../../../../core/services/chassis-search-service';
+// Service history lookup + OCR scan (added 18.11.2026)
+import { firstValueFrom } from 'rxjs';
+import { JobcardServiceHistoryLookupService, ShHistoryCard, ShScope, ShSuggestion, ShVehicle } from '../../../../core/services/jobcard-service-history-lookup.service';
+import { VehicleOcrService, OcrCandidate, extractCandidates, editDistance, isConfident, VoteTracker } from '../../../../core/services/vehicle-ocr.service';
 @Component({
   selector: 'app-job-card-add-form',
   standalone: true,
@@ -108,6 +112,39 @@ export class JobCardAddForm {
   globalSearching: boolean = false;
   private globalSearchModalRef: any = null;
 
+  // ===== Find vehicle: service history (My dealer / All dealers) + live scan — 18.11.2026 / 21.11.2026 =====
+  /** false = "My dealer" (default), true = "All dealers"; SuperAdmin has no dealer → always all */
+  shAllDealers = false;
+  /** number read by the live scan - shown as "✓ found" while it is looked up */
+  shFound = '';
+  shLiveGuess = '';
+  shLiveHint = false;
+  /** chassis the "Vehicle details fetched" card belongs to, and where its data came from */
+  shDetailsChassis = '';
+  shDetailsSource = '';
+  private shLoopId = 0;
+  shSearchTerm = '';
+  shSuggestions: (ShSuggestion & { ocrDistance?: number })[] = [];
+  shSuggestLoading = false;
+  shLoading = false;
+  shCard: ShHistoryCard | null = null;
+  shNotFound = false;
+  shError = '';
+  shScanMode = false;
+  shCameraOn = false;
+  shOcrBusy = false;
+  shOcrError = '';
+  shOcrText = '';
+  shOcrCandidates: OcrCandidate[] = [];
+  shPreviewUrl: string | null = null;
+  /** past jobs of the vehicle filled from service history (shown only while that chassis is selected) */
+  shPastJobs: Record<string, any>[] = [];
+  shPastJobsChassis = '';
+  shLastKms: number | null = null;
+  private shTimer: any;
+  private shStream: MediaStream | null = null;
+  private shModalRef: any = null;
+
   chargerMake: string = '';
   batteryVoltage: string = '';
   capacityAH: string = '';
@@ -178,7 +215,9 @@ export class JobCardAddForm {
     private ebwInvoiceService: EbwInvoiceService,
     private menuAccess: MenuAccessService,
     private chassisSearchService: ChassisSearchService,
-    private toaster: ToastService) { }
+    private toaster: ToastService,
+    private shLookup: JobcardServiceHistoryLookupService,
+    private vehicleOcr: VehicleOcrService) { }
 
   ngOnInit(): void {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
@@ -1718,8 +1757,474 @@ validateWarranty(): boolean {
       }
     });
   }
+  // =====================================================================================
+  // Job card: find the vehicle by Chassis No / Reg No (18.11.2026, live scan + dealer scope 21.11.2026)
+  // Sources: the dealer's own chassis list, DMS sales of all dealers (api/chassis/global) and the imported service
+  // history (JobCardServiceHistory) - "My dealer" (default) or "All dealers".
+  // Scan: the webcam reads by itself (no capture button); only the part of the picture inside the guide box is read
+  // (other numbers in view are ignored) and a number is accepted when it is the best reading in 2 of the last 3 frames.
+  // A confident number is looked up AT ONCE and the job card filled; otherwise the list is shown to pick from.
+  // Fill order: DMS data first (onChassisChange / applyGlobalChassisResult - unchanged), then service history fills
+  // only the fields that are still empty.
+  // =====================================================================================
+  openServiceHistorySearch(content: any, scan = false) {
+    this.shResetSearch();
+    this.shScanMode = scan;
+    this.shFound = '';
+    this.shAllDealers = !!this.isSuperAdmin;   // "My dealer" by default; SuperAdmin has no dealer
+    this.shSearchTerm = scan ? '' : (this.selectedChassis || '');
+    this.shModalRef = this.modalService.open(content, { size: 'xl', centered: true, backdrop: 'static', scrollable: true });
+    const cleanup = () => { this.stopCamera(); this.shModalRef = null; };
+    this.shModalRef.result.then(cleanup, cleanup);
+    if (this.shSearchTerm.replace(/[^A-Za-z0-9]/g, '').length >= 3) this.onShInput();
+    if (scan) {
+      this.vehicleOcr.warmUp();
+      // the modal is in the DOM on the next tick
+      setTimeout(() => {
+        const video = document.getElementById('sh-video') as HTMLVideoElement | null;
+        if (video) this.startCamera(video);
+      }, 50);
+    }
+  }
+
+  closeServiceHistorySearch() {
+    this.stopCamera();
+    this.shModalRef?.dismiss();
+    this.shModalRef = null;
+  }
+
+  get shScope(): ShScope { return this.shAllDealers ? 'all' : 'dealer'; }
+
+  setShScope(all: boolean) {
+    if (this.isSuperAdmin && !all) return;
+    this.shAllDealers = all;
+    this.shCard = null;
+    if ((this.shSearchTerm || '').replace(/[^A-Za-z0-9]/g, '').length >= 3) this.onShInput();
+  }
+
+  private shResetSearch() {
+    clearTimeout(this.shTimer);
+    this.shSuggestions = [];
+    this.shCard = null;
+    this.shNotFound = false;
+    this.shError = '';
+    this.shOcrError = '';
+    this.shOcrText = '';
+    this.shOcrCandidates = [];
+    if (this.shPreviewUrl) { URL.revokeObjectURL(this.shPreviewUrl); this.shPreviewUrl = null; }
+  }
+
+  onShInput() {
+    this.shCard = null;
+    this.shNotFound = false;
+    this.shError = '';
+    clearTimeout(this.shTimer);
+    const term = (this.shSearchTerm || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (term.length < 3) { this.shSuggestions = []; return; }
+    this.shTimer = setTimeout(() => {
+      this.shSuggestLoading = true;
+      this.shLookup.suggest(term, this.shScope).subscribe({
+        next: (res) => {
+          this.shSuggestions = res || [];
+          this.shSuggestLoading = false;
+          this.shNotFound = this.shSuggestions.length === 0;
+        },
+        error: (err) => {
+          this.shSuggestions = [];
+          this.shSuggestLoading = false;
+          this.shError = this.shHttpMessage(err);
+        }
+      });
+    }, 300);
+  }
+
+  /** Enter in the search box: one suggestion → take it; otherwise look the typed number up directly. */
+  onShEnter() {
+    if (this.shSuggestions.length === 1) { this.pickShSuggestion(this.shSuggestions[0]); return; }
+    const v = (this.shSearchTerm || '').trim();
+    if (v.length >= 3) this.lookupScanned(v);
+  }
+
+  pickShSuggestion(s: ShSuggestion) {
+    this.shSearchTerm = s.value;
+    this.shSuggestions = [];
+    this.loadShVehicle(s.value);
+  }
+
+  /** One vehicle → filled at once; several → shown to choose. */
+  private loadShVehicle(value: string) {
+    clearTimeout(this.shTimer);
+    this.shLoading = true;
+    this.shCard = null;
+    this.shNotFound = false;
+    this.shError = '';
+    this.shLookup.vehicle(value, this.shScope).subscribe({
+      next: (card) => {
+        this.shLoading = false;
+        const usable = (card?.vehicles || []).filter(v => !!v.chassisNo);
+        if (usable.length === 1) { this.useServiceHistoryVehicle(usable[0]); return; }
+        this.shCard = card;
+        this.shNotFound = !card?.vehicles?.length;
+      },
+      error: (err) => {
+        this.shLoading = false;
+        this.shError = this.shHttpMessage(err);
+      }
+    });
+  }
+
+  /**
+   * A scanned (or typed + Enter) number, looked up AT ONCE:
+   *   1. the dealer's own chassis list (chassis or reg no.)  → onChassisChange()
+   *   2. service history of this dealer (exact match)         → DMS data first, history fills the rest
+   *   3. service history of all dealers                       → same
+   *   4. DMS sale of any dealer (api/chassis/global)          → applyGlobalChassisResult()
+   * Not found exactly → the list (all dealers) is shown with the number, to pick a close match or correct it.
+   */
+  async lookupScanned(raw: string) {
+    const v = (raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (v.length < 3) return;
+    const norm = (x: any) => String(x || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    this.shSearchTerm = v;
+    this.shLoading = true;
+    try {
+      const local = this.chassisList.find(x => norm(x.chassisNumber) === v || norm(x.registerNo) === v);
+      if (local) {
+        this.closeServiceHistorySearch();
+        this.selectChassis(local);
+        this.shDetailsSource = 'Your dealership – DMS';
+        this.shDetailsChassis = this.selectedChassis;
+        const hv = await this.exactHistory(v, 'dealer');
+        if (hv) this.fillFromServiceHistory(hv);
+        return;
+      }
+      const scopes: ShScope[] = this.isSuperAdmin ? ['all'] : ['dealer', 'all'];
+      for (const scope of scopes) {
+        const hv = await this.exactHistory(v, scope);
+        if (hv) { this.useServiceHistoryVehicle(hv); return; }
+      }
+      const sale: any = await firstValueFrom(this.chassisSearchService.getGlobalChassisDetails(v)).catch(() => null);
+      if (sale) {
+        this.closeServiceHistorySearch();
+        this.globalSaleData = sale;
+        this.globalChassisSearchTerm = v;
+        this.applyGlobalChassisResult();
+        this.shDetailsSource = 'DMS – all dealers';
+        this.shDetailsChassis = this.selectedChassis;
+        return;
+      }
+      // not found exactly: show the list from every dealer with the number
+      this.shFound = '';
+      this.shAllDealers = true;
+      this.onShInput();
+      this.shOcrError = `"${v}" was not found exactly - pick the vehicle below or correct the number.`;
+    } finally {
+      this.shLoading = false;
+    }
+  }
+
+  /** The one service-history vehicle whose chassis or reg no. is exactly v (null when none or several). */
+  private async exactHistory(v: string, scope: ShScope): Promise<ShVehicle | null> {
+    const norm = (x: any) => String(x || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const hits = await firstValueFrom(this.shLookup.suggest(v, scope)).catch(() => [] as ShSuggestion[]);
+    const hit = (hits || []).find(h => norm(h.value) === v);
+    if (!hit) return null;
+    const card = await firstValueFrom(this.shLookup.vehicle(hit.value, scope)).catch(() => null);
+    const usable = (card?.vehicles || []).filter(x => !!x.chassisNo);
+    return usable.length === 1 ? usable[0] : null;
+  }
+
+  /** "Use this vehicle": fill the job card (DMS data first, then service history for empty fields). */
+  useServiceHistoryVehicle(v: ShVehicle) {
+    const chassis = (v?.chassisNo || '').trim();
+    if (!chassis) {
+      this.toaster.show('This service history record has no Chassis No, so it cannot be used for a job card.', { classname: 'bg-warning text-white', delay: 5000 });
+      return;
+    }
+    this.closeServiceHistorySearch();
+    this.selectedChassis = chassis;
+    this.filteredChassisList = [];
+
+    const local = this.chassisList.find(x => x.chassisNumber == chassis);
+    if (local) {
+      this.onChassisChange();
+      this.shDetailsSource = 'Your dealership – DMS';
+      this.fillFromServiceHistory(v);
+      return;
+    }
+
+    this.loader.show();
+    this.chassisSearchService.getGlobalChassisDetails(chassis).subscribe({
+      next: (res: any) => {
+        this.loader.hide();
+        if (res) {
+          this.globalSaleData = res;
+          this.globalChassisSearchTerm = chassis;
+          this.applyGlobalChassisResult();
+          this.shDetailsSource = 'DMS – all dealers';
+        } else {
+          this.applyHistoryOnlyVehicle(chassis);
+          this.shDetailsSource = 'Service history only (not sold in DMS)';
+        }
+        this.fillFromServiceHistory(v);
+      },
+      error: () => {
+        // no DMS sale record for this chassis (e.g. sold before DMS) → service history only
+        this.loader.hide();
+        this.applyHistoryOnlyVehicle(chassis);
+        this.shDetailsSource = 'Service history only (not sold in DMS)';
+        this.fillFromServiceHistory(v);
+      }
+    });
+  }
+
+  /** Vehicle not in DMS: clear what a previously selected vehicle left in the form, keep the usual lookups. */
+  private applyHistoryOnlyVehicle(chassis: string) {
+    this.invoiceNo = '';
+    this.couponNo = chassis.slice(-13);
+    this.inwardType = '';
+    this.vehiclePrevkms = 0;
+    this.customerObj.customerLedgerId = 0;
+    this.customerObj.customerName = '';
+    this.customerObj.customerMobile = '';
+    this.customerObj.customerAltMobile = '';
+    this.customerObj.saleDate = '';
+    this.customerObj.nextServiceDueDate = '';
+    this.customerObj.insuranceExpDate = '';
+    this.modelName = '';
+    this.registerNo = '';
+    this.batteryCapacity = '';
+    this.batteryMake = '';
+    this.batteryChemestry = '';
+    this.batteryNumber = '';
+    this.motorNo = '';
+    this.controllerNo = '';
+    this.converterNo = '';
+    this.chargerNumber = '';
+    this.odoReading = 0;
+    this.duration = 0;
+    this.durationType = '';
+    this.expireWarrentyDate = '';
+    this.oemModelId = 0;
+    this.loadServiceHistory(chassis);
+    this.loadEbwInfo(chassis);
+  }
+
+  /** Fills only empty fields from the vehicle's service history (latest job with a value). */
+  private fillFromServiceHistory(v: ShVehicle) {
+    const jobs = v?.jobs || [];
+    const pick = (key: string): string => {
+      for (const j of jobs) {
+        const x = j?.[key];
+        if (x !== null && x !== undefined && String(x).trim() !== '') return String(x).trim();
+      }
+      return '';
+    };
+    const filled: string[] = [];
+    const take = (current: any, value: string, label: string) => {
+      if (current || !value) return current;
+      filled.push(label);
+      return value;
+    };
+    this.registerNo = take(this.registerNo, v.regNo || '', 'Reg No');
+    this.modelName = take(this.modelName, v.model || pick('Model'), 'Model');
+    this.customerObj.customerName = take(this.customerObj.customerName, pick('PartyName'), 'Customer');
+    this.customerObj.customerMobile = take(this.customerObj.customerMobile, pick('MobileNumber'), 'Mobile');
+    this.customerObj.saleDate = take(this.customerObj.saleDate, v.saleDate ? String(v.saleDate).split('T')[0] : '', 'Sale Date');
+    this.batteryNumber = take(this.batteryNumber, pick('BatterySerialNo1'), 'Battery No');
+
+    this.shPastJobs = jobs;
+    this.shPastJobsChassis = this.selectedChassis;
+    this.shDetailsChassis = this.selectedChassis;
+    const kms = jobs.length ? Number(jobs[0]?.['KMS']) : NaN;
+    this.shLastKms = isNaN(kms) ? null : kms;
+
+    const msg = jobs.length
+      ? `Service history: ${jobs.length} past job(s) found.` + (filled.length ? ` Filled: ${filled.join(', ')}.` : '') + ' Please verify before saving.'
+      : 'Vehicle selected. No past jobs in service history.';
+    this.toaster.show(msg, { classname: 'bg-success text-white', delay: 5000 });
+  }
+
+  get showShPastJobs(): boolean {
+    return this.shPastJobs.length > 0 && !!this.selectedChassis && this.shPastJobsChassis === this.selectedChassis;
+  }
+
+  /** "Vehicle details fetched" card: shown while the vehicle that was scanned / searched is the selected one. */
+  get showShDetails(): boolean {
+    return !!this.selectedChassis && this.shDetailsChassis === this.selectedChassis;
+  }
+
+  // ---------------- live webcam scan ----------------
+  async startCamera(video: HTMLVideoElement) {
+    this.shOcrError = '';
+    if (!navigator?.mediaDevices?.getUserMedia) {
+      this.shOcrError = 'Camera is not available in this browser. Use "Upload / take photo" instead.';
+      return;
+    }
+    try {
+      this.stopCamera();
+      this.shStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: false
+      });
+      video.srcObject = this.shStream;
+      await video.play();
+      this.shCameraOn = true;
+      this.shScanMode = true;
+      this.runLiveLoop(video);
+    } catch (e) {
+      console.error(e);
+      this.stopCamera();
+      this.shOcrError = 'Camera permission denied or no camera found (camera needs HTTPS). Use "Upload / take photo" instead.';
+    }
+  }
+
+  stopCamera() {
+    this.shLoopId++;
+    this.shStream?.getTracks().forEach(t => t.stop());
+    this.shStream = null;
+    this.shCameraOn = false;
+    this.shLiveGuess = '';
+  }
+
+  /** Reads the guide-box part of the video about every 0.7 s until one number is read in 2 of the last 3 frames. */
+  private async runLiveLoop(video: HTMLVideoElement) {
+    const loopId = ++this.shLoopId;
+    const tracker = new VoteTracker(2, 3);
+    const started = Date.now();
+    this.shLiveHint = false;
+    while (loopId === this.shLoopId && this.shCameraOn) {
+      try {
+        const guide = document.getElementById('sh-guide');
+        const vr = video.getBoundingClientRect();
+        const gr = guide?.getBoundingClientRect();
+        const box = gr ? { left: gr.left - vr.left, top: gr.top - vr.top, width: gr.width, height: gr.height }
+                       : { left: 0, top: 0, width: video.clientWidth, height: video.clientHeight };
+        const canvas = this.vehicleOcr.cropVideo(video, box);
+        if (canvas) {
+          this.shOcrBusy = true;
+          const text = await this.vehicleOcr.recognizeCanvas(canvas);
+          if (loopId !== this.shLoopId) return;
+          const found = extractCandidates(text);
+          this.shLiveGuess = found[0]?.value || '';
+          const accepted = tracker.push(found);
+          if (accepted) {
+            this.shOcrBusy = false;
+            this.stopCamera();
+            if (isConfident(accepted)) {
+              // detected and read automatically → look it up and fill the job card
+              this.shFound = accepted.value;
+              await new Promise(r => setTimeout(r, 600));
+              await this.lookupScanned(accepted.value);
+            } else {
+              this.shOcrCandidates = found;
+              this.shSearchTerm = accepted.value;
+              this.shOcrError = 'Please check the number read, then press Search.';
+              this.onShInput();
+            }
+            return;
+          }
+        }
+      } catch (e) {
+        console.error(e);
+        this.shOcrError = 'OCR could not run (engine download blocked or offline). Type the number instead.';
+        this.stopCamera();
+        return;
+      } finally {
+        this.shOcrBusy = false;
+      }
+      if (Date.now() - started > 8000) this.shLiveHint = true;
+      if (Date.now() - started > 40000) {
+        this.stopCamera();
+        this.shOcrError = 'No chassis or registration number could be read. Scan again - closer, in good light - or type it.';
+        return;
+      }
+      await new Promise(r => setTimeout(r, 700));
+    }
+  }
+
+  // ---------------- photo (upload / phone camera app) ----------------
+  onShPhoto(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      this.shOcrError = 'Please choose an image (photo of the number plate, chassis sticker or RC).';
+      return;
+    }
+    this.runOcr(file);
+  }
+
+  private async runOcr(image: Blob) {
+    this.stopCamera();
+    this.shResetSearch();
+    this.shOcrBusy = true;
+    this.shPreviewUrl = URL.createObjectURL(image);
+    try {
+      const text = await this.vehicleOcr.recognize(image);
+      this.shOcrText = (text || '').trim();
+      this.shOcrCandidates = extractCandidates(text);
+      if (!this.shOcrCandidates.length) {
+        this.shOcrError = 'No Chassis No / Reg No could be read. Retake the photo closer and straight, in good light, or type the number.';
+        return;
+      }
+      const best = this.shOcrCandidates[0];
+      if (isConfident(best)) { await this.lookupScanned(best.value); return; }
+      await this.matchOcrCandidates();
+    } catch (e) {
+      console.error(e);
+      this.shOcrError = 'OCR could not run (engine download blocked or offline). Type the number instead.';
+    } finally {
+      this.shOcrBusy = false;
+    }
+  }
+
+  /**
+   * An unsure photo read can have a wrong character, so each read is matched against the service history by prefix
+   * (full read, then first 10 / 7 characters) and ranked by how many characters differ.
+   */
+  private async matchOcrCandidates() {
+    const best = new Map<string, ShSuggestion & { ocrDistance?: number }>();
+    for (const c of this.shOcrCandidates.slice(0, 3)) {
+      const lens = [...new Set([c.value.length, 10, 7])].filter(l => l >= 5 && l <= c.value.length);
+      const allowed = Math.max(1, Math.floor(c.value.length * 0.2));
+      for (const len of lens) {
+        let res: ShSuggestion[] = [];
+        try { res = await firstValueFrom(this.shLookup.suggest(c.value.slice(0, len), 'all')); } catch { res = []; }
+        let hit = false;
+        for (const s of res || []) {
+          const d = editDistance((s.value || '').toUpperCase().replace(/[^A-Z0-9]/g, ''), c.value);
+          if (d > allowed) continue;
+          hit = true;
+          const prev = best.get(s.value);
+          if (!prev || (prev.ocrDistance ?? 99) > d) best.set(s.value, { ...s, ocrDistance: d });
+        }
+        if (hit) break;
+      }
+    }
+    const list = [...best.values()].sort((a, b) => (a.ocrDistance! - b.ocrDistance!) || (b.jobs - a.jobs));
+    this.shSearchTerm = list[0]?.value || this.shOcrCandidates[0].value;
+    this.shSuggestions = list;
+    if (!list.length) {
+      this.shOcrError = `Read "${this.shOcrCandidates.map(x => x.value).join('", "')}" but no such vehicle is in service history. Correct the number below if it was misread.`;
+    }
+  }
+
+  private shHttpMessage(err: any): string {
+    if (err?.status === 0) return 'Server not reachable. Check the network.';
+    if (err?.status === 401) return 'Session expired. Please log in again.';
+    return err?.error?.message || 'Could not read service history. Please try again.';
+  }
+
+  ngOnDestroy(): void {
+    clearTimeout(this.shTimer);
+    this.stopCamera();
+    if (this.shPreviewUrl) URL.revokeObjectURL(this.shPreviewUrl);
+    this.vehicleOcr.dispose();
+  }
   onCancelClick() {
     this.router.navigate(['/job-card']);
   }
 
-}
+}

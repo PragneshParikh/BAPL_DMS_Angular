@@ -122,4 +122,19 @@ color: white;
   a:hover {
     color: #06421e;
   }
-}
+}/* 21.11.2026 - find vehicle: live scan + "Vehicle details fetched" */
+.sh-cam { position: relative; background: #000; border-radius: 10px; overflow: hidden; height: 320px; }
+.sh-cam video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sh-guide { position: absolute; left: 6%; right: 6%; top: 50%; height: 30%; transform: translateY(-50%);
+  border: 3px solid #22c55e; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35); pointer-events: none; }
+.sh-cam-status { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px; color: #fff; text-align: center;
+  background: rgba(0, 0, 0, 0.55); font-weight: 600; font-size: 13px; }
+.sh-cam-hint { color: #fde68a; font-weight: 400; font-size: 12px; }
+.sh-found { background: #052e16; color: #d1fae5; border-radius: 12px; padding: 18px; text-align: center; }
+.sh-found-tick { color: #22c55e; font-size: 40px; font-weight: 800; line-height: 1; }
+.sh-found-value { color: #fff; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; margin: 4px 0; }
+.sh-details { background: #f8fbff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 12px; }
+.sh-sec { font-size: 11px; font-weight: 700; color: #1e3a5f; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.sh-kv { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; padding: 3px 0; border-bottom: 1px dashed #e2e6ec; }
+.sh-kv span { color: #6b7280; }
+.sh-kv b { color: #101828; text-align: right; word-break: break-all; }

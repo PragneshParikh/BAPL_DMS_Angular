@@ -23,35 +23,45 @@
                     </a>
                 </div>
 
-                <!-- App Search-->
-                <form class="app-search d-none d-md-block">
+                <!-- App Search: pages of the selected module (ShowRoom / WorkShop / Account) that this login has rights to -->
+                <form class="app-search tb-search d-none d-md-block" (submit)="$event.preventDefault()" (focusout)="onSearchBlur()">
                     <div class="position-relative">
-                        <input type="text" class="form-control form-control-sm" placeholder="Search..."
-                            autocomplete="off" id="search-options" value="" (keyup)="Search()">
+                        <input type="text" class="form-control form-control-sm" autocomplete="off" id="search-options"
+                            [placeholder]="'Search ' + selectedOption + ' pages…'" [(ngModel)]="searchTerm" name="searchTerm"
+                            (input)="Search()" (focus)="Search()" (keydown)="onSearchKey($event)"
+                            role="combobox" aria-autocomplete="list" [attr.aria-expanded]="searchOpen" aria-controls="search-dropdown">
                         <span class="mdi mdi-magnify search-widget-icon"></span>
-                        <span class="mdi mdi-close-circle search-widget-icon search-widget-icon-close d-none"
-                            id="search-close-options" (click)="closeBtn(null)"></span>
-                        <span class="mdi mdi-close-circle search-widget-icon search-widget-icon-close d-none"
-                            id="search-close-options" (click)="closeBtn(null)"></span>
+                        @if (searchTerm) {
+                            <span class="mdi mdi-close-circle search-widget-icon search-widget-icon-close" id="search-close-options"
+                                (mousedown)="$event.preventDefault()" (click)="closeBtn(null)" title="Clear"></span>
+                        }
                     </div>
 
-                    <div class="dropdown-menu dropdown-menu-lg" id="search-dropdown">
-                        <ngx-simplebar style="max-height: 320px;">
-
-                            <!-- item-->
-                            <div class="dropdown-header mt-2">
-                                <h6 class="text-overflow text-muted mb-1 text-uppercase">Pages</h6>
-                            </div>
-                            <div *ngFor="let search of searchResults">
-                                <!-- item-->
-                                <a class="dropdown-item notify-item" (click)="closeBtn(search)">
-                                    <i class="ri-bubble-chart-line align-middle fs-18 text-muted me-2"></i>
-                                    <span>{{ search.label }}</span>
+                    <div class="dropdown-menu tb-search-menu" id="search-dropdown" [class.show]="searchOpen" role="listbox">
+                        <div class="tb-search-head">
+                            <span>Pages in <strong>{{ selectedOption }}</strong></span>
+                            <span class="tb-search-count">{{ searchResults.length }}{{ searchMore ? '+' : '' }} found</span>
+                        </div>
+                        <div class="tb-search-list">
+                            @for (search of searchResults; track search.key; let i = $index) {
+                                <a class="tb-search-item" [class.active]="i === activeIndex" role="option" [attr.aria-selected]="i === activeIndex"
+                                    (mousedown)="$event.preventDefault()" (mouseenter)="activeIndex = i" (click)="closeBtn(search)">
+                                    <span class="tb-search-icon"><i class="ri-file-list-3-line"></i></span>
+                                    <span class="tb-search-text">
+                                        <span class="tb-search-label" [innerHTML]="highlight(search.label)"></span>
+                                        @if (search.parent) { <span class="tb-search-path">{{ search.parent }}</span> }
+                                    </span>
+                                    <i class="ri-arrow-right-line tb-search-go"></i>
                                 </a>
-                            </div>
-
-                        </ngx-simplebar>
-
+                            } @empty {
+                                <div class="tb-search-empty">
+                                    <i class="ri-search-eye-line"></i>
+                                    @if (searchLoading) { Loading menus… }
+                                    @else { No {{ selectedOption }} page matches "{{ searchTerm }}". }
+                                </div>
+                            }
+                        </div>
+                        <div class="tb-search-foot"><kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> close</div>
                     </div>
                 </form>
             </div>

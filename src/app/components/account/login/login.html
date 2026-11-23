@@ -1,90 +1,120 @@
-<!--src\app\components\account\login\login.html-->
-<div class="login-root">
+<!--src\app\components\account\login\login.html  (3D look: perspective scene + tilting card)-->
+<div class="login-root" #root>
 
-  <!-- Left panel — brand -->
+  <!-- Left panel — brand, 3D scene -->
   <div class="login-brand">
+    <!-- perspective grid floor + glow -->
+    <div class="login-3d-floor" aria-hidden="true"><div class="login-3d-grid"></div></div>
+    <div class="login-3d-sun" aria-hidden="true"></div>
+
+    <!-- floating 3D rings and battery cells -->
+    <div class="login-3d-objects" aria-hidden="true">
+      <span class="ring ring-a"></span>
+      <span class="ring ring-b"></span>
+      <span class="ring ring-c"></span>
+      <span class="cell cell-a"><i></i></span>
+      <span class="cell cell-b"><i></i></span>
+      <span class="spark spark-a"></span>
+      <span class="spark spark-b"></span>
+      <span class="spark spark-c"></span>
+    </div>
+
     <div class="login-brand-inner">
-      <div class="login-logo">
+      <div class="login-logo layer-3">
         <img src="assets/images/BGauss_Logo.png" alt="BGauss" class="login-logo-img">
       </div>
 
-      <h1 class="login-brand-headline">Dealer Management System</h1>
-      <!-- <p class="login-brand-sub">Manage sales, service, and inventory — all in one place.</p> -->
+      <h1 class="login-brand-headline layer-2">Dealer Management System</h1>
 
-      <div class="login-scooty-wrap">
+      <div class="login-scooty-wrap layer-4">
         <a href="https://www.bgauss.com/" target="_blank" rel="noopener noreferrer">
-            <img src="assets/images/Bg0-scooty.png" alt="BGauss scooter" class="login-scooty-img">
+          <img src="assets/images/Bg0-scooty.png" alt="BGauss scooter" class="login-scooty-img">
         </a>
-    </div>
+        <span class="login-scooty-pad" aria-hidden="true"></span>
+      </div>
     </div>
   </div>
 
-  <!-- Right panel — login card -->
+  <!-- Right panel — 3D login card -->
   <div class="login-card-panel">
-    <div class="login-card">
-      <div class="login-card-header">
-        <h2 class="login-card-title">Welcome back</h2>
-        <p class="login-card-desc">Sign in to continue.</p>
+    <div class="login-card-stage" #stage>
+      <div class="login-card" #card>
+        <span class="login-card-glare" aria-hidden="true"></span>
+        <span class="login-card-edge" aria-hidden="true"></span>
+
+        <div class="login-card-header depth-3">
+          <span class="login-card-badge"><i class="mdi mdi-lightning-bolt"></i></span>
+          <div>
+            <h2 class="login-card-title">Welcome back</h2>
+            <p class="login-card-desc">Sign in to continue.</p>
+          </div>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-dealer-form">
+
+          <div class="login-dealer-field depth-2">
+            <label for="username">Username</label>
+            <div class="login-input-wrap">
+              <i class="mdi mdi-account-outline login-input-icon"></i>
+              <input type="text" id="username" formControlName="username" autocomplete="username"
+                [class.is-invalid]="submitted && f['username'].errors"
+                placeholder="Enter your username">
+            </div>
+            @if (submitted && f['username'].errors) {
+            <div class="login-dealer-error">
+              @if (f['username'].errors['required']) {
+              <span>Username is required</span>
+              }
+            </div>
+            }
+          </div>
+
+          <div class="login-dealer-field depth-2">
+            <div class="login-field-label-row">
+              <label for="password-input">Password</label>
+              <a routerLink="/forgot-password" class="login-forgot-link">Forgot password?</a>
+            </div>
+
+            <div class="login-input-wrap login-password-wrap">
+              <i class="mdi mdi-lock-outline login-input-icon"></i>
+              <input [type]="fieldTextType ? 'text' : 'password'" id="password-input" autocomplete="current-password"
+                formControlName="password" placeholder="••••••••"
+                [class.is-invalid]="submitted && f['password'].errors">
+              <button type="button" class="login-password-toggle" (click)="toggleFieldTextType()"
+                [attr.aria-label]="fieldTextType ? 'Hide password' : 'Show password'">
+                <i class="mdi align-middle"
+                  [ngClass]="{'mdi-eye-off-outline': !fieldTextType, 'mdi-eye-outline': fieldTextType}"></i>
+              </button>
+            </div>
+
+            @if (submitted && f['password'].errors) {
+            <div class="login-dealer-error">
+              @if (f['password'].errors['required']) {
+              <span>Password is required</span>
+              }
+            </div>
+            }
+          </div>
+
+          <div class="login-remember-row depth-1">
+            <input type="checkbox" id="auth-remember-check">
+            <label for="auth-remember-check">Remember me</label>
+          </div>
+
+          <button class="btn-signin depth-3" type="submit" [disabled]="isLoading">
+            @if (!isLoading) {
+            <span>Sign In</span><i class="mdi mdi-arrow-right btn-signin-arrow"></i>
+            } @else {
+            <span class="d-flex align-items-center justify-content-center gap-2">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Signing In...
+            </span>
+            }
+          </button>
+
+        </form>
       </div>
-
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-dealer-form">
-
-        <div class="login-dealer-field">
-          <label for="username">Username</label>
-          <input type="text" id="username" formControlName="username"
-            [class.is-invalid]="submitted && f['username'].errors"
-            placeholder="Enter your username">
-          @if (submitted && f['username'].errors) {
-          <div class="login-dealer-error">
-            @if (f['username'].errors['required']) {
-            <span>Username is required</span>
-            }
-          </div>
-          }
-        </div>
-
-        <div class="login-dealer-field">
-          <div class="login-field-label-row">
-            <label for="password-input">Password</label>
-            <a routerLink="/forgot-password" class="login-forgot-link">Forgot password?</a>
-          </div>
-
-          <div class="login-password-wrap">
-            <input [type]="fieldTextType ? 'text' : 'password'" id="password-input"
-              formControlName="password" placeholder="••••••••"
-              [class.is-invalid]="submitted && f['password'].errors">
-            <button type="button" class="login-password-toggle" (click)="toggleFieldTextType()">
-              <i class="mdi align-middle"
-                [ngClass]="{'mdi-eye-off-outline': !fieldTextType, 'mdi-eye-outline': fieldTextType}"></i>
-            </button>
-          </div>
-
-          @if (submitted && f['password'].errors) {
-          <div class="login-dealer-error">
-            @if (f['password'].errors['required']) {
-            <span>Password is required</span>
-            }
-          </div>
-          }
-        </div>
-
-        <div class="login-remember-row">
-          <input type="checkbox" id="auth-remember-check">
-          <label for="auth-remember-check">Remember me</label>
-        </div>
-
-        <button class="btn-signin" type="submit" [disabled]="isLoading">
-          @if (!isLoading) {
-          <span>Sign In</span>
-          } @else {
-          <span class="d-flex align-items-center justify-content-center gap-2">
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Signing In...
-          </span>
-          }
-        </button>
-
-      </form>
+      <span class="login-card-shadow" aria-hidden="true"></span>
     </div>
   </div>
 

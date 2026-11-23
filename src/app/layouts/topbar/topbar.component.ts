@@ -25,6 +25,9 @@ import { VehicleInwardService } from '../../core/services/vehicle-inwardservice'
 import { PartsInwardService } from '../../core/services/partsinwardservice';
 import { PartInward } from '../../components/part-inward/part-inward';
 import { NotificationService } from '../../core/services/notification-service';
+/** One page the topbar search can open. */
+interface SearchHit { key: string; id: number | null; label: string; link: string; module: string | null; parent: string | null; }
+
 @Component({
   selector: 'app-topbar',
   templateUrl: './topbar.component.html',
@@ -67,7 +70,13 @@ export class TopbarComponent implements OnInit {
   dealerCode: string = '';
 
   menuList: any[] = [];
-  searchResults: any[] = [];
+  searchResults: SearchHit[] = [];
+  searchTerm = '';
+  searchOpen = false;
+  searchLoading = false;
+  searchMore = false;
+  activeIndex = -1;
+  private static readonly MAX_SEARCH_RESULTS = 15;
 
   constructor(
     @Inject(DOCUMENT) private document: any,
@@ -119,6 +128,12 @@ export class TopbarComponent implements OnInit {
     );
 
     this.dealerCode = this.storageService.getDealerCode();
+
+    // search shows the pages of the module the sidebar is showing (ShowRoom / WorkShop / Account)
+    this.menuService.activeModule$.subscribe(module => {
+      if (module) this.selectedOption = module;
+      if (this.searchOpen) this.Search();
+    });
 
     this.getVehicleDispatchNotification();
     this.getPartsInwardNotification();
@@ -224,85 +239,118 @@ export class TopbarComponent implements OnInit {
       this.isDropdownOpen = true;
     }
   }
-  // Search Topbar
+  // ---------------------------------------------------------------- Search Topbar
+  // Searches only the pages the sidebar can show for the selected module (ShowRoom / WorkShop / Account):
+  // same module rule as the sidebar (page module = selected module, or no module = common page) AND the
+  // logged-in role has a right on the page (menuRights, permission > 0 - same rule as AuthGuard).
   async Search() {
-    var searchOptions = document.getElementById("search-close-options") as HTMLAreaElement;
-    var dropdown = document.getElementById("search-dropdown") as HTMLAreaElement;
-    var input: any, filter: any, ul: any, li: any, a: any | undefined, i: any, txtValue: any;
-    input = document.getElementById("search-options") as HTMLAreaElement;
-    filter = input.value.toUpperCase();
-    var inputLength = filter.length;
-
+    const term = (this.searchTerm ?? '').trim();
+    if (!term) {
+      this.searchResults = [];
+      this.searchOpen = false;
+      this.activeIndex = -1;
+      return;
+    }
+    this.searchOpen = true;
     if (this.menuList.length === 0) {
-      await this.getMenuList();
+      this.searchLoading = true;
+      try { await this.getMenuList(); } catch { /* shown as "no match" */ }
+      this.searchLoading = false;
     }
 
-    this.searchResults = this.menuList
-      .flatMap(item => this.searchItemsWithLink(item, filter));
+    const words = term.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+    const scored = this.searchablePages()
+      .map(p => {
+        const label = p.label.toLowerCase();
+        const all = `${label} ${(p.parent ?? '').toLowerCase()}`;
+        if (!words.every(w => all.includes(w))) return null;
+        // best first: page name starts with the text, then a word of it starts with it, then anywhere
+        const first = words[0];
+        const score = label.startsWith(first) ? 0 : label.split(/[\s/()-]+/).some(x => x.startsWith(first)) ? 1 : label.includes(first) ? 2 : 3;
+        return { p, score };
+      })
+      .filter((x): x is { p: SearchHit; score: number } => x !== null)
+      .sort((a, b) => a.score - b.score || a.p.label.localeCompare(b.p.label));
 
-    if (inputLength > 0) {
-      dropdown.classList.add("show");
-      searchOptions.classList.remove("d-none");
-      var inputVal = input.value.toLowerCase();
-      var notifyItem = document.getElementsByClassName("notify-item");
-
-      Array.from(notifyItem).forEach(function (element: any) {
-        var notifiTxt = ''
-        notifiTxt = element.getElementsByTagName("span")[0].innerText.toLowerCase()
-        if (notifiTxt)
-          element.style.display = notifiTxt.includes(inputVal) ? "block" : "none";
-
-      });
-    } else {
-      dropdown.classList.remove("show");
-      searchOptions.classList.add("d-none");
-    }
+    this.searchMore = scored.length > TopbarComponent.MAX_SEARCH_RESULTS;
+    this.searchResults = scored.slice(0, TopbarComponent.MAX_SEARCH_RESULTS).map(x => x.p);
+    this.activeIndex = this.searchResults.length ? 0 : -1;
   }
 
-  private searchItemsWithLink(item: any, filter: string): any[] {
-    const search = filter.toLowerCase();
-    let results: any[] = [];
+  /** Linked pages of the selected module that this login has rights to (no duplicates). */
+  private searchablePages(): SearchHit[] {
+    const selected = this.moduleKey(this.selectedOption);
+    const rights = (this.storageService.getMenuRights() ?? []) as any[];
+    const allowed = new Set<number>(
+      (Array.isArray(rights) ? rights : [])
+        .filter(r => r && typeof r.subMenuId === 'number' && Number(r.permission) > 0)
+        .map(r => r.subMenuId as number));
+    const checkRights = allowed.size > 0;   // rights not loaded yet -> same list the sidebar shows
 
-    const matches = item.label?.toLowerCase().includes(search) && item.link != null;
+    const out: SearchHit[] = [];
+    const seen = new Set<string>();
+    const walk = (items: any[], parent: string | null) => {
+      for (const item of items ?? []) {
+        const label = (item.label ?? item.menuName ?? item.name ?? '').toString().trim();
+        const link = item.link ?? item.url ?? item.route ?? item.path ?? item.pathName ?? null;
+        const module = item.module ?? item.moduleName ?? null;
+        const id = typeof (item.id ?? item.menuId) === 'number' ? (item.id ?? item.menuId) : null;
+        const children = item.subItems ?? item.subMenus ?? item.subMenu ?? item.children;
 
-    // Include item ONLY if it has link and matches
-    if (matches) {
-      results.push(item);
-    }
+        const moduleOk = !module || this.moduleKey(module) === selected;
+        const rightOk = !checkRights || link === '/' || (id !== null && allowed.has(id));
+        if (label && link && !item.isTitle && moduleOk && rightOk) {
+          const key = `${link}|${label}`.toLowerCase();
+          if (!seen.has(key)) {
+            seen.add(key);
+            out.push({ key, id, label, link: link.startsWith('/') ? link : '/' + link, module, parent });
+          }
+        }
+        if (Array.isArray(children) && children.length) walk(children, label || parent);
+      }
+    };
+    walk(this.menuList, null);
+    return out;
+  }
 
-    // Traverse subItems
-    if (item.subItems && item.subItems.length > 0) {
-      item.subItems.forEach(sub => {
-        results = results.concat(
-          this.searchItemsWithLink(sub, filter)
-        );
-      });
-    }
+  /** 'Work Shop', 'work_shop', 'WORKSHOP' -> 'workshop' (same as the sidebar) */
+  private moduleKey(value: any): string {
+    const k = (value ?? '').toString().toLowerCase().replace(/[\s_-]/g, '');
+    return k === 'accounts' ? 'account' : k;
+  }
 
-    return results;
+  /** Bold the typed words inside a page name (text is escaped first). */
+  highlight(label: string): string {
+    const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const words = (this.searchTerm ?? '').trim().split(/\s+/).filter(w => w.length > 0)
+      .map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    if (!words.length) return esc(label);
+    const re = new RegExp(`(${words.join('|')})`, 'gi');
+    return label.split(re).map((part, i) => i % 2 === 1 ? `<mark>${esc(part)}</mark>` : esc(part)).join('');
+  }
+
+  onSearchKey(e: KeyboardEvent): void {
+    if (e.key === 'Escape') { this.closeBtn(null); return; }
+    if (!this.searchOpen || !this.searchResults.length) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); this.activeIndex = (this.activeIndex + 1) % this.searchResults.length; }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); this.activeIndex = (this.activeIndex - 1 + this.searchResults.length) % this.searchResults.length; }
+    else if (e.key === 'Enter') { e.preventDefault(); this.closeBtn(this.searchResults[Math.max(0, this.activeIndex)]); }
+  }
+
+  onSearchBlur(): void {
+    // let a click on a result finish first
+    setTimeout(() => { this.searchOpen = false; }, 150);
   }
 
   /**
-   * Search Close Btn
+   * Search Close Btn / open a result
    */
-  closeBtn(selectedForm: any | null) {
-    var searchOptions = document.getElementById("search-close-options") as HTMLAreaElement;
-    var dropdown = document.getElementById("search-dropdown") as HTMLAreaElement;
-    var searchInputReponsive = document.getElementById("search-options") as HTMLInputElement;
-    dropdown.classList.remove("show");
-    searchOptions.classList.add("d-none");
-    searchInputReponsive.value = "";
-
-    if (selectedForm) {
-      const moduleOption = this.moduleOptionFor(selectedForm.module);
-      if (moduleOption && moduleOption !== this.selectedOption) {
-        this.selectedOption = moduleOption;
-        this.storageService.setSelectedModule(moduleOption);
-        this.menuService.filterMenu(moduleOption);
-      }
-
-      this.router.navigate([selectedForm.link]);
-    }
+  closeBtn(selectedForm: SearchHit | null) {
+    this.searchOpen = false;
+    this.searchTerm = '';
+    this.searchResults = [];
+    this.activeIndex = -1;
+    if (selectedForm) this.router.navigate([selectedForm.link]);
   }
 
   private moduleOptionFor(module: string | undefined): string | null {
@@ -509,7 +557,7 @@ export class TopbarComponent implements OnInit {
       this.loader.show();
       this.menuService.getMenu().subscribe({
         next: (menu: any) => {
-          this.menuList = menu;
+          this.menuList = Array.isArray(menu) ? menu : (menu?.data ?? menu?.result ?? menu?.items ?? []);
           resolve(menu);
           this.loader.hide();
         }, error: (err) => {
