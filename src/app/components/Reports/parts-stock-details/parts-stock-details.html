@@ -111,13 +111,7 @@
                                 <th>Part Description</th>
                                 <th>Item Type</th>
                                 <th>Pur.Qty</th>
-                                <!--
-                                    STILL OPEN, unresolved from before: MT and
-                                    Sale Qty both bind to item.saleCount, so
-                                    they'll show identical numbers. Left as-is
-                                    since removal/repurposing wasn't confirmed.
-                                -->
-                                <th>MT</th>
+                                <th>D2D Out</th>
                                 <th>Sale Qty</th>
                                 <th>Sdj.</th>
                                 <th>Bal.Qty</th>
@@ -149,7 +143,7 @@
                                 <td>{{ item.itemdesc }}</td>
                                 <td>{{ item.groupType }}</td>
                                 <td>{{ item.purchaseCount }}</td>
-                                <td>{{ item.saleCount }}</td>
+                                <td>{{ item.d2DOutgoingQty }}</td>
                                 <td>{{ item.saleCount }}</td>
                                 <!-- FIXED — now bound to the real, newly-added
                                      backend field: net TI/TO quantity from

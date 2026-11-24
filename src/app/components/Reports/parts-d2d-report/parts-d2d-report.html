@@ -1,0 +1,143 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between">
+  <h4 class="mb-sm-0">PartD2D Reports</h4>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-title mb-0">Filters</h5>
+  </div>
+  <div class="card-body">
+    <form #reportFilterForm="ngForm" (ngSubmit)="search()">
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-6 col-lg-2">
+          <label class="form-label" for="dealerCode">Dealer</label>
+          <select
+            id="dealerCode"
+            class="form-select form-select-sm"
+            name="dealerCode"
+            [(ngModel)]="filters.dealerCode"
+            (ngModelChange)="onDealerChange()">
+            <option value="">-- Select --</option>
+            <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
+              {{ dealer.dealerName }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-2">
+          <label class="form-label" for="location">Location</label>
+          <select
+            id="location"
+            class="form-select form-select-sm"
+            name="location"
+            [(ngModel)]="filters.location"
+            (ngModelChange)="onFiltersChanged()">
+            <option [ngValue]="null">All Locations</option>
+            <option *ngFor="let location of locationList" [ngValue]="location">
+              {{ getLocationLabel(location) }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-2">
+          <label class="form-label" for="fromDate">From Date</label>
+          <input
+            id="fromDate"
+            class="form-control form-control-sm"
+            type="date"
+            name="fromDate"
+            [(ngModel)]="filters.fromDate"
+            (ngModelChange)="onFiltersChanged()"
+            required>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-2">
+          <label class="form-label" for="toDate">To Date</label>
+          <input
+            id="toDate"
+            class="form-control form-control-sm"
+            type="date"
+            name="toDate"
+            [(ngModel)]="filters.toDate"
+            (ngModelChange)="onFiltersChanged()"
+            required>
+        </div>
+
+        <div class="col-12 col-md-12 col-lg-4">
+          <div class="d-flex align-items-center flex-nowrap gap-2">
+            <button type="submit" class="btn btn-primary btn-sm">Search</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="reset()">Reset</button>
+            <button
+              type="button"
+              class="btn btn-success btn-sm"
+              title="Export filtered report to Excel"
+              aria-label="Export filtered report to Excel"
+              (click)="exportExcel()">
+              <i class="ri-file-excel-2-line me-1"></i>Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped table-hover align-middle report-table">
+        <thead>
+          <tr>
+            <th>Sr No</th>
+            <th>D2D Bill No</th>
+            <th>Prefix</th>
+            <th>Date</th>
+            <th>From Dealer</th>
+            <th>From Location</th>
+            <th>To Dealer</th>
+            <th>To Location</th>
+            <th>Part No</th>
+            <th>Description</th>
+            <th>Rate</th>
+            <th>Quantity</th>
+            <th>From Opening Stock</th>
+            <th>From Closing Stock</th>
+            <th>To Opening Stock</th>
+            <th>To Closing Stock</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="reportRows.length === 0">
+            <td colspan="17" class="text-center text-muted py-4">
+              {{ hasSearched ? 'No data available' : 'Set filters and select Search to view transactions.' }}
+            </td>
+          </tr>
+          <tr *ngFor="let transaction of reportRows; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ formatBillNo(transaction.d2DBillNo) }}</td>
+            <td>{{ transaction.prefix }}</td>
+            <td>{{ transaction.date | date:'dd/MM/yyyy' }}</td>
+            <td>{{ transaction.fromDealerCode }}</td>
+            <td>{{ transaction.fromLocationName }} ({{ transaction.fromLocationCode }})</td>
+            <td>{{ transaction.toDealerCode }}</td>
+            <td>{{ transaction.toLocationName }} ({{ transaction.toLocationCode }})</td>
+            <td>{{ transaction.partCode }}</td>
+            <td>{{ transaction.description }}</td>
+            <td>{{ transaction.rate | number:'1.2-2' }}</td>
+            <td>{{ transaction.transferQuantity }}</td>
+            <td>{{ transaction.fromPreviousStock }}</td>
+            <td>{{ transaction.fromClosingStock }}</td>
+            <td>{{ transaction.toPreviousStock }}</td>
+            <td>{{ transaction.toClosingStock }}</td>
+            <td>
+              <span class="badge" [ngClass]="transaction.isReceived ? 'bg-success' : 'bg-warning text-dark'">
+                {{ transaction.isReceived ? 'Received' : 'Pending' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

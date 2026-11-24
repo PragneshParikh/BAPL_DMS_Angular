@@ -25,6 +25,7 @@ import { VehicleInwardService } from '../../core/services/vehicle-inwardservice'
 import { PartsInwardService } from '../../core/services/partsinwardservice';
 import { PartInward } from '../../components/part-inward/part-inward';
 import { NotificationService } from '../../core/services/notification-service';
+import { LocalPartsService, formatPartsD2DBillNo } from '../../core/services/local-parts.service';
 /** One page the topbar search can open. */
 interface SearchHit { key: string; id: number | null; label: string; link: string; module: string | null; parent: string | null; }
 
@@ -45,6 +46,7 @@ export class TopbarComponent implements OnInit {
   partsInward: any[] = [];
   vehicleInward: any[] = [];
   d2dNotificationList: any[] = [];
+  partsD2DNotifications: any[] = [];
   invoiceNotifications: any[] = [];
   partsNotifications: any[] = [];
   ebwNotifications: any[] = [];
@@ -93,7 +95,8 @@ export class TopbarComponent implements OnInit {
     private lotInspectionService: LotInspectionService,
     private toastService: ToastService,
     private partInwardService: PartsInwardService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private localPartsService: LocalPartsService
   ) { }
 
   ngOnInit(): void {
@@ -138,6 +141,7 @@ export class TopbarComponent implements OnInit {
     this.getVehicleDispatchNotification();
     this.getPartsInwardNotification();
     this.getD2DVehicleNotification();
+    this.getPartsD2DNotifications();
     this.getEbwNotifications();
 
     // Fetch Data
@@ -145,6 +149,7 @@ export class TopbarComponent implements OnInit {
 
     this.notificationService.refreshPartsNotification.subscribe(() => {
       this.getPartsInwardNotification();
+      this.getPartsD2DNotifications();
       this.getEbwNotifications();
     });
 
@@ -486,6 +491,7 @@ export class TopbarComponent implements OnInit {
               status: 'Received'
             };
           }
+
           acc[invoiceNo].numberOfItems += 1;
           return acc;
         }, {});
@@ -496,6 +502,36 @@ export class TopbarComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+
+  getPartsD2DNotifications(): void {
+    this.localPartsService.getPartsD2DNotifications().subscribe({
+      next: notifications => {
+        this.partsD2DNotifications = notifications || [];
+      },
+      error: error => {
+        this.toastService.show(
+          error?.error?.message || 'Unable to load Parts D2D notifications.',
+          { classname: 'bg-danger text-white', delay: 5000 }
+        );
+        console.error(error);
+      }
+    });
+  }
+
+  get pendingPartsD2DNotificationCount(): number {
+    return this.partsD2DNotifications.filter(item => !item.isReceived).length;
+  }
+
+  get hasNotifications(): boolean {
+    return this.invoiceNotifications.length > 0 ||
+      this.partsNotifications.length > 0 ||
+      this.ebwNotifications.length > 0 ||
+      this.pendingPartsD2DNotificationCount > 0;
+  }
+
+  formatPartsD2DBillNo(billNo: string): string {
+    return formatPartsD2DBillNo(billNo);
   }
 
   onClickInvoiceNumber(invoiceData) {
@@ -589,5 +625,18 @@ export class TopbarComponent implements OnInit {
     const value = Date.now() + '|' + invoiceNo;
     const encClaim = btoa(value);
     this.router.navigate(['parts-inward', encClaim]);
+  }
+
+  onClickPartsD2DNotification(item: any): void {
+    const d2dBillNo = String(item?.d2DBillNo ?? '').trim();
+    if (!d2dBillNo) {
+      this.toastService.show('D2D bill number is missing.', {
+        classname: 'bg-danger text-white',
+        delay: 5000
+      });
+      return;
+    }
+
+    this.router.navigate(['/parts-inward/d2d', d2dBillNo]);
   }
 }

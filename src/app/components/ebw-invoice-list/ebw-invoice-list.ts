@@ -39,6 +39,8 @@ export class EbwInvoiceList implements OnInit {
   canDownload = false;
 
   locationList: any[] = [];
+  isAdminOrSuperAdmin = false;
+  readonly ALL_LOCATIONS = 'ALL_LOCATIONS';
 
   // ===== Pagination =====
   page: number = 1;
@@ -68,6 +70,7 @@ export class EbwInvoiceList implements OnInit {
     private menuAccess: MenuAccessService   // ADDED
   ) {
     const role = this.storageService.getRole().toLowerCase();
+    this.isAdminOrSuperAdmin = role === 'admin' || role === 'superadmin';
     this.canManageInvoices = role === 'employee' || role === 'superadmin';
 
     // ADDED — real per-action permission flags, independent of the existing
@@ -84,6 +87,7 @@ export class EbwInvoiceList implements OnInit {
     from.setDate(to.getDate() - 30);
     this.filter.fromDate = from.toISOString().split('T')[0];
     this.filter.toDate = to.toISOString().split('T')[0];
+    this.filter.locationCode = this.isAdminOrSuperAdmin ? this.ALL_LOCATIONS : '';
   }
 
   ngOnInit(): void {
@@ -92,9 +96,16 @@ export class EbwInvoiceList implements OnInit {
 
   getLocationList() {
     const dealerCode = this.storageService.getDealerCode();
-    this.locationMasterService.getLocationByDealerCodeAndAreaId(dealerCode, this.WORKSHOP_AREA_ID).subscribe({
+    const locations$ = this.isAdminOrSuperAdmin
+      ? this.locationMasterService.getLocationDropdownByDealerCode(null)
+      : this.locationMasterService.getLocationByDealerCodeAndAreaId(dealerCode, this.WORKSHOP_AREA_ID);
+
+    locations$.subscribe({
       next: (res: any) => {
-        this.locationList = res || [];
+        const locations = res || [];
+        this.locationList = this.isAdminOrSuperAdmin
+          ? locations.filter((loc: any) => Number(loc.locareaidno) === this.WORKSHOP_AREA_ID)
+          : locations;
       },
       error: (err) => {
         console.error(err);
@@ -112,7 +123,11 @@ export class EbwInvoiceList implements OnInit {
 
     this.isLoading = true;
     this.loader.show();
-    this.ebwInvoiceService.getAll(undefined, this.filter.fromDate, this.filter.toDate).subscribe({
+    const locationCode = this.filter.locationCode === this.ALL_LOCATIONS
+      ? undefined
+      : this.filter.locationCode;
+
+    this.ebwInvoiceService.getAll(undefined, this.filter.fromDate, this.filter.toDate, locationCode).subscribe({
       next: (res: any) => {
         this.gridData = res.data || [];
         this.hasSearched = true;
@@ -156,7 +171,7 @@ export class EbwInvoiceList implements OnInit {
       result = result.filter((r) => (r.billType || '').toLowerCase() === this.filter.billType.toLowerCase());
     }
 
-    if (this.filter.locationCode) {
+    if (this.filter.locationCode && this.filter.locationCode !== this.ALL_LOCATIONS) {
       result = result.filter((r) => r.locationCode === this.filter.locationCode);
     }
 
