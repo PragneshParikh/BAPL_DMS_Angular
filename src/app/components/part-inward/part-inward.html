@@ -17,13 +17,13 @@
                         <fieldset [disabled]="isFormDisabled">
                             <!-- Purchase Info Header -->
                             <div class="row g-1 mb-2 align-items-end">
-                                <div class="col-md-1-5">
+                                <div [ngClass]="isD2DReceiptFlow ? 'col-md-4' : 'col-md-1-5'">
                                     <label class="form-label mb-0 small">Invoice No.</label>
                                     <input type="text" class="form-control form-control-sm bg-light" name="invoiceNo"
                                         #invoiceNo="ngModel" [ngModel]="partsInwardData.invoiceNo" [disabled]="true">
                                 </div>
 
-                                <div class="col-md-1-5">
+                                <div [ngClass]="isD2DReceiptFlow ? 'col-md-2' : 'col-md-1-5'">
                                     <label class="form-label mb-0 small">Invoice Date</label>
                                     <input type="text" class="form-control form-control-sm bg-light" name="invoiceDate"
                                         #invoiceDate="ngModel"
@@ -35,7 +35,7 @@
                                      staying editable. Native type="date" is removed since
                                      its calendar-icon display format is locale-controlled
                                      by the browser and can't be forced to dd-MM-yyyy. -->
-                                <div class="col-md-1-5">
+                                <div [ngClass]="isD2DReceiptFlow ? 'col-md-2' : 'col-md-1-5'">
                                     <label class="form-label mb-0 small">Receipt Date</label>
                                     <input type="text" class="form-control form-control-sm" name="receiptDate"
                                         #receiptDate="ngModel" [(ngModel)]="partsInwardData.receiptDate"
@@ -46,7 +46,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div [ngClass]="isD2DReceiptFlow ? 'col-md-4' : 'col-md-3'">
                                     <label class="form-label mb-0 small">Location</label>
                                     <select class="form-select form-select-sm border-start border-2" name="location"
                                         #location="ngModel" [(ngModel)]=" partsInwardData.selectedLocation">
@@ -63,25 +63,25 @@
                                         [disabled]="true">
                                 </div>
 
-                                <div class="col-md-1">
+                                <div *ngIf="!isD2DReceiptFlow" class="col-md-1">
                                     <label class="form-label mb-0 small">Purchase No.</label>
                                     <input type="text" class="form-control form-control-sm bg-light" name="purchaseNo"
                                         #purchaseNo="ngModel" [(ngModel)]="partsInwardData.purchaseNo" readonly>
                                 </div>
 
-                                <div class="col-md-2">
+                                <div *ngIf="!isD2DReceiptFlow" class="col-md-2">
                                     <label class="form-label mb-0 small">Document No.</label>
                                     <input type="text" class="form-control form-control-sm" name="documentNo"
                                         #documentNo="ngModel" [(ngModel)]="partsInwardData.documentNo">
                                 </div>
 
-                                <div class="col-md-3">
+                                <div [ngClass]="isD2DReceiptFlow ? 'col-md-6' : 'col-md-3'">
                                     <label class="form-label mb-0 small">Party Name</label>
                                     <input type="text" class="form-control form-control-sm bg-light" name="partyName"
                                         #partyName="ngModel" [ngModel]="partsInwardData.partyName" [disabled]="true">
                                 </div>
 
-                                <div class="col-md-2">
+                                <div [ngClass]="isD2DReceiptFlow ? 'col-md-4' : 'col-md-2'">
                                     <label class="form-label mb-0 small">Source System</label>
                                     <input type="text" class="form-control form-control-sm bg-light" name="sourceType"
                                         #sourceType="ngModel" [ngModel]="partsInwardData.sourceTypeDisplay" [disabled]="true">
@@ -111,17 +111,17 @@
                                         <th>Sr.No</th>
                                         <th>Part No.</th>
                                         <th>Part Description</th>
-                                        <th>HSN Code</th>
-                                        <th>Rack No.</th>
-                                        <th>Bin No.</th>
+                                        <th *ngIf="!isD2DReceiptFlow">HSN Code</th>
+                                        <th *ngIf="!isD2DReceiptFlow">Rack No.</th>
+                                        <th *ngIf="!isD2DReceiptFlow">Bin No.</th>
                                         <th>Qty</th>
-                                        <th>Rcpt Qty.</th>
+                                        <th *ngIf="!isD2DReceiptFlow">Rcpt Qty.</th>
                                         <th>Rate w/o Tax</th>
-                                        <th>Disc.</th>
-                                        <th>Type</th>
-                                        <th>CGST</th>
-                                        <th>SGST</th>
-                                        <th>IGST</th>
+                                        <th *ngIf="!isD2DReceiptFlow">Disc.</th>
+                                        <th *ngIf="!isD2DReceiptFlow">Type</th>
+                                        <th *ngIf="!isD2DReceiptFlow">CGST</th>
+                                        <th *ngIf="!isD2DReceiptFlow">SGST</th>
+                                        <th *ngIf="!isD2DReceiptFlow">IGST</th>
                                         <th>Amount</th>
                                         <th>MRP</th>
                                     </tr>
@@ -131,31 +131,31 @@
                                         <td class="text-center">{{(page - 1) * pageSize + i + 1}}</td>
                                         <td>{{ item.partNo }}</td>
                                         <td>{{ item.itemdesc }}</td>
-                                        <td>{{ item.itemHsncode}}</td>
-                                        <td>{{ item.rack }}</td>
-                                        <td>{{ item.bin }}</td>
+                                        <td *ngIf="!isD2DReceiptFlow">{{ item.itemHsncode}}</td>
+                                        <td *ngIf="!isD2DReceiptFlow">{{ item.rack }}</td>
+                                        <td *ngIf="!isD2DReceiptFlow">{{ item.bin }}</td>
                                         <td class="text-center">{{ item.itemQty }}</td>
-                                        <td class="text-center">{{ item.itemQty }}</td>
+                                        <td *ngIf="!isD2DReceiptFlow" class="text-center">{{ item.itemQty }}</td>
                                         <td class="text-end">{{ item.itemRate | number:'1.2-2' }}</td>
-                                        <td class="text-end">{{ item.itemDisc | number:'1.2-2' }}</td>
-                                        <td>{{ item.discountType }}</td>
-                                        <td>{{ item.cgst }}</td>
-                                        <td>{{ item.sgst }}</td>
-                                        <td>{{ item.igst }}</td>
+                                        <td *ngIf="!isD2DReceiptFlow" class="text-end">{{ item.itemDisc | number:'1.2-2' }}</td>
+                                        <td *ngIf="!isD2DReceiptFlow">{{ item.discountType }}</td>
+                                        <td *ngIf="!isD2DReceiptFlow">{{ item.cgst }}</td>
+                                        <td *ngIf="!isD2DReceiptFlow">{{ item.sgst }}</td>
+                                        <td *ngIf="!isD2DReceiptFlow">{{ item.igst }}</td>
                                         <td class="text-end">{{ item.itemAmount | number:'1.2-2' }}</td>
                                         <td>{{ item.itemMrp | number:'1.2-2' }}</td>
                                     </tr>
                                     <!-- Total Row -->
                                     <tr class="fw-bold table-secondary">
-                                        <td colspan="6" class="text-end">Total :</td>
+                                        <td [attr.colspan]="isD2DReceiptFlow ? 3 : 6" class="text-end">Total :</td>
                                         <td class="text-center">{{totalQty}}</td>
+                                        <td *ngIf="!isD2DReceiptFlow"></td>
                                         <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
+                                        <td *ngIf="!isD2DReceiptFlow"></td>
+                                        <td *ngIf="!isD2DReceiptFlow"></td>
+                                        <td *ngIf="!isD2DReceiptFlow"></td>
+                                        <td *ngIf="!isD2DReceiptFlow"></td>
+                                        <td *ngIf="!isD2DReceiptFlow"></td>
                                         <td class="text-end">{{ totalAmount | number:'1.2-2'}}</td>
                                         <td></td>
                                     </tr>
@@ -184,8 +184,15 @@
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button class="btn btn-primary btn-sm" *ngIf="!isFormDisabled && canEdit" (click)="onSave()">
+                            <button class="btn btn-primary btn-sm"
+                                *ngIf="isD2DReceiptFlow ? !isD2DReceiptReceived : !isFormDisabled && canEdit"
+                                (click)="onSave()">
                                 Save
+                            </button>
+                            <button class="btn btn-danger btn-sm"
+                                *ngIf="isD2DReceiptFlow && !isD2DReceiptReceived"
+                                (click)="deleteD2DReceipt()">
+                                Delete
                             </button>
                             <button class="btn btn-danger btn-sm" (click)="returnToList()">
                                 Cancel

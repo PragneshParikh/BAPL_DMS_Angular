@@ -30,9 +30,11 @@
           </div>
           <div class="col-md-3">
             <label class="form-label mb-1">Location<span class="text-danger">*</span></label>
-            <select class="form-select form-select-sm" name="locationCode" [(ngModel)]="formData.locationCode" required>
+            <select class="form-select form-select-sm" name="locationCode" [(ngModel)]="formData.locationCode" (change)="onLocationChange()" required>
               <option value="">-- Select --</option>
-              <option *ngFor="let loc of locationList" [value]="loc.loccode">{{ loc.locname }}</option>
+              <option *ngFor="let loc of locationList" [value]="loc.loccode">
+                {{ loc.locname }}{{ isAdminOrSuperAdmin && loc.dealercode ? ' - ' + loc.dealercode : '' }}
+              </option>
             </select>
           </div>
           <div class="col-md-2">

@@ -110,6 +110,8 @@ import { StockAdjustment } from './components/stock-adjustment/stock-adjustment'
 import { StockAdjustmentReport } from './components/Reports/stock-adjustment-report/stock-adjustment-report';
 import { B2BJobcard } from './components/b2b-jobcard/b2b-jobcard';
 import { AddB2BJobcard } from './components/b2b-jobcard/add-b2b-jobcard/add-b2b-jobcard';
+import {PartsD2D} from './components/parts-d2d/parts-d2d';
+import { PartsD2DTransactions } from './components/parts-d2d/parts-d2d-transactions';
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
   { path: 'forgot-password', loadComponent: () => import('./components/account/forgot-password/forgot-password').then(m => m.ForgotPassword) },
@@ -339,6 +341,8 @@ export const routes: Routes = [
       { path: 'stock-adjustment', component: StockAdjustment, data: [136] },
       { path: 'stock-bill-list', component: StockBillListComponent, data: [136] },
       { path: 'stock-adjustment-report', component: StockAdjustmentReport, data: [136] },
+      { path: 'parts-d2d', data: [0], loadComponent: () => import('./components/parts-d2d/parts-d2d').then(m => m.PartsD2D) },
+      { path: 'parts-d2d-transactions', data: [0], loadComponent: () => import('./components/parts-d2d/parts-d2d-transactions').then(m => m.PartsD2DTransactions) },
       { path: 'bg-free-service', data: [145], loadComponent: () => import('./components/bg-free-service/bg-free-service').then(m => m.BgFreeService) },
     ]
   },

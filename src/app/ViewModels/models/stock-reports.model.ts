@@ -30,6 +30,7 @@ export interface PartsStockDetailsReportRow {
   groupType: string;
   saleCount: number;
   purchaseCount: number;
+  d2DOutgoingQty: number;
   stockAdjustmentQty: number;
   mrp: number;
 }

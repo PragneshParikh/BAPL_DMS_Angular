@@ -1,8 +1,8 @@
 // src\app\components\estimate\estimate.ts
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { EstimateService, JobTypeDropdownItem } from '../../core/services/estimate.service';
@@ -66,6 +66,10 @@ export class Estimate implements OnInit {
   isSaving = false;
   searchError = '';
   saveError = '';
+  saveSuccess = '';
+  emailError = '';
+  emailSuccess = '';
+  isSendingEstimate = false;
   customerFound = false;
 
   jobTypeList: JobTypeDropdownItem[] = [];
@@ -137,6 +141,7 @@ export class Estimate implements OnInit {
       customerMobile: [''],
       customerPin: [''],
       customerEmail: [''],
+      estimateEmail: ['', [Validators.required, Validators.email]],
       customerCity: [''],
       customerState: [''],
       kms: [null],
@@ -234,6 +239,7 @@ export class Estimate implements OnInit {
           customerMobile: res.customerMobile,
           customerPin: res.customerPin,
           customerEmail: res.customerEmail,
+          estimateEmail: res.customerEmail || '',
           customerCity: res.customerCity,
           customerState: res.customerState,
           kms: res.kms,
@@ -310,7 +316,35 @@ export class Estimate implements OnInit {
   // ═══════════════════════════════════════════════════════════════════
 
   onChassisInput(): void {
+    const entered = (this.form.get('searchNo')?.value ?? '').trim().toUpperCase();
+    const selected = (this.form.get('chassisNo')?.value ?? '').trim().toUpperCase();
+    if (this.customerFound && entered !== selected) {
+      this.clearVehicleSelection();
+    }
     this.updateChassisSuggestions();
+  }
+
+  private clearVehicleSelection(): void {
+    this.customerFound = false;
+    this.detailsArray.clear();
+    this.batteryNos = [];
+    this.motorNos = [];
+    this.chargerNos = [];
+    this.emailError = '';
+    this.emailSuccess = '';
+    this.form.patchValue({
+      chassisNo: '',
+      customerName: '',
+      customerAddress: '',
+      customerMobile: '',
+      customerPin: '',
+      customerEmail: '',
+      estimateEmail: '',
+      customerCity: '',
+      customerState: '',
+      kms: null,
+      jobTypeId: null
+    });
   }
 
   onChassisFocus(): void {
@@ -377,6 +411,7 @@ export class Estimate implements OnInit {
           customerMobile: res.partyDetails?.partyMobile ?? '',
           customerPin: res.partyDetails?.pin ?? '',
           customerEmail: res.partyDetails?.email ?? '',
+          estimateEmail: res.partyDetails?.email ?? '',
           customerCity: res.partyDetails?.city ?? '',
           customerState: res.partyDetails?.state ?? ''
         });
@@ -676,10 +711,15 @@ export class Estimate implements OnInit {
   // ═══════════════════════════════════════════════════════════════════
 
   onSave(): void {
+    const raw = this.form.getRawValue();
+    if (!this.customerFound || !raw.chassisNo) {
+      this.saveError = 'Search for a valid chassis or registration number before saving.';
+      return;
+    }
+
     this.isSaving = true;
     this.saveError = '';
-
-    const raw = this.form.getRawValue();
+    this.saveSuccess = '';
 
     const model = {
       estimationNo: raw.estimationNo,
@@ -722,6 +762,7 @@ export class Estimate implements OnInit {
       }))
     };
 
+    const wasEditMode = this.isEditMode;
     const save$: Observable<any> = this.isEditMode && this.estimateId
       ? this.estimateService.update(this.estimateId, model)
       : this.estimateService.create(model);
@@ -734,10 +775,25 @@ export class Estimate implements OnInit {
           // Let the host (e.g. the Estimate List's Edit modal) decide what
           // happens next — it closes the modal and refreshes its own list.
           this.saved.emit();
-        } else {
-          alert(this.isEditMode ? 'Estimate updated successfully.' : `Estimate saved successfully (Id: ${result}).`);
-          this.router.navigate(['/estimate']);
+          return;
         }
+
+        if (!wasEditMode) {
+          const createdId = Number(result);
+          if (!Number.isInteger(createdId) || createdId <= 0) {
+            this.saveError = 'Estimate was saved, but its ID could not be loaded. Refresh the estimate list to continue.';
+            return;
+          }
+          this.estimateId = createdId;
+          this.isEditMode = true;
+          this.form.get('estimateEmail')?.setValue(raw.customerEmail || '');
+        }
+
+        this.emailError = '';
+        this.emailSuccess = '';
+        this.saveSuccess = wasEditMode
+          ? 'Estimate updated successfully.'
+          : 'Estimate saved. Enter an email to send the estimate PDF.';
       },
       error: (err) => {
         this.isSaving = false;
@@ -746,6 +802,91 @@ export class Estimate implements OnInit {
     });
   }
 
+  onEmailEstimate(): void {
+    if (!this.estimateId) return;
+
+    const emailControl = this.form.get('estimateEmail');
+    emailControl?.markAsTouched();
+    if (!emailControl || emailControl.invalid) {
+      this.emailError = 'Enter a valid email address.';
+      this.emailSuccess = '';
+      return;
+    }
+
+    const recipient = emailControl.value.toString().trim();
+    this.isSendingEstimate = true;
+    this.emailError = '';
+    this.emailSuccess = '';
+
+    this.estimateService.emailEstimate(this.estimateId, recipient).subscribe({
+      next: () => {
+        this.isSendingEstimate = false;
+        this.emailSuccess = `Estimate PDF emailed successfully to ${recipient}.`;
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isSendingEstimate = false;
+        console.error('Failed to email estimate PDF.', err);
+        void this.getEstimateEmailErrorMessage(err).then(
+          (message) => this.emailError = message,
+          (decodeError: unknown) => {
+            console.error('Failed to read estimate email error response.', decodeError);
+            this.emailError = this.getEstimateEmailErrorFallback(err);
+          }
+        );
+      }
+    });
+  }
+
+  private async getEstimateEmailErrorMessage(error: HttpErrorResponse): Promise<string> {
+    let response: unknown = error.error;
+
+    if (response instanceof Blob) {
+      const responseText = await response.text();
+      if (responseText) {
+        try {
+          response = JSON.parse(responseText) as unknown;
+        } catch {
+          response = responseText;
+        }
+      }
+    }
+
+    let detail = '';
+    if (typeof response === 'string') {
+      detail = response.trim();
+    } else if (typeof response === 'object' && response !== null) {
+      const body = response as { message?: unknown; title?: unknown };
+      if (typeof body.message === 'string') detail = body.message.trim();
+      else if (typeof body.title === 'string') detail = body.title.trim();
+    }
+
+    const fallback = this.getEstimateEmailErrorFallback(error);
+    if (!detail || detail.toLowerCase() === 'unable to email the estimate pdf.') {
+      return fallback;
+    }
+    return `${fallback} ${detail}`;
+  }
+
+  private getEstimateEmailErrorFallback(error: HttpErrorResponse): string {
+    const status = error.status > 0 ? ` (HTTP ${error.status})` : '';
+    return `Unable to email the estimate PDF${status}.`;
+  }
+
+  private openPdfInWindow(pdf: Blob, pdfWindow: Window | null, fileName: string): boolean {
+    const pdfUrl = window.URL.createObjectURL(pdf);
+    if (pdfWindow) {
+      pdfWindow.location.href = pdfUrl;
+    } else {
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+    window.setTimeout(() => window.URL.revokeObjectURL(pdfUrl), 5 * 60 * 1000);
+    return pdfWindow !== null;
+  }
 
     get partIndices(): number[] {
       return this.detailsArray.controls
@@ -779,12 +920,20 @@ export class Estimate implements OnInit {
     onPrint(): void {
     if (!this.estimateId) return;
 
+      const pdfWindow = window.open('', '_blank');
     this.estimateService.downloadPdf(this.estimateId).subscribe({
       next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        window.open(url, '_blank');
+          const openedInTab = this.openPdfInWindow(
+            blob,
+            pdfWindow,
+            `Estimate_${this.estimateId}.pdf`
+          );
+          if (!openedInTab) {
+            this.saveSuccess = 'The PDF was downloaded because the browser blocked a new tab.';
+          }
       },
       error: (err) => {
+          pdfWindow?.close();
         this.saveError = err?.error?.message || 'Failed to generate print PDF.';
       }
     });

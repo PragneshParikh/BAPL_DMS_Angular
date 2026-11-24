@@ -212,7 +212,7 @@ export class PartsStockDetails implements OnInit {
       'Part Description': item.itemdesc,
       'Item Type': item.groupType,
       'Pur.Qty': item.purchaseCount,
-      'MT': item.saleCount,
+      'D2D Out': item.d2DOutgoingQty,
       'Sale Qty': item.saleCount,
       'Sdj.': item.stockAdjustmentQty,
       'Bal.Qty': item.batchClosingQty,
