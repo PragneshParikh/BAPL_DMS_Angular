@@ -48,10 +48,11 @@
                 <label>Dealer <span class="text-danger">*</span></label>
                 <select class="form-select form-select-sm" [(ngModel)]="dealerCode" (change)="onDealerChange()"
                   [class.is-invalid]="submitted && !dealerCode">
-                  <option [ngValue]="null">Select Dealer</option>
+                  <option [ngValue]="null">All Dealers</option>
                   <option *ngFor="let d of dealers" [ngValue]="d.dmsDealerCode">{{ d.name }} ({{ d.dmsDealerCode }})</option>
                 </select>
-                <small class="text-warning" *ngIf="dealerMessage">{{ dealerMessage }}</small>
+                <small class="text-muted" *ngIf="!dealerCode">All Dealers: search any chassis - the dealer is picked from the vehicle, or choose it here before saving.</small>
+                <small class="text-warning" *ngIf="dealerCode && dealerMessage">{{ dealerMessage }}</small>
               </div>
               <div class="col-md-12" *ngIf="!isAdmin && dealerMessage && !ro">
                 <small class="text-warning">{{ dealerMessage }}</small>
@@ -73,9 +74,13 @@
                   <input type="text" class="form-control text-uppercase" placeholder="Type Chassis No. / Reg No."
                     [(ngModel)]="searchTerm" (input)="onSearchInput()" (keyup.enter)="onSearchEnter()"
                     (blur)="hideSuggestions()" autocomplete="off">
-                  <button type="button" class="btn btn-outline-primary" (click)="onSearchEnter()" [disabled]="vehicleLoading"
-                    title="Search Chassis No / Reg No">
+                  <button type="button" class="btn btn-outline-secondary" (click)="openGlobalSearch(globalSearchModal)"
+                    title="Search chassis across all dealers">
                     <i class="ri-search-line"></i>
+                  </button>
+                  <button type="button" class="btn btn-outline-primary" (click)="onSearchEnter()" [disabled]="vehicleLoading"
+                    title="Fetch this Chassis No / Reg No with its service history">
+                    <i class="ri-history-line"></i>
                   </button>
                 </div>
                 <input *ngIf="ro" type="text" class="form-control form-control-sm bg-light" [value]="f.chassisNo" readonly>
@@ -471,7 +476,7 @@
       <thead class="table-light sticky-top">
         <tr>
           <th>Sr.No</th><th>Job Card No</th><th>Job Date</th><th>Vehicle No</th><th class="text-end">KMs</th><th>Job Type</th>
-          <th>Service Head</th><th>Complaint</th><th>Service Location</th><th>Status</th><th>Dealer</th>
+          <th>Service Head</th><th>Complaint</th><th>Service Location</th><th>Status</th><th>Dealer</th><th>Source</th>
         </tr>
       </thead>
       <tbody>
@@ -487,11 +492,63 @@
           <td>{{ h.serviceLocation || '-' }}</td>
           <td>{{ h.status }}<span *ngIf="h.stage"> / {{ h.stage }}</span></td>
           <td>{{ h.dealerName || h.dealerCode || '-' }}</td>
+          <td><span class="badge bg-light text-dark border">{{ h.source || 'B2B (JobCardScanner)' }}</span></td>
         </tr>
         <tr *ngIf="!history.length">
-          <td colspan="11" class="text-center text-muted">No earlier job cards for this vehicle.</td>
+          <td colspan="12" class="text-center text-muted">No earlier job cards for this vehicle.</td>
         </tr>
       </tbody>
     </table>
+  </div>
+</ng-template>
+
+<!-- ======================= Search Chassis Across All Dealers (same popup as the B2C job card) ======================= -->
+<ng-template #globalSearchModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Search Chassis Across All Dealers</h5>
+    <button type="button" class="btn-close btn-close-white" (click)="closeGlobalSearch()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-8 position-relative">
+        <label class="form-label mb-0 small">Chassis No / Reg No</label>
+        <input type="text" class="form-control form-control-sm text-uppercase" [(ngModel)]="globalTerm" name="globalTerm"
+          placeholder="Type 2+ characters…" autocomplete="off" (input)="onGlobalInput()" (keyup.enter)="runGlobalSearch()">
+        <div class="list-group position-absolute w-100 shadow-sm b2b-suggest" *ngIf="globalSuggestions.length > 0">
+          <button type="button" class="list-group-item list-group-item-action py-1" *ngFor="let s of globalSuggestions"
+            (click)="pickGlobalSuggestion(s)">
+            <div class="small fw-semibold">{{ s.chassisNo }} <span class="badge bg-light text-dark border ms-1">{{ s.source }}</span></div>
+            <div class="text-muted b2b-xs">Reg No: {{ s.regNo || '-' }} | {{ s.customerName || '-' }} | Dealer: {{ s.dealerCode || '-' }}</div>
+          </button>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <button type="button" class="btn btn-primary btn-sm w-100 mb-0" [disabled]="globalSearching" (click)="runGlobalSearch()">
+          {{ globalSearching ? 'Searching…' : 'Search' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-3" *ngIf="globalResult">
+      <table class="table table-sm table-bordered mb-0">
+        <tbody>
+          <tr><td class="text-muted small w-30">Chassis No</td><td>{{ globalResult.chassisNo || '-' }}</td></tr>
+          <tr><td class="text-muted small">Register No</td><td>{{ globalResult.regNo || '-' }}</td></tr>
+          <tr><td class="text-muted small">Customer Name</td><td>{{ globalResult.customerName || '-' }}</td></tr>
+          <tr><td class="text-muted small">Mobile No.</td><td>{{ globalResult.mobile || '-' }}</td></tr>
+          <tr><td class="text-muted small">Model</td><td>{{ globalResult.model || '-' }}</td></tr>
+          <tr><td class="text-muted small">Dealer</td><td>{{ globalResult.dealerCode || '-' }}</td></tr>
+          <tr><td class="text-muted small">Sale Date</td><td>{{ globalResult.saleDate ? (globalResult.saleDate | date:'dd-MM-yyyy') : '-' }}</td></tr>
+          <tr><td class="text-muted small">Found in</td><td><span class="badge bg-light text-dark border">{{ globalResult.source }}</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-3 text-danger small" *ngIf="globalNotFound">
+      No vehicle with this Chassis No / Reg No in any dealer (JobCardScanner, DMS sales, service history).
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-success btn-sm mb-0" [disabled]="!globalResult" (click)="useGlobalChassis()">Use This Chassis</button>
+    <button type="button" class="btn btn-light btn-sm mb-0" (click)="closeGlobalSearch()">Close</button>
   </div>
 </ng-template>

@@ -67,7 +67,7 @@ export class JobCardAddForm {
   selectedChassis: string = '';
   invoiceNo: string = '';
   couponNo: string = '';
-  inwardType: string = '';
+  inwardType: string = 'B2C';   // Job Category - B2C by default
   modelName = '';
   registerNo = '';
   vehicleKms: number = 0;
@@ -525,7 +525,7 @@ filterChassis() {
     // ===== Same field set as onChassisChange() =====
     this.invoiceNo = data.invoiceNo || '';
     this.couponNo = this.selectedChassis.slice(-13);
-    this.inwardType = data.inwardType || '';
+    this.inwardType = data.inwardType || 'B2C';
     this.vehiclePrevkms = data.vehiclePrevKms || 0;
 
     this.customerObj.customerLedgerId = data.customerLedgerId || 0;
@@ -755,8 +755,8 @@ filterChassis() {
       const last = rows.find(r => r.kms !== null);
       if (!this.isEditMode && last && last.kms !== null && last.kms > (Number(this.vehiclePrevkms) || 0)) {
         this.vehiclePrevkms = last.kms;
-        this.kmsError = !this.isSuperAdmin && this.vehicleKms && Number(this.vehicleKms) < last.kms
-          ? `Vehicle KM cannot be less than Previous KM (${last.kms})` : '';
+        this.kmsError = this.vehicleKms !== null && this.vehicleKms !== undefined && String(this.vehicleKms).trim() !== '' && Number(this.vehicleKms) < last.kms
+          ? `Odometer cannot be less than the last job card km (${last.kms} km).` : '';
       }
     }, () => { this.serviceCardHistoryLoading = false; });
   }
@@ -1063,7 +1063,7 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
 
     this.invoiceNo = selected.invoiceNo;
     this.couponNo = this.selectedChassis.slice(-13);
-    this.inwardType = selected.inwardType;
+    this.inwardType = selected.inwardType || 'B2C';
     this.vehiclePrevkms = selected.vehiclePrevkms;
     this.customerObj.customerLedgerId = selected.customerLedgerId;
     this.customerObj.customerName = selected.customerName;
@@ -1328,11 +1328,20 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
       });
       return;
     }
-    if (!this.isSuperAdmin && this.vehicleKms < this.vehiclePrevkms) {
-        this.kmsError =
-          `Vehicle KM cannot be less than Previous KM (${this.vehiclePrevkms})`;
-        return;
-      }
+    // 25.11.2026 Odometer (km) is required and can never be less than the last job card's reading (every user)
+    const kmsEntered = this.vehicleKms !== null && this.vehicleKms !== undefined && String(this.vehicleKms).trim() !== '';
+    const kms = Number(this.vehicleKms);
+    const lastKms = Number(this.vehiclePrevkms) || 0;
+    if (!kmsEntered || isNaN(kms) || kms < 0) {
+      this.kmsError = 'Odometer (km) is required.';
+      Swal.fire({ icon: 'warning', title: 'Validation', text: 'Please enter Odometer (km).', width: '300px' });
+      return;
+    }
+    if (kms < lastKms) {
+      this.kmsError = `Odometer cannot be less than the last job card km (${lastKms} km).`;
+      Swal.fire({ icon: 'warning', title: 'Validation', text: this.kmsError, width: '320px' });
+      return;
+    }
 
     // 25.11.2026 Photos tab: at least one photo for a new job card (and for an edited one that has none yet)
     if (this.pendingPhotos.length === 0 && this.savedPhotos.length === 0 && !this.isEditMode) {
@@ -1523,8 +1532,8 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
 
     this.isSaving = true; // NEW: lock out further calls until this request settles
     this.loader.show();
-    // 25.11.2026: photos are uploaded to blob storage first, so a failed upload never leaves a job card without photos
-    this.photoService.uploadAll(this.pendingPhotos).then(uploaded => {
+    // 25.11.2026: the photos are uploaded right after the job card is saved (linkUploadedPhotos)
+    Promise.resolve(this.pendingPhotos.slice()).then(uploaded => {
     apiCall.subscribe({
       next: (res: any) => {
         const savedId = this.isEditMode ? this.chassiseditData?.jobCardHeader?.id : (res?.id ?? res?.Id);
@@ -1590,17 +1599,17 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
       });
   }
 
-  /** saves the uploaded photos' blob URLs against the saved job card (runs after the job card itself is saved) */
-  private linkUploadedPhotos(jobCardHeaderId: any, uploaded: any[]) {
-    if (!uploaded?.length) return;
+  /** uploads the picked photos for the saved job card (stored by the API like JobCardScanner) */
+  private linkUploadedPhotos(jobCardHeaderId: any, photos: PendingPhoto[]) {
+    if (!photos?.length) return;
     const id = Number(jobCardHeaderId);
     if (!id) {
-      this.toastr.show('Job card saved, but the photos could not be linked (the API did not return the job card id - rebuild the API).', { classname: 'bg-warning text-dark', delay: 8000 });
+      this.toastr.show('Job card saved, but the photos could not be attached (the API did not return the job card id - rebuild the API).', { classname: 'bg-warning text-dark', delay: 8000 });
       return;
     }
-    this.photoService.saveB2CPhotos(id, uploaded).subscribe({
-      next: () => JobcardPhotoService.release(this.pendingPhotos.splice(0)),
-      error: (e) => this.toastr.show('Job card saved, but the photos could not be linked: ' + (e?.error?.message || 'server error'), { classname: 'bg-warning text-dark', delay: 8000 })
+    this.photoService.uploadB2CPhotos(id, photos).subscribe({
+      next: () => JobcardPhotoService.release(photos),
+      error: (e) => this.toastr.show('Job card saved, but the photos could not be uploaded: ' + (e?.error?.message || 'server error') + ' - edit the job card and add them again.', { classname: 'bg-warning text-dark', delay: 8000 })
     });
   }
 
@@ -1622,8 +1631,7 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
     this.selectedLocation = data.jobCardHeader.serviceloc;
 
     this.couponNo = data.jobCardHeader.couponno;
-    this.inwardType = data.jobCardHeader.inwardType;
-    this.inwardType = data.jobCardHeader.inwardType;
+    this.inwardType = data.jobCardHeader.inwardType || 'B2C';
     this.jobPrefix = data.jobCardHeader.jobprefix;
     this.jobInDate = data.jobCardHeader.jobinDate;
     this.jobInTime = data.jobCardHeader.jobinTime;
@@ -1702,10 +1710,10 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
 
 validateWarranty(): boolean {
 
-    if (!this.isSuperAdmin && this.vehicleKms && this.vehiclePrevkms &&
-      this.vehicleKms < this.vehiclePrevkms) {
+    if (this.vehicleKms !== null && this.vehicleKms !== undefined && String(this.vehicleKms).trim() !== '' &&
+      Number(this.vehiclePrevkms) > 0 && Number(this.vehicleKms) < Number(this.vehiclePrevkms)) {
 
-      this.kmsError = `Vehicle KM cannot be less than Previous KM (${this.vehiclePrevkms})`;
+      this.kmsError = `Odometer cannot be less than the last job card km (${this.vehiclePrevkms} km).`;
     } else {
       this.kmsError = '';
     }
@@ -1743,7 +1751,7 @@ validateWarranty(): boolean {
 
     this.invoiceNo = '';
     this.couponNo = '';
-    this.inwardType = '';
+    this.inwardType = 'B2C';
     this.vehicleKms = 0;
     this.jobPrefix = '';
     this.jobInDate = '';
@@ -2119,7 +2127,7 @@ validateWarranty(): boolean {
   private applyHistoryOnlyVehicle(chassis: string) {
     this.invoiceNo = '';
     this.couponNo = chassis.slice(-13);
-    this.inwardType = '';
+    this.inwardType = 'B2C';
     this.vehiclePrevkms = 0;
     this.customerObj.customerLedgerId = 0;
     this.customerObj.customerName = '';

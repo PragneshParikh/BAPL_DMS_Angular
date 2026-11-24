@@ -123,6 +123,8 @@ export interface B2BHistoryRow {
   dealerCode?: string | null;
   dealerName?: string | null;
   complaints?: string | null;
+  /** B2B (JobCardScanner) / DMS job card / Service history - set by the form when it merges the sources */
+  source?: string | null;
 }
 
 export interface B2BVehicleCard {

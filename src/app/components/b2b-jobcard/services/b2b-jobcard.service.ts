@@ -6,6 +6,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { JobcardPhotoService, PendingPhoto } from '../../../core/services/jobcard-photo.service';
 import {
   B2BComplaint, B2BDealer, B2BIdName, B2BJobCardCreateRequest, B2BJobCardDetail, B2BJobCardFilter, B2BJobCardListRow,
   B2BJobCardUpdateRequest, B2BMasters, B2BPaged, B2BPhoto, B2BPriority, B2BSaveResult, B2BStaffLists, B2BVehicleCard, B2BVehicleSuggestResult, B2BWorkshop
@@ -69,9 +70,9 @@ export class B2BJobcardService {
     return this.http.get<B2BVehicleSuggestResult>(`${this.baseUrl}/vehicle-suggest`, { params: this.params({ term, dealerCode }) });
   }
 
-  /** check-in photos (blob URLs already uploaded with JobcardPhotoService.uploadAll) */
-  addPhotos(id: string, photos: { fileName: string; blobUrl: string; contentType: string; fileSize: number; caption?: string | null }[]): Observable<B2BPhoto[]> {
-    return this.http.post<B2BPhoto[]>(`${this.baseUrl}/${id}/photos`, { photos });
+  /** check-in photos (multipart: files + captions) -> stored by the API like JobCardScanner, rows in JobCardScanner JobCardPhotos */
+  addPhotos(id: string, list: PendingPhoto[]): Observable<B2BPhoto[]> {
+    return this.http.post<B2BPhoto[]>(`${this.baseUrl}/${id}/photos`, JobcardPhotoService.formData(list));
   }
 
   /** vehicle + customer + full service card history (JobCardScanner job cards of the chassis, every dealer) */

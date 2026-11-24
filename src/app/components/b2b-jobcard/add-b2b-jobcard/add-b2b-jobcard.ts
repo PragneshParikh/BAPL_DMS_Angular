@@ -15,8 +15,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
-import { firstValueFrom } from 'rxjs';
+import { NgbDropdownModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { catchError, firstValueFrom, forkJoin, of } from 'rxjs';
+import { JobcardServiceHistoryLookupService } from '../../../core/services/jobcard-service-history-lookup.service';
 import { StorageService } from '../../../core/services/storage';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
 import { ToastService } from '../../../shared/toaster/toast-service';
@@ -92,6 +93,18 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
   history: B2BHistoryRow[] = [];
   private suggestTimer: any;
   private suggestSeq = 0;
+  /** chassis the merged Service Card History belongs to (ignore late answers for an older chassis) */
+  private historyChassis = '';
+
+  // ---------- "Search Chassis Across All Dealers" popup (same as the B2C form)
+  globalTerm = '';
+  globalSearching = false;
+  globalNotFound = false;
+  globalResult: { source: string; chassisNo: string; regNo?: string | null; customerName?: string | null; mobile?: string | null;
+    model?: string | null; dealerCode?: string | null; saleDate?: string | null } | null = null;
+  globalSuggestions: B2BVehicleSuggestion[] = [];
+  private globalTimer: any;
+  private globalModalRef: any = null;
 
   // ---------- form
   f: B2BJobCardCreateRequest = this.emptyForm();
@@ -124,7 +137,9 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
     private locationService: LocationMasterService,
     private chassisSearch: ChassisSearchService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private modalService: NgbModal,
+    private shLookup: JobcardServiceHistoryLookupService
   ) {}
 
   ngOnInit(): void {
@@ -165,6 +180,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     clearTimeout(this.suggestTimer);
+    clearTimeout(this.globalTimer);
     JobcardPhotoService.release(this.pendingPhotos);
   }
 
@@ -392,6 +408,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
     };
     this.card = null;
     this.history = [];
+    this.historyChassis = '';
     this.previousOdometer = null;
     this.openJobCardNumber = '';
     this.vehicleLocked = false;
@@ -418,9 +435,15 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
           customerName: cust.name, customerMobile: cust.mobile, customerEmail: cust.email, customerAddress: cust.address,
           customerCity: cust.city, customerState: cust.state
         });
-        this.history = card.history || [];
+        this.history = (card.history || []).map(h => ({ ...h, source: 'B2B (JobCardScanner)' }));
         this.isOpen['history'] = this.history.length > 0;
         this.previousOdometer = card.previousOdometer ?? null;
+        // Admin on "All Dealers": the vehicle's JobCardScanner dealer becomes the job card dealer
+        if (this.isAdmin && !this.dealerCode && veh.dealerCode && this.dealers.some(d => (d.dmsDealerCode || '').toUpperCase() === veh.dealerCode!.toUpperCase())) {
+          this.dealerCode = this.dealers.find(d => (d.dmsDealerCode || '').toUpperCase() === veh.dealerCode!.toUpperCase())!.dmsDealerCode!;
+          this.staffKey = '';
+          this.loadMasters();
+        }
         this.openJobCardNumber = card.openJobCardNumber || '';
         const own = !!veh.dealerCode && !!this.dealerCode && veh.dealerCode.toUpperCase() === this.dealerCode.toUpperCase();
         this.vehicleLocked = own;
@@ -428,6 +451,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
         this.vehicleMessage = own ? 'Vehicle found in JobCardScanner for this dealer.'
           : `Vehicle found in JobCardScanner (dealer ${veh.dealerCode || '-'}); it is added to this dealer on save.`;
         this.searchTerm = this.f.chassisNo;
+        this.loadOtherHistory(this.f.chassisNo);
         return;
       }
       const sale: any = await firstValueFrom(this.chassisSearch.getGlobalChassisDetails(v)).catch(() => null);
@@ -448,11 +472,146 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
         this.vehicleMessage = 'Vehicle not found. Enter the vehicle and customer details; they are created on save.';
       }
       this.searchTerm = this.f.chassisNo;
+      this.loadOtherHistory(this.f.chassisNo);
     } catch (e) {
       this.vehicleMessage = B2BJobcardService.errorText(e, 'Could not look the vehicle up.');
     } finally {
       this.vehicleLoading = false;
     }
+  }
+
+  /**
+   * Service Card History for every dealer login (not only admin): the B2B JobCardScanner job cards (already in
+   * this.history) + DMS job cards of the chassis + imported service history (all dealers), newest first.
+   * Previous Kms = the highest reading of all of them.
+   */
+  private loadOtherHistory(chassisNo: string): void {
+    const chassis = (chassisNo || '').trim().toUpperCase();
+    if (chassis.length < 5) return;
+    this.historyChassis = chassis;
+    const today = new Date();
+    const dms$ = this.jobCardService.getJobCardList({
+      dealerCode: this.isAdmin ? null : this.storage.getDealerCode(), fromDate: '2000-01-01', toDate: this.ymd(today), chassisNo: chassis
+    }).pipe(catchError(() => of([])));
+    const imported$ = this.shLookup.vehicle(chassis, 'all').pipe(catchError(() => of(null)));
+    forkJoin([dms$, imported$]).subscribe(([dms, imported]: [any, any]) => {
+      if (this.historyChassis !== chassis) return;
+      const extra: B2BHistoryRow[] = [];
+      const dmsList: any[] = Array.isArray(dms) ? dms : (dms?.data || []);
+      for (const it of dmsList) {
+        const h = it?.jobCardHeader || {};
+        if (String(it?.jobCardCustomer?.chassisNo || h.chassisno || '').trim().toUpperCase() !== chassis) continue;
+        extra.push({
+          id: 'dms-' + (h.id ?? h.jobNo), jobCardNumber: String(h.jobNo ?? ''), createdAt: h.jobinDate || h.createdDate || '',
+          regNo: it?.jobCardCustomer?.registerNo || '', odometerAtCheckIn: Number(h.vehiclekms) || 0, jobType: it?.jobtype || '',
+          serviceHead: [it?.serviceHead, it?.serviceType].filter(Boolean).join(' / '), serviceLocation: it?.location || '',
+          status: h.jobStatus || '', dealerCode: h.dealerCode || '', complaints: it?.complaint || '', source: 'DMS job card'
+        });
+      }
+      for (const v of (imported?.vehicles || [])) {
+        if (String(v?.chassisNo || '').trim().toUpperCase() !== chassis) continue;
+        for (const j of (v.jobs || [])) {
+          const kms = Number(j['KMS']);
+          extra.push({
+            id: 'sh-' + (j['Id'] ?? j['JobNo'] ?? extra.length), jobCardNumber: String(j['JobNo'] ?? ''), createdAt: j['JobDate'] || '',
+            regNo: j['RegNo'] || v.regNo || '', odometerAtCheckIn: isNaN(kms) ? 0 : kms, jobType: j['JobType'] || '',
+            serviceHead: j['ServiceHead'] || '', serviceLocation: j['Location'] || '', status: j['JobStatus'] || j['Status'] || '',
+            dealerName: j['CompName'] || '', dealerCode: j['DealerCode'] || '', complaints: '', source: 'Service history'
+          });
+        }
+      }
+      const time = (r: B2BHistoryRow) => { const t = new Date(this.utc(r.createdAt) || 0).getTime(); return isNaN(t) ? 0 : t; };
+      const own = this.history.filter(h => h.source === 'B2B (JobCardScanner)' || !h.source);
+      this.history = [...own, ...extra].sort((a, b) => time(b) - time(a));
+      if (this.history.length) this.isOpen['history'] = true;
+      const maxKms = Math.max(0, ...this.history.map(h => Number(h.odometerAtCheckIn) || 0));
+      if (maxKms > (this.previousOdometer || 0)) this.previousOdometer = maxKms;
+    });
+  }
+
+  // =========================================================== "Search Chassis Across All Dealers" popup
+  openGlobalSearch(tpl: any): void {
+    this.globalTerm = (this.searchTerm || '').toUpperCase();
+    this.globalResult = null;
+    this.globalNotFound = false;
+    this.globalSuggestions = [];
+    this.globalModalRef = this.modalService.open(tpl, { size: 'lg', centered: true, backdrop: 'static' });
+    if (this.globalTerm.replace(/[^A-Z0-9]/g, '').length >= 5) this.runGlobalSearch();
+  }
+
+  closeGlobalSearch(): void {
+    clearTimeout(this.globalTimer);
+    this.globalModalRef?.dismiss();
+    this.globalModalRef = null;
+  }
+
+  onGlobalInput(): void {
+    clearTimeout(this.globalTimer);
+    this.globalResult = null;
+    this.globalNotFound = false;
+    const t = (this.globalTerm || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (t.length < 2) { this.globalSuggestions = []; return; }
+    this.globalTimer = setTimeout(() => {
+      // admin "All Dealers" -> every dealer; a dealer login -> its own first, then every dealer
+      this.api.suggestVehicles(t, this.dealerCode).subscribe({
+        next: (r) => (this.globalSuggestions = r?.items || []),
+        error: () => (this.globalSuggestions = [])
+      });
+    }, 250);
+  }
+
+  pickGlobalSuggestion(s: B2BVehicleSuggestion): void {
+    this.globalTerm = s.chassisNo || s.regNo || '';
+    this.globalSuggestions = [];
+    this.runGlobalSearch();
+  }
+
+  /** exact Chassis No / Reg No in any dealer: JobCardScanner vehicle -> DMS sale -> imported service history */
+  async runGlobalSearch(): Promise<void> {
+    const v = (this.globalTerm || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (v.length < 3) return;
+    this.globalSuggestions = [];
+    this.globalSearching = true;
+    this.globalResult = null;
+    this.globalNotFound = false;
+    try {
+      const card = await firstValueFrom(this.api.getVehicle(v, null)).catch(() => null);
+      if (card?.found && card.vehicle) {
+        this.globalResult = {
+          source: 'JobCardScanner', chassisNo: card.vehicle.chassisNo || v, regNo: card.vehicle.regNo, customerName: card.customer?.name,
+          mobile: card.customer?.mobile, model: card.vehicle.model, dealerCode: card.vehicle.dealerCode, saleDate: card.vehicle.purchaseDate
+        };
+        return;
+      }
+      const sale: any = await firstValueFrom(this.chassisSearch.getGlobalChassisDetails(v)).catch(() => null);
+      if (sale) {
+        this.globalResult = {
+          source: 'DMS sale', chassisNo: String(sale.chassisNumber || sale.chassisNo || v).toUpperCase(), regNo: sale.registerNo,
+          customerName: sale.customerName, mobile: sale.mobileNo, model: sale.modelName, dealerCode: sale.dealerCode, saleDate: sale.saleDate
+        };
+        return;
+      }
+      const hist: any = await firstValueFrom(this.shLookup.vehicle(v, 'all')).catch(() => null);
+      const hv = (hist?.vehicles || []).find((x: any) => !!x.chassisNo);
+      if (hv) {
+        this.globalResult = {
+          source: 'Service history', chassisNo: hv.chassisNo, regNo: hv.regNo, customerName: hv.jobs?.[0]?.['PartyName'],
+          mobile: hv.jobs?.[0]?.['MobileNumber'], model: hv.model, dealerCode: hv.jobs?.[0]?.['DealerCode'], saleDate: hv.saleDate
+        };
+        return;
+      }
+      this.globalNotFound = true;
+    } finally {
+      this.globalSearching = false;
+    }
+  }
+
+  useGlobalChassis(): void {
+    if (!this.globalResult) return;
+    const chassis = this.globalResult.chassisNo;
+    this.closeGlobalSearch();
+    this.searchTerm = chassis;
+    this.lookupVehicle(chassis);
   }
 
   // =========================================================== complaints
@@ -563,14 +722,13 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
     this.saving = true;
     this.loader.show();
     try {
-      // photos first: a failed upload never leaves a job card without photos
-      const uploaded = await this.photoService.uploadAll(this.pendingPhotos);
       const res = await firstValueFrom(this.api.create(req));
       try {
-        await firstValueFrom(this.api.addPhotos(res.id, uploaded));
+        // photos are stored against the new job card (same folder layout as JobCardScanner)
+        await firstValueFrom(this.api.addPhotos(res.id, this.pendingPhotos));
         JobcardPhotoService.release(this.pendingPhotos.splice(0));
       } catch (pe) {
-        this.toaster.show(`${res.jobCardNumber} saved, but the photos could not be linked: ${B2BJobcardService.errorText(pe)}`,
+        this.toaster.show(`${res.jobCardNumber} saved, but the photos could not be uploaded: ${B2BJobcardService.errorText(pe)} - open the job card and add them again.`,
           { classname: 'bg-warning text-dark', delay: 8000 });
       }
       this.toaster.show(res?.message || 'B2B Job Card created.', { classname: 'bg-success text-white', delay: 5000 });
@@ -628,7 +786,10 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
         });
         if (v.chassisNo) {
           this.api.getVehicle(v.chassisNo, this.isAdmin ? this.dealerCode : null).subscribe({
-            next: (card) => (this.history = (card?.history || []).filter(h => h.id !== d.id)),
+            next: (card) => {
+              this.history = (card?.history || []).filter(h => h.id !== d.id).map(h => ({ ...h, source: 'B2B (JobCardScanner)' }));
+              this.loadOtherHistory(v.chassisNo!);
+            },
             error: () => (this.history = [])
           });
         }
@@ -659,8 +820,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
     this.loader.show();
     try {
       if (this.pendingPhotos.length) {
-        const uploaded = await this.photoService.uploadAll(this.pendingPhotos);
-        this.savedPhotos = await firstValueFrom(this.api.addPhotos(this.detail.id, uploaded));
+        this.savedPhotos = await firstValueFrom(this.api.addPhotos(this.detail.id, this.pendingPhotos));
         JobcardPhotoService.release(this.pendingPhotos.splice(0));
       }
       const res = await firstValueFrom(this.api.update(this.detail.id, {
