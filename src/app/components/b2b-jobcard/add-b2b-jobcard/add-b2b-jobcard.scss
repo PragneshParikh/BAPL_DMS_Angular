@@ -1,0 +1,180 @@
+// src\app\components\b2b-jobcard\add-b2b-jobcard\add-b2b-jobcard.scss - same styles as the B2C job card form + B2B additions
+.section-card {
+  border: 1px solid #e9ebec;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.section-header {
+  padding: 12px 15px;
+  background: #f3f6f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.section-header:hover {
+  background: #e9ebec;
+}
+
+.section-body {
+  padding: 15px;
+}
+.single-line {
+  white-space: nowrap;
+}
+.btn-add{
+  background-color: #747CA0;
+  color: white;
+  margin-bottom: 10px;
+ }
+
+ .commonbtnAdd{
+  margin-top: 25px;
+ }
+ .btn-light{
+  margin-bottom: 10px;
+  margin-right: 10px;
+ }
+ .btn-close-white {
+color: white;
+}
+
+ //*Customer details popup CSS*//
+ .modal-header {
+  background-color: #747CA0;
+  position: sticky;
+  top: 0;
+  z-index: 1055;
+}
+.modal-title {
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+}
+.btn-close-white{
+  color: white;
+}
+
+.dropdown-menu-chassis {
+  display: block;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1050;
+}
+
+.section-title {
+    background-color: #dfe2e6; /* grey */
+    padding: 8px 12px;
+    margin-bottom: 0;
+    border-radius: 3px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.service-history-table {
+    max-height: 350px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.dropdown-menu {
+    z-index: 1060 !important;
+}
+
+.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #fff;
+}
+
+.table th,
+.table td {
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.ebw-highlight {
+  background-color: #d1f7e0;
+  color: #14532d;
+  border: 1px solid #28a745;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  i {
+    font-size: 1rem;
+  }
+
+  a {
+    color: #0a6b32;
+    text-decoration: underline;
+    margin-left: 4px;
+    font-weight: 600;
+  }
+
+  a:hover {
+    color: #06421e;
+  }
+}/* 21.11.2026 - find vehicle: live scan + "Vehicle details fetched" */
+.sh-cam { position: relative; background: #000; border-radius: 10px; overflow: hidden; height: 320px; }
+.sh-cam video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sh-guide { position: absolute; left: 6%; right: 6%; top: 50%; height: 30%; transform: translateY(-50%);
+  border: 3px solid #22c55e; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35); pointer-events: none; }
+.sh-cam-status { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px; color: #fff; text-align: center;
+  background: rgba(0, 0, 0, 0.55); font-weight: 600; font-size: 13px; }
+.sh-cam-hint { color: #fde68a; font-weight: 400; font-size: 12px; }
+.sh-found { background: #052e16; color: #d1fae5; border-radius: 12px; padding: 18px; text-align: center; }
+.sh-found-tick { color: #22c55e; font-size: 40px; font-weight: 800; line-height: 1; }
+.sh-found-value { color: #fff; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; margin: 4px 0; }
+.sh-details { background: #f8fbff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 12px; }
+.sh-sec { font-size: 11px; font-weight: 700; color: #1e3a5f; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.sh-kv { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; padding: 3px 0; border-bottom: 1px dashed #e2e6ec; }
+.sh-kv span { color: #6b7280; }
+.sh-kv b { color: #101828; text-align: right; word-break: break-all; }
+
+// 25.11.2026 Photos tab
+.jc-photo { height: 110px; object-fit: cover; background: #f3f6f9; }
+
+// ---- B2B additions
+.b2b-dd { min-width: 900px; max-width: 95vw; }
+.b2b-suggest { z-index: 1056; max-height: 300px; overflow-y: auto; }
+.b2b-xs { font-size: 11px; }
+.b2b-wrap { white-space: normal; min-width: 180px; }
+.dropdown-menu-chassis { max-height: 320px; overflow-y: auto; z-index: 1056; }
+.section-header { flex-wrap: wrap; gap: 8px; }
+.custom-line { margin: 4px 0 8px; }
+@media (max-width: 768px) {
+  .b2b-dd { min-width: 0; width: 95vw; }
+  .border-end { border-right: 0 !important; }
+}
+
+// ---- dropdown / label fit (25.11.2026)
+label {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.form-select {
+  padding-right: 2rem;          // room for the arrow - text never runs under it
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.form-select optgroup {
+  font-weight: 600;
+  color: #495057;
+}
+.form-select option {
+  font-weight: 400;
+  color: #212529;
+  padding: 4px 8px;
+}
