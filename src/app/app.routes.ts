@@ -336,6 +336,8 @@ export const routes: Routes = [
       { path: 'historical-material-transfer', data: [152], loadComponent: () => import('./components/Historical/historical-material-transfer/historical-material-transfer').then(m => m.HistoricalMaterialTransfer) },
       { path: 'historical-job-report', data: [154], loadComponent: () => import('./components/Historical/historical-job-report/historical-job-report').then(m => m.HistoricalJobReport) },
       { path: 'historical-vehicle-warranty', data: [155], loadComponent: () => import('./components/Historical/vehicle-warranty/vehicle-warranty').then(m => m.VehicleWarrantyComponent) },
+      {path: 'historical-zero-hours-job-data',data: [157],loadComponent: () =>import('./components/Historical/zero-hours-job-data/zero-hours-job-data').then((m) => m.ZeroHoursJobDataComponent)},
+      {path: 'new-zero-hours',data: [159],loadComponent: () =>import('./components/Reports/new-zero-hours/new-zero-hours').then(m => m.NewZeroHoursComponent)},
       { path: 'job-data', data: [148], loadComponent: () => import('./components/Reports/job-data/job-data').then(m => m.JobData) },
       { path: 'jobcard-servicehistory-import', data: [146], loadComponent: () => import('./components/jobcard-servicehistory-import/jobcard-servicehistory-import').then(m => m.JobcardServicehistoryImport) },
       { path: 'stock-adjustment', component: StockAdjustment, data: [136] },

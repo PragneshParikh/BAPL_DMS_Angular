@@ -1,0 +1,221 @@
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h5 class="mb-0 fw-semibold">Zero Hours Job Data</h5>
+
+    <div class="d-flex gap-2">
+      <label class="btn btn-primary btn-sm mb-0" [class.disabled]="importing">
+        {{ importing ? 'Importing...' : 'Import Excel' }}
+        <input type="file" accept=".xlsx,.xls,.csv" hidden (change)="onFileSelected($event)" [disabled]="importing" />
+      </label>
+
+      <button type="button" class="btn btn-success btn-sm" (click)="exportExcel()" [disabled]="loading || totalRecords === 0">
+        Export Excel
+      </button>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body py-2">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3" *ngIf="isAdmin">
+          <label class="form-label small mb-1">Dealer</label>
+          <select class="form-select form-select-sm" [(ngModel)]="dealerCode">
+            <option value="">All Dealers</option>
+            <option *ngFor="let d of dealers" [value]="d.dealerCode">
+              {{ d.dealerCode }} - {{ d.dealerName }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label small mb-1">From Date (Job Date)</label>
+          <input type="date" class="form-control form-control-sm" [(ngModel)]="fromDate" />
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label small mb-1">To Date (Job Date)</label>
+          <input type="date" class="form-control form-control-sm" [(ngModel)]="toDate" />
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label small mb-1">Search</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Job No, Chassis No, Party, Model..."
+            [(ngModel)]="searchText"
+            (keyup.enter)="search(true)"
+          />
+        </div>
+
+        <div class="col-md-2 d-flex gap-1">
+          <button type="button" class="btn btn-primary btn-sm" (click)="search(true)" [disabled]="loading">
+            {{ loading ? 'Loading...' : 'Search' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover table-sm align-middle mb-0 text-nowrap">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Comp Name</th>
+            <th>Dealer Code</th>
+            <th>Dealer State</th>
+            <th>Job Date</th>
+            <th>Job No</th>
+            <th>Job Category</th>
+            <th>FFR Per%</th>
+            <th>Doc No</th>
+            <th>Doc Date</th>
+            <th>Doc Type</th>
+            <th>Job Status</th>
+            <th>Location</th>
+            <th>Model</th>
+            <th>Brand Name</th>
+            <th>Party Name</th>
+            <th>Party Mobile</th>
+            <th>Supervisor</th>
+            <th>Technician</th>
+            <th>KMS</th>
+            <th>Service Head</th>
+            <th>Job Type</th>
+            <th>Reg No</th>
+            <th>Vehicle Type</th>
+            <th>Engine No</th>
+            <th>Chassis No</th>
+            <th>Expected delivery date</th>
+            <th>Proforma Date</th>
+            <th>Invoice Date</th>
+            <th>Estimated Job expenses</th>
+            <th>Labour hours</th>
+            <th>Parts</th>
+            <th>Accessory</th>
+            <th>Oil</th>
+            <th>Labour</th>
+            <th>Outside Work</th>
+            <th>Total W/O Tax</th>
+            <th>GST_Amnt</th>
+            <th>IGST_Amnt</th>
+            <th>Net Total</th>
+            <th>In Time</th>
+            <th>Close Time</th>
+            <th>Close Date</th>
+            <th>Copn_No</th>
+            <th>sale_date</th>
+            <th>Battery_SerialNo1</th>
+            <th>Battery_SerialNo2</th>
+            <th>Battery_SerialNo3</th>
+            <th>Battery_SerialNo4</th>
+            <th>Battery_SerialNo5</th>
+            <th>Battery_SerialNo6</th>
+            <th>IndividualAH_Battery1</th>
+            <th>IndividualAH_Battery2</th>
+            <th>IndividualAH_Battery3</th>
+            <th>IndividualAH_Battery4</th>
+            <th>IndividualAH_Battery5</th>
+            <th>IndividualAH_Battery6</th>
+            <th>Charger No</th>
+            <th>Controller No</th>
+            <th>Converter</th>
+            <th>Create Through</th>
+            <th>Zone Name</th>
+            <th>UniqueId</th>
+            <th>Dealer Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="loading">
+            <td colspan="64" class="text-center py-4">Loading records...</td>
+          </tr>
+          <tr *ngIf="!loading && rows.length === 0">
+            <td colspan="64" class="text-center py-4 text-muted">No records found.</td>
+          </tr>
+          <tr *ngFor="let r of rows; let i = index">
+            <td>{{ (pageIndex - 1) * pageSize + i + 1 }}</td>
+            <td>{{ r.compName || '-' }}</td>
+            <td>{{ r.dealerCode || '-' }}</td>
+            <td>{{ r.dealerState || '-' }}</td>
+            <td>{{ r.jobDate ? (r.jobDate | date:'dd-MM-yyyy') : '-' }}</td>
+            <td class="fw-semibold">{{ r.jobNo || '-' }}</td>
+            <td>{{ r.jobCategory || '-' }}</td>
+            <td class="text-end">{{ r.ffrPer ?? '-' }}</td>
+            <td>{{ r.docNo || '-' }}</td>
+            <td>{{ r.docDate ? (r.docDate | date:'dd-MM-yyyy') : '-' }}</td>
+            <td>{{ r.docType || '-' }}</td>
+            <td>{{ r.jobStatus || '-' }}</td>
+            <td>{{ r.location || '-' }}</td>
+            <td>{{ r.model || '-' }}</td>
+            <td>{{ r.brandName || '-' }}</td>
+            <td>{{ r.partyName || '-' }}</td>
+            <td>{{ r.partyMobile || '-' }}</td>
+            <td>{{ r.supervisor || '-' }}</td>
+            <td>{{ r.technician || '-' }}</td>
+            <td class="text-end">{{ r.kms ?? '-' }}</td>
+            <td>{{ r.serviceHead || '-' }}</td>
+            <td>{{ r.jobType || '-' }}</td>
+            <td>{{ r.regNo || '-' }}</td>
+            <td>{{ r.vehicleType || '-' }}</td>
+            <td>{{ r.engineNo || '-' }}</td>
+            <td>{{ r.chassisNo || '-' }}</td>
+            <td>{{ r.expectedDeliveryDate ? (r.expectedDeliveryDate | date:'dd-MM-yyyy') : '-' }}</td>
+            <td>{{ r.proformaDate ? (r.proformaDate | date:'dd-MM-yyyy') : '-' }}</td>
+            <td>{{ r.invoiceDate ? (r.invoiceDate | date:'dd-MM-yyyy') : '-' }}</td>
+            <td class="text-end">{{ r.estimatedJobExpenses != null ? (r.estimatedJobExpenses | number:'1.2-2') : '-' }}</td>
+            <td class="text-end">{{ r.labourHours ?? '-' }}</td>
+            <td class="text-end">{{ r.parts != null ? (r.parts | number:'1.2-2') : '-' }}</td>
+            <td class="text-end">{{ r.accessory != null ? (r.accessory | number:'1.2-2') : '-' }}</td>
+            <td class="text-end">{{ r.oil != null ? (r.oil | number:'1.2-2') : '-' }}</td>
+            <td class="text-end">{{ r.labour != null ? (r.labour | number:'1.2-2') : '-' }}</td>
+            <td class="text-end">{{ r.outsideWork != null ? (r.outsideWork | number:'1.2-2') : '-' }}</td>
+            <td class="text-end">{{ r.totalWoTax != null ? (r.totalWoTax | number:'1.2-2') : '-' }}</td>
+            <td class="text-end">{{ r.gstAmnt != null ? (r.gstAmnt | number:'1.2-2') : '-' }}</td>
+            <td class="text-end">{{ r.igstAmnt != null ? (r.igstAmnt | number:'1.2-2') : '-' }}</td>
+            <td class="text-end">{{ r.netTotal != null ? (r.netTotal | number:'1.2-2') : '-' }}</td>
+            <td>{{ r.inTime || '-' }}</td>
+            <td>{{ r.closeTime || '-' }}</td>
+            <td>{{ r.closeDate ? (r.closeDate | date:'dd-MM-yyyy') : '-' }}</td>
+            <td>{{ r.copnNo || '-' }}</td>
+            <td>{{ r.saleDate ? (r.saleDate | date:'dd-MM-yyyy') : '-' }}</td>
+            <td>{{ r.batterySerialNo1 || '-' }}</td>
+            <td>{{ r.batterySerialNo2 || '-' }}</td>
+            <td>{{ r.batterySerialNo3 || '-' }}</td>
+            <td>{{ r.batterySerialNo4 || '-' }}</td>
+            <td>{{ r.batterySerialNo5 || '-' }}</td>
+            <td>{{ r.batterySerialNo6 || '-' }}</td>
+            <td>{{ r.individualAhBattery1 || '-' }}</td>
+            <td>{{ r.individualAhBattery2 || '-' }}</td>
+            <td>{{ r.individualAhBattery3 || '-' }}</td>
+            <td>{{ r.individualAhBattery4 || '-' }}</td>
+            <td>{{ r.individualAhBattery5 || '-' }}</td>
+            <td>{{ r.individualAhBattery6 || '-' }}</td>
+            <td>{{ r.chargerNo || '-' }}</td>
+            <td>{{ r.controllerNo || '-' }}</td>
+            <td>{{ r.converter || '-' }}</td>
+            <td>{{ r.createThrough || '-' }}</td>
+            <td>{{ r.zoneName || '-' }}</td>
+            <td>{{ r.uniqueId || '-' }}</td>
+            <td>{{ r.dealerType || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center py-2">
+      <small class="text-muted">Total Records: {{ totalRecords | number }}</small>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-outline-secondary btn-sm" (click)="changePage(pageIndex - 1)" [disabled]="pageIndex <= 1">
+          Prev
+        </button>
+        <span class="small">Page {{ pageIndex }} of {{ totalPages }}</span>
+        <button class="btn btn-outline-secondary btn-sm" (click)="changePage(pageIndex + 1)" [disabled]="pageIndex >= totalPages">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
