@@ -292,8 +292,9 @@
                 <input class="form-control form-control-sm" [(ngModel)]="f.customerCity" [readonly]="ro || vehicleLocked" [class.bg-light]="ro || vehicleLocked">
               </div>
               <div class="col-md-4">
-                <label>State</label>
-                <input class="form-control form-control-sm" [(ngModel)]="f.customerState" [readonly]="ro || vehicleLocked" [class.bg-light]="ro || vehicleLocked">
+                <label>State <span class="text-danger" *ngIf="customerStateEditable">*</span></label>
+                <input class="form-control form-control-sm" [(ngModel)]="f.customerState" [readonly]="!customerStateEditable"
+                  [class.bg-light]="!customerStateEditable" [class.is-invalid]="submitted && customerStateEditable && !f.customerState?.trim()">
               </div>
               <div class="col-md-4">
                 <label>Controller No.</label>

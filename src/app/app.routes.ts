@@ -343,8 +343,9 @@ export const routes: Routes = [
       { path: 'stock-adjustment', component: StockAdjustment, data: [136] },
       { path: 'stock-bill-list', component: StockBillListComponent, data: [136] },
       { path: 'stock-adjustment-report', component: StockAdjustmentReport, data: [136] },
-      { path: 'parts-d2d', data: [0], loadComponent: () => import('./components/parts-d2d/parts-d2d').then(m => m.PartsD2D) },
-      { path: 'parts-d2d-transactions', data: [0], loadComponent: () => import('./components/parts-d2d/parts-d2d-transactions').then(m => m.PartsD2DTransactions) },
+      { path: 'parts-d2d', data: [156], loadComponent: () => import('./components/parts-d2d/parts-d2d').then(m => m.PartsD2D) },
+      { path: 'parts-d2d-transactions', data: [156], loadComponent: () => import('./components/parts-d2d/parts-d2d-transactions').then(m => m.PartsD2DTransactions) },
+     { path: 'parts-d2d-report', data: [158], loadComponent: () => import('./components/Reports/parts-d2d-report/parts-d2d-report').then(m => m.PartsD2DReport) },
       { path: 'bg-free-service', data: [145], loadComponent: () => import('./components/bg-free-service/bg-free-service').then(m => m.BgFreeService) },
     ]
   },

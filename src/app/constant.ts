@@ -102,11 +102,14 @@ export const CashTypeOptions = [
     { name: 'UPI', value: 'UPI' },
 ];
 
+export const FOC_ISSUE_TYPE_ID = 5;
+
 export const IssueTypes = [
     { id: 1, name: 'Paid' },
     { id: 2, name: 'U/W' },
     { id: 3, name: 'FSC' },
-    { id: 4, name: 'Goodwill' }
+    { id: 4, name: 'Goodwill' },
+    { id: FOC_ISSUE_TYPE_ID, name: 'FOC' }
 ]
 
 export const userRole = [

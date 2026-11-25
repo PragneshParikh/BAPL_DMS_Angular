@@ -257,6 +257,7 @@ export interface B2BJobCardUpdateRequest {
   priority?: string | null;
   expectedDeliveryAt?: string | null;
   assignedTechnicianName?: string | null;
+  customerState?: string | null;
 }
 
 export interface B2BSaveResult {

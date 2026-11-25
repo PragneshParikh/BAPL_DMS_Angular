@@ -354,10 +354,10 @@
                     </div>
 
                     <div class="col-md-2">
-                        <label class="form-label">Issue Type</label>
+                        <label class="form-label">Issue Type <span class="text-danger">*</span></label>
                         <select class="form-select form-select-sm" [(ngModel)]="selectedIssueType">
 
-                            <option [ngValue]=null>--Select Cash--</option>
+                            <option [ngValue]="null">--Select Issue Type--</option>
 
                             <option *ngFor="let item of IssueType" [ngValue]="item.id">
                                 {{ item.name }}
@@ -461,19 +461,15 @@
                         </div>
 
 
-                        <!-- Issue Type -->
-                        <!-- <div class="col-md-2">
+                        <div class="col-md-2">
                             <label class="form-label">Issue Type</label>
-                            <select class="form-select form-select-sm" [(ngModel)]="selectedIssueType"
-                                [disabled]="isPartEditMode">
-
-                                <option [ngValue]=null>--Select Cash--</option>
-
+                            <select class="form-select form-select-sm" [(ngModel)]="selectedPartIssueType">
+                                <option [ngValue]="null">--Select Issue Type--</option>
                                 <option *ngFor="let item of IssueType" [ngValue]="item.id">
                                     {{ item.name }}
                                 </option>
                             </select>
-                        </div> -->
+                        </div>
                         <!-- Button -->
                         <div class="col-md-1 d-grid">
                             <!-- CHANGED: was `isPartEditMode ? updatePart() : ''` —
@@ -579,6 +575,8 @@
                                         ? 0.00
                                         : item.issuetypeName === 'FSC'
                                         ? 0.00
+                                        : item.issuetypeName === 'FOC'
+                                        ? 0.00
                                         : item.netAmount | number:'1.2-2'}}
                                         <!-- {{item.netAmount | number:'1.2-2'}} -->
                                     </td>
@@ -589,7 +587,7 @@
 
                                     <td class="text-end">
                                         {{
-                                        item.issuetypeName === 'U/W'
+                                        (item.issuetypeName === 'U/W' || item.issuetypeName === 'FOC')
                                         ? item.rate
                                         : item.issuetypeName === 'FSC'
                                         ? item.waveRate
@@ -682,6 +680,8 @@
                                     ? 0.00
                                     : item.issuetypeName === 'FSC'
                                     ? 0.00
+                                    : item.issuetypeName === 'FOC'
+                                    ? 0.00
                                     : item.igstAmount | number:'1.2-2'
                                     }}
                                 </td>
@@ -689,11 +689,13 @@
                                     ? 0.00
                                     : item.issuetypeName === 'FSC'
                                     ? 0.00
+                                    : item.issuetypeName === 'FOC'
+                                    ? 0.00
                                     : item.netAmount | number:'1.2-2'}}</td>
                                 <td>{{item.issuetypeName}}</td>
                                 <td>
                                     {{
-                                    item.issuetypeName === 'U/W'
+                                    (item.issuetypeName === 'U/W' || item.issuetypeName === 'FOC')
                                     ? item.partRate
                                     : item.issuetypeName === 'FSC'
                                     ? item.fscRate
@@ -830,6 +832,9 @@
                 </div>
 
                 <div class="d-flex gap-2">
+                    <span *ngIf="selectedJobCard?.recordType === 'B2B' && !b2bTaxStateReady" class="text-warning small">
+                        Dealer and customer states are required before saving this B2B Repair Bill.
+                    </span>
                     <button *ngIf="!isEditMode && selectedJobCard?.jobCardHeader?.jobtype != 1 && canCreate"
                         class="btn btn-primary btn-sm" (click)="saveRepairBill()">
                         <i class="ri-save-line"></i> Save As Performa
@@ -950,14 +955,14 @@
                             <tr>
 
                                 <th>Sr No.</th>
+                                <th>Job Type</th>
                                 <th>Job No</th>
                                 <th>Job Date</th>
                                 <th>Location</th>
-                                <th>Job Type/Service Name</th>
+                                <th>Job Type / Service</th>
                                 <th>Party Name</th>
                                 <th>Regn./Chassis No.</th>
-                                <th>Vehicle Type</th>
-                                <th>Job Source</th>
+                                <th>Vehicle Model</th>
                                 <th>Action</th>
 
                             </tr>
@@ -970,12 +975,14 @@
 
                                 <td>{{ i + 1 }}</td>
 
+                                <td>{{ item.recordType }}</td>
+
                                 <td>
-                                    {{ item.jobCardHeader?.jobNo }}
+                                    {{ item.recordType === 'B2B' ? item.jobNo : item.jobCardHeader?.jobNo }}
                                 </td>
 
                                 <td>
-                                    {{ item.jobCardHeader?.jobinDate | date:'dd-MM-yyyy' }}
+                                    {{ (item.recordType === 'B2B' ? item.jobDate : item.jobCardHeader?.jobinDate) | date:'dd-MM-yyyy' }}
                                 </td>
 
                                 <td>
@@ -994,20 +1001,16 @@
 
                                 <td>
                                     <b>R:</b>
-                                    {{ item.jobCardCustomer?.registerNo }}
+                                    {{ item.recordType === 'B2B' ? item.registerNo : item.jobCardCustomer?.registerNo }}
 
                                     <br>
 
                                     <b>C:</b>
-                                    {{ item.jobCardCustomer?.chassisNo }}
+                                    {{ item.recordType === 'B2B' ? item.chassisNo : item.jobCardCustomer?.chassisNo }}
                                 </td>
 
                                 <td>
-                                    External
-                                </td>
-
-                                <td>
-                                    {{ item.jobsource }}
+                                    {{ (item.recordType === 'B2B' ? item.modelName : item.jobCardCustomer?.modelName) || '-' }}
                                 </td>
 
                                 <td>

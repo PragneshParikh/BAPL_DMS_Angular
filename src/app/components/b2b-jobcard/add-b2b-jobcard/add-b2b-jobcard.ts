@@ -203,6 +203,11 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
 
   get ro(): boolean { return this.mode === 'view'; }
 
+  get customerStateEditable(): boolean {
+    return (!this.ro && (!this.vehicleLocked || !this.f.customerState?.trim()))
+      || (this.ro && this.editable && !this.f.customerState?.trim());
+  }
+
   toggle(key: string): void {
     this.isOpen[key] = !this.isOpen[key];
   }
@@ -685,6 +690,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
       if (!(this.f.customerName || '').trim()) return 'Customer Name is required.';
       if ((this.f.customerMobile || '').replace(/\D/g, '').length !== 10) return 'Mobile No. must have 10 digits.';
     }
+    if (!this.f.customerState?.trim()) return 'Customer State is required for tax calculation.';
     const b = this.f.batteryLevelAtCheckIn;
     if (b !== null && b !== undefined && (b as any) !== '' && (Number(b) < 0 || Number(b) > 100)) return 'Battery level must be 0 to 100 %.';
     if (!this.estDelDate || !this.estDelTime) return 'Est. Delivery Date and Time are required.';
@@ -812,6 +818,10 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
 
   async saveEdit(): Promise<void> {
     if (!this.detail || !this.editable || this.saving) return;
+    if (!this.f.customerState?.trim()) {
+      this.toaster.show('Customer State is required for tax calculation.', { classname: 'bg-danger text-white', delay: 4000 });
+      return;
+    }
     if (!this.estDelDate || !this.estDelTime) {
       this.toaster.show('Est. Delivery Date and Time are required.', { classname: 'bg-danger text-white', delay: 4000 });
       return;
@@ -826,7 +836,8 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
       const res = await firstValueFrom(this.api.update(this.detail.id, {
         priority: this.edit.priority || null,
         expectedDeliveryAt: new Date(`${this.estDelDate}T${this.estDelTime}`).toISOString(),
-        assignedTechnicianName: this.edit.assignedTechnicianName ?? ''
+        assignedTechnicianName: this.edit.assignedTechnicianName ?? '',
+        customerState: this.f.customerState.trim()
       }));
       this.toaster.show(res?.message || 'B2B Job Card updated.', { classname: 'bg-success text-white', delay: 4000 });
       this.loadDetail();

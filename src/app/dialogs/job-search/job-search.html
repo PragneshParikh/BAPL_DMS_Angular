@@ -210,24 +210,28 @@
                                                 <th>Job No</th>
                                                 <th>Job Date</th>
                                                 <th>Location</th>
-                                                <th>Job Type/Service Name</th>
+                                                <th>{{ sourceType === 'material-transfer' ? 'Job Type' : 'Job Type/Service Name' }}</th>
                                                 <th>Party Name</th>
                                                 <th>Regn./Chassis No.</th>
-                                                <th>Vehicle Type</th>
-                                                <th>Job Source</th>
+                                                <th>Vehicle Model</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr *ngFor="let item of jobList; let i = index">
-                                                <td>{{ i + 1 }}</td>
+                                                <td>{{ (page - 1) * pageSize + i + 1 }}</td>
                                                 <td> {{ item.jobNo }} </td>
                                                 <td> {{ item.jobDate | date:'dd-MM-yyyy' }} </td>
                                                <td> {{ item.locationName }} </td>
                                                 <td>
-                                                    {{ item.jobType }}
-                                                    <br>
-                                                    {{ item.serviceType }}
+                                                    <ng-container *ngIf="sourceType === 'material-transfer'; else jobTypeAndService">
+                                                        {{ item.recordType }}
+                                                    </ng-container>
+                                                    <ng-template #jobTypeAndService>
+                                                        {{ item.jobType }}
+                                                        <br>
+                                                        {{ item.serviceType }}
+                                                    </ng-template>
                                                 </td>
                                                 <td> {{ item.customerName }} </td>
                                                 <td>
@@ -237,19 +241,19 @@
                                                     <b>C:</b>
                                                     {{ item.chasisNo }}
                                                 </td>
-                                                <td *ngIf="true"> External </td>
-                                                <td *ngIf="true"> {{ item.jobsource }} </td>
+                                                <td>{{ item.modelName || item.jobCardCustomer?.modelName || '-' }}</td>
                                                 <td>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                                    <button *ngIf="item.canSelect !== false" type="button" class="btn btn-sm btn-outline-primary"
                                                         (click)="onSelectJobType(item)">
                                                         Select
                                                     </button>
+                                                    <span *ngIf="item.canSelect === false" class="text-muted">View only</span>
                                                 </td>
                                             </tr>
 
                                             <!-- No Data -->
                                             <tr *ngIf="jobList.length === 0">
-                                                <td colspan="10" class="text-center text-muted py-3">
+                                                <td colspan="9" class="text-center text-muted py-3">
                                                     No Data Available
                                                 </td>
                                             </tr>

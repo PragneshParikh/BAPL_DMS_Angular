@@ -10,7 +10,7 @@ import { LoaderService } from '../../../core/services/loader';
 import { MaterialTransferService } from '../../../core/services/material-transfer';
 import { ItemMasterService } from '../../../core/services/item-master-service';
 import { ToastService } from '../../../shared/toaster/toast-service';
-import { IssueTypes } from '../../../constant';
+import { FOC_ISSUE_TYPE_ID, IssueTypes } from '../../../constant';
 import { LocationMasterService } from '../../../core/services/location-master-service';
 import { StorageService } from '../../../core/services/storage';
 import { JobCardService } from '../../../core/services/job-card-service';
@@ -21,6 +21,8 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { PrefixService } from '../../../core/services/prefix';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
 import { Server } from 'http';
+import { B2BJobcardService } from '../../b2b-jobcard/services/b2b-jobcard.service';
+import { DealerService } from '../../../core/services/dealer-service';
 
 @Component({
   selector: 'app-material-transfer-detail',
@@ -39,7 +41,9 @@ import { Server } from 'http';
 })
 export class MaterialTransferDetail implements OnInit {
 
-  issueTypes = IssueTypes.filter(x => x.id === 1 || x.id === 2);
+  issueTypes = IssueTypes.filter(x =>
+    x.id === 1 || x.id === 2 || x.id === FOC_ISSUE_TYPE_ID
+  );
   lstTechnician = TechnicianList;
 
   readonly SUBMENU_ID = 29;
@@ -106,6 +110,12 @@ export class MaterialTransferDetail implements OnInit {
   }
 
   private jobId: number = 0;
+  private b2bJobCardId: string | null = null;
+  isB2BTaxStateReady: boolean = true;
+  get isB2BSelection(): boolean {
+    return this.b2bJobCardId !== null;
+  }
+
   itemList: any[] = [];
   items: any[] = [];
   lstLocation: any[] = [];
@@ -131,7 +141,9 @@ export class MaterialTransferDetail implements OnInit {
     private storageService: StorageService,
     private jobCardService: JobCardService,
     private prefixMasterService: PrefixService,
-    private menuAccess: MenuAccessService
+    private menuAccess: MenuAccessService,
+    private b2bJobcardService: B2BJobcardService,
+    private dealerService: DealerService
   ) {
     this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
     this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
@@ -173,6 +185,7 @@ export class MaterialTransferDetail implements OnInit {
         this.itemList = (res || []).filter((item: any) =>
           !(item.itemcode || '').toUpperCase().includes('EW')
         );
+        this.hydrateB2BMaterialTransferRows();
       },
       error: (err) => {
         this.loader.hide();
@@ -198,10 +211,14 @@ export class MaterialTransferDetail implements OnInit {
 
   getMaterialTransferList(jobId: Number, dealerCode: string | null) {
     this.loader.show();
-    this.materialTransferService.getMaterialTransferByJobId(jobId).subscribe({
+    const request = this.b2bJobCardId
+      ? this.materialTransferService.getMaterialTransferByB2BJobCardId(this.b2bJobCardId)
+      : this.materialTransferService.getMaterialTransferByJobId(jobId);
+    request.subscribe({
       next: (res: any) => {
         this.items = [];
         if (res && res.length > 0) {
+          this.isEdit = true;
 
           const materialPrefix = res[0].materialPrefix ?? '';
           const materialIssueNumber = res[0].materialIssueNumber;
@@ -221,16 +238,22 @@ export class MaterialTransferDetail implements OnInit {
                 : ''
           };
 
-          this.items = res.map((item: any) => {
-            item.mrp = (
-              Number(item.custprice) *
+          this.items = res.map((item: any) => ({
+            ...item,
+            itemcode: item.itemcode ?? item.itemCode,
+            itemdesc: item.itemdesc ?? item.itemDesc,
+            mrp: item.mrp ?? (
+              Number(item.custprice ?? item.itemRate ?? 0) *
               (item.quantity || 0)
-            ).toFixed(2);
-
-            return item;
-          });
+            ).toFixed(2),
+            amount: Number(item.issueType) === FOC_ISSUE_TYPE_ID
+              ? 0
+              : (item.amount ?? item.mrp ?? (Number(item.itemRate || 0) * (item.quantity || 0)))
+          }));
+          this.hydrateB2BMaterialTransferRows();
 
         } else {
+            this.isEdit = false;
           if (dealerCode && dealerCode !== '') {
             this.getMaterialPrefix(dealerCode);
           }
@@ -250,6 +273,14 @@ export class MaterialTransferDetail implements OnInit {
   }
 
   onSubmit(form: any) {
+    if (this.isB2BSelection && !this.isB2BTaxStateReady) {
+      this.toast.show('Dealer and customer states are required to calculate tax before saving this B2B Material Transfer.', {
+        classname: 'bg-warning text-dark',
+        delay: 7000
+      });
+      return;
+    }
+
     if (!form.valid) {
       return;
     }
@@ -269,7 +300,13 @@ export class MaterialTransferDetail implements OnInit {
         error: (err) => {
           this.loader.hide();
           console.error(err);
-          this.toast.show('Failed to load items. Please try again later.', { classname: 'bg-danger text-light', delay: 5000 });
+          const responseMessage = typeof err?.error === 'string'
+            ? err.error
+            : err?.error?.message || err?.error?.detail;
+          this.toast.show(responseMessage || 'Material Transfer could not be saved. Please try again later.', {
+            classname: 'bg-danger text-light',
+            delay: 7000
+          });
         }
       })
     }
@@ -342,6 +379,8 @@ export class MaterialTransferDetail implements OnInit {
 
     return {
       ...item,
+      jobId: this.b2bJobCardId ? null : this.jobId,
+      b2bJobCardId: this.b2bJobCardId,
       itemRate: toNum(item.itemRate),
       mrp: toNum(item.mrp),
       quantity: toNum(item.quantity),
@@ -358,7 +397,46 @@ export class MaterialTransferDetail implements OnInit {
     };
   }
 
+  private hydrateB2BMaterialTransferRows(): void {
+    if (!this.b2bJobCardId || !this.itemList.length || !this.items.length) {
+      return;
+    }
+
+    this.items = this.items.map((row: any) => {
+      const itemMaster = this.itemList.find(
+        (item: any) => item.itemcode === row.itemcode
+      );
+      if (!itemMaster) {
+        return row;
+      }
+
+      const cgst = Number(itemMaster.cgstPercentage || 0);
+      const sgst = Number(itemMaster.sgstPercentage || 0);
+      const igst = Number(itemMaster.igstPercentage || 0);
+      const taxableAmount = Number(row.itemRate || 0) * Number(row.quantity || 0);
+
+      return {
+        ...row,
+        hsncode: row.hsncode || itemMaster.hsncode,
+        cgst: this.formData.isSameLocation ? cgst : 0,
+        sgst: this.formData.isSameLocation ? sgst : 0,
+        igst: this.formData.isSameLocation ? 0 : igst,
+        amount: row.amount ?? row.mrp ?? (Number(row.itemRate || 0) * Number(row.quantity || 0)),
+        cgstAmount: row.cgstAmount ?? (this.formData.isSameLocation ? Number((taxableAmount * cgst / 100).toFixed(2)) : 0),
+        sgstAmount: row.sgstAmount ?? (this.formData.isSameLocation ? Number((taxableAmount * sgst / 100).toFixed(2)) : 0),
+        igstAmount: row.igstAmount ?? (!this.formData.isSameLocation ? Number((taxableAmount * igst / 100).toFixed(2)) : 0)
+      };
+    });
+  }
+
   onAddItem() {
+    if (this.isB2BSelection && !this.isB2BTaxStateReady) {
+      this.toast.show('Dealer and customer states are required to calculate tax before adding items.', {
+        classname: 'bg-warning text-dark',
+        delay: 7000
+      });
+      return;
+    }
 
     const _existingItem = this.items.filter(x => x.itemcode === this.newItem.itemcode);
 
@@ -396,6 +474,7 @@ export class MaterialTransferDetail implements OnInit {
       dealerLocation: this.lstLocation.filter(x => x.loccode === this.formData.location)[0].locname,
       materialPrefix: this.formData.prefix,
       materialissueNumber: this.formData.issueNumber,
+      b2bJobCardId: this.b2bJobCardId,
       updatedBy: this.storageService.getUserId(),
       updatedDate: new Date()
     };
@@ -413,23 +492,24 @@ export class MaterialTransferDetail implements OnInit {
       const finalPrice = Number(this.items[index].itemRate) * this.newItem.quantity * (1 + totalGST / 100);
       const taxDetails = this.calculateGST(finalPrice, totalGST);
       const totalGSTAmount = Number(taxDetails.gstAmount);
+      const isFoc = Number(itemToSave.issueType) === FOC_ISSUE_TYPE_ID;
 
       this.newItem.itemRate = Number(taxDetails.basePrice).toFixed(2);
 
       //itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
-      itemToSave.amount = Number(taxDetails.finalPrice).toFixed(2);
+      itemToSave.amount = isFoc ? '0.00' : Number(taxDetails.finalPrice).toFixed(2);
 
       itemToSave.mrp = this.items[index].mrp;
 
-      itemToSave.cgstAmount = this.formData.isSameLocation && totalGST > 0
+      itemToSave.cgstAmount = !isFoc && this.formData.isSameLocation && totalGST > 0
         ? ((Number(this.items[index].cgst) / totalGST) * totalGSTAmount).toFixed(2)
         : '0.00';
 
-      itemToSave.sgstAmount = this.formData.isSameLocation && totalGST > 0
+      itemToSave.sgstAmount = !isFoc && this.formData.isSameLocation && totalGST > 0
         ? ((Number(this.items[index].sgst) / totalGST) * totalGSTAmount).toFixed(2)
         : '0.00';
 
-      itemToSave.igstAmount = !this.formData.isSameLocation && totalGST > 0
+      itemToSave.igstAmount = !isFoc && !this.formData.isSameLocation && totalGST > 0
         ? totalGSTAmount.toFixed(2)
         : '0.00';
 
@@ -453,6 +533,7 @@ export class MaterialTransferDetail implements OnInit {
 
       const taxDetails = this.calculateGST(Number(selectedItem.custprice), totalGST);
       const totalGSTAmount = Number(taxDetails.gstAmount);
+      const isFoc = Number(itemToSave.issueType) === FOC_ISSUE_TYPE_ID;
 
       // this.newItem.amount = Number(taxDetails.basePrice).toFixed(2);
       // this.newItem.mrp = taxDetails.finalPrice;
@@ -460,21 +541,21 @@ export class MaterialTransferDetail implements OnInit {
       // itemToSave.amount = Number(taxDetails.basePrice).toFixed(2);
       // itemToSave.mrp = taxDetails.finalPrice;
          
-      this.newItem.amount = taxDetails.finalPrice;
+      this.newItem.amount = isFoc ? '0.00' : taxDetails.finalPrice;
        this.newItem.mrp = taxDetails.finalPrice;
 
-       itemToSave.amount = taxDetails.finalPrice;
+       itemToSave.amount = isFoc ? '0.00' : taxDetails.finalPrice;
        itemToSave.mrp = taxDetails.finalPrice;
 
-      itemToSave.cgstAmount = this.formData.isSameLocation && totalGST > 0
+      itemToSave.cgstAmount = !isFoc && this.formData.isSameLocation && totalGST > 0
         ? ((Number(this.newItem.cgst) / totalGST) * totalGSTAmount).toFixed(2)
         : '0.00';
 
-      itemToSave.sgstAmount = this.formData.isSameLocation && totalGST > 0
+      itemToSave.sgstAmount = !isFoc && this.formData.isSameLocation && totalGST > 0
         ? ((Number(this.newItem.sgst) / totalGST) * totalGSTAmount).toFixed(2)
         : '0.00';
 
-      itemToSave.igstAmount = !this.formData.isSameLocation && totalGST > 0
+      itemToSave.igstAmount = !isFoc && !this.formData.isSameLocation && totalGST > 0
         ? totalGSTAmount.toFixed(2)
         : '0.00';
 
@@ -482,8 +563,7 @@ export class MaterialTransferDetail implements OnInit {
 
       itemToSave.id = this.tempIdCounter--;
 
-      itemToSave.jobId = this.jobId;
-
+      itemToSave.jobId = this.b2bJobCardId ? null : this.jobId;
       itemToSave.batchClosingQty = this.newItem.batchClosingQty - this.newItem.quantity;
 
       itemToSave.createdBy = this.storageService.getUserId();
@@ -511,12 +591,66 @@ export class MaterialTransferDetail implements OnInit {
     modalRef.result.then(
       (result) => {
         if (result && result.isAccepted) {
-          this.jobId = result.jobDetail.id;
-          this.getMaterialTransferList(this.jobId, result.jobDetail.dealerCode);
-          this.getJobCardById(this.jobId);
-          this.getLocationList(result.jobDetail.dealerCode, 2);
-          this.getJobCardStatus(this.jobId);
-          this.getItemList(result.jobDetail);
+          if (result.jobDetail.recordType === 'B2B') {
+            this.jobId = 0;
+            this.b2bJobCardId = result.jobDetail.id;
+            this.isB2BTaxStateReady = false;
+            this.jobCardStatus = true;
+            this.items = [];
+            this.isEdit = false;
+            this.getMaterialTransferList(0, result.jobDetail.dealerCode);
+            this.getLocationList(result.jobDetail.dealerCode, 2);
+            this.getItemList(result.jobDetail);
+            this.b2bJobcardService.getById(result.jobDetail.id).subscribe({
+              next: (detail) => {
+                this.formData = {
+                  ...this.formData,
+                  jobNo: detail.jobCardNumber,
+                  OdoMeter: detail.odometerAtCheckIn,
+                  date: detail.createdAt?.slice(0, 10) || '',
+                  technician: detail.technicianName,
+                  location: detail.serviceLocationCode || '',
+                  isSameLocation: false
+                };
+                this.dealerService.getByDealerCode(detail.dealerCode || result.jobDetail.dealerCode).subscribe({
+                  next: (dealerResult: any) => {
+                    const dealerState = String(dealerResult?.data?.state || '').trim().toLowerCase();
+                    const customerState = String(detail.customer?.state || '').trim().toLowerCase();
+                    this.isB2BTaxStateReady = Boolean(dealerState && customerState);
+                    if (this.isB2BTaxStateReady) {
+                      this.formData.isSameLocation = dealerState === customerState;
+                      this.jobCardStatus = false;
+                      this.hydrateB2BMaterialTransferRows();
+                    }
+                  },
+                  error: (err) => {
+                    console.error('Error fetching dealer state for B2B material transfer', err);
+                    this.isB2BTaxStateReady = false;
+                    this.toast.show('Failed to load dealer state; tax cannot be calculated for this B2B job.', {
+                      classname: 'bg-danger text-light',
+                      delay: 7000
+                    });
+                  }
+                });
+              },
+              error: (err) => {
+                console.error('Error fetching B2B job card details', err);
+                this.toast.show('Failed to load B2B job card details.', {
+                  classname: 'bg-danger text-light',
+                  delay: 5000
+                });
+              }
+            });
+          } else {
+            this.b2bJobCardId = null;
+            this.isB2BTaxStateReady = true;
+            this.jobId = result.jobDetail.id;
+            this.getMaterialTransferList(this.jobId, result.jobDetail.dealerCode);
+            this.getJobCardById(this.jobId);
+            this.getLocationList(result.jobDetail.dealerCode, 2);
+            this.getJobCardStatus(this.jobId);
+            this.getItemList(result.jobDetail);
+          }
         }
       },
       (reason) => {
