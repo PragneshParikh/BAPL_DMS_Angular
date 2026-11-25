@@ -1,8 +1,8 @@
 // src\app\components\estimate\estimate.ts
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { EstimateService, JobTypeDropdownItem } from '../../core/services/estimate.service';
@@ -10,6 +10,7 @@ import { ReportService } from '../../core/services/report.service';
 import { LedgerMasterService } from '../../core/services/ledger-master';
 import { Observable } from 'rxjs';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import Swal from 'sweetalert2';
 
 interface PartyDetails {
   partyName: string;
@@ -64,8 +65,12 @@ export class Estimate implements OnInit {
 
   isSearching = false;
   isSaving = false;
+  isSendingEstimate = false;
   searchError = '';
   saveError = '';
+  saveSuccess = '';
+  emailError = '';
+  emailSuccess = '';
   customerFound = false;
 
   jobTypeList: JobTypeDropdownItem[] = [];
@@ -141,6 +146,7 @@ export class Estimate implements OnInit {
       customerState: [''],
       kms: [null],
       jobTypeId: [null],
+      estimateEmail: ['', Validators.email],
       details: this.fb.array([])
     });
   }
@@ -678,6 +684,7 @@ export class Estimate implements OnInit {
   onSave(): void {
     this.isSaving = true;
     this.saveError = '';
+    this.saveSuccess = '';
 
     const raw = this.form.getRawValue();
 
@@ -735,8 +742,14 @@ export class Estimate implements OnInit {
           // happens next — it closes the modal and refreshes its own list.
           this.saved.emit();
         } else {
-          alert(this.isEditMode ? 'Estimate updated successfully.' : `Estimate saved successfully (Id: ${result}).`);
-          this.router.navigate(['/estimate']);
+          if (!this.isEditMode) {
+            this.estimateId = Number(result);
+            this.isEditMode = true;
+          }
+          this.form.get('estimateEmail')?.setValue(raw.customerEmail || '');
+          this.saveSuccess = this.isEditMode
+            ? 'Estimate saved successfully. Enter an email to send the estimate PDF.'
+            : 'Estimate saved successfully.';
         }
       },
       error: (err) => {
@@ -746,6 +759,35 @@ export class Estimate implements OnInit {
     });
   }
 
+  onEmailEstimate(): void {
+    if (!this.estimateId) return;
+
+    const emailControl = this.form.get('estimateEmail');
+    emailControl?.markAsTouched();
+    if (!emailControl || emailControl.invalid) {
+      this.emailError = 'Enter a valid email address.';
+      this.emailSuccess = '';
+      return;
+    }
+
+    const recipient = emailControl.value.toString().trim();
+    this.isSendingEstimate = true;
+    this.emailError = '';
+    this.emailSuccess = '';
+
+    this.estimateService.emailEstimate(this.estimateId, recipient).subscribe({
+      next: () => {
+        this.isSendingEstimate = false;
+        this.emailSuccess = `Estimate PDF emailed successfully to ${recipient}.`;
+      },
+      error: (error: HttpErrorResponse) => {
+        this.isSendingEstimate = false;
+        console.error('Failed to email estimate PDF.', error);
+        const status = error.status > 0 ? ` (HTTP ${error.status})` : '';
+        this.emailError = `Unable to email the estimate PDF${status}.`;
+      }
+    });
+  }
 
     get partIndices(): number[] {
       return this.detailsArray.controls
@@ -758,9 +800,28 @@ export class Estimate implements OnInit {
         .map((_, i) => i)
         .filter(i => this.detailsArray.at(i).value.itemType === 'Labour');
     }
-  onCreateJobCard(): void {
+  async onCreateJobCard(): Promise<void> {
+    const result = await Swal.fire({
+      title: 'Select Job Card Type',
+      showDenyButton: true,
+      showCancelButton: false,
+      confirmButtonText: 'B2B',
+      denyButtonText: 'B2C',
+      buttonsStyling: false,
+      customClass: {
+        confirmButton: 'btn btn-primary me-2',
+        denyButton: 'btn btn-primary'
+      }
+    });
+
+    if (result.isConfirmed) {
+      await this.router.navigate(['/b2bjobcards/add']);
+      return;
+    }
+    if (!result.isDenied) return;
+
     const raw = this.form.getRawValue();
-    this.router.navigate(['/job-card-addForm', 'new'], {
+    await this.router.navigate(['/job-card-addForm', 'new'], {
       state: {
         fromEstimate: true,
         estimateId: this.estimateId,

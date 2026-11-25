@@ -108,6 +108,10 @@ import { RoleMenuRights } from './components/role-menu-rights/role-menu-rights';
 import { StockBillListComponent } from './components/Reports/stock-bill-list/stock-bill-list';
 import { StockAdjustment } from './components/stock-adjustment/stock-adjustment';
 import { StockAdjustmentReport } from './components/Reports/stock-adjustment-report/stock-adjustment-report';
+import { B2BJobcard } from './components/b2b-jobcard/b2b-jobcard';
+import { AddB2BJobcard } from './components/b2b-jobcard/add-b2b-jobcard/add-b2b-jobcard';
+import {PartsD2D} from './components/parts-d2d/parts-d2d';
+import { PartsD2DTransactions } from './components/parts-d2d/parts-d2d-transactions';
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./components/account/login/login').then(m => m.Login) },
   { path: 'forgot-password', loadComponent: () => import('./components/account/forgot-password/forgot-password').then(m => m.ForgotPassword) },
@@ -144,7 +148,11 @@ export const routes: Routes = [
       { path: 'vehicle-sale-bill/edit/:id', component: AddVehicleSaleBill, data: [27] },
       { path: 'vehicle-sale-bill/add', component: AddVehicleSaleBill, data: [27] },
       { path: 'vehicle-sale-bill', component: VehicleSaleBill, data: [27] },
-
+      // B2B Job Card (JobCardScanner database) - MenuMaster 160
+      { path: 'b2bjobcards', component: B2BJobcard, data: [160] },
+      { path: 'b2bjobcards/add', component: AddB2BJobcard, data: [160] },
+      { path: 'b2bjobcards/:id', component: AddB2BJobcard, data: [160] },
+      { path: 'b2b-jobcard', redirectTo: 'b2bjobcards', pathMatch: 'full' },
       { path: 'add-vehicle-sale-bill/delivery-certificate/:id', data: [22], loadComponent: () => import('./components/Reports/delivery-certificate/delivery-certificate').then(m => m.DeliveryCertificate) },
       { path: 'add-vehicle-sale-bill/performaInvoice/:saleBillNo', component: PerformaInvoice, data: [27] },
       { path: 'chassis-search', data: [39], loadComponent: () => import('../app/components/chassis-search/chassis-search').then(m => m.ChassisSearch) },
@@ -335,6 +343,8 @@ export const routes: Routes = [
       { path: 'stock-adjustment', component: StockAdjustment, data: [136] },
       { path: 'stock-bill-list', component: StockBillListComponent, data: [136] },
       { path: 'stock-adjustment-report', component: StockAdjustmentReport, data: [136] },
+      { path: 'parts-d2d', data: [0], loadComponent: () => import('./components/parts-d2d/parts-d2d').then(m => m.PartsD2D) },
+      { path: 'parts-d2d-transactions', data: [0], loadComponent: () => import('./components/parts-d2d/parts-d2d-transactions').then(m => m.PartsD2DTransactions) },
       { path: 'bg-free-service', data: [145], loadComponent: () => import('./components/bg-free-service/bg-free-service').then(m => m.BgFreeService) },
     ]
   },

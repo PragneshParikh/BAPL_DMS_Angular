@@ -11,6 +11,11 @@ import { LedgerMasterService } from '../../core/services/ledger-master';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import {
+  formatPartsD2DBillNo,
+  LocalPartsService,
+  PartsD2DReceipt
+} from '../../core/services/local-parts.service';
 
 @Component({
   selector: 'app-part-inward',
@@ -51,6 +56,9 @@ export class PartInward implements OnInit {
   invoiceNo: string = '';
 
   isFormDisabled: boolean = false;
+  isD2DReceiptFlow = false;
+  isD2DReceiptReceived = false;
+  d2dBillNo = '';
 
   private invoiceDataLoaded = false;
 
@@ -64,7 +72,8 @@ export class PartInward implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private notificationService: NotificationService,
-    private menuAccess: MenuAccessService
+    private menuAccess: MenuAccessService,
+    private localPartsService: LocalPartsService
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
 
@@ -81,6 +90,13 @@ export class PartInward implements OnInit {
     this.getLedgerList();
 
     this.route.params.subscribe(params => {
+      const d2dBillNo = params['d2dBillNo'];
+      if (d2dBillNo) {
+        this.isD2DReceiptFlow = true;
+        this.d2dBillNo = d2dBillNo;
+        this.getD2DReceipt();
+        return;
+      }
 
       const encClaim = params['invoiceNo'];
 
@@ -285,6 +301,11 @@ export class PartInward implements OnInit {
   }
 
   onSave() {
+    if (this.isD2DReceiptFlow) {
+      this.acceptD2DReceipt();
+      return;
+    }
+
     if (this.partsInwardForm.invalid)
       return;
 
@@ -309,6 +330,108 @@ export class PartInward implements OnInit {
         this.loader.hide();
         console.error(err);
         this.toaster.show("Something went wrong.", { classname: 'bg-danger text-white', delay: 5000 });
+      }
+    });
+  }
+
+  private getD2DReceipt(): void {
+    this.loader.show();
+    this.localPartsService.getPartsD2DReceipt(this.d2dBillNo).subscribe({
+      next: (receipt: PartsD2DReceipt) => {
+        this.loader.hide();
+        this.partsInwardData.invoiceNo =
+          `${formatPartsD2DBillNo(receipt.d2DBillNo)} / ${receipt.prefix}`;
+        this.partsInwardData.invoiceDate = receipt.invoiceDate;
+        this.partsInwardData.receiptDate = this.isoToDisplayDate(receipt.receivedDate);
+        this.partsInwardData.selectedLocation = receipt.toLocationCode;
+        this.partsInwardData.prefixNo = receipt.prefix;
+        this.partsInwardData.purchaseNo = '';
+        this.partsInwardData.documentNo = '';
+        this.partsInwardData.partyName = `${receipt.fromLocationName} (${receipt.fromDealerCode})`;
+        this.partsInwardData.sourceType = 'd2d';
+        this.partsInwardData.sourceTypeDisplay = 'D2D';
+        this.partsInwardData.isAccepted = receipt.isReceived;
+        this.partsInwardData.poType = 'D2D';
+        this.partsPurchaseDetails = receipt.items.map(item => ({
+          partNo: item.partCode,
+          itemdesc: item.description,
+          itemHsncode: item.hsnCode,
+          rack: '',
+          bin: '',
+          itemQty: item.quantity,
+          itemRate: item.rate,
+          itemDisc: 0,
+          discountType: '%',
+          cgst: 0,
+          sgst: 0,
+          igst: 0,
+          itemAmount: item.quantity * item.rate,
+          itemMrp: item.rate
+        }));
+        this.isD2DReceiptReceived = receipt.isReceived;
+        this.isFormDisabled = true;
+      },
+      error: error => {
+        this.loader.hide();
+        console.error('Unable to load D2D receipt:', error);
+        this.toaster.show(
+          error?.error?.message || 'Unable to load D2D receipt.',
+          { classname: 'bg-danger text-white', delay: 5000 }
+        );
+      }
+    });
+  }
+
+  private acceptD2DReceipt(): void {
+    if (this.isD2DReceiptReceived || !this.d2dBillNo) return;
+
+    this.loader.show();
+    this.localPartsService.acceptPartsD2DReceipt(this.d2dBillNo).subscribe({
+      next: () => {
+        this.loader.hide();
+        this.toaster.show('D2D receipt marked as received.', {
+          classname: 'bg-success text-white',
+          delay: 5000
+        });
+        this.notificationService.refreshPartsNotification.next();
+        this.returnToList();
+      },
+      error: error => {
+        this.loader.hide();
+        console.error('Unable to accept D2D receipt:', error);
+        this.toaster.show(
+          error?.error?.message || 'Unable to accept D2D receipt.',
+          { classname: 'bg-danger text-white', delay: 5000 }
+        );
+      }
+    });
+  }
+
+  deleteD2DReceipt(): void {
+    if (!this.d2dBillNo || this.isD2DReceiptReceived) return;
+    const confirmed = window.confirm(
+      `Reject D2D bill ${formatPartsD2DBillNo(this.d2dBillNo)} and reverse its stock transfer?`
+    );
+    if (!confirmed) return;
+
+    this.loader.show();
+    this.localPartsService.rejectPartsD2DReceipt(this.d2dBillNo).subscribe({
+      next: () => {
+        this.loader.hide();
+        this.toaster.show('D2D transfer rejected and stock restored.', {
+          classname: 'bg-success text-white',
+          delay: 5000
+        });
+        this.notificationService.refreshPartsNotification.next();
+        this.returnToList();
+      },
+      error: error => {
+        this.loader.hide();
+        console.error('Unable to reject D2D receipt:', error);
+        this.toaster.show(
+          error?.error?.message || 'Unable to reject D2D receipt.',
+          { classname: 'bg-danger text-white', delay: 5000 }
+        );
       }
     });
   }

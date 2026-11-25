@@ -138,3 +138,6 @@ color: white;
 .sh-kv { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; padding: 3px 0; border-bottom: 1px dashed #e2e6ec; }
 .sh-kv span { color: #6b7280; }
 .sh-kv b { color: #101828; text-align: right; word-break: break-all; }
+
+// 25.11.2026 Photos tab
+.jc-photo { height: 110px; object-fit: cover; background: #f3f6f9; }

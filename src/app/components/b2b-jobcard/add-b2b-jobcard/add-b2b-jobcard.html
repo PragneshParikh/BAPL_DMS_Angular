@@ -1,0 +1,554 @@
+<!--src\app\components\b2b-jobcard\add-b2b-jobcard\add-b2b-jobcard.html  (B2B Job Card - same layout as the B2C job card form; data: JobCardScanner)-->
+<div class="card">
+  <!-- HEADER -->
+  <div class="card-header d-flex justify-content-between align-items-center">
+
+    <div class="d-flex align-items-center gap-2">
+      <!-- Service Card History dropdown (JobCardScanner job cards of this chassis, every dealer) -->
+      <div ngbDropdown class="d-inline-block">
+        <button class="btn btn-primary btn-sm" ngbDropdownToggle [disabled]="!f.chassisNo">
+          Service History ({{ history.length }})
+        </button>
+        <div ngbDropdownMenu class="p-2 shadow-lg b2b-dd">
+          <ng-container *ngTemplateOutlet="historyTable"></ng-container>
+        </div>
+      </div>
+      <button class="btn btn-light btn-sm border mb-0" type="button" (click)="cancel()">
+        <i class="ri-arrow-left-line"></i> List
+      </button>
+    </div>
+
+    <h5 class="mb-0">
+      B2B Job Card <span *ngIf="ro && detail">({{ detail.jobCardNumber }} · {{ detail.status }})</span>
+    </h5>
+  </div>
+
+  <div class="card-body">
+    <div class="alert alert-danger py-2 small" *ngIf="mastersError">{{ mastersError }}</div>
+
+    <!-- ================= JOB BASIC ================= -->
+    <div class="section-card">
+      <div class="section-header" (click)="toggle('job')">
+        <h6 class="mb-0">Job Basic Information</h6>
+        <div>
+          Previous Kms : {{ previousOdometer ?? 0 }}
+          <span *ngIf="dealerName"> | {{ dealerName }}</span>
+        </div>
+        <div *ngIf="openJobCardNumber" class="text-danger">Open job card {{ openJobCardNumber }}</div>
+        <i [class]="isOpen['job'] ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+      </div>
+
+      <div class="section-body" *ngIf="isOpen['job']">
+        <div class="row">
+          <!-- ================= LEFT SIDE (JOB DETAILS) ================= -->
+          <div class="col-md-6 border-end pe-3">
+            <div class="row g-2">
+
+              <div class="col-md-12" *ngIf="isAdmin && !ro">
+                <label>Dealer <span class="text-danger">*</span></label>
+                <select class="form-select form-select-sm" [(ngModel)]="dealerCode" (change)="onDealerChange()"
+                  [class.is-invalid]="submitted && !dealerCode">
+                  <option [ngValue]="null">All Dealers</option>
+                  <option *ngFor="let d of dealers" [ngValue]="d.dmsDealerCode">{{ d.name }} ({{ d.dmsDealerCode }})</option>
+                </select>
+                <small class="text-muted" *ngIf="!dealerCode">All Dealers: search any chassis - the dealer is picked from the vehicle, or choose it here before saving.</small>
+                <small class="text-warning" *ngIf="dealerCode && dealerMessage">{{ dealerMessage }}</small>
+              </div>
+              <div class="col-md-12" *ngIf="!isAdmin && dealerMessage && !ro">
+                <small class="text-warning">{{ dealerMessage }}</small>
+              </div>
+
+              <div class="col-md-4">
+                <label>Job Type <span class="text-danger">*</span></label>
+                <select class="form-select form-select-sm" [(ngModel)]="f.jobTypeId" (ngModelChange)="onJobTypeChange()"
+                  [disabled]="ro" [class.is-invalid]="submitted && !f.jobTypeId">
+                  <option [ngValue]="null">Select Job Type</option>
+                  <option *ngFor="let o of jobTypes" [ngValue]="o.value">{{ o.label }}</option>
+                  <option *ngIf="ro && f.jobTypeId && !jobTypeLabel" [ngValue]="f.jobTypeId">{{ detail?.jobTypeName }}</option>
+                </select>
+              </div>
+
+              <div class="col-md-5 position-relative">
+                <label>Select Chassis <span class="text-danger">*</span></label>
+                <div class="input-group input-group-sm" *ngIf="!ro">
+                  <input type="text" class="form-control text-uppercase" placeholder="Type Chassis No. / Reg No."
+                    [(ngModel)]="searchTerm" (input)="onSearchInput()" (keyup.enter)="onSearchEnter()"
+                    (blur)="hideSuggestions()" autocomplete="off">
+                  <button type="button" class="btn btn-outline-secondary" (click)="openGlobalSearch(globalSearchModal)"
+                    title="Search chassis across all dealers">
+                    <i class="ri-search-line"></i>
+                  </button>
+                  <button type="button" class="btn btn-outline-primary" (click)="onSearchEnter()" [disabled]="vehicleLoading"
+                    title="Fetch this Chassis No / Reg No with its service history">
+                    <i class="ri-history-line"></i>
+                  </button>
+                </div>
+                <input *ngIf="ro" type="text" class="form-control form-control-sm bg-light" [value]="f.chassisNo" readonly>
+
+                <div class="small text-muted mt-1" *ngIf="suggestLoading"><span class="spinner-border spinner-border-sm me-1"></span>Searching…</div>
+                <div class="dropdown-menu dropdown-menu-chassis show w-100" *ngIf="suggestions.length > 0">
+                  <div class="dropdown-header small" *ngIf="suggestScope === 'all'">Not found at your dealership – all dealers</div>
+                  <button type="button" class="dropdown-item" *ngFor="let s of suggestions" (mousedown)="pickSuggestion(s)">
+                    <div>{{ s.chassisNo }} <span class="badge bg-light text-dark border ms-1">{{ s.source }}</span></div>
+                    <small class="text-muted">Reg No: {{ s.regNo || '-' }} | {{ s.model || '-' }} | {{ s.customerName || '-' }} | Dealer: {{ s.dealerCode || '-' }}</small>
+                  </button>
+                </div>
+                <small class="text-muted d-block mt-1" *ngIf="suggestDone && !suggestLoading && suggestions.length === 0 && searchTerm">
+                  No Chassis No / Reg No found in any dealer. Press Enter to add it as a new vehicle.
+                </small>
+                <small class="d-block mt-1" *ngIf="vehicleLoading"><span class="spinner-border spinner-border-sm me-1"></span>Fetching vehicle…</small>
+                <small class="d-block mt-1" *ngIf="!vehicleLoading && vehicleMessage"
+                  [class.text-success]="vehicleSource === 'JobCardScanner'" [class.text-primary]="vehicleSource !== 'JobCardScanner'">
+                  {{ vehicleMessage }}
+                </small>
+              </div>
+
+              <div class="col-md-3">
+                <label>Odometer (km) <span class="text-danger">*</span></label>
+                <input type="number" min="0" class="form-control form-control-sm" [(ngModel)]="f.odometerAtCheckIn" [disabled]="ro"
+                  [placeholder]="previousOdometer ? ('Last JC: ' + previousOdometer + ' km') : 'Enter odometer km'"
+                  [title]="previousOdometer ? ('Last job card odometer: ' + previousOdometer + ' km') : ''"
+                  [class.is-invalid]="!!odometerError">
+                <div *ngIf="odometerError" class="text-danger small">{{ odometerError }}</div>
+              </div>
+
+              <div class="col-md-4">
+                <label>Service Head <span class="text-danger">*</span></label>
+                <select class="form-select form-select-sm" [(ngModel)]="f.serviceHeadId" (ngModelChange)="onServiceHeadChange()"
+                  [disabled]="ro || !f.jobTypeId" [class.is-invalid]="submitted && !f.serviceHeadId">
+                  <option [ngValue]="null">Select Service Head</option>
+                  <option *ngFor="let o of serviceHeads" [ngValue]="o.value">{{ o.label }}</option>
+                  <option *ngIf="ro && f.serviceHeadId && !serviceHeads.length" [ngValue]="f.serviceHeadId">{{ detail?.serviceHeadName }}</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label>Priority <span class="text-danger">*</span></label>
+                <select *ngIf="!ro" class="form-select form-select-sm" [(ngModel)]="f.priority" [disabled]="!f.serviceHeadId"
+                  [class.is-invalid]="submitted && !f.priority">
+                  <option value="">Select Priority</option>
+                  <option *ngFor="let o of priorities" [value]="o.value">{{ o.label }} ({{ o.value }})</option>
+                </select>
+                <select *ngIf="ro" class="form-select form-select-sm" [(ngModel)]="edit.priority" [disabled]="!editable">
+                  <option *ngFor="let o of priorities" [value]="o.value">{{ o.label }} ({{ o.value }})</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-lael">Service Location <span class="text-danger">*</span></label>
+                <select class="form-select form-select-sm text-truncate" [(ngModel)]="f.serviceLocationCode" [disabled]="ro"
+                  (ngModelChange)="onLocationChange()" [class.is-invalid]="submitted && !f.serviceLocationCode">
+                  <option value="">Select Location</option>
+                  <option *ngFor="let w of workshops" [value]="w.locCode">{{ w.locName }}</option>
+                </select>
+                <small class="text-muted b2b-xs" *ngIf="workshopSource === 'DMS'">From DMS (not synced to JobCardScanner yet)</small>
+              </div>
+
+              <div class="col-md-4">
+                <label>Coupon No</label>
+                <input class="form-control form-control-sm" [(ngModel)]="f.couponNo" [disabled]="ro" maxlength="100">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label d-block mb-1">Job Category</label>
+                <div class="btn-group w-auto" role="group">
+                  <input type="radio" class="btn-check" id="b2b-cat-b2c" disabled>
+                  <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2b-cat-b2c">B2C</label>
+                  <input type="radio" class="btn-check" id="b2b-cat-b2b" checked disabled>
+                  <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2b-cat-b2b">B2B</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-lael">Job Source</label>
+                <select class="form-select form-select-sm" [(ngModel)]="f.jobSourceId" [disabled]="ro">
+                  <option [ngValue]="null">Select Job Source</option>
+                  <option *ngFor="let s of jobSources" [ngValue]="s.jobSourceId">{{ s.jobSourceName }}</option>
+                </select>
+              </div>
+
+              <h6 class="section-title">
+                <strong>Job Details</strong>
+              </h6>
+              <hr class="custom-line">
+
+              <div class="col-md-3">
+                <label>Job No.</label>
+                <input class="form-control form-control-sm" [value]="detail?.jobCardNumber || 'JC/... on save'" disabled>
+              </div>
+              <div class="col-md-3">
+                <label>Job In Date</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="jobInDate" disabled>
+              </div>
+              <div class="col-md-3">
+                <label>Job In Time</label>
+                <input type="time" class="form-control form-control-sm" [(ngModel)]="jobInTime" disabled>
+              </div>
+              <div class="col-md-3">
+                <label>Manual Job No.</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="f.manualJobNo" [disabled]="ro" maxlength="40">
+              </div>
+
+              <div class="col-md-6">
+                <label>Est.Delivery Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="estDelDate" [disabled]="ro && !editable"
+                  [class.is-invalid]="submitted && !estDelDate">
+              </div>
+              <div class="col-md-6">
+                <label>Est.Delivery Time <span class="text-danger">*</span></label>
+                <input type="time" class="form-control form-control-sm" [(ngModel)]="estDelTime" [disabled]="ro && !editable"
+                  [class.is-invalid]="submitted && !estDelTime">
+              </div>
+              <div class="col-md-6">
+                <label>Supervisor/Advisor</label>
+                <select class="form-select form-select-sm" [(ngModel)]="f.supervisorName" [disabled]="ro || !f.serviceLocationCode">
+                  <option [ngValue]="null">{{ staffLoading ? 'Loading…' : (supervisors.length ? 'Select Supervisor' : 'No Supervisor set up') }}</option>
+                  <option *ngIf="f.supervisorName && !supervisors.includes(f.supervisorName)" [ngValue]="f.supervisorName">{{ f.supervisorName }}</option>
+                  <optgroup label="This location" *ngIf="supervisorsHere.length">
+                    <option *ngFor="let s of supervisorsHere" [ngValue]="s.name">{{ s.name }}</option>
+                  </optgroup>
+                  <optgroup label="Other locations" *ngIf="supervisorsOther.length">
+                    <option *ngFor="let s of supervisorsOther" [ngValue]="s.name">{{ s.name }}</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label>Technician</label>
+                <select *ngIf="!ro" class="form-select form-select-sm" [(ngModel)]="f.technicianName" [disabled]="!f.serviceLocationCode">
+                  <option [ngValue]="null">{{ staffLoading ? 'Loading…' : (technicians.length ? 'Select Technician' : 'No Technician set up') }}</option>
+                  <optgroup label="This location" *ngIf="techniciansHere.length">
+                    <option *ngFor="let t of techniciansHere" [ngValue]="t.name">{{ t.name }}</option>
+                  </optgroup>
+                  <optgroup label="Other locations" *ngIf="techniciansOther.length">
+                    <option *ngFor="let t of techniciansOther" [ngValue]="t.name">{{ t.name }} – {{ t.locationName }}</option>
+                  </optgroup>
+                </select>
+                <select *ngIf="ro" class="form-select form-select-sm" [(ngModel)]="edit.assignedTechnicianName" [disabled]="!editable">
+                  <option value="">{{ f.technicianName ? ('As created: ' + f.technicianName) : 'Select Technician' }}</option>
+                  <option *ngIf="edit.assignedTechnicianName && !technicians.includes(edit.assignedTechnicianName)" [value]="edit.assignedTechnicianName">{{ edit.assignedTechnicianName }}</option>
+                  <optgroup label="This location" *ngIf="techniciansHere.length">
+                    <option *ngFor="let t of techniciansHere" [value]="t.name">{{ t.name }}</option>
+                  </optgroup>
+                  <optgroup label="Other locations" *ngIf="techniciansOther.length">
+                    <option *ngFor="let t of techniciansOther" [value]="t.name">{{ t.name }} – {{ t.locationName }}</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="col-md-12" *ngIf="staffError">
+                <small class="text-danger">{{ staffError }} <a href="javascript:void(0)" (click)="loadStaff()">Retry</a></small>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= RIGHT SIDE (CUSTOMER DETAILS) ================= -->
+          <div class="col-md-6 ps-3">
+            <h6 class="mb-3">Customer Details <span class="badge bg-light text-dark border ms-1" *ngIf="vehicleSource">{{ vehicleSource }}</span></h6>
+            <div class="row g-3">
+              <div class="col-md-12">
+                <label>Customer Name <span class="text-danger" *ngIf="!vehicleLocked && !ro">*</span></label>
+                <input class="form-control form-control-sm" [(ngModel)]="f.customerName" [readonly]="ro || vehicleLocked"
+                  [class.bg-light]="ro || vehicleLocked" [class.is-invalid]="submitted && !vehicleLocked && !f.customerName">
+              </div>
+              <div class="col-md-4">
+                <label>Mobile No. <span class="text-danger" *ngIf="!vehicleLocked && !ro">*</span></label>
+                <input class="form-control form-control-sm" [(ngModel)]="f.customerMobile" maxlength="10" [readonly]="ro || vehicleLocked"
+                  [class.bg-light]="ro || vehicleLocked" [class.is-invalid]="submitted && !vehicleLocked && (f.customerMobile || '').length !== 10">
+              </div>
+              <div class="col-md-4">
+                <label>Email</label>
+                <input class="form-control form-control-sm" [(ngModel)]="f.customerEmail" [readonly]="ro || vehicleLocked" [class.bg-light]="ro || vehicleLocked">
+              </div>
+              <div class="col-md-4">
+                <label>Model Name <span class="text-danger" *ngIf="!vehicleLocked && !ro">*</span></label>
+                <input class="form-control form-control-sm" [(ngModel)]="f.model" [readonly]="ro || vehicleLocked"
+                  [class.bg-light]="ro || vehicleLocked" [class.is-invalid]="submitted && !vehicleLocked && !f.model">
+              </div>
+              <div class="col-md-4">
+                <label>Chassis No.</label>
+                <input class="form-control form-control-sm bg-light text-muted" [value]="f.chassisNo" readonly>
+              </div>
+              <div class="col-md-4">
+                <label>Reg. No.</label>
+                <input class="form-control form-control-sm text-uppercase" [(ngModel)]="f.regNo" [readonly]="ro || (vehicleLocked && !!card?.vehicle?.regNo)"
+                  [class.bg-light]="ro || (vehicleLocked && !!card?.vehicle?.regNo)">
+              </div>
+              <div class="col-md-4">
+                <label>Motor No.</label>
+                <input class="form-control form-control-sm" [(ngModel)]="f.motorNo" [readonly]="ro || (vehicleLocked && !!card?.vehicle?.motorNo)"
+                  [class.bg-light]="ro || (vehicleLocked && !!card?.vehicle?.motorNo)">
+              </div>
+              <div class="col-md-4">
+                <label>Variant / Colour</label>
+                <div class="input-group input-group-sm">
+                  <input class="form-control" [(ngModel)]="f.variant" [readonly]="ro || vehicleLocked" placeholder="Variant">
+                  <input class="form-control" [(ngModel)]="f.color" [readonly]="ro || vehicleLocked" placeholder="Colour">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label>Sale Date</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="f.purchaseDate" [readonly]="ro || (vehicleLocked && !!card?.vehicle?.purchaseDate)"
+                  [class.bg-light]="ro || (vehicleLocked && !!card?.vehicle?.purchaseDate)">
+              </div>
+              <div class="col-md-4">
+                <label>City</label>
+                <input class="form-control form-control-sm" [(ngModel)]="f.customerCity" [readonly]="ro || vehicleLocked" [class.bg-light]="ro || vehicleLocked">
+              </div>
+              <div class="col-md-4">
+                <label>State</label>
+                <input class="form-control form-control-sm" [(ngModel)]="f.customerState" [readonly]="ro || vehicleLocked" [class.bg-light]="ro || vehicleLocked">
+              </div>
+              <div class="col-md-4">
+                <label>Controller No.</label>
+                <input class="form-control form-control-sm" [(ngModel)]="f.controllerNo" [readonly]="ro || (vehicleLocked && !!card?.vehicle?.controllerNo)"
+                  [class.bg-light]="ro || (vehicleLocked && !!card?.vehicle?.controllerNo)">
+              </div>
+              <div class="col-md-12">
+                <label>Address</label>
+                <textarea class="form-control form-control-sm" rows="3" [(ngModel)]="f.customerAddress" [readonly]="ro || vehicleLocked"
+                  [class.bg-light]="ro || vehicleLocked"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= BATTERY ================= -->
+    <div class="section-card">
+      <div class="section-header" (click)="toggle('battery')">
+        <h6 class="mb-0">Battery Details</h6>
+        <i [class]="isOpen['battery'] ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+      </div>
+      <div class="section-body" *ngIf="isOpen['battery']">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label>Battery No.</label>
+            <input class="form-control form-control-sm" [(ngModel)]="f.batteryNo" [readonly]="ro || (vehicleLocked && !!card?.vehicle?.batteryNo)"
+              [class.bg-light]="ro || (vehicleLocked && !!card?.vehicle?.batteryNo)">
+          </div>
+          <div class="col-md-3">
+            <label>Battery level at check-in (%)</label>
+            <input type="number" min="0" max="100" class="form-control form-control-sm" [(ngModel)]="f.batteryLevelAtCheckIn" [disabled]="ro">
+          </div>
+          <div class="col-md-3">
+            <label>Converter No.</label>
+            <input class="form-control form-control-sm" [(ngModel)]="f.converterNo" [readonly]="ro || (vehicleLocked && !!card?.vehicle?.converterNo)"
+              [class.bg-light]="ro || (vehicleLocked && !!card?.vehicle?.converterNo)">
+          </div>
+          <div class="col-md-3">
+            <label>Charger No.</label>
+            <input class="form-control form-control-sm" [(ngModel)]="f.chargerNo" [readonly]="ro || (vehicleLocked && !!card?.vehicle?.chargerNo)"
+              [class.bg-light]="ro || (vehicleLocked && !!card?.vehicle?.chargerNo)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= CUSTOMER VOICE (complaints) ================= -->
+    <div class="section-card">
+      <div class="section-header" (click)="toggle('voice')">
+        <h6 class="mb-0">Customer Voice <span class="text-danger">*</span>
+          <span class="badge bg-primary ms-1" *ngIf="selectedComplaints.length">{{ selectedComplaints.length }}</span></h6>
+        <i [class]="isOpen['voice'] ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+      </div>
+      <div class="section-body" *ngIf="isOpen['voice']">
+        <ng-container *ngIf="!ro">
+          <label class="mb-1">Complaint</label>
+          <div class="d-flex flex-wrap gap-2 mb-2">
+            <button type="button" class="btn btn-sm mb-0" *ngFor="let c of buttonComplaints"
+              [class.btn-primary]="isPicked(c.complaintText)" [class.btn-outline-secondary]="!isPicked(c.complaintText)"
+              (click)="toggleComplaint(c.complaintText)">{{ c.complaintText }}</button>
+            <span class="small text-muted" *ngIf="!complaintMaster.length && !mastersLoading">No complaints in the Complaint Master.</span>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-4 position-relative" *ngIf="complaintMaster.length > COMPLAINT_BUTTON_LIMIT">
+              <label>More complaints</label>
+              <input class="form-control form-control-sm" [(ngModel)]="complaintSearch" placeholder="Search more complaints…" autocomplete="off">
+              <div class="dropdown-menu show w-100 b2b-suggest" *ngIf="complaintSearch">
+                <button type="button" class="dropdown-item" *ngFor="let c of overflowMatches" [disabled]="isPicked(c.complaintText)"
+                  (click)="addOverflow(c.complaintText)">{{ c.complaintText }}{{ isPicked(c.complaintText) ? ' (added)' : '' }}</button>
+                <span class="dropdown-item-text small text-muted" *ngIf="!overflowMatches.length">No matching complaints.</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label>Other Complaint</label>
+              <input class="form-control form-control-sm" [(ngModel)]="manualComplaint" (keyup.enter)="addManualComplaint()" maxlength="500">
+            </div>
+            <div class="col-md-1">
+              <button type="button" class="btn btn-primary btn-sm commonbtnAdd" [disabled]="!manualComplaint" (click)="addManualComplaint()">Add</button>
+            </div>
+          </div>
+        </ng-container>
+
+        <div class="mt-3">
+          <table class="table table-bordered table-sm" *ngIf="selectedComplaints.length > 0">
+            <thead class="table-light">
+              <tr><th>Sr No</th><th>Complaint</th><th *ngIf="!ro">Action</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of selectedComplaints; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ c }}</td>
+                <td *ngIf="!ro"><button class="btn btn-soft-danger btn-sm" type="button" (click)="removeComplaint(c)"><i class="ri-delete-bin-2-line"></i></button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="text-center text-muted" *ngIf="selectedComplaints.length === 0">Record(s) not found.</div>
+          <div class="text-danger mt-2" *ngIf="submitted && !selectedComplaints.length">Please add at least one complaint before saving.</div>
+        </div>
+
+        <div class="row g-3 mt-1">
+          <div class="col-md-12">
+            <label>Customer Voice</label>
+            <textarea class="form-control form-control-sm" rows="3" [(ngModel)]="f.customerVoice" [disabled]="ro" maxlength="2000"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= PHOTOS (required, like the JobCardScanner wizard) ================= -->
+    <div class="section-card">
+      <div class="section-header" (click)="toggle('photos')">
+        <h6 class="mb-0">Photos <span class="text-danger">*</span>
+          <span class="badge bg-primary ms-1" *ngIf="pendingPhotos.length + savedPhotos.length">{{ pendingPhotos.length + savedPhotos.length }}</span></h6>
+        <i [class]="isOpen['photos'] ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+      </div>
+      <div class="section-body" *ngIf="isOpen['photos']">
+        <ng-container *ngIf="!ro || editable">
+          <label class="btn btn-outline-primary btn-sm mb-2">
+            <i class="ri-camera-line me-1"></i> Take / Upload Photo
+            <input type="file" accept="image/*" capture="environment" multiple hidden (change)="onPhotosPicked($event)">
+          </label>
+          <small class="text-muted ms-2">Images only, up to 10 MB each, max 10 photos.</small>
+        </ng-container>
+        <div class="text-danger small" *ngIf="photoError || (submitted && !ro && !pendingPhotos.length)">
+          {{ photoError || 'At least one photo is required.' }}
+        </div>
+        <div class="row g-2 mt-1">
+          <div class="col-6 col-md-2" *ngFor="let p of savedPhotos">
+            <div class="border rounded p-1 h-100">
+              <a [href]="p.url" target="_blank" rel="noopener"><img [src]="p.url" alt="Job card photo" class="w-100 rounded jc-photo"></a>
+              <div class="small text-truncate" [title]="p.caption || ''">{{ p.caption || p.stage }}</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-2" *ngFor="let p of pendingPhotos; let i = index">
+            <div class="border rounded p-1 h-100 border-primary">
+              <img [src]="p.previewUrl" [alt]="p.file.name" class="w-100 rounded jc-photo">
+              <input class="form-control form-control-sm mt-1" [(ngModel)]="p.caption" placeholder="Caption (optional)" maxlength="200">
+              <button type="button" class="btn btn-soft-danger btn-sm w-100 mb-0 mt-1" (click)="removePendingPhoto(i)"><i class="ri-close-line"></i> Remove</button>
+            </div>
+          </div>
+          <div class="col-12 small text-muted" *ngIf="ro && !savedPhotos.length && !pendingPhotos.length">No photos.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SERVICE CARD HISTORY ================= -->
+    <div class="section-card" *ngIf="f.chassisNo">
+      <div class="section-header" (click)="toggle('history')">
+        <h6 class="mb-0">Service Card History ({{ history.length }})</h6>
+        <i [class]="isOpen['history'] ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+      </div>
+      <div class="section-body p-0" *ngIf="isOpen['history']">
+        <ng-container *ngTemplateOutlet="historyTable"></ng-container>
+      </div>
+    </div>
+
+    <div class="alert alert-danger py-2 small" *ngIf="formError">{{ formError }}</div>
+    <div class="small text-muted text-end" *ngIf="ro && !editable && detail">
+      {{ detail.canEdit ? 'You have view rights only.' : 'This job card is ' + detail.status + ' and cannot be changed.' }}
+    </div>
+  </div>
+
+  <div class="card-footer d-flex justify-content-end gap-2">
+    <button *ngIf="!ro" type="button" class="btn btn-primary btn-sm mb-0" (click)="save()" [disabled]="saving || !canCreate">
+      <span class="spinner-border spinner-border-sm me-1" *ngIf="saving"></span> Save
+    </button>
+    <button *ngIf="editable" type="button" class="btn btn-primary btn-sm mb-0" (click)="saveEdit()" [disabled]="saving">
+      <span class="spinner-border spinner-border-sm me-1" *ngIf="saving"></span> Update
+    </button>
+    <button type="button" class="btn btn-danger btn-sm mb-0" (click)="cancel()">Cancel</button>
+  </div>
+</div>
+
+<!-- Service Card History: every JobCardScanner job card of this chassis (all dealers), newest first -->
+<ng-template #historyTable>
+  <div class="table-responsive service-history-table">
+    <table class="table table-bordered table-sm mb-0 text-nowrap">
+      <thead class="table-light sticky-top">
+        <tr>
+          <th>Sr.No</th><th>Job Card No</th><th>Job Date</th><th>Vehicle No</th><th class="text-end">KMs</th><th>Job Type</th>
+          <th>Service Head</th><th>Complaint</th><th>Service Location</th><th>Status</th><th>Dealer</th><th>Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let h of history; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ h.jobCardNumber }}</td>
+          <td>{{ utc(h.createdAt) | date:'dd.MM.yyyy' }}</td>
+          <td>{{ h.regNo || '-' }}</td>
+          <td class="text-end">{{ h.odometerAtCheckIn | number:'1.0-0' }}</td>
+          <td>{{ h.jobType || '-' }}</td>
+          <td>{{ h.serviceHead || '-' }}</td>
+          <td class="b2b-wrap">{{ h.complaints || '-' }}</td>
+          <td>{{ h.serviceLocation || '-' }}</td>
+          <td>{{ h.status }}<span *ngIf="h.stage"> / {{ h.stage }}</span></td>
+          <td>{{ h.dealerName || h.dealerCode || '-' }}</td>
+          <td><span class="badge bg-light text-dark border">{{ h.source || 'B2B (JobCardScanner)' }}</span></td>
+        </tr>
+        <tr *ngIf="!history.length">
+          <td colspan="12" class="text-center text-muted">No earlier job cards for this vehicle.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</ng-template>
+
+<!-- ======================= Search Chassis Across All Dealers (same popup as the B2C job card) ======================= -->
+<ng-template #globalSearchModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Search Chassis Across All Dealers</h5>
+    <button type="button" class="btn-close btn-close-white" (click)="closeGlobalSearch()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-8 position-relative">
+        <label class="form-label mb-0 small">Chassis No / Reg No</label>
+        <input type="text" class="form-control form-control-sm text-uppercase" [(ngModel)]="globalTerm" name="globalTerm"
+          placeholder="Type 2+ characters…" autocomplete="off" (input)="onGlobalInput()" (keyup.enter)="runGlobalSearch()">
+        <div class="list-group position-absolute w-100 shadow-sm b2b-suggest" *ngIf="globalSuggestions.length > 0">
+          <button type="button" class="list-group-item list-group-item-action py-1" *ngFor="let s of globalSuggestions"
+            (click)="pickGlobalSuggestion(s)">
+            <div class="small fw-semibold">{{ s.chassisNo }} <span class="badge bg-light text-dark border ms-1">{{ s.source }}</span></div>
+            <div class="text-muted b2b-xs">Reg No: {{ s.regNo || '-' }} | {{ s.customerName || '-' }} | Dealer: {{ s.dealerCode || '-' }}</div>
+          </button>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <button type="button" class="btn btn-primary btn-sm w-100 mb-0" [disabled]="globalSearching" (click)="runGlobalSearch()">
+          {{ globalSearching ? 'Searching…' : 'Search' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-3" *ngIf="globalResult">
+      <table class="table table-sm table-bordered mb-0">
+        <tbody>
+          <tr><td class="text-muted small w-30">Chassis No</td><td>{{ globalResult.chassisNo || '-' }}</td></tr>
+          <tr><td class="text-muted small">Register No</td><td>{{ globalResult.regNo || '-' }}</td></tr>
+          <tr><td class="text-muted small">Customer Name</td><td>{{ globalResult.customerName || '-' }}</td></tr>
+          <tr><td class="text-muted small">Mobile No.</td><td>{{ globalResult.mobile || '-' }}</td></tr>
+          <tr><td class="text-muted small">Model</td><td>{{ globalResult.model || '-' }}</td></tr>
+          <tr><td class="text-muted small">Dealer</td><td>{{ globalResult.dealerCode || '-' }}</td></tr>
+          <tr><td class="text-muted small">Sale Date</td><td>{{ globalResult.saleDate ? (globalResult.saleDate | date:'dd-MM-yyyy') : '-' }}</td></tr>
+          <tr><td class="text-muted small">Found in</td><td><span class="badge bg-light text-dark border">{{ globalResult.source }}</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-3 text-danger small" *ngIf="globalNotFound">
+      No vehicle with this Chassis No / Reg No in any dealer (JobCardScanner, DMS sales, service history).
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-success btn-sm mb-0" [disabled]="!globalResult" (click)="useGlobalChassis()">Use This Chassis</button>
+    <button type="button" class="btn btn-light btn-sm mb-0" (click)="closeGlobalSearch()">Close</button>
+  </div>
+</ng-template>

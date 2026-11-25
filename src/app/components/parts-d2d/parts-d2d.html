@@ -1,0 +1,186 @@
+<div class="container-fluid">
+  <div class="d-sm-flex align-items-center justify-content-between mb-3">
+    <h4 class="mb-0">{{ isTransactionEditFlow ? 'Edit Parts D2D' : 'Parts D2D' }}</h4>
+    <button *ngIf="!isTransactionEditFlow" type="button" class="btn btn-primary btn-sm"
+            title="View D2D transactions" aria-label="View D2D transactions"
+            (click)="openTransactions()">
+      <i class="ri-menu-line"></i>
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ errorMessage }}
+        <button type="button" class="btn-close" aria-label="Close" (click)="dismissError()"></button>
+      </div>
+      <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ successMessage }}
+        <button type="button" class="btn-close" aria-label="Close" (click)="dismissSuccess()"></button>
+      </div>
+
+      <div class="row g-3 align-items-end mb-4">
+        <div class="col-md-2">
+          <label class="form-label">Prefix <span class="text-danger">*</span></label>
+          <input class="form-control" [(ngModel)]="prefix" maxlength="100" placeholder="Enter Prefix" required>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">D2D Bill No.</label>
+          <input class="form-control" [value]="d2DBillNo ? formatBillNo(d2DBillNo) : ''"
+                 [placeholder]="isLoadingBillNo ? 'Loading sequence...' : ''" readonly>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Date</label>
+          <input class="form-control" type="date" [(ngModel)]="transferDate" disabled>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">From Location <span class="text-danger">*</span></label>
+          <select class="form-select" [ngModel]="fromLocationId"
+                  (ngModelChange)="onFromLocationChange($event ? +$event : null)"
+                  [disabled]="isLoadingLocations || draftLines.length > 0 || isTransactionEditFlow">
+            <option [ngValue]="null">Select from location</option>
+            <option *ngFor="let location of fromLocations" [ngValue]="location.locationId">
+              {{ location.locationName }} ({{ location.locationCode }})
+            </option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">To Location <span class="text-danger">*</span></label>
+          <select class="form-select" [(ngModel)]="toLocationId"
+                  (ngModelChange)="onToLocationChange($event ? +$event : null)"
+                  [disabled]="isLoadingToLocations || isTransactionEditFlow">
+            <option [ngValue]="null">Select to location</option>
+            <option *ngFor="let location of toLocations" [ngValue]="location.locationId">
+              {{ location.locationName }} - {{ location.dealerCode }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <h5>Part Details</h5>
+      <div class="row g-3 align-items-end mb-4">
+        <div class="col-lg-3">
+          <label class="form-label">Part No.</label>
+          <input *ngIf="editingSavedTransfer; else partSelector" class="form-control"
+                 [value]="editingSavedTransfer.partCode" readonly>
+          <ng-template #partSelector>
+            <select class="form-select" [(ngModel)]="partCode" (ngModelChange)="onPartChange()"
+                    [disabled]="!canSendFromSelectedLocation || isLoadingParts">
+              <option value="">Select part with stock</option>
+              <option *ngFor="let part of parts" [value]="part.partCode">
+                {{ part.partCode }} - {{ part.description }} | Rate: {{ part.purchaseRate | number:'1.2-2' }}
+                | Stock: {{ part.currentStock }}
+              </option>
+            </select>
+          </ng-template>
+        </div>
+        <div class="col-lg-3">
+          <label class="form-label">Description</label>
+          <input class="form-control"
+                 [value]="editingSavedTransfer?.description ?? selectedPart?.description ?? ''" readonly>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Rate</label>
+          <input class="form-control" [value]="currentRate | number:'1.2-2'" readonly>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">C.Stock</label>
+          <input class="form-control" [value]="currentStock" readonly>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Up.Stock</label>
+          <input class="form-control" type="number" min="1" [(ngModel)]="transferQuantity"
+                 [disabled]="!canUpdateCurrentRow">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Up.Qty</label>
+          <input class="form-control" [value]="editingSavedTransfer || selectedPart ? remainingStock : ''" readonly>
+        </div>
+        <div class="col-md-2 ms-auto text-end">
+          <button *ngIf="!editingSavedTransfer" type="button" class="btn btn-primary btn-sm"
+                  (click)="addOrUpdateLine()"
+                  [disabled]="!canUpdateCurrentRow || isUpdatingSavedTransfer || deletingSavedTransferId !== null">
+            {{ editingIndex !== null ? 'Update Item' : 'Add Item' }}
+          </button>
+          <button *ngIf="editingSavedTransfer" type="button" class="btn btn-secondary btn-sm ms-1"
+                  (click)="cancelSavedTransferEdit()" [disabled]="isUpdatingSavedTransfer">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <h5>{{ isTransactionEditFlow ? 'Transfer Details' : 'Parts to Transfer' }}</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Sr. No.</th>
+              <th>D2D Bill No.</th>
+              <th>Date</th>
+              <th>Prefix</th>
+              <th>Part No.</th>
+              <th>Description</th>
+              <th>Rate</th>
+              <th>C.Stock</th>
+              <th>Up.Stock</th>
+              <th>Up.Qty</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let line of draftLines; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ formatBillNo(d2DBillNo) }}</td>
+              <td>{{ transferDate | date:'dd-MM-yyyy' }}</td>
+              <td>{{ prefix }}</td>
+              <td>{{ line.partCode }}</td>
+              <td>{{ line.description }}</td>
+              <td>{{ line.rate | number:'1.2-2' }}</td>
+              <td>{{ line.currentStock }}</td>
+              <td>{{ line.transferQuantity }}</td>
+              <td>{{ line.remainingStock }}</td>
+              <td class="text-nowrap">
+                <button type="button" class="btn btn-sm btn-soft-info me-1" (click)="editLine(i)" title="Edit">
+                  <i class="ri-pencil-line"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-danger" (click)="deleteLine(i)" title="Delete">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="draftLines.length === 0">
+              <td colspan="11" class="text-center text-muted py-3">
+                No draft lines. Add or import parts to begin a transfer.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="d-flex gap-2">
+          <input #excelFile type="file" accept=".xlsx,.xls" hidden
+                 [disabled]="!canSendFromSelectedLocation || isSaving || isUpdatingSavedTransfer || deletingSavedTransferId !== null"
+                 (change)="importExcel($event)">
+          <button type="button" class="btn btn-info text-white" (click)="downloadSampleExcel()"
+                  title="Download the Excel template">
+            <i class="ri-file-download-line"></i>
+            Download Sample
+          </button>
+          <button type="button" class="btn btn-success" (click)="excelFile.click()"
+                  [disabled]="!canSendFromSelectedLocation || isSaving || isUpdatingSavedTransfer || deletingSavedTransferId !== null"
+                  title="Upload completed Excel">
+            <i class="ri-file-excel-2-line"></i>
+            Upload Excel
+          </button>
+        </div>
+        <button type="button" class="btn btn-primary"
+                [disabled]="isSaving || isUpdatingSavedTransfer || deletingSavedTransferId !== null ||
+                            (isTransactionEditFlow ? !canUpdateCurrentRow :
+                              (draftLines.length === 0 || !canSendFromSelectedLocation))"
+                (click)="save()">
+          {{ isSaving || isUpdatingSavedTransfer ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

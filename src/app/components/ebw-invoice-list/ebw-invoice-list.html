@@ -33,8 +33,11 @@
           <div class="filter-field">
             <label class="form-label mb-0 small">Location</label>
             <select class="form-select form-select-sm" [(ngModel)]="filter.locationCode" (ngModelChange)="onLocationChange()" [disabled]="isLoading">
-              <option value="">--Select--</option>
-              <option *ngFor="let loc of locationList" [value]="loc.loccode">{{ loc.locname }}</option>
+              <option *ngIf="isAdminOrSuperAdmin" [value]="ALL_LOCATIONS">All Locations</option>
+              <option *ngIf="!isAdminOrSuperAdmin" value="">--Select--</option>
+              <option *ngFor="let loc of locationList" [value]="loc.loccode">
+                {{ loc.locname }}{{ isAdminOrSuperAdmin && loc.dealercode ? ' - ' + loc.dealercode : '' }}
+              </option>
             </select>
           </div>
 

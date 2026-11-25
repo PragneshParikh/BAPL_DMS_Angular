@@ -26,9 +26,10 @@ import { environment } from '../../../../../environments/environment';
 import { MenuAccessService } from '../../../../core/services/menu-access.service';
 import { ChassisSearchService } from '../../../../core/services/chassis-search-service';
 // Service history lookup + OCR scan (added 18.11.2026)
-import { firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, forkJoin, of } from 'rxjs';
+import { JobcardPhotoService, JobCardPhotoRow, PendingPhoto } from '../../../../core/services/jobcard-photo.service';
 import { JobcardServiceHistoryLookupService, ShHistoryCard, ShScope, ShSuggestion, ShVehicle } from '../../../../core/services/jobcard-service-history-lookup.service';
-import { VehicleOcrService, OcrCandidate, extractCandidates, editDistance, isConfident, VoteTracker } from '../../../../core/services/vehicle-ocr.service';
+// import { VehicleOcrService, OcrCandidate, extractCandidates, editDistance, isConfident, VoteTracker } from '../../../../core/services/vehicle-ocr.service';   // 24.11.2026 OCR disabled
 @Component({
   selector: 'app-job-card-add-form',
   standalone: true,
@@ -66,7 +67,7 @@ export class JobCardAddForm {
   selectedChassis: string = '';
   invoiceNo: string = '';
   couponNo: string = '';
-  inwardType: string = '';
+  inwardType: string = 'B2C';   // Job Category - B2C by default
   modelName = '';
   registerNo = '';
   vehicleKms: number = 0;
@@ -135,12 +136,23 @@ export class JobCardAddForm {
   shOcrBusy = false;
   shOcrError = '';
   shOcrText = '';
-  shOcrCandidates: OcrCandidate[] = [];
+  shOcrCandidates: { value: string; kind: string }[] = [];   // OCR disabled 24.11.2026 (stays empty)
   shPreviewUrl: string | null = null;
   /** past jobs of the vehicle filled from service history (shown only while that chassis is selected) */
   shPastJobs: Record<string, any>[] = [];
   shPastJobsChassis = '';
   shLastKms: number | null = null;
+  /** 24.11.2026 Service Card History (B2C only): DMS B2C job cards of the chassis + imported service history (all dealers), newest first */
+  serviceCardHistory: { source: string; jobNo: string; jobDate: string | null; regNo: string; kms: number | null; jobType: string;
+    serviceHead: string; complaint: string; location: string; status: string; dealer: string }[] = [];
+  serviceCardHistoryLoading = false;
+  showServiceCardHistory = true;
+  private serviceCardHistoryChassis = '';
+
+  /** 25.11.2026 Photos tab (required for a new job card): picked photos waiting for upload + photos already saved (edit) */
+  pendingPhotos: PendingPhoto[] = [];
+  savedPhotos: JobCardPhotoRow[] = [];
+  photoError = '';
   private shTimer: any;
   private shStream: MediaStream | null = null;
   private shModalRef: any = null;
@@ -162,7 +174,8 @@ export class JobCardAddForm {
     comments: false,
     labour: false,
     affectedparts: false,
-    insurance: false
+    insurance: false,
+    photos: false
   };
 
   customerObj = {
@@ -217,7 +230,8 @@ export class JobCardAddForm {
     private chassisSearchService: ChassisSearchService,
     private toaster: ToastService,
     private shLookup: JobcardServiceHistoryLookupService,
-    private vehicleOcr: VehicleOcrService) { }
+    private photoService: JobcardPhotoService
+    /* , private vehicleOcr: VehicleOcrService   24.11.2026 OCR disabled */) { }
 
   ngOnInit(): void {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
@@ -511,7 +525,7 @@ filterChassis() {
     // ===== Same field set as onChassisChange() =====
     this.invoiceNo = data.invoiceNo || '';
     this.couponNo = this.selectedChassis.slice(-13);
-    this.inwardType = data.inwardType || '';
+    this.inwardType = data.inwardType || 'B2C';
     this.vehiclePrevkms = data.vehiclePrevKms || 0;
 
     this.customerObj.customerLedgerId = data.customerLedgerId || 0;
@@ -666,6 +680,7 @@ filterChassis() {
     });
   }
   loadServiceHistory(chassisNo: string) {
+    this.loadServiceCardHistory(chassisNo);   // 24.11.2026 full Service Card History + Previous Kms from the last job card
     let jobCardId: number | null = 0;
 
     if (this.chassiseditData?.jobCardHeader?.id) {
@@ -689,6 +704,63 @@ filterChassis() {
       }
     });
   }
+  /**
+   * 24.11.2026 - Service Card History of the selected chassis, B2C sources only (never the B2B / JobCardScanner data):
+   *   1. DMS B2C job cards (api/JobCard/GetJobCardList, chassis filter, from 01.01.2000 to today)
+   *   2. imported service history (api/jobcard-servicehistory-lookup/vehicle, all dealers)
+   * Previous Kms (header) = the KMs of the latest of these job cards when that is higher than what the chassis data gave.
+   * Not changed in edit mode, so editing an old job card is not blocked by later readings.
+   */
+  loadServiceCardHistory(chassisNo: string) {
+    const chassis = (chassisNo || '').trim();
+    this.serviceCardHistoryChassis = chassis;
+    this.serviceCardHistory = [];
+    if (!chassis) return;
+    this.serviceCardHistoryLoading = true;
+    const currentJobId = this.chassiseditData?.jobCardHeader?.id || 0;
+    const today = new Date();
+    const toDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const dms$ = this.jobCardService.getJobCardList({ dealerCode: this.isSuperAdmin ? null : this.storageService.getDealerCode(), fromDate: '2000-01-01', toDate, chassisNo: chassis })
+      .pipe(catchError(() => of([])));
+    const imported$ = this.shLookup.vehicle(chassis, 'all').pipe(catchError(() => of(null)));
+    forkJoin([dms$, imported$]).subscribe(([dms, imported]: [any, any]) => {
+      if (this.serviceCardHistoryChassis !== chassis) return;   // another chassis was picked meanwhile
+      const rows: typeof this.serviceCardHistory = [];
+      const dmsList: any[] = Array.isArray(dms) ? dms : (dms?.data || []);
+      for (const it of dmsList) {
+        const h = it?.jobCardHeader || {};
+        if (String(it?.jobCardCustomer?.chassisNo || h.chassisno || '').trim().toUpperCase() !== chassis.toUpperCase()) continue;
+        if (currentJobId && h.id === currentJobId) continue;
+        rows.push({
+          source: 'DMS', jobNo: String(h.jobNo ?? ''), jobDate: h.jobinDate || h.createdDate || null,
+          regNo: it?.jobCardCustomer?.registerNo || '', kms: h.vehiclekms != null && h.vehiclekms !== '' ? Number(h.vehiclekms) : null,
+          jobType: it?.jobtype || '', serviceHead: [it?.serviceHead, it?.serviceType].filter(Boolean).join(' / '),
+          complaint: it?.complaint || '', location: it?.location || '', status: h.jobStatus || '', dealer: h.dealerCode || ''
+        });
+      }
+      for (const v of (imported?.vehicles || [])) {
+        if (String(v?.chassisNo || '').trim().toUpperCase() !== chassis.toUpperCase()) continue;
+        for (const j of (v.jobs || [])) {
+          rows.push({
+            source: 'Service history', jobNo: String(j['JobNo'] ?? ''), jobDate: j['JobDate'] || null, regNo: j['RegNo'] || v.regNo || '',
+            kms: j['KMS'] != null && j['KMS'] !== '' && !isNaN(Number(j['KMS'])) ? Number(j['KMS']) : null,
+            jobType: j['JobType'] || '', serviceHead: j['ServiceHead'] || '', complaint: '', location: j['Location'] || '',
+            status: j['JobStatus'] || j['Status'] || '', dealer: j['CompName'] || j['DealerCode'] || ''
+          });
+        }
+      }
+      rows.sort((a, b) => (b.jobDate ? new Date(b.jobDate).getTime() : 0) - (a.jobDate ? new Date(a.jobDate).getTime() : 0));
+      this.serviceCardHistory = rows;
+      this.serviceCardHistoryLoading = false;
+      const last = rows.find(r => r.kms !== null);
+      if (!this.isEditMode && last && last.kms !== null && last.kms > (Number(this.vehiclePrevkms) || 0)) {
+        this.vehiclePrevkms = last.kms;
+        this.kmsError = this.vehicleKms !== null && this.vehicleKms !== undefined && String(this.vehicleKms).trim() !== '' && Number(this.vehicleKms) < last.kms
+          ? `Odometer cannot be less than the last job card km (${last.kms} km).` : '';
+      }
+    }, () => { this.serviceCardHistoryLoading = false; });
+  }
+
   loadJobSorces() {
     this.selectedJobSources = '';
     this.jobCardService.getJobSource().subscribe({
@@ -991,7 +1063,7 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
 
     this.invoiceNo = selected.invoiceNo;
     this.couponNo = this.selectedChassis.slice(-13);
-    this.inwardType = selected.inwardType;
+    this.inwardType = selected.inwardType || 'B2C';
     this.vehiclePrevkms = selected.vehiclePrevkms;
     this.customerObj.customerLedgerId = selected.customerLedgerId;
     this.customerObj.customerName = selected.customerName;
@@ -1256,11 +1328,28 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
       });
       return;
     }
-    if (!this.isSuperAdmin && this.vehicleKms < this.vehiclePrevkms) {
-        this.kmsError =
-          `Vehicle KM cannot be less than Previous KM (${this.vehiclePrevkms})`;
-        return;
-      }
+    // 25.11.2026 Odometer (km) is required and can never be less than the last job card's reading (every user)
+    const kmsEntered = this.vehicleKms !== null && this.vehicleKms !== undefined && String(this.vehicleKms).trim() !== '';
+    const kms = Number(this.vehicleKms);
+    const lastKms = Number(this.vehiclePrevkms) || 0;
+    if (!kmsEntered || isNaN(kms) || kms < 0) {
+      this.kmsError = 'Odometer (km) is required.';
+      Swal.fire({ icon: 'warning', title: 'Validation', text: 'Please enter Odometer (km).', width: '300px' });
+      return;
+    }
+    if (kms < lastKms) {
+      this.kmsError = `Odometer cannot be less than the last job card km (${lastKms} km).`;
+      Swal.fire({ icon: 'warning', title: 'Validation', text: this.kmsError, width: '320px' });
+      return;
+    }
+
+    // 25.11.2026 Photos tab: at least one photo for a new job card (and for an edited one that has none yet)
+    if (this.pendingPhotos.length === 0 && this.savedPhotos.length === 0 && !this.isEditMode) {
+      this.photoError = 'At least one photo is required.';
+      this.isOpen.photos = true;
+      Swal.fire({ icon: 'warning', title: 'Validation', text: 'Please attach at least one photo (Photos tab).', width: '300px' });
+      return;
+    }
 
     const jobIn = new Date(`${this.jobInDate}T${this.jobInTime}`);
     const estDel = new Date(`${this.estDelDate}T${this.estDelTime}`);
@@ -1443,8 +1532,12 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
 
     this.isSaving = true; // NEW: lock out further calls until this request settles
     this.loader.show();
+    // 25.11.2026: the photos are uploaded right after the job card is saved (linkUploadedPhotos)
+    Promise.resolve(this.pendingPhotos.slice()).then(uploaded => {
     apiCall.subscribe({
       next: (res: any) => {
+        const savedId = this.isEditMode ? this.chassiseditData?.jobCardHeader?.id : (res?.id ?? res?.Id);
+        this.linkUploadedPhotos(savedId, uploaded);
         this.isSaving = false; // NEW
         this.toastr.show(`${this.isEditMode ? 'Updated' : 'Saved'} Successfully`, { classname: 'bg-success text-white', delay: 5000 });
         this.resetForm();
@@ -1468,6 +1561,56 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
         });
       }
     });
+    }).catch(err => {
+      this.isSaving = false;
+      this.loader.hide();
+      this.photoError = err?.message || 'Photos could not be uploaded.';
+      this.toastr.show(this.photoError + ' The job card was not saved.', { classname: 'bg-danger text-white', delay: 6000 });
+    });
+  }
+
+  // ================= 25.11.2026 Photos tab =================
+  onPhotosPicked(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.photoError = JobcardPhotoService.addFiles(this.pendingPhotos, input.files, this.savedPhotos.length);
+    input.value = '';
+  }
+
+  removePendingPhoto(i: number) {
+    const [p] = this.pendingPhotos.splice(i, 1);
+    if (p) JobcardPhotoService.release([p]);
+  }
+
+  loadSavedPhotos(jobCardHeaderId: number) {
+    this.photoService.getB2CPhotos(jobCardHeaderId).subscribe({
+      next: (rows) => (this.savedPhotos = rows || []),
+      error: () => (this.savedPhotos = [])
+    });
+  }
+
+  deleteSavedPhoto(p: JobCardPhotoRow) {
+    Swal.fire({ icon: 'question', title: 'Remove photo?', text: p.fileName, showCancelButton: true, confirmButtonText: 'Remove', width: '320px' })
+      .then(r => {
+        if (!r.isConfirmed) return;
+        this.photoService.deleteB2CPhoto(p.id).subscribe({
+          next: () => (this.savedPhotos = this.savedPhotos.filter(x => x.id !== p.id)),
+          error: (e) => this.toastr.show(e?.error?.message || 'Photo could not be removed.', { classname: 'bg-danger text-white', delay: 5000 })
+        });
+      });
+  }
+
+  /** uploads the picked photos for the saved job card (stored by the API like JobCardScanner) */
+  private linkUploadedPhotos(jobCardHeaderId: any, photos: PendingPhoto[]) {
+    if (!photos?.length) return;
+    const id = Number(jobCardHeaderId);
+    if (!id) {
+      this.toastr.show('Job card saved, but the photos could not be attached (the API did not return the job card id - rebuild the API).', { classname: 'bg-warning text-dark', delay: 8000 });
+      return;
+    }
+    this.photoService.uploadB2CPhotos(id, photos).subscribe({
+      next: () => JobcardPhotoService.release(photos),
+      error: (e) => this.toastr.show('Job card saved, but the photos could not be uploaded: ' + (e?.error?.message || 'server error') + ' - edit the job card and add them again.', { classname: 'bg-warning text-dark', delay: 8000 })
+    });
   }
 
   // edit jobcard
@@ -1483,11 +1626,12 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
 
     this.selectedChassis = data.jobCardHeader.chassisno;
     this.vehicleKms = data.jobCardHeader.vehiclekms;
+    if (this.selectedChassis) this.loadServiceCardHistory(this.selectedChassis);   // 24.11.2026 history only (Previous Kms untouched in edit mode)
+    if (data.jobCardHeader?.id) this.loadSavedPhotos(data.jobCardHeader.id);   // 25.11.2026 Photos tab
     this.selectedLocation = data.jobCardHeader.serviceloc;
 
     this.couponNo = data.jobCardHeader.couponno;
-    this.inwardType = data.jobCardHeader.inwardType;
-    this.inwardType = data.jobCardHeader.inwardType;
+    this.inwardType = data.jobCardHeader.inwardType || 'B2C';
     this.jobPrefix = data.jobCardHeader.jobprefix;
     this.jobInDate = data.jobCardHeader.jobinDate;
     this.jobInTime = data.jobCardHeader.jobinTime;
@@ -1566,10 +1710,10 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
 
 validateWarranty(): boolean {
 
-    if (!this.isSuperAdmin && this.vehicleKms && this.vehiclePrevkms &&
-      this.vehicleKms < this.vehiclePrevkms) {
+    if (this.vehicleKms !== null && this.vehicleKms !== undefined && String(this.vehicleKms).trim() !== '' &&
+      Number(this.vehiclePrevkms) > 0 && Number(this.vehicleKms) < Number(this.vehiclePrevkms)) {
 
-      this.kmsError = `Vehicle KM cannot be less than Previous KM (${this.vehiclePrevkms})`;
+      this.kmsError = `Odometer cannot be less than the last job card km (${this.vehiclePrevkms} km).`;
     } else {
       this.kmsError = '';
     }
@@ -1607,7 +1751,7 @@ validateWarranty(): boolean {
 
     this.invoiceNo = '';
     this.couponNo = '';
-    this.inwardType = '';
+    this.inwardType = 'B2C';
     this.vehicleKms = 0;
     this.jobPrefix = '';
     this.jobInDate = '';
@@ -1777,14 +1921,15 @@ validateWarranty(): boolean {
     const cleanup = () => { this.stopCamera(); this.shModalRef = null; };
     this.shModalRef.result.then(cleanup, cleanup);
     if (this.shSearchTerm.replace(/[^A-Za-z0-9]/g, '').length >= 3) this.onShInput();
-    if (scan) {
-      this.vehicleOcr.warmUp();
-      // the modal is in the DOM on the next tick
-      setTimeout(() => {
-        const video = document.getElementById('sh-video') as HTMLVideoElement | null;
-        if (video) this.startCamera(video);
-      }, 50);
-    }
+    // 24.11.2026 OCR disabled: the scan mode no longer starts the camera / OCR engine.
+    // if (scan) {
+    //   this.vehicleOcr.warmUp();
+    //   // the modal is in the DOM on the next tick
+    //   setTimeout(() => {
+    //     const video = document.getElementById('sh-video') as HTMLVideoElement | null;
+    //     if (video) this.startCamera(video);
+    //   }, 50);
+    // }
   }
 
   closeServiceHistorySearch() {
@@ -1982,7 +2127,7 @@ validateWarranty(): boolean {
   private applyHistoryOnlyVehicle(chassis: string) {
     this.invoiceNo = '';
     this.couponNo = chassis.slice(-13);
-    this.inwardType = '';
+    this.inwardType = 'B2C';
     this.vehiclePrevkms = 0;
     this.customerObj.customerLedgerId = 0;
     this.customerObj.customerName = '';
@@ -2055,29 +2200,30 @@ validateWarranty(): boolean {
   }
 
   // ---------------- live webcam scan ----------------
-  async startCamera(video: HTMLVideoElement) {
-    this.shOcrError = '';
-    if (!navigator?.mediaDevices?.getUserMedia) {
-      this.shOcrError = 'Camera is not available in this browser. Use "Upload / take photo" instead.';
-      return;
-    }
-    try {
-      this.stopCamera();
-      this.shStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
-        audio: false
-      });
-      video.srcObject = this.shStream;
-      await video.play();
-      this.shCameraOn = true;
-      this.shScanMode = true;
-      this.runLiveLoop(video);
-    } catch (e) {
-      console.error(e);
-      this.stopCamera();
-      this.shOcrError = 'Camera permission denied or no camera found (camera needs HTTPS). Use "Upload / take photo" instead.';
-    }
-  }
+  // 24.11.2026 OCR disabled (startCamera) - kept commented for reference.
+//   async startCamera(video: HTMLVideoElement) {
+//     this.shOcrError = '';
+//     if (!navigator?.mediaDevices?.getUserMedia) {
+//       this.shOcrError = 'Camera is not available in this browser. Use "Upload / take photo" instead.';
+//       return;
+//     }
+//     try {
+//       this.stopCamera();
+//       this.shStream = await navigator.mediaDevices.getUserMedia({
+//         video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+//         audio: false
+//       });
+//       video.srcObject = this.shStream;
+//       await video.play();
+//       this.shCameraOn = true;
+//       this.shScanMode = true;
+//       this.runLiveLoop(video);
+//     } catch (e) {
+//       console.error(e);
+//       this.stopCamera();
+//       this.shOcrError = 'Camera permission denied or no camera found (camera needs HTTPS). Use "Upload / take photo" instead.';
+//     }
+//   }
 
   stopCamera() {
     this.shLoopId++;
@@ -2087,129 +2233,131 @@ validateWarranty(): boolean {
     this.shLiveGuess = '';
   }
 
-  /** Reads the guide-box part of the video about every 0.7 s until one number is read in 2 of the last 3 frames. */
-  private async runLiveLoop(video: HTMLVideoElement) {
-    const loopId = ++this.shLoopId;
-    const tracker = new VoteTracker(2, 3);
-    const started = Date.now();
-    this.shLiveHint = false;
-    while (loopId === this.shLoopId && this.shCameraOn) {
-      try {
-        const guide = document.getElementById('sh-guide');
-        const vr = video.getBoundingClientRect();
-        const gr = guide?.getBoundingClientRect();
-        const box = gr ? { left: gr.left - vr.left, top: gr.top - vr.top, width: gr.width, height: gr.height }
-                       : { left: 0, top: 0, width: video.clientWidth, height: video.clientHeight };
-        const canvas = this.vehicleOcr.cropVideo(video, box);
-        if (canvas) {
-          this.shOcrBusy = true;
-          const text = await this.vehicleOcr.recognizeCanvas(canvas);
-          if (loopId !== this.shLoopId) return;
-          const found = extractCandidates(text);
-          this.shLiveGuess = found[0]?.value || '';
-          const accepted = tracker.push(found);
-          if (accepted) {
-            this.shOcrBusy = false;
-            this.stopCamera();
-            if (isConfident(accepted)) {
-              // detected and read automatically → look it up and fill the job card
-              this.shFound = accepted.value;
-              await new Promise(r => setTimeout(r, 600));
-              await this.lookupScanned(accepted.value);
-            } else {
-              this.shOcrCandidates = found;
-              this.shSearchTerm = accepted.value;
-              this.shOcrError = 'Please check the number read, then press Search.';
-              this.onShInput();
-            }
-            return;
-          }
-        }
-      } catch (e) {
-        console.error(e);
-        this.shOcrError = 'OCR could not run (engine download blocked or offline). Type the number instead.';
-        this.stopCamera();
-        return;
-      } finally {
-        this.shOcrBusy = false;
-      }
-      if (Date.now() - started > 8000) this.shLiveHint = true;
-      if (Date.now() - started > 40000) {
-        this.stopCamera();
-        this.shOcrError = 'No chassis or registration number could be read. Scan again - closer, in good light - or type it.';
-        return;
-      }
-      await new Promise(r => setTimeout(r, 700));
-    }
-  }
+  // 24.11.2026 OCR disabled (live camera loop) - kept commented for reference.
+//   /** Reads the guide-box part of the video about every 0.7 s until one number is read in 2 of the last 3 frames. */
+//   private async runLiveLoop(video: HTMLVideoElement) {
+//     const loopId = ++this.shLoopId;
+//     const tracker = new VoteTracker(2, 3);
+//     const started = Date.now();
+//     this.shLiveHint = false;
+//     while (loopId === this.shLoopId && this.shCameraOn) {
+//       try {
+//         const guide = document.getElementById('sh-guide');
+//         const vr = video.getBoundingClientRect();
+//         const gr = guide?.getBoundingClientRect();
+//         const box = gr ? { left: gr.left - vr.left, top: gr.top - vr.top, width: gr.width, height: gr.height }
+//                        : { left: 0, top: 0, width: video.clientWidth, height: video.clientHeight };
+//         const canvas = this.vehicleOcr.cropVideo(video, box);
+//         if (canvas) {
+//           this.shOcrBusy = true;
+//           const text = await this.vehicleOcr.recognizeCanvas(canvas);
+//           if (loopId !== this.shLoopId) return;
+//           const found = extractCandidates(text);
+//           this.shLiveGuess = found[0]?.value || '';
+//           const accepted = tracker.push(found);
+//           if (accepted) {
+//             this.shOcrBusy = false;
+//             this.stopCamera();
+//             if (isConfident(accepted)) {
+//               // detected and read automatically → look it up and fill the job card
+//               this.shFound = accepted.value;
+//               await new Promise(r => setTimeout(r, 600));
+//               await this.lookupScanned(accepted.value);
+//             } else {
+//               this.shOcrCandidates = found;
+//               this.shSearchTerm = accepted.value;
+//               this.shOcrError = 'Please check the number read, then press Search.';
+//               this.onShInput();
+//             }
+//             return;
+//           }
+//         }
+//       } catch (e) {
+//         console.error(e);
+//         this.shOcrError = 'OCR could not run (engine download blocked or offline). Type the number instead.';
+//         this.stopCamera();
+//         return;
+//       } finally {
+//         this.shOcrBusy = false;
+//       }
+//       if (Date.now() - started > 8000) this.shLiveHint = true;
+//       if (Date.now() - started > 40000) {
+//         this.stopCamera();
+//         this.shOcrError = 'No chassis or registration number could be read. Scan again - closer, in good light - or type it.';
+//         return;
+//       }
+//       await new Promise(r => setTimeout(r, 700));
+//     }
+//   }
 
-  // ---------------- photo (upload / phone camera app) ----------------
-  onShPhoto(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    input.value = '';
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      this.shOcrError = 'Please choose an image (photo of the number plate, chassis sticker or RC).';
-      return;
-    }
-    this.runOcr(file);
-  }
+  // 24.11.2026 OCR disabled (photo upload / runOcr / matchOcrCandidates) - kept commented for reference.
+//   // ---------------- photo (upload / phone camera app) ----------------
+//   onShPhoto(event: Event) {
+//     const input = event.target as HTMLInputElement;
+//     const file = input.files?.[0];
+//     input.value = '';
+//     if (!file) return;
+//     if (!file.type.startsWith('image/')) {
+//       this.shOcrError = 'Please choose an image (photo of the number plate, chassis sticker or RC).';
+//       return;
+//     }
+//     this.runOcr(file);
+//   }
 
-  private async runOcr(image: Blob) {
-    this.stopCamera();
-    this.shResetSearch();
-    this.shOcrBusy = true;
-    this.shPreviewUrl = URL.createObjectURL(image);
-    try {
-      const text = await this.vehicleOcr.recognize(image);
-      this.shOcrText = (text || '').trim();
-      this.shOcrCandidates = extractCandidates(text);
-      if (!this.shOcrCandidates.length) {
-        this.shOcrError = 'No Chassis No / Reg No could be read. Retake the photo closer and straight, in good light, or type the number.';
-        return;
-      }
-      const best = this.shOcrCandidates[0];
-      if (isConfident(best)) { await this.lookupScanned(best.value); return; }
-      await this.matchOcrCandidates();
-    } catch (e) {
-      console.error(e);
-      this.shOcrError = 'OCR could not run (engine download blocked or offline). Type the number instead.';
-    } finally {
-      this.shOcrBusy = false;
-    }
-  }
+//   private async runOcr(image: Blob) {
+//     this.stopCamera();
+//     this.shResetSearch();
+//     this.shOcrBusy = true;
+//     this.shPreviewUrl = URL.createObjectURL(image);
+//     try {
+//       const text = await this.vehicleOcr.recognize(image);
+//       this.shOcrText = (text || '').trim();
+//       this.shOcrCandidates = extractCandidates(text);
+//       if (!this.shOcrCandidates.length) {
+//         this.shOcrError = 'No Chassis No / Reg No could be read. Retake the photo closer and straight, in good light, or type the number.';
+//         return;
+//       }
+//       const best = this.shOcrCandidates[0];
+//       if (isConfident(best)) { await this.lookupScanned(best.value); return; }
+//       await this.matchOcrCandidates();
+//     } catch (e) {
+//       console.error(e);
+//       this.shOcrError = 'OCR could not run (engine download blocked or offline). Type the number instead.';
+//     } finally {
+//       this.shOcrBusy = false;
+//     }
+//   }
 
-  /**
-   * An unsure photo read can have a wrong character, so each read is matched against the service history by prefix
-   * (full read, then first 10 / 7 characters) and ranked by how many characters differ.
-   */
-  private async matchOcrCandidates() {
-    const best = new Map<string, ShSuggestion & { ocrDistance?: number }>();
-    for (const c of this.shOcrCandidates.slice(0, 3)) {
-      const lens = [...new Set([c.value.length, 10, 7])].filter(l => l >= 5 && l <= c.value.length);
-      const allowed = Math.max(1, Math.floor(c.value.length * 0.2));
-      for (const len of lens) {
-        let res: ShSuggestion[] = [];
-        try { res = await firstValueFrom(this.shLookup.suggest(c.value.slice(0, len), 'all')); } catch { res = []; }
-        let hit = false;
-        for (const s of res || []) {
-          const d = editDistance((s.value || '').toUpperCase().replace(/[^A-Z0-9]/g, ''), c.value);
-          if (d > allowed) continue;
-          hit = true;
-          const prev = best.get(s.value);
-          if (!prev || (prev.ocrDistance ?? 99) > d) best.set(s.value, { ...s, ocrDistance: d });
-        }
-        if (hit) break;
-      }
-    }
-    const list = [...best.values()].sort((a, b) => (a.ocrDistance! - b.ocrDistance!) || (b.jobs - a.jobs));
-    this.shSearchTerm = list[0]?.value || this.shOcrCandidates[0].value;
-    this.shSuggestions = list;
-    if (!list.length) {
-      this.shOcrError = `Read "${this.shOcrCandidates.map(x => x.value).join('", "')}" but no such vehicle is in service history. Correct the number below if it was misread.`;
-    }
-  }
+//   /**
+//    * An unsure photo read can have a wrong character, so each read is matched against the service history by prefix
+//    * (full read, then first 10 / 7 characters) and ranked by how many characters differ.
+//    */
+//   private async matchOcrCandidates() {
+//     const best = new Map<string, ShSuggestion & { ocrDistance?: number }>();
+//     for (const c of this.shOcrCandidates.slice(0, 3)) {
+//       const lens = [...new Set([c.value.length, 10, 7])].filter(l => l >= 5 && l <= c.value.length);
+//       const allowed = Math.max(1, Math.floor(c.value.length * 0.2));
+//       for (const len of lens) {
+//         let res: ShSuggestion[] = [];
+//         try { res = await firstValueFrom(this.shLookup.suggest(c.value.slice(0, len), 'all')); } catch { res = []; }
+//         let hit = false;
+//         for (const s of res || []) {
+//           const d = editDistance((s.value || '').toUpperCase().replace(/[^A-Z0-9]/g, ''), c.value);
+//           if (d > allowed) continue;
+//           hit = true;
+//           const prev = best.get(s.value);
+//           if (!prev || (prev.ocrDistance ?? 99) > d) best.set(s.value, { ...s, ocrDistance: d });
+//         }
+//         if (hit) break;
+//       }
+//     }
+//     const list = [...best.values()].sort((a, b) => (a.ocrDistance! - b.ocrDistance!) || (b.jobs - a.jobs));
+//     this.shSearchTerm = list[0]?.value || this.shOcrCandidates[0].value;
+//     this.shSuggestions = list;
+//     if (!list.length) {
+//       this.shOcrError = `Read "${this.shOcrCandidates.map(x => x.value).join('", "')}" but no such vehicle is in service history. Correct the number below if it was misread.`;
+//     }
+//   }
 
   private shHttpMessage(err: any): string {
     if (err?.status === 0) return 'Server not reachable. Check the network.';
@@ -2221,7 +2369,8 @@ validateWarranty(): boolean {
     clearTimeout(this.shTimer);
     this.stopCamera();
     if (this.shPreviewUrl) URL.revokeObjectURL(this.shPreviewUrl);
-    this.vehicleOcr.dispose();
+    JobcardPhotoService.release(this.pendingPhotos);   // 25.11.2026
+    // this.vehicleOcr.dispose();   // 24.11.2026 OCR disabled
   }
   onCancelClick() {
     this.router.navigate(['/job-card']);

@@ -280,6 +280,41 @@ export class SidebarComponent implements OnInit {
     });
   }
 
+  private ensurePartsD2DReportMenu(items: MenuItem[]): void {
+    if (this.hasRouteRecursive(items, '/parts-d2d-report')) return;
+
+    const reportGroup = this.findMenuGroup(items, 'reports');
+    const reportLink: MenuItem = {
+      id: -1399,
+      label: 'PartD2D Reports',
+      link: '/parts-d2d-report',
+      module: 'workshop',
+      parentId: reportGroup?.id
+    };
+
+    if (reportGroup) {
+      reportGroup.subItems = [...(reportGroup.subItems ?? []), reportLink];
+      return;
+    }
+
+    items.push({
+      id: -1398,
+      label: 'Reports',
+      icon: 'ri-bar-chart-2-line',
+      isCollapsed: true,
+      subItems: [reportLink]
+    });
+  }
+
+  private findMenuGroup(items: MenuItem[], label: string): MenuItem | undefined {
+    for (const item of items) {
+      if ((item.label ?? '').toString().trim().toLowerCase() === label) return item;
+      const nested = item.subItems ? this.findMenuGroup(item.subItems, label) : undefined;
+      if (nested) return nested;
+    }
+    return undefined;
+  }
+
   /** Distinct AutoDash-style icon per top-level menu (API sends one generic icon). */
   private static readonly MENU_ICONS: { [key: string]: string } = {
     'dashboard': 'ri-dashboard-3-line',   // ADDED — real "Dashboard" group now comes from MenuMaster
@@ -375,6 +410,7 @@ private hasRouteRecursive(items: MenuItem[] | undefined, path: string): boolean 
           // API may return a plain array or a wrapped object ({ data: [...] })
           const raw = Array.isArray(menu) ? menu : (menu?.data ?? menu?.result ?? menu?.items ?? []);
           this.menuItems = this.normalizeMenu(raw);
+          this.ensurePartsD2DReportMenu(this.menuItems);
           resolve(menu);
           this.loader.hide();
         }, error: (err) => {

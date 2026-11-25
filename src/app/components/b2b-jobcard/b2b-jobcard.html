@@ -1,0 +1,146 @@
+<!--src\app\components\b2b-jobcard\b2b-jobcard.html  (B2B Job Card list - JobCardScanner database)-->
+<div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
+  <h5 class="mb-0">B2B Job Card List</h5>
+  <span class="badge bg-light text-dark border">Source: JobCardScanner</span>
+</div>
+
+<!-- Filter Card -->
+<div class="card">
+  <div class="card-body">
+    <div class="row g-3 align-items-end">
+
+      <div class="col-md-3" *ngIf="isAdmin">
+        <label class="form-label">Dealer</label>
+        <select class="form-select form-select-sm text-truncate" [(ngModel)]="filter.dealerCode" (change)="onDealerChange()">
+          <option [ngValue]="null">All Dealers</option>
+          <option *ngFor="let d of dealers" [ngValue]="d.dmsDealerCode">{{ d.name }} ({{ d.dmsDealerCode }})</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Date From</label>
+        <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.fromDate" (change)="search()">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Date To</label>
+        <input type="date" class="form-control form-control-sm" [(ngModel)]="filter.toDate" (change)="search()">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Service Location</label>
+        <select class="form-select form-select-sm text-truncate" [(ngModel)]="filter.serviceLocationCode" (change)="search()">
+          <option value="">All Locations</option>
+          <option *ngFor="let w of workshops" [value]="w.locCode">{{ w.locName }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Job No.</label>
+        <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.jobNo" (ngModelChange)="onTextChange()"
+          placeholder="JC/... or manual job no.">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Customer Name</label>
+        <input type="text" class="form-control form-control-sm" [(ngModel)]="filter.customerName" (ngModelChange)="onTextChange()"
+          placeholder="Enter Customer Name">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Chassis No.</label>
+        <input type="text" class="form-control form-control-sm text-uppercase" [(ngModel)]="filter.chassisNo"
+          (ngModelChange)="onTextChange()" placeholder="Enter Chassis No.">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Register No.</label>
+        <input type="text" class="form-control form-control-sm text-uppercase" [(ngModel)]="filter.regNo"
+          (ngModelChange)="onTextChange()" placeholder="Enter Register No.">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Status</label>
+        <select class="form-select form-select-sm" [(ngModel)]="filter.status" (change)="search()">
+          <option [ngValue]="null">All Status</option>
+          <option *ngFor="let s of statuses" [ngValue]="s">{{ s }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-12 d-flex flex-wrap justify-content-end gap-2 mt-2">
+        <button class="btn btn-sm btn-primary" (click)="search()" [disabled]="loading">Search</button>
+        <button class="btn btn-sm btn-light border" (click)="reset()" [disabled]="loading">Reset</button>
+        <button class="btn btn-sm btn-success" (click)="onAdd()" [disabled]="!canCreate">Add</button>
+      </div>
+    </div>
+    <div class="small text-warning mt-2" *ngIf="dealerMessage">{{ dealerMessage }}</div>
+  </div>
+</div>
+
+<!-- Table Card -->
+<div class="card">
+  <div class="card-body p-0">
+    <div class="p-3 text-center text-muted" *ngIf="loading">
+      <span class="spinner-border spinner-border-sm me-1"></span> Loading B2B job cards…
+    </div>
+    <div class="alert alert-danger m-2 py-2 small" *ngIf="error">{{ error }}</div>
+
+    <div class="table-responsive table-responsive-sm b2b-table-wrap" *ngIf="!loading">
+      <table class="table table-sm table-hover table-bordered mb-0 text-nowrap">
+        <thead class="table-light">
+          <tr>
+            <th>SR.No.</th>
+            <th>Action</th>
+            <th>JobNo / JobDate</th>
+            <th>Status / Stage</th>
+            <th>ManualJobNo.</th>
+            <th>Service Location</th>
+            <th>JobType / JobSource</th>
+            <th>ServiceHead / Priority</th>
+            <th>Complaint</th>
+            <th>Reg / ChassisNo.</th>
+            <th>Vehicle</th>
+            <th class="text-end">KMs</th>
+            <th>CustomerName / MobileNo</th>
+            <th *ngIf="isAdmin">Dealer</th>
+            <th>Updated Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of rows; let i = index" (dblclick)="onOpen(item)">
+            <td>{{ (filter.pageIndex - 1) * filter.pageSize + i + 1 }}</td>
+            <td>
+              <button class="btn btn-sm btn-soft-primary" [title]="canEdit && item.status !== 'Closed' && item.status !== 'Cancelled' ? 'View / Edit' : 'View'"
+                (click)="onOpen(item)">
+                <i [class]="canEdit && item.status !== 'Closed' && item.status !== 'Cancelled' ? 'ri-pencil-fill fs-12' : 'ri-eye-line fs-12'"></i>
+              </button>
+            </td>
+            <td>{{ item.jobCardNumber }}<br>{{ item.createdAt + 'Z' | date:'dd-MM-yyyy hh:mm a' }}</td>
+            <td><span class="badge" [ngClass]="statusClass(item.status)">{{ item.status }}</span><br><small>{{ item.stage || '' }}</small></td>
+            <td>{{ item.manualJobNo || '-' }}</td>
+            <td>{{ item.serviceLocation || '-' }}</td>
+            <td>{{ item.jobType || '-' }}<br>{{ item.jobSource || '' }}</td>
+            <td>{{ item.serviceHead || '-' }}<br>{{ item.priority }}</td>
+            <td class="b2b-wrap">{{ item.complaints || '-' }}</td>
+            <td><b>R:</b> {{ item.regNo || '-' }}<br><b>C:</b> {{ item.chassisNo || '-' }}</td>
+            <td>{{ item.model || '-' }}</td>
+            <td class="text-end">{{ item.odometerAtCheckIn | number:'1.0-0' }}</td>
+            <td>{{ item.customerName || '-' }}<br>{{ item.customerMobile || '-' }}</td>
+            <td *ngIf="isAdmin">{{ item.dealerCode || '-' }}</td>
+            <td>{{ item.updatedAt + 'Z' | date:'dd-MM-yyyy hh:mm a' }}</td>
+          </tr>
+          <tr *ngIf="rows.length === 0 && !error">
+            <td [attr.colspan]="isAdmin ? 15 : 14" class="text-center text-muted py-3">No Data Available</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center p-2 gap-2" *ngIf="totalRecords > 0">
+      <small class="text-muted">{{ totalRecords }} job card(s)</small>
+      <ngb-pagination [collectionSize]="totalRecords" [page]="filter.pageIndex" [pageSize]="filter.pageSize" [maxSize]="5"
+        (pageChange)="pageChange($event)" [boundaryLinks]="true" size="sm">
+      </ngb-pagination>
+    </div>
+  </div>
+</div>

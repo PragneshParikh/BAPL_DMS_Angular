@@ -25,11 +25,12 @@ export class EbwInvoiceService {
     return this.httpClient.get<string[]>(`${this.baseUrl}/chassis-details/battery-serials/${chassisNo}`);
   }
 
-  getAll(dealerCode?: string, fromDate?: string, toDate?: string): Observable<any> {
+  getAll(dealerCode?: string, fromDate?: string, toDate?: string, locationCode?: string): Observable<any> {
     let params = new HttpParams();
     if (dealerCode) params = params.set('dealerCode', dealerCode);
     if (fromDate) params = params.set('fromDate', fromDate);
     if (toDate) params = params.set('toDate', toDate);
+    if (locationCode) params = params.set('locationCode', locationCode);
     return this.httpClient.get(`${this.baseUrl}/ebw-invoice`, { params });
   }
 

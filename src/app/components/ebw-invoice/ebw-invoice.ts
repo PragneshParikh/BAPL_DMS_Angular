@@ -27,6 +27,8 @@ export class EBWInvoice implements OnInit {
 
   invoiceId: number | null = null;
   isEditMode: boolean = false;
+  isAdminOrSuperAdmin = false;
+  selectedLocationDealerCode = '';
 
   readonly EBW_INVOICE_SUBMENU_ID = 106;
   canCreate = false;
@@ -127,6 +129,9 @@ export class EBWInvoice implements OnInit {
     private router: Router
   ) {
     this.dealerCode = this.storageService.getDealerCode();
+    const role = this.storageService.getRole().toLowerCase();
+    this.isAdminOrSuperAdmin = role === 'admin' || role === 'superadmin';
+    this.selectedLocationDealerCode = this.dealerCode;
     this.canCreate = this.menuAccess.canCreate(this.EBW_INVOICE_SUBMENU_ID);
     this.canEdit = this.menuAccess.canEdit(this.EBW_INVOICE_SUBMENU_ID);
     this.canDelete = this.menuAccess.canDelete(this.EBW_INVOICE_SUBMENU_ID);
@@ -172,9 +177,19 @@ export class EBWInvoice implements OnInit {
 
   getLocationList() {
     this.loader.show();
-    this.locationMasterService.getLocationByDealerCodeAndAreaId(this.dealerCode, 2).subscribe({
+    const locations$ = this.isAdminOrSuperAdmin
+      ? this.locationMasterService.getLocationDropdownByDealerCode(null)
+      : this.locationMasterService.getLocationByDealerCodeAndAreaId(this.dealerCode, 2);
+
+    locations$.subscribe({
       next: (res: any) => {
-        this.locationList = res;
+        const locations = res || [];
+        this.locationList = this.isAdminOrSuperAdmin
+          ? locations.filter((loc: any) => Number(loc.locareaidno) === 2)
+          : locations;
+        if (this.locationList.length > 0 && this.isEditMode && this.formData.locationCode) {
+          this.onLocationChange();
+        }
         this.loader.hide();
       },
       error: (err) => {
@@ -183,6 +198,15 @@ export class EBWInvoice implements OnInit {
         this.toast.show('Something went wrong.', { classname: 'bg-danger text-white', delay: 5000 });
       },
     });
+  }
+
+  onLocationChange(): void {
+    const location = this.locationList.find((loc: any) =>
+      String(loc.loccode) === String(this.formData.locationCode));
+    if (location?.dealercode) {
+      this.selectedLocationDealerCode = location.dealercode;
+      this.formData.soldByDealerCode = location.dealercode;
+    }
   }
 
   getSchemeList() {
@@ -930,7 +954,7 @@ export class EBWInvoice implements OnInit {
 
     const payload = {
       id: this.invoiceId || 0,
-      dealerCode: this.dealerCode,
+      dealerCode: this.selectedLocationDealerCode || this.dealerCode,
       invoiceDate: this.formData.date,
       prefixNo: this.formData.prefixNo,
       billNo: this.formData.billNo ? Number(this.formData.billNo) : null,

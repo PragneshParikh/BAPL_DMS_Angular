@@ -1,0 +1,134 @@
+<div class="container-fluid">
+  <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+    <h4 class="mb-sm-0">Parts D2D Transactions</h4>
+    <button type="button" class="btn btn-primary btn-sm" (click)="openEntryPage()">
+      <i class="ri-arrow-left-line me-1"></i>
+      Parts D2D
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    {{ errorMessage }}
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label for="d2dFromDate" class="form-label">Date From</label>
+          <input id="d2dFromDate" type="date" class="form-control" [(ngModel)]="fromDate">
+        </div>
+        <div class="col-md-3">
+          <label for="d2dToDate" class="form-label">Date To</label>
+          <input id="d2dToDate" type="date" class="form-control" [(ngModel)]="toDate">
+        </div>
+        <div class="col-md-4">
+          <label for="d2dLocation" class="form-label">Location</label>
+          <select id="d2dLocation" class="form-select" [(ngModel)]="locationId">
+            <option [ngValue]="null">All locations</option>
+            <option *ngFor="let location of locations" [ngValue]="location.locationId">
+              {{ location.locationName }} ({{ location.dealerCode }} / {{ location.locationCode }})
+            </option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+          <button type="button" class="btn btn-primary" [disabled]="isLoading" (click)="search()">
+            {{ isLoading ? 'Loading...' : 'Search' }}
+          </button>
+          <button type="button" class="btn btn-success"
+                  [disabled]="filteredTransactions.length === 0" title="Export to Excel"
+                  aria-label="Export to Excel" (click)="exportExcel()">
+            <i class="ri-file-excel-2-line"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-3">
+    <div class="card-body">
+      <div *ngIf="!hasSearched" class="text-center text-muted py-4">
+        Select filters and click Search to view transactions.
+      </div>
+      <div *ngIf="hasSearched" class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Sr. No.</th>
+              <th>D2D Bill No.</th>
+              <th>Prefix</th>
+              <th>Date</th>
+              <th>From Location</th>
+              <th>To Location</th>
+              <th>Part No.</th>
+              <th>Description</th>
+              <th class="text-end">Rate</th>
+              <th class="text-end">C.Stock</th>
+              <th class="text-end">Up.Stock</th>
+              <th class="text-end">Up.Qty</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="!isLoading && filteredTransactions.length === 0">
+              <td colspan="13" class="text-center text-muted py-4">No D2D transactions found.</td>
+            </tr>
+            <tr *ngFor="let transaction of paginatedTransactions; let i = index">
+              <td>{{ ((currentPage - 1) * pageSize) + i + 1 }}</td>
+              <td>{{ formatBillNo(transaction.d2DBillNo) }}</td>
+              <td>{{ transaction.prefix }}</td>
+              <td>{{ transaction.date | date:'dd/MM/yyyy' }}</td>
+              <td>{{ transaction.fromLocationName }} ({{ transaction.fromDealerCode }})</td>
+              <td>{{ transaction.toLocationName }} ({{ transaction.toDealerCode }})</td>
+              <td>{{ transaction.partCode }}</td>
+              <td>{{ transaction.description }}</td>
+              <td class="text-end">{{ transaction.rate | number:'1.2-2' }}</td>
+              <td class="text-end">{{ getPreviousStock(transaction) }}</td>
+              <td class="text-end">{{ transaction.transferQuantity }}</td>
+              <td class="text-end">{{ getClosingStock(transaction) }}</td>
+              <td class="text-nowrap">
+                <button type="button" class="btn btn-sm btn-primary me-1"
+                        (click)="editTransaction(transaction)"
+                        [disabled]="transaction.isIncomingForCaller || deletingTransactionId !== null"
+                        title="Edit">
+                  <i class="ri-pencil-line"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-danger"
+                        (click)="deleteTransaction(transaction)"
+                        [disabled]="transaction.isIncomingForCaller || deletingTransactionId !== null"
+                        title="Delete">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="hasSearched" class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+          Showing
+          {{ filteredTransactions.length === 0 ? 0 : ((currentPage - 1) * pageSize) + 1 }}
+          to
+          {{ (((currentPage - 1) * pageSize) + pageSize) > filteredTransactions.length
+            ? filteredTransactions.length
+            : (((currentPage - 1) * pageSize) + pageSize) }}
+          of {{ filteredTransactions.length }} records
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-outline-secondary btn-sm"
+                  [disabled]="currentPage === 1" (click)="goToFirstPage()">First</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm"
+                  [disabled]="currentPage === 1" (click)="goToPreviousPage()">Previous</button>
+          <button type="button" class="btn btn-primary btn-sm" disabled>
+            Page {{ currentPage }} of {{ totalPages }}
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm"
+                  [disabled]="currentPage === totalPages" (click)="goToNextPage()">Next</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm"
+                  [disabled]="currentPage === totalPages" (click)="goToLastPage()">Last</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

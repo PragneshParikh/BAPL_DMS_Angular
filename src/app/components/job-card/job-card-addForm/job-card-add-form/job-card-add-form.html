@@ -75,6 +75,7 @@
 
 
       <!-- Past jobs from imported service history (shown after a vehicle is picked from service history) -->
+<!-- 24.11.2026 replaced by the "Service Card History" section below (kept for reference)
       <div ngbDropdown class="d-inline-block" *ngIf="showShPastJobs">
         <button class="btn btn-outline-primary btn-sm" ngbDropdownToggle>
           Past Jobs ({{ shPastJobs.length }})
@@ -114,6 +115,7 @@
           </div>
         </div>
       </div>
+      -->
 
       <div>
         <button class="btn btn-primary btn-sm" type="button" [disabled]="!isEditMode" (click)="goToFFIR()">
@@ -125,7 +127,7 @@
 
     <!-- RIGHT SIDE (Invoice No) -->
     <h5 class="mb-0">
-      Job Card <span *ngIf="selectedJobtype == 1">
+      B2C Job Card <span *ngIf="selectedJobtype == 1">
         (Invoice No. {{ invoiceNo || '' }})
       </span>
     </h5>
@@ -133,6 +135,7 @@
   </div>
   <div class="card-body">
     <!-- 21.11.2026: what the scan / search fetched, read-only, in Job Card order (the editable fields below are what is saved) -->
+<!-- 24.11.2026 "Vehicle details fetched" removed: the same details are shown in the form below (kept for reference)
     <div class="sh-details mb-3" *ngIf="showShDetails">
       <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
         <strong class="text-success"><i class="ri-checkbox-circle-line"></i> Vehicle details fetched</strong>
@@ -169,6 +172,7 @@
         </div>
       </div>
     </div>
+    -->
     <!-- ================= JOB BASIC ================= -->
     <div class="section-card">
       <div class="section-header" (click)="toggle('job')">
@@ -237,10 +241,12 @@
                       title="Search service history by Chassis No / Reg No">
                       <i class="ri-history-line"></i>
                     </button>
+                    <!-- 24.11.2026 OCR disabled
                     <button type="button" class="btn btn-outline-primary" (click)="openServiceHistorySearch(serviceHistorySearchModal, true)"
                       title="Scan Chassis No / Reg No (camera or photo)">
                       <i class="ri-camera-line"></i>
                     </button>
+                    -->
                   </div>
                     <div *ngIf="chassisLoading" class="small text-muted mt-1">Loading chassis...</div>
 
@@ -253,7 +259,7 @@
                   </div>
 
                   <small class="text-muted d-block mt-1" *ngIf="selectedChassis && filteredChassisList.length === 0">
-                    Not found here? Use <i class="ri-history-line"></i> (search) or <i class="ri-camera-line"></i> (scan) - your dealership first, then all dealers.
+                    Not found here? Use <i class="ri-history-line"></i> (search) - your dealership first, then all dealers.
                   </small>
                 </div>
 
@@ -262,13 +268,17 @@
                   [value]="selectedChassis" readonly>
               </div>
               <div class="col-md-3">
-                <label>Vehicle Kms.</label>
-                <input class="form-control form-control-sm" [(ngModel)]="vehicleKms"
+                <label>Odometer (km) <span class="text-danger">*</span></label>
+                <input type="number" min="0" class="form-control form-control-sm" [(ngModel)]="vehicleKms"
+                  [placeholder]="vehiclePrevkms ? ('Last JC: ' + vehiclePrevkms + ' km') : 'Enter odometer km'"
+                  [title]="vehiclePrevkms ? ('Last job card odometer: ' + vehiclePrevkms + ' km') : ''"
                   (ngModelChange)="validateWarranty()">
                   <div *ngIf="kmsError" class="text-danger">{{ kmsError }} </div>
+                  <!-- 24.11.2026 removed: Previous Kms (header) now comes from the last job card
                   <small *ngIf="showShPastJobs && shLastKms !== null" class="text-muted d-block">
                     Last KMS in service history: {{ shLastKms | number:'1.0-0' }}
                   </small>
+                  -->
               </div>
               <div class="col-md-4">
                 <label>Service Head</label>
@@ -322,10 +332,10 @@
               <div class="col-md-4">
                 <label class="form-label d-block mb-1 ">Job Category</label>
                 <div class="btn-group w-auto" role="group">
-                  <input type="radio" class="btn-check" id="b2c" checked  value="B2C" [(ngModel)]="inwardType"> 
+                  <input type="radio" class="btn-check" id="b2c" name="jobCategory" value="B2C" [(ngModel)]="inwardType">
                   <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2c">B2C</label>
 
-                  <input type="radio" class="btn-check" id="b2b"  value="B2B" [(ngModel)]="inwardType">
+                  <input type="radio" class="btn-check" id="b2b" name="jobCategory" value="B2B" [(ngModel)]="inwardType">
                   <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2b">B2B</label>
                 </div>
               </div>
@@ -521,6 +531,45 @@
           </div>
 
 
+        </div>
+      </div>
+    </div>
+    <!-- ================= SERVICE CARD HISTORY (24.11.2026, B2C sources: DMS job cards + imported service history) ================= -->
+    <div class="section-card" *ngIf="selectedChassis">
+      <div class="section-header" (click)="showServiceCardHistory = !showServiceCardHistory">
+        <h6 class="mb-0">Service Card History ({{ serviceCardHistory.length }})</h6>
+        <span class="small text-muted" *ngIf="serviceCardHistoryLoading"><span class="spinner-border spinner-border-sm me-1"></span>Loading…</span>
+        <i [class]="showServiceCardHistory ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+      </div>
+      <div class="section-body p-0" *ngIf="showServiceCardHistory">
+        <div class="table-responsive service-history-table">
+          <table class="table table-bordered table-sm mb-0 text-nowrap">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th>Sr.No</th><th>Job Card No</th><th>Job Date</th><th>Vehicle No</th><th class="text-end">KMs</th><th>Job Type</th>
+                <th>Service Head</th><th>Complaint</th><th>Service Location</th><th>Status</th><th>Dealer</th><th>Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let h of serviceCardHistory; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ h.jobNo || '-' }}</td>
+                <td>{{ h.jobDate ? (h.jobDate | date:'dd.MM.yyyy') : '-' }}</td>
+                <td>{{ h.regNo || '-' }}</td>
+                <td class="text-end">{{ h.kms !== null ? (h.kms | number:'1.0-0') : '-' }}</td>
+                <td>{{ h.jobType || '-' }}</td>
+                <td>{{ h.serviceHead || '-' }}</td>
+                <td style="white-space: normal; min-width: 160px;">{{ h.complaint || '-' }}</td>
+                <td>{{ h.location || '-' }}</td>
+                <td>{{ h.status || '-' }}</td>
+                <td>{{ h.dealer || '-' }}</td>
+                <td><span class="badge bg-light text-dark border">{{ h.source }}</span></td>
+              </tr>
+              <tr *ngIf="!serviceCardHistoryLoading && serviceCardHistory.length === 0">
+                <td colspan="12" class="text-center text-muted">No earlier job cards for this vehicle.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -725,6 +774,41 @@
             <div class="text-danger mt-1"
               *ngIf="supervisorCommentCtrl.invalid && (supervisorCommentCtrl.dirty || supervisorCommentCtrl.touched)">
               Supervisor Comment is required.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= PHOTOS (25.11.2026, required for a new job card) ================= -->
+    <div class="section-card">
+      <div class="section-header" (click)="toggle('photos')">
+        <h6 class="mb-0">Photos <span class="text-danger">*</span>
+          <span class="badge bg-primary ms-1" *ngIf="pendingPhotos.length + savedPhotos.length">{{ pendingPhotos.length + savedPhotos.length }}</span></h6>
+        <i [class]="isOpen.photos ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+      </div>
+      <div class="section-body" *ngIf="isOpen.photos">
+        <label class="btn btn-outline-primary btn-sm mb-2">
+          <i class="ri-camera-line me-1"></i> Take / Upload Photo
+          <input type="file" accept="image/*" capture="environment" multiple hidden (change)="onPhotosPicked($event)">
+        </label>
+        <small class="text-muted ms-2">Images only, up to 10 MB each, max 10 photos.</small>
+        <div class="text-danger small" *ngIf="photoError || (isSubmitted && !isEditMode && !pendingPhotos.length && !savedPhotos.length)">
+          {{ photoError || 'At least one photo is required.' }}
+        </div>
+        <div class="row g-2 mt-1">
+          <div class="col-6 col-md-2" *ngFor="let p of savedPhotos">
+            <div class="border rounded p-1 h-100">
+              <a [href]="p.blobUrl" target="_blank" rel="noopener"><img [src]="p.blobUrl" [alt]="p.fileName" class="w-100 rounded jc-photo"></a>
+              <div class="small text-truncate" [title]="p.caption || p.fileName">{{ p.caption || p.fileName }}</div>
+              <button type="button" class="btn btn-soft-danger btn-sm w-100 mb-0" (click)="deleteSavedPhoto(p)"><i class="ri-delete-bin-2-line"></i> Remove</button>
+            </div>
+          </div>
+          <div class="col-6 col-md-2" *ngFor="let p of pendingPhotos; let i = index">
+            <div class="border rounded p-1 h-100 border-primary">
+              <img [src]="p.previewUrl" [alt]="p.file.name" class="w-100 rounded jc-photo">
+              <input class="form-control form-control-sm mt-1" [(ngModel)]="p.caption" placeholder="Caption (optional)" maxlength="200">
+              <button type="button" class="btn btn-soft-danger btn-sm w-100 mb-0 mt-1" (click)="removePendingPhoto(i)"><i class="ri-close-line"></i> Remove</button>
             </div>
           </div>
         </div>
@@ -1094,7 +1178,7 @@
 <ng-template #serviceHistorySearchModal let-modal>
   <div class="modal-header">
     <h5 class="modal-title">
-      <i class="ri-history-line me-1"></i> Find vehicle – Chassis No / Reg No
+      <i class="ri-history-line me-1"></i> Find vehicle – Chassis No / Reg No (search)
     </h5>
     <button type="button" class="btn-close" (click)="closeServiceHistorySearch()"></button>
   </div>
@@ -1111,7 +1195,8 @@
       <span class="small text-muted" *ngIf="isSuperAdmin">All dealers (SuperAdmin)</span>
     </div>
 
-    <!-- ---------- found (live scan) ---------- -->
+    <!-- 24.11.2026 OCR disabled - live scan / photo OCR removed from the modal (kept for reference)
+    [found (live scan)]
     <div class="sh-found mb-3" *ngIf="shFound">
       <div class="sh-found-tick">✓</div>
       <div class="small">Number read</div>
@@ -1119,7 +1204,7 @@
       <div class="small"><span class="spinner-border spinner-border-sm me-1" *ngIf="shLoading"></span>Fetching the vehicle details – your dealership first, then all dealers…</div>
     </div>
 
-    <!-- ---------- live scan ---------- -->
+    [live scan]
     <div class="border rounded p-2 mb-3 bg-light" *ngIf="!shFound">
       <div class="d-flex flex-wrap align-items-center gap-2">
         <strong class="small me-2"><i class="ri-camera-line"></i> Scan</strong>
@@ -1164,6 +1249,7 @@
       </div>
       <div *ngIf="shOcrError" class="text-danger small mt-1">{{ shOcrError }}</div>
     </div>
+    -->
 
     <!-- ---------- search ---------- -->
     <div class="row g-2 align-items-end" *ngIf="!shFound">

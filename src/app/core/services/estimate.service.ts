@@ -185,4 +185,8 @@ update(id: number, model: any): Observable<void> {
 downloadPdf(id: number): Observable<Blob> {
   return this.http.get(`${this.apiUrl}/download/${id}`, { responseType: 'blob' });
 }
+
+emailEstimate(id: number, email: string): Observable<Blob> {
+  return this.http.post(`${this.apiUrl}/${id}/email`, { email }, { responseType: 'blob' });
+}
 }

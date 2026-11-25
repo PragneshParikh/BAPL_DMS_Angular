@@ -2,15 +2,16 @@
 
 .filter-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: flex-end;
   gap: 12px;
+  overflow-x: auto;
 }
 
 .filter-field {
   display: flex;
   flex-direction: column;
-  min-width: 130px;
+  min-width: 140px;
 
   label {
     margin-bottom: 2px;
