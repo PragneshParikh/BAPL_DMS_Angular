@@ -853,4 +853,9 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
   cancel(): void {
     this.router.navigate(['/b2bjobcards']);
   }
+
+  goToFFIR(): void {
+    if (!this.jobCardId || this.mode !== 'view') return;
+    this.router.navigate(['/ffir-b2b', this.jobCardId]);
+  }
 }

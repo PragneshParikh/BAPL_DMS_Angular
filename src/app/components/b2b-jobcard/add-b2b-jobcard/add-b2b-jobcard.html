@@ -13,8 +13,12 @@
           <ng-container *ngTemplateOutlet="historyTable"></ng-container>
         </div>
       </div>
+      <button class="btn btn-primary btn-sm mb-0" type="button"
+        [disabled]="mode !== 'view' || !detail?.canEdit || !(canCreate || canEdit)" (click)="goToFFIR()">
+        FFIR
+      </button>
       <button class="btn btn-light btn-sm border mb-0" type="button" (click)="cancel()">
-        <i class="ri-arrow-left-line"></i> List
+        <i class="ri-arrow-left-line"></i> Back To List
       </button>
     </div>
 

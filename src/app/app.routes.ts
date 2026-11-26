@@ -194,6 +194,7 @@ export const routes: Routes = [
       { path: 'modelwise-service-schedule', component: ModelwiseServiceSchedule, data: [36] },
       { path: 'ffir', component: FFIR, data: [40] },
       { path: 'ffir/:id', component: FFIR, data: [40] },
+      { path: 'ffir-b2b/:id', component: FFIR, data: [160] },
       { path: 'ffirlisting', component: Ffirlisting, data: [40] },
       { path: 'repair-bill', component: RepairBill, data: [51] },
       { path: 'repair-bill-list', component: RepairBillList, data: [51] },

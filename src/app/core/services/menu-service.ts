@@ -24,6 +24,7 @@ export class MenuService {
     private storageService: StorageService
   ) {
     this.activeMenuModule = this.storageService.getSelectedModule() || 'ShowRoom';
+    this.activeModuleSource.next(this.activeMenuModule);
   }
 
   filterMenu(module: string) {

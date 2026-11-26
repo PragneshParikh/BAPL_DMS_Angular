@@ -174,7 +174,9 @@ export class ComplaintMaster implements OnInit {
   }
 
   refreshGrid(): void {
-    const rows = filterRows(this.complaintMasterModelList, this.searchTerm, ['complaintName', 'complaintGroupName', 'groupName']);
+    const rows = this.sortRows(
+      filterRows(this.complaintMasterModelList, this.searchTerm, ['complaintName', 'complaintGroupName', 'groupName'])
+    );
 
     this.collectionSize = rows.length;
 
@@ -190,40 +192,52 @@ export class ComplaintMaster implements OnInit {
   }
 
   sortColumn: string = '';
-sortDirection: 'asc' | 'desc' = 'asc';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
-sort(column: string): void {
+  sort(column: string): void {
+    const sortColumn = column === 'groupName' ? 'complaintGroupName' : column;
 
-  if (this.sortColumn === column) {
-    this.sortDirection =
-      this.sortDirection === 'asc' ? 'desc' : 'asc';
-  } else {
-    this.sortColumn = column;
-    this.sortDirection = 'asc';
-  }
-
-  this.complaintMasterModelList.sort((a: any, b: any) => {
-
-    const valueA = a[column];
-    const valueB = b[column];
-
-    if (valueA == null) return 1;
-    if (valueB == null) return -1;
-
-    if (typeof valueA === 'string') {
-
-      return this.sortDirection === 'asc'
-        ? valueA.localeCompare(valueB)
-        : valueB.localeCompare(valueA);
+    if (this.sortColumn === sortColumn) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = sortColumn;
+      this.sortDirection = 'asc';
     }
 
-    return this.sortDirection === 'asc'
-      ? valueA > valueB ? 1 : -1
-      : valueA < valueB ? 1 : -1;
-  });
+    this.page = 1;
+    this.refreshGrid();
+  }
 
-  this.refreshGrid();
-}
+  private sortRows(rows: ComplaintMasterModel[]): ComplaintMasterModel[] {
+    const sortColumn = this.sortColumn || 'complaintGroupName';
+
+    return rows.sort((a: any, b: any) => {
+      const valueA = a[sortColumn];
+      const valueB = b[sortColumn];
+
+      if (valueA == null) return valueB == null ? 0 : 1;
+      if (valueB == null) return -1;
+
+      let comparison: number;
+      if (typeof valueA === 'number' && typeof valueB === 'number') {
+        comparison = valueA - valueB;
+      } else if (typeof valueA === 'boolean' && typeof valueB === 'boolean') {
+        comparison = Number(valueA) - Number(valueB);
+      } else {
+        comparison = String(valueA).localeCompare(String(valueB), undefined, { sensitivity: 'base' });
+      }
+
+      if (comparison === 0 && sortColumn === 'complaintGroupName') {
+        comparison = String(a.complaintName ?? '').localeCompare(
+          String(b.complaintName ?? ''),
+          undefined,
+          { sensitivity: 'base' }
+        );
+      }
+
+      return this.sortDirection === 'asc' ? comparison : -comparison;
+    });
+  }
 
   downloadComplaintMasterExcel() {
     this.complaintService.getComplaintMasterExcel().subscribe((response: Blob) => {

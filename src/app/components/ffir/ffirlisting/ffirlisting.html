@@ -74,6 +74,7 @@
                         <th>Action</th>
                         <th>FFIR No/FFIR Date</th>
                         <th>FFIR Against</th>
+                        <th>Job Type</th>
                         <th>Customer</th>
                         <th>Model</th>
                         <th>Purpose</th>
@@ -112,6 +113,8 @@
                             {{ item.jobDate | date:'dd-MM-yyyy' }}
                         </td>
 
+                        <!-- Job Type -->
+                        <td>{{ item.jobType }}</td>
 
                         <!-- Manual Job No -->
                         <td>{{ item.customerName }}</td>
