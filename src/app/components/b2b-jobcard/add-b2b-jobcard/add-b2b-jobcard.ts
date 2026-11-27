@@ -103,6 +103,10 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
   globalResult: { source: string; chassisNo: string; regNo?: string | null; customerName?: string | null; mobile?: string | null;
     model?: string | null; dealerCode?: string | null; saleDate?: string | null } | null = null;
   globalSuggestions: B2BVehicleSuggestion[] = [];
+  /** 27.11.2026 - customer of the most recent job card of the found chassis (any dealer) */
+  globalLast: { name: string; mobile: string; jobNo: string; jobDate: string; dealer: string } | null = null;
+  globalLastLoading = false;
+  private globalLastSeq = 0;
   private globalTimer: any;
   private globalModalRef: any = null;
 
@@ -172,7 +176,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
     if (this.isAdmin) {
       this.api.getDealers().subscribe({
         next: (d) => (this.dealers = d || []),
-        error: (e) => (this.dealerMessage = B2BJobcardService.errorText(e, 'Could not load JobCardScanner dealers.'))
+        error: (e) => (this.dealerMessage = B2BJobcardService.errorText(e, 'Could not load the dealers.'))
       });
     }
     this.loadMasters();
@@ -186,7 +190,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
 
   private emptyForm(): B2BJobCardCreateRequest {
     return {
-      chassisNo: '', jobTypeId: null, serviceHeadId: null, priority: '', serviceLocationCode: '',
+      chassisNo: '', jobTypeId: null, serviceHeadId: null, priority: '', serviceLocationCode: '', jobCategory: 'B2B',
       odometerAtCheckIn: null, expectedDeliveryAt: null, complaints: [], batteryLevelAtCheckIn: null, jobSourceId: null,
       supervisorName: null, technicianName: null
     };
@@ -242,7 +246,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
       },
       error: (e) => {
         this.mastersLoading = false;
-        this.mastersError = B2BJobcardService.errorText(e, 'Could not load the JobCardScanner masters.');
+        this.mastersError = B2BJobcardService.errorText(e, 'Could not load the job card masters.');
       }
     });
   }
@@ -371,8 +375,10 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
       this.api.suggestVehicles(term, this.dealerCode).subscribe({
         next: (r) => {
           if (seq !== this.suggestSeq) return;
-          this.suggestions = r?.items || [];
           this.suggestScope = r?.scope || 'dealer';
+          // 27.11.2026 - a dealer login only sees its OWN vehicles while typing; other dealers' chassis are
+          // fetched only from the Search (all dealers) button. Admin on "All Dealers" (no dealer) sees everything.
+          this.suggestions = (this.dealerCode && this.suggestScope === 'all') ? [] : (r?.items || []);
           this.suggestLoading = false;
           this.suggestDone = true;
         },
@@ -408,22 +414,45 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
     this.f = {
       ...this.emptyForm(),
       jobTypeId: k.jobTypeId, serviceHeadId: k.serviceHeadId, priority: k.priority, serviceLocationCode: k.serviceLocationCode,
-      jobSourceId: k.jobSourceId, manualJobNo: k.manualJobNo, couponNo: k.couponNo, supervisorName: k.supervisorName,
+      jobSourceId: k.jobSourceId, manualJobNo: k.manualJobNo, couponNo: k.couponNo, jobCategory: k.jobCategory || 'B2B', supervisorName: k.supervisorName,
       technicianName: k.technicianName, batteryLevelAtCheckIn: k.batteryLevelAtCheckIn, customerVoice: k.customerVoice
     };
     this.card = null;
     this.history = [];
+    this.historyRaw.clear();
     this.historyChassis = '';
     this.previousOdometer = null;
     this.openJobCardNumber = '';
     this.vehicleLocked = false;
     this.vehicleSource = '';
     this.vehicleMessage = '';
+    this.vehicleNotOwn = false;
+  }
+
+  /** 27.11.2026 - vehicle belongs to another dealer and was not picked from the Search (all dealers) popup */
+  vehicleNotOwn = false;
+  private notOwnVehicle(): void {
+    this.vehicleNotOwn = true;
+    this.vehicleSource = '';
+    this.vehicleMessage = 'Not found at your dealership. Click the Search button to look in all dealers.';
+  }
+
+  /** display names for the data sources (no internal system names on screen) */
+  srcLabel(s: string | null | undefined): string {
+    const v = (s || '').trim();
+    if (!v || /jobcardscanner/i.test(v)) return 'B2B Job Card';
+    if (/^dms sale$/i.test(v)) return 'DMS Sale';
+    if (/^service history$/i.test(v)) return 'Service History';
+    if (/^dms job card$/i.test(v)) return 'DMS Job Card';
+    return v;
   }
 
   /** JobCardScanner first (vehicle + customer + history); not there -> DMS sale data pre-fills a new vehicle */
-  async lookupVehicle(value: string): Promise<void> {
+  async lookupVehicle(value: string, allowOtherDealer = false): Promise<void> {
     const v = (value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    // a dealer login gets another dealer's vehicle only through the Search (all dealers) popup
+    const myDealer = (this.dealerCode || '').toUpperCase();
+    const ownOnly = !!myDealer && !allowOtherDealer;
     if (v.length < 2) return;
     this.clearVehicle();
     this.vehicleLoading = true;
@@ -433,6 +462,10 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
       if (card?.found && card.vehicle) {
         const veh = card.vehicle;
         const cust = card.customer || {};
+        if (ownOnly && veh.dealerCode && veh.dealerCode.toUpperCase() !== myDealer) {
+          this.notOwnVehicle();
+          return;
+        }
         Object.assign(this.f, {
           chassisNo: veh.chassisNo || v, regNo: veh.regNo, model: veh.model, variant: veh.variant, color: veh.color,
           batteryNo: veh.batteryNo, motorNo: veh.motorNo, controllerNo: veh.controllerNo, converterNo: veh.converterNo,
@@ -440,7 +473,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
           customerName: cust.name, customerMobile: cust.mobile, customerEmail: cust.email, customerAddress: cust.address,
           customerCity: cust.city, customerState: cust.state
         });
-        this.history = (card.history || []).map(h => ({ ...h, source: 'B2B (JobCardScanner)' }));
+        this.history = (card.history || []).map(h => ({ ...h, partyName: h.partyName || h.customerName || cust.name || '', source: 'B2B (JobCardScanner)' }));
         this.isOpen['history'] = this.history.length > 0;
         this.previousOdometer = card.previousOdometer ?? null;
         // Admin on "All Dealers": the vehicle's JobCardScanner dealer becomes the job card dealer
@@ -453,13 +486,16 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
         const own = !!veh.dealerCode && !!this.dealerCode && veh.dealerCode.toUpperCase() === this.dealerCode.toUpperCase();
         this.vehicleLocked = own;
         this.vehicleSource = 'JobCardScanner';
-        this.vehicleMessage = own ? 'Vehicle found in JobCardScanner for this dealer.'
-          : `Vehicle found in JobCardScanner (dealer ${veh.dealerCode || '-'}); it is added to this dealer on save.`;
+        this.vehicleMessage = own ? 'Vehicle found.' : `Vehicle of dealer ${veh.dealerCode || '-'} - added to this dealer on save.`;
         this.searchTerm = this.f.chassisNo;
-        this.loadOtherHistory(this.f.chassisNo);
+        this.loadSupplementalHistory(this.f.chassisNo);
         return;
       }
       const sale: any = await firstValueFrom(this.chassisSearch.getGlobalChassisDetails(v)).catch(() => null);
+      if (sale && ownOnly && sale.dealerCode && String(sale.dealerCode).toUpperCase() !== myDealer) {
+        this.notOwnVehicle();
+        return;
+      }
       this.f.chassisNo = v;
       if (sale) {
         Object.assign(this.f, {
@@ -468,16 +504,22 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
           batteryNo: sale.batteryNumber || null, motorNo: sale.motorNo || null, controllerNo: sale.controllerNo || null,
           converterNo: sale.converterNo || null, chargerNo: sale.chargerNumber || null,
           purchaseDate: sale.saleDate ? String(sale.saleDate).split('T')[0] : null,
-          customerName: sale.customerName || null, customerMobile: sale.mobileNo || null
+          // 27.11.2026 - the DMS sale "customer" is often the dealer / sub-dealer: the customer comes from the
+          // latest job card's party name (below); the sale values are only a fallback when there is no job card
+          customerName: null, customerMobile: null
         });
         this.vehicleSource = 'DMS sale';
-        this.vehicleMessage = 'Not in JobCardScanner yet - details from the DMS sale. Check them; the vehicle is created on save.';
+        this.vehicleMessage = 'Details from the DMS sale - check them; the vehicle is created on save.';
       } else {
         this.vehicleSource = 'New';
-        this.vehicleMessage = 'Vehicle not found. Enter the vehicle and customer details; they are created on save.';
+        this.vehicleMessage = 'New vehicle - enter the vehicle and customer details.';
       }
       this.searchTerm = this.f.chassisNo;
-      this.loadOtherHistory(this.f.chassisNo);
+      await this.loadSupplementalHistory(this.f.chassisNo);
+      if (sale) {
+        if (!this.f.customerName) this.f.customerName = sale.customerName || null;
+        if (!this.f.customerMobile) this.f.customerMobile = sale.mobileNo || null;
+      }
     } catch (e) {
       this.vehicleMessage = B2BJobcardService.errorText(e, 'Could not look the vehicle up.');
     } finally {
@@ -490,18 +532,24 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
    * this.history) + DMS job cards of the chassis + imported service history (all dealers), newest first.
    * Previous Kms = the highest reading of all of them.
    */
-  private loadOtherHistory(chassisNo: string): void {
+  /** resolves once the history is merged and the latest job card's details are on the form */
+  private loadSupplementalHistory(chassisNo: string): Promise<void> {
     const chassis = (chassisNo || '').trim().toUpperCase();
-    if (chassis.length < 5) return;
+    if (chassis.length < 5) return Promise.resolve();
+    return new Promise<void>(resolve => {
     this.historyChassis = chassis;
     const today = new Date();
     const dms$ = this.jobCardService.getJobCardList({
       dealerCode: this.isAdmin ? null : this.storage.getDealerCode(), fromDate: '2000-01-01', toDate: this.ymd(today), chassisNo: chassis
     }).pipe(catchError(() => of([])));
     const imported$ = this.shLookup.vehicle(chassis, 'all').pipe(catchError(() => of(null)));
-    forkJoin([dms$, imported$]).subscribe(([dms, imported]: [any, any]) => {
-      if (this.historyChassis !== chassis) return;
+    // 27.11.2026 - the DMS sale bill is the source of truth for Sale Date
+    const sale$ = this.chassisSearch.getGlobalChassisDetails(chassis).pipe(catchError(() => of(null)));
+    forkJoin([dms$, imported$, sale$]).subscribe({ next: ([dms, imported, sale]: [any, any, any]) => {
+      if (this.historyChassis !== chassis) { resolve(); return; }
       const extra: B2BHistoryRow[] = [];
+      // 27.11.2026 - customer / vehicle details carried by each job, so the form can show the LATEST job card's details
+      const details = new Map<string, Record<string, any>>();
       const dmsList: any[] = Array.isArray(dms) ? dms : (dms?.data || []);
       for (const it of dmsList) {
         const h = it?.jobCardHeader || {};
@@ -510,7 +558,17 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
           id: 'dms-' + (h.id ?? h.jobNo), jobCardNumber: String(h.jobNo ?? ''), createdAt: h.jobinDate || h.createdDate || '',
           regNo: it?.jobCardCustomer?.registerNo || '', odometerAtCheckIn: Number(h.vehiclekms) || 0, jobType: it?.jobtype || '',
           serviceHead: [it?.serviceHead, it?.serviceType].filter(Boolean).join(' / '), serviceLocation: it?.location || '',
-          status: h.jobStatus || '', dealerCode: h.dealerCode || '', complaints: it?.complaint || '', source: 'DMS job card'
+          status: h.jobStatus || '', dealerCode: h.dealerCode || '', complaints: it?.complaint || '',
+          partyName: it?.jobCardCustomer?.customerName || '', source: 'DMS job card'
+        });
+        const c = it?.jobCardCustomer || {};
+        this.historyRaw.set('dms-' + (h.id ?? h.jobNo), {
+          ...this.primitives(h), ...this.primitives(c), jobType: it?.jobtype, serviceHead: it?.serviceHead,
+          serviceType: it?.serviceType, location: it?.location, complaint: it?.complaint
+        });
+        details.set('dms-' + (h.id ?? h.jobNo), {
+          customerName: c.customerName, customerMobile: c.customerMobile, regNo: c.registerNo, model: c.modelName,
+          motorNo: c.motorNo, batteryNo: c.batteryNo, purchaseDate: c.saleDate
         });
       }
       for (const v of (imported?.vehicles || [])) {
@@ -521,17 +579,111 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
             id: 'sh-' + (j['Id'] ?? j['JobNo'] ?? extra.length), jobCardNumber: String(j['JobNo'] ?? ''), createdAt: j['JobDate'] || '',
             regNo: j['RegNo'] || v.regNo || '', odometerAtCheckIn: isNaN(kms) ? 0 : kms, jobType: j['JobType'] || '',
             serviceHead: j['ServiceHead'] || '', serviceLocation: j['Location'] || '', status: j['JobStatus'] || j['Status'] || '',
-            dealerName: j['CompName'] || '', dealerCode: j['DealerCode'] || '', complaints: '', source: 'Service history'
+            dealerName: j['CompName'] || '', dealerCode: j['DealerCode'] || '', complaints: '',
+            partyName: j['PartyName'] || '', source: 'Service history'
+          });
+          this.historyRaw.set(extra[extra.length - 1].id, { ...j, Colour: v.colour, SoldThrough: v.soldThrough });
+          details.set(extra[extra.length - 1].id, {
+            customerName: j['PartyName'], customerMobile: j['MobileNumber'], regNo: j['RegNo'] || v.regNo,
+            model: j['Model'] || v.model, color: v.colour,
+            // DMS sale bill date first (v.saleSource 'DMS'), then the date carried by the imported job
+            purchaseDate: (v.saleSource === 'DMS' && v.saleDate) || j['SaleDate'] || v.saleDate
           });
         }
       }
       const time = (r: B2BHistoryRow) => { const t = new Date(this.utc(r.createdAt) || 0).getTime(); return isNaN(t) ? 0 : t; };
-      const own = this.history.filter(h => h.source === 'B2B (JobCardScanner)' || !h.source);
-      this.history = [...own, ...extra].sort((a, b) => time(b) - time(a));
+      const scannerRows = this.history.filter(h => h.source === 'B2B (JobCardScanner)' || !h.source);
+      this.history = [...scannerRows, ...extra].sort((a, b) => time(b) - time(a));
       if (this.history.length) this.isOpen['history'] = true;
-      const maxKms = Math.max(0, ...this.history.map(h => Number(h.odometerAtCheckIn) || 0));
-      if (maxKms > (this.previousOdometer || 0)) this.previousOdometer = maxKms;
+      // 27.11.2026 - Previous Kms = odometer of the LATEST job (by job date), not the highest reading ever
+      // (one wrong entry, e.g. 66677 instead of 6666, used to block every new job card)
+      const latest = this.history.find(h => time(h) > 0 && (Number(h.odometerAtCheckIn) || 0) > 0);
+      if (latest) this.previousOdometer = Number(latest.odometerAtCheckIn);
+      // newest job card that carries a party name (a newest row without one, e.g. a PDI, is skipped)
+      const newestWithParty = this.history.find(h => !!String(details.get(h.id)?.['customerName'] || '').trim());
+      if (this.history[0] && details.has(this.history[0].id)) this.applyLatestJobDetails(details.get(newestWithParty?.id || this.history[0].id));
+      // Sale Date: DMS sale bill wins over every job card / vehicle record (they often hold the PDI or job date)
+      const dmsVeh = (imported?.vehicles || []).find((x: any) => String(x?.chassisNo || '').trim().toUpperCase() === chassis && x.saleSource === 'DMS');
+      const saleDate = String(sale?.saleDate || dmsVeh?.saleDate || '').split('T')[0];
+      if (/^\d{4}-\d{2}-\d{2}$/.test(saleDate) && !saleDate.startsWith('0001') && !saleDate.startsWith('1900')) this.f.purchaseDate = saleDate;
+      resolve();
+    }, error: () => resolve() });
     });
+  }
+
+  /**
+   * 27.11.2026 - customer / vehicle fields come from the most recently created job card of the chassis
+   * (newest Job Date across B2B, DMS and service-history jobs). Only non-empty values replace what is shown;
+   * when the newest job is a B2B job card its details are already on the form.
+   */
+  private applyLatestJobDetails(d: Record<string, any> | undefined): void {
+    if (!d) return;
+    const val = (x: any) => (x === null || x === undefined ? '' : String(x).trim());
+    for (const k of ['customerName', 'customerMobile', 'regNo', 'model', 'color', 'motorNo', 'batteryNo']) {
+      const x = val(d[k]);
+      if (x && x !== '-') (this.f as any)[k] = x;
+    }
+    const sale = val(d['purchaseDate']).split('T')[0];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(sale) && !sale.startsWith('0001') && !sale.startsWith('1900')) this.f.purchaseDate = sale;
+  }
+
+  // =========================================================== job card detail popup (27.11.2026)
+  /** every field of each history row as it came from its source (service history / DMS job card / B2B) */
+  private historyRaw = new Map<string, Record<string, any>>();
+  historyDetail: { row: B2BHistoryRow; fields: { label: string; value: string; amount: boolean }[] } | null = null;
+
+  private primitives(o: any): Record<string, any> {
+    const r: Record<string, any> = {};
+    for (const [k, v] of Object.entries(o || {})) if (v === null || ['string', 'number', 'boolean'].includes(typeof v)) r[k] = v;
+    return r;
+  }
+
+  private static readonly DETAIL_LABELS: Record<string, string> = {
+    JobNo: 'Job Card No', jobNo: 'Job Card No', jobCardNumber: 'Job Card No', JobDate: 'Job Date', jobinDate: 'Job Date', createdAt: 'Job Date',
+    JobType: 'Job Type', jobType: 'Job Type', ServiceHead: 'Service Head', serviceHead: 'Service Head', JobCategory: 'Job Category',
+    RepairType: 'Repair Type', JobStatus: 'Status', jobStatus: 'Status', status: 'Status', Location: 'Service Location', location: 'Service Location',
+    serviceLocation: 'Service Location', DealerCode: 'Dealer Code', dealerCode: 'Dealer Code', CompName: 'Dealer', dealerName: 'Dealer',
+    ChassisNo: 'Chassis No', chassisNo: 'Chassis No', chassisno: 'Chassis No', RegNo: 'Reg No', registerNo: 'Reg No', regNo: 'Reg No',
+    Model: 'Model', modelName: 'Model', KMS: 'KMs', vehiclekms: 'KMs', odometerAtCheckIn: 'KMs', PartyName: 'Party Name', customerName: 'Party Name',
+    partyName: 'Party Name', MobileNumber: 'Mobile No', customerMobile: 'Mobile No', customerAltMobile: 'Alt. Mobile', SaleDate: 'Sale Date',
+    saleDate: 'Sale Date', DocType: 'Document Type', DocNo: 'Document No', InvoiceDate: 'Invoice Date', Technician: 'Technician',
+    Supervisor: 'Supervisor', Parts: 'Parts', Accessory: 'Accessory', Oil: 'Oil', Labour: 'Labour', OutsideWork: 'Outside Work',
+    TotalWOTax: 'Total w/o Tax', GSTAmount: 'GST', IGSTAmount: 'IGST', NetTotal: 'Net Total', complaint: 'Complaint', complaints: 'Complaint',
+    Colour: 'Colour', SoldThrough: 'Sold Through', motorNo: 'Motor No', batteryNo: 'Battery No'
+  };
+  private static readonly DETAIL_AMOUNTS = new Set(['Parts', 'Accessory', 'Oil', 'Labour', 'OutsideWork', 'TotalWOTax', 'GSTAmount', 'IGSTAmount', 'NetTotal']);
+
+  openHistoryDetail(h: B2BHistoryRow, tpl: any): void {
+    const raw: Record<string, any> = this.historyRaw.get(h.id) || { ...h };
+    const order = Object.keys(AddB2BJobcard.DETAIL_LABELS);
+    const keys = Object.keys(raw)
+      .filter(k => !/^(id|.*Id|source|password.*)$/i.test(k))
+      .filter(k => { const v = raw[k]; return v !== null && v !== undefined && String(v).trim() !== '' && String(v).trim() !== '-'; })
+      .sort((a, b) => { const ia = order.indexOf(a), ib = order.indexOf(b); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib); });
+    const seen = new Set<string>();
+    const fields: { label: string; value: string; amount: boolean }[] = [];
+    for (const k of keys) {
+      const label = AddB2BJobcard.DETAIL_LABELS[k] || k.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/^./, c => c.toUpperCase());
+      if (seen.has(label)) continue;           // same field from two sources (e.g. jobNo + jobCardNumber)
+      seen.add(label);
+      const amount = AddB2BJobcard.DETAIL_AMOUNTS.has(k);
+      fields.push({ label, value: this.detailValue(raw[k], amount, label), amount });
+    }
+    this.historyDetail = { row: h, fields };
+    this.modalService.open(tpl, { size: 'lg', centered: true, scrollable: true });
+  }
+
+  private detailValue(v: any, amount: boolean, label: string): string {
+    if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+    if (amount && !isNaN(Number(v))) return '₹ ' + Number(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (label === 'KMs' && !isNaN(Number(v))) return Number(v).toLocaleString('en-IN');
+    const s = String(v);
+    const m = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/.exec(s);
+    if (m) {
+      const date = `${m[3]}.${m[2]}.${m[1]}`;
+      return m[4] && !(m[4] === '00' && m[5] === '00') ? `${date} ${m[4]}:${m[5]}` : date;
+    }
+    return s;
   }
 
   // =========================================================== "Search Chassis Across All Dealers" popup
@@ -579,6 +731,8 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
     this.globalSearching = true;
     this.globalResult = null;
     this.globalNotFound = false;
+    this.globalLast = null;
+    this.globalLastSeq++;
     try {
       const card = await firstValueFrom(this.api.getVehicle(v, null)).catch(() => null);
       if (card?.found && card.vehicle) {
@@ -608,7 +762,40 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
       this.globalNotFound = true;
     } finally {
       this.globalSearching = false;
+      if (this.globalResult?.chassisNo) this.loadGlobalLastCustomer(this.globalResult.chassisNo);
     }
+  }
+
+  /** newest job card of the chassis across B2B job cards and the imported service history (all dealers) */
+  private loadGlobalLastCustomer(chassisNo: string): void {
+    const chassis = (chassisNo || '').trim().toUpperCase();
+    if (chassis.length < 5) return;
+    const seq = ++this.globalLastSeq;
+    this.globalLastLoading = true;
+    const b2b$ = this.api.getVehicle(chassis, null).pipe(catchError(() => of(null)));
+    const imported$ = this.shLookup.vehicle(chassis, 'all').pipe(catchError(() => of(null)));
+    forkJoin([b2b$, imported$]).subscribe({
+      next: ([card, imported]: [any, any]) => {
+        if (seq !== this.globalLastSeq) return;
+        const rows: { name: string; mobile: string; jobNo: string; jobDate: string; dealer: string; t: number }[] = [];
+        const t = (d: any) => { const x = new Date(this.utc(d) || 0).getTime(); return isNaN(x) ? 0 : x; };
+        for (const h of (card?.history || [])) {
+          rows.push({ name: h.partyName || h.customerName || card?.customer?.name || '', mobile: card?.customer?.mobile || '',
+            jobNo: String(h.jobCardNumber || ''), jobDate: h.createdAt || '', dealer: h.dealerName || h.dealerCode || card?.vehicle?.dealerCode || '', t: t(h.createdAt) });
+        }
+        for (const v of (imported?.vehicles || [])) {
+          if (String(v?.chassisNo || '').trim().toUpperCase() !== chassis) continue;
+          for (const j of (v.jobs || [])) {
+            rows.push({ name: j['PartyName'] || '', mobile: j['MobileNumber'] || '', jobNo: String(j['JobNo'] ?? ''),
+              jobDate: j['JobDate'] || '', dealer: j['CompName'] || j['DealerCode'] || '', t: t(j['JobDate']) });
+          }
+        }
+        const best = rows.filter(r => r.name && r.t > 0).sort((a, b) => b.t - a.t)[0];
+        this.globalLast = best ? { name: best.name, mobile: best.mobile, jobNo: best.jobNo, jobDate: best.jobDate, dealer: best.dealer } : null;
+        this.globalLastLoading = false;
+      },
+      error: () => { if (seq === this.globalLastSeq) this.globalLastLoading = false; }
+    });
   }
 
   useGlobalChassis(): void {
@@ -616,7 +803,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
     const chassis = this.globalResult.chassisNo;
     this.closeGlobalSearch();
     this.searchTerm = chassis;
-    this.lookupVehicle(chassis);
+    this.lookupVehicle(chassis, true);
   }
 
   // =========================================================== complaints
@@ -676,7 +863,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
 
   private validate(): string {
     if (this.isAdmin && !this.dealerCode) return 'Select the dealer.';
-    if (!this.dealerName) return this.dealerMessage || 'This dealer is not set up in JobCardScanner.';
+    if (!this.dealerName) return this.dealerMessage || 'This dealer is not set up for B2B job cards.';
     if ((this.f.chassisNo || '').replace(/[^A-Za-z0-9]/g, '').length < 5) return 'Search and select the vehicle (Chassis No / Reg No).';
     if (this.openJobCardNumber) return `This chassis already has an open job card (${this.openJobCardNumber}).`;
     if (!this.f.jobTypeId) return 'Job Type is required.';
@@ -794,7 +981,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
           this.api.getVehicle(v.chassisNo, this.isAdmin ? this.dealerCode : null).subscribe({
             next: (card) => {
               this.history = (card?.history || []).filter(h => h.id !== d.id).map(h => ({ ...h, source: 'B2B (JobCardScanner)' }));
-              this.loadOtherHistory(v.chassisNo!);
+              this.loadSupplementalHistory(v.chassisNo!);
             },
             error: () => (this.history = [])
           });

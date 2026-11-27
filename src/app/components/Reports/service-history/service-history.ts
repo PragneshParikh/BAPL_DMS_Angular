@@ -113,13 +113,27 @@ export class ServiceHistory implements OnInit {
     this.load();
   }
 
+  /** header sort (server-side, so it covers every page, not just the rows on screen) */
+  sortBy = 'JobDate';
+  sortDir: 'asc' | 'desc' = 'desc';
+
+  sort(col: string): void {
+    if (this.sortBy === col) this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+    else { this.sortBy = col; this.sortDir = 'asc'; }
+    if (this.searched) { this.page = 1; this.load(); }
+  }
+
+  sortIcon(col: string): string {
+    return this.sortBy !== col ? 'ri-arrow-up-down-line sh-sort-idle' : this.sortDir === 'asc' ? 'ri-arrow-up-line' : 'ri-arrow-down-line';
+  }
+
   onPageSizeChange(): void { if (this.searched) { this.page = 1; this.load(); } }
 
   async load(): Promise<void> {
     this.loading = true;
     this.error = null;
     try {
-      this.data = await firstValueFrom(this.api.serviceHistory(this.searched, this.page, this.pageSize, this.searchedExact));
+      this.data = await firstValueFrom(this.api.serviceHistory(this.searched, this.page, this.pageSize, this.searchedExact, this.sortBy, this.sortDir));
       if (this.view === 'card' && this.data.total) this.loadCard();   // keep the card in step with a new search
     } catch (e: any) {
       this.error = await this.api.errorText(e);
@@ -209,7 +223,7 @@ export class ServiceHistory implements OnInit {
     if (!this.searched || !this.data?.total || this.exporting) return;
     this.exporting = true;
     try {
-      const res = await firstValueFrom(this.api.exportServiceHistory(this.searched, this.searchedExact));
+      const res = await firstValueFrom(this.api.exportServiceHistory(this.searched, this.searchedExact, this.sortBy, this.sortDir));
       this.api.save(res, `Service_History_${this.searched}.xlsx`);
       this.toast(`${this.num(Number(res.headers.get('X-Row-Count') ?? this.data.total))} records exported.`, 'success');
     } catch (e: any) {

@@ -123,6 +123,9 @@ export interface B2BHistoryRow {
   dealerCode?: string | null;
   dealerName?: string | null;
   complaints?: string | null;
+  /** customer / party on that job card (27.11.2026) */
+  partyName?: string | null;
+  customerName?: string | null;
   /** B2B (JobCardScanner) / DMS job card / Service history - set by the form when it merges the sources */
   source?: string | null;
 }
@@ -194,6 +197,7 @@ export interface B2BJobCardDetail {
   jobTypeName?: string | null;
   serviceHeadId?: number | null;
   serviceHeadName?: string | null;
+  serviceTypeName?: string | null;
   priority: string;
   serviceLocationCode?: string | null;
   serviceLocationName?: string | null;
@@ -244,6 +248,8 @@ export interface B2BJobCardCreateRequest {
   jobSourceName?: string | null;
   manualJobNo?: string | null;
   couponNo?: string | null;
+  /** 27.11.2026 - Job Category on the form: 'B2B' (default) or 'B2C' */
+  jobCategory?: 'B2B' | 'B2C' | null;
   supervisorName?: string | null;
   technicianName?: string | null;
   odometerAtCheckIn: number | null;

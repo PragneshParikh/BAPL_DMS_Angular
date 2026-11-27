@@ -178,3 +178,24 @@ label {
   color: #212529;
   padding: 4px 8px;
 }
+
+// 27.11.2026 chassis search: dropdown wide enough (no cut text / sideways scroll); message stays one line
+.dropdown-menu-chassis {
+  top: auto; left: 0; min-width: 100%; width: max-content; max-width: min(520px, 92vw);
+  overflow-x: hidden; padding: 4px 0;
+  .dropdown-item { white-space: normal; padding: 6px 12px; line-height: 1.3; }
+}
+.b2b-msg { font-size: 11.5px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+// 27.11.2026 Service Card History rows open the job card detail
+.b2b-hist-row { cursor: pointer; }
+.b2b-hist-row:hover td { background: #eef2ff; }
+.b2b-detail-grid { border-top: 1px solid #e9ebec; border-left: 1px solid #e9ebec; }
+.b2b-detail-item { display: flex; justify-content: space-between; gap: 12px; padding: 7px 12px; font-size: 13px;
+  border-right: 1px solid #e9ebec; border-bottom: 1px solid #e9ebec; height: 100%; }
+.b2b-detail-label { color: #6c757d; white-space: nowrap; }
+.b2b-detail-value { color: #212529; text-align: right; word-break: break-word; }
+
+// 27.11.2026 Job Category: same label style as the other fields, buttons as tall as the inputs
+.b2b-cat { height: calc(1.5em + .5rem + 2px);
+  .btn { min-width: 64px; display: flex; align-items: center; justify-content: center; font-size: 12.5px; padding: 0 14px; } }

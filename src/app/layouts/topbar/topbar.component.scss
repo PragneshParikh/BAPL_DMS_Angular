@@ -262,3 +262,29 @@
 .tb-profile-row { display: flex; justify-content: space-between; gap: .75rem; padding: .4rem 1rem; font-size: 12.5px;
   span { color: #878a99; } b { font-weight: 500; color: #212529; text-align: right; } }
 .min-w-0 { min-width: 0; }
+
+// 27.11.2026 profile menu items + Mapped Dealers popup
+.tb-menu-item {
+  display: flex; align-items: center; gap: .65rem; padding: .5rem 1rem; font-size: 13px; color: #495057;
+  i { font-size: 17px; color: #878a99; }
+  &:hover i { color: var(--vz-primary, #405189); }
+}
+.tb-md-backdrop {
+  position: fixed; inset: 0; z-index: 1065; background: rgba(15, 23, 42, .45);
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.tb-md-dialog {
+  width: 560px; max-width: 100%; background: #fff; border-radius: 10px; overflow: hidden;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, .25);
+}
+.tb-md-head { display: flex; justify-content: space-between; align-items: center; padding: .8rem 1rem; background: #747CA0; color: #fff;
+  h6 { color: #fff; font-weight: 600; } }
+.tb-md-body { padding: .9rem 1rem; }
+// 5 rows visible, then the list scrolls (header stays)
+.tb-md-table-wrap { max-height: 214px; overflow-y: auto; border-radius: 6px; }
+.tb-md-table {
+  font-size: 12.5px;
+  thead th { position: sticky; top: 0; z-index: 1; background: #f3f6f9; font-weight: 600; white-space: nowrap; }
+  td { height: 36px; vertical-align: middle; }
+}
+.tb-md-foot { display: flex; justify-content: space-between; align-items: center; padding: .6rem 1rem; border-top: 1px solid #e9ebec; }

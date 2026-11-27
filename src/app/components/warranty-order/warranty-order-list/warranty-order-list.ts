@@ -9,6 +9,7 @@ import { WarrantyOrderService } from '../../../core/services/warranty-order-serv
 import { LedgerMasterService } from '../../../core/services/ledger-master';
 import { StorageService } from '../../../core/services/storage';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { LocalPartsLocation, LocalPartsService } from '../../../core/services/local-parts.service';
 @Component({
   selector: 'app-warranty-order-list',
   standalone: true,
@@ -66,6 +67,7 @@ export class WarrantyOrderList implements OnInit {
     private storageService: StorageService,
     private ledgerService: LedgerMasterService,
     private warrantyOrderService: WarrantyOrderService,
+    private localPartsService: LocalPartsService,
     private menuAccess: MenuAccessService
   ) { 
     this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
@@ -101,17 +103,29 @@ export class WarrantyOrderList implements OnInit {
     });
   }
 
-  // Now loads only the locations actually used in this dealer's saved
-  // orders, per explicit request - replaces the earlier dealer-wide
-  // getLocationDropdownByDealerCode lookup, matching the same reasoning
-  // already applied on warranty-order.ts's own form (avoiding the
-  // confirmed bug where a valid location was excluded just because it
-  // wasn't tagged locareaidno=2 in the dealer-wide list).
   loadLocations(): void {
-    const dealerCode = this.storageService.getDealerCode();
-    this.warrantyOrderService.getDistinctOrderLocations(dealerCode).subscribe({
-      next: (res: any) => this.locationList = res || [],
-      error: (err) => console.error(err)
+    const role = (this.storageService.getRole() || '').toLowerCase().replace(/[\s_-]/g, '');
+    const isAdminOrSuperAdmin = role === 'admin' || role === 'superadmin';
+    const dealerCode = (this.storageService.getDealerCode() || '').trim().toLowerCase();
+    this.localPartsService.getWorkshopLocations().subscribe({
+      next: (locations: LocalPartsLocation[]) => {
+        this.locationList = (locations || [])
+          .filter((location: LocalPartsLocation) => isAdminOrSuperAdmin
+            || (location.dealerCode || '').trim().toLowerCase() === dealerCode)
+          .map((location: LocalPartsLocation) => ({
+            loccode: location.locationCode,
+            locname: location.locationName,
+            dealercode: location.dealerCode
+          }));
+      },
+      error: (err) => {
+        console.error('Failed to load Warranty Order warehouse locations:', err);
+        this.locationList = [];
+        this.toaster.show('Failed to load workshop locations.', {
+          classname: 'bg-danger text-white',
+          delay: 3000
+        });
+      }
     });
   }
 

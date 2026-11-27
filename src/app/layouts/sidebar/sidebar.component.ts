@@ -283,6 +283,12 @@ export class SidebarComponent implements OnInit {
   private ensurePartsD2DReportMenu(items: MenuItem[]): void {
     if (this.hasRouteRecursive(items, '/parts-d2d-report')) return;
 
+    // 27.11.2026 - this link was added for EVERY login, so it showed even after its rights were removed in
+    // Role Menu Rights. The page is a normal MenuMaster page (rights id 158) and comes from /api/menu when
+    // granted. Only SuperAdmin / Admin still get this fallback.
+    const role = (this.storageService.getRole() || '').toLowerCase().trim();
+    if (role !== 'superadmin' && role !== 'admin') return;
+
     const reportGroup = this.findMenuGroup(items, 'reports');
     const reportLink: MenuItem = {
       id: -1399,
@@ -304,6 +310,35 @@ export class SidebarComponent implements OnInit {
       isCollapsed: true,
       subItems: [reportLink]
     });
+  }
+
+  private ensureFFIRReportsMenu(items: MenuItem[]): void {
+    const role = (this.storageService.getRole() || '').toLowerCase().replace(/[^a-z]/g, '');
+    if (!['dealer', 'bgemployee', 'admin', 'superadmin'].includes(role)
+      || this.hasRouteRecursive(items, '/ffir-report')) {
+      return;
+    }
+
+    let reportGroup = this.findMenuGroup(items, 'reports');
+    if (!reportGroup) {
+      reportGroup = {
+        id: -1403,
+        label: 'Reports',
+        icon: 'ri-bar-chart-2-line',
+        module: 'workshop',
+        isCollapsed: true,
+        subItems: []
+      };
+      items.push(reportGroup);
+    }
+
+    reportGroup.subItems = [...(reportGroup.subItems ?? []), {
+      id: -1404,
+      label: 'FFIR Reports',
+      link: '/ffir-report',
+      module: reportGroup.module ?? 'workshop',
+      parentId: reportGroup.id
+    }];
   }
 
   private findMenuGroup(items: MenuItem[], label: string): MenuItem | undefined {
@@ -411,6 +446,7 @@ private hasRouteRecursive(items: MenuItem[] | undefined, path: string): boolean 
           const raw = Array.isArray(menu) ? menu : (menu?.data ?? menu?.result ?? menu?.items ?? []);
           this.menuItems = this.normalizeMenu(raw);
           this.ensurePartsD2DReportMenu(this.menuItems);
+          this.ensureFFIRReportsMenu(this.menuItems);
           resolve(menu);
           this.loader.hide();
         }, error: (err) => {

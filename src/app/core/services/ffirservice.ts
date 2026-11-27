@@ -48,6 +48,12 @@ export class FFIRService {
     );
   }
 
+  getFFIRPrintDetails(id: number): Observable<any> {
+    return this.httpClient.get(
+      `${environment.apiUrl}/FFIR/GetFFIRPrintDetails/${id}`
+    );
+  }
+
   updateFFIR(id: number, payload: any): Observable<any> {
     return this.httpClient.put(
       `${environment.apiUrl}/FFIR/UpdateFFIR/${id}`,
@@ -58,6 +64,35 @@ export class FFIRService {
   getAttachments(id: number): Observable<any[]> {
     return this.httpClient.get<any[]>(
       `${environment.apiUrl}/FFIR/GetFFIRAttachments/${id}`
+    );
+  }
+
+  getVerificationList(filters: {
+    fromDate?: string;
+    toDate?: string;
+    dealerCode?: string;
+    status?: string;
+  }): Observable<any[]> {
+    return this.httpClient.get<any[]>(
+      `${environment.apiUrl}/FFIR/GetVerificationList`,
+      { params: filters }
+    );
+  }
+
+  setVerificationStatus(
+    id: number,
+    status: 'Approved' | 'Rejected',
+    remarks: string | null = null
+  ): Observable<any> {
+    return this.httpClient.put(
+      `${environment.apiUrl}/FFIR/SetVerificationStatus/${id}`,
+      { status, remarks }
+    );
+  }
+
+  getVerificationAttachments(id: number): Observable<any[]> {
+    return this.httpClient.get<any[]>(
+      `${environment.apiUrl}/FFIR/GetVerificationAttachments/${id}`
     );
   }
 

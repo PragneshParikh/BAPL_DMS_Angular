@@ -91,18 +91,18 @@
 
                 <div class="small text-muted mt-1" *ngIf="suggestLoading"><span class="spinner-border spinner-border-sm me-1"></span>Searching…</div>
                 <div class="dropdown-menu dropdown-menu-chassis show w-100" *ngIf="suggestions.length > 0">
-                  <div class="dropdown-header small" *ngIf="suggestScope === 'all'">Not found at your dealership – all dealers</div>
                   <button type="button" class="dropdown-item" *ngFor="let s of suggestions" (mousedown)="pickSuggestion(s)">
-                    <div>{{ s.chassisNo }} <span class="badge bg-light text-dark border ms-1">{{ s.source }}</span></div>
-                    <small class="text-muted">Reg No: {{ s.regNo || '-' }} | {{ s.model || '-' }} | {{ s.customerName || '-' }} | Dealer: {{ s.dealerCode || '-' }}</small>
+                    <div class="fw-medium">{{ s.chassisNo }}</div>
+                    <small class="text-muted">Reg No: {{ s.regNo || '-' }} | {{ s.model || '-' }} | {{ s.customerName || '-' }}<span *ngIf="!dealerCode"> | Dealer: {{ s.dealerCode || '-' }}</span></small>
                   </button>
                 </div>
-                <small class="text-muted d-block mt-1" *ngIf="suggestDone && !suggestLoading && suggestions.length === 0 && searchTerm">
-                  No Chassis No / Reg No found in any dealer. Press Enter to add it as a new vehicle.
+                <small class="text-muted d-block mt-1 b2b-msg" *ngIf="suggestDone && !suggestLoading && suggestions.length === 0 && searchTerm && !vehicleMessage">
+                  {{ dealerCode && suggestScope === 'all' ? 'Not at your dealership - use Search for all dealers.' : 'No match. Press Enter to add a new vehicle.' }}
                 </small>
                 <small class="d-block mt-1" *ngIf="vehicleLoading"><span class="spinner-border spinner-border-sm me-1"></span>Fetching vehicle…</small>
-                <small class="d-block mt-1" *ngIf="!vehicleLoading && vehicleMessage"
-                  [class.text-success]="vehicleSource === 'JobCardScanner'" [class.text-primary]="vehicleSource !== 'JobCardScanner'">
+                <small class="d-block mt-1 b2b-msg" *ngIf="!vehicleLoading && vehicleMessage" [title]="vehicleMessage"
+                  [class.text-warning]="vehicleNotOwn" [class.text-success]="!vehicleNotOwn && vehicleSource === 'JobCardScanner'"
+                  [class.text-primary]="!vehicleNotOwn && vehicleSource !== 'JobCardScanner'">
                   {{ vehicleMessage }}
                 </small>
               </div>
@@ -110,7 +110,7 @@
               <div class="col-md-3">
                 <label>Odometer (km) <span class="text-danger">*</span></label>
                 <input type="number" min="0" class="form-control form-control-sm" [(ngModel)]="f.odometerAtCheckIn" [disabled]="ro"
-                  [placeholder]="previousOdometer ? ('Last JC: ' + previousOdometer + ' km') : 'Enter odometer km'"
+                  [placeholder]="previousOdometer ? ('Last: ' + previousOdometer + ' km') : 'Enter odometer km'"
                   [title]="previousOdometer ? ('Last job card odometer: ' + previousOdometer + ' km') : ''"
                   [class.is-invalid]="!!odometerError">
                 <div *ngIf="odometerError" class="text-danger small">{{ odometerError }}</div>
@@ -145,7 +145,7 @@
                   <option value="">Select Location</option>
                   <option *ngFor="let w of workshops" [value]="w.locCode">{{ w.locName }}</option>
                 </select>
-                <small class="text-muted b2b-xs" *ngIf="workshopSource === 'DMS'">From DMS (not synced to JobCardScanner yet)</small>
+                <small class="text-muted b2b-xs" *ngIf="workshopSource === 'DMS'">From DMS workshops</small>
               </div>
 
               <div class="col-md-4">
@@ -153,12 +153,14 @@
                 <input class="form-control form-control-sm" [(ngModel)]="f.couponNo" [disabled]="ro" maxlength="100">
               </div>
               <div class="col-md-4">
-                <label class="form-label d-block mb-1">Job Category</label>
-                <div class="btn-group w-auto" role="group">
-                  <input type="radio" class="btn-check" id="b2b-cat-b2c" disabled>
-                  <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2b-cat-b2c">B2C</label>
-                  <input type="radio" class="btn-check" id="b2b-cat-b2b" checked disabled>
-                  <label class="btn btn-outline-primary btn-sm px-2 py-1" for="b2b-cat-b2b">B2B</label>
+                <label class="d-block">Job Category</label>
+                <div class="btn-group btn-group-sm b2b-cat" role="group">
+                  <input type="radio" class="btn-check" id="b2b-cat-b2c" name="b2bJobCategory" value="B2C"
+                    [(ngModel)]="f.jobCategory" [disabled]="ro">
+                  <label class="btn btn-outline-primary btn-sm mb-0" for="b2b-cat-b2c">B2C</label>
+                  <input type="radio" class="btn-check" id="b2b-cat-b2b" name="b2bJobCategory" value="B2B"
+                    [(ngModel)]="f.jobCategory" [disabled]="ro">
+                  <label class="btn btn-outline-primary btn-sm mb-0" for="b2b-cat-b2b">B2B</label>
                 </div>
               </div>
               <div class="col-md-4">
@@ -244,7 +246,7 @@
 
           <!-- ================= RIGHT SIDE (CUSTOMER DETAILS) ================= -->
           <div class="col-md-6 ps-3">
-            <h6 class="mb-3">Customer Details <span class="badge bg-light text-dark border ms-1" *ngIf="vehicleSource">{{ vehicleSource }}</span></h6>
+            <h6 class="mb-3">Customer Details <span class="badge bg-light text-dark border ms-1" *ngIf="vehicleSource && vehicleSource !== 'JobCardScanner'">{{ srcLabel(vehicleSource) }}</span></h6>
             <div class="row g-3">
               <div class="col-md-12">
                 <label>Customer Name <span class="text-danger" *ngIf="!vehicleLocked && !ro">*</span></label>
@@ -481,11 +483,12 @@
       <thead class="table-light sticky-top">
         <tr>
           <th>Sr.No</th><th>Job Card No</th><th>Job Date</th><th>Vehicle No</th><th class="text-end">KMs</th><th>Job Type</th>
-          <th>Service Head</th><th>Complaint</th><th>Service Location</th><th>Status</th><th>Dealer</th><th>Source</th>
+          <th>Service Head</th><th>Party Name</th><th>Complaint</th><th>Service Location</th><th>Status</th><th>Dealer</th><th>Source</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let h of history; let i = index">
+        <tr *ngFor="let h of history; let i = index" class="b2b-hist-row" title="Click to see this job card"
+            (click)="openHistoryDetail(h, historyDetailModal)">
           <td>{{ i + 1 }}</td>
           <td>{{ h.jobCardNumber }}</td>
           <td>{{ utc(h.createdAt) | date:'dd.MM.yyyy' }}</td>
@@ -493,17 +496,42 @@
           <td class="text-end">{{ h.odometerAtCheckIn | number:'1.0-0' }}</td>
           <td>{{ h.jobType || '-' }}</td>
           <td>{{ h.serviceHead || '-' }}</td>
+          <td>{{ h.partyName || '-' }}</td>
           <td class="b2b-wrap">{{ h.complaints || '-' }}</td>
           <td>{{ h.serviceLocation || '-' }}</td>
           <td>{{ h.status }}<span *ngIf="h.stage"> / {{ h.stage }}</span></td>
           <td>{{ h.dealerName || h.dealerCode || '-' }}</td>
-          <td><span class="badge bg-light text-dark border">{{ h.source || 'B2B (JobCardScanner)' }}</span></td>
+          <td><span class="badge bg-light text-dark border">{{ srcLabel(h.source) }}</span></td>
         </tr>
         <tr *ngIf="!history.length">
-          <td colspan="12" class="text-center text-muted">No earlier job cards for this vehicle.</td>
+          <td colspan="13" class="text-center text-muted">No earlier job cards for this vehicle.</td>
         </tr>
       </tbody>
     </table>
+  </div>
+</ng-template>
+
+<!-- ======================= Job card detail (click a Service Card History row) ======================= -->
+<ng-template #historyDetailModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Job Card {{ historyDetail?.row?.jobCardNumber || '' }}
+      <span class="badge bg-light text-dark border ms-2 fw-normal">{{ srcLabel(historyDetail?.row?.source) }}</span>
+    </h5>
+    <button type="button" class="btn-close btn-close-white" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="row g-0 b2b-detail-grid" *ngIf="historyDetail?.fields?.length; else noDetail">
+      <div class="col-md-6" *ngFor="let f of historyDetail?.fields">
+        <div class="b2b-detail-item">
+          <span class="b2b-detail-label">{{ f.label }}</span>
+          <span class="b2b-detail-value" [class.text-end]="f.amount" [class.fw-semibold]="f.label === 'Net Total'">{{ f.value }}</span>
+        </div>
+      </div>
+    </div>
+    <ng-template #noDetail><div class="text-muted text-center py-3">No details for this job card.</div></ng-template>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light btn-sm mb-0" (click)="modal.dismiss()">Close</button>
   </div>
 </ng-template>
 
@@ -522,7 +550,7 @@
         <div class="list-group position-absolute w-100 shadow-sm b2b-suggest" *ngIf="globalSuggestions.length > 0">
           <button type="button" class="list-group-item list-group-item-action py-1" *ngFor="let s of globalSuggestions"
             (click)="pickGlobalSuggestion(s)">
-            <div class="small fw-semibold">{{ s.chassisNo }} <span class="badge bg-light text-dark border ms-1">{{ s.source }}</span></div>
+            <div class="small fw-semibold">{{ s.chassisNo }} <span class="badge bg-light text-dark border ms-1">{{ srcLabel(s.source) }}</span></div>
             <div class="text-muted b2b-xs">Reg No: {{ s.regNo || '-' }} | {{ s.customerName || '-' }} | Dealer: {{ s.dealerCode || '-' }}</div>
           </button>
         </div>
@@ -539,17 +567,26 @@
         <tbody>
           <tr><td class="text-muted small w-30">Chassis No</td><td>{{ globalResult.chassisNo || '-' }}</td></tr>
           <tr><td class="text-muted small">Register No</td><td>{{ globalResult.regNo || '-' }}</td></tr>
-          <tr><td class="text-muted small">Customer Name</td><td>{{ globalResult.customerName || '-' }}</td></tr>
-          <tr><td class="text-muted small">Mobile No.</td><td>{{ globalResult.mobile || '-' }}</td></tr>
+          <!-- 27.11.2026 Customer = party name of the latest job card (the DMS sale "customer" is often the dealer / sub-dealer) -->
+          <tr><td class="text-muted small">Customer Name</td>
+            <td>
+              <span *ngIf="globalLastLoading" class="small text-muted"><span class="spinner-border spinner-border-sm me-1"></span>Loading…</span>
+              <span *ngIf="!globalLastLoading">{{ globalLast?.name || globalResult.customerName || '-' }}</span>
+            </td></tr>
+          <tr><td class="text-muted small">Mobile No.</td>
+            <td><span *ngIf="!globalLastLoading">{{ (globalLast?.name ? globalLast?.mobile : globalResult.mobile) || globalResult.mobile || '-' }}</span></td></tr>
+          <tr *ngIf="!globalLastLoading && globalLast"><td class="text-muted small">Last Job Card</td>
+            <td>{{ globalLast.jobNo || '-' }} · {{ utc(globalLast.jobDate) | date:'dd.MM.yyyy' }}<span *ngIf="globalLast.dealer"> · {{ globalLast.dealer }}</span></td></tr>
+          <tr *ngIf="!globalLastLoading && globalLast && globalResult.customerName && globalResult.customerName !== globalLast.name">
+            <td class="text-muted small">Sold To (DMS sale)</td><td class="text-muted">{{ globalResult.customerName }}</td></tr>
           <tr><td class="text-muted small">Model</td><td>{{ globalResult.model || '-' }}</td></tr>
           <tr><td class="text-muted small">Dealer</td><td>{{ globalResult.dealerCode || '-' }}</td></tr>
           <tr><td class="text-muted small">Sale Date</td><td>{{ globalResult.saleDate ? (globalResult.saleDate | date:'dd-MM-yyyy') : '-' }}</td></tr>
-          <tr><td class="text-muted small">Found in</td><td><span class="badge bg-light text-dark border">{{ globalResult.source }}</span></td></tr>
         </tbody>
       </table>
     </div>
     <div class="mt-3 text-danger small" *ngIf="globalNotFound">
-      No vehicle with this Chassis No / Reg No in any dealer (JobCardScanner, DMS sales, service history).
+      No vehicle with this Chassis No / Reg No in any dealer.
     </div>
   </div>
   <div class="modal-footer">

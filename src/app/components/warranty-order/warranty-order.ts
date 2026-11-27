@@ -7,6 +7,7 @@ import { switchMap } from 'rxjs/operators';
 import { LoaderService } from '../../core/services/loader';
 import { StorageService } from '../../core/services/storage';
 import { LedgerMasterService } from '../../core/services/ledger-master';
+import { LocalPartsLocation, LocalPartsService } from '../../core/services/local-parts.service';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { WarrantyOrderService } from '../../core/services/warranty-order-service';
 import { WarrantyInvoiceService } from '../../core/services/warranty-invoice-service';
@@ -33,9 +34,13 @@ export class WarrantyOrder implements OnInit {
   orderNo: string = '';       // auto-generated, read-only on the form
   orderDate: string = '';
   selectedLocation: string | null = null;
+  jobCardTypeFilter: string = '';
+  hasSearchedFilters: boolean = false;
   claimType: string = 'Warranty';
   selectedSupplierId: number | null = null;
   locationList: any[] = [];
+  isAdminOrSuperAdmin = false;
+  private locationCatalogLoaded = false;
   supplierList: any[] = [];
   selectedClaims: any[] = [];
   historicalClaims: any[] = [];
@@ -54,6 +59,7 @@ export class WarrantyOrder implements OnInit {
     private loader: LoaderService,
     private storageService: StorageService,
     private ledgerService: LedgerMasterService,
+    private localPartsService: LocalPartsService,
     private toaster: ToastService,
     private warrantyOrderService: WarrantyOrderService,
     private warrantyInvoiceService: WarrantyInvoiceService,
@@ -73,6 +79,9 @@ export class WarrantyOrder implements OnInit {
     this.dateFrom = this.formatDate(firstDayOfMonth);
     this.dateTo = this.formatDate(today);
 
+    const role = (this.storageService.getRole() || '').toLowerCase().replace(/[\s_-]/g, '');
+    this.isAdminOrSuperAdmin = role === 'admin' || role === 'superadmin';
+    this.loadLocations();
     this.loadSuppliers();
 
     const routeId = this.route.snapshot.paramMap.get('id');
@@ -92,10 +101,14 @@ export class WarrantyOrder implements OnInit {
     if (viewOrderId) {
       sessionStorage.removeItem('viewWarrantyOrderId');
       this.orderId = Number(viewOrderId);
+      this.jobCardTypeFilter = 'All';
+      this.hasSearchedFilters = true;
       this.loadExistingOrder(this.orderId);
     } else if (routeId) {
       // Edit mode - Batch No / Order No were already generated at creation time.
       this.orderId = Number(routeId);
+      this.jobCardTypeFilter = 'All';
+      this.hasSearchedFilters = true;
       this.loadExistingOrder(this.orderId);
     } else if (pending?.claimId) {
       // A new claim is waiting to be added - auto-saves silently (no
@@ -297,10 +310,6 @@ loadPendingClaims(): void {
 
           if (this.selectedClaims.length > 0) {
             const firstClaim = this.selectedClaims[0];
-            if (firstClaim.serviceLocation) {
-              this.locationList = [{ loccode: firstClaim.serviceLocation, locname: firstClaim.locationName || firstClaim.serviceLocation }];
-              this.selectedLocation = firstClaim.serviceLocation;
-            }
             if (firstClaim.supplierId) {
               this.selectedSupplierId = firstClaim.supplierId;
             }
@@ -323,7 +332,25 @@ loadPendingClaims(): void {
   // stay read-only (auto-generated), so search works by Date From/To,
   // Location, Claim Type, and Supplier.
   searchOrder(): void {
+    if (!this.selectedLocation) {
+      this.toaster.show('Please select a Location.', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+
+    if (!this.jobCardTypeFilter) {
+      this.toaster.show('Please select a Job Card Type.', {
+        classname: 'bg-warning text-white',
+        delay: 3000
+      });
+      return;
+    }
+
+    this.hasSearchedFilters = false;
     const filter = {
+      dealerCode: this.isAdminOrSuperAdmin ? null : this.storageService.getDealerCode(),
       dateFrom: this.dateFrom || null,
       dateTo: this.dateTo || null,
       location: this.selectedLocation || null,
@@ -337,16 +364,18 @@ loadPendingClaims(): void {
     this.warrantyOrderService.searchWarrantyOrders(filter).subscribe({
       next: (res: any) => {
         this.loader.hide();
+        this.hasSearchedFilters = true;
         const items = res?.items || [];
         if (items.length > 0) {
           this.orderId = items[0].id;
           this.loadExistingOrder(this.orderId);
-        } else {
+        } else if (this.claimLineRows.length === 0) {
           this.toaster.show('No matching Warranty Order found.', {
             classname: 'bg-warning text-white',
             delay: 3000
           });
         }
+
       },
       error: (err) => {
         this.loader.hide();
@@ -359,11 +388,74 @@ loadPendingClaims(): void {
     });
   }
 
+  onSearchFilterChange(): void {
+    this.hasSearchedFilters = false;
+  }
+
   formatDate(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private loadLocations(): void {
+    if (!this.isAdminOrSuperAdmin && !this.storageService.getDealerCode()) {
+      this.locationCatalogLoaded = true;
+      this.locationList = [];
+      this.selectedLocation = null;
+      this.toaster.show('Could not load locations because no dealer is associated with this account.', {
+        classname: 'bg-danger text-white',
+        delay: 5000
+      });
+      return;
+    }
+
+    this.localPartsService.getWorkshopLocations().subscribe({
+      next: (locations: LocalPartsLocation[]) => {
+        const dealerCode = (this.storageService.getDealerCode() || '').trim().toLowerCase();
+        this.locationList = (locations || [])
+          .filter((loc: LocalPartsLocation) => this.isAdminOrSuperAdmin
+            || (loc.dealerCode || '').trim().toLowerCase() === dealerCode)
+          .map((loc: LocalPartsLocation) => ({
+            loccode: String(loc.locationCode || '').trim(),
+            locname: String(loc.locationName || '').trim(),
+            dealercode: loc.dealerCode || null
+          }))
+          .filter((loc: any) => !!loc.loccode);
+        this.locationList.sort((a: any, b: any) => a.locname.localeCompare(b.locname));
+        this.locationCatalogLoaded = true;
+
+        const requestedLocation = this.selectedLocation;
+        this.selectedLocation = null;
+        if (requestedLocation) this.setSelectedLocation(requestedLocation);
+      },
+      error: (err) => {
+        console.error('Failed to load Warranty Order locations:', err);
+        this.locationCatalogLoaded = true;
+        this.locationList = [];
+        this.selectedLocation = null;
+        const serverMsg = err?.error?.title || err?.error?.message || err?.message || 'Unknown error';
+        this.toaster.show(`Could not load locations (status ${err?.status}): ${serverMsg}`, {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+      }
+    });
+  }
+
+  private setSelectedLocation(value: unknown): void {
+    if (value === null || value === undefined || !String(value).trim()) {
+      this.selectedLocation = null;
+      return;
+    }
+
+    const requested = String(value).trim();
+    const normalized = requested.toLowerCase();
+    const location = this.locationList.find((item: any) =>
+      item.loccode.toLowerCase() === normalized || item.locname.toLowerCase() === normalized
+    );
+    this.selectedLocation = location?.loccode ?? (this.locationCatalogLoaded ? null : requested);
   }
 
   loadSuppliers(): void {
@@ -459,12 +551,7 @@ loadPendingClaims(): void {
         this.orderNo = res.orderNo;
         this.orderDate = res.orderDate?.substring(0, 10);
 
-        if (res.location) {
-          this.locationList = [{ loccode: res.location, locname: res.locationName || res.location }];
-        } else {
-          this.locationList = [];
-        }
-        this.selectedLocation = res.location;
+        this.setSelectedLocation(res.location || res.locationName);
 
         this.claimType = res.claimType;
         this.selectedSupplierId = res.supplierId;
@@ -494,6 +581,7 @@ loadPendingClaims(): void {
     // order" (see saveWarrantyOrder) instead of trying to update an order
     // that's been deleted and can no longer be saved to directly.
     this.warrantyOrderService.searchWarrantyOrders({
+      dealerCode: this.isAdminOrSuperAdmin ? null : this.storageService.getDealerCode(),
       pageNumber: 1,
       pageSize: this.maxHistoricalOrders + 1, // +1 in case currentOrderId is in this page
       includeInactive: true
@@ -576,10 +664,7 @@ loadPendingClaims(): void {
 
         if (res.supplierId) this.selectedSupplierId = res.supplierId;
 
-        if (res.serviceLocation) {
-          this.locationList = [{ loccode: res.serviceLocation, locname: res.locationName || res.serviceLocation }];
-          this.selectedLocation = res.serviceLocation;
-        }
+        this.setSelectedLocation(res.locationCode || res.serviceLocation || res.locationName);
 
         // Claim is now visible in the grid, unchecked. Nothing is saved to
         // the DB until the user checks its box and clicks Save.
@@ -793,6 +878,7 @@ loadPendingClaims(): void {
 
   toggleSelectAllApproved(checked: boolean): void {
   const allRows = this.claimLineRows;
+  const visibleClaimIds = new Set(allRows.map(row => row.claimId));
   allRows.forEach(row => {
     row.isApproved = checked;
     if (row.lineRef) {
@@ -800,14 +886,9 @@ loadPendingClaims(): void {
     }
   });
 
-  this.selectedClaims.forEach(c => {
-    c.isApproved = checked;
-    if (c.details) {
-      c.details.forEach((d: any) => d.isApproved = checked);
-    }
-  });
-
-  this.historicalClaims.forEach(c => {
+  [...this.selectedClaims, ...this.historicalClaims]
+    .filter(c => visibleClaimIds.has(c.id))
+    .forEach(c => {
     c.isApproved = checked;
     if (c.details) {
       c.details.forEach((d: any) => d.isApproved = checked);
@@ -848,6 +929,47 @@ loadPendingClaims(): void {
 
   get totalClaims(): number {
     return this.selectedClaims.length;
+  }
+
+  get visibleWarrantyClaimCount(): number {
+    if (!this.hasSearchedFilters || !this.jobCardTypeFilter || !this.selectedLocation) return 0;
+    return [...this.selectedClaims, ...this.historicalClaims]
+      .filter(claim => this.matchesSearchFilters(claim)).length;
+  }
+
+  private getClaimJobCardType(claim: any): string {
+    const type = claim?.recordType || claim?.RecordType || claim?.jobCardType || claim?.JobCardType;
+    if (type) return String(type).trim().toUpperCase();
+    return claim?.b2bJobCardId || claim?.B2BJobCardId ? 'B2B' : '';
+  }
+
+  private matchesJobCardType(claim: any): boolean {
+    return this.jobCardTypeFilter === 'All'
+      || this.getClaimJobCardType(claim) === this.jobCardTypeFilter;
+  }
+
+  private matchesLocation(claim: any): boolean {
+    if (!this.selectedLocation) return false;
+
+    const selectedCode = this.selectedLocation.trim().toLowerCase();
+    const selectedLocation = this.locationList.find((location: any) =>
+      location.loccode.toLowerCase() === selectedCode
+    );
+    const selectedName = selectedLocation?.locname?.trim().toLowerCase();
+    const claimLocationCode = claim?.locationCode ?? claim?.LocationCode
+      ?? claim?.serviceLocation ?? claim?.ServiceLocation;
+    const claimLocationName = claim?.locationName ?? claim?.LocationName;
+    const claimLocationValues = [claimLocationCode, claimLocationName]
+      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+      .map(value => value.trim().toLowerCase());
+
+    return claimLocationValues.some(value =>
+      value === selectedCode || (!!selectedName && value === selectedName)
+    );
+  }
+
+  private matchesSearchFilters(claim: any): boolean {
+    return this.matchesLocation(claim) && this.matchesJobCardType(claim);
   }
 
   // Flattens a claims array (each carrying a .details[] of part/labour
@@ -981,6 +1103,7 @@ private buildRowsFromClaims(claims: any[], startSrNo: number, isHistorical: bool
         isOrderDeleted: !!claim._isOrderDeleted,
         orderNo: claim._orderNo ?? this.orderNo,
         batchNo: claim._batchNo ?? this.batchNo,
+        jobCardType: this.getClaimJobCardType(claim),
 
         claimNo: `${claim.claimPrefix || ''}${claim.claimNo || ''}`,
         claimDate: claim.claimDate,
@@ -995,6 +1118,7 @@ private buildRowsFromClaims(claims: any[], startSrNo: number, isHistorical: bool
         kms: claim.kms ?? claim.kilometers ?? claim.distance ?? 0,
 
         locationName: claim.locationName || claim.serviceLocation || claim.locationCode || '',
+        locationCode: claim.locationCode || claim.serviceLocation || '',
 
         chassisNo: claim.chassisNo,
         motorNo: claim.motorNo || '',
@@ -1044,8 +1168,11 @@ toggleRowApproval(row: any, checked: boolean): void {
   // order's own rows render last, i.e. "below the previous entry". Only
   // the non-historical rows are ever wired to checkbox/remove/save actions.
   get claimLineRows(): any[] {
-    const historicalRows = this.buildRowsFromClaims(this.historicalClaims, 1, true);
-    const currentRows = this.buildRowsFromClaims(this.selectedClaims, historicalRows.length + 1, false);
+    if (!this.hasSearchedFilters || !this.jobCardTypeFilter || !this.selectedLocation) return [];
+    const historicalClaims = this.historicalClaims.filter(claim => this.matchesSearchFilters(claim));
+    const currentClaims = this.selectedClaims.filter(claim => this.matchesSearchFilters(claim));
+    const historicalRows = this.buildRowsFromClaims(historicalClaims, 1, true);
+    const currentRows = this.buildRowsFromClaims(currentClaims, historicalRows.length + 1, false);
     return [...historicalRows, ...currentRows];
   }
 

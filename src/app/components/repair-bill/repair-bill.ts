@@ -2756,7 +2756,17 @@ calculateTotals(): void {
     this.repairBillService.getRepairBillById(id).subscribe({
 
       next: (res: any) => {
-        const header = res.repairBillheader;
+        const header = res?.repairBillheader ?? res?.RepairBillheader;
+        const repairBillDetails = res?.repairBillDetail ?? res?.RepairBillDetail;
+        if (!header || !Array.isArray(repairBillDetails)) {
+          this.loader.hide();
+          console.error('Repair bill response is missing its header or detail list.', res);
+          this.toaster.show('Repair bill details could not be loaded. Please try again.', {
+            classname: 'bg-danger text-dark',
+            delay: 5000
+          });
+          return;
+        }
 
         // =====================
         // EDIT MODE
@@ -2776,12 +2786,18 @@ calculateTotals(): void {
         this.selectedJobCard.partyName = header.partyName;
         this.selectedJobCard.partyMobileNo = header.mobileNumber;
         this.selectedJobCard.partyState = header.partyState;
-        this.selectedJobCard.recordType = header.b2bJobCardId ? 'B2B' : 'B2C';
-        this.selectedJobCard.b2bJobCardId = header.b2bJobCardId;
-        this.selectedJobCard.b2bJobCardNumber = header.b2bJobCardNumber;
+        const b2bJobCardId = header.b2bJobCardId
+          ?? header.b2BJobCardId
+          ?? header.B2BJobCardId;
+        const b2bJobCardNumber = header.b2bJobCardNumber
+          ?? header.b2BJobCardNumber
+          ?? header.B2BJobCardNumber;
+        this.selectedJobCard.recordType = b2bJobCardId ? 'B2B' : 'B2C';
+        this.selectedJobCard.b2bJobCardId = b2bJobCardId;
+        this.selectedJobCard.b2bJobCardNumber = b2bJobCardNumber;
         this.selectedJobCard.jobCardHeader.id = header.jobId;
         this.selectedJobCard.jobCardHeader.jobinDate = header.jobInDate;
-        this.selectedJobCard.jobCardHeader.jobNo = header.b2bJobCardNumber || header.jobNo;
+        this.selectedJobCard.jobCardHeader.jobNo = b2bJobCardNumber || header.jobNo;
         this.selectedJobCard.jobCardHeader.jobtype = header.jobTypeName || this.selectedJobCard.jobCardHeader.jobtype;
         this.selectedJobCard.jobCardCustomer.registerNo = header.registerNo;
         this.selectedJobCard.jobCardCustomer.modelName = header.modelName;
@@ -2819,12 +2835,12 @@ calculateTotals(): void {
         // PART DETAILS
         // =====================
 
-        res.repairBillDetail
-          .filter((x: any) => x.itemType === 'Part')
+        repairBillDetails
+          .filter((x: any) => String(x.itemType ?? x.ItemType ?? '').trim().toLowerCase() === 'part')
           .forEach((d: any) => {
             const partItem: PartItem = {
 
-              id: d.id,
+              id: d.id ?? d.Id,
               materialId: d.materialId || d.materialTransferId,
               partItemId: d.partItemId || d.itemId,
               partCode: d.partCode || '',
@@ -2874,11 +2890,12 @@ calculateTotals(): void {
         // LABOUR DETAILS
         // =====================
 
-        res.repairBillDetail
-          .filter((x: any) => x.itemType === 'Labour')
+        repairBillDetails
+          .filter((x: any) => String(x.itemType ?? x.ItemType ?? '').trim().toLowerCase() === 'labour')
           .forEach((d: any) => {
             this.labourItems.push({
 
+              id: d.id ?? d.Id,
               labourId: d.labourId || 0,
               partWiseLabourId: d.partWiseLabourId || 0,
 
@@ -2950,6 +2967,11 @@ calculateTotals(): void {
 
         this.loader.hide();
         console.error(err);
+        const message = err?.error?.message || err?.error?.Message || 'Failed to load Repair Bill details.';
+        this.toaster.show(message, {
+          classname: 'bg-danger text-dark',
+          delay: 5000
+        });
 
       }
 
@@ -3282,7 +3304,8 @@ calculateTotals(): void {
 
           console.error(err);
 
-          this.toaster.show('Failed to Update Repair Bill', {
+          const message = err?.error?.message || err?.error?.Message || 'Failed to Update Repair Bill';
+          this.toaster.show(message, {
             classname: 'bg-danger text-dark',
             icons: 'Danger',
             delay: 5000

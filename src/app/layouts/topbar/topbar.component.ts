@@ -1,5 +1,5 @@
 //BAPL_DMS_Angular\src\app\layouts\topbar\topbar.component.ts
-import { Component, OnInit, EventEmitter, Output, Inject, ViewChild, TemplateRef, DOCUMENT } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, Inject, ViewChild, TemplateRef, DOCUMENT, inject } from '@angular/core';
 
 //Logout
 import { AuthenticationService } from '../../core/services/auth.service';
@@ -26,6 +26,7 @@ import { PartsInwardService } from '../../core/services/partsinwardservice';
 import { PartInward } from '../../components/part-inward/part-inward';
 import { NotificationService } from '../../core/services/notification-service';
 import { LocalPartsService, formatPartsD2DBillNo } from '../../core/services/local-parts.service';
+import { DealerService } from '../../core/services/dealer-service';
 /** One page the topbar search can open. */
 interface SearchHit { key: string; id: number | null; label: string; link: string; module: string | null; parent: string | null; }
 
@@ -98,6 +99,43 @@ export class TopbarComponent implements OnInit {
     private notificationService: NotificationService,
     private localPartsService: LocalPartsService
   ) { }
+
+  // ---------- 27.11.2026 "Mapped Dealers" popup (profile menu) ----------
+  private dealerService = inject(DealerService);
+  mappedDealersOpen = false;
+  mappedDealersLoading = false;
+  mappedDealerSearch = '';
+  private dealerNames = new Map<string, string>();
+
+  openMappedDealers(): void {
+    this.mappedDealersOpen = true;
+    this.mappedDealerSearch = '';
+    if (this.dealerNames.size) return;
+    this.mappedDealersLoading = true;
+    // the API only returns this user's own (mapped) dealers
+    this.dealerService.getDealerDropdown(null).subscribe({
+      next: (res: any) => {
+        (res?.data || []).forEach((d: any) => this.dealerNames.set((d.dealerCode || '').toString().trim(), d.dealerName || ''));
+        this.mappedDealersLoading = false;
+      },
+      error: () => (this.mappedDealersLoading = false)
+    });
+  }
+
+  goDashboard(): void {
+    this.router.navigate(['/']);
+  }
+
+  closeMappedDealers(): void {
+    this.mappedDealersOpen = false;
+  }
+
+  get mappedDealerRows(): { code: string; name: string }[] {
+    const q = this.mappedDealerSearch.trim().toLowerCase();
+    return this.profileCodes
+      .map(code => ({ code, name: this.dealerNames.get(code) || '' }))
+      .filter(r => !q || `${r.code} ${r.name}`.toLowerCase().includes(q));
+  }
 
   // ---------- 26.11.2026 profile display (BG employees carry a comma list of dealer codes) ----------
   get profileCodes(): string[] {

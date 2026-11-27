@@ -59,6 +59,91 @@
     </div>
   </div>
 
+  <!-- 27.11.2026 employees of this role: pick one to give him his own menu / page / button rights -->
+  @if (selectedRoleId && roleEmployees.length) {
+    <div class="card rmr-card">
+      <div class="card-body rmr-emp">
+        <div class="rmr-emp-head">
+          <div>
+            <div class="fw-semibold"><i class="ri-team-line me-1"></i>Employees with role "{{ selectedRoleName }}" ({{ roleEmployees.length }})</div>
+            <small class="text-muted">Tick one or more employees to give them their own menus, pages and Add / Edit / Delete / Print buttons. Tick nobody to change the role for everyone.</small>
+          </div>
+        </div>
+        @if (!employeeTableReady) {
+          <div class="alert alert-warning py-2 small mb-2"><i class="ri-error-warning-line me-1"></i>Employee-wise rights need the table BgEmployeeMenuRight - run SqlScripts/BgEmployeeMenuRight.sql once.</div>
+        }
+
+        <div class="rmr-emp-row">
+          <div ngbDropdown #empDd="ngbDropdown" class="rmr-emp-dd" autoClose="outside" container="body">
+            <button type="button" class="form-select rmr-emp-toggle text-start" ngbDropdownToggle>
+              <i class="me-1" [class.ri-shield-user-line]="!selectedEmployeeIds.length" [class.ri-user-settings-line]="selectedEmployeeIds.length"></i>{{ employeePickerLabel }}
+            </button>
+            <div ngbDropdownMenu class="rmr-emp-menu p-0">
+              <div class="p-2 border-bottom">
+                <div class="rmr-search"><i class="ri-search-line"></i>
+                  <input type="text" class="form-control form-control-sm" placeholder="Search name, code or email…" [(ngModel)]="employeeSearch">
+                </div>
+              </div>
+              <div class="rmr-emp-opts">
+                <button type="button" class="dropdown-item rmr-emp-opt" [class.active]="!selectedEmployeeIds.length" (click)="clearEmps(); empDd.close()">
+                  <i class="ri-shield-user-line me-2"></i>Role rights (all employees)
+                </button>
+                @if (filteredEmployees.length) {
+                  <label class="dropdown-item rmr-emp-opt rmr-emp-all">
+                    <input type="checkbox" class="form-check-input me-2" [checked]="allFilteredEmpsSelected" (change)="toggleAllEmps()">
+                    Select all ({{ filteredEmployees.length }})
+                  </label>
+                }
+                @for (e of filteredEmployees; track e.employeeId) {
+                  <label class="dropdown-item rmr-emp-opt" [class.inactive]="!e.isActive" [title]="e.email || ''">
+                    <input type="checkbox" class="form-check-input me-2" [checked]="isEmpSelected(e.employeeId)" (change)="toggleEmp(e.employeeId)">
+                    <span class="rmr-emp-avatar">{{ (e.name || '?').charAt(0) }}</span>
+                    <span class="flex-grow-1 min-w-0">
+                      <span class="d-block fw-medium text-truncate">{{ e.name }}</span>
+                      <small class="text-muted">{{ e.employeeCode }}{{ e.email ? ' · ' + e.email : '' }}</small>
+                    </span>
+                    @if (e.hasOwnRights) { <span class="badge bg-primary-subtle text-primary ms-1">Own</span> }
+                    @if (!e.isActive) { <span class="badge bg-secondary-subtle text-secondary ms-1">Inactive</span> }
+                  </label>
+                } @empty {
+                  <div class="px-3 py-2 small text-muted">No employee matches.</div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- ticked employees as removable chips -->
+          <div class="rmr-emp-chips">
+            @for (e of selectedEmployees; track e.employeeId; let i = $index) {
+              <span class="rmr-emp-tag" [class.first]="i === 0" [title]="i === 0 ? 'The grid shows the rights of this employee' : ''">
+                {{ e.name }}
+                @if (e.hasOwnRights) { <i class="ri-user-settings-line ms-1" title="Has own rights"></i> }
+                <button type="button" class="btn-close btn-close-sm ms-1" (click)="toggleEmp(e.employeeId)" aria-label="Remove"></button>
+              </span>
+            }
+          </div>
+        </div>
+
+        @if (selectedEmployee; as emp) {
+          <div class="rmr-emp-status">
+            <span>
+              <i class="ri-information-line me-1"></i>
+              @if (employeeHasOwnRights) { Showing the <b>own rights</b> of {{ emp.name }}. }
+              @else { {{ emp.name }} uses the rights of role "{{ selectedRoleName }}" (shown below). }
+              @if (selectedEmployeeIds.length > 1) { Save applies these rights to <b>all {{ selectedEmployeeIds.length }} selected employees</b>. }
+              @else { Change and Save to give {{ employeeHasOwnRights ? 'him new' : 'him his own' }} rights. }
+            </span>
+            @if (selectedWithOwnRights) {
+              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="resetEmployeeToRole()">
+                <i class="ri-arrow-go-back-line me-1"></i>Use role rights again{{ selectedWithOwnRights > 1 ? ' (' + selectedWithOwnRights + ')' : '' }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   @if (!selectedRoleId) {
     <div class="card rmr-card"><div class="card-body text-center text-muted py-5">
       <i class="ri-shield-user-line d-block fs-1 mb-2 opacity-50"></i>
@@ -152,7 +237,8 @@
         </table>
       </div>
       <div class="rmr-foot">
-        <small class="text-muted">Any right also gives View. Untick View to remove the page from the role.</small>
+        <small class="text-muted">Any right also gives View. Untick View to remove the page from the {{ selectedEmployee ? 'employee' : 'role' }}.
+          @if (selectedEmployee) { <b class="text-primary ms-1">Saving for {{ selectedEmployeeIds.length > 1 ? selectedEmployeeIds.length + ' employees' : selectedEmployee.name }}</b> }</small>
         <button class="btn btn-primary btn-sm" type="button" [disabled]="!isDirty" (click)="save()">
           <i class="ri-save-3-line me-1"></i>Save @if (isDirty) { <span class="badge bg-light text-primary ms-1">{{ changedCount }}</span> }
         </button>

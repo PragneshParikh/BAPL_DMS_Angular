@@ -36,6 +36,13 @@ export class AuthGuard {
             return true;
         }
 
+        const normalizedRole = role.replace(/[^a-z]/g, '');
+        const requestedPath = requestedUrl.split(/[?#]/, 1)[0];
+        if (requestedPath === '/ffir-report'
+            && (normalizedRole === 'dealer' || normalizedRole === 'bgemployee')) {
+            return true;
+        }
+
         let menuRights: any[] = [];
 
         try {
@@ -67,6 +74,13 @@ export class AuthGuard {
         const hasAccess = permission > 0;
 
         if (!hasAccess) {
+            this.router.navigate(['/']);
+            return false;
+        }
+
+        // 27.11.2026 - an "add" page needs the Add right (bit 2), not only View
+        const path = (requestedUrl || '').split('?')[0].toLowerCase();
+        if (/\/add(\/|$)/.test(path) && (permission & 2) !== 2) {
             this.router.navigate(['/']);
             return false;
         }
