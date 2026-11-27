@@ -24,4 +24,7 @@ export interface DealerLocationModel {
   locCode?: string;
   locName?: string;
   isActive: boolean;
+  /** 26.11.2026 1 Showroom, 2 Workshop, 3 Yard */
+  locAreaIdNo?: number;
+  locArea?: string;
 }

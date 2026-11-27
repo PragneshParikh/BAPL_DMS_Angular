@@ -14,6 +14,8 @@ export interface DealerListModel {
 export interface DealerListFilter {
   search?: string;
   dealerCode?: string;
+  /** 26.11.2026 'active' | 'inactive' | undefined = all */
+  status?: string;
   pageIndex: number;
   pageSize: number;
 }

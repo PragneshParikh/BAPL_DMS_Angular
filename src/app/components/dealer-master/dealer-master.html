@@ -24,6 +24,16 @@
                     </button>
                     <input #importFileInput type="file" accept=".xlsx" hidden (change)="onImportFileSelected($event)">
 
+                    <!-- 26.11.2026 SuperAdmin: UAT ERP dealer report import + ERP sync -->
+                    <button *ngIf="isSuperAdmin" class="btn btn-primary btn-sm me-2" [ngbTooltip]="'Import UAT ERP Manage Dealer Report - other dealers become Inactive'"
+                        (click)="openErpSync('import')">
+                        <i class="ri-file-upload-line me-1"></i>ERP Import
+                    </button>
+                    <button *ngIf="isSuperAdmin" class="btn btn-outline-primary btn-sm me-3" [ngbTooltip]="'Sync dealer details from ERP C_CustomerMaster'"
+                        (click)="openErpSync('sync')">
+                        <i class="ri-refresh-line me-1"></i>Sync ERP
+                    </button>
+
                     <!-- Search Box -->
                     <div class="search-box">
                         <input type="text" class="form-control search" placeholder="Search..." [(ngModel)]="searchTerm"
@@ -31,6 +41,39 @@
                         <i class="ri-search-line search-icon"></i>
                     </div>
 
+                </div>
+
+                <!-- 26.11.2026 Filters: Dealer (code / name) / State / City / Status -->
+                <div class="row g-2 align-items-end mt-2 dealer-filters" *ngIf="!lockedDealer">
+                    <div class="col-md-4 col-lg-3">
+                        <label class="form-label mb-0">Dealer</label>
+                        <app-search-select [options]="dealerOptions" [(value)]="fDealer" allLabel="All Dealers"
+                            placeholder="Dealer code or name..." (valueChange)="onFilterChange()"></app-search-select>
+                    </div>
+                    <div class="col-md-3 col-lg-2">
+                        <label class="form-label mb-0">State</label>
+                        <app-search-select [options]="stateOptions" [(value)]="fState" allLabel="All States"
+                            placeholder="Search state..." (valueChange)="onFilterChange()"></app-search-select>
+                    </div>
+                    <div class="col-md-3 col-lg-2">
+                        <label class="form-label mb-0">City</label>
+                        <app-search-select [options]="cityOptions" [(value)]="fCity" allLabel="All Cities"
+                            placeholder="Search city..." (valueChange)="onFilterChange()"></app-search-select>
+                    </div>
+                    <div class="col-md-2 col-lg-2">
+                        <label class="form-label mb-0">Status</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="fStatus" (ngModelChange)="onFilterChange()">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12 col-lg-3 d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-light btn-sm border" (click)="resetFilters()" [disabled]="!hasFilter">
+                            <i class="ri-refresh-line me-1"></i>Reset
+                        </button>
+                        <span class="small text-muted">{{ collectionSize }} dealer(s)</span>
+                    </div>
                 </div>
 
             </div>
@@ -73,6 +116,7 @@
                                     style="cursor: pointer">B2B </th>
                                 <th class="sort col-regDate" (click)="onSort('regDate')" style="cursor: pointer">Reg
                                     Date</th>
+                                <th class="sort col-status" (click)="onSort('isActive')" style="cursor: pointer">Status</th>
                             </tr>
                         </thead>
 
@@ -102,11 +146,16 @@
                                     </span>
                                 </td>
                                 <td>{{ dealer.regDate }}</td>
+                                <td>
+                                    <span class="badge" [ngClass]="dealer.isActive ? 'bg-success' : 'bg-danger'">
+                                        {{ dealer.isActive ? 'ACTIVE' : 'INACTIVE' }}
+                                    </span>
+                                </td>
                             </tr>
                             }
                             <!-- No Data Row -->
                             <tr *ngIf="dealerList.length === 0">
-                                <td colspan="6" class="text-center">No Data Available</td>
+                                <td colspan="19" class="text-center">No Data Available</td>
                             </tr>
                         </tbody>
                     </table>

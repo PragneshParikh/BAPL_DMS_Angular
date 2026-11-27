@@ -1,15 +1,13 @@
 <!-- src\app\components\dashboard\dashboard.html -->
-<div class="db-head">
+<!-- 26.11.2026 header in the same style as the other DMS pages -->
+<div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent db-page-head">
   <div>
-    <h4 class="db-title">Dashboard</h4>
-    <ol class="breadcrumb m-0">
-      <li class="breadcrumb-item"><a routerLink="/">Home</a></li>
-      <li class="breadcrumb-item active">Dashboard</li>
-    </ol>
+    <h4 class="mb-sm-0">Dashboard Overview</h4>
+    <span class="db-page-sub">{{ greeting }} · {{ today | date: 'EEEE, dd.MM.yyyy' }}</span>
   </div>
   <div class="db-head-actions">
-    <button type="button" class="btn btn-light" (click)="load()" [disabled]="loading"><i class="ri-refresh-line me-1" [class.db-spin]="loading"></i>Refresh</button>
-    <a class="btn btn-outline-success" [routerLink]="links.totalSale"><i class="ri-file-chart-line me-1"></i>Full Report</a>
+    <button type="button" class="btn btn-light btn-sm border" (click)="load()" [disabled]="loading"><i class="ri-refresh-line me-1" [class.db-spin]="loading"></i>Refresh</button>
+    <a class="btn btn-primary btn-sm" [routerLink]="links.totalSale"><i class="ri-file-chart-line me-1"></i>Full Report</a>
   </div>
 </div>
 <app-db-filter [from]="from" [to]="to" [loading]="loading" (rangeChange)="onRange($event)"></app-db-filter>
@@ -20,46 +18,51 @@
   </div>
 }
 
-<!-- KPI tiles: equal height, every tile opens its report -->
+<!-- KPI tiles (26.11.2026): Units Sold (Total) / Current Month Sold Units / Proforma Completed / Vehicles in Stock.
+     Every tile opens its report. -->
 <div class="row g-4 mb-4">
   <div class="col-xl-3 col-md-6">
-    <a class="db-kpi" [routerLink]="links.totalSale" title="Open Total Sale Report">
+    <a class="db-kpi v-blue" [routerLink]="links.totalSale" title="Open Total Sale Report">
       <div class="db-kpi-body">
-        <span class="db-kpi-label">Units Sold</span>
-        <span class="db-kpi-value">{{ num(unitsSold) }}</span>
-        <span class="db-kpi-sub">{{ num(cashCount) }} cash · {{ num(creditCount) }} credit</span>
+        <span class="db-kpi-label">Units Sold (Total)</span>
+        <span class="db-kpi-value">{{ loading ? '…' : num(unitsSold) }}</span>
+        <span class="db-kpi-sub"><i class="ri-calendar-2-line me-1"></i>{{ periodLabel }}</span>
       </div>
-      <span class="db-kpi-icon kpi-blue"><i class="ri-motorbike-line"></i></span>
+      <span class="db-kpi-icon"><i class="ri-motorbike-line"></i></span>
+      <span class="db-kpi-go">Total Sale Report <i class="ri-arrow-right-line"></i></span>
     </a>
   </div>
   <div class="col-xl-3 col-md-6">
-    <a class="db-kpi" [routerLink]="links.totalSale" title="Open Total Sale Report">
+    <a class="db-kpi v-green" [routerLink]="links.totalSale" [queryParams]="monthParams" title="Open Total Sale Report for this month">
       <div class="db-kpi-body">
-        <span class="db-kpi-label">Sales Value</span>
-        <span class="db-kpi-value">{{ inr(salesValue) }}</span>
-        <span class="db-kpi-sub">Avg. {{ inr(avgTicket) }} / unit</span>
+        <span class="db-kpi-label">Current Month Sold Units</span>
+        <span class="db-kpi-value">{{ monthSale || failed.monthSale ? num(monthUnits) : '…' }}</span>
+        <span class="db-kpi-sub"><i class="ri-calendar-check-line me-1"></i>{{ monthLabel }} · {{ inr(monthValue) }}</span>
       </div>
-      <span class="db-kpi-icon kpi-success"><i class="ri-money-rupee-circle-line"></i></span>
+      <span class="db-kpi-icon"><i class="ri-line-chart-line"></i></span>
+      <span class="db-kpi-go">This month <i class="ri-arrow-right-line"></i></span>
     </a>
   </div>
   <div class="col-xl-3 col-md-6">
-    <a class="db-kpi" [routerLink]="links.modelStock" title="Open Model-wise Current Stock">
+    <a class="db-kpi v-purple" [routerLink]="links.proforma" [queryParams]="proformaParams" title="Open Performa vs Sale Bill Comparison Report">
+      <div class="db-kpi-body">
+        <span class="db-kpi-label">Proforma Completed</span>
+        <span class="db-kpi-value">{{ proforma || failed.proforma ? num(proformaCount) : '…' }}</span>
+        <span class="db-kpi-sub"><i class="ri-file-list-3-line me-1"></i>{{ num(proformaBilled) }} billed · {{ num(proformaPending) }} pending</span>
+      </div>
+      <span class="db-kpi-icon"><i class="ri-file-text-line"></i></span>
+      <span class="db-kpi-go">Comparison Report <i class="ri-arrow-right-line"></i></span>
+    </a>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <a class="db-kpi v-amber" [routerLink]="links.modelStock" title="Open Model-wise Current Stock">
       <div class="db-kpi-body">
         <span class="db-kpi-label">Vehicles in Stock</span>
-        <span class="db-kpi-value">{{ num(stockUnits) }}</span>
-        <span class="db-kpi-sub">Across {{ num(modelCount) }} models</span>
+        <span class="db-kpi-value">{{ loading ? '…' : num(stockUnits) }}</span>
+        <span class="db-kpi-sub"><i class="ri-stack-line me-1"></i>Across {{ num(modelCount) }} models</span>
       </div>
-      <span class="db-kpi-icon kpi-warning"><i class="ri-store-2-line"></i></span>
-    </a>
-  </div>
-  <div class="col-xl-3 col-md-6">
-    <a class="db-kpi" [routerLink]="links.jobCards" title="Open Job Card Report">
-      <div class="db-kpi-body">
-        <span class="db-kpi-label">Job Cards</span>
-        <span class="db-kpi-value">{{ num(jobs?.totalJobs) }}</span>
-        <span class="db-kpi-sub">{{ jobCompletionPct }}% completed</span>
-      </div>
-      <span class="db-kpi-icon kpi-purple"><i class="ri-tools-line"></i></span>
+      <span class="db-kpi-icon"><i class="ri-store-2-line"></i></span>
+      <span class="db-kpi-go">Current Stock <i class="ri-arrow-right-line"></i></span>
     </a>
   </div>
 </div>
@@ -69,7 +72,7 @@
   <div class="col-xl-8">
     <div class="card db-card h-100 mb-0">
       <div class="card-header db-card-head">
-        <h4 class="card-title mb-0">Sales vs Stock by Model</h4>
+        <h4 class="card-title mb-0"><i class="ri-bar-chart-grouped-line"></i>Sales vs Stock by Model</h4>
         <a [routerLink]="links.modelSale" class="db-link">View report <i class="ri-arrow-right-up-line"></i></a>
       </div>
       <div class="card-body db-chart-body">
@@ -83,7 +86,7 @@
   <div class="col-xl-4">
     <div class="card db-card h-100 mb-0">
       <div class="card-header db-card-head">
-        <h4 class="card-title mb-0">Stock by Model</h4>
+        <h4 class="card-title mb-0"><i class="ri-store-3-line"></i>Stock by Model</h4>
         <a [routerLink]="links.modelStock" class="db-link">View <i class="ri-arrow-right-up-line"></i></a>
       </div>
       <div class="card-body db-chart-body">
@@ -101,7 +104,7 @@
   <div class="col-xl-6">
     <div class="card db-card h-100 mb-0">
       <div class="card-header db-card-head">
-        <h4 class="card-title mb-0">Top Dealers by Units</h4>
+        <h4 class="card-title mb-0"><i class="ri-trophy-line"></i>Top Dealers by Units</h4>
         <a [routerLink]="links.totalSale" class="db-link">View all <i class="ri-arrow-right-up-line"></i></a>
       </div>
       <div class="card-body p-0">
@@ -144,7 +147,7 @@
   <div class="col-xl-3 col-md-6">
     <div class="card db-card h-100 mb-0">
       <div class="card-header db-card-head">
-        <h4 class="card-title mb-0">Payment Mix</h4>
+        <h4 class="card-title mb-0"><i class="ri-pie-chart-2-line"></i>Payment Mix</h4>
         <a [routerLink]="links.totalSale" class="db-link"><i class="ri-arrow-right-up-line"></i></a>
       </div>
       <div class="card-body db-chart-body">
@@ -159,7 +162,7 @@
   <div class="col-xl-3 col-md-6">
     <div class="card db-card h-100 mb-0">
       <div class="card-header db-card-head">
-        <h4 class="card-title mb-0">Job Card Status</h4>
+        <h4 class="card-title mb-0"><i class="ri-tools-line"></i>Job Card Status</h4>
         <a [routerLink]="links.jobCards" class="db-link"><i class="ri-arrow-right-up-line"></i></a>
       </div>
       <div class="card-body db-chart-body">

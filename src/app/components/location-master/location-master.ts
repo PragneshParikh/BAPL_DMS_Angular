@@ -4,7 +4,8 @@ import { LocationMasterService } from '../../core/services/location-master-servi
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import * as bootstrap from 'bootstrap';
-import { NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { ErpSyncDialog } from '../../shared/erp-sync/erp-sync-dialog';
 import { LoaderService } from '../../core/services/loader';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { StorageService } from '../../core/services/storage';
@@ -13,13 +14,14 @@ import { DealerService } from '../../core/services/dealer-service';
 import { MenuAccessService } from '../../core/services/menu-access.service';
 import { ElementRef, ViewChild } from '@angular/core';
 import { filterRows } from '../../shared/search/table-search';
+import { SearchSelect, SearchSelectOption } from '../../shared/search-select/search-select';
 
 declare var bootstrap: any;
 
 @Component({
   selector: 'app-location-master',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbPaginationModule, NgbTooltipModule],
+  imports: [CommonModule, FormsModule, NgbPaginationModule, NgbTooltipModule, SearchSelect],
   templateUrl: './location-master.html'
 })
 
@@ -31,6 +33,9 @@ export class LocationMasterComponent implements OnInit {
   isDealer: boolean = false;
   locationArea: string = '';
   locationName: string = '';
+  /** 26.11.2026 Status filter: '' = all, 'Y' = active, 'N' = inactive */
+  statusFilter: string = '';
+  dealerOptions: SearchSelectOption[] = [];
   selectedLocation: any = {};
   pagedLocationList: any[] = [];
   page = 1;
@@ -56,7 +61,8 @@ export class LocationMasterComponent implements OnInit {
     private loader: LoaderService,
     private storageService: StorageService,
     public toastr: ToastService,
-    private menuAccess: MenuAccessService
+    private menuAccess: MenuAccessService,
+    private modalService: NgbModal
   ) {
     this.isSuperAdmin = this.storageService.getRole().toLowerCase() === 'superadmin';
     this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
@@ -72,6 +78,15 @@ export class LocationMasterComponent implements OnInit {
       this.isDealer = true;
       this.dealerCode = this.storageService.getDealerCode();
     }
+  }
+
+  /** 26.11.2026 - SuperAdmin: UAT ERP location list import / ERP C_DMS_DealerConsigneeDetail sync (preview, then Apply) */
+  openErpSync(mode: 'import' | 'sync'): void {
+    const ref = this.modalService.open(ErpSyncDialog, { size: 'xl', centered: true, backdrop: 'static', scrollable: true });
+    ref.componentInstance.kind = 'location';
+    ref.componentInstance.mode = mode;
+    ref.componentInstance.dealerCode = mode === 'sync' ? this.dealerCode : null;
+    ref.result.then(r => { if (r === 'saved') this.loadLocations(); }, () => {});
   }
 
   ngOnInit(): void {
@@ -93,12 +108,8 @@ export class LocationMasterComponent implements OnInit {
         // constructor) must only ever see its own dealer's locations on
         // initial load, not the full unfiltered list. Superadmin logins
         // (dealerCode null) still see everything, same as before.
-        this.locationList = this.dealerCode
-          ? data.filter((x: any) => x.dealercode == this.dealerCode)
-          : [...data];
-
-        this.loadPage(); // for pagination
-        this.sort(this.sortColumn, true);
+        // keeps the dealer / area / status / keyword filters after a reload (e.g. after ERP import)
+        this.applyFilters();
       },
       error: (err) => {
         this.loader.hide();
@@ -107,8 +118,9 @@ export class LocationMasterComponent implements OnInit {
     });
   }
 
-  searchLocation() {
-    let filtered = this.originalLocationList;
+  /** 26.11.2026 - one place for all filters: dealer, area, status, keyword */
+  private applyFilters(): void {
+    let filtered = this.originalLocationList || [];
 
     if (this.dealerCode) {
       filtered = filtered.filter((x: any) => x.dealercode == this.dealerCode);
@@ -120,14 +132,24 @@ export class LocationMasterComponent implements OnInit {
       );
     }
 
+    if (this.statusFilter === 'Y') {
+      filtered = filtered.filter((x: any) => (x.active || '').toString().trim().toUpperCase() === 'Y');
+    } else if (this.statusFilter === 'N') {
+      filtered = filtered.filter((x: any) => (x.active || '').toString().trim().toUpperCase() !== 'Y');
+    }
+
     if (this.locationName?.trim()) {
       filtered = filterRows(filtered, this.locationName, ['loccode', 'locname', 'dealercode', 'formtype', 'rrglocationidno']);
     }
 
-    this.locationList = filtered;
+    this.locationList = [...filtered];
     this.sort(this.sortColumn, true);
     this.page = 1;
     this.loadPage();
+  }
+
+  searchLocation() {
+    this.applyFilters();
   }
 
   resetSearch() {
@@ -141,13 +163,9 @@ export class LocationMasterComponent implements OnInit {
     }
     this.locationArea = '';
     this.locationName = '';
+    this.statusFilter = '';
 
-    this.locationList = this.dealerCode
-      ? this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode)
-      : [...this.originalLocationList];
-
-    this.page = 1;
-    this.loadPage();
+    this.applyFilters();
   }
 
   openEditModal(location: any) {
@@ -202,47 +220,21 @@ export class LocationMasterComponent implements OnInit {
   }
 
   checkSearchReset(selectedDealerCode: string | null) {
-    this.page = 1;
-
-    // FIXED: a dealer-scoped login has its dropdown disabled and dealerCode
-    // locked to its own code — always re-derive the list from that locked
-    // value rather than trusting the event's selectedDealerCode, so this
-    // can't be widened back out to every dealer's locations.
-    if (this.isDealer) {
-      this.locationList = this.originalLocationList.filter(
-        (x: any) => x.dealercode == this.dealerCode
-      );
-      this.loadPage();
-      return;
+    // a dealer-scoped login stays locked to its own dealerCode (dropdown is disabled)
+    if (!this.isDealer) {
+      this.dealerCode = selectedDealerCode;
     }
-
-    this.locationList = selectedDealerCode
-      ? this.originalLocationList.filter((x: any) => x.dealercode == selectedDealerCode)
-      : [...this.originalLocationList];
-
-    this.loadPage();
+    // 26.11.2026 - keep area / status / keyword filters when the dealer changes
+    this.applyFilters();
   }
 
   checkIfEmpty() {
-    if (
-      (!this.locationName || this.locationName.trim() === '') &&
-      (!this.dealerCode || this.dealerCode === '') &&
-      (!this.locationArea || this.locationArea === '')
-    ) {
-      this.page = 1;
-      this.locationList = [...this.originalLocationList];
-      this.pagedLocationList = [...this.locationList];
-      this.loadPage();
-    }
+    this.applyFilters();
   }
 
   checkKeywordReset() {
     if (!this.locationName || this.locationName.trim() === '') {
-      this.locationList = this.dealerCode
-        ? this.originalLocationList.filter((x: any) => x.dealercode == this.dealerCode)
-        : [...this.originalLocationList];
-      this.page = 1;
-      this.loadPage();
+      this.applyFilters();
     }
   }
 
@@ -256,7 +248,9 @@ export class LocationMasterComponent implements OnInit {
     // blank/placeholder value.
     this.dealerMasterService.getDealerDropdown(null).subscribe({
       next: (res: any) => {
-        this.dealerList = res.data;
+        this.dealerList = res.data || [];
+        // 26.11.2026 searchable dealer dropdown: name + code
+        this.dealerOptions = this.dealerList.map((d: any) => ({ value: d.dealerCode, label: d.dealerName, sub: d.dealerCode }));
         this.loader.hide();
       },
       error: (err) => {

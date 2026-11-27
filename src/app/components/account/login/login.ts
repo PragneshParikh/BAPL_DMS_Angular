@@ -226,7 +226,14 @@ export class Login implements AfterViewInit, OnDestroy {
       this.isLoading = false;
     }, error => {
       console.error('Login error:', error);
-      this.toastService.show('An error occurred during login. Please try again.', { classname: 'bg-danger text-white', delay: 5000 });
+      // 26.11.2026 - show the server's reason (Username not found / Invalid password / inactive ...)
+      // instead of one generic text for every failure.
+      const e = error?.error;
+      const serverMsg = (typeof e === 'string' && e.trim()) ? e : (e?.message || e?.title || '');
+      const msg = error?.status === 0
+        ? 'Server not reachable. Please check the API is running.'
+        : (serverMsg || 'An error occurred during login. Please try again.');
+      this.toastService.show(msg, { classname: 'bg-danger text-white', delay: 5000 });
       this.isLoading = false;
     });
 

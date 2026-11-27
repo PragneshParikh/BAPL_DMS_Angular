@@ -116,3 +116,12 @@
   margin-bottom: 0.5rem;
   color: #000008 !important;
 }
+
+// 26.11.2026 filter row
+.dealer-filters .form-label {
+  font-size: 12px;
+}
+.dealer-table th.col-status,
+.dealer-table td:last-child {
+  min-width: 100px;
+}

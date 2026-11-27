@@ -17,10 +17,10 @@
 
             <div class="col-xl-2 col-md-4" *ngIf="isSuperAdmin">
               <label class="form-label">Dealer</label>
-              <select formControlName="dealerCode" class="form-select form-select-sm">
-                <option value="">-- All Dealers --</option>
-                <option *ngFor="let d of dealerList" [value]="d.dealerCode">{{ d.dealerName }}</option>
-              </select>
+              <!-- 26.11.2026 searchable by dealer code / name; changing it reloads the report -->
+              <app-search-select [options]="dealerOptions" [value]="filterForm.value.dealerCode || null"
+                allLabel="All Dealers" placeholder="Dealer code or name..."
+                (valueChange)="filterForm.patchValue({ dealerCode: $event || '' })"></app-search-select>
             </div>
 
             <div class="col-xl-2 col-md-4">

@@ -1,0 +1,22 @@
+<!-- src\app\shared\search-select\search-select.html -->
+<div ngbDropdown #dd="ngbDropdown" class="ss-wrap" container="body" (openChange)="onOpen($event)" autoClose="outside">
+  <button type="button" class="form-select form-select-sm ss-toggle text-start" ngbDropdownToggle [disabled]="disabled"
+    [class.ss-placeholder]="!value" [title]="selectedText">
+    {{ selectedText }}
+  </button>
+  <div ngbDropdownMenu class="ss-menu p-0">
+    <div class="p-2 border-bottom">
+      <input #searchBox type="text" class="form-control form-control-sm" [(ngModel)]="search" (ngModelChange)="active = -1"
+        [placeholder]="placeholder" (keydown)="onKey($event)" autocomplete="off">
+    </div>
+    <div class="ss-list">
+      <button type="button" class="dropdown-item ss-item" [class.ss-selected]="!value" (click)="pick(null)">{{ allLabel }}</button>
+      <button type="button" class="dropdown-item ss-item" *ngFor="let o of filtered; let i = index"
+        [class.ss-selected]="o.value === value" [class.ss-active]="i === active" (click)="pick(o.value)">
+        {{ o.label }} <small class="text-muted ms-1" *ngIf="o.sub">{{ o.sub }}</small>
+      </button>
+      <div class="px-3 py-2 small text-muted" *ngIf="!filtered.length">No match.</div>
+      <div class="px-3 py-1 small text-muted" *ngIf="hiddenCount">Type to see {{ hiddenCount }} more…</div>
+    </div>
+  </div>
+</div>

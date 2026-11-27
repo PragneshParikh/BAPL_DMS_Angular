@@ -75,6 +75,10 @@ export class PartsD2DReport implements OnInit {
         if (this.isAdmin) {
           this.dealerList.unshift({ dealerCode: 'ALL', dealerName: 'All Dealers' });
           this.filters.dealerCode = 'ALL';
+        } else if (this.dealerCode.includes(',')) {
+          // 26.11.2026 BG employee mapped to several dealers: all of them by default, or pick one
+          this.dealerList.unshift({ dealerCode: 'ALL', dealerName: 'All My Dealers' });
+          this.filters.dealerCode = 'ALL';
         } else {
           this.filters.dealerCode = this.dealerCode;
         }
@@ -111,6 +115,8 @@ export class PartsD2DReport implements OnInit {
         this.loader.hide();
         this.locationList = (locations ?? [])
           .filter(location => this.isAdmin || Number(location.locareaidno) === 2)
+          // 26.11.2026 a multi-dealer employee only sees locations of their own dealers
+          .filter(location => this.isAdmin || this.dealerList.some(d => d.dealerCode === location.dealercode))
           .map(location => ({
             ...location,
             dealerName: this.dealerList.find(dealer => dealer.dealerCode === location.dealercode)?.dealerName

@@ -3,8 +3,11 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { of, Subject, Subscription } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { OnDestroy } from '@angular/core';
+import { StorageService } from '../../../core/services/storage';
+import { SearchSelect, SearchSelectOption } from '../../../shared/search-select/search-select';
 
 import { ReportService } from '../../../core/services/report.service';
 import { LedgerMasterService } from '../../../core/services/ledger-master';
@@ -20,11 +23,11 @@ import {
 @Component({
   selector: 'app-vehicle-sale-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbTooltipModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbTooltipModule, SearchSelect],
   templateUrl: './vehicle-sale-report.html',
   providers: [ReportService]
 })
-export class VehicleSaleReportComponent implements OnInit {
+export class VehicleSaleReportComponent implements OnInit, OnDestroy {
   private menuAccess = inject(MenuAccessService);
   readonly SUBMENU_ID = 43;
   canDownload = false;
@@ -32,9 +35,15 @@ export class VehicleSaleReportComponent implements OnInit {
   private reportService       = inject(ReportService);
   private ledgerMasterService = inject(LedgerMasterService);
   private fb                  = inject(FormBuilder);
+  private storage             = inject(StorageService);
+  private autoSub?: Subscription;
+  /** a newer load was started - drop the older response (auto search fires often) */
+  private loadSeq = 0;
 
   filterForm!: FormGroup;
   dealerList: DealerDropdownItem[] = [];
+  /** 26.11.2026 searchable dealer filter (code / name) */
+  dealerOptions: SearchSelectOption[] = [];
   financierList: LedgerMaster[] = [];
 
   // NEW — SuperAdmins can browse this report across every dealer, so they
@@ -89,6 +98,18 @@ export class VehicleSaleReportComponent implements OnInit {
     }
 
     this.loadReport();
+
+    // 26.11.2026 auto search: dropdowns / dates reload at once, typed boxes after a short pause
+    this.autoSub = this.filterForm.valueChanges
+      .pipe(
+        debounceTime(450),
+        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
+      )
+      .subscribe(() => this.onSearch());
+  }
+
+  ngOnDestroy(): void {
+    this.autoSub?.unsubscribe();
   }
 
   /**
@@ -106,8 +127,10 @@ export class VehicleSaleReportComponent implements OnInit {
    * wired in, so it only needs fixing in one place.
    */
   private checkIsSuperAdmin(): boolean {
-    const role = localStorage.getItem('role');
-    return role === 'SuperAdmin';
+    // 26.11.2026 - role is stored as 'SuperAdmin' or 'superadmin' depending on the login;
+    // the exact-case check hid the Dealer filter for SuperAdmin. Same check as the other pages.
+    const role = (this.storage.getRole() || '').toLowerCase();
+    return role === 'superadmin' || role === 'admin';   // the API shows all dealers to both
   }
 
   initDates(): void {
@@ -116,14 +139,20 @@ export class VehicleSaleReportComponent implements OnInit {
     this.filterForm.patchValue({
       fromDate: this.toISO(firstDay),
       toDate:   this.toISO(today)
-    });
+    }, { emitEvent: false });
   }
 
-  toISO(d: Date): string { return d.toISOString().split('T')[0]; }
+  // 26.11.2026 - local date (toISOString() is UTC, so in IST the 1st of the month became the last day of the previous month)
+  toISO(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
 
   loadDealers(): void {
     this.reportService.getDealerDropdown().subscribe({
-      next:  res => { this.dealerList = res || []; },
+      next:  res => {
+        this.dealerList = res || [];
+        this.dealerOptions = this.dealerList.map(d => ({ value: d.dealerCode, label: d.dealerName, sub: d.dealerCode }));
+      },
       error: err => console.error('Dealer dropdown error', err)
     });
   }
@@ -155,6 +184,7 @@ export class VehicleSaleReportComponent implements OnInit {
     this.totals     = null;
 
     const filter = this.buildFilter();
+    const seq = ++this.loadSeq;
 
     this.reportService.getVehicleSaleBillReport(filter)
       .pipe(catchError(err => {
@@ -163,6 +193,7 @@ export class VehicleSaleReportComponent implements OnInit {
       }))
       .subscribe({
         next: (res) => {
+          if (seq !== this.loadSeq) return;   // an older request finished late
           const rows = (res?.data || []).map(r => this.normalizeAliases({ ...r }));
           rows.forEach((r, i) => r.srNo = i + 1);
 
@@ -222,7 +253,7 @@ export class VehicleSaleReportComponent implements OnInit {
       dealerCode: '', fromDate: '', toDate: '', saleType: '',
       customerType: '', billType: '', status: '',
       chassisNo: '', saleBillNo: '', financier: '', search: ''
-    });
+    }, { emitEvent: false });
     this.initDates();
     this.pageIndex = 1;
     this.loadReport();

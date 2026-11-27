@@ -19,7 +19,7 @@
             (ngModelChange)="onDealerChange()">
             <option value="">-- Select --</option>
             <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
-              {{ dealer.dealerName }}
+              {{ dealer.dealerName }}{{ dealer.dealerCode && dealer.dealerCode !== 'ALL' ? ' (' + dealer.dealerCode + ')' : '' }}
             </option>
           </select>
         </div>

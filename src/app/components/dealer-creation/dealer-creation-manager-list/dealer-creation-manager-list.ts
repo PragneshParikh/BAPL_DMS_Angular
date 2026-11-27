@@ -86,6 +86,7 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
 
     this.filterForm = this.fb.group({
       dealerCode: [''],
+      status: [''],     // 26.11.2026 '' = all, 'active', 'inactive'
       search: ['']
     });
 
@@ -146,6 +147,7 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
     this.dealerService.getAll({
       search: raw.search || undefined,
       dealerCode: raw.dealerCode || undefined,
+      status: raw.status || undefined,
       pageIndex: this.pageIndex,
       pageSize: this.pageSize
     })
@@ -170,7 +172,7 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   }
 
   onReset(): void {
-    this.filterForm.reset({ dealerCode: '', search: '' });
+    this.filterForm.reset({ dealerCode: '', status: '', search: '' });
     this.dealerSearchText = '';
     this.showDealerDropdown = false;
     this.pageIndex = 1;
@@ -481,6 +483,16 @@ export class DealerCreationManagerList implements OnInit, OnDestroy {
   // ═══════════════════════════════════════════════════════════════════
   // LOCATION — opens a dedicated page in a new tab (no more popup).
   // ═══════════════════════════════════════════════════════════════════
+
+  /** 26.11.2026 - badge colour for the work location type */
+  locAreaClass(loc: DealerLocationModel): string {
+    switch (loc.locAreaIdNo) {
+      case 1: return 'bg-primary-subtle text-primary';
+      case 2: return 'bg-warning-subtle text-warning';
+      case 3: return 'bg-info-subtle text-info';
+      default: return 'bg-light text-muted border';
+    }
+  }
 
   onOpenLocation(loc: DealerLocationModel): void {
     this.router.navigate(['/location-edit', loc.id]);

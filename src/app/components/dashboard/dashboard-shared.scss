@@ -263,3 +263,138 @@ $soft: #f1f5f9;
   .db-seg button { padding: .4rem .65rem; }
   .db-search { flex: 1 1 100%; min-width: 0; }
 }
+
+/* =====================================================================
+   26.11.2026 - dashboards follow the DMS look (white cards, theme primary,
+   #747CA0 table headers like the other masters / reports). Every dashboard
+   page imports this file, so all of them change together.
+   ===================================================================== */
+$brand: var(--vz-primary, #405189);
+$card-line: #e9ebec;
+$card-shadow: 0 1px 2px rgba(56, 65, 74, .15);
+$head: #747CA0;
+
+/* ---------- page header (same as other pages) ---------- */
+.db-page-head { margin-bottom: .25rem; }
+.db-page-head h4 { font-weight: 600; }
+.db-page-sub { display: block; color: $muted; font-size: .8125rem; margin-top: .15rem; }
+.db-head-actions { gap: .5rem; }
+
+/* ---------- KPI tiles ---------- */
+.db-kpi {
+  --kpi: #405189;
+  --kpi-soft: rgba(64, 81, 137, .12);
+  position: relative;
+  flex-wrap: wrap;
+  min-height: 0;
+  padding: 1.1rem 1.15rem .85rem;
+  background: #fff;
+  border: 1px solid $card-line;
+  border-top: 3px solid var(--kpi);
+  border-radius: 10px;
+  box-shadow: $card-shadow;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: $card-line;
+    border-top-color: var(--kpi);
+    box-shadow: 0 6px 16px rgba(56, 65, 74, .12);
+  }
+}
+.db-kpi-label {
+  color: #878a99;
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: .35rem;
+}
+.db-kpi-value { color: #212529; font-weight: 600; font-size: clamp(1.3rem, 14cqi, 1.75rem); }
+.db-kpi-sub { color: #878a99; font-size: .78rem; display: flex; align-items: center; }
+.db-kpi-icon {
+  width: 3rem;
+  height: 3rem;
+  flex: 0 0 3rem;
+  border-radius: 8px;
+  font-size: 1.4rem;
+  background: var(--kpi-soft);
+  color: var(--kpi);
+}
+.db-kpi-go {
+  flex: 0 0 100%;
+  margin-top: .75rem;
+  padding-top: .6rem;
+  border-top: 1px dashed $card-line;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: .78rem;
+  font-weight: 500;
+  color: var(--kpi);
+  i { transition: transform .15s ease; }
+}
+.db-kpi:hover .db-kpi-go i { transform: translateX(3px); }
+
+.v-blue { --kpi: #405189; --kpi-soft: rgba(64, 81, 137, .12); }
+.v-green { --kpi: #0ab39c; --kpi-soft: rgba(10, 179, 156, .12); }
+.v-amber { --kpi: #f7b84b; --kpi-soft: rgba(247, 184, 75, .16); }
+.v-purple { --kpi: #6559cc; --kpi-soft: rgba(101, 89, 204, .12); }
+.v-red { --kpi: #f06548; --kpi-soft: rgba(240, 101, 72, .12); }
+.v-teal { --kpi: #299cdb; --kpi-soft: rgba(41, 156, 219, .12); }
+.v-amber .db-kpi-go { color: #c98a12; }
+
+/* ---------- cards ---------- */
+.db-card {
+  border: 0;
+  border-radius: 10px;
+  box-shadow: $card-shadow;
+}
+.db-card-head {
+  padding: .9rem 1.25rem;
+  background: #fff;
+  border-bottom: 1px solid $card-line;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+.db-card-head .card-title { font-size: .95rem; font-weight: 600; color: #212529; }
+.db-card-head .card-title i {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .95rem;
+  background: rgba(64, 81, 137, .1);
+  color: $brand;
+}
+.db-link {
+  padding: .25rem .65rem;
+  border-radius: 4px;
+  font-size: .75rem;
+  color: $brand;
+  background: rgba(64, 81, 137, .1);
+  &:hover { color: #fff; background: $brand; }
+}
+
+/* ---------- tables: same header colour as the DMS list pages ---------- */
+.db-table th {
+  background: $head;
+  color: #fff;
+  font-size: .72rem;
+  letter-spacing: .03em;
+}
+.db-table tbody tr.db-clickable:hover { background: #f3f6f9; }
+.db-rank { border-radius: 6px; background: rgba(64, 81, 137, .1); color: $brand; }
+
+/* segmented switch + search in card headers */
+.db-seg { border-radius: 6px; button { border-radius: 4px; padding: .3rem .8rem; font-size: .8rem; }
+  button.active { background: $brand; box-shadow: none; } }
+.db-search .form-control { border-radius: 4px; font-size: .8125rem; height: 32px; }
+
+/* dark mode */
+:host-context([data-bs-theme="dark"]) {
+  .db-kpi, .db-card, .db-card-head { background: #212529; border-color: #32383e; }
+  .db-kpi-value, .db-card-head .card-title { color: #ced4da; }
+  .db-kpi-go { border-top-color: #32383e; }
+}
