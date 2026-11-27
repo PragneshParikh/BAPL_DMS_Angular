@@ -406,3 +406,21 @@
 
   li + li { margin-top: 2px; }
 }
+
+// 27.11.2026 compact dealer columns + mapped dealers popup
+.emp-dealer-cell { white-space: nowrap; max-width: 260px; }
+.emp-dealer-name { display: inline-block; max-width: 190px; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; }
+.emp-more { font-size: 12px; font-weight: 600; text-decoration: none; vertical-align: baseline; }
+.emp-md-backdrop {
+  position: fixed; inset: 0; z-index: 1065; background: rgba(15, 23, 42, .45);
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.emp-md-dialog { width: 600px; max-width: 100%; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 20px 50px rgba(15, 23, 42, .25); }
+.emp-md-head { display: flex; justify-content: space-between; align-items: center; padding: .8rem 1rem; background: #747CA0; color: #fff;
+  h6 { color: #fff; font-weight: 600; } }
+.emp-md-body { padding: .9rem 1rem; }
+.emp-md-table-wrap { max-height: 214px; overflow-y: auto; border-radius: 6px; }   // 5 rows, then scroll
+.emp-md-table { font-size: 12.5px;
+  thead th { position: sticky; top: 0; z-index: 1; background: #f3f6f9; font-weight: 600; white-space: nowrap; }
+  td { height: 36px; vertical-align: middle; } }
+.emp-md-foot { display: flex; justify-content: space-between; align-items: center; padding: .6rem 1rem; border-top: 1px solid #e9ebec; }

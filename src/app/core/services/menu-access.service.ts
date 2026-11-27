@@ -32,7 +32,8 @@ export class MenuAccessService {
     const role = (this.storageService.getRole() || '').toLowerCase().trim();
     // 27.11.2026 - BG employees (login role Employee) also follow their rights: the role / employee-wise
     // rights set in Role Menu Rights now decide their Add / Edit / Delete / Print buttons.
-    return role === 'dealer' || role === 'employee';
+    // 27.11.2026 - same rule as AuthGuard: everyone except SuperAdmin / Admin follows the rights
+    return !!role && role !== 'superadmin' && role !== 'admin';
   }
 
   hasPermission(subMenuId: number, bit: MenuPermissionBit): boolean {
@@ -42,7 +43,7 @@ export class MenuAccessService {
 
     const rights = this.storageService.getMenuRights();
     if (!rights || !Array.isArray(rights) || rights.length === 0) {
-      return true; // fail-open safeguard: a Dealer with no configured rights sees everything
+      return false; // 27.11.2026 - no rights = no actions (AuthGuard does not open the page either)
     }
 
     // Several rows can exist for one page (two roles / legacy duplicates): combine them.

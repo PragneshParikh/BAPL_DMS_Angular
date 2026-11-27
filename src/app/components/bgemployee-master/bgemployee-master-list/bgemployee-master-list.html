@@ -152,15 +152,24 @@
           <!-- EMPLOYEE NAME -->
           <td class="fw-semibold" [title]="emp.employeeName">{{ emp.employeeName || '—' }}</td>
 
-          <!-- DEALER CODE -->
-          <td [title]="emp.dealerCode">{{ emp.dealerCode || '—' }}</td>
+          <!-- DEALER CODE (27.11.2026: first 2 + "+N more" instead of the full comma list) -->
+          <td class="emp-dealer-cell">
+            <ng-container *ngIf="getDealerCodes(emp) as codes">
+              <span *ngIf="!codes.length">—</span>
+              <span *ngIf="codes.length">{{ codes.slice(0, 2).join(', ') }}</span>
+              <button *ngIf="codes.length > 2" type="button" class="btn btn-link btn-sm p-0 ms-1 emp-more"
+                (click)="openDealers(emp, $event)">+{{ codes.length - 2 }} more</button>
+            </ng-container>
+          </td>
 
           <!-- DEALER NAME -->
-          <td [title]="emp.dealerName">
-            <ol class="mb-0 ps-3" *ngIf="getDealerNames(emp).length; else noDealer">
-              <li *ngFor="let d of getDealerNames(emp)">{{ d }}</li>
-            </ol>
-            <ng-template #noDealer>—</ng-template>
+          <td class="emp-dealer-cell">
+            <ng-container *ngIf="getDealerNames(emp) as names">
+              <span *ngIf="!names.length">—</span>
+              <span *ngIf="names.length" class="emp-dealer-name" [title]="names[0]">{{ names[0] }}</span>
+              <button *ngIf="names.length > 1" type="button" class="btn btn-link btn-sm p-0 ms-1 emp-more"
+                (click)="openDealers(emp, $event)">+{{ names.length - 1 }} more</button>
+            </ng-container>
           </td>
 
           <!-- ZONE -->
@@ -201,6 +210,11 @@
                 (click)="openEditPopup(emp); $event.stopPropagation()">
                 <i class="ri-pencil-fill fs-12"></i> Edit
             </button>
+            <button *ngIf="canDelete" class="btn btn-sm btn-soft-danger ms-1" [disabled]="deletingId === emp.id"
+                title="Delete employee" (click)="deleteEmployee(emp, $event)">
+                <span *ngIf="deletingId === emp.id" class="spinner-border spinner-border-sm"></span>
+                <i *ngIf="deletingId !== emp.id" class="ri-delete-bin-6-line fs-12"></i> Delete
+            </button>
         </td>
 
         </tr>
@@ -211,6 +225,39 @@
 
   </div>
 
+</div>
+
+<!-- ===================================================== -->
+<!-- 27.11.2026 MAPPED DEALERS POPUP -->
+<!-- ===================================================== -->
+<div class="emp-md-backdrop" *ngIf="dealerPopupEmp" (click)="closeDealers()">
+  <div class="emp-md-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <div class="emp-md-head">
+      <h6 class="mb-0"><i class="ri-store-2-line me-1"></i>{{ dealerPopupEmp.employeeName }} - Mapped Dealers ({{ dealerPopupRows.length }})</h6>
+      <button type="button" class="btn-close btn-close-white" (click)="closeDealers()" aria-label="Close"></button>
+    </div>
+    <div class="emp-md-body">
+      <input type="text" class="form-control form-control-sm mb-2" placeholder="Search dealer code or name..."
+        [(ngModel)]="dealerPopupSearch">
+      <div class="emp-md-table-wrap">
+        <table class="table table-sm table-bordered table-hover mb-0 emp-md-table">
+          <thead><tr><th style="width:70px;">Sr No.</th><th style="width:130px;">Dealer Code</th><th>Dealer Name</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let r of dealerPopupFiltered; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td class="fw-medium">{{ r.code || '—' }}</td>
+              <td>{{ r.name || '—' }}</td>
+            </tr>
+            <tr *ngIf="!dealerPopupFiltered.length"><td colspan="3" class="text-center text-muted">No dealer matches.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="emp-md-foot">
+      <span class="small text-muted">{{ dealerPopupFiltered.length }} of {{ dealerPopupRows.length }} dealers</span>
+      <button type="button" class="btn btn-light btn-sm border" (click)="closeDealers()">Close</button>
+    </div>
+  </div>
 </div>
 
 <!-- ===================================================== -->

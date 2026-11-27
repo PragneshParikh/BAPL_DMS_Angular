@@ -58,3 +58,10 @@
   // the frame's thead/tfoot give every page its 10 mm top/bottom space instead
   @page { size: A4 portrait; margin: 0; }
 }
+
+// 27.11.2026 header sorting
+.sh-sortable { cursor: pointer; user-select: none;
+  i { font-size: .8rem; margin-left: 2px; vertical-align: -1px; color: var(--vz-primary, #405189); }
+  .sh-sort-idle { color: #cbd5e1; }
+  &:hover { color: #334155; .sh-sort-idle { color: #94a3b8; } }
+}
