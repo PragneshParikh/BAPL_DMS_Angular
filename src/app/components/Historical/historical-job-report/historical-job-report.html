@@ -22,6 +22,16 @@
       <label class="form-label">To Date</label>
       <input type="date" class="form-control" [(ngModel)]="toDate">
     </div>
+   <div>
+      <label class="form-label">Search</label>
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Chassis No, Customer Name, Mobile No..."
+        [(ngModel)]="searchText"
+        (keyup.enter)="onSearch()"
+      >
+    </div>
     <button class="btn btn-primary" (click)="onSearch()">Search</button>
   </div>
 </div>

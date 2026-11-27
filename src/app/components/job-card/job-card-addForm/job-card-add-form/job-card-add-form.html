@@ -236,7 +236,8 @@
                   <div class="input-group input-group-sm">
                     <input type="text" class="form-control" placeholder="Type Chassis No."
                       [(ngModel)]="selectedChassis" (input)="filterChassis()" (focus)="filterChassis()"
-                      (blur)="hideChassisDropdown()">
+                      (blur)="hideChassisDropdown()"
+                      (keyup.enter)="onChassisInputEnter($event)">
                     <button type="button" class="btn btn-outline-secondary" (click)="openGlobalChassisSearch(globalChassisSearchModal)"
                       title="Search chassis across all dealers">
                       <i class="ri-search-line"></i>
@@ -1149,9 +1150,13 @@
             <td class="text-muted small">Register No</td>
             <td>{{ globalSaleData.registerNo || '-' }}</td>
           </tr>
-          <tr>
+          <!-- <tr>
             <td class="text-muted small">Customer Name</td>
             <td>{{ globalSaleData.customerName || '-' }}</td>
+          </tr> -->
+          <tr>
+            <td class="text-muted small">Customer Name</td>
+            <td>{{ globalSaleData.partyName || '-' }}</td>
           </tr>
           <tr>
             <td class="text-muted small">Mobile No.</td>
@@ -1320,8 +1325,10 @@
             | Sale: {{ v.saleDate ? (v.saleDate | date:'dd.MM.yyyy') : '-' }}
             <span *ngIf="v.soldThrough"> by {{ v.soldThrough }}</span>
             <div class="text-muted" *ngIf="v.jobs?.length">
-              Customer: {{ v.jobs[0]['PartyName'] || '-' }} | Mobile: {{ v.jobs[0]['MobileNumber'] || '-' }}
-              | Last KMS: {{ v.jobs[0]['KMS'] | number:'1.0-0' }} | Jobs: {{ v.jobs.length }}
+              <!-- Customer: {{ v.jobs[0]['PartyName'] || '-' }} | Mobile: {{ v.jobs[0]['MobileNumber'] || '-' }}
+              | Last KMS: {{ v.jobs[0]['KMS'] | number:'1.0-0' }} | Jobs: {{ v.jobs.length }} -->
+              Customer: {{ latestCustomerJob(v)?.['PartyName'] || '-' }} | Mobile: {{ latestCustomerJob(v)?.['MobileNumber'] || '-' }}
+|              Last KMS: {{ sortedJobs(v)[0]?.['KMS'] | number:'1.0-0' }} | Jobs: {{ v.jobs.length }}
             </div>
           </div>
           <button type="button" class="btn btn-success btn-sm" [disabled]="!v.chassisNo" (click)="useServiceHistoryVehicle(v)">

@@ -202,7 +202,7 @@ export class BgFreeService implements OnInit {
     if (row.isApproved !== null && row.isApproved !== undefined) return;
     const userRole = this.storageService.getRole() || '';
     if (userRole.toLowerCase() !== 'superadmin' && userRole.toLowerCase() !== 'admin') {
-      this.toaster.show('Fakt admin ch approve karu shakto.', { classname: 'bg-danger text-white', delay: 5000 });
+      this.toaster.show('Only the Admin can approve the claims.', { classname: 'bg-danger text-white', delay: 5000 });
       return;
     }
     row.decision = row.decision === decision ? null : decision;

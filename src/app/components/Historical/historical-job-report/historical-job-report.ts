@@ -30,6 +30,7 @@ export class HistoricalJobReport implements OnInit {
   pageSize = 10;
   loading = false;
   exporting = false;
+  searchText: string = '';
 
   columns: Col[] = [
     { key: 'dealerName', label: 'Dealer Name' },
@@ -66,6 +67,7 @@ export class HistoricalJobReport implements OnInit {
   ];
 
   constructor(private svc: HistoricalJobReportService) {}
+  
 
   ngOnInit() { this.search(); }
 
@@ -82,9 +84,11 @@ export class HistoricalJobReport implements OnInit {
   }
 
   private buildReq(): HistoricalJobReportRequest {
+    const trimmed = this.searchText?.trim();
     return {
       fromDate: this.fromDate,
       toDate: this.toDate,
+      searchText: trimmed ? trimmed : undefined,
       pageIndex: this.page,
       pageSize: this.pageSize
     };
@@ -123,6 +127,7 @@ export class HistoricalJobReport implements OnInit {
         this.rows = res.data ?? [];
         this.totalCount = res.totalRecords ?? 0;
         this.loading = false;
+      
       },
       error: () => {
         this.loading = false;
@@ -159,4 +164,6 @@ export class HistoricalJobReport implements OnInit {
         alert('Failed to download Excel. Please narrow the date range (max 100,000 rows) and try again.'); }
     });
   }
+
+ 
 }

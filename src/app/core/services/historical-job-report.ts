@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 export interface HistoricalJobReportRequest {
   fromDate: string;
   toDate: string;
+  searchText?: string;
   dealerCode?: string | null;
   pageIndex: number;
   pageSize: number;
@@ -32,6 +33,11 @@ export class HistoricalJobReportService {
     if (req.dealerCode) {
       params = params.set('dealerCode', req.dealerCode);
     }
+
+    if (req.searchText && req.searchText.trim()) {
+      params = params.set('searchText', req.searchText.trim());
+    }
+
     return params;
   }
 
