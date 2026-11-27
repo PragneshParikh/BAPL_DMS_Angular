@@ -78,6 +78,13 @@ export class AuthGuard {
             return false;
         }
 
+        // 27.11.2026 - an "add" page needs the Add right (bit 2), not only View
+        const path = (requestedUrl || '').split('?')[0].toLowerCase();
+        if (/\/add(\/|$)/.test(path) && (permission & 2) !== 2) {
+            this.router.navigate(['/']);
+            return false;
+        }
+
         return true;
     }
 

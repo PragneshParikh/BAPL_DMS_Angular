@@ -7,6 +7,7 @@ import { Loader } from './components/loader/loader';
 import { LoaderService } from './core/services/loader';
 import { TimeoutService } from './core/services/timeout';
 import { StorageService } from './core/services/storage';
+import { ActionPermissionService } from './core/services/action-permission.service';
 
 @Component({
   selector: 'app-root',
@@ -23,7 +24,8 @@ export class App implements OnInit {
     private loader: LoaderService,
     private router: Router,
     private timeoutService: TimeoutService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private actionPermissions: ActionPermissionService
   ) { }
 
   ngOnInit(): void {
@@ -43,6 +45,9 @@ export class App implements OnInit {
     });
 
     this.timeoutService.startWatching(() => this.authService.logout());
+
+    // 27.11.2026 - Role Menu Rights: hide Add / Edit / Delete / Print actions the page's rights do not allow
+    this.actionPermissions.start();
 
     // this.authService.initAuth();
 

@@ -107,9 +107,25 @@
     <table class="table table-sm table-hover align-middle mb-0">
       <thead>
         <tr>
-          <th>Job Date</th><th>Dealer</th><th>Location</th><th class="text-end">Job No</th><th>Job Type</th><th>Service Head</th>
-          <th>Model</th><th>Chassis No</th><th>Reg No</th><th class="text-end">KMS</th><th>Technician</th><th>Doc</th>
-          <th>Invoice Date</th><th class="text-end">Parts</th><th class="text-end">Labour</th><th class="text-end">GST</th><th class="text-end">Net Total</th><th>Status</th>
+          <th class="sh-sortable" (click)="sort('JobDate')" [attr.aria-sort]="sortBy === 'JobDate' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Job Date <i [class]="sortIcon('JobDate')"></i></th>
+          <th class="sh-sortable" (click)="sort('DealerCode')" [attr.aria-sort]="sortBy === 'DealerCode' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Dealer <i [class]="sortIcon('DealerCode')"></i></th>
+          <th class="sh-sortable" (click)="sort('Location')" [attr.aria-sort]="sortBy === 'Location' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Location <i [class]="sortIcon('Location')"></i></th>
+          <th class="sh-sortable text-end" (click)="sort('JobNo')" [attr.aria-sort]="sortBy === 'JobNo' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Job No <i [class]="sortIcon('JobNo')"></i></th>
+          <th class="sh-sortable" (click)="sort('JobType')" [attr.aria-sort]="sortBy === 'JobType' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Job Type <i [class]="sortIcon('JobType')"></i></th>
+          <th class="sh-sortable" (click)="sort('ServiceHead')" [attr.aria-sort]="sortBy === 'ServiceHead' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Service Head <i [class]="sortIcon('ServiceHead')"></i></th>
+          <th class="sh-sortable" (click)="sort('Model')" [attr.aria-sort]="sortBy === 'Model' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Model <i [class]="sortIcon('Model')"></i></th>
+          <th class="sh-sortable" (click)="sort('ChassisNo')" [attr.aria-sort]="sortBy === 'ChassisNo' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Chassis No <i [class]="sortIcon('ChassisNo')"></i></th>
+          <th class="sh-sortable" (click)="sort('RegNo')" [attr.aria-sort]="sortBy === 'RegNo' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Reg No <i [class]="sortIcon('RegNo')"></i></th>
+          <th class="sh-sortable" (click)="sort('PartyName')" [attr.aria-sort]="sortBy === 'PartyName' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Party <i [class]="sortIcon('PartyName')"></i></th>
+          <th class="sh-sortable text-end" (click)="sort('KMS')" [attr.aria-sort]="sortBy === 'KMS' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">KMS <i [class]="sortIcon('KMS')"></i></th>
+          <th class="sh-sortable" (click)="sort('Technician')" [attr.aria-sort]="sortBy === 'Technician' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Technician <i [class]="sortIcon('Technician')"></i></th>
+          <th class="sh-sortable" (click)="sort('DocNo')" [attr.aria-sort]="sortBy === 'DocNo' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Doc <i [class]="sortIcon('DocNo')"></i></th>
+          <th class="sh-sortable" (click)="sort('InvoiceDate')" [attr.aria-sort]="sortBy === 'InvoiceDate' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Invoice Date <i [class]="sortIcon('InvoiceDate')"></i></th>
+          <th class="sh-sortable text-end" (click)="sort('Parts')" [attr.aria-sort]="sortBy === 'Parts' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Parts <i [class]="sortIcon('Parts')"></i></th>
+          <th class="sh-sortable text-end" (click)="sort('Labour')" [attr.aria-sort]="sortBy === 'Labour' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Labour <i [class]="sortIcon('Labour')"></i></th>
+          <th class="sh-sortable text-end" (click)="sort('GSTAmount')" [attr.aria-sort]="sortBy === 'GSTAmount' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">GST <i [class]="sortIcon('GSTAmount')"></i></th>
+          <th class="sh-sortable text-end" (click)="sort('NetTotal')" [attr.aria-sort]="sortBy === 'NetTotal' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Net Total <i [class]="sortIcon('NetTotal')"></i></th>
+          <th class="sh-sortable" (click)="sort('JobStatus')" [attr.aria-sort]="sortBy === 'JobStatus' ? (sortDir === 'asc' ? 'ascending' : 'descending') : null">Status <i [class]="sortIcon('JobStatus')"></i></th>
         </tr>
       </thead>
       <tbody>
@@ -124,6 +140,7 @@
             <td>{{ r['Model'] || '—' }}</td>
             <td class="fw-medium">{{ r['ChassisNo'] || '—' }}</td>
             <td>{{ r['RegNo'] || '—' }}</td>
+            <td class="text-truncate" style="max-width: 14rem" [title]="r['PartyName'] || ''">{{ r['PartyName'] || '—' }}</td>
             <td class="text-end">{{ r['KMS'] != null ? num(r['KMS']) : '—' }}</td>
             <td>{{ r['Technician'] || '—' }}</td>
             <td>{{ r['DocType'] || '—' }} @if (r['DocNo']) { <small class="text-muted">#{{ r['DocNo'] }}</small> }</td>
@@ -135,7 +152,7 @@
             <td><span class="badge" [class]="r['JobStatus'] === 'Closed' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'">{{ r['JobStatus'] || '—' }}</span></td>
           </tr>
         } @empty {
-          <tr><td colspan="18" class="text-center text-muted py-4"><i class="ri-search-eye-line me-1"></i>No service history for "{{ searched }}".</td></tr>
+          <tr><td colspan="19" class="text-center text-muted py-4"><i class="ri-search-eye-line me-1"></i>No service history for "{{ searched }}".</td></tr>
         }
       </tbody>
     </table>

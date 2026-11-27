@@ -51,8 +51,8 @@ export class JobcardServicehistoryReportService {
   }
 
   /** exact = value picked from the type-ahead (matched exactly); otherwise a "starts with" search */
-  serviceHistory(search: string, page: number, pageSize: number, exact = false): Observable<JcshReportPage> {
-    return this.http.get<JcshReportPage>(`${this.baseUrl}/service-history`, { params: this.params({ search, page, pageSize, exact: exact || null }) });
+  serviceHistory(search: string, page: number, pageSize: number, exact = false, sortBy: string | null = null, sortDir: 'asc' | 'desc' | null = null): Observable<JcshReportPage> {
+    return this.http.get<JcshReportPage>(`${this.baseUrl}/service-history`, { params: this.params({ search, page, pageSize, exact: exact || null, sortBy, sortDir }) });
   }
 
   /** Vehicle History Card for the same search (all jobs of the vehicle(s), newest first) */
@@ -73,8 +73,8 @@ export class JobcardServicehistoryReportService {
     return this.http.get<JcshDealerOption[]>(`${this.baseUrl}/dealers`);
   }
 
-  exportServiceHistory(search: string, exact = false): Observable<HttpResponse<Blob>> {
-    return this.http.get(`${this.baseUrl}/service-history/export`, { params: this.params({ search, exact: exact || null }), responseType: 'blob', observe: 'response' });
+  exportServiceHistory(search: string, exact = false, sortBy: string | null = null, sortDir: 'asc' | 'desc' | null = null): Observable<HttpResponse<Blob>> {
+    return this.http.get(`${this.baseUrl}/service-history/export`, { params: this.params({ search, exact: exact || null, sortBy, sortDir }), responseType: 'blob', observe: 'response' });
   }
 
   exportJobData(dealerCode: string | null, fromDate: string, toDate: string): Observable<HttpResponse<Blob>> {

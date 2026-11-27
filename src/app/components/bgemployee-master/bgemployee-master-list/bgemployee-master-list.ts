@@ -37,6 +37,8 @@ export class BgemployeeMasterList implements OnInit {
   readonly SUBMENU_ID = 76;
   canCreate = false;
   canEdit = false;
+  canDelete = false;
+  deletingId: number | null = null;
   canDownload = false;
 
   departmentList: any[] = [];
@@ -65,6 +67,7 @@ export class BgemployeeMasterList implements OnInit {
   ) {
     this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
     this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
+    this.canDelete = this.menuAccess.canDelete(this.SUBMENU_ID);
     this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
   }
 
@@ -178,6 +181,36 @@ export class BgemployeeMasterList implements OnInit {
       .filter((z: string) => z.length > 0);
   }
 
+  // ---------- 27.11.2026 compact dealer columns + "all dealers" popup ----------
+  getDealerCodes(emp: any): string[] {
+    return (emp.dealerCode || '').split(',').map((d: string) => d.trim()).filter((d: string) => d.length > 0);
+  }
+
+  dealerPopupEmp: any = null;
+  dealerPopupRows: { code: string; name: string }[] = [];
+  dealerPopupSearch = '';
+
+  openDealers(emp: any, ev?: Event): void {
+    ev?.stopPropagation();
+    const codes = this.getDealerCodes(emp);
+    const names = this.getDealerNames(emp);
+    const aligned = names.length === codes.length;   // names are only shown when they line up with the codes
+    this.dealerPopupRows = codes.length
+      ? codes.map((code, i) => ({ code, name: aligned ? names[i] : '' }))
+      : names.map(name => ({ code: '', name }));
+    this.dealerPopupSearch = '';
+    this.dealerPopupEmp = emp;
+  }
+
+  closeDealers(): void {
+    this.dealerPopupEmp = null;
+  }
+
+  get dealerPopupFiltered(): { code: string; name: string }[] {
+    const q = this.dealerPopupSearch.trim().toLowerCase();
+    return this.dealerPopupRows.filter(r => !q || `${r.code} ${r.name}`.toLowerCase().includes(q));
+  }
+
   getDealerNames(emp: any): string[] {
     return (emp.dealerName || '')
       .split(',')
@@ -231,6 +264,30 @@ export class BgemployeeMasterList implements OnInit {
     this.showModal        = false;
     this.selectedEmployee = null;
     this.loadEmployees();
+  }
+
+  /** 27.11.2026 - delete an employee (its role mappings + menu rights go too; its login is locked) */
+  deleteEmployee(emp: any, event: Event): void {
+    event.stopPropagation();
+    if (this.deletingId) return;
+    const name = emp.employeeName || emp.employeeCode || 'this employee';
+    if (!confirm(`Delete ${name}${emp.employeeCode ? ' (' + emp.employeeCode + ')' : ''}?\n\n` +
+      'Its dealer mapping, roles and menu rights are removed and its login is blocked. This cannot be undone.\n' +
+      'To keep the record, use Inactive instead.')) return;
+    this.deletingId = emp.id;
+    this.bgEmployeeService.deleteEmployee(emp.id).subscribe({
+      next: () => {
+        this.deletingId = null;
+        this.employeeList = this.employeeList.filter((e: any) => e.id !== emp.id);
+        this.applyFilters();
+        this.toaster.show(`${name} deleted`, { classname: 'bg-success text-light', delay: 3000 });
+      },
+      error: (err) => {
+        this.deletingId = null;
+        const msg = err?.error?.message || err?.message || 'Failed to delete employee.';
+        this.toaster.show(msg, { classname: 'bg-danger text-white', delay: 6000 });
+      },
+    });
   }
 
   toggleStatus(emp: any, event: Event): void {
