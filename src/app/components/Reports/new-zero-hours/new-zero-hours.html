@@ -16,12 +16,9 @@
       <div class="row g-2 align-items-end">
         <div class="col-md-2">
           <label class="form-label">Dealer</label>
-          <select class="form-select form-select-sm" [(ngModel)]="dealerCode" (change)="onDealerChange()">
-            <option value="ALL">All Dealers</option>
-            <option *ngFor="let d of dealers" [value]="d.dealerCode">
-              {{ d.dealerCode }} - {{ d.dealerName }}
-            </option>
-          </select>
+          <!-- 26.11.2026 searchable (dealer code / name) -->
+          <app-search-select [options]="dealerOptions" [value]="dealerCode === 'ALL' ? null : dealerCode"
+            allLabel="All Dealers" placeholder="Dealer code or name..." (valueChange)="pickDealer($event)"></app-search-select>
         </div>
 
         <div class="col-md-2">

@@ -55,7 +55,7 @@
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label>Purpose of FFIR</label>
+                                    <label>Purpose of FFIR <span class="text-danger">*</span></label>
                                     <select class="form-select form-select-sm" [(ngModel)]="ffirObj.purposeOfCIR">
                                         <option value="">-- Select Type --</option>
 
@@ -103,12 +103,12 @@
                                         [(ngModel)]="ffirObj.failureDate">
                                 </div>
                                 <div class="col-md-3">
-                                    <label>Report Title</label>
+                                    <label>Report Title <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control form-control-sm"
                                         [(ngModel)]="ffirObj.reportTitle">
                                 </div>
                                 <div class="col-md-3">
-                                    <label>Report Prepared by</label>
+                                    <label>Report Prepared by <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control form-control-sm"
                                         [(ngModel)]="ffirObj.reportPreparedBy">
                                 </div>
@@ -146,7 +146,7 @@
                                     </ul>
                                 </div>
                                 <div class="col-md-3">
-                                    <label>Type of Road Surface</label>
+                                    <label>Type of Road Surface <span class="text-danger">*</span></label>
                                     <select name="RoadSurface" id="ddlRoadSurface" class="form-select form-select-sm"
                                         [(ngModel)]="ffirObj.typeOfRoadSurface">
                                         <option value="">-- Select Type --</option>
@@ -272,8 +272,8 @@
                                         <thead class="table-light">
                                             <tr>
                                                 <th>Customer Voice</th>
-                                                <th>Complaint Code</th>
-                                                <th>Complaint Description</th>
+                                                <th>Group Name</th>
+                                                <th>Complaint Name</th>
                                                 <th>Dealer Observation</th>
                                                 <!-- <th>Action Taken</th> -->
                                             </tr>
@@ -281,8 +281,8 @@
                                         <tbody>
                                             <tr *ngFor="let item of complaintList">
                                                 <td>{{ item.customerVoice }}</td>
-                                                <td>{{ item.complaintCode }}</td>
-                                                <td>{{ item.complaint }}</td>
+                                                <td>{{ item.groupName || '-' }}</td>
+                                                <td>{{ item.complaintName || item.complaint }}</td>
                                                 <td>{{ item.observation }}</td>
                                                 <!-- <td>{{ item.actionTaken }}</td> -->
                                         </tbody>
@@ -298,7 +298,7 @@
                 <!--Cuurently commented not to need -->
                 <!-- <div class="accordion-item">
                     <h2 class="accordion-header" id="headingVehicle">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
                             data-bs-target="#collapseVehicle">
                             Failure Parts
                         </button>
@@ -562,6 +562,7 @@
                                             <tr>
                                                 <td style="width: 50%;">
                                                     Detailed Observations on complaint and the Failed Parts:
+                                                    <span class="text-danger">*</span>
                                                 </td>
                                                 <td>
                                                     <textarea class="form-control form-control-sm"
@@ -571,7 +572,7 @@
                                             </tr>
                                             <!-- Row 2 -->
                                             <tr>
-                                                <td>Root cause of the failure</td>
+                                                <td>Root cause of the failure <span class="text-danger">*</span></td>
                                                 <td>
                                                     <textarea class="form-control form-control-sm"
                                                         [(ngModel)]="ffirObj.detailObservation.rootCauseofFailure">
@@ -580,7 +581,7 @@
                                             </tr>
                                             <!-- Row 3 -->
                                             <tr>
-                                                <td>Corrective action taken</td>
+                                                <td>Corrective action taken <span class="text-danger">*</span></td>
                                                 <td>
                                                     <textarea class="form-control form-control-sm"
                                                         [(ngModel)]="ffirObj.detailObservation.correctiveAction">
@@ -592,6 +593,7 @@
                                                 <td>
                                                     Any Local solution or Suggestion from the field for Prevention/Quick
                                                     resolution of the complaint
+                                                    <span class="text-danger">*</span>
                                                 </td>
                                                 <td>
                                                     <textarea class="form-control form-control-sm"
@@ -600,7 +602,7 @@
                                             </tr>
                                             <!-- Row 5 -->
                                             <tr>
-                                                <td>Present Status of the Vehicle</td>
+                                                <td>Present Status of the Vehicle <span class="text-danger">*</span></td>
                                                 <td>
                                                     <select class="form-select form-select-sm"
                                                         [(ngModel)]="ffirObj.detailObservation.presentStatusofVehicle">
@@ -627,12 +629,72 @@
                         </div>
                     </div>
                 </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingAttachments">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapseAttachments">
+                            Attachments <span class="text-danger ms-1">*</span>
+                        </button>
+                    </h2>
+                    <div id="collapseAttachments" class="accordion-collapse collapse show">
+                        <div class="accordion-body">
+                            <div class="mb-3">
+                                <label class="form-label">Photos <span class="text-danger">*</span></label>
+                                <input type="file" class="form-control form-control-sm"
+                                    accept="image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp" multiple
+                                    (change)="onImagesSelected($event)" [disabled]="isSaving">
+                                <small class="text-muted">
+                                    At least one photo is required. Maximum 10 photos, 10 MB each.
+                                    {{ savedImages.length + pendingImages.length }}/10 selected.
+                                </small>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6 col-md-3 col-lg-2" *ngFor="let item of savedImages; let i = index">
+                                    <img [src]="item.url" [alt]="item.fileName || 'FFIR photo'"
+                                        class="img-thumbnail w-100" style="height: 120px; object-fit: cover;">
+                                    <small class="d-block text-truncate">{{ item.fileName }}</small>
+                                </div>
+                                <div class="col-6 col-md-3 col-lg-2" *ngFor="let item of pendingImages; let i = index">
+                                    <button type="button" class="btn-close float-end" aria-label="Remove photo"
+                                        (click)="removePendingAttachment('Image', i)" [disabled]="isSaving"></button>
+                                    <img [src]="item.previewUrl" [alt]="item.file.name"
+                                        class="img-thumbnail w-100" style="height: 120px; object-fit: cover;">
+                                    <small class="d-block text-truncate">{{ item.file.name }}</small>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Videos (optional)</label>
+                                <input type="file" class="form-control form-control-sm"
+                                    accept="video/mp4,video/quicktime,.mp4,.mov" multiple
+                                    (change)="onVideosSelected($event)" [disabled]="isSaving">
+                                <small class="text-muted">
+                                    Maximum 5 MP4/MOV videos, 100 MB each.
+                                    {{ savedVideos.length + pendingVideos.length }}/5 selected.
+                                </small>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-12 col-md-4" *ngFor="let item of savedVideos">
+                                    <video [src]="item.url" controls class="w-100" style="max-height: 220px;"></video>
+                                    <small class="d-block text-truncate">{{ item.fileName }}</small>
+                                </div>
+                                <div class="col-12 col-md-4" *ngFor="let item of pendingVideos; let i = index">
+                                    <button type="button" class="btn-close float-end" aria-label="Remove video"
+                                        (click)="removePendingAttachment('Video', i)" [disabled]="isSaving"></button>
+                                    <video [src]="item.previewUrl" controls class="w-100"
+                                        style="max-height: 220px;"></video>
+                                    <small class="d-block text-truncate">{{ item.file.name }}</small>
+                                </div>
+                            </div>
+                            <div class="text-muted" *ngIf="isLoadingAttachments">Loading saved attachments...</div>
+                        </div>
+                    </div>
+                </div>
                 <!-- Accordion End -->
                 <!-- Footer Buttons -->
                 <div class="mt-3 d-flex justify-content-between">
                     <div>
                         <button class="btn btn-primary btn-sm" *ngIf="(!isEditMode && canCreate) || (isEditMode && canEdit)"
-                            (click)="saveFFIR()">Save</button>
+                            (click)="saveFFIR()" [disabled]="!canSaveFFIR">Save</button>
                         <button class="btn btn-light btn-sm">Cancel</button>
                     </div>
                 </div>

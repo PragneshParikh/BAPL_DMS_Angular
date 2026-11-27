@@ -197,159 +197,202 @@
 
             <div class="section-body">
 
-              <!-- ZONE DROPDOWN + SEARCH + COUNT + ADD BUTTON -->
-              <div class="row g-2 mb-2 align-items-end">
-                <div class="col-md-3">
-                  <label class="form-label mb-1" style="font-size:12px;">
-                    Zone <span class="text-danger">*</span>
-                  </label>
-                  <select class="form-select form-select-sm py-1"
-                    [(ngModel)]="selectedZone"
-                    (ngModelChange)="onZoneChange()"
-                    name="selectedZone">
+              <!-- 26.11.2026 zone-wise dealer mapping:
+                   pick a zone -> all its dealers are listed (already added ones ticked) -> tick / untick -> Add / Update -->
+              <div class="zm-toolbar">
+                <div class="zm-field">
+                  <label class="form-label">Zone <span class="text-danger">*</span></label>
+                  <select class="form-select form-select-sm" [(ngModel)]="selectedZone" (ngModelChange)="onZoneChange()" name="selectedZone">
                     <option value="">— Select Zone —</option>
-                    <option *ngFor="let z of zones" [value]="z.zone">{{ z.zone }}</option>
+                    <option *ngFor="let z of zones" [value]="z.zone">{{ z.zone }}{{ zoneCount(z.zone) !== null ? ' (' + zoneCount(z.zone) + ' dealers)' : '' }}</option>
                   </select>
                 </div>
-
-                <div class="col-md-4" *ngIf="selectedZone && zoneDealers.length > 0">
-                  <label class="form-label mb-1" style="font-size:12px;">Search dealers</label>
-                  <input type="text" class="form-control form-control-sm py-1"
-                    [(ngModel)]="dealerSearchTerm"
-                    name="dealerSearchTerm"
-                    placeholder="Dealer name, code or city">
+                <div class="zm-field zm-grow" *ngIf="selectedZone">
+                  <label class="form-label">Search dealers in {{ selectedZone }}</label>
+                  <div class="zm-search">
+                    <i class="ri-search-line"></i>
+                    <input type="text" class="form-control form-control-sm" [(ngModel)]="dealerSearchTerm" name="dealerSearchTerm"
+                      placeholder="Dealer name, code, city or state">
+                  </div>
                 </div>
-
-                <div class="col-md-3 d-flex align-items-center gap-2" *ngIf="selectedZone">
-                  <span class="badge bg-primary-subtle text-primary px-2 py-1" style="font-size:12px;">
-                    {{ currentZoneCheckedCount }} selected in {{ selectedZone }}
-                  </span>
-                  <button type="button" class="btn btn-success btn-sm px-3"
-                    [disabled]="currentZoneCheckedCount === 0"
-                    (click)="onAddZoneDealers()">
-                    <i class="ri-add-line"></i> Add
+                <div class="zm-actions" *ngIf="selectedZone">
+                  <span class="zm-count"><b>{{ currentZoneCheckedCount }}</b> ticked · <b>{{ currentZoneAddedCount }}</b> added</span>
+                  <button type="button" class="btn btn-light btn-sm border" (click)="clearCurrentZoneSelection()" [disabled]="currentZoneCheckedCount === 0">
+                    Clear
+                  </button>
+                  <button type="button" class="btn btn-success btn-sm" [disabled]="!currentZoneDirty" (click)="onAddZoneDealers()">
+                    <i class="ri-check-double-line me-1"></i>{{ currentZoneAddedCount ? 'Update' : 'Add' }} {{ selectedZone }}
                   </button>
                 </div>
               </div>
 
+              <!-- 26.11.2026 dealers per zone (zone_master rows + dealers of the zone's states) -->
+              <div class="zm-summary" *ngIf="zoneCounts">
+                <div class="zm-summary-line">
+                  <span><b>{{ zoneCounts.totalDealers }}</b> dealers in Dealer Master ({{ zoneCounts.activeDealers }} active)</span>
+                  <span class="zm-dot">·</span>
+                  <ng-container *ngFor="let z of zoneCounts.zones; let last = last">
+                    <a href="javascript:void(0)" class="zm-zone-link" (click)="openZone(z.zone)">{{ z.zone }} <b>{{ z.total }}</b></a><span *ngIf="!last" class="zm-dot">·</span>
+                  </ng-container>
+                  <ng-container *ngIf="zoneCounts.notInZone">
+                    <span class="zm-dot">·</span>
+                    <span class="text-danger">No zone <b>{{ zoneCounts.notInZone }}</b></span>
+                  </ng-container>
+                  <button type="button" class="btn btn-link btn-sm p-0 ms-auto" (click)="showZoneSummary = !showZoneSummary">
+                    {{ showZoneSummary ? 'Hide' : 'Details' }}
+                  </button>
+                </div>
+                <div *ngIf="showZoneSummary" class="table-responsive mt-2">
+                  <table class="table table-sm table-bordered mb-1 zm-table">
+                    <thead>
+                      <tr><th>Zone</th><th class="text-end">Own row in Zone Master</th><th class="text-end">By state</th><th class="text-end">Total</th><th class="text-end">Active</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let z of zoneCounts.zones" class="zm-click" (click)="openZone(z.zone)">
+                        <td class="fw-semibold">{{ z.zone }}</td>
+                        <td class="text-end">{{ z.mapped }}</td>
+                        <td class="text-end">{{ z.byState }}</td>
+                        <td class="text-end fw-semibold">{{ z.total }}</td>
+                        <td class="text-end">{{ z.active }}</td>
+                      </tr>
+                      <tr *ngIf="zoneCounts.notInZone" class="table-warning">
+                        <td>No zone</td>
+                        <td colspan="2" class="small">States not in Zone Master: {{ zoneCounts.notInZoneStates.join(', ') }}</td>
+                        <td class="text-end fw-semibold">{{ zoneCounts.notInZone }}</td>
+                        <td class="text-end">{{ zoneCounts.notInZoneActive }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="small text-muted">"By state" = the dealer has no row of its own in zone_master, but its state belongs to that zone there.</div>
+                </div>
+              </div>
+
+              <!-- mapped zones: click a chip to open that zone -->
+              <div class="zm-chips" *ngIf="addedZoneSummary.length">
+                <span class="zm-chips-label">Mapped zones:</span>
+                <button type="button" class="zm-chip" *ngFor="let z of addedZoneSummary"
+                  [class.zm-chip-on]="z.zone === selectedZone" (click)="openZone(z.zone)">
+                  {{ z.zone }} <span class="zm-chip-n">{{ z.count }}</span>
+                </button>
+              </div>
+
+              <div *ngIf="!selectedZone" class="zm-hint">
+                <i class="ri-information-line me-1"></i>Select a zone to see all of its dealers.
+              </div>
+
               <!-- LOADING -->
-              <div *ngIf="loadingDealers" class="text-center py-3 text-muted" style="font-size:13px;">
-                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                Loading dealers…
+              <div *ngIf="loadingDealers" class="text-center py-3 text-muted small">
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>Loading dealers…
               </div>
 
               <!-- NO DEALERS FOR THIS ZONE -->
-              <div *ngIf="selectedZone && !loadingDealers && zoneDealers.length === 0"
-                   class="alert alert-warning py-2 px-3 mb-2" style="font-size:13px;">
-                No dealers mapped to the {{ selectedZone }} zone.
+              <div *ngIf="selectedZone && !loadingDealers && zoneDealers.length === 0" class="alert alert-warning py-2 px-3 mb-2 small">
+                No dealers mapped to the {{ selectedZone }} zone (Zone Master).
               </div>
 
-              <!-- DEALER CHECKBOX GRID (2 columns) -->
-              <div *ngIf="selectedZone && !loadingDealers && zoneDealers.length > 0"
-                   class="border rounded mb-3" style="max-height:280px; overflow-y:auto;">
-
-                <div class="d-flex align-items-center px-3 py-2 border-bottom bg-light"
-                     style="position:sticky; top:0; z-index:1;">
-                  <input type="checkbox" class="form-check-input me-2"
-                    [checked]="allFilteredSelected"
-                    (change)="toggleSelectAll($event)"
-                    id="selectAllDealers">
-                  <label class="form-check-label fw-semibold mb-0"
-                         for="selectAllDealers" style="font-size:13px;">
-                    Select all ({{ filteredZoneDealers.length }})
-                  </label>
+              <!-- ALL DEALERS OF THE ZONE -->
+              <div *ngIf="selectedZone && !loadingDealers && zoneDealers.length > 0" class="zm-list">
+                <div class="zm-list-head">
+                  <div class="form-check mb-0">
+                    <input type="checkbox" class="form-check-input" id="selectAllDealers"
+                      [checked]="allFilteredSelected" (change)="toggleSelectAll($event)">
+                    <label class="form-check-label fw-semibold" for="selectAllDealers">
+                      Select all ({{ filteredZoneDealers.length }})
+                    </label>
+                  </div>
+                  <span class="small text-muted">{{ zoneDealers.length }} dealer(s) in {{ selectedZone }}</span>
                 </div>
 
                 <div class="dealer-grid">
-                  <div *ngFor="let d of filteredZoneDealers; let i = index"
-                       class="dealer-grid-item"
-                       [class.border-end]="i % 2 === 0">
-                    <input type="checkbox" class="form-check-input me-2"
-                      [id]="'dealer-' + d.dealerId"
-                      [checked]="isDealerSelected(d.dealerId)"
-                      (change)="toggleDealer(d.dealerId)">
-                    
-                   <label class="form-check-label flex-grow-1 mb-0"
-                        [for]="'dealer-' + d.dealerId">
-                    <span class="fw-semibold">{{ d.dealerName }}</span>
-                      <span *ngIf="getDealerAssignment(d.dealerCode) as assignment"
-                            class="badge bg-warning-subtle text-warning ms-1"
-                            style="font-size:10px;"
-                            [title]="'Currently assigned to ' + (assignment.employeeName || assignment.employeeCode)">
-                        ⚠ {{ assignment.employeeName || assignment.employeeCode }}
+                  <label *ngFor="let d of filteredZoneDealers" class="dealer-grid-item" [for]="'dealer-' + d.dealerId"
+                    [class.zm-picked]="isDealerSelected(d.dealerId)" [class.zm-inactive]="d.isActive === false">
+                    <input type="checkbox" class="form-check-input me-2" [id]="'dealer-' + d.dealerId"
+                      [checked]="isDealerSelected(d.dealerId)" (change)="toggleDealer(d.dealerId)">
+                    <span class="flex-grow-1 min-w-0">
+                      <span class="zm-name" [title]="d.dealerName">{{ d.dealerName }}</span>
+                      <span class="zm-meta">
+                        {{ d.dealerCode }}<ng-container *ngIf="d.cityName"> · {{ d.cityName }}</ng-container>
                       </span>
-                    <br>
-                      <span class="text-muted">{{ d.dealerCode }}
-                        <ng-container *ngIf="d.cityName"> · {{ d.cityName }}</ng-container>
+                      <span class="zm-badges">
+                        <span *ngIf="isAddedInZone(d.dealerId)" class="badge bg-success-subtle text-success">Added</span>
+                        <span *ngIf="d.source === 'State'" class="badge bg-info-subtle text-info" title="No own row in zone_master - placed in this zone by its state">By state</span>
+                        <span *ngIf="d.isActive === false" class="badge bg-secondary-subtle text-secondary">Inactive</span>
+                        <span *ngIf="getDealerAssignment(d.dealerCode) as assignment" class="badge bg-warning-subtle text-warning"
+                          [title]="'Currently assigned to ' + (assignment.employeeName || assignment.employeeCode)">
+                          <i class="ri-error-warning-line"></i> {{ assignment.employeeName || assignment.employeeCode }}
+                        </span>
                       </span>
+                    </span>
                   </label>
-                  </div>
                 </div>
 
-                <div *ngIf="filteredZoneDealers.length === 0"
-                     class="text-center text-muted py-3" style="font-size:13px;">
+                <div *ngIf="filteredZoneDealers.length === 0" class="text-center text-muted py-3 small">
                   No dealers match "{{ dealerSearchTerm }}"
                 </div>
               </div>
 
-              <!-- SUMMARY TABLE — added zone-dealer pairs -->
-               <div *ngIf="removedDueToReassignment.length"
-                  class="alert alert-info py-2 px-3 mb-2" style="font-size:12.5px;">
+              <div *ngIf="removedDueToReassignment.length" class="alert alert-info py-2 px-3 mb-2 small">
                 <i class="ri-information-line"></i>
                 The following dealer(s) were removed — they're now assigned to someone else:
-                  <ul class="mb-0 mt-1 ps-3">
-                    <li *ngFor="let r of removedDueToReassignment">
-                      <strong>{{ r.dealerName }}</strong> — now with {{ r.assignedTo }}
-                    </li>
-                  </ul>
+                <ul class="mb-0 mt-1 ps-3">
+                  <li *ngFor="let r of removedDueToReassignment"><strong>{{ r.dealerName }}</strong> — now with {{ r.assignedTo }}</li>
+                </ul>
               </div>
-              <div *ngIf="addedDealers.length > 0">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                  <span class="fw-semibold" style="font-size:13px;">
-                    Added Dealers
-                    <span class="badge bg-success ms-1">{{ addedDealers.length }}</span>
-                  </span>
+
+              <!-- ADDED DEALERS (all zones) -->
+              <div *ngIf="addedDealers.length > 0" class="zm-added">
+                <div class="zm-added-head">
+                  <span class="fw-semibold">Added Dealers <span class="badge bg-success ms-1">{{ addedDealers.length }}</span></span>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <select class="form-select form-select-sm zm-small" [(ngModel)]="addedZoneFilter" name="addedZoneFilter">
+                      <option value="">All zones</option>
+                      <option *ngFor="let z of addedZoneSummary" [value]="z.zone">{{ z.zone }} ({{ z.count }})</option>
+                    </select>
+                    <input type="text" class="form-control form-control-sm zm-small" [(ngModel)]="addedSearch" name="addedSearch"
+                      placeholder="Search added…">
+                  </div>
                 </div>
 
-                <div class="table-responsive">
-                  <table class="table table-sm table-bordered table-hover mb-0"
-                         style="font-size:12.5px;">
-                    <thead class="table-light">
+                <div class="table-responsive zm-table-wrap">
+                  <table class="table table-sm table-bordered table-hover mb-0 zm-table">
+                    <thead>
                       <tr>
-                        <th>#</th>
-                        <th>Zone</th>
+                        <th style="width:42px;">#</th>
+                        <th style="width:90px;">Zone</th>
                         <th>Dealer Name</th>
-                        <th>Dealer Code</th>
-                        <th>City</th>
-                        <th>Remove</th>
+                        <th style="width:110px;">Dealer Code</th>
+                        <th style="width:130px;">City</th>
+                        <th style="width:70px;" class="text-center">Remove</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr *ngFor="let row of addedDealers; let i = index">
+                      <tr *ngFor="let row of filteredAddedDealers; let i = index">
                         <td>{{ i + 1 }}</td>
-                        <td>
-                          <span class="badge bg-primary-subtle text-primary">{{ row.zone }}</span>
+                        <td><span class="badge bg-primary-subtle text-primary">{{ row.zone }}</span></td>
+                        <td class="fw-medium">
+                          {{ row.dealerName }}
+                          <span *ngIf="row.isActive === false" class="badge bg-secondary-subtle text-secondary ms-1">Inactive</span>
+                          <span *ngIf="row.notInZone" class="badge bg-warning-subtle text-warning ms-1" title="Not in any zone list now - check Zone Master">Not in zone</span>
                         </td>
-                        <td class="fw-semibold">{{ row.dealerName }}</td>
                         <td>{{ row.dealerCode }}</td>
-                        <td>{{ row.cityName }}</td>
-                        <td>
-                          <button type="button"
-                            class="btn btn-sm btn-outline-danger py-0 px-2"
-                            (click)="removeAddedDealer(row.dealerId, row.zone)"
-                            title="Remove">
+                        <td>{{ row.cityName || '-' }}</td>
+                        <td class="text-center">
+                          <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2"
+                            (click)="removeAddedDealer(row.dealerId, row.zone)" title="Remove">
                             <i class="ri-delete-bin-line"></i>
                           </button>
                         </td>
+                      </tr>
+                      <tr *ngIf="filteredAddedDealers.length === 0">
+                        <td colspan="6" class="text-center text-muted small">No added dealers match.</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
               </div>
 
-              <small *ngIf="addedDealers.length === 0"
-                     class="text-danger d-block mt-1" style="font-size:12px;">
-                Select dealers from a zone and click Add to confirm.
+              <small *ngIf="addedDealers.length === 0" class="text-danger d-block mt-2 small">
+                Select a zone, tick its dealers and click Add.
               </small>
 
             </div>
@@ -457,7 +500,7 @@
                 </div>
 
                 <ng-template #noRoles>
-                  <small class="text-muted">No roles found for {{ dept }}.</small>
+                  <small class="text-warning"><i class="ri-error-warning-line me-1"></i>No roles are mapped to the {{ dept }} category. Map roles to {{ dept }} in Role Master (or pick another category) - a login needs at least one role.</small>
                 </ng-template>
               </div>
             </div>
@@ -474,6 +517,10 @@
               [disabled]="!isFormValid">
               {{ isEditMode ? 'Update' : 'Save' }}
           </button>
+            <!-- 26.11.2026 tell the user why Save is disabled -->
+            <div class="small text-danger mt-1" *ngIf="saveBlockers.length && ((!isEditMode && canCreate) || (isEditMode && canEdit))">
+              <i class="ri-information-line me-1"></i>To enable {{ isEditMode ? 'Update' : 'Save' }}, fill: {{ saveBlockers.join(', ') }}
+            </div>
           </div>
 
         </div>

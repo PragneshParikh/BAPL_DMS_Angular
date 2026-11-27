@@ -18,6 +18,7 @@ import {
 } from '@angular/forms';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { SearchSelect, SearchSelectOption } from '../../../shared/search-select/search-select';
 @Component({
   selector: 'app-job-report',
   standalone: true,
@@ -25,8 +26,7 @@ import { MenuAccessService } from '../../../core/services/menu-access.service';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    NgbTooltipModule
-  ],
+    NgbTooltipModule, SearchSelect],
   templateUrl: './job-report.html'
 })
 export class JobReportComponent implements OnInit, OnDestroy {
@@ -36,6 +36,18 @@ export class JobReportComponent implements OnInit, OnDestroy {
   filterForm!: FormGroup;
   reportData: JobReportViewModel[] = [];
   dealerList: DealerDropdownItem[] = [];
+
+  // 26.11.2026 searchable dealer filter (name + code). The list comes from getDealerDropdown(), which the API
+  // now scopes: admins get every dealer, a dealer its own, a BG employee only the dealers mapped to them.
+  private _dlSrc: any = null;
+  private _dlOpts: SearchSelectOption[] = [];
+  get dealerOptions(): SearchSelectOption[] {
+    if (this._dlSrc !== this.dealerList) {
+      this._dlSrc = this.dealerList;
+      this._dlOpts = (this.dealerList || []).map((d: any) => ({ value: d.dealerCode, label: d.dealerName || d.dealerCode, sub: d.dealerCode }));
+    }
+    return this._dlOpts;
+  }
   Math = Math;
 
   pageIndex: number = 1;

@@ -494,22 +494,39 @@
                         <span class="d-flex align-items-center">
                             <!-- <img class="rounded-circle header-profile-user" src="assets/images/users/avatar-1.jpg"
                                 alt="Header Avatar"> -->
-                            <span
-                                class="rounded-circle header-profile-user d-flex justify-content-center align-items-center bg-primary text-white"
-                                style="width: 32px; height: 32px;">
-                                {{ userData?.compName?.charAt(0) | uppercase }}
-                            </span>
-                            <span class="text-start ms-xl-2">
-                                <span
-                                    class="d-none d-xl-block ms-1 fs-12 text-muted user-name-sub-text">{{userData?.dealerCode}}</span>
+                            <!-- 26.11.2026 profile: initial + name + one short code line (never the full dealer list) -->
+                            <span class="tb-avatar">{{ profileInitial }}</span>
+                            <span class="text-start ms-2 d-none d-xl-block tb-user">
+                                <span class="tb-user-name" [title]="profileName">{{ profileName }}</span>
+                                <span class="tb-user-sub" [title]="profileCodes.join(', ')">{{ profileSub }}</span>
                             </span>
                         </span>
                     </button>
-                    <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
-                        <!-- item-->
-                        <h6 class="dropdown-header text-dark">{{userData?.compName}}</h6>
-                        <h6 class="dropdown-header">{{userData?.userName}}</h6>
-                        <h6 class="dropdown-header text-dark">Last Login : {{ lastLoginDate$ | async }}</h6>
+                    <div class="dropdown-menu dropdown-menu-end tb-profile-menu" ngbDropdownMenu>
+                        <div class="tb-profile-head">
+                            <span class="tb-avatar tb-avatar-lg">{{ profileInitial }}</span>
+                            <div class="min-w-0">
+                                <div class="tb-profile-name">{{ profileName }}</div>
+                                <div class="tb-profile-mail">{{ userData?.email || userData?.userName }}</div>
+                                <div class="tb-profile-role" *ngIf="profileRole">{{ profileRole }}</div>
+                            </div>
+                        </div>
+                        <div class="tb-profile-codes" *ngIf="profileCodes.length > 1">
+                            <div class="tb-profile-label">Mapped dealers ({{ profileCodes.length }})</div>
+                            <div class="tb-code-list">
+                                <span class="tb-code" *ngFor="let c of profileCodes">{{ c }}</span>
+                            </div>
+                        </div>
+                        <div class="tb-profile-row" *ngIf="userData?.employeeCode">
+                            <span>Employee Code</span><b>{{ userData?.employeeCode }}</b>
+                        </div>
+                        <div class="tb-profile-row" *ngIf="profileCodes.length === 1 && !userData?.employeeCode">
+                            <span>Dealer Code</span><b>{{ profileCodes[0] }}</b>
+                        </div>
+                        <div class="tb-profile-row">
+                            <span>Last Login</span><b>{{ (lastLoginDate$ | async) || '-' }}</b>
+                        </div>
+                        <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="javascript: void(0);" (click)="logout()">
                             <i class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i>
                             <span class="align-middle" data-key="t-logout">Logout</span>

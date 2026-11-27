@@ -47,12 +47,20 @@
               </div>
             </div>
 
+            <div class="col-md-2">
+              <label class="form-label">Status</label>
+              <select formControlName="status" class="form-select form-select-sm">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
             <div class="col-md-4">
               <label class="form-label">Search</label>
               <input type="text" formControlName="search" class="form-control form-control-sm"
                 placeholder="Search by code, name, or email...">
             </div>
-            <div class="col-md-4 d-flex align-items-end">
+            <div class="col-md-2 d-flex align-items-end">
               <button type="button" class="btn btn-light btn-sm border" (click)="onReset()">Reset</button>
             </div>
           </div>
@@ -146,6 +154,7 @@
                               <th style="width: 40px;" class="text-center">
                                 <input type="checkbox" [checked]="allLocationsSelected" (change)="toggleSelectAllLocations()">
                               </th>
+                              <th style="width: 120px;">Work Location</th>
                               <th>Location Code</th>
                               <th>Location Name</th>
                               <th style="width: 100px;">Status</th>
@@ -158,6 +167,9 @@
                                 <input type="checkbox"
                                   [checked]="selectedLocationIds.has(loc.id)"
                                   (change)="toggleLocationSelection(loc)">
+                              </td>
+                              <td>
+                                <span class="badge" [ngClass]="locAreaClass(loc)">{{ loc.locArea || '-' }}</span>
                               </td>
                               <td>{{ loc.locCode }}</td>
                               <td>{{ loc.locName }}</td>
@@ -173,7 +185,7 @@
                               </td>
                             </tr>
                             <tr *ngIf="dealerLocations.length === 0">
-                              <td colspan="5" class="text-center text-muted py-3">No locations found for this dealer.</td>
+                              <td colspan="6" class="text-center text-muted py-3">No locations found for this dealer.</td>
                             </tr>
                           </tbody>
                         </table>

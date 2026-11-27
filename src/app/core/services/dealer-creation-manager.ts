@@ -17,6 +17,7 @@ export class DealerCreationManagerService {
       .set('pageSize', filter.pageSize.toString());
     if (filter.search) params = params.set('search', filter.search);
     if (filter.dealerCode) params = params.set('dealerCode', filter.dealerCode);
+    if (filter.status) params = params.set('status', filter.status);
 
     return this.http.get<DealerListPagedResponse>(this.apiUrl, { params });
   }

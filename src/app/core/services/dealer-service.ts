@@ -15,7 +15,8 @@ export class DealerService {
     searchTerm: string | null = null,
     pageIndex: number,
     pageSize: number,
-    dealer: string | null = null
+    dealer: string | null = null,
+    filters: { status?: string | null; city?: string | null; state?: string | null } = {}
   ): Observable<any> {
 
     let params = new HttpParams()
@@ -30,7 +31,19 @@ export class DealerService {
       params = params.set('dealerCode', dealer);
     }
 
+    // 26.11.2026 Dealer Master filters
+    if (filters.status) params = params.set('status', filters.status);
+    if (filters.city) params = params.set('city', filters.city);
+    if (filters.state) params = params.set('state', filters.state);
+
     return this.httpClient.get(`${this.baseUrl}/DealerMaster/paged`, { params });
+  }
+
+  /** 26.11.2026 - every dealer with code, name, city, state, isActive (Dealer Master filter dropdowns) */
+  getDealerFilterOptions(dealerCode?: string | null): Observable<any> {
+    let params = new HttpParams();
+    if (dealerCode) params = params.set('dealerCode', dealerCode);
+    return this.httpClient.get<any>(`${this.baseUrl}/DealerMaster/filter-options`, { params });
   }
 
   downloadDealerExcel() {

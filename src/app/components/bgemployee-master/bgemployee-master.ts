@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 import { Gender } from '../../constant';
@@ -15,7 +17,7 @@ import { StateService }                  from '../../core/services/state';
 import { EmployeeProfileMasterService }  from '../../core/services/employee-profile-master-service';
 import { ZoneMasterService }             from '../../core/services/zone-master.service';
 import { RoleService }                   from '../../core/services/Deptrole';
-import { ZoneViewModel, ZoneDealerViewModel } from '../../ViewModels/models/ZoneViewModel';
+import { ZoneViewModel, ZoneDealerViewModel, ZoneDealerCountResponse } from '../../ViewModels/models/ZoneViewModel';
 import { MenuAccessService } from '../../core/services/menu-access.service';
 @Component({
   selector: 'app-bgemployee-master',
@@ -87,6 +89,14 @@ export class BgemployeeMaster implements OnInit {
 
   zoneSelectionMap: Map<string, Set<number>> = new Map();
   addedDealers: any[] = [];
+  /** 26.11.2026 - dealers per zone, loaded once (edit restore + zone switch use the same list) */
+  private zoneDealerCache: Map<string, ZoneDealerViewModel[]> = new Map();
+  /** filter for the "Added Dealers" table: '' = all zones */
+  addedZoneFilter = '';
+  /** 26.11.2026 dealers per zone (zone_master + state) */
+  zoneCounts: ZoneDealerCountResponse | null = null;
+  showZoneSummary = false;
+  addedSearch = '';
 
   // =====================================================
   // ASSIGNED-ELSEWHERE TRACKING
@@ -339,7 +349,7 @@ export class BgemployeeMaster implements OnInit {
     this.selectedDepartments.forEach(dept => {
       this.roleService.getByCategory(dept).subscribe({
         next: (res: any[]) => {
-          this.rolesByDepartment[dept] = (res ?? []).map(r => ({ name: r.name ?? r.Name }));
+          this.rolesByDepartment[dept] = this.toRoleOptions(res);
         },
         error: () => { this.rolesByDepartment[dept] = []; }
       });
@@ -470,9 +480,14 @@ export class BgemployeeMaster implements OnInit {
   // =====================================================
 
   loadZones(): void {
+    this.zoneMasterService.getZoneDealerCounts().subscribe({
+      next: r => this.zoneCounts = r,
+      error: err => console.error('Zone dealer counts error', err)
+    });
     this.zoneMasterService.getZones().subscribe({
       next: (res: ZoneViewModel[]) => {
-        this.zones = [...new Map((res ?? []).map(z => [z.zone, z])).values()];
+        this.zones = [...new Map((res ?? []).filter(z => !!z.zone).map(z => [z.zone, z])).values()]
+          .sort((a, b) => a.zone.localeCompare(b.zone));
       },
       error: (err) => console.error('Zone load error', err),
     });
@@ -516,8 +531,64 @@ export class BgemployeeMaster implements OnInit {
     return this.zoneDealers.filter(d =>
       d.dealerName?.toLowerCase().includes(term) ||
       d.dealerCode?.toLowerCase().includes(term) ||
-      d.cityName?.toLowerCase().includes(term)
+      d.cityName?.toLowerCase().includes(term) ||
+      d.stateName?.toLowerCase().includes(term)
     );
+  }
+
+  // ---------- 26.11.2026 helpers for the zone-wise UI ----------
+
+  /** dealers already in the Added table for the zone shown */
+  get currentZoneAddedCount(): number {
+    return this.addedDealers.filter(r => r.zone === this.selectedZone).length;
+  }
+
+  /** selection differs from what is already added -> Add / Update button enabled */
+  get currentZoneDirty(): boolean {
+    const sel = this.currentZoneSelection;
+    const added = new Set(this.addedDealers.filter(r => r.zone === this.selectedZone).map(r => r.dealerId));
+    if (sel.size !== added.size) return true;
+    for (const id of sel) if (!added.has(id)) return true;
+    return false;
+  }
+
+  /** one chip per zone in the Added table: zone + count */
+  get addedZoneSummary(): { zone: string; count: number }[] {
+    const m = new Map<string, number>();
+    this.addedDealers.forEach(r => m.set(r.zone || '—', (m.get(r.zone || '—') || 0) + 1));
+    return [...m.entries()].map(([zone, count]) => ({ zone, count })).sort((a, b) => a.zone.localeCompare(b.zone));
+  }
+
+  get filteredAddedDealers(): any[] {
+    const q = this.addedSearch.trim().toLowerCase();
+    return this.addedDealers.filter(r =>
+      (!this.addedZoneFilter || (r.zone || '—') === this.addedZoneFilter) &&
+      (!q || `${r.dealerName} ${r.dealerCode} ${r.cityName || ''}`.toLowerCase().includes(q)));
+  }
+
+  /** open a zone from its chip (shows that zone's dealers with the added ones ticked) */
+  openZone(zone: string): void {
+    if (!zone || zone === '—' || zone === this.selectedZone) return;
+    this.selectedZone = zone;
+    this.onZoneChange();
+  }
+
+  zoneCount(zone: string): number | null {
+    const z = this.zoneCounts?.zones?.find(x => (x.zone || '').toLowerCase() === (zone || '').toLowerCase());
+    return z ? z.total : null;
+  }
+
+  isAddedInZone(dealerId: number): boolean {
+    return this.addedDealers.some(r => r.dealerId === dealerId && r.zone === this.selectedZone);
+  }
+
+  clearCurrentZoneSelection(): void {
+    this.currentZoneSelection.clear();
+  }
+
+  private sortAddedDealers(): void {
+    this.addedDealers.sort((a, b) =>
+      (a.zone || '').localeCompare(b.zone || '') || (a.dealerName || '').localeCompare(b.dealerName || ''));
   }
 
   get currentZoneCheckedCount(): number {
@@ -530,10 +601,15 @@ export class BgemployeeMaster implements OnInit {
 
     if (!this.selectedZone) return;
 
+    const zone = this.selectedZone;
+    const cached = this.zoneDealerCache.get(zone);
+    if (cached) { this.zoneDealers = cached; return; }
+
     this.loadingDealers = true;
-    this.zoneMasterService.getDealersByZone(this.selectedZone).subscribe({
+    this.zoneMasterService.getDealersByZone(zone).subscribe({
       next: (res: ZoneDealerViewModel[]) => {
-        this.zoneDealers     = res ?? [];
+        this.zoneDealerCache.set(zone, res ?? []);
+        if (this.selectedZone === zone) this.zoneDealers = res ?? [];
         this.loadingDealers = false;
       },
       error: (err) => {
@@ -546,8 +622,9 @@ export class BgemployeeMaster implements OnInit {
   onAddZoneDealers(): void {
     if (!this.selectedZone) return;
 
+    // 26.11.2026 - an empty selection is allowed: it removes this zone's dealers (Update)
     const sel = this.currentZoneSelection;
-    if (sel.size === 0) return;
+    if (sel.size === 0 && this.currentZoneAddedCount === 0) return;
 
     const zone = this.selectedZone;
 
@@ -562,11 +639,13 @@ export class BgemployeeMaster implements OnInit {
           dealerName: d.dealerName,
           dealerCode: d.dealerCode,
           cityName:   d.cityName ?? d.city,
+          isActive:   d.isActive,
         });
 
         this.assignedDealersMap.delete((d.dealerCode || '').trim());
       });
 
+    this.sortAddedDealers();
     this.syncPayloadFromAddedDealers();
   }
 
@@ -615,44 +694,75 @@ export class BgemployeeMaster implements OnInit {
   }
 
   private syncPayloadFromAddedDealers(): void {
-    const zones = [...new Set(this.addedDealers.map(r => r.zone))];
+    const zones = [...new Set(this.addedDealers.map(r => r.zone).filter(z => !!z && z !== '—'))];
     this.employeeData.mappedZones    = zones.join(',');
     this.employeeData.mappedZoneIds  = this.addedDealers.map(r => r.dealerId).join(',');
     this.employeeData.dealerCode     = this.addedDealers.map(r => r.dealerCode).join(',');
     this.selectedLocations           = this.addedDealers.map(r => r.dealerCode);
   }
 
+  /**
+   * 26.11.2026 - edit mode: rebuild the Added table from mappedZones / mappedZoneIds.
+   * All zones load together (forkJoin) so the table is built once, in zone order, and the
+   * first saved zone opens with its full dealer list (added dealers ticked) so more can be added.
+   * A saved dealer that is no longer in its zone is kept (code from the saved dealerCode list)
+   * instead of being silently dropped on the next Save.
+   */
   private restoreZoneDealerSelections(data: any): void {
     if (!data.mappedZones || !data.mappedZoneIds) return;
 
-    const savedZones = String(data.mappedZones)
+    const savedZones: string[] = String(data.mappedZones)
       .split(',').map((z: string) => z.trim()).filter(Boolean);
-    const savedIds = String(data.mappedZoneIds)
+    const savedIds: number[] = String(data.mappedZoneIds)
       .split(',').map((id: string) => Number(id.trim())).filter(Boolean);
+    const savedCodes: string[] = String(data.dealerCode || '')
+      .split(',').map((c: string) => c.trim());
 
-    savedZones.forEach(zone => {
-      this.zoneMasterService.getDealersByZone(zone).subscribe({
-        next: (res: ZoneDealerViewModel[]) => {
-          const matched = (res ?? []).filter(d => savedIds.includes(d.dealerId));
+    if (!savedZones.length || !savedIds.length) return;
 
-          this.zoneSelectionMap.set(zone, new Set<number>(matched.map(d => d.dealerId)));
+    const calls = savedZones.map(zone =>
+      this.zoneMasterService.getDealersByZone(zone).pipe(catchError(() => of([] as ZoneDealerViewModel[]))));
 
-          matched.forEach(d => {
-            if (!this.addedDealers.some(r => r.dealerId === d.dealerId && r.zone === zone)) {
-              this.addedDealers.push({
-                zone,
-                dealerId:   d.dealerId,
-                dealerName: d.dealerName,
-                dealerCode: d.dealerCode,
-                cityName:   d.cityName ?? d.city,
-              });
-            }
+    forkJoin(calls).subscribe(results => {
+      const found = new Set<number>();
+
+      results.forEach((res, i) => {
+        const zone = savedZones[i];
+        const list = res ?? [];
+        this.zoneDealerCache.set(zone, list);
+
+        const matched = list.filter(d => savedIds.includes(d.dealerId) && !found.has(d.dealerId));
+        this.zoneSelectionMap.set(zone, new Set<number>(matched.map(d => d.dealerId)));
+
+        matched.forEach(d => {
+          found.add(d.dealerId);
+          this.addedDealers.push({
+            zone,
+            dealerId:   d.dealerId,
+            dealerName: d.dealerName,
+            dealerCode: d.dealerCode,
+            cityName:   d.cityName ?? d.city,
+            isActive:   d.isActive
           });
-
-          this.syncPayloadFromAddedDealers();
-          this.pruneStaleAssignments();
-        },
+        });
       });
+
+      // saved but not found in any zone list any more - keep them
+      savedIds.forEach((id, idx) => {
+        if (found.has(id)) return;
+        const code = savedCodes[idx] || '';
+        this.addedDealers.push({ zone: '—', dealerId: id, dealerName: code || `Dealer #${id}`, dealerCode: code, cityName: '', notInZone: true });
+      });
+
+      this.sortAddedDealers();
+      this.syncPayloadFromAddedDealers();
+      this.pruneStaleAssignments();
+
+      // open the first saved zone so its dealers are visible straight away
+      if (!this.selectedZone) {
+        this.selectedZone = savedZones[0];
+        this.zoneDealers = this.zoneDealerCache.get(savedZones[0]) ?? [];
+      }
     });
   }
 
@@ -725,7 +835,7 @@ export class BgemployeeMaster implements OnInit {
 
       this.roleService.getByCategory(dept).subscribe({
         next: (res: any[]) => {
-          this.rolesByDepartment[dept] = (res ?? []).map(r => ({ name: r.name ?? r.Name }));
+          this.rolesByDepartment[dept] = this.toRoleOptions(res);
         },
         error: () => { this.rolesByDepartment[dept] = []; }
       });
@@ -735,6 +845,16 @@ export class BgemployeeMaster implements OnInit {
       delete this.rolesByDepartment[dept];
       this.selectedRoles = this.selectedRoles.filter(r => !removed.includes(r));
     }
+  }
+
+  /**
+   * 26.11.2026 - api/Role/by-category returns { roleId, roleName }; the old mapping read r.name,
+   * so every role came through without a name and could never be ticked -> Save stayed disabled.
+   */
+  private toRoleOptions(res: any[] | null | undefined): { name: string }[] {
+    return (res ?? [])
+      .map(r => ({ name: (r?.roleName ?? r?.RoleName ?? r?.name ?? r?.Name ?? '').toString().trim() }))
+      .filter(r => !!r.name);
   }
 
   isRoleSelected(role: string): boolean {
@@ -804,6 +924,37 @@ export class BgemployeeMaster implements OnInit {
     return valid;
   }
 
+  /** 26.11.2026 - what still blocks Save (shown under the buttons) */
+  get saveBlockers(): string[] {
+    const d = this.employeeData;
+    const out: string[] = [];
+    if (!d.firstName?.trim()) out.push('First Name');
+    if (!d.lastName?.trim()) out.push('Last Name');
+    if (!d.gender) out.push('Gender');
+    if (!/^\d{10}$/.test(String(d.mobile ?? ''))) out.push('Mobile (10 digits)');
+    if (!d.state) out.push('State');
+    if (!d.city) out.push('City');
+    if (!/^\d{6}$/.test(String(d.pincode ?? ''))) out.push('Pincode (6 digits)');
+    if (!d.dateOfJoin) out.push('Date of Joining');
+    if (!d.dateOfBirth) out.push('Date of Birth');
+    if (!d.effectiveDate) out.push('Effective Date');
+    if (!d.department) out.push('Department');
+    if (this.addedDealers.length === 0) out.push('at least one dealer (Zone & Dealer Mapping)');
+    if (d.createLogin) {
+      if (!d.emailId?.trim()) out.push('Login Email ID');
+      if (!this.isEditMode && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/.test(String(d.password ?? '')))
+        out.push('Password (min 6 with upper, lower, number and symbol)');
+      if (this.selectedDepartments.length === 0) out.push('Category (Sales / Service)');
+      else if (this.selectedRoles.length === 0) {
+        const noRoleCats = this.selectedDepartments.filter(c => !(this.rolesByDepartment[c]?.length));
+        out.push(noRoleCats.length === this.selectedDepartments.length
+          ? `a role - no roles are mapped to ${noRoleCats.join(' / ')} (map them in Role Master)`
+          : 'at least one role');
+      }
+    }
+    return out;
+  }
+
   get isFormValid(): boolean {
     const d = this.employeeData;
 
@@ -850,7 +1001,7 @@ export class BgemployeeMaster implements OnInit {
       });
     });
 
-    const zones       = [...new Set(this.addedDealers.map(r => r.zone))];
+    const zones       = [...new Set(this.addedDealers.map(r => r.zone).filter(z => !!z && z !== '—'))];
     const dealerIds   = this.addedDealers.map(r => r.dealerId);
     const dealerCodes = this.addedDealers.map(r => r.dealerCode);
 
@@ -907,7 +1058,10 @@ export class BgemployeeMaster implements OnInit {
       },
       error: (err) => {
         console.error('Save error', err);
-        alert(this.isEditMode ? 'Failed to update employee.' : 'Failed to save employee.');
+        // 26.11.2026 - show the server's reason (e.g. login / password problem) instead of a generic text
+        const e = err?.error;
+        const reason = (typeof e === 'string' && e.trim()) ? e : (e?.message || e?.title || '');
+        alert((this.isEditMode ? 'Failed to update employee.' : 'Failed to save employee.') + (reason ? '\n\n' + reason : ''));
       },
     });
   }

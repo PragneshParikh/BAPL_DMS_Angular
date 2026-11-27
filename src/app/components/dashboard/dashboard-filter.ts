@@ -38,16 +38,16 @@ import { DateRange, FyOption, defaultRange, fmtRange, fyOptions, isoDate } from 
     :host { display: block; margin: .75rem 0 1.5rem; }
     .dbf {
       display: flex; flex-wrap: wrap; align-items: flex-end; gap: .75rem 1rem;
-      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: .85rem 1rem;
-      box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+      background: #fff; border: 0; border-radius: 10px; padding: .85rem 1.1rem;
+      box-shadow: 0 1px 2px rgba(56, 65, 74, .15);
     }
     .dbf-field { display: flex; flex-direction: column; gap: .3rem; flex: 0 1 170px; min-width: 150px; }
     .dbf-fy { flex-basis: 230px; }
-    .dbf-field label { font-size: .75rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .03em; margin: 0; }
-    .dbf-field .form-select, .dbf-field .form-control { height: 38px; font-size: .875rem; border-radius: 8px; }
+    .dbf-field label { font-size: .8125rem; font-weight: 500; color: #495057; margin: 0; }
+    .dbf-field .form-select, .dbf-field .form-control { height: 32px; font-size: .8125rem; border-radius: 4px; padding-top: .25rem; padding-bottom: .25rem; }
     .dbf-range {
       margin-left: auto; display: inline-flex; align-items: center; gap: .4rem; min-width: 0; max-width: 100%;
-      height: 38px; padding: 0 .85rem; border-radius: 8px; background: #eef2ff; color: #4f46e5;
+      height: 32px; padding: 0 .75rem; border-radius: 4px; background: rgba(64, 81, 137, .1); color: #405189;
       font-size: .8125rem; font-weight: 600; white-space: nowrap;
     }
     .dbf-range span { overflow: hidden; text-overflow: ellipsis; }

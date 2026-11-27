@@ -23,6 +23,9 @@ import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { Console } from 'console';
 import { JobCardSearchModel } from '../../ViewModels/JobCardViewModel';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { B2BJobcardService } from '../b2b-jobcard/services/b2b-jobcard.service';
+import { DealerService } from '../../core/services/dealer-service';
+import { forkJoin } from 'rxjs';
 @Component({
   selector: 'app-repair-bill',
   imports: [FormsModule, CommonModule, NgbDropdownModule],
@@ -89,6 +92,11 @@ export class RepairBill implements OnInit {
   repairBillStatus = '';
   issuetypeId = 0;
   issuetypeName = '';
+
+  private isZeroAmountIssueType(issueTypeName: string | null | undefined): boolean {
+    const name = (issueTypeName || '').trim().toUpperCase();
+    return name === 'U/W' || name === 'FSC' || name === 'FOC';
+  }
 
   repairBillId: number = 0;
   isEditMode = false;
@@ -171,9 +179,10 @@ export class RepairBill implements OnInit {
   // Previously undefined until something set it — addPart() still guarded
   // this with `|| 1`, but a real default is clearer than relying on that.
   selectedPartQty: number = 1;
-  selectedPartIssueType: number;
+  selectedPartIssueType: number | null = null;
   partdiscount: number;
   dealerState: string;
+  b2bTaxStateReady = false;
   discountValue: number;
   showLabourSuggestionPopup = false;
   suggestedLabourList: any[] = [];
@@ -195,7 +204,9 @@ export class RepairBill implements OnInit {
     private toaster: ToastService,
     private router: Router,
     private menuAccess: MenuAccessService,
-    private freeServiceClaimService: FreeServiceClaimService
+    private freeServiceClaimService: FreeServiceClaimService,
+    private b2bJobcardService: B2BJobcardService,
+    private dealerService: DealerService
   ) {
     this.canCreate = this.menuAccess.canCreate(this.SUBMENU_ID);
     this.canEdit = this.menuAccess.canEdit(this.SUBMENU_ID);
@@ -231,8 +242,7 @@ export class RepairBill implements OnInit {
   }
 
   saveOrUpdateRepairBill() {
-
-    if (this.selectedJobCard?.jobCardHeader?.jobtype != 1) {
+    if (this.isEditMode || this.selectedJobCard?.jobCardHeader?.jobtype != 1) {
       this.updateRepairBill();
     } else {
       this.saveRepairBill();
@@ -431,22 +441,32 @@ export class RepairBill implements OnInit {
 
  
   this.searchModel.dealerCode = dealerCode;
+  this.searchModel.jobNo = this.jobNo ? Number(this.jobNo) : undefined;
+  this.searchModel.registerNo = this.registerNo || undefined;
+  this.searchModel.chassisNo = this.chassisNo || undefined;
 
   this.loader.show();
 
-  this.jobCardService
-    .getJobCardListRepairBill(this.searchModel)
-    .subscribe({
-
-      next: (res: any[]) => {
+  forkJoin({
+    b2c: this.jobCardService.getJobCardListRepairBill(this.searchModel),
+    b2b: this.b2bJobcardService.getList({
+      dealerCode,
+      fromDate: this.searchModel.fromDate || null,
+      toDate: this.searchModel.toDate || null,
+      jobNo: this.jobNo || null,
+      regNo: this.registerNo || null,
+      chassisNo: this.chassisNo || null,
+      pageIndex: 1,
+      pageSize: 500
+    })
+  }).subscribe({
+      next: ({ b2c, b2b }) => {
 
         this.loader.hide();
 
-        console.log('API Job Card List:', res);
-
         const uniqueJobCards = new Map<string, any>();
 
-(res || []).forEach((jobCard: any) => {
+((b2c || []) as any[]).forEach((jobCard: any) => {
 
   const header = jobCard?.jobCardHeader;
 
@@ -463,13 +483,33 @@ export class RepairBill implements OnInit {
   }
 
   if (!uniqueJobCards.has(jobNo)) {
-    uniqueJobCards.set(jobNo, jobCard);
+    uniqueJobCards.set(jobNo, { ...jobCard, recordType: 'B2C' });
   }
 
 });
 
-this.jobCardList =
-  Array.from(uniqueJobCards.values());
+const b2bRows = (b2b?.data || []).map((row) => ({
+  recordType: 'B2B',
+  b2bJobCardId: row.id,
+  dealerCode: row.dealerCode,
+  jobNo: row.jobCardNumber,
+  jobDate: row.createdAt,
+  location: row.serviceLocation,
+  jobtype: row.jobType,
+  serviceType: row.serviceHead,
+  partyName: row.customerName,
+  partyMobileNo: row.customerMobile,
+  registerNo: row.regNo,
+  chassisNo: row.chassisNo,
+  modelName: row.model,
+  jobsource: row.jobSource
+}));
+
+this.jobCardList = [
+  ...Array.from(uniqueJobCards.values()),
+  ...b2bRows
+].sort((a, b) => new Date(b.jobDate || b.jobCardHeader?.jobinDate).getTime()
+  - new Date(a.jobDate || a.jobCardHeader?.jobinDate).getTime());
 
       },
 
@@ -500,6 +540,73 @@ this.jobCardList =
   }
 
   onSelect(item: any) {
+    if (item.recordType === 'B2B') {
+      this.loader.show();
+      this.b2bJobcardService.getById(item.b2bJobCardId).subscribe({
+        next: (detail) => {
+          this.loader.hide();
+          const vehicle = detail.vehicle;
+          const customer = detail.customer;
+          const selectedJobCard = {
+            ...item,
+            b2bJobCardId: detail.id,
+            jobCardHeader: {
+              jobNo: detail.jobCardNumber,
+              jobinDate: detail.createdAt,
+              jobtype: detail.jobTypeName,
+              chassisno: vehicle.chassisNo,
+              vehiclekms: detail.odometerAtCheckIn,
+              technician: detail.technicianName,
+              serviceloc: detail.serviceLocationName,
+              dealerCode: detail.dealerCode
+            },
+            jobCardCustomer: {
+              registerNo: vehicle.regNo,
+              chassisNo: vehicle.chassisNo,
+              modelName: vehicle.model,
+              insuranceExpDate: vehicle.insuranceExpiry,
+              customerLedgerId: null
+            },
+            partyName: customer.name,
+            partyMobileNo: customer.mobile,
+            partyState: customer.state
+          };
+          this.dealerService.getByDealerCode(detail.dealerCode || item.dealerCode).subscribe({
+            next: (dealerResult: any) => {
+              this.dealerState = String(dealerResult?.data?.state || '').trim();
+              this.b2bTaxStateReady = Boolean(this.dealerState && String(customer?.state || '').trim());
+              this.applySelectedJobCard(selectedJobCard);
+              if (!this.b2bTaxStateReady) {
+                this.toaster.show('Dealer or customer state is missing; tax cannot be calculated safely for this B2B Repair Bill.', {
+                  classname: 'bg-warning text-dark',
+                  delay: 7000
+                });
+              }
+            },
+            error: (err) => {
+              console.error('Error fetching dealer state for B2B Repair Bill', err);
+              this.dealerState = '';
+              this.b2bTaxStateReady = false;
+              this.applySelectedJobCard(selectedJobCard);
+              this.toaster.show('Failed to load dealer state; tax cannot be calculated for this B2B Repair Bill.', {
+                classname: 'bg-danger text-light',
+                delay: 7000
+              });
+            }
+          });
+        },
+        error: (err) => {
+          this.loader.hide();
+          console.error('Error fetching B2B job card details', err);
+          this.toaster.show('Failed to load B2B job card details.', {
+            classname: 'bg-danger text-light',
+            delay: 5000
+          });
+        }
+      });
+      return;
+    }
+
     if (item.isMaterialTransfer === false || item.isMaterialTransfer === "null") {
       this.toaster.show('Material Transfer is not completed for this Job Card', {
         classname: 'bg-warning text-dark',
@@ -507,9 +614,13 @@ this.jobCardList =
       });
 
     }
+    this.applySelectedJobCard({ ...item, recordType: 'B2C' });
+  }
+
+  private applySelectedJobCard(item: any): void {
     this.selectedJobCard = item;
     this.chassisNo = this.selectedJobCard.jobCardHeader.chassisno;
-    this.insValidTill = this.selectedJobCard.jobCardCustomer.insuranceExpDate;
+    this.insValidTill = this.selectedJobCard.jobCardCustomer?.insuranceExpDate;
    
 
     this.vehicleSaleBillService.getPolicyNo(this.chassisNo).subscribe({
@@ -523,7 +634,13 @@ this.jobCardList =
     this.showPopup = false;
     this.showJobDetails = true;
     this.loadLabourCodelist();
-    this.loadMaterialedJobCardList();
+    if (item.recordType === 'B2B') {
+      this.materialedJobCarDList = [];
+      this.partItems = [];
+      this.labourItems = [];
+    } else {
+      this.loadMaterialedJobCardList();
+    }
   }
   toggleJobDetails() {
     this.showJobDetails = !this.showJobDetails;
@@ -736,18 +853,16 @@ this.jobCardList =
           Number(x.partQty || 0) *
           Number(x.partRate || 0);
 
-        const taxableAmount =
-          (issueTypeName === 'U/W' || issueTypeName === 'FSC')
-            ? 0
-            : grossAmount - discount;
+        const isZeroAmount = this.isZeroAmountIssueType(issueTypeName);
+        const taxableAmount = isZeroAmount ? 0 : grossAmount - discount;
 
         const cgstAmount =
-          (issueTypeName === 'U/W' || issueTypeName === 'FSC')
+          isZeroAmount
             ? 0
             : Number(x.cgstAmount || 0);
 
         const sgstAmount =
-          (issueTypeName === 'U/W' || issueTypeName === 'FSC')
+          isZeroAmount
             ? 0
             : Number(x.sgstAmount || 0);
 
@@ -763,7 +878,7 @@ this.jobCardList =
         //   igstAmount;
 
         const igstAmount =
-  (issueTypeName === 'U/W' || issueTypeName === 'FSC')
+  isZeroAmount
     ? 0
     : Number(x.partRate || 0) * Number(x.igst || 0) / 100;
 
@@ -771,7 +886,7 @@ this.jobCardList =
 //   Number(x.partRate || 0) + igstAmount;
   
 const netAmount =
-  (issueTypeName === 'U/W' || issueTypeName === 'FSC')
+  isZeroAmount
     ? 0
     : Number(x.partRate || 0) + igstAmount;
 
@@ -1146,7 +1261,7 @@ const netAmount =
             ? (uwType?.id ?? 0) 
             : (isFreeServiceLabour ? (fscType?.id ?? Number(part.issueType || 0)) : Number(part.issueType || 0));
 
-          const isZeroTax = issueName === 'U/W' || issueName === 'FSC';
+          const isZeroTax = this.isZeroAmountIssueType(issueName);
 
           const rate = Number(labour.labourRate || 0);
           const cgst = Number(labour.cgst || 0);
@@ -1278,28 +1393,34 @@ const netAmount =
     this.oemmodelName = this.selectedJobCard?.jobCardCustomer?.modelName
     this.customerLedgerId = this.selectedJobCard?.jobCardCustomer?.customerLedgerId
     const dealerCode = this.storageService.getDealerCode();
-    this.labourMasterService.getLabourRateDropDown(this.oemmodelName, this.customerLedgerId, dealerCode).subscribe({
-  //     next: (res) => {
-  //       this.loader.hide();
-  //       this.labourCodeList = res;
-  //     },
-  //     error: (err) => {
-  //       this.loader.hide();
-  //       console.error("error", err)
-  //     }
-
-
-  next: (res) => {
-  this.loader.hide();
-  this.labourCodeList = (res || []).map((x: any) => ({
-    ...x,
-    labourId: x.labourId || 0,
-    partWiseLabourId: x.partWiseLabourId || 0,
-    labourDescription: x.labourDescription || '',
-    hsnCode: x.labourHsnCode || ''
-  }));
-}
-     })
+    this.labourMasterService
+      .getLabourRateDropDown(
+        this.oemmodelName || 'Unknown',
+        this.customerLedgerId == null ? null : Number(this.customerLedgerId),
+        dealerCode,
+        this.selectedJobCard?.recordType === 'B2B' ? this.selectedJobCard?.partyState : null
+      )
+      .subscribe({
+        next: (res) => {
+          this.loader.hide();
+          this.labourCodeList = (res || []).map((x: any) => ({
+            ...x,
+            labourId: x.labourId || 0,
+            partWiseLabourId: x.partWiseLabourId || 0,
+            labourDescription: x.labourDescription || '',
+            hsnCode: x.labourHsnCode || ''
+          }));
+        },
+        error: (err) => {
+          this.loader.hide();
+          this.labourCodeList = [];
+          console.error('Error loading Labour Rate dropdown', err);
+          this.toaster.show(err?.error?.message || 'Failed to load labour rates for this job.', {
+            classname: 'bg-danger text-light',
+            delay: 7000
+          });
+        }
+      });
   }
   
 
@@ -1391,6 +1512,11 @@ const netAmount =
       return;
     }
 
+    if (this.selectedIssueType == null || this.selectedIssueType <= 0) {
+      Swal.fire({ icon: 'warning', title: 'Validation', text: 'Please select an Issue Type.' });
+      return;
+    }
+
     if (!this.selectedLabour) {
       this.selectedLabour = {};
     }
@@ -1422,7 +1548,7 @@ const netAmount =
     let sgstAmount = 0;
     let igstAmount = 0;
 
-    if (selectedIssue?.name === 'U/W' || selectedIssue?.name === 'FSC') { cgstAmount = 0; sgstAmount = 0; igstAmount = 0; taxableAmount = 0; this.totalTaxPer = 0; }
+    if (this.isZeroAmountIssueType(selectedIssue?.name)) { cgstAmount = 0; sgstAmount = 0; igstAmount = 0; taxableAmount = 0; this.totalTaxPer = 0; }
     else {
       if (isSameState) {
 
@@ -1866,7 +1992,6 @@ calculateTotals(): void {
     this.selectedPartIssueType = item.issuetypeId;
   }
   updatePart(): void {
-
     const item = this.partItems[this.editPartIndex];
 
     //item.discountValue = Number(this.discountValue||0);
@@ -1874,7 +1999,7 @@ calculateTotals(): void {
     item.discountType = this.discountPartType;
     item.discountValue = Number(this.partdiscount || 0);
 
-    item.issuetypeId = this.selectedPartIssueType;
+    item.issuetypeId = Number(this.selectedPartIssueType || 0);
 
     const issue = this.IssueType.find(
       x => x.id === this.selectedPartIssueType
@@ -1898,7 +2023,8 @@ calculateTotals(): void {
       discountAmount = grossAmount * discountAmount / 100;
     }
 
-    const taxableAmount = grossAmount - discountAmount;
+    const isZeroAmount = this.isZeroAmountIssueType(item.issuetypeName);
+    const taxableAmount = isZeroAmount ? 0 : grossAmount - discountAmount;
 
     const isSameState =
       (item.dealerState || '').trim().toUpperCase() ===
@@ -1908,7 +2034,11 @@ calculateTotals(): void {
     let sgstAmount = 0;
     let igstAmount = 0;
 
-    if (isSameState) {
+    if (isZeroAmount) {
+      cgstAmount = 0;
+      sgstAmount = 0;
+      igstAmount = 0;
+    } else if (isSameState) {
 
       cgstAmount = taxableAmount * (item.cgst || 0) / 100;
       sgstAmount = taxableAmount * (item.sgst || 0) / 100;
@@ -2039,15 +2169,16 @@ calculateTotals(): void {
           this.labourDiscount;
       }
 
-      const taxableAmount =
-        grossAmount -
-        discountAmount;
+      const isZeroAmount = this.isZeroAmountIssueType(item.issuetypeName);
+      const taxableAmount = isZeroAmount ? 0 : grossAmount - discountAmount;
 
       let cgstAmount = 0;
       let sgstAmount = 0;
       let igstAmount = 0;
 
-      if (isSameState) {
+      if (isZeroAmount) {
+        this.totalTaxPer = 0;
+      } else if (isSameState) {
 
         // Intrastate
         cgstAmount = taxableAmount * (item.cgst || 0) / 100;
@@ -2121,9 +2252,10 @@ calculateTotals(): void {
         discountAmount = this.partDiscount;
       }
 
-      const taxableAmount = grossAmount - discountAmount;
+      const isZeroAmount = this.isZeroAmountIssueType(item.issuetypeName);
+      const taxableAmount = isZeroAmount ? 0 : grossAmount - discountAmount;
 
-      const igstAmount = taxableAmount * item.igst / 100;
+      const igstAmount = isZeroAmount ? 0 : taxableAmount * item.igst / 100;
       item.discount = discountAmount;
       item.discountType = this.partDiscountType;
       item.taxableAmount = taxableAmount;
@@ -2166,7 +2298,7 @@ calculateTotals(): void {
 
     this.discountPartType = 'Value';
 
-    //this.selectedIssueType = null;
+    this.selectedPartIssueType = null;
 
   }
 
@@ -2181,6 +2313,15 @@ calculateTotals(): void {
 
   isSaveClicked = false;
   saveRepairBill(): void {
+    if (this.selectedJobCard?.recordType === 'B2B'
+      && (!this.b2bTaxStateReady || !this.dealerState?.trim() || !this.selectedJobCard?.partyState?.trim())) {
+      this.toaster.show('Dealer and customer states are required to calculate B2B Repair Bill tax.', {
+        classname: 'bg-warning text-dark',
+        delay: 7000
+      });
+      return;
+    }
+
     this.isSaveClicked = true;
     const dealerCode = this.storageService.getDealerCode();
     if (this.selectedCashAccount == null || this.selectedCashAccount == 0) {
@@ -2206,11 +2347,19 @@ calculateTotals(): void {
         billType: this.billType,
         cashAccount: this.selectedCashAccount || 0,
 
-        customerLedgerId:
-          this.selectedJobCard?.jobCardCustomer?.customerLedgerId || 0,
+        customerLedgerId: this.selectedJobCard?.recordType === 'B2B'
+          ? null
+          : this.selectedJobCard?.jobCardCustomer?.customerLedgerId || 0,
 
-        jobId:
-          this.selectedJobCard?.jobCardHeader?.id || 0,
+        jobId: this.selectedJobCard?.recordType === 'B2B'
+          ? null
+          : this.selectedJobCard?.jobCardHeader?.id || 0,
+        b2bJobCardId: this.selectedJobCard?.recordType === 'B2B'
+          ? this.selectedJobCard?.b2bJobCardId
+          : null,
+        b2bJobCardNumber: this.selectedJobCard?.recordType === 'B2B'
+          ? this.selectedJobCard?.jobCardHeader?.jobNo
+          : null,
 
         remarks: this.remarks || '',
 
@@ -2241,10 +2390,9 @@ calculateTotals(): void {
         isActive: true,
         isSavedPerforma: true,
         isSavedInvoice: false,
-        repairBillStatus:
-          this.selectedJobCard?.jobCardHeader?.jobtype == 1
-            ? 'Billed'
-            : 'Performa created'
+        repairBillStatus: this.selectedJobCard?.jobCardHeader?.jobtype == 1
+          ? 'Billed'
+          : 'Performa created'
       },
       // repairBillheader: {
       //   id: 0,
@@ -2628,15 +2776,21 @@ calculateTotals(): void {
         this.selectedJobCard.partyName = header.partyName;
         this.selectedJobCard.partyMobileNo = header.mobileNumber;
         this.selectedJobCard.partyState = header.partyState;
+        this.selectedJobCard.recordType = header.b2bJobCardId ? 'B2B' : 'B2C';
+        this.selectedJobCard.b2bJobCardId = header.b2bJobCardId;
+        this.selectedJobCard.b2bJobCardNumber = header.b2bJobCardNumber;
         this.selectedJobCard.jobCardHeader.id = header.jobId;
         this.selectedJobCard.jobCardHeader.jobinDate = header.jobInDate;
-        this.selectedJobCard.jobCardHeader.jobNo = header.jobNo;
+        this.selectedJobCard.jobCardHeader.jobNo = header.b2bJobCardNumber || header.jobNo;
+        this.selectedJobCard.jobCardHeader.jobtype = header.jobTypeName || this.selectedJobCard.jobCardHeader.jobtype;
         this.selectedJobCard.jobCardCustomer.registerNo = header.registerNo;
         this.selectedJobCard.jobCardCustomer.modelName = header.modelName;
         this.selectedJobCard.jobCardHeader.vehiclekms = header.vehicleKms;
         this.selectedJobCard.jobCardCustomer.chassisNo = header.chassisNo;
         this.selectedJobCard.jobCardHeader.technician = header.technician;
         this.dealerState = header.dealerState;
+        this.b2bTaxStateReady = this.selectedJobCard.recordType === 'B2B'
+          && Boolean(String(header.dealerState || '').trim() && String(header.partyState || '').trim());
         this.repairBillStatus = header.repairBillStatus;
         this.remarks = header.remarks;
 
@@ -2679,7 +2833,7 @@ calculateTotals(): void {
               partQty: Number(d.partQty || 0),
               partRate: Number(d.partRate || 0),
               partMRP: Number(d.partMRP || 0),
-              fscRate: (d.issuetypeName === 'U/W'
+              fscRate: (d.issuetypeName === 'U/W' || d.issuetypeName === 'FOC'
                 ? d.partRate
                 : d.issuetypeName === 'FSC'
                   ? d.fscRate
@@ -2804,6 +2958,15 @@ calculateTotals(): void {
   }
 
   updateRepairBill(): void {
+    if (this.selectedJobCard?.recordType === 'B2B'
+      && (!this.b2bTaxStateReady || !this.dealerState?.trim() || !this.selectedJobCard?.partyState?.trim())) {
+      this.toaster.show('Dealer and customer states are required to calculate B2B Repair Bill tax.', {
+        classname: 'bg-warning text-dark',
+        delay: 7000
+      });
+      return;
+    }
+
     let dealerCode = this.storageService.getDealerCode();
 
     // if (!this.isSuperAdmin) {
@@ -2830,9 +2993,19 @@ calculateTotals(): void {
 
         // partyName: this.selectedJobCard?.partyName || '',
         // mobileNumber: this.selectedJobCard?.partyMobileNo || '',
-        customerLedgerId: this.customerLedgerId || 0,
+        customerLedgerId: this.selectedJobCard?.recordType === 'B2B'
+          ? null
+          : this.customerLedgerId || 0,
 
-        jobId: this.selectedJobCard?.jobCardHeader?.id || 0,
+        jobId: this.selectedJobCard?.recordType === 'B2B'
+          ? null
+          : this.selectedJobCard?.jobCardHeader?.id || 0,
+        b2bJobCardId: this.selectedJobCard?.recordType === 'B2B'
+          ? this.selectedJobCard?.b2bJobCardId
+          : null,
+        b2bJobCardNumber: this.selectedJobCard?.recordType === 'B2B'
+          ? this.selectedJobCard?.jobCardHeader?.jobNo
+          : null,
 
         remarks: this.remarks || '',
 
@@ -3021,7 +3194,7 @@ calculateTotals(): void {
     Number(item.partRate || 0),
 
   fscRate:
-    item.issuetypeName === 'U/W'
+    item.issuetypeName === 'U/W' || item.issuetypeName === 'FOC'
       ? Number(item.partRate || 0)
       : item.issuetypeName === 'FSC'
         ? Number(item.fscRate || 0)
@@ -3295,7 +3468,7 @@ calculateTotals(): void {
           return;
         }
 
-        const isZeroTax = part.issuetypeName === 'U/W' || part.issuetypeName === 'FSC';
+        const isZeroTax = this.isZeroAmountIssueType(part.issuetypeName);
 
         const rate = Number(labour.labourRate || 0);
         const cgst = Number(labour.cgst || 0);

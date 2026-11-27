@@ -423,13 +423,24 @@ private hasRouteRecursive(items: MenuItem[] | undefined, path: string): boolean 
   }
 
   // ---------------------------------------------------------------- footer: user + logout
+  // 26.11.2026 - BG employees carry a comma list of dealer codes: show name + "code · N dealers", not the list
+  private get footerCodes(): string[] {
+    const u: any = this.authService.currentUserValue ?? {};
+    return (u.dealerCode || this.storageService.getDealerCode() || '').toString()
+      .split(',').map((c: string) => c.trim()).filter(Boolean);
+  }
   get userName(): string {
     const u: any = this.authService.currentUserValue ?? {};
-    return (u.compName || u.userName || u.firstName || 'User').toString();
+    if (u.compName && this.footerCodes.length <= 1) return u.compName.toString();
+    const local = (u.email || u.userName || '').toString().split('@')[0];
+    const pretty = local.split(/[._-]+/).filter(Boolean).map((p: string) => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+    return pretty || (u.compName || u.firstName || 'User').toString();
   }
   get userCode(): string {
     const u: any = this.authService.currentUserValue ?? {};
-    return (u.dealerCode || this.storageService.getDealerCode() || u.employeeCode || '').toString();
+    const codes = this.footerCodes;
+    if (u.employeeCode) return codes.length > 1 ? `${u.employeeCode} · ${codes.length} dealers` : u.employeeCode.toString();
+    return codes.length > 1 ? `${codes.length} dealers` : (codes[0] || '');
   }
   get userInitial(): string { return this.userName.charAt(0).toUpperCase() || 'U'; }
 

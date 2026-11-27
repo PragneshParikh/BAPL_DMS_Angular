@@ -22,12 +22,9 @@
 
               <div class="col-md-2" *ngIf="!isDealer">
                 <label class="form-label mb-1">Dealer</label>
-                <select formControlName="dealerCode" class="form-select form-select-sm">
-                  <option value="">-- All Dealers --</option>
-                  <option *ngFor="let dealer of dealerList" [value]="dealer.dealerCode">
-                    {{ dealer.dealerName }}
-                  </option>
-                </select>
+                <app-search-select [options]="dealerOptions" [value]="filterForm.get('dealerCode')?.value || null"
+                allLabel="All Dealers" placeholder="Dealer code or name..."
+                (valueChange)="filterForm.get('dealerCode')?.setValue($event || '')"></app-search-select>
               </div>
 
               <div class="col-md-2" *ngIf="isDealer">

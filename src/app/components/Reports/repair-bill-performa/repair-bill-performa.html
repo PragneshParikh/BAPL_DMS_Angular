@@ -92,7 +92,7 @@
                             <td><strong>Color</strong>: {{ performaData.color }}</td>
                         </tr>
                         <tr>
-                            <td><strong>Job Card Number</strong>: {{ performaData.jobNo }}</td>
+                            <td><strong>Job Card Number</strong>: {{ performaData.b2bJobCardNumber || performaData.jobNo }}</td>
                         </tr>
 
                         <tr>
@@ -557,7 +557,7 @@
                 Chassis No : {{ performaData.chassisNo }}
             </div>
             <div class="col-6 mt-2">
-                Job No : {{ performaData.jobNo }}
+                Job No : {{ performaData.b2bJobCardNumber || performaData.jobNo }}
             </div>
 
         </div>

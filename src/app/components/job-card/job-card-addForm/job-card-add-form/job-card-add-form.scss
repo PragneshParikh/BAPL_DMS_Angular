@@ -33,6 +33,12 @@
  .commonbtnAdd{
   margin-top: 25px;
  }
+
+:host ::ng-deep .ng-select.ng-select-sm .ng-select-container {
+  min-height: 27px !important;
+  height: 27px !important;
+}
+
  .btn-light{
   margin-bottom: 10px;
   margin-right: 10px;
@@ -62,6 +68,12 @@ color: white;
   max-height: 200px;
   overflow-y: auto;
   z-index: 1050;
+}
+
+.complaint-name-dropdown {
+  max-height: 240px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .section-title {

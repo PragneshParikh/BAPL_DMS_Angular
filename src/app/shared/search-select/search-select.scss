@@ -1,0 +1,38 @@
+// src\app\shared\search-select\search-select.scss
+.ss-wrap {
+  width: 100%;
+}
+.ss-toggle {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background-color: #fff;
+  // hide the ngbDropdownToggle caret, form-select already draws an arrow
+  &::after {
+    display: none;
+  }
+}
+.ss-placeholder {
+  color: #495057;
+}
+.ss-menu {
+  min-width: 280px;
+  max-width: 420px;
+}
+.ss-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+.ss-item {
+  font-size: 12px;
+  white-space: normal;
+  padding: 4px 12px;
+}
+.ss-selected {
+  background: #eef1fb;
+  font-weight: 600;
+}
+.ss-active {
+  background: #e2e6f3;
+}

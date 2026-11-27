@@ -10,11 +10,16 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
 import { StorageService } from '../../core/services/storage';
 import { MenuAccessService } from '../../core/services/menu-access.service';
+import { ErpSyncDialog } from '../../shared/erp-sync/erp-sync-dialog';
+import { SearchSelect, SearchSelectOption } from '../../shared/search-select/search-select';
+
+/** 26.11.2026 one row of DealerMaster/filter-options */
+interface DealerFilterRow { dealerCode: string; dealerName: string; city?: string | null; state?: string | null; isActive: boolean; }
 
 @Component({
   selector: 'app-dealer-master',
   standalone: true,
-  imports: [CommonModule, NgbModule, FormsModule],
+  imports: [CommonModule, NgbModule, FormsModule, SearchSelect],
   templateUrl: './dealer-master.html',
   styleUrl: './dealer-master.scss',
 })
@@ -44,9 +49,29 @@ export class DealerMaster implements OnInit, OnDestroy {
   // search: wait until typing pauses, then ask the server (searches all pages, not only the visible one)
   private searchTimer: ReturnType<typeof setTimeout> | null = null;
   private lastSearch = '';
+  private lastLoadKey = '';
 
   isSuperAdmin: boolean = false;
   dealerCode: string = '';
+
+  // 26.11.2026 filters: Dealer (search by code / name), State, City, Status
+  filterRows: DealerFilterRow[] = [];
+  fDealer: string | null = null;
+  fState: string | null = null;
+  fCity: string | null = null;
+  fStatus = '';           // '' = all, 'active', 'inactive'
+  dealerOptions: SearchSelectOption[] = [];
+  stateOptions: SearchSelectOption[] = [];
+  cityOptions: SearchSelectOption[] = [];
+
+  /** a dealer login is locked to its own dealer - no filters for it */
+  get lockedDealer(): string | null {
+    return !this.isSuperAdmin && this.dealerCode ? this.dealerCode : null;
+  }
+
+  get hasFilter(): boolean {
+    return !!(this.fDealer || this.fState || this.fCity || this.fStatus || (this.searchTerm || '').trim());
+  }
 
   constructor(
     private dealerService: DealerService,
@@ -65,7 +90,71 @@ export class DealerMaster implements OnInit, OnDestroy {
   /* ================= INIT ================= */
 
   ngOnInit(): void {
+    this.loadFilterOptions();
     this.loadDealers();
+  }
+
+  /* ================= FILTERS (26.11.2026) ================= */
+
+  loadFilterOptions(): void {
+    if (this.lockedDealer) return;
+    this.dealerService.getDealerFilterOptions(null).subscribe({
+      next: (res: any) => {
+        this.filterRows = res?.data || [];
+        this.buildFilterOptions();
+      },
+      error: (err) => console.error('Dealer filter options error:', err)
+    });
+  }
+
+  private static uniq(values: (string | null | undefined)[]): string[] {
+    const seen = new Map<string, string>();
+    for (const v of values) {
+      const t = (v || '').trim();
+      if (t && !seen.has(t.toLowerCase())) seen.set(t.toLowerCase(), t);
+    }
+    return [...seen.values()].sort((a, b) => a.localeCompare(b));
+  }
+
+  /** State -> City -> Dealer narrow each other; Status narrows the dealer list */
+  buildFilterOptions(): void {
+    const same = (a: string | null | undefined, b: string | null) => (a || '').trim().toLowerCase() === (b || '').trim().toLowerCase();
+    const byStatus = this.filterRows.filter(r => !this.fStatus || (this.fStatus === 'active') === !!r.isActive);
+    const inState = byStatus.filter(r => !this.fState || same(r.state, this.fState));
+    const inCity = inState.filter(r => !this.fCity || same(r.city, this.fCity));
+
+    this.stateOptions = DealerMaster.uniq(byStatus.map(r => r.state)).map(s => ({ value: s, label: s }));
+    this.cityOptions = DealerMaster.uniq(inState.map(r => r.city)).map(c => ({ value: c, label: c }));
+    this.dealerOptions = inCity.map(r => ({ value: r.dealerCode, label: r.dealerName, sub: r.dealerCode }));
+
+    // drop a choice that no longer fits the others
+    if (this.fCity && !this.cityOptions.some(o => o.value === this.fCity)) this.fCity = null;
+    if (this.fDealer && !this.dealerOptions.some(o => o.value === this.fDealer)) this.fDealer = null;
+  }
+
+  onFilterChange(): void {
+    this.buildFilterOptions();
+    this.page = 1;
+    this.loadDealers();
+  }
+
+  resetFilters(): void {
+    this.fDealer = null;
+    this.fState = null;
+    this.fCity = null;
+    this.fStatus = '';
+    this.searchTerm = '';
+    this.buildFilterOptions();
+    this.page = 1;
+    this.loadDealers();
+  }
+
+  /** 26.11.2026 - SuperAdmin: UAT ERP dealer report import / ERP C_CustomerMaster sync (preview, then Apply) */
+  openErpSync(mode: 'import' | 'sync'): void {
+    const ref = this.modalService.open(ErpSyncDialog, { size: 'xl', centered: true, backdrop: 'static', scrollable: true });
+    ref.componentInstance.kind = 'dealer';
+    ref.componentInstance.mode = mode;
+    ref.result.then(r => { if (r === 'saved') { this.loadFilterOptions(); this.loadDealers(); } }, () => {});
   }
 
   ngOnDestroy(): void {
@@ -78,16 +167,20 @@ export class DealerMaster implements OnInit, OnDestroy {
 
     this.loader.show();
 
-    const dealer = this.isSuperAdmin ? null : this.dealerCode;
+    // dealer login: own dealer only; otherwise the Dealer filter (blank = all)
+    const dealer = this.isSuperAdmin ? this.fDealer : (this.dealerCode || this.fDealer);
+    const filters = this.lockedDealer ? {} : { status: this.fStatus || null, city: this.fCity, state: this.fState };
 
     const search = (this.searchTerm || '').trim();
     this.lastSearch = search;
+    const key = JSON.stringify([search, dealer, filters, this.page]);
+    this.lastLoadKey = key;
 
-    this.dealerService.getDealerByPaged(search || null, this.page, this.pageSize, dealer).subscribe({
+    this.dealerService.getDealerByPaged(search || null, this.page, this.pageSize, dealer, filters).subscribe({
       next: (res) => {
 
-        // a newer search was typed while this one was loading - ignore this result
-        if (search !== (this.searchTerm || '').trim()) { this.loader.hide(); return; }
+        // a newer search / filter was started while this one was loading - ignore this result
+        if (key !== this.lastLoadKey) { this.loader.hide(); return; }
 
         const dealerData = res.data;
         this.collectionSize = res.totalRecords;

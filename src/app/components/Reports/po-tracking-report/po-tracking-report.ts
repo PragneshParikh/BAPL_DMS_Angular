@@ -16,14 +16,14 @@ import {
   DealerDropdownItem
 } from '../../../ViewModels/models/po-tracking-report.model';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { SearchSelect, SearchSelectOption } from '../../../shared/search-select/search-select';
 @Component({
   selector: 'app-po-tracking-report',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule
-  ],
+    ReactiveFormsModule, SearchSelect],
   templateUrl: './po-tracking-report.html'
 })
 export class POTrackingReportComponent implements OnInit {
@@ -43,6 +43,18 @@ export class POTrackingReportComponent implements OnInit {
 
   // ── Dropdown lists ──────────────────────────────────────
   dealerList  : DealerDropdownItem[] = [];
+
+  // 26.11.2026 searchable dealer filter (name + code). The list comes from getDealerDropdown(), which the API
+  // now scopes: admins get every dealer, a dealer its own, a BG employee only the dealers mapped to them.
+  private _dlSrc: any = null;
+  private _dlOpts: SearchSelectOption[] = [];
+  get dealerOptions(): SearchSelectOption[] {
+    if (this._dlSrc !== this.dealerList) {
+      this._dlSrc = this.dealerList;
+      this._dlOpts = (this.dealerList || []).map((d: any) => ({ value: d.dealerCode, label: d.dealerName || d.dealerCode, sub: d.dealerCode }));
+    }
+    return this._dlOpts;
+  }
   poTypeList  : string[]             = [];
 
   // ✅ Fixed — always exactly Active / Inactive (bool field)

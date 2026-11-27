@@ -20,11 +20,13 @@ import { LoaderService } from '../../../../core/services/loader';
 import { EbwInvoiceService } from '../../../../core/services/ebw-invoice-service';
 import { LocationMasterService } from '../../../../core/services/location-master-service';
 import { ComplaintmasterService } from '../../../../core/services/complaintmaster-service';
+import { GroupMasterService } from '../../../../core/services/group-master-service';
 import { PrefixService } from '../../../../core/services/prefix';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { MenuAccessService } from '../../../../core/services/menu-access.service';
 import { ChassisSearchService } from '../../../../core/services/chassis-search-service';
+import { NgSelectModule } from '@ng-select/ng-select';
 // Service history lookup + OCR scan (added 18.11.2026)
 import { catchError, firstValueFrom, forkJoin, of } from 'rxjs';
 import { JobcardPhotoService, JobCardPhotoRow, PendingPhoto } from '../../../../core/services/jobcard-photo.service';
@@ -33,7 +35,7 @@ import { JobcardServiceHistoryLookupService, ShHistoryCard, ShScope, ShSuggestio
 @Component({
   selector: 'app-job-card-add-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbDropdownModule],
+  imports: [CommonModule, FormsModule, NgbDropdownModule, NgSelectModule],
   templateUrl: './job-card-add-form.html',
   styleUrl: './job-card-add-form.scss',
 })
@@ -204,6 +206,8 @@ export class JobCardAddForm {
   isPdiSaved = false;
 
   dealerCode: string = '';
+  groupMasterList: any[] = [];
+  selectedComplaintGroupId: number | null = null;
   complaintMasterList: any[] = [];
   filteredComplaints: any[] = [];
   showComplaintDropdown = false;
@@ -220,6 +224,7 @@ export class JobCardAddForm {
     private router: Router,
     private jobCardService: JobCardService,
     private complaintMasterService: ComplaintmasterService,
+    private groupMasterService: GroupMasterService,
     private http: HttpClient,
     private prefixService: PrefixService,
     public toastr: ToastService,
@@ -254,6 +259,7 @@ export class JobCardAddForm {
     this.loadJobTypes();
     this.loadChassisList();
     this.loadJobSorces();
+    this.loadGroupMaster();
     this.loadComplaintMaster();
 
     const data = history.state.data;
@@ -339,8 +345,42 @@ export class JobCardAddForm {
   loadComplaintMaster(): void {
     this.complaintMasterService.getComplaintMasterList().subscribe({
       next: (res: any) => {
-        this.complaintMasterList = res;
+        this.complaintMasterList = res || [];
+        this.complaintList = this.complaintList.map((complaint: any) => {
+          const master = this.complaintMasterList.find((item: any) =>
+            item.complaintName?.toLowerCase() === complaint.complaintCode?.toLowerCase()
+          );
+          const groupId = Number(master?.groupName ?? master?.GroupName) || null;
+          const group = this.groupMasterList.find((item: any) => Number(item.id) === groupId);
 
+          return {
+            ...complaint,
+            groupId,
+            groupName: group?.groupName ?? master?.complaintGroupName ?? master?.ComplaintGroupName ?? ''
+          };
+        });
+      },
+      error: (err) => {
+        console.error('Error fetching complaint master', err);
+        this.toastr.show('Failed to load Complaint Master.', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
+      }
+    });
+  }
+
+  loadGroupMaster(): void {
+    this.groupMasterService.getGroupMasterList().subscribe({
+      next: (res: any) => {
+        this.groupMasterList = res || [];
+      },
+      error: (err) => {
+        console.error('Error fetching group master', err);
+        this.toastr.show('Failed to load Group Master.', {
+          classname: 'bg-danger text-white',
+          delay: 5000
+        });
       }
     });
   }
@@ -630,25 +670,40 @@ filterChassis() {
 
 
   onComplaintSearch(event: any): void {
-
-    const value = event.target.value?.trim().toLowerCase();
+    const value = String(event.target.value ?? '').trim().toLowerCase();
 
     // User ne typing start ki -> previous selection invalid
     this.complaintObj.complaintId = 0;
+    this.complaintObj.complaint = '';
+    this.filterComplaints(value);
+  }
 
-    if (!value) {
+  onComplaintFocus(): void {
+    this.filterComplaints('');
+  }
+
+  private filterComplaints(value: string): void {
+    if (this.selectedComplaintGroupId === null) {
       this.filteredComplaints = [];
       this.showComplaintDropdown = false;
       return;
     }
 
     this.filteredComplaints = this.complaintMasterList.filter(x =>
-      x.complaintName?.toLowerCase().includes(value)
+      Number(x.groupName ?? x.GroupName) === this.selectedComplaintGroupId &&
+      String(x.complaintName ?? x.ComplaintName ?? '').toLowerCase().includes(value)
     );
 
     this.showComplaintDropdown = this.filteredComplaints.length > 0;
   }
 
+  onComplaintGroupChange(): void {
+    this.complaintObj.complaintCode = '';
+    this.complaintObj.complaint = '';
+    this.complaintObj.complaintId = 0;
+    this.filteredComplaints = [];
+    this.showComplaintDropdown = false;
+  }
 
 
   selectComplaint(item: any): void {
@@ -1201,11 +1256,15 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
   // add complain section 
   addComplaint() {
 
-    if (!this.complaintObj.customerVoice || !this.complaintObj.complaint) {
+    if (
+      !this.complaintObj.customerVoice ||
+      !this.complaintObj.complaint ||
+      this.selectedComplaintGroupId === null
+    ) {
       Swal.fire({
         icon: 'error',
         title: 'Validation',
-        text: 'Please fill required fields',
+        text: 'Please fill Customer Voice, Group Master, and Complaint Name.',
         width: '300px'
       });
       return;
@@ -1220,9 +1279,18 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
       return;
     }
 
-    this.complaintList.push({ ...this.complaintObj });
+    this.complaintList.push({
+      ...this.complaintObj,
+      groupId: this.selectedComplaintGroupId,
+      groupName: this.groupMasterList.find(
+        (group: any) => Number(group.id) === this.selectedComplaintGroupId
+      )?.groupName ?? ''
+    });
 
     // Reset fields
+    this.selectedComplaintGroupId = null;
+    this.filteredComplaints = [];
+    this.showComplaintDropdown = false;
     this.complaintObj = {
       customerVoice: '',
       complaintCode: '',
@@ -1386,7 +1454,8 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
 
     if (
       this.complaintObj.customerVoice?.trim() ||
-      this.complaintObj.complaint?.trim()
+      this.complaintObj.complaint?.trim() ||
+      this.selectedComplaintGroupId !== null
     ) {
       this.showComplaintValidation = true;
       this.isOpen.voice = true;
@@ -1812,6 +1881,9 @@ validateWarranty(): boolean {
 
     // COMPLAINT
     this.complaintList = [];
+    this.selectedComplaintGroupId = null;
+    this.filteredComplaints = [];
+    this.showComplaintDropdown = false;
     this.complaintObj = {
       customerVoice: '',
       complaintCode: '',

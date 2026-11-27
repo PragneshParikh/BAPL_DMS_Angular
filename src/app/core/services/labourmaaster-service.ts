@@ -37,8 +37,21 @@ export class LabourMasterService {
     return this.httpClient.get(`${this.baseUrl}/LabourMaster/GetLabourMasterPartwiseListApi`,{ params: { searchText: searchText } });
   }
 
-  getLabourRateDropDown(oemmodelName: string, customerLedgerId: number, dealerCode: string): Observable<any> {
-    return this.httpClient.get(`${this.baseUrl}/LabourMaster/GetLabourRateDropDown/${oemmodelName}/${customerLedgerId}/${dealerCode}`);
+  getLabourRateDropDown(
+    oemmodelName: string,
+    customerLedgerId: number | null,
+    dealerCode: string,
+    customerState?: string | null
+  ): Observable<any> {
+    let params = new HttpParams();
+    if (customerState?.trim()) {
+      params = params.set('customerState', customerState.trim());
+    }
+
+    return this.httpClient.get(
+      `${this.baseUrl}/LabourMaster/GetLabourRateDropDown/${encodeURIComponent(oemmodelName || 'Unknown')}/${customerLedgerId || 0}/${encodeURIComponent(dealerCode)}`,
+      { params }
+    );
   }
   
  downloadLabourRateMasterExcel(rateType: string, oemModelName?: string, cityTier?: number): Observable<Blob> {

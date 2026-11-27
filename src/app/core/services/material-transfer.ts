@@ -45,6 +45,10 @@ getByDealer(
     return this.httpClient.get(`${this.baseUrl}/material-transfer/${jobId}`);
   }
 
+  getMaterialTransferByB2BJobCardId(jobCardId: string): Observable<any> {
+    return this.httpClient.get(`${this.baseUrl}/material-transfer/b2b/${jobCardId}`);
+  }
+
   insert(items: any) {
     return this.httpClient.post(`${this.baseUrl}/material-transfer`, items);
   }

@@ -55,4 +55,19 @@ export class FFIRService {
     );
   }
 
+  getAttachments(id: number): Observable<any[]> {
+    return this.httpClient.get<any[]>(
+      `${environment.apiUrl}/FFIR/GetFFIRAttachments/${id}`
+    );
+  }
+
+  uploadAttachment(id: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    return this.httpClient.post(
+      `${environment.apiUrl}/FFIR/UploadFFIRAttachment/${id}`,
+      formData
+    );
+  }
+
 }
