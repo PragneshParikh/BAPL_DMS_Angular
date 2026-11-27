@@ -1,0 +1,21 @@
+.ffir-report-table {
+  max-height: 70vh;
+}
+
+.ffir-report-table table {
+  min-width: 2600px;
+}
+
+.ffir-report-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.ffir-report-table td {
+  min-width: 100px;
+  max-width: 220px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

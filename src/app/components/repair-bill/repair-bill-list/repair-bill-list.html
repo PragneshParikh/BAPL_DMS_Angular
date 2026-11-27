@@ -130,7 +130,7 @@
                         <td>{{ item.chassisNumber }}</td>
                         <td>{{ item.locationCode }}</td>
                         <td>{{ item.billType }}</td>
-                        <td>{{ item.b2bJobCardNumber || item.jobCardNo }}</td>
+                        <td>{{ item.b2bJobCardNumber || item.b2BJobCardNumber || item.B2BJobCardNumber || item.jobCardNo }}</td>
                         <td class="text-end">{{ item.totalNetAmount | number:'1.2-2' }}</td>
 
                         <!-- Colour-coded status badge -->

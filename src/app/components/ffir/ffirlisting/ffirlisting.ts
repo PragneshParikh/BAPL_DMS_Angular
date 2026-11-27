@@ -304,4 +304,8 @@ export class Ffirlisting {
     });
   }
 
+  onFFIRPrint(item: any): void {
+    void this.router.navigate(['/ffir-print', item.id]);
+  }
+
 }

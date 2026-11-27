@@ -1,0 +1,160 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
+  <h5 class="mb-0">FFIR Reports</h5>
+  <span class="badge bg-light text-dark border px-3 py-2">{{ rows.length }} record(s)</span>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="row g-2 align-items-end">
+      <div class="col-sm-6 col-lg-2">
+        <label class="form-label">From Date</label>
+        <input type="date" class="form-control form-control-sm" [(ngModel)]="filters.fromDate">
+      </div>
+      <div class="col-sm-6 col-lg-2">
+        <label class="form-label">To Date</label>
+        <input type="date" class="form-control form-control-sm" [(ngModel)]="filters.toDate">
+      </div>
+      <div class="col-sm-6 col-lg-4" *ngIf="!isDealerUser">
+        <label class="form-label">Dealer</label>
+        <select class="form-select form-select-sm" [(ngModel)]="filters.dealerCode">
+          <option value="">All Dealers</option>
+          <option *ngFor="let dealer of dealers" [value]="dealer.dealerCode">
+            {{ dealer.dealerName }} ({{ dealer.dealerCode }})
+          </option>
+        </select>
+      </div>
+      <div class="col-sm-6 col-lg-4" *ngIf="isDealerUser">
+        <label class="form-label">Dealer</label>
+        <input class="form-control form-control-sm bg-light" [value]="filters.dealerCode" readonly>
+      </div>
+      <div class="col-sm-6 col-lg-2 d-grid">
+        <button class="btn btn-primary btn-sm" (click)="search()" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+          Search
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive ffir-report-table" *ngIf="rows.length > 0">
+      <table class="table table-sm table-bordered table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>S.No.</th>
+            <th>FFIR No. / Date</th>
+            <th>Job Type</th>
+            <th>Job Card No.</th>
+            <th>Job Card Date</th>
+            <th>Service Head</th>
+            <th>Service Type</th>
+            <th>Dealer Code</th>
+            <th>Dealer Name</th>
+            <th>City</th>
+            <th>Customer</th>
+            <th>Customer Mobile</th>
+            <th>Technician</th>
+            <th>Model</th>
+            <th>Chassis / VIN</th>
+            <th>Registration No.</th>
+            <th>Sale Date</th>
+            <th>Dispatch Date</th>
+            <th>Current KMS</th>
+            <th>Motor No.</th>
+            <th>Battery No.</th>
+            <th>Charger No.</th>
+            <th>Purpose</th>
+            <th>Report Title</th>
+            <th>Prepared By</th>
+            <th>Road Surface</th>
+            <th>No. of Passengers</th>
+            <th>Repeat Failure</th>
+            <th>Chassis Modified</th>
+            <th>Customer Voice</th>
+            <th>Complaint</th>
+            <th>Detailed Observation</th>
+            <th>Root Cause</th>
+            <th>Corrective Action</th>
+            <th>Quick Suggestion</th>
+            <th>Present Vehicle Status</th>
+            <th>Vehicle Off Road Reason</th>
+            <th>Main Part Affected</th>
+            <th>FFIR Remarks</th>
+            <th>Verification Status</th>
+            <th>Verification Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of pagedRows; let index = index">
+            <td>{{ (page - 1) * pageSize + index + 1 }}</td>
+            <td>{{ row.ffirNumber }}<br><small>{{ row.ffirDate | date:'dd-MM-yyyy' }}</small></td>
+            <td>{{ row.jobType || '-' }}</td>
+            <td>{{ row.jobCardNumber || '-' }}</td>
+            <td>{{ row.jobCardDate ? (row.jobCardDate | date:'dd-MM-yyyy') : '-' }}</td>
+            <td>{{ row.serviceHead || '-' }}</td>
+            <td>{{ row.serviceType || '-' }}</td>
+            <td>{{ row.dealerCode || '-' }}</td>
+            <td>{{ row.dealerName || '-' }}</td>
+            <td>{{ row.city || '-' }}</td>
+            <td>{{ row.customerName || '-' }}</td>
+            <td>{{ row.customerMobile || '-' }}</td>
+            <td>{{ row.technician || '-' }}</td>
+            <td>{{ row.modelName || '-' }}</td>
+            <td>{{ row.chassisNo || '-' }}</td>
+            <td>{{ row.registerNo || '-' }}</td>
+            <td>{{ row.saleDate ? (row.saleDate | date:'dd-MM-yyyy') : '-' }}</td>
+            <td>{{ row.dispatchDate ? (row.dispatchDate | date:'dd-MM-yyyy') : '-' }}</td>
+            <td>{{ row.currentKms ?? '-' }}</td>
+            <td>{{ row.motorNo || '-' }}</td>
+            <td>{{ row.batteryNo || '-' }}</td>
+            <td>{{ row.chargerNo || '-' }}</td>
+            <td>{{ row.purpose || '-' }}</td>
+            <td>{{ row.reportTitle || '-' }}</td>
+            <td>{{ row.reportPreparedBy || '-' }}</td>
+            <td>{{ row.typeOfRoadSurface || '-' }}</td>
+            <td>{{ row.noOfPassenger ?? '-' }}</td>
+            <td>{{ row.repeatFailure ? 'Yes' : 'No' }}</td>
+            <td>{{ row.chassisModified ? 'Yes' : 'No' }}</td>
+            <td>{{ row.customerVoice || '-' }}</td>
+            <td>{{ row.complaint || '-' }}</td>
+            <td>{{ row.detailedObservation || '-' }}</td>
+            <td>{{ row.rootCause || '-' }}</td>
+            <td>{{ row.correctiveAction || '-' }}</td>
+            <td>{{ row.quickSuggestion || '-' }}</td>
+            <td>{{ row.presentVehicleStatus || '-' }}</td>
+            <td>{{ row.vehicleOffRoadReason || '-' }}</td>
+            <td>{{ row.mainPartAffected || '-' }}</td>
+            <td>{{ row.ffirRemarks || '-' }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'bg-warning text-dark': row.status === 'Pending',
+                'bg-success': row.status === 'Approved',
+                'bg-danger': row.status === 'Rejected'
+              }">{{ row.status }}</span>
+            </td>
+            <td>{{ row.remarks || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="loading" class="text-center text-muted py-4">
+      <span class="spinner-border spinner-border-sm me-2"></span>Loading FFIR report...
+    </div>
+    <div *ngIf="!loading && searched && rows.length === 0" class="text-center text-muted py-4">
+      No FFIR records found for the selected filters.
+    </div>
+    <div *ngIf="!loading && !searched" class="text-center text-muted py-4">
+      Select filters and click Search to load FFIR records.
+    </div>
+    <div class="d-flex justify-content-between align-items-center p-2" *ngIf="rows.length > 0">
+      <small class="text-muted">{{ rows.length }} record(s)</small>
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-outline-secondary" (click)="changePage(-1)" [disabled]="page <= 1">Previous</button>
+        <span class="btn btn-light disabled">Page {{ page }} of {{ pageCount }}</span>
+        <button class="btn btn-outline-secondary" (click)="changePage(1)" [disabled]="page >= pageCount">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
