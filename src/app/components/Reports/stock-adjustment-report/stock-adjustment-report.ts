@@ -77,6 +77,10 @@ export class StockAdjustmentReport implements OnInit {
     }
   }
 
+
+  /** 26.11.2026 BG employee mapped to several dealers (dealer code is a comma list) */
+  get isMultiDealer(): boolean { return (this.dealerCode || '').includes(','); }
+
   ngOnInit(): void {
     this.getDealerList();
     this.initDefaultDates();
@@ -108,14 +112,14 @@ export class StockAdjustmentReport implements OnInit {
 
           this.dealerList = res.data ?? [];
 
-          if (!this.dealerCode) {
+          if (!this.dealerCode || this.isMultiDealer) {
             this.dealerList.unshift({
               dealerCode: 'ALL',
-              dealerName: 'All'
+              dealerName: this.isMultiDealer ? 'All My Dealers' : 'All'
             });
           }
           this.reportFilterFormData.selectedDealerCode =
-            this.dealerCode || (this.isSuperAdmin ? 'ALL' : '');
+            (this.isMultiDealer ? 'ALL' : (this.dealerCode || (this.isSuperAdmin ? 'ALL' : '')));
           this.loadLocationList();
         },
         error: (err) => {
@@ -152,6 +156,8 @@ export class StockAdjustmentReport implements OnInit {
         this.loader.hide();
         this.locationList = (locations ?? [])
           .filter(location => Number(location.locareaidno) === 2)
+          // 26.11.2026 a multi-dealer employee only sees locations of their own dealers
+          .filter(location => !this.isMultiDealer || this.dealerList.some(d => d.dealerCode === location.dealercode))
           .map(location => ({
             ...location,
             dealerName: this.dealerList.find(dealer => dealer.dealerCode === location.dealercode)?.dealerName
@@ -244,7 +250,7 @@ export class StockAdjustmentReport implements OnInit {
   resetForm(): void {
 
     this.reportFilterFormData = {
-      selectedDealerCode: this.dealerCode || (this.isSuperAdmin ? 'ALL' : ''),
+      selectedDealerCode: (this.isMultiDealer ? 'ALL' : (this.dealerCode || (this.isSuperAdmin ? 'ALL' : ''))),
       selectedLocation: null,
       fromDate: this.reportFilterFormData.fromDate,
       toDate: this.reportFilterFormData.toDate

@@ -9,6 +9,7 @@ import {
 } from '../../../ViewModels/models/Comaprision-reportModel';
 import { DealerDropdownItem } from '../../../ViewModels/models/job-report.model';
 import { MenuAccessService } from '../../../core/services/menu-access.service';
+import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-comparison-report',
   standalone: true,
@@ -49,7 +50,8 @@ export class ComparisonReportComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private reportService: ReportService,
-    private menuAccess: MenuAccessService
+    private menuAccess: MenuAccessService,
+    private route: ActivatedRoute
   ) {
     this.canDownload = this.menuAccess.canDownload(this.SUBMENU_ID);
     // NEW — fromDate/toDate now default to the current month (1st of this
@@ -77,6 +79,15 @@ export class ComparisonReportComponent implements OnInit {
     // show it, hence the same treatment as the other report screens.
     this.isDealer = this.checkIsDealer();
     this.loggedInDealerCode = this.getLoggedInDealerCode();
+
+    // 26.11.2026 - opened from the Dashboard "Proforma Completed" card:
+    // ?fromDate=yyyy-MM-dd&toDate=yyyy-MM-dd&performa=yes  -> same period + "Performa Created"
+    const qp = this.route.snapshot.queryParamMap;
+    const iso = /^\d{4}-\d{2}-\d{2}$/;
+    const qFrom = qp.get('fromDate'), qTo = qp.get('toDate'), qPerforma = qp.get('performa');
+    if (qFrom && iso.test(qFrom)) this.filterForm.patchValue({ fromDate: qFrom }, { emitEvent: false });
+    if (qTo && iso.test(qTo)) this.filterForm.patchValue({ toDate: qTo }, { emitEvent: false });
+    if (qPerforma === 'yes' || qPerforma === 'no') this.filterForm.patchValue({ performaStatus: qPerforma }, { emitEvent: false });
 
     if (this.isDealer) {
       // Keep the filter's dealerCode in sync with the read-only box shown

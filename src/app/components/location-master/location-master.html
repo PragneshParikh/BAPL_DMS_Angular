@@ -9,31 +9,35 @@
             <div class="row">
                 <div class="col-md-3 dropdown-wrapper">
                     <label class="form-label">Dealer Name</label>
-                    <select class="form-select form-select-sm" [(ngModel)]="dealerCode"
-                        (ngModelChange)="checkSearchReset($event)" [disabled]="isDealer">
-                        <option [ngValue]="null">Select Dealer</option>
-                        <option [ngValue]="null">All</option>
-                        <option *ngFor="let d of dealerList" [ngValue]="d.dealerCode">
-                            {{d.dealerName}}
-                        </option>
-                    </select>
+                    <!-- 26.11.2026 searchable by dealer code / name -->
+                    <app-search-select [options]="dealerOptions" [value]="dealerCode" allLabel="All Dealers"
+                        placeholder="Dealer code or name..." [disabled]="isDealer"
+                        (valueChange)="checkSearchReset($event)"></app-search-select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label">Location Area</label>
-                    <select class="form-select form-select-sm" [(ngModel)]="locationArea">
-                        <option value="">-- Select Area --</option>
+                    <select class="form-select form-select-sm" [(ngModel)]="locationArea" (ngModelChange)="searchLocation()">
+                        <option value="">All Areas</option>
                         <option *ngFor="let area of locationAreaMaster" [value]="area.id">
                             {{area.name}}
                         </option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="statusFilter" (ngModelChange)="searchLocation()">
+                        <option value="">All Status</option>
+                        <option value="Y">Active</option>
+                        <option value="N">Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <label class="form-label">Search</label>
                     <input type="text" class="form-control form-control-sm" [(ngModel)]="locationName"
                         placeholder="Code, name, dealer, form type..."
                         (input)="searchLocation()" (keyup.enter)="searchLocation()" />
                 </div>
-                <div class="col-md-3 d-flex align-items-end gap-2">
+                <div class="col-md-3 d-flex flex-wrap align-items-end gap-2">
                     <button class="btn btn-primary btn-sm" (click)="searchLocation()">
                         Search
                     </button>
@@ -51,6 +55,16 @@
                         <i class="ri-upload-2-line"></i>
                     </button>
                     <input #importFileInput type="file" accept=".xlsx" hidden (change)="onImportFileSelected($event)">
+
+                    <!-- 26.11.2026 SuperAdmin: UAT ERP location list import + ERP sync -->
+                    <button *ngIf="isSuperAdmin" class="btn btn-primary btn-sm text-nowrap" [ngbTooltip]="'Import UAT ERP Location List (Store = Workshop)'"
+                        (click)="openErpSync('import')">
+                        <i class="ri-file-upload-line me-1"></i>ERP Import
+                    </button>
+                    <button *ngIf="isSuperAdmin" class="btn btn-outline-primary btn-sm text-nowrap" [ngbTooltip]="'Sync location details from ERP C_DMS_DealerConsigneeDetail (selected dealer, or all)'"
+                        (click)="openErpSync('sync')">
+                        <i class="ri-refresh-line me-1"></i>Sync ERP
+                    </button>
 
                 </div>
             </div>

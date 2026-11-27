@@ -26,8 +26,9 @@ export const REPORT_LINKS = {
 } as const;
 
 export const COLORS = {
-  blue: '#5b8def', green: '#34d399', amber: '#fbbf24', purple: '#a78bfa', pink: '#f472b6',
-  teal: '#2dd4bf', orange: '#fb923c', red: '#f87171', sky: '#60a5fa', indigo: '#6366f1',
+  // 26.11.2026 - same colours as the DMS theme (primary / success / warning / ...)
+  blue: '#405189', green: '#0ab39c', amber: '#f7b84b', purple: '#6559cc', pink: '#f672a7',
+  teal: '#299cdb', orange: '#f1963b', red: '#f06548', sky: '#3577f1', indigo: '#5156be',
   axis: '#64748b', grid: '#eef2f7', font: 'Inter, sans-serif'
 };
 export const PALETTE = [COLORS.blue, COLORS.purple, COLORS.green, COLORS.amber, COLORS.red, COLORS.teal,

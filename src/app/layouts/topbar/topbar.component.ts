@@ -99,6 +99,34 @@ export class TopbarComponent implements OnInit {
     private localPartsService: LocalPartsService
   ) { }
 
+  // ---------- 26.11.2026 profile display (BG employees carry a comma list of dealer codes) ----------
+  get profileCodes(): string[] {
+    const raw = (this.userData?.dealerCode || '').toString();
+    return raw.split(',').map((c: string) => c.trim()).filter(Boolean);
+  }
+  get profileName(): string {
+    const u = this.userData || {};
+    if (u.compName && this.profileCodes.length <= 1) return u.compName;
+    const mail = (u.email || u.userName || '').toString();
+    const local = mail.split('@')[0] || '';
+    // sajeed.khan -> Sajeed Khan
+    const pretty = local.split(/[._-]+/).filter(Boolean).map((p: string) => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+    return pretty || u.compName || 'User';
+  }
+  get profileInitial(): string {
+    return (this.profileName || 'U').charAt(0).toUpperCase();
+  }
+  get profileSub(): string {
+    const codes = this.profileCodes;
+    if (this.userData?.employeeCode) return codes.length > 1 ? `${this.userData.employeeCode} · ${codes.length} dealers` : this.userData.employeeCode;
+    if (codes.length > 1) return `${codes.length} dealers`;
+    return codes[0] || (this.userData?.role || '');
+  }
+  get profileRole(): string {
+    const roles: string[] = this.userData?.roles?.length ? this.userData.roles : (this.userData?.role ? [this.userData.role] : []);
+    return roles.join(', ');
+  }
+
   ngOnInit(): void {
     this.userData = this.authService.currentUserValue;
 

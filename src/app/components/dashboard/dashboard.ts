@@ -15,6 +15,7 @@ import { TotalSaleReportDealerWiseResponse, TotalSaleReportDealerWiseRow } from 
 import { ModelWiseSalePivotResponse } from '../../ViewModels/models/model-wise-sale-countModel';
 import { ModelWiseStockPivotResponse } from '../../ViewModels/models/Model wise stock count.model';
 import { JobReportSummaryStats } from '../../ViewModels/models/job-report.model';
+import { ComparisonReportPagedResponse } from '../../ViewModels/models/Comaprision-reportModel';
 import { DashboardFilter } from './dashboard-filter';
 import { DateRange, defaultRange, fmtRange } from './dashboard-kit';
 
@@ -23,12 +24,14 @@ export const DASHBOARD_LINKS = {
   totalSale: '/total-sale-dealer-wise',
   modelSale: '/model-wise-sale-report',
   modelStock: '/model-wise-current-stock',
-  jobCards: '/job-card-report'
+  jobCards: '/job-card-report',
+  proforma: '/comparison-report'
 } as const;
 
 const C = {
-  blue: '#5b8def', green: '#34d399', amber: '#fbbf24', purple: '#a78bfa',
-  pink: '#f472b6', teal: '#2dd4bf', orange: '#fb923c', sky: '#60a5fa',
+  // 26.11.2026 - DMS theme colours
+  blue: '#405189', green: '#0ab39c', amber: '#f7b84b', purple: '#6559cc',
+  pink: '#f672a7', teal: '#299cdb', orange: '#f1963b', sky: '#3577f1',
   axis: '#64748b', grid: '#eef2f7', font: 'Inter, sans-serif'
 };
 const PALETTE = [C.blue, C.green, C.amber, C.purple, C.pink, C.teal, C.orange, C.sky];
@@ -58,7 +61,11 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   modelSale: ModelWiseSalePivotResponse | null = null;
   modelStock: ModelWiseStockPivotResponse | null = null;
   jobs: JobReportSummaryStats | null = null;
-  failed = { sale: false, modelSale: false, stock: false, jobs: false };
+  /** 26.11.2026 current month (1st - today) sale, independent of the selected range */
+  monthSale: TotalSaleReportDealerWiseResponse | null = null;
+  /** 26.11.2026 Performa vs Sale Bill comparison (selected range) */
+  proforma: ComparisonReportPagedResponse | null = null;
+  failed = { sale: false, modelSale: false, stock: false, jobs: false, monthSale: false, proforma: false };
 
   topDealers: TotalSaleReportDealerWiseRow[] = [];
   hasSalesChart = false;
@@ -101,9 +108,21 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   // ---------------------------------------------------------------- data
   load(): void {
     this.loading = true;
-    this.failed = { sale: false, modelSale: false, stock: false, jobs: false };
+    this.failed = { sale: false, modelSale: false, stock: false, jobs: false, monthSale: false, proforma: false };
     const range = { fromDate: this.from, toDate: this.to };
     const dealerCode = this.storage.getDealerCode() || '';
+    const month = this.monthRange;
+
+    // 26.11.2026 - the two new KPI cards load on their own, so a slow call never holds back the charts
+    this.monthSale = null;
+    this.proforma = null;
+    this.report.getTotalSaleReportDealerWise({ fromDate: month.from, toDate: month.to })
+      .pipe(catchError(() => { this.failed.monthSale = true; return of(null); }))
+      .subscribe(r => this.monthSale = r);
+    // only the totals are needed - one row keeps it light
+    this.report.getComparisonReport({ fromDate: this.from, toDate: this.to, pageIndex: 1, pageSize: 1 })
+      .pipe(catchError(() => { this.failed.proforma = true; return of(null); }))
+      .subscribe(r => this.proforma = r);
 
     forkJoin({
       sale: this.report.getTotalSaleReportDealerWise(range)
@@ -156,6 +175,29 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   get stockUnits(): number | null { return this.modelStock ? this.modelStock.grandTotal ?? 0 : null; }
   get modelCount(): number { return this.modelStock?.modelNames?.length ?? 0; }
   get dealerCount(): number { return this.sale?.rows?.length ?? 0; }
+
+  // 26.11.2026 new KPI cards
+  /** 1st of this month - today (local dates) */
+  get monthRange(): DateRange {
+    const t = new Date();
+    const f = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return { from: f(new Date(t.getFullYear(), t.getMonth(), 1)), to: f(t) };
+  }
+  get monthLabel(): string {
+    return new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  }
+  get monthUnits(): number | null { return this.monthSale ? this.monthSale.grandTotal?.totalUnitsSold ?? 0 : null; }
+  get monthValue(): number | null { return this.monthSale ? this.monthSale.grandTotal?.totalFinalAmount ?? 0 : null; }
+  get proformaCount(): number | null { return this.proforma ? this.proforma.totalWithPerforma ?? 0 : null; }
+  get proformaBilled(): number { return this.proforma?.totalSaleBillCreated ?? 0; }
+  get proformaPending(): number { return Math.max(0, (this.proformaCount ?? 0) - this.proformaBilled); }
+  get proformaParams(): Record<string, string> { return { fromDate: this.from, toDate: this.to, performa: 'yes' }; }
+  get monthParams(): Record<string, string> { return { fromDate: this.monthRange.from, toDate: this.monthRange.to }; }
+  get greeting(): string {
+    const h = new Date().getHours();
+    return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  }
+  get today(): Date { return new Date(); }
   get jobCompletionPct(): number {
     const t = this.jobs?.totalJobs ?? 0;
     return t > 0 ? Math.round(((this.jobs?.completedJobs ?? 0) / t) * 100) : 0;

@@ -2,11 +2,12 @@ import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NewZeroHoursService, NewZeroHoursRow } from '../../../core/services/new-zero-hours';
+import { SearchSelect, SearchSelectOption } from '../../../shared/search-select/search-select';
 
 @Component({
   selector: 'app-new-zero-hours',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SearchSelect],
   templateUrl: './new-zero-hours.html'
 })
 export class NewZeroHoursComponent implements OnInit {
@@ -15,6 +16,22 @@ export class NewZeroHoursComponent implements OnInit {
 
   dealers: { dealerCode: string; dealerName: string }[] = [];
   locations: { locationCode: string; locationName: string }[] = [];
+
+  // 26.11.2026 searchable dealer filter; list is scoped by the API (admin all, employee mapped, dealer own)
+  private _dlSrc: any = null;
+  private _dlOpts: SearchSelectOption[] = [];
+  get dealerOptions(): SearchSelectOption[] {
+    if (this._dlSrc !== this.dealers) {
+      this._dlSrc = this.dealers;
+      this._dlOpts = (this.dealers || []).map(d => ({ value: d.dealerCode, label: d.dealerName || d.dealerCode, sub: d.dealerCode }));
+    }
+    return this._dlOpts;
+  }
+
+  pickDealer(code: string | null): void {
+    this.dealerCode = code || 'ALL';
+    this.onDealerChange();
+  }
 
   dealerCode = 'ALL';
   locationCode = 'ALL';

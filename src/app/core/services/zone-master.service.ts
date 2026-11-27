@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ZoneViewModel, ZoneDealerViewModel } from '../../ViewModels/models/ZoneViewModel';
+import { ZoneViewModel, ZoneDealerViewModel, ZoneDealerCountResponse } from '../../ViewModels/models/ZoneViewModel';
 
 @Injectable({
   providedIn: 'root',
@@ -49,6 +49,11 @@ export class ZoneMasterService {
   /** Get all distinct active zones for dropdown */
   getZones(): Observable<ZoneViewModel[]> {
     return this.http.get<ZoneViewModel[]>(`${this.baseUrl}/GetAll`);
+  }
+
+  /** 26.11.2026 - dealers per zone + dealers whose state is in no zone */
+  getZoneDealerCounts(): Observable<ZoneDealerCountResponse> {
+    return this.http.get<ZoneDealerCountResponse>(`${this.baseUrl}/GetZoneDealerCounts`);
   }
 
   /** Get dealers mapped to a specific zone, with city/state info */

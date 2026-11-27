@@ -68,6 +68,10 @@ export class PartsStockDetails implements OnInit {
 
   }
 
+
+  /** 26.11.2026 BG employee mapped to several dealers (dealer code is a comma list) */
+  get isMultiDealer(): boolean { return (this.dealerCode || '').includes(','); }
+
   ngOnInit(): void {
     this.initDefaultDates();
     this.getDealerList();
@@ -88,11 +92,11 @@ export class PartsStockDetails implements OnInit {
         this.loader.hide();
         this.dealerList = res.data ?? [];
 
-        if (!this.dealerCode) {
-          this.dealerList.unshift({ dealerCode: 'ALL', dealerName: 'All' });
+        if (!this.dealerCode || this.isMultiDealer) {
+          this.dealerList.unshift({ dealerCode: 'ALL', dealerName: this.isMultiDealer ? 'All My Dealers' : 'All' });
         }
         this.stockReportFilterFormData.selectedDealerCode =
-          this.dealerCode || (this.isSuperAdmin ? 'ALL' : '');
+          (this.isMultiDealer ? 'ALL' : (this.dealerCode || (this.isSuperAdmin ? 'ALL' : '')));
         this.loadLocationList();
       },
       error: (err) => {
@@ -120,7 +124,8 @@ export class PartsStockDetails implements OnInit {
       next: (locations: ReportLocationOption[]) => {
         this.loader.hide();
         this.locationList = (locations ?? [])
-         .filter(location => location.locareaidno === 2).map(location => ({
+         .filter(location => location.locareaidno === 2)
+         .filter(location => !this.isMultiDealer || this.dealerList.some(d => d.dealerCode === location.dealercode)).map(location => ({
           ...location,
           dealerName: this.dealerList.find(dealer => dealer.dealerCode === location.dealercode)?.dealerName
         }));
@@ -172,7 +177,7 @@ export class PartsStockDetails implements OnInit {
 
   resetForm() {
     this.stockReportFilterFormData = {
-      selectedDealerCode: this.dealerCode || (this.isSuperAdmin ? 'ALL' : ''),
+      selectedDealerCode: (this.isMultiDealer ? 'ALL' : (this.dealerCode || (this.isSuperAdmin ? 'ALL' : ''))),
       selectedLocation: null,
       fromDate: this.stockReportFilterFormData.fromDate,
       toDate: this.stockReportFilterFormData.toDate,

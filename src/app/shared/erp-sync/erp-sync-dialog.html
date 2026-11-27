@@ -1,0 +1,122 @@
+<!-- src\app\shared\erp-sync\erp-sync-dialog.html -->
+<div class="modal-header">
+  <h5 class="modal-title">{{ title }}</h5>
+  <button type="button" class="btn-close btn-close-white" (click)="close()"></button>
+</div>
+
+<div class="modal-body">
+  <div class="small text-muted mb-2">Source: <b>{{ sourceText }}</b></div>
+
+  <!-- ---------- import: file ---------- -->
+  <ng-container *ngIf="mode === 'import'">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-7">
+        <label class="form-label mb-0">Excel file <span class="text-danger">*</span></label>
+        <input type="file" class="form-control form-control-sm" accept=".xlsx,.xls" (change)="onFile($event)" [disabled]="busy">
+      </div>
+      <div class="col-md-5" *ngIf="kind === 'location'">
+        <div class="form-check mt-2">
+          <input class="form-check-input" type="checkbox" id="erpInactMissing" [(ngModel)]="inactivateMissing" [disabled]="busy || !!done">
+          <label class="form-check-label small" for="erpInactMissing">Make DMS locations that are not in the file Inactive</label>
+        </div>
+      </div>
+    </div>
+    <div class="erp-headers mt-2">
+      <span class="small text-muted me-1">Column headers (do not change):</span>
+      <span class="badge bg-light text-dark border me-1 mb-1" *ngFor="let h of (kind === 'dealer' ? dealerHeaders : locationHeaders)">{{ h }}</span>
+    </div>
+    <div class="alert alert-info py-2 small mt-2 mb-0" *ngIf="kind === 'dealer'">
+      The report is the master list: its dealers are added / updated (<b>Current Status</b> decides Active / Inactive) and
+      <b>every other DMS dealer becomes Inactive</b>. New dealers get their ledger and Dealer login (role Dealer).
+    </div>
+    <div class="alert alert-info py-2 small mt-2 mb-0" *ngIf="kind === 'location'">
+      Showroom &rarr; Showroom, <b>Store &rarr; Workshop</b>, Yard &rarr; Yard. <b>Status</b> decides Active / Inactive.
+      Codes that do not start with their Dealer Code are skipped.
+    </div>
+  </ng-container>
+
+  <!-- ---------- sync: dealer filter ---------- -->
+  <ng-container *ngIf="mode === 'sync'">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label mb-0">Dealer Code (blank = all dealers)</label>
+        <input class="form-control form-control-sm text-uppercase" [(ngModel)]="dealerCode" placeholder="e.g. CUS0347" [disabled]="busy || !!preview">
+      </div>
+    </div>
+    <div class="alert alert-info py-2 small mt-2 mb-0">
+      <ng-container *ngIf="kind === 'dealer'">Updates the <b>active</b> DMS dealers from ERP: address, pin and contact person
+        (name, mobile and email only when blank). Active / Inactive is not changed - that comes from the UAT report import.</ng-container>
+      <ng-container *ngIf="kind === 'location'">Updates the DMS locations with the same Location Code from ERP: address, city,
+        state, pin, GSTIN, contacts, area and ERP id. Active / Inactive is not changed - that comes from the UAT location list import.</ng-container>
+    </div>
+  </ng-container>
+
+  <div class="alert alert-danger py-2 small mt-2 mb-0" *ngIf="error">{{ error }}</div>
+
+  <!-- ---------- result ---------- -->
+  <ng-container *ngIf="result as r">
+    <div class="alert py-2 small mt-3 mb-2" [class.alert-success]="r.applied" [class.alert-warning]="!r.applied">
+      <b>{{ r.applied ? 'Saved.' : 'Preview - nothing saved yet.' }}</b>
+      {{ r.totalRows }} row(s) read. After {{ r.applied ? 'this run' : 'Apply' }}: <b>{{ r.activeAfter }}</b> active, {{ r.inactiveAfter }} inactive.
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-2">
+      <button type="button" class="btn btn-sm erp-chip" [class.erp-chip-on]="filterAction === ''" (click)="filterAction = ''">All {{ r.items.length }}</button>
+      <ng-container *ngFor="let a of actions">
+        <button type="button" class="btn btn-sm erp-chip" *ngIf="count(a)" [class.erp-chip-on]="filterAction === a" (click)="filterAction = a">
+          <span class="badge me-1" [ngClass]="badge(a)">{{ count(a) }}</span>{{ a }}
+        </button>
+      </ng-container>
+    </div>
+
+    <div class="small text-muted mb-2" *ngIf="r.notes.length">
+      <div *ngFor="let n of r.notes.slice(0, 8)">• {{ n }}</div>
+      <div *ngIf="r.notes.length > 8">… and {{ r.notes.length - 8 }} more note(s)</div>
+    </div>
+
+    <div class="d-flex gap-2 mb-2">
+      <input class="form-control form-control-sm" [(ngModel)]="search" placeholder="Search code, name, dealer, detail…">
+      <button type="button" class="btn btn-outline-success btn-sm text-nowrap" (click)="downloadCsv()"><i class="ri-file-excel-2-line"></i> List</button>
+    </div>
+
+    <div class="table-responsive erp-table">
+      <table class="table table-sm table-bordered mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Action</th>
+            <th>{{ kind === 'dealer' ? 'Dealer Code' : 'Location Code' }}</th>
+            <th>Name</th>
+            <th *ngIf="kind === 'location'">Dealer</th>
+            <th>Row</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let i of rows.slice(0, showRows)">
+            <td><span class="badge" [ngClass]="badge(i.action)">{{ i.action }}</span></td>
+            <td class="text-nowrap">{{ i.code || '-' }}</td>
+            <td>{{ i.name || '-' }}</td>
+            <td *ngIf="kind === 'location'" class="text-nowrap">{{ i.dealerCode || '-' }}</td>
+            <td>{{ i.rowNumber || '' }}</td>
+            <td class="erp-detail">{{ i.detail || '' }}</td>
+          </tr>
+          <tr *ngIf="!rows.length"><td [attr.colspan]="kind === 'location' ? 6 : 5" class="text-center text-muted">No rows.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="text-center mt-2" *ngIf="rows.length > showRows">
+      <button type="button" class="btn btn-light btn-sm border" (click)="showRows = showRows + 300">Show more ({{ rows.length - showRows }} left)</button>
+    </div>
+  </ng-container>
+</div>
+
+<div class="modal-footer">
+  <span class="small text-muted me-auto" *ngIf="busy"><span class="spinner-border spinner-border-sm me-1"></span>Working… (large files take a minute)</span>
+  <button type="button" class="btn btn-primary btn-sm" *ngIf="!done" (click)="runPreview()" [disabled]="busy || (mode === 'import' && !file)">
+    <i class="ri-eye-line me-1"></i>Preview
+  </button>
+  <button type="button" class="btn btn-success btn-sm" *ngIf="preview && !done" (click)="apply()" [disabled]="busy || !changes">
+    <i class="ri-save-3-line me-1"></i>Apply ({{ changes }} change{{ changes === 1 ? '' : 's' }})
+  </button>
+  <button type="button" class="btn btn-light btn-sm border" (click)="close()" [disabled]="busy">Close</button>
+</div>
