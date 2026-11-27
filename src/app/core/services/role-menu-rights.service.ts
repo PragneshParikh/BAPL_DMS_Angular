@@ -40,6 +40,22 @@ export interface SaveRoleMenuRightsRequest {
   rights: { menuId: number; subMenuId: number; permission: number }[];
 }
 
+export interface RoleEmployee {
+  employeeId: number;
+  employeeCode?: string | null;
+  name: string;
+  email?: string | null;
+  isActive: boolean;
+  hasOwnRights: boolean;
+}
+
+export interface EmployeeMatrix {
+  employeeId: number;
+  hasOwnRights: boolean;
+  tableReady: boolean;
+  groups: RoleMenuGroup[];
+}
+
 export interface ApiResult {
   success: boolean;
   message: string;
@@ -57,5 +73,25 @@ export class RoleMenuRightsService {
 
   save(payload: SaveRoleMenuRightsRequest): Observable<ApiResult> {
     return this.http.post<ApiResult>(`${this.baseUrl}/save`, payload);
+  }
+
+  // ---- 27.11.2026 employee-wise rights (API: EmployeeMenuRightsController, table BgEmployeeMenuRight)
+  private empUrl = `${environment.apiUrl}/menu-rights/employee`;
+
+  getRoleEmployees(roleId: string): Observable<{ tableReady: boolean; data: RoleEmployee[] }> {
+    return this.http.get<{ tableReady: boolean; data: RoleEmployee[] }>(`${this.empUrl}/list`, { params: { roleId } });
+  }
+
+  getEmployeeMatrix(employeeId: number, roleId: string): Observable<EmployeeMatrix> {
+    return this.http.get<EmployeeMatrix>(`${this.empUrl}/${employeeId}`, { params: { roleId } });
+  }
+
+  /** Same rights for one or several employees */
+  saveEmployees(employeeIds: number[], rights: { menuId: number; subMenuId: number; permission: number }[]): Observable<ApiResult> {
+    return this.http.post<ApiResult>(`${this.empUrl}/save`, { employeeId: 0, employeeIds, rights });
+  }
+
+  resetEmployeeToRole(employeeId: number): Observable<ApiResult> {
+    return this.http.delete<ApiResult>(`${this.empUrl}/${employeeId}`);
   }
 }

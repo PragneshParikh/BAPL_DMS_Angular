@@ -30,7 +30,9 @@ export class MenuAccessService {
   // too). This check must run BEFORE anything looks at rights.length.
   private isDealerRole(): boolean {
     const role = (this.storageService.getRole() || '').toLowerCase().trim();
-    return role === 'dealer';
+    // 27.11.2026 - BG employees (login role Employee) also follow their rights: the role / employee-wise
+    // rights set in Role Menu Rights now decide their Add / Edit / Delete / Print buttons.
+    return role === 'dealer' || role === 'employee';
   }
 
   hasPermission(subMenuId: number, bit: MenuPermissionBit): boolean {

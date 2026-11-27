@@ -511,12 +511,6 @@
                                 <div class="tb-profile-role" *ngIf="profileRole">{{ profileRole }}</div>
                             </div>
                         </div>
-                        <div class="tb-profile-codes" *ngIf="profileCodes.length > 1">
-                            <div class="tb-profile-label">Mapped dealers ({{ profileCodes.length }})</div>
-                            <div class="tb-code-list">
-                                <span class="tb-code" *ngFor="let c of profileCodes">{{ c }}</span>
-                            </div>
-                        </div>
                         <div class="tb-profile-row" *ngIf="userData?.employeeCode">
                             <span>Employee Code</span><b>{{ userData?.employeeCode }}</b>
                         </div>
@@ -527,10 +521,50 @@
                             <span>Last Login</span><b>{{ (lastLoginDate$ | async) || '-' }}</b>
                         </div>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="javascript: void(0);" (click)="logout()">
-                            <i class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i>
-                            <span class="align-middle" data-key="t-logout">Logout</span>
+                        <!-- 27.11.2026 menu items (icon + text) -->
+                        <a class="dropdown-item tb-menu-item" href="javascript: void(0);" (click)="goDashboard()">
+                            <i class="ri-dashboard-line"></i><span>Dashboard</span>
                         </a>
+                        <a class="dropdown-item tb-menu-item" href="javascript: void(0);" *ngIf="profileCodes.length > 1" (click)="openMappedDealers()">
+                            <i class="ri-list-check-2"></i><span>Mapped Dealers</span>
+                            <span class="badge bg-primary-subtle text-primary ms-auto">{{ profileCodes.length }}</span>
+                        </a>
+                        <a class="dropdown-item tb-menu-item" href="javascript: void(0);" (click)="logout()">
+                            <i class="ri-logout-box-r-line"></i><span data-key="t-logout">Logout</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 27.11.2026 Mapped Dealers popup -->
+                <div class="tb-md-backdrop" *ngIf="mappedDealersOpen" (click)="closeMappedDealers()">
+                    <div class="tb-md-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+                        <div class="tb-md-head">
+                            <h6 class="mb-0"><i class="ri-store-2-line me-1"></i>Mapped Dealers ({{ profileCodes.length }})</h6>
+                            <button type="button" class="btn-close btn-close-white" (click)="closeMappedDealers()" aria-label="Close"></button>
+                        </div>
+                        <div class="tb-md-body">
+                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Search dealer code or name..."
+                                [(ngModel)]="mappedDealerSearch">
+                            <div class="tb-md-table-wrap">
+                                <table class="table table-sm table-bordered table-hover mb-0 tb-md-table">
+                                    <thead>
+                                        <tr><th style="width:70px;">Sr No.</th><th style="width:130px;">Dealer Code</th><th>Dealer Name</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let r of mappedDealerRows; let i = index">
+                                            <td>{{ i + 1 }}</td>
+                                            <td class="fw-medium">{{ r.code }}</td>
+                                            <td>{{ mappedDealersLoading && !r.name ? 'Loading…' : (r.name || '-') }}</td>
+                                        </tr>
+                                        <tr *ngIf="!mappedDealerRows.length"><td colspan="3" class="text-center text-muted">No dealer matches.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tb-md-foot">
+                            <span class="small text-muted">{{ mappedDealerRows.length }} of {{ profileCodes.length }} dealers</span>
+                            <button type="button" class="btn btn-light btn-sm border" (click)="closeMappedDealers()">Close</button>
+                        </div>
                     </div>
                 </div>
             </div>

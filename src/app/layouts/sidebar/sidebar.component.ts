@@ -283,6 +283,12 @@ export class SidebarComponent implements OnInit {
   private ensurePartsD2DReportMenu(items: MenuItem[]): void {
     if (this.hasRouteRecursive(items, '/parts-d2d-report')) return;
 
+    // 27.11.2026 - this link was added for EVERY login, so it showed even after its rights were removed in
+    // Role Menu Rights. The page is a normal MenuMaster page (rights id 158) and comes from /api/menu when
+    // granted. Only SuperAdmin / Admin still get this fallback.
+    const role = (this.storageService.getRole() || '').toLowerCase().trim();
+    if (role !== 'superadmin' && role !== 'admin') return;
+
     const reportGroup = this.findMenuGroup(items, 'reports');
     const reportLink: MenuItem = {
       id: -1399,
