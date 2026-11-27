@@ -1,5 +1,6 @@
 export interface LabourItem {
 
+  id?: number;
   labourId: number;
   partWiseLabourId: number;
   labourCode: string;

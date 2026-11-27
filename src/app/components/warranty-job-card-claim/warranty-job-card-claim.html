@@ -102,7 +102,7 @@
                 <label class="form-label">Job No</label>
                 <div class="input-group input-group-sm">
                     <input type="text" class="form-control form-control-sm bg-light text-muted"
-                        [value]="selectedJob?.jobNo || ''" readonly>
+                        [value]="getJobCardNumberLabel(selectedJob)" readonly>
                     <button class="btn btn-primary" (click)="openJobSearch(jobSearchPopup)">
                         <i class="ri-add-line"></i>
                     </button>
@@ -410,7 +410,9 @@
 
                     <tr>
                         <th>Sr.No</th>
+                        <th width="80">Action</th>
                         <th>Dealer</th>
+                        <th>Job Card Type</th>
                         <th>Job Type</th>
                         <th>Date</th>
                         <th>Location</th>
@@ -419,7 +421,6 @@
                         <th>Service Type</th>
                         <th>Chassis No</th>
                         <th>Model Name</th>
-                        <th width="80">Action</th>
                     </tr>
 
                 </thead>
@@ -429,28 +430,26 @@
                     <tr *ngFor="let item of jobCardList; let i=index">
 
                         <td>{{i+1}}</td>
+                        <td class="text-center">
+                            <button class="btn btn-success btn-sm" (click)="selectJob(item,modal)">
+                                <i class="ri-check-line"></i>
+                            </button>
+                        </td>
                         <td>{{ getJobCardDealerLabel(item) }}</td>
+                        <td>{{item.recordType}}</td>
                         <td>{{item.jobType}}</td>
                         <td>{{item.jobInDate | date:'dd-MM-yyyy'}}</td>
                         <td>{{ getJobCardLocationLabel(item) }}</td>
-                        <td>{{item.jobNo}}</td>
+                        <td>{{ getJobCardNumberLabel(item) }}</td>
                         <td>{{item.serviceHead}}</td>
                         <td>{{item.serviceType}}</td>
                         <td>{{item.chassisNo}}</td>
                         <td>{{item.modelName}}</td>
-                        <td class="text-center">
-
-                            <button class="btn btn-success btn-sm" (click)="selectJob(item,modal)">
-
-                                <i class="ri-check-line"></i>
-                            </button>
-
-                        </td>
 
                     </tr>
 
                     <tr *ngIf="jobCardList.length==0">
-                        <td colspan="11" class="text-center">
+                        <td colspan="12" class="text-center">
                             No Records Found
                         </td>
                     </tr>

@@ -79,6 +79,8 @@
                         <th>Model</th>
                         <th>Purpose</th>
                         <th>Current KMS</th>
+                        <th>Verification Status</th>
+                        <th>Remarks</th>
                     </tr>
                 </thead>
 
@@ -90,7 +92,12 @@
 
                         <!-- ACTION -->
                         <td>
-                            <button *ngIf="canEdit" class="btn btn-sm btn-soft-primary" (click)="onFFIREdit(item)"><i class="ri-pencil-fill fs-12"></i></button>
+                            <button *ngIf="canEdit" class="btn btn-sm btn-soft-primary" title="Edit FFIR"
+                                (click)="onFFIREdit(item)"><i class="ri-pencil-fill fs-12"></i></button>
+                            <button class="btn btn-sm btn-soft-success" title="Print FFIR / Save as PDF"
+                                aria-label="Print FFIR or save as PDF" (click)="onFFIRPrint(item)">
+                                <i class="ri-printer-line fs-12"></i>
+                            </button>
                             <button *ngIf="canDelete" class="btn btn-sm btn-soft-danger" title="Only SuperAdmin can delete"
                                 (click)="deleteFFIR(item.id)" [disabled]="!this.isSuperAdmin">
                                 <i class="ri-delete-bin-fill fs-12"></i>
@@ -127,12 +134,20 @@
 
                         <!-- Current Kms -->
                         <td>{{ item.currentKms }}</td>
+                        <td>
+                            <span class="badge" [ngClass]="{
+                                'bg-warning text-dark': (item.verificationStatus || 'Pending') === 'Pending',
+                                'bg-success': item.verificationStatus === 'Approved',
+                                'bg-danger': item.verificationStatus === 'Rejected'
+                            }">{{ item.verificationStatus || 'Pending' }}</span>
+                        </td>
+                        <td>{{ item.verificationRemarks || '-' }}</td>
 
                     </tr>
 
                     <!-- No Data -->
                     <tr *ngIf="pagedData.length === 0">
-                        <td colspan="13" class="text-center text-muted py-3">
+                        <td colspan="11" class="text-center text-muted py-3">
                             No Data Available
                         </td>
                     </tr>

@@ -312,6 +312,35 @@ export class SidebarComponent implements OnInit {
     });
   }
 
+  private ensureFFIRReportsMenu(items: MenuItem[]): void {
+    const role = (this.storageService.getRole() || '').toLowerCase().replace(/[^a-z]/g, '');
+    if (!['dealer', 'bgemployee', 'admin', 'superadmin'].includes(role)
+      || this.hasRouteRecursive(items, '/ffir-report')) {
+      return;
+    }
+
+    let reportGroup = this.findMenuGroup(items, 'reports');
+    if (!reportGroup) {
+      reportGroup = {
+        id: -1403,
+        label: 'Reports',
+        icon: 'ri-bar-chart-2-line',
+        module: 'workshop',
+        isCollapsed: true,
+        subItems: []
+      };
+      items.push(reportGroup);
+    }
+
+    reportGroup.subItems = [...(reportGroup.subItems ?? []), {
+      id: -1404,
+      label: 'FFIR Reports',
+      link: '/ffir-report',
+      module: reportGroup.module ?? 'workshop',
+      parentId: reportGroup.id
+    }];
+  }
+
   private findMenuGroup(items: MenuItem[], label: string): MenuItem | undefined {
     for (const item of items) {
       if ((item.label ?? '').toString().trim().toLowerCase() === label) return item;
@@ -417,6 +446,7 @@ private hasRouteRecursive(items: MenuItem[] | undefined, path: string): boolean 
           const raw = Array.isArray(menu) ? menu : (menu?.data ?? menu?.result ?? menu?.items ?? []);
           this.menuItems = this.normalizeMenu(raw);
           this.ensurePartsD2DReportMenu(this.menuItems);
+          this.ensureFFIRReportsMenu(this.menuItems);
           resolve(menu);
           this.loader.hide();
         }, error: (err) => {
