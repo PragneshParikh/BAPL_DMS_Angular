@@ -5,10 +5,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { forkJoin } from 'rxjs';
 import { RoleService } from '../../core/services/Deptrole';
 import { RoleModel } from '../../ViewModels/RoleModel';
 import {
-  RoleMenuGroup, RoleMenuRightsService, RoleSubMenuRight
+  RoleEmployee, RoleMenuGroup, RoleMenuRightsService, RoleSubMenuRight
 } from '../../core/services/role-menu-rights.service';
 import { ToastService } from '../../shared/toaster/toast-service';
 import { LoaderService } from '../../core/services/loader';
@@ -34,7 +36,7 @@ interface ViewGroup extends RoleMenuGroup {
 @Component({
   selector: 'app-role-menu-rights',
   standalone: true,
-  imports: [CommonModule, FormsModule, MenuMasterPanel],
+  imports: [CommonModule, FormsModule, NgbDropdownModule, MenuMasterPanel],
   templateUrl: './role-menu-rights.html',
   styleUrl: './role-menu-rights.scss'
 })
@@ -43,6 +45,14 @@ export class RoleMenuRights implements OnInit {
   roles: RoleModel[] = [];
   selectedRoleId = '';
   copyFromRoleId = '';
+
+  // 27.11.2026 employee-wise rights: employees of the selected role (BG Employee Master)
+  roleEmployees: RoleEmployee[] = [];
+  /** 27.11.2026 several employees can be ticked - the same rights are saved for all of them */
+  selectedEmployeeIds: number[] = [];
+  employeeHasOwnRights = false;
+  employeeTableReady = true;
+  employeeSearch = '';
 
   groups: ViewGroup[] = [];              // full tree for the selected role
   private original = new Map<number, number>(); // subMenuId -> permission as loaded
@@ -89,12 +99,137 @@ export class RoleMenuRights implements OnInit {
       return;
     }
     this.copyFromRoleId = '';
+    this.selectedEmployeeIds = [];
+    this.employeeHasOwnRights = false;
+    this.roleEmployees = [];
     if (!this.selectedRoleId) {
       this.groups = [];
       this.original.clear();
       return;
     }
     this.loadMatrix(this.selectedRoleId, true);
+    this.loadRoleEmployees();
+  }
+
+  // ---------------------------------------------------------------- employees (27.11.2026)
+  private loadRoleEmployees(): void {
+    const roleId = this.selectedRoleId;
+    this.rightsService.getRoleEmployees(roleId).subscribe({
+      next: res => {
+        if (roleId !== this.selectedRoleId) return;
+        this.roleEmployees = res?.data || [];
+        this.employeeTableReady = res?.tableReady !== false;
+      },
+      error: () => (this.roleEmployees = [])
+    });
+  }
+
+  get filteredEmployees(): RoleEmployee[] {
+    const q = this.employeeSearch.trim().toLowerCase();
+    return !q ? this.roleEmployees
+      : this.roleEmployees.filter(e => `${e.name} ${e.employeeCode || ''} ${e.email || ''}`.toLowerCase().includes(q));
+  }
+
+  get selectedEmployees(): RoleEmployee[] {
+    return this.selectedEmployeeIds
+      .map(id => this.roleEmployees.find(e => e.employeeId === id))
+      .filter((e): e is RoleEmployee => !!e);
+  }
+
+  /** first ticked employee - the grid shows his rights */
+  get selectedEmployee(): RoleEmployee | undefined {
+    return this.selectedEmployees[0];
+  }
+
+  get employeePickerLabel(): string {
+    const list = this.selectedEmployees;
+    if (!list.length) return 'Role rights (all employees)';
+    if (list.length === 1) return `${list[0].name} (${list[0].employeeCode || ''})`;
+    return `${list.length} employees selected`;
+  }
+
+  isEmpSelected(id: number): boolean {
+    return this.selectedEmployeeIds.includes(id);
+  }
+
+  get allFilteredEmpsSelected(): boolean {
+    const f = this.filteredEmployees;
+    return f.length > 0 && f.every(e => this.isEmpSelected(e.employeeId));
+  }
+
+  toggleEmp(id: number): void {
+    const next = this.isEmpSelected(id)
+      ? this.selectedEmployeeIds.filter(x => x !== id)
+      : [...this.selectedEmployeeIds, id];
+    this.setEmployeeSelection(next);
+  }
+
+  toggleAllEmps(): void {
+    const ids = this.filteredEmployees.map(e => e.employeeId);
+    const next = this.allFilteredEmpsSelected
+      ? this.selectedEmployeeIds.filter(id => !ids.includes(id))
+      : Array.from(new Set([...this.selectedEmployeeIds, ...ids]));
+    this.setEmployeeSelection(next);
+  }
+
+  clearEmps(): void {
+    this.setEmployeeSelection([]);
+  }
+
+  /** The grid shows the role rights (nobody ticked) or the first ticked employee's rights. */
+  private setEmployeeSelection(next: number[]): void {
+    const firstBefore = this.selectedEmployeeIds[0] ?? null;
+    const firstAfter = next[0] ?? null;
+    if (firstBefore !== firstAfter && this.isDirty && !confirm('You have unsaved changes. Discard them?')) return;
+    this.selectedEmployeeIds = next;
+    if (firstBefore === firstAfter) return;          // same rights shown - keep the grid (and any ticks)
+    this.employeeHasOwnRights = false;
+    if (firstAfter == null) this.loadMatrix(this.selectedRoleId, true);
+    else this.loadEmployeeMatrix(firstAfter);
+  }
+
+  private loadEmployeeMatrix(id: number): void {
+    this.loader.show();
+    this.rightsService.getEmployeeMatrix(id, this.selectedRoleId).subscribe({
+      next: res => {
+        this.groups = this.normalise(res?.groups || []);
+        this.original = new Map(this.allSubs().map(s => [s.subMenuId, s.permission]));
+        this.employeeHasOwnRights = !!res?.hasOwnRights;
+        this.employeeTableReady = res?.tableReady !== false;
+        this.applyFilters();
+        this.loader.hide();
+      },
+      error: err => {
+        this.loader.hide();
+        console.error(err);
+        this.toastError(err?.error?.message || 'Failed to load the employee rights.');
+      }
+    });
+  }
+
+  /** Remove the own rights of the ticked employees - they get the role rights again. */
+  resetEmployeeToRole(): void {
+    const emps = this.selectedEmployees.filter(e => e.hasOwnRights);
+    if (!emps.length) return;
+    const names = emps.length === 1 ? emps[0].name : `${emps.length} employees`;
+    if (!confirm(`Remove the own rights of ${names}? They will get the rights of role "${this.selectedRoleName}" again.`)) return;
+    this.loader.show();
+    forkJoin(emps.map(e => this.rightsService.resetEmployeeToRole(e.employeeId))).subscribe({
+      next: () => {
+        this.loader.hide();
+        emps.forEach(e => (e.hasOwnRights = false));
+        this.toast.show(`${names} now use the role rights.`, { classname: 'bg-success text-white', delay: 3000 });
+        if (this.selectedEmployee) this.loadEmployeeMatrix(this.selectedEmployee.employeeId);
+      },
+      error: err => {
+        this.loader.hide();
+        this.toastError(err?.error?.message || 'Failed to reset the employee rights.');
+      }
+    });
+  }
+
+  get selectedWithOwnRights(): number {
+    return this.selectedEmployees.filter(e => e.hasOwnRights).length;
   }
 
   private loadMatrix(roleId: string, asBaseline: boolean): void {
@@ -291,6 +426,31 @@ export class RoleMenuRights implements OnInit {
     const rights = this.groups.flatMap(g =>
       g.subMenus.map(s => ({ menuId: g.menuId, subMenuId: s.subMenuId, permission: s.permission }))
     );
+
+    // 27.11.2026 employee(s) ticked -> save the same own rights for each of them (role rights stay unchanged)
+    if (this.selectedEmployeeIds.length) {
+      const emps = this.selectedEmployees;
+      if (emps.length > 1 && !confirm(`Save these rights for all ${emps.length} selected employees?`)) return;
+      this.loader.show();
+      this.rightsService.saveEmployees(this.selectedEmployeeIds, rights).subscribe({
+        next: res => {
+          this.loader.hide();
+          if (res?.success) {
+            this.toast.show(res.message || 'Employee rights saved.', { classname: 'bg-success text-white', delay: 3500 });
+            emps.forEach(e => (e.hasOwnRights = true));
+            this.loadEmployeeMatrix(this.selectedEmployeeIds[0]);
+          } else {
+            this.toast.show(res?.message || 'Save failed.', { classname: 'bg-warning text-dark', delay: 5000 });
+          }
+        },
+        error: err => {
+          this.loader.hide();
+          console.error(err);
+          this.toastError(err?.error?.message || 'Failed to save the employee rights.');
+        }
+      });
+      return;
+    }
 
     this.loader.show();
     this.rightsService.save({ roleId: this.selectedRoleId, rights }).subscribe({
