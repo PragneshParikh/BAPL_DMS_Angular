@@ -66,6 +66,15 @@
         </select>
     </div>
 
+            <div class="col-md-2">
+             <label class="form-label">Date From</label>
+              <input type="date" class="form-control form-control-sm" [(ngModel)]="fromDate" name="fromDate">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Date To</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="toDate" name="toDate">
+            </div>
+
     <div class="col-md-3" *ngIf="claimId === 0">
         <button class="btn btn-primary btn-sm" (click)="onSearch()">
             <i class="ri-search-line me-1"></i>

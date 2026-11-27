@@ -32,6 +32,7 @@ describe('PartsStockDetails', () => {
     dealerName: 'Dealer One',
     locname: 'Workshop',
     groupType: 'Parts',
+    openingBalance: 0,
     saleCount: 2,
     purchaseCount: 3,
     stockAdjustmentQty: 1,
@@ -83,7 +84,7 @@ describe('PartsStockDetails', () => {
     component.getPartsStockDetails();
 
     expect(getPartsStockDetailsByDealer).toHaveBeenCalledWith(
-      1,
+      0,
       jasmine.any(Date),
       jasmine.any(Date),
       null,

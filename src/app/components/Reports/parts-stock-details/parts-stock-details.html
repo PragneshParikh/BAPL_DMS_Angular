@@ -4,6 +4,7 @@
     <h4 class="mb-sm-0">
         PARTS STOCK DETAILS
     </h4>
+    <span class="badge bg-primary">Total Records: {{ partsStockData.length }}</span>
 </div>
 
 <div class="row">
@@ -110,6 +111,7 @@
                                 <th>Part Code</th>
                                 <th>Part Description</th>
                                 <th>Item Type</th>
+                                <th>Opening Bal.</th>   
                                 <th>Pur.Qty</th>
                                 <th>D2D Out</th>
                                 <th>Sale Qty</th>
@@ -127,7 +129,7 @@
 
                             <!-- No Data — colspan matches the 18 headers above -->
                             <tr *ngIf="partsStockData.length === 0">
-                                <td colspan="18" class="text-center">
+                                <td colspan="19" class="text-center">
                                     No data available
                                 </td>
                             </tr>
@@ -142,6 +144,7 @@
                                 <td>{{ item.itemcode }}</td>
                                 <td>{{ item.itemdesc }}</td>
                                 <td>{{ item.groupType }}</td>
+                                <td>{{ item.openingBalance }}</td>
                                 <td>{{ item.purchaseCount }}</td>
                                 <td>{{ item.d2DOutgoingQty }}</td>
                                 <td>{{ item.saleCount }}</td>
@@ -161,7 +164,7 @@
                         </tbody>
                         <tfoot class="table-secondary">
                             <tr>
-                                <td class="text-end" colspan="14"><strong>Total</strong></td>
+                                <td class="text-end" colspan="15"><strong>Total</strong></td>
                                 <td class="text-end"><strong>{{getTotalRate() | number:'1.2-2'}}</strong></td>
                                 <td></td>
                                 <td></td>

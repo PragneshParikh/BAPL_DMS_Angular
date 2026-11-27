@@ -151,7 +151,7 @@ export class PartsStockDetails implements OnInit {
     const toDate = new Date(this.stockReportFilterFormData.toDate);
 
     this.reportService.getPartsStockDetailsByDealer(
-      1,
+      0,
       fromDate,
       toDate,
       dealerCode,
@@ -211,6 +211,7 @@ export class PartsStockDetails implements OnInit {
       'Part Code': item.itemcode,
       'Part Description': item.itemdesc,
       'Item Type': item.groupType,
+      'Opening Bal.': item.openingBalance,  
       'Pur.Qty': item.purchaseCount,
       'D2D Out': item.d2DOutgoingQty,
       'Sale Qty': item.saleCount,

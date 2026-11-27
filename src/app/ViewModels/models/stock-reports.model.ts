@@ -28,6 +28,7 @@ export interface PartsStockDetailsReportRow {
   dealerName: string | null;
   locname: string;
   groupType: string;
+  openingBalance: number;
   saleCount: number;
   purchaseCount: number;
   d2DOutgoingQty: number;
