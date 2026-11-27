@@ -189,7 +189,8 @@ export class JobCardService {
     jobNo: number | null,
     serviceloc: string | null,
     fromDate: string | null,
-    toDate: string | null
+    toDate: string | null,
+    b2bJobNo: string | null = null
   ): Observable<any[]> {
     let params = new HttpParams();
 
@@ -207,6 +208,9 @@ export class JobCardService {
     }
     if (toDate) {
       params = params.set('toDate', toDate);
+    }
+    if (b2bJobNo) {
+      params = params.set('b2bJobNo', b2bJobNo);
     }
 
     return this.httpClient.get<any[]>(

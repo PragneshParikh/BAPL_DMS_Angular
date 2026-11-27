@@ -14,6 +14,7 @@ import { ToastService } from '../../shared/toaster/toast-service';
 import { WarrantyJCClaimService } from '../../core/services/warranty-jcclaim-service';
 import { WarrantyOrderService } from '../../core/services/warranty-order-service';
 import { DealerService } from '../../core/services/dealer-service';
+import { LocalPartsLocation, LocalPartsService } from '../../core/services/local-parts.service';
 import { locationAreaMaster } from '../../constant';
 import { MenuAccessService } from '../../core/services/menu-access.service';
 
@@ -70,7 +71,6 @@ export class WarrantyJobCardClaim implements OnInit {
   toDate: string;
   locationList: { locname: string; loccode: string | null; areaName: string | null }[] = [];
   private allLocations: any[] = [];
-  private lastRawJobCards: any[] = [];
 
   dealerObservation: string;
   rootCauseAnalysis: string;
@@ -87,6 +87,7 @@ export class WarrantyJobCardClaim implements OnInit {
     private warrantyJCClaimService: WarrantyJCClaimService,
     private warrantyOrderService: WarrantyOrderService,
     private dealerService: DealerService,
+    private localPartsService: LocalPartsService,
     private router: Router,
     private menuAccess: MenuAccessService
   ) {
@@ -144,8 +145,8 @@ export class WarrantyJobCardClaim implements OnInit {
         this.loader.hide();
         this.dealerList = res?.data || [];
 
-        const role = (this.storageService.getRole() || '').toLowerCase().replace(/\s+/g, '');
-        const isAdminRole = role.includes('admin');
+        const role = (this.storageService.getRole() || '').toLowerCase().replace(/[\s_-]/g, '');
+        const isAdminRole = role === 'admin' || role === 'superadmin';
         this.isDealerUser = !isAdminRole;
 
         if (this.isDealerUser) {
@@ -189,7 +190,6 @@ export class WarrantyJobCardClaim implements OnInit {
       this.claimLocationCode = null;
       this.claimLocationArea = null; 
       this.locationList = [];
-      this.lastRawJobCards = [];
     }
 
     this.loadAllLocations();
@@ -260,6 +260,7 @@ export class WarrantyJobCardClaim implements OnInit {
         this.calculatePartsTotal();
         this.labourGridData = allDetails.filter((x: any) => x.itemType === 'Labour');
         this.calculateLabourTotal();
+        this.loadAllLocations();
       },
       error: (err) => {
         this.loader.hide();
@@ -327,12 +328,28 @@ export class WarrantyJobCardClaim implements OnInit {
   }
 
   private loadAllLocations(): void {
-    this.locationService.getAllLocationMaster().subscribe({
+    const role = (this.storageService.getRole() || '').toLowerCase().replace(/[\s_-]/g, '');
+    const isAdminRole = role === 'admin' || role === 'superadmin';
+    const tokenDealerCode = (this.storageService.getDealerCode() || '').trim();
+    const dealerCode = isAdminRole ? this.selectedDealerCode : tokenDealerCode;
+
+    if (!isAdminRole && !dealerCode) {
+      this.allLocations = [];
+      this.locationList = [];
+      return;
+    }
+
+    this.locationList = [];
+    this.locationService.getLocationDropdownByDealerCode(dealerCode).subscribe({
       next: (res: any) => {
-        this.allLocations = res?.data || res || [];
-        if (this.lastRawJobCards.length > 0) {
-          this.locationList = this.buildLocationOptionsFromJobCards(this.lastRawJobCards);
-        }
+        const locations = res?.data || res?.Data || res || [];
+        this.allLocations = locations.map((loc: any) => ({
+          ...loc,
+          loccode: loc.loccode ?? loc.Loccode ?? null,
+          locname: loc.locname ?? loc.Locname ?? '',
+          dealercode: loc.dealercode ?? loc.Dealercode ?? null,
+          locareaidno: loc.locareaidno ?? loc.Locareaidno ?? null
+        }));
         if (this.selectedJob?.jobLocation) {
           this.resolveWorkshopLocation(this.selectedJob.jobLocation);
         }
@@ -342,41 +359,49 @@ export class WarrantyJobCardClaim implements OnInit {
         this.allLocations = [];
       }
     });
+
+    this.localPartsService.getWorkshopLocations().subscribe({
+      next: (locations: LocalPartsLocation[]) => {
+        const selectedDealerCode = (dealerCode || '').trim().toLowerCase();
+        this.locationList = (locations || [])
+          .filter((location: LocalPartsLocation) => !selectedDealerCode
+            || (location.dealerCode || '').trim().toLowerCase() === selectedDealerCode)
+          .map((location: LocalPartsLocation) => ({
+            locname: location.locationName || location.locationCode,
+            loccode: location.locationCode,
+            areaName: this.getAreaName(this.workshopAreaId ?? 2)
+          }))
+          .sort((a, b) => a.locname.localeCompare(b.locname));
+      },
+      error: (err) => {
+        console.error('Failed to load dealer warehouse locations:', err);
+        this.locationList = [];
+        this.toaster.show('Failed to load workshop locations.', {
+          classname: 'bg-danger text-white',
+          delay: 3000
+        });
+      }
+    });
   }
 
-  private resolveLocationByCode(loccode: string | null | undefined): { locname: string | null; areaName: string | null; dealerCode: string | null } {
-    if (!loccode) return { locname: null, areaName: null, dealerCode: null };
-    const match = this.allLocations.find((loc: any) => loc.loccode === loccode);
+  private resolveLocationByCode(loccode: string | null | undefined): { locname: string | null; loccode: string | null; areaName: string | null; dealerCode: string | null } {
+    if (!loccode) return { locname: null, loccode: null, areaName: null, dealerCode: null };
+    const key = loccode.toString().trim().toLowerCase();
+    const match = this.allLocations.find((loc: any) =>
+      (loc.loccode || '').toString().trim().toLowerCase() === key
+      || (loc.locname || '').toString().trim().toLowerCase() === key
+    );
     if (!match) {
-      return { locname: null, areaName: null, dealerCode: null };
+      return { locname: null, loccode: null, areaName: null, dealerCode: null };
     }
     return {
       locname: match.locname,
+      loccode: match.loccode,
       areaName: this.getAreaName(match.locareaidno),
       dealerCode: match.dealercode
     };
   }
     
-  private buildLocationOptionsFromJobCards(jobCards: any[]): { locname: string; loccode: string | null; areaName: string | null }[] {
-    const seen = new Set<string>();
-    const options: { locname: string; loccode: string | null; areaName: string | null }[] = [];
-
-    for (const item of jobCards) {
-      const key = item.jobLocationCode || (item.jobLocation || '').toUpperCase();
-      if (!key || seen.has(key)) continue;
-      seen.add(key);
-
-      const resolved = this.resolveLocationByCode(item.jobLocationCode);
-      options.push({
-        locname: resolved.locname || item.jobLocation || '',
-        loccode: item.jobLocationCode || null,
-        areaName: resolved.areaName
-      });
-    }
-
-    return options;
-  }
-
   private resolveWorkshopLocation(jobLocationName: string | null | undefined): void {
     const name = (jobLocationName || '').toString().trim();
     this.claimLocationName = name || null;
@@ -390,16 +415,29 @@ export class WarrantyJobCardClaim implements OnInit {
   }
 
   getJobCardLocationLabel(item: any): string {
-    const resolved = this.resolveLocationByCode(item.jobLocationCode);
-    const name = resolved.locname || item.jobLocation || '';
-    if (!item.jobLocationCode) return name;
-    let label = `${name} (${item.jobLocationCode})`;
+    const locationCode = item?.jobLocationCode || item?.JobLocationCode;
+    const locationName = item?.jobLocation || item?.JobLocation;
+    const resolved = this.resolveLocationByCode(locationCode || locationName);
+    const name = resolved.locname || locationName || locationCode || '';
+    const code = resolved.loccode || locationCode;
+    if (!code || code.toString().trim().toLowerCase() === name.toString().trim().toLowerCase()) return name;
+    let label = `${name} (${code})`;
     if (resolved.areaName) label += ` [${resolved.areaName}]`;
     return label;
   }
 
+  getJobCardNumberLabel(item: any): string {
+    const b2bNumber = item?.jobCardNumber || item?.JobCardNumber;
+    if (b2bNumber) return b2bNumber;
+
+    const prefix = item?.jobprefix || item?.jobPrefix || item?.Jobprefix || '';
+    const jobNo = item?.jobNo ?? item?.JobNo;
+    return `${prefix}${jobNo ?? ''}`.trim();
+  }
+
   getJobCardDealerLabel(item: any): string {
-    const code = this.resolveLocationByCode(item.jobLocationCode).dealerCode;
+    const code = item.dealerCode || item.DealerCode
+      || this.resolveLocationByCode(item.jobLocationCode || item.JobLocationCode || item.jobLocation || item.JobLocation).dealerCode;
     if (!code) return '';
     const name = this.dealerList.find((d: any) => d.dealerCode === code)?.dealerName;
     return name ? `${name} (${code})` : code;
@@ -413,18 +451,21 @@ loadJobCarDetails(): void {
     this.loader.show();
     const dealerCode = this.selectedDealerCode || null;
 
-    let jobNo = this.jobSearch.jobNo;
-    if (jobNo === null || jobNo === undefined || jobNo === '') {
-      jobNo = 0;
-    } else {
-      jobNo = Number(jobNo);
-      if (isNaN(jobNo)) jobNo = 0;
-    }
+    const enteredJobNo = String(this.jobSearch.jobNo ?? '').trim();
+    const parsedJobNo = Number(enteredJobNo);
+    const jobNo = enteredJobNo && Number.isInteger(parsedJobNo) ? parsedJobNo : 0;
 
     const fromDate = this.jobSearch.rBillfromDate || null;
     const toDate = this.jobSearch.rBilltoDate || null;
 
-    this.jobcardService.getIssueTypebasedJobDetails(dealerCode, jobNo, null, fromDate, toDate).subscribe({
+    this.jobcardService.getIssueTypebasedJobDetails(
+      dealerCode,
+      jobNo,
+      null,
+      fromDate,
+      toDate,
+      enteredJobNo || null
+    ).subscribe({
       next: (jobCardsRes: any) => {
         this.warrantyJCClaimService.searchWarrantyJCClaims({ 
           dealerCode: dealerCode, 
@@ -444,7 +485,11 @@ loadJobCarDetails(): void {
 
           
             rawResults = rawResults.filter((item: any) => {
-              const fullJobNo = `${item.jobprefix || item.Jobprefix || ''}${item.jobNo || item.JobNo || ''}`.trim().toLowerCase();
+              const isB2B = (item.recordType || item.RecordType || '').toString().toUpperCase() === 'B2B';
+              const fullJobNo = (isB2B
+                ? (item.jobCardNumber || item.JobCardNumber || '')
+                : `${item.jobprefix || item.Jobprefix || ''}${item.jobNo || item.JobNo || ''}`)
+                .toString().trim().toLowerCase();
               const numericJobNo = (item.jobNo || item.JobNo || '').toString().trim().toLowerCase();
 
               const isMatched = Array.from(claimedJobNos).some((cNo: any) => {
@@ -455,15 +500,16 @@ loadJobCarDetails(): void {
               return !isMatched;
             });
 
-            this.lastRawJobCards = rawResults;
-            this.locationList = this.buildLocationOptionsFromJobCards(rawResults);
-
             let results = rawResults;
             if (this.selectedLocationId) {
-              const selectedLocName = this.selectedLocationId.toString().trim().toUpperCase();
-              results = rawResults.filter((item: any) =>
-                (item.jobLocation || '').toString().trim().toUpperCase() === selectedLocName
-              );
+              const selectedLocation = this.selectedLocationId.toString().trim().toLowerCase();
+              results = rawResults.filter((item: any) => {
+                const locationCode = item.jobLocationCode || item.JobLocationCode;
+                const locationName = item.jobLocation || item.JobLocation;
+                const itemLocation = this.resolveLocationByCode(locationCode || locationName);
+                return (itemLocation.loccode || locationCode || '').toString().trim().toLowerCase() === selectedLocation
+                  || (itemLocation.locname || locationName || '').toString().trim().toLowerCase() === selectedLocation;
+              });
             }
 
             this.jobCardList = results;
@@ -560,13 +606,14 @@ loadJobCarDetails(): void {
     this.labourGridData = allDetails.filter((x: any) => x.itemType === 'Labour');
     this.calculateLabourTotal();
 
-    const resolved = this.resolveLocationByCode(item.jobLocationCode);
+    const resolved = this.resolveLocationByCode(item.jobLocationCode || item.jobLocation);
     this.claimLocationName = resolved.locname || item.jobLocation || null;
-    this.claimLocationCode = item.jobLocationCode || null;
+    this.claimLocationCode = resolved.loccode || item.jobLocationCode || null;
     this.claimLocationArea = resolved.areaName;
 
-    if (resolved.dealerCode && resolved.dealerCode !== this.selectedDealerCode) {
-      this.selectedDealerCode = resolved.dealerCode;
+    const jobDealerCode = item.dealerCode || item.DealerCode || resolved.dealerCode;
+    if (jobDealerCode && jobDealerCode !== this.selectedDealerCode) {
+      this.selectedDealerCode = jobDealerCode;
       this.loadPrefix();
     }
 
@@ -633,8 +680,12 @@ loadJobCarDetails(): void {
       claimDate: this.toDate,
       chassisNo: this.selectedJob?.chassisNo,
       supplierId: this.selectedSupplierId,
-      jobCardHeaderId: this.selectedJob?.jobcardId || this.selectedJob?.jobcardHeaderId,
-      customerLedgerId: this.selectedJob?.customerLedgerId,
+      jobCardHeaderId: this.selectedJob?.recordType === 'B2B'
+        ? null
+        : this.selectedJob?.jobcardId || this.selectedJob?.jobcardHeaderId,
+      customerLedgerId: this.selectedJob?.recordType === 'B2B'
+        ? null
+        : this.selectedJob?.customerLedgerId,
       repairBillHeaderId: this.selectedJob?.repairBillHeaderId,
       ffirId: this.selectedJob?.ffirId,
       claimAccount: this.claimAccount,

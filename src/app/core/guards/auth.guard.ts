@@ -36,6 +36,13 @@ export class AuthGuard {
             return true;
         }
 
+        const normalizedRole = role.replace(/[^a-z]/g, '');
+        const requestedPath = requestedUrl.split(/[?#]/, 1)[0];
+        if (requestedPath === '/ffir-report'
+            && (normalizedRole === 'dealer' || normalizedRole === 'bgemployee')) {
+            return true;
+        }
+
         let menuRights: any[] = [];
 
         try {

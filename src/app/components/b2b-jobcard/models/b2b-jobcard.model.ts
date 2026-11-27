@@ -197,6 +197,7 @@ export interface B2BJobCardDetail {
   jobTypeName?: string | null;
   serviceHeadId?: number | null;
   serviceHeadName?: string | null;
+  serviceTypeName?: string | null;
   priority: string;
   serviceLocationCode?: string | null;
   serviceLocationName?: string | null;

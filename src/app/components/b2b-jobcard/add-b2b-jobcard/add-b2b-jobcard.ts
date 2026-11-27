@@ -488,7 +488,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
         this.vehicleSource = 'JobCardScanner';
         this.vehicleMessage = own ? 'Vehicle found.' : `Vehicle of dealer ${veh.dealerCode || '-'} - added to this dealer on save.`;
         this.searchTerm = this.f.chassisNo;
-        this.loadOtherHistory(this.f.chassisNo);
+        this.loadSupplementalHistory(this.f.chassisNo);
         return;
       }
       const sale: any = await firstValueFrom(this.chassisSearch.getGlobalChassisDetails(v)).catch(() => null);
@@ -515,7 +515,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
         this.vehicleMessage = 'New vehicle - enter the vehicle and customer details.';
       }
       this.searchTerm = this.f.chassisNo;
-      await this.loadOtherHistory(this.f.chassisNo);
+      await this.loadSupplementalHistory(this.f.chassisNo);
       if (sale) {
         if (!this.f.customerName) this.f.customerName = sale.customerName || null;
         if (!this.f.customerMobile) this.f.customerMobile = sale.mobileNo || null;
@@ -533,7 +533,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
    * Previous Kms = the highest reading of all of them.
    */
   /** resolves once the history is merged and the latest job card's details are on the form */
-  private loadOtherHistory(chassisNo: string): Promise<void> {
+  private loadSupplementalHistory(chassisNo: string): Promise<void> {
     const chassis = (chassisNo || '').trim().toUpperCase();
     if (chassis.length < 5) return Promise.resolve();
     return new Promise<void>(resolve => {
@@ -592,8 +592,8 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
         }
       }
       const time = (r: B2BHistoryRow) => { const t = new Date(this.utc(r.createdAt) || 0).getTime(); return isNaN(t) ? 0 : t; };
-      const own = this.history.filter(h => h.source === 'B2B (JobCardScanner)' || !h.source);
-      this.history = [...own, ...extra].sort((a, b) => time(b) - time(a));
+      const scannerRows = this.history.filter(h => h.source === 'B2B (JobCardScanner)' || !h.source);
+      this.history = [...scannerRows, ...extra].sort((a, b) => time(b) - time(a));
       if (this.history.length) this.isOpen['history'] = true;
       // 27.11.2026 - Previous Kms = odometer of the LATEST job (by job date), not the highest reading ever
       // (one wrong entry, e.g. 66677 instead of 6666, used to block every new job card)
@@ -981,7 +981,7 @@ export class AddB2BJobcard implements OnInit, OnDestroy {
           this.api.getVehicle(v.chassisNo, this.isAdmin ? this.dealerCode : null).subscribe({
             next: (card) => {
               this.history = (card?.history || []).filter(h => h.id !== d.id).map(h => ({ ...h, source: 'B2B (JobCardScanner)' }));
-              this.loadOtherHistory(v.chassisNo!);
+              this.loadSupplementalHistory(v.chassisNo!);
             },
             error: () => (this.history = [])
           });

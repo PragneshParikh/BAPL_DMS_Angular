@@ -1,0 +1,122 @@
+<div class="print-actions d-flex justify-content-end gap-2 mb-3">
+  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="backToList()">Back to FFIR List</button>
+  <button type="button" class="btn btn-primary btn-sm" (click)="print()">
+    <i class="ri-printer-line me-1"></i>Print / Save PDF
+  </button>
+</div>
+
+<div *ngIf="loading" class="text-center py-5">
+  <span class="spinner-border spinner-border-sm me-2"></span>Preparing FFIR report...
+</div>
+
+<main class="ffir-print-sheet" *ngIf="!loading && ffir">
+  <header class="report-header">
+    <div class="brand">BGauss</div>
+    <h1>FIRST FAILURE / INFORMATION REPORT</h1>
+    <div class="report-number">CIR Number: {{ ffirNumber }}</div>
+  </header>
+
+  <table class="report-fields">
+    <tbody>
+      <tr>
+        <th>Report Prepared By</th><td>{{ formatValue(readProperty(ffir, 'reportPreparedBy')) }}</td>
+        <th>Date</th><td>{{ formatValue(readProperty(ffir, 'failureDate') | date:'dd-MM-yyyy') }}</td>
+      </tr>
+      <tr>
+        <th>Dealer Name</th><td>{{ formatValue(readProperty(dealer, 'dealerName') || readProperty(dealer, 'compname')) }}</td>
+        <th>CIR Number</th><td>{{ ffirNumber }}</td>
+      </tr>
+      <tr>
+        <th>Report Title</th><td>{{ formatValue(readProperty(ffir, 'reportTitle')) }}</td>
+        <th>Dealer City</th><td>{{ formatValue(readProperty(dealer, 'city')) }}</td>
+      </tr>
+      <tr>
+        <th>Main Part Affected</th>
+        <td>{{ mainPartsText }}</td>
+        <th>Battery Type</th><td>{{ formatValue(jobCard?.batteryType) }}</td>
+      </tr>
+      <tr>
+        <th>Model / Variant / Color</th>
+        <td>{{ formatValue(jobCard?.modelName) }} / {{ formatValue(jobCard?.variant) }} / {{ formatValue(jobCard?.color) }}</td>
+        <th>Motor Number</th><td>{{ formatValue(jobCard?.motorNo) }}</td>
+      </tr>
+      <tr>
+        <th>VIN / Chassis Number</th><td>{{ formatValue(jobCard?.chassisNo || readProperty(ffir, 'ffirChassisNo')) }}</td>
+        <th>Odometer Reading</th><td>{{ formatValue(jobCard?.currentKms) }}</td>
+      </tr>
+      <tr>
+        <th>Selling Dealer Name</th><td>{{ formatValue(readProperty(dealer, 'dealerName') || readProperty(dealer, 'compname')) }}</td>
+        <th>Registration Number</th><td>{{ formatValue(jobCard?.registerNo) }}</td>
+      </tr>
+      <tr>
+        <th>Date of Sale</th><td>{{ formatValue(jobCard?.saleDate | date:'dd-MM-yyyy') }}</td>
+        <th>Customer Name</th><td>{{ formatValue(jobCard?.customerName) }}</td>
+      </tr>
+      <tr>
+        <th>Date of Failure</th><td>{{ formatValue(readProperty(ffir, 'failureDate') | date:'dd-MM-yyyy') }}</td>
+        <th>Customer Contact</th><td>{{ formatValue(jobCard?.customerMobile) }}</td>
+      </tr>
+      <tr>
+        <th>Date of Repair</th><td>{{ formatValue(jobCard?.jobDate | date:'dd-MM-yyyy') }}</td>
+        <th>Technician Name &amp; No.</th><td>{{ formatValue(jobCard?.technician) }}</td>
+      </tr>
+      <tr>
+        <th>Battery Number</th><td>{{ formatValue(jobCard?.batteryNo) }}</td>
+        <th>Charger Number</th><td>{{ formatValue(jobCard?.chargerNo) }}</td>
+      </tr>
+      <tr>
+        <th>Purpose</th><td>{{ formatValue(readProperty(ffir, 'purposeOfCIR')) }}</td>
+        <th>Type of Road Surface</th><td>{{ formatValue(readProperty(ffir, 'typeOfRoadSurface')) }}</td>
+      </tr>
+      <tr>
+        <th>No. of Passengers</th><td>{{ formatValue(readProperty(ffir, 'noOfPassenger')) }}</td>
+        <th>Repeat Failure / Chassis Modified</th>
+        <td>{{ readProperty(ffir, 'repeatFailure') ? 'Yes' : 'No' }} / {{ readProperty(ffir, 'chassisModified') ? 'Yes' : 'No' }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Job Card History</h2>
+  <table class="report-grid">
+    <thead>
+      <tr><th>S.No.</th><th>Job Card No.</th><th>Job Date</th><th>Odo Reading</th><th>Observation</th><th>Remarks</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of history; let index = index">
+        <td>{{ index + 1 }}</td>
+        <td>{{ formatValue(row.jobCardNo) }}</td>
+        <td>{{ formatValue(row.jobCardDate | date:'dd-MM-yyyy') }}</td>
+        <td>{{ formatValue(row.odometer) }}</td>
+        <td>{{ formatValue(row.observation) }}</td>
+        <td>{{ formatValue(row.remarks) }}</td>
+      </tr>
+      <tr *ngIf="history.length === 0"><td colspan="6" class="empty-cell">No service history found.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Customer Voice</h2>
+  <table class="report-grid">
+    <thead><tr><th>S.No.</th><th>Customer Voice</th><th>Complaint</th></tr></thead>
+    <tbody>
+      <tr *ngFor="let complaint of complaints; let index = index">
+        <td>{{ index + 1 }}</td>
+        <td>{{ formatValue(readProperty(complaint, 'customerVoice')) }}</td>
+        <td>{{ formatValue(readProperty(complaint, 'complaint')) }}</td>
+      </tr>
+      <tr *ngIf="complaints.length === 0"><td colspan="3" class="empty-cell">No complaint details found.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Detailed Observations</h2>
+  <table class="report-fields observation-fields">
+    <tbody>
+      <tr><th>Detailed observations on complaint and failed parts</th><td>{{ formatValue(readProperty(readProperty(ffir, 'detailObservation'), 'observationFailedParts')) }}</td></tr>
+      <tr><th>Root cause of the failure</th><td>{{ formatValue(readProperty(readProperty(ffir, 'detailObservation'), 'rootCauseofFailure')) }}</td></tr>
+      <tr><th>Corrective action taken</th><td>{{ formatValue(readProperty(readProperty(ffir, 'detailObservation'), 'correctiveAction')) }}</td></tr>
+      <tr><th>Local solution / suggestion for prevention</th><td>{{ formatValue(readProperty(readProperty(ffir, 'detailObservation'), 'resolutionComplaint')) }}</td></tr>
+      <tr><th>Present status of the vehicle</th><td>{{ formatValue(readProperty(readProperty(ffir, 'detailObservation'), 'presentStatusofVehicle')) }}</td></tr>
+      <tr><th>Reason for vehicle off road</th><td>{{ formatValue(readProperty(readProperty(ffir, 'detailObservation'), 'vehicleOffRoadReason')) }}</td></tr>
+      <tr><th>FFIR Remarks</th><td>{{ formatValue(readProperty(ffir, 'ffirRemarks')) }}</td></tr>
+    </tbody>
+  </table>
+</main>

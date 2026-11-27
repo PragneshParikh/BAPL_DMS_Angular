@@ -1,0 +1,177 @@
+<div class="page-title-box d-sm-flex align-items-center justify-content-between mb-2">
+  <h5 class="mb-0">FFIR Verification</h5>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="row g-2 align-items-end">
+      <div class="col-sm-6 col-lg-2">
+        <label class="form-label">Date From</label>
+        <input type="date" class="form-control form-control-sm" [(ngModel)]="filters.fromDate">
+      </div>
+      <div class="col-sm-6 col-lg-2">
+        <label class="form-label">Date To</label>
+        <input type="date" class="form-control form-control-sm" [(ngModel)]="filters.toDate">
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <label class="form-label">Dealer</label>
+        <select class="form-select form-select-sm" [(ngModel)]="filters.dealerCode">
+          <option value="">All Dealers</option>
+          <option *ngFor="let dealer of dealers" [value]="dealer.dealerCode">
+            {{ dealer.dealerName }} ({{ dealer.dealerCode }})
+          </option>
+        </select>
+      </div>
+      <div class="col-sm-6 col-lg-2">
+        <label class="form-label">FFIR Status</label>
+        <select class="form-select form-select-sm" [(ngModel)]="filters.status">
+          <option value="All">All</option>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="col-sm-6 col-lg-2 d-grid">
+        <button class="btn btn-primary btn-sm" (click)="search()" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+          Search
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive verification-table">
+      <table class="table table-sm table-bordered table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>S.No.</th>
+            <th>Approval</th>
+            <th>Attachments</th>
+            <th>FFIR No. / Date</th>
+            <th>Job No</th>
+            <th>Service Details</th>
+            <th>Sale Date / Dispatch Date</th>
+            <th>Job Type</th>
+            <th>Dealer Name</th>
+            <th>Location (City)</th>
+            <th>Customer</th>
+            <th>Model</th>
+            <th>Purpose</th>
+            <th>Current KMS</th>
+            <th>Motor No.</th>
+            <th>Charger No.</th>
+            <th>FFIR Status</th>
+            <th>Detailed Obs. (Complaint &amp; Failed Parts)</th>
+            <th>Root Cause</th>
+            <th>Action Taken</th>
+            <th>Quick Suggestion</th>
+            <th>Present Status of Vehicle</th>
+            <th>Reason for Vehicle Off Road</th>
+            <th>Main Part Affected</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of pagedRows; let index = index">
+            <td>{{ (page - 1) * pageSize + index + 1 }}</td>
+            <td class="approval-cell">
+              <ng-container *ngIf="row.status === 'Pending'; else decisionLabel">
+                <button class="btn btn-success btn-sm me-1" (click)="decide(row, 'Approved')"
+                  [disabled]="savingStatusForId === row.id">Accept</button>
+                <button class="btn btn-danger btn-sm" (click)="decide(row, 'Rejected')"
+                  [disabled]="savingStatusForId === row.id">Reject</button>
+              </ng-container>
+              <ng-template #decisionLabel>
+                <span [class.text-success]="row.status === 'Approved'" [class.text-danger]="row.status === 'Rejected'">
+                  {{ row.status }}
+                </span>
+              </ng-template>
+            </td>
+            <td>
+              <button class="btn btn-outline-primary btn-sm" (click)="openAttachments(row)">
+                <i class="ri-attachment-2 me-1"></i>View
+              </button>
+            </td>
+            <td>{{ row.ffirNumber }}<br><small>{{ row.ffirDate | date:'dd-MM-yyyy' }}</small></td>
+            <td>{{ row.jobCardNumber || '-' }}</td>
+            <td>
+              <div><strong>Job Card No:</strong> {{ row.jobCardNumber || '-' }}</div>
+              <div><strong>Service Head:</strong> {{ row.serviceHead || '-' }}</div>
+              <div><strong>Service Type:</strong> {{ row.serviceType || '-' }}</div>
+            </td>
+            <td>
+              <div><strong>Sale:</strong> {{ row.saleDate ? (row.saleDate | date:'dd-MM-yyyy') : '-' }}</div>
+              <div><strong>Dispatch:</strong> {{ row.dispatchDate ? (row.dispatchDate | date:'dd-MM-yyyy') : '-' }}</div>
+            </td>
+            <td>{{ row.jobType }}</td>
+            <td>{{ row.dealerName || row.dealerCode || '-' }}</td>
+            <td>{{ row.city || '-' }}</td>
+            <td>{{ row.customerName || '-' }}</td>
+            <td>{{ row.modelName || '-' }}</td>
+            <td>{{ row.purpose || '-' }}</td>
+            <td>{{ row.currentKms ?? '-' }}</td>
+            <td>{{ row.motorNo || '-' }}</td>
+            <td>{{ row.chargerNo || '-' }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'bg-warning text-dark': row.status === 'Pending',
+                'bg-success': row.status === 'Approved',
+                'bg-danger': row.status === 'Rejected'
+              }">{{ row.status }}</span>
+            </td>
+            <td>{{ row.complaint ? row.complaint + ' | ' : '' }}{{ row.detailedObservation || '-' }}</td>
+            <td>{{ row.rootCause || '-' }}</td>
+            <td>{{ row.correctiveAction || '-' }}</td>
+            <td>{{ row.quickSuggestion || '-' }}</td>
+            <td>{{ row.presentVehicleStatus || '-' }}</td>
+            <td>{{ row.vehicleOffRoadReason || '-' }}</td>
+            <td>{{ row.mainPartAffected || '-' }}</td>
+          </tr>
+          <tr *ngIf="!loading && rows.length === 0">
+            <td colspan="24" class="text-center text-muted py-4">No FFIR records found. Select filters and search.</td>
+          </tr>
+          <tr *ngIf="loading">
+            <td colspan="24" class="text-center text-muted py-4">Loading FFIR records...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="d-flex justify-content-between align-items-center p-2">
+      <small class="text-muted">{{ rows.length }} record(s)</small>
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-outline-secondary" (click)="changePage(-1)" [disabled]="page <= 1">Previous</button>
+        <span class="btn btn-light disabled">Page {{ page }} of {{ pageCount }}</span>
+        <button class="btn btn-outline-secondary" (click)="changePage(1)" [disabled]="page >= pageCount">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="verification-modal-backdrop" *ngIf="attachmentModalOpen" (click)="closeAttachments()">
+  <section class="verification-modal card shadow" role="dialog" aria-modal="true"
+    aria-labelledby="attachments-title" (click)="$event.stopPropagation()">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0" id="attachments-title">FFIR Attachments - {{ activeRow?.ffirNumber }}</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="closeAttachments()"></button>
+    </div>
+    <div class="card-body">
+      <div *ngIf="attachmentLoading" class="text-center py-4">
+        <span class="spinner-border spinner-border-sm me-2"></span>Loading attachments...
+      </div>
+      <div *ngIf="!attachmentLoading && attachments.length === 0" class="text-center text-muted py-4">
+        No attachments found.
+      </div>
+      <div class="attachment-grid" *ngIf="!attachmentLoading && attachments.length > 0">
+        <div class="attachment-item" *ngFor="let attachment of attachments">
+          <video *ngIf="isVideo(attachment)" [src]="attachment.url" controls preload="metadata"></video>
+          <a *ngIf="!isVideo(attachment)" [href]="attachment.url" target="_blank" rel="noopener noreferrer">
+            <img [src]="attachment.url" [alt]="attachment.fileName">
+          </a>
+          <small class="text-muted text-truncate">{{ attachment.fileName }}</small>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
