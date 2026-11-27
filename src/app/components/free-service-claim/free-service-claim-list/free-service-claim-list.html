@@ -92,7 +92,8 @@
                                         <td>{{ claim?.claimPrefix }}</td>
                                         <td>
                                             {{ claim?.claimNo }} <br>
-                                            {{ claim?.claimDate }}
+                                            <!-- {{ claim?.claimDate }} -->
+                                            {{ claim?.claimDate | date:'dd-MM-yyyy':'UTC' }}
                                         </td>
                                         <!-- <td>{{ claim?.locationCode }}</td> -->
                                          <td>{{ getLocationName(claim?.locationCode) }}</td>

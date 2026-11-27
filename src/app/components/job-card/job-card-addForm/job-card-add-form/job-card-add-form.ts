@@ -44,6 +44,9 @@ export class JobCardAddForm {
   readonly SUBMENU_ID = 23;
   canCreate = false;
   canEdit = false;
+  
+  private activeChassisToken = 0;
+  private lockedCustomerName: string | null = null;
   jobTypeList: any[] = [];
   jobSourceList: any[] = [];
   serviceHeadList: any[] = [];
@@ -521,29 +524,73 @@ filterChassis() {
     this.searchGlobalChassis();
   }
 
-  searchGlobalChassis() {
-    if (!this.globalChassisSearchTerm) {
-      this.toaster.show('Enter a Chassis No to search.', { classname: 'bg-warning text-white', delay: 4000 });
-      return;
-    }
+  // searchGlobalChassis() {
+  //   if (!this.globalChassisSearchTerm) {
+  //     this.toaster.show('Enter a Chassis No to search.', { classname: 'bg-warning text-white', delay: 4000 });
+  //     return;
+  //   }
 
-    this.globalChassisSuggestions = [];
-    this.globalSearching = true;
-    this.globalSaleData = null;
-    this.globalSearchNotFound = false;
+  //   this.globalChassisSuggestions = [];
+  //   this.globalSearching = true;
+  //   this.globalSaleData = null;
+  //   this.globalSearchNotFound = false;
 
-    this.chassisSearchService.getGlobalChassisDetails(this.globalChassisSearchTerm).subscribe({
-      next: (res: any) => {
-        this.globalSearching = false;
-        this.globalSaleData = res;
-      },
-      error: (err) => {
-        this.globalSearching = false;
-        console.error(err);
-        this.globalSearchNotFound = true;
-      },
-    });
+  //   this.chassisSearchService.getGlobalChassisDetails(this.globalChassisSearchTerm).subscribe({
+  //     next: (res: any) => {
+  //       this.globalSearching = false;
+  //       this.globalSaleData = res;
+  //     },
+  //     error: (err) => {
+  //       this.globalSearching = false;
+  //       console.error(err);
+  //       this.globalSearchNotFound = true;
+  //     },
+  //   });
+  // }
+
+ async searchGlobalChassis() {
+  if (!this.globalChassisSearchTerm) {
+    this.toaster.show('Enter a Chassis No to search.', { classname: 'bg-warning text-white', delay: 4000 });
+    return;
   }
+
+  this.globalChassisSuggestions = [];
+  this.globalSearching = true;
+  this.globalSaleData = null;
+  this.globalSearchNotFound = false;
+
+  const term = this.globalChassisSearchTerm.trim();
+  const cleanKey = term.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+  try {
+    const [res, hv] = await Promise.all([
+      firstValueFrom(this.chassisSearchService.getGlobalChassisDetails(term)),
+      cleanKey ? this.exactHistory(cleanKey, 'all').catch(() => null) : Promise.resolve(null),
+    ]);
+
+    const finalKey = (res?.chassisNo || cleanKey).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const historyData =
+      hv || (finalKey && finalKey !== cleanKey ? await this.exactHistory(finalKey, 'all').catch(() => null) : null);
+
+    const custJob = historyData ? this.latestCustomerJob(historyData) : null;
+    const resolvedPartyName =
+      custJob?.['PartyName'] ||
+      res?.partyName ||
+      res?.customerName ||
+      '';
+
+    this.globalSaleData = {
+      ...res,
+      partyName: resolvedPartyName,
+      customerName: resolvedPartyName,
+    };
+  } catch (err) {
+    console.error(err);
+    this.globalSearchNotFound = true;
+  } finally {
+    this.globalSearching = false;
+  }
+}
 
   // Applies the globally-found chassis into this form and closes the modal.
   // This chassis isn't in the dealer's own inspected-lot list (chassisList
@@ -568,9 +615,14 @@ filterChassis() {
     this.inwardType = data.inwardType || 'B2C';
     this.vehiclePrevkms = data.vehiclePrevKms || 0;
 
+    // this.customerObj.customerLedgerId = data.customerLedgerId || 0;
+    // this.customerObj.customerName = data.customerName || '';
+    // this.customerObj.customerMobile = data.mobileNo || '';
+    const saleCustomerName = data.customerName || '';
+    const saleCustomerMobile = data.mobileNo || '';
     this.customerObj.customerLedgerId = data.customerLedgerId || 0;
-    this.customerObj.customerName = data.customerName || '';
-    this.customerObj.customerMobile = data.mobileNo || '';
+    this.customerObj.customerName = '';       
+    this.customerObj.customerMobile = '';
     this.customerObj.customerAltMobile = data.customerAltMobile || '';
     this.customerObj.saleDate = data.saleDate ? String(data.saleDate).split('T')[0] : '';
     this.customerObj.nextServiceDueDate = data.nextserviceDueDate ? String(data.nextserviceDueDate).split('T')[0] : '';
@@ -638,10 +690,22 @@ filterChassis() {
         // best-effort only — don't block job card creation if this lookup fails
       }
     });
+        // Customer: latest real customer from service history; if there is no history, fall back to the DMS sale bill.
+    const histKey = (this.selectedChassis || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const useSaleCustomer = () => {
+      if (!this.customerObj.customerName) this.customerObj.customerName = saleCustomerName;
+      if (!this.customerObj.customerMobile) this.customerObj.customerMobile = saleCustomerMobile;
+    };
+    this.exactHistory(histKey, 'all')
+      .then(hv => { if (hv) this.fillFromServiceHistory(hv); useSaleCustomer(); })
+      .catch(() => useSaleCustomer());
 
+   
     this.closeGlobalSearchModal();
   }
 
+
+  
   allowOnlyNumbers(
     event: any,
     field: 'rear' | 'front' | 'altMobile' | 'manualno'
@@ -1105,53 +1169,292 @@ onJobType(isEdit = false, isFromEstimate: boolean = false) {
       });
   }
 
-  onChassisChange() {
-    //debugger;
-    if (!this.selectedChassis) return;
-    this.loadServiceHistory(this.selectedChassis);
+//   onChassisChange() {
+//     //debugger;
+//     if (!this.selectedChassis) return;
+//     this.loadServiceHistory(this.selectedChassis);
 
-    const selected = this.chassisList.find(
-      x => x.chassisNumber == this.selectedChassis
-    );
+//     const selected = this.chassisList.find(
+//       x => x.chassisNumber == this.selectedChassis
+//     );
 
-    if (!selected) return;
+//     if (!selected) return;
 
-    this.invoiceNo = selected.invoiceNo;
-    this.couponNo = this.selectedChassis.slice(-13);
-    this.inwardType = selected.inwardType || 'B2C';
-    this.vehiclePrevkms = selected.vehiclePrevkms;
-    this.customerObj.customerLedgerId = selected.customerLedgerId;
-    this.customerObj.customerName = selected.customerName;
-    this.customerObj.customerMobile = selected.customerMobile;
-    this.customerObj.customerAltMobile = selected.customerAltMobile;
-    this.customerObj.saleDate = selected.saleDate?.split('T')[0];
-    this.customerObj.nextServiceDueDate = selected.nextserviceDueDate?.split('T')[0];
-    this.customerObj.insuranceExpDate = selected.insuranceExpDate?.split('T')[0];
+//     this.invoiceNo = selected.invoiceNo;
+//     this.couponNo = this.selectedChassis.slice(-13);
+//     this.inwardType = selected.inwardType || 'B2C';
+//     this.vehiclePrevkms = selected.vehiclePrevkms;
+//     this.customerObj.customerLedgerId = selected.customerLedgerId;
+//     this.customerObj.customerName = selected.partyName ;
+//     this.customerObj.customerMobile = selected.customerMobile;
+//     this.customerObj.customerAltMobile = selected.customerAltMobile;
+//     this.customerObj.saleDate = selected.saleDate?.split('T')[0];
+//     this.customerObj.nextServiceDueDate = selected.nextserviceDueDate?.split('T')[0];
+//     this.customerObj.insuranceExpDate = selected.insuranceExpDate?.split('T')[0];
 
-    this.modelName = selected.modelName
-      + (selected.colourName ? ' (' + selected.colourName + ')' : '');
+//     this.modelName = selected.modelName
+//       + (selected.colourName ? ' (' + selected.colourName + ')' : '');
 
-    this.registerNo = selected.registerNo;
-    this.batteryCapacity = selected.batteryCapacity;
-    this.batteryMake = selected.batteryMake;
-    this.batteryChemestry = selected.batteryChemestry;
-    this.batteryNumber = selected.batteryNumber;
-    this.motorNo = selected.motorNo;
-    this.controllerNo = selected.controllerNo;
-    this.converterNo = selected.converterNo;
-    this.chargerNumber = selected.chargerNumber;
-    this.odoReading = selected.odoReading;
-    this.duration = selected.duration;
-    this.durationType = selected.durationType;
-    this.expireWarrentyDate = selected.expireWarrentyDate;
-    this.oemModelId = selected.oemModelId;
+//     this.registerNo = selected.registerNo;
+//     this.batteryCapacity = selected.batteryCapacity;
+//     this.batteryMake = selected.batteryMake;
+//     this.batteryChemestry = selected.batteryChemestry;
+//     this.batteryNumber = selected.batteryNumber;
+//     this.motorNo = selected.motorNo;
+//     this.controllerNo = selected.controllerNo;
+//     this.converterNo = selected.converterNo;
+//     this.chargerNumber = selected.chargerNumber;
+//     this.odoReading = selected.odoReading;
+//     this.duration = selected.duration;
+//     this.durationType = selected.durationType;
+//     this.expireWarrentyDate = selected.expireWarrentyDate;
+//     this.oemModelId = selected.oemModelId;
 
-    if (this.oemModelId) {
-      this.loadPdiData(this.oemModelId);
+//     if (this.oemModelId) {
+//       this.loadPdiData(this.oemModelId);
+//     }
+
+//     this.loadEbwInfo(this.selectedChassis); // NEW
+//     this.applyPartyNameFromHistory(this.selectedChassis, false);
+//   }
+
+//  private async applyPartyNameFromHistory(chassisNo: string, showToast = false): Promise<void> {
+//   const cleanKey = (chassisNo || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+//   if (!cleanKey) return;
+
+//   try {
+//     const hv: any = await this.exactHistory(cleanKey, 'all');
+//     if (!hv) return;
+
+//     const jobs: any[] = Array.isArray(hv.jobs) ? hv.jobs : [];
+//     const norm = (s: any) => String(s || '').trim().toLowerCase();
+
+//     const sortedJobs = [...jobs].sort((a, b) => {
+//       const da = new Date(a?.['JobCardDate'] || a?.['CreatedDate'] || 0).getTime();
+//       const db = new Date(b?.['JobCardDate'] || b?.['CreatedDate'] || 0).getTime();
+//       return db - da;
+//     });
+
+//     const partyJob =
+//       sortedJobs.find(j => norm(j?.['PartyName'])) ||
+//       (typeof this.latestCustomerJob === 'function' ? this.latestCustomerJob(hv) : null);
+
+//     const partyName = String(
+//       partyJob?.['PartyName'] || hv?.['PartyName'] || hv?.['CustomerName'] || ''
+//     ).trim();
+
+//     if (partyName) {
+//       this.customerObj.customerLedgerId = 0;
+//       this.customerObj.customerName = partyName;
+
+//       const partyMobile = String(
+//         partyJob?.['PartyMobile'] ||
+//         partyJob?.['CustomerMobile'] ||
+//         partyJob?.['MobileNo'] ||
+//         hv?.['CustomerMobile'] ||
+//         ''
+//       ).trim();
+
+//       if (partyMobile) {
+//         this.customerObj.customerMobile = partyMobile;
+//       }
+
+//     }
+//   } catch (err) {
+//     console.warn('applyPartyNameFromHistory failed:', err);
+//   }
+// }
+
+onChassisChange() {
+  if (!this.selectedChassis) return;
+
+  const token = ++this.activeChassisToken;
+  this.loadServiceHistory(this.selectedChassis);
+
+  const selected = this.chassisList.find(
+    x => x.chassisNumber == this.selectedChassis
+  );
+
+  if (!selected) return;
+
+  this.invoiceNo = selected.invoiceNo;
+  this.couponNo = this.selectedChassis.slice(-13);
+  this.inwardType = selected.inwardType || 'B2C';
+  this.vehiclePrevkms = selected.vehiclePrevkms;
+  this.customerObj.customerLedgerId = selected.customerLedgerId;
+
+  // Fakt selected.partyName vapra — lagech bind hoil
+  const partyName = String(selected.partyName || '').trim();
+  this.customerObj.customerName =
+    partyName && partyName.toLowerCase() !== 'ram auto' ? partyName : '';
+
+  this.customerObj.customerMobile = selected.customerMobile || '';
+  this.customerObj.customerAltMobile = selected.customerAltMobile;
+  this.customerObj.saleDate = selected.saleDate?.split('T')[0];
+  this.customerObj.nextServiceDueDate = selected.nextserviceDueDate?.split('T')[0];
+  this.customerObj.insuranceExpDate = selected.insuranceExpDate?.split('T')[0];
+
+  this.modelName = selected.modelName
+    + (selected.colourName ? ' (' + selected.colourName + ')' : '');
+
+  this.registerNo = selected.registerNo;
+  this.batteryCapacity = selected.batteryCapacity;
+  this.batteryMake = selected.batteryMake;
+  this.batteryChemestry = selected.batteryChemestry;
+  this.batteryNumber = selected.batteryNumber;
+  this.motorNo = selected.motorNo;
+  this.controllerNo = selected.controllerNo;
+  this.converterNo = selected.converterNo;
+  this.chargerNumber = selected.chargerNumber;
+  this.odoReading = selected.odoReading;
+  this.duration = selected.duration;
+  this.durationType = selected.durationType;
+  this.expireWarrentyDate = selected.expireWarrentyDate;
+  this.oemModelId = selected.oemModelId;
+
+  if (this.oemModelId) {
+    this.loadPdiData(this.oemModelId);
+  }
+
+  this.loadEbwInfo(this.selectedChassis);
+
+  if (!this.customerObj.customerName) {
+    void this.applyPartyNameFromHistory(this.selectedChassis, false, token);
+  }
+}
+
+
+  private async applyPartyNameFromHistory(
+    chassisNo: string,
+    showToast = false,
+    token: number = this.activeChassisToken
+  ): Promise<void> {
+    const cleanKey = (chassisNo || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (!cleanKey) return;
+
+    try {
+      const hv: any = await this.exactHistory(cleanKey, 'all');
+      if (token !== this.activeChassisToken || !hv) return;
+
+      const jobs: any[] = Array.isArray(hv.jobs) ? hv.jobs : [];
+      const sortedJobs = [...jobs].sort((a, b) => {
+        const da = new Date(a?.['JobCardDate'] || a?.['JobDate'] || a?.['CreatedDate'] || 0).getTime();
+        const db = new Date(b?.['JobCardDate'] || b?.['JobDate'] || b?.['CreatedDate'] || 0).getTime();
+        return db - da;
+      });
+
+      const latestWithParty =
+        sortedJobs.find(j => String(j?.['PartyName'] ?? '').trim() !== '') ||
+        (typeof this.latestCustomerJob === 'function' ? this.latestCustomerJob(hv) : null);
+
+      const dbPartyName = String(
+        latestWithParty?.['PartyName'] ?? hv?.['PartyName'] ?? hv?.['CustomerName'] ?? ''
+      ).trim();
+
+      if (dbPartyName) {
+        this.customerObj.customerLedgerId = 0;
+        this.customerObj.customerName = dbPartyName;
+
+        const dbMobile = String(
+          latestWithParty?.['MobileNumber'] ??
+          latestWithParty?.['PartyMobile'] ??
+          latestWithParty?.['CustomerMobile'] ??
+          hv?.['CustomerMobile'] ??
+          ''
+        ).trim();
+
+        if (dbMobile) {
+          this.customerObj.customerMobile = dbMobile;
+        }
+      }
+    } catch (err) {
+      console.warn('applyPartyNameFromHistory failed:', err);
+    }
+  }
+
+  private fillFromServiceHistory(v: ShVehicle) {
+    const token = this.activeChassisToken;
+    const jobs = this.sortedJobs(v);
+    const pick = (key: string): string => {
+      for (const j of jobs) {
+        const x = j?.[key];
+        if (x !== null && x !== undefined && String(x).trim() !== '') return String(x).trim();
+      }
+      return '';
+    };
+    const filled: string[] = [];
+    const take = (current: any, value: string, label: string) => {
+      if (current || !value) return current;
+      filled.push(label);
+      return value;
+    };
+
+    if (token !== this.activeChassisToken) return;
+
+    this.registerNo = take(this.registerNo, v.regNo || '', 'Reg No');
+    this.modelName = take(this.modelName, v.model || pick('Model'), 'Model');
+
+    const dbPartyName = pick('PartyName') || String((v as any)?.['PartyName'] ?? '').trim();
+    const dbMobile = pick('MobileNumber');
+
+    if (dbPartyName) {
+      this.customerObj.customerLedgerId = 0;
+      this.customerObj.customerName = dbPartyName;
+      if (dbMobile) {
+        this.customerObj.customerMobile = dbMobile;
+      }
+      filled.push('Customer');
+    } else if (!this.customerObj.customerMobile && dbMobile) {
+      this.customerObj.customerMobile = dbMobile;
     }
 
-    this.loadEbwInfo(this.selectedChassis); // NEW
+    this.customerObj.saleDate = take(
+      this.customerObj.saleDate,
+      v.saleDate ? String(v.saleDate).split('T')[0] : '',
+      'Sale Date'
+    );
+    this.batteryNumber = take(this.batteryNumber, pick('BatterySerialNo1'), 'Battery No');
+
+    this.shPastJobs = jobs;
+    this.shPastJobsChassis = this.selectedChassis;
+    this.shDetailsChassis = this.selectedChassis;
+
+    const kms = jobs.length ? Number(jobs[0]?.['KMS']) : NaN;
+    this.shLastKms = isNaN(kms) ? null : kms;
+    if (!this.vehiclePrevkms && this.shLastKms) {
+      this.vehiclePrevkms = this.shLastKms;
+    }
+
+    const msg = jobs.length
+      ? `Service history: ${jobs.length} past job(s) found.` +
+        (filled.length ? ` Filled: ${filled.join(', ')}.` : '') +
+        ' Please verify before saving.'
+      : 'Vehicle selected. No past jobs in service history.';
+    this.toaster.show(msg, { classname: 'bg-success text-white', delay: 5000 });
   }
+
+onChassisInputEnter(event: Event) {
+  event.preventDefault();
+  const val = (this.selectedChassis || '').trim();
+  if (!val) return;
+
+  this.filteredChassisList = [];
+
+  const exactLocal = this.chassisList.find(
+    x =>
+      x.chassisNumber?.toLowerCase() === val.toLowerCase() ||
+      x.registerNo?.toLowerCase() === val.toLowerCase()
+  );
+
+  if (exactLocal) {
+    this.selectedChassis = exactLocal.chassisNumber;
+    this.onChassisChange();
+    return;
+  }
+
+  this.lookupScanned(val);
+  // this.applyPartyNameFromHistory(val, false);
+}
 
   private loadEbwInfo(chassisNo: string): void {
     this.ebwExpiryDate = '';
@@ -2226,42 +2529,59 @@ validateWarranty(): boolean {
     this.loadServiceHistory(chassis);
     this.loadEbwInfo(chassis);
   }
-
-  /** Fills only empty fields from the vehicle's service history (latest job with a value). */
-  private fillFromServiceHistory(v: ShVehicle) {
-    const jobs = v?.jobs || [];
-    const pick = (key: string): string => {
-      for (const j of jobs) {
-        const x = j?.[key];
-        if (x !== null && x !== undefined && String(x).trim() !== '') return String(x).trim();
-      }
-      return '';
-    };
-    const filled: string[] = [];
-    const take = (current: any, value: string, label: string) => {
-      if (current || !value) return current;
-      filled.push(label);
-      return value;
-    };
-    this.registerNo = take(this.registerNo, v.regNo || '', 'Reg No');
-    this.modelName = take(this.modelName, v.model || pick('Model'), 'Model');
-    this.customerObj.customerName = take(this.customerObj.customerName, pick('PartyName'), 'Customer');
-    this.customerObj.customerMobile = take(this.customerObj.customerMobile, pick('MobileNumber'), 'Mobile');
-    this.customerObj.saleDate = take(this.customerObj.saleDate, v.saleDate ? String(v.saleDate).split('T')[0] : '', 'Sale Date');
-    this.batteryNumber = take(this.batteryNumber, pick('BatterySerialNo1'), 'Battery No');
-
-    this.shPastJobs = jobs;
-    this.shPastJobsChassis = this.selectedChassis;
-    this.shDetailsChassis = this.selectedChassis;
-    const kms = jobs.length ? Number(jobs[0]?.['KMS']) : NaN;
-    this.shLastKms = isNaN(kms) ? null : kms;
-
-    const msg = jobs.length
-      ? `Service history: ${jobs.length} past job(s) found.` + (filled.length ? ` Filled: ${filled.join(', ')}.` : '') + ' Please verify before saving.'
-      : 'Vehicle selected. No past jobs in service history.';
-    this.toaster.show(msg, { classname: 'bg-success text-white', delay: 5000 });
+  sortedJobs(v: any): Record<string, any>[] {
+    return [...(v?.jobs || [])].sort((a, b) =>
+      new Date(b?.['JobDate'] || 0).getTime() - new Date(a?.['JobDate'] || 0).getTime());
   }
 
+  /** Latest job whose PartyName is a real customer (not the dealer's own CompName, e.g. the PDI entry). */
+  latestCustomerJob(v: any): Record<string, any> | null {
+    const jobs = this.sortedJobs(v);
+    const n = (x: any) => String(x || '').trim().toLowerCase();
+    return jobs.find(j => n(j['PartyName']) !== '' && n(j['PartyName']) !== n(j['CompName']))
+        ?? jobs.find(j => n(j['PartyName']) !== '')
+        ?? null;
+  }
+
+  // /** Fills only empty fields from the vehicle's service history (latest job with a value). */
+  // private fillFromServiceHistory(v: ShVehicle) {
+  //   const jobs = v?.jobs || [];
+  //   const pick = (key: string): string => {
+  //     for (const j of jobs) {
+  //       const x = j?.[key];
+  //       if (x !== null && x !== undefined && String(x).trim() !== '') return String(x).trim();
+  //     }
+  //     return '';
+  //   };
+  //   const filled: string[] = [];
+  //   const take = (current: any, value: string, label: string) => {
+  //     if (current || !value) return current;
+  //     filled.push(label);
+  //     return value;
+  //   };
+  //   this.registerNo = take(this.registerNo, v.regNo || '', 'Reg No');
+  //   this.modelName = take(this.modelName, v.model || pick('Model'), 'Model');
+  //   this.customerObj.customerName = take(this.customerObj.customerName, pick('PartyName'), 'Customer');
+  //   this.customerObj.customerMobile = take(this.customerObj.customerMobile, pick('MobileNumber'), 'Mobile');
+  //   this.customerObj.saleDate = take(this.customerObj.saleDate, v.saleDate ? String(v.saleDate).split('T')[0] : '', 'Sale Date');
+  //   this.batteryNumber = take(this.batteryNumber, pick('BatterySerialNo1'), 'Battery No');
+
+  //   this.shPastJobs = jobs;
+  //   this.shPastJobsChassis = this.selectedChassis;
+  //   this.shDetailsChassis = this.selectedChassis;
+  //   const kms = jobs.length ? Number(jobs[0]?.['KMS']) : NaN;
+  //   this.shLastKms = isNaN(kms) ? null : kms;
+
+  //   const msg = jobs.length
+  //     ? `Service history: ${jobs.length} past job(s) found.` + (filled.length ? ` Filled: ${filled.join(', ')}.` : '') + ' Please verify before saving.'
+  //     : 'Vehicle selected. No past jobs in service history.';
+  //   this.toaster.show(msg, { classname: 'bg-success text-white', delay: 5000 });
+  // }
+
+  
+  
+
+ 
   get showShPastJobs(): boolean {
     return this.shPastJobs.length > 0 && !!this.selectedChassis && this.shPastJobsChassis === this.selectedChassis;
   }
@@ -2448,4 +2768,129 @@ validateWarranty(): boolean {
     this.router.navigate(['/job-card']);
   }
 
-}
+
+  private extractPartyDetailsFromHistory(hv: any): { partyName: string; partyMobile: string } {
+    if (!hv) {
+      return { partyName: '', partyMobile: '' };
+    }
+
+    const jobs: any[] = Array.isArray(hv.jobs) ? hv.jobs : [];
+    const norm = (s: any) => String(s || '').trim().toLowerCase();
+
+    const sortedJobs = [...jobs].sort((a, b) => {
+      const da = new Date(a?.['JobCardDate'] || a?.['JobDate'] || a?.['CreatedDate'] || 0).getTime();
+      const db = new Date(b?.['JobCardDate'] || b?.['JobDate'] || b?.['CreatedDate'] || 0).getTime();
+      return db - da;
+    });
+
+    const dealerNames = new Set(
+      sortedJobs.map(j => norm(j?.['CompName'] || j?.['DealerName']))
+    );
+
+    const partyJob =
+      sortedJobs.find(j => {
+        const p = norm(j?.['PartyName']);
+        return p !== '' && !dealerNames.has(p);
+      }) ||
+      (typeof this.latestCustomerJob === 'function' ? this.latestCustomerJob(hv) : null);
+
+    const rawPartyName = String(
+      partyJob?.['PartyName'] || hv?.['PartyName'] || hv?.['CustomerName'] || ''
+    ).trim();
+
+    const partyName = dealerNames.has(norm(rawPartyName)) ? '' : rawPartyName;
+
+    const partyMobile = String(
+      partyJob?.['PartyMobile'] ||
+      partyJob?.['MobileNumber'] ||
+      partyJob?.['CustomerMobile'] ||
+      partyJob?.['MobileNo'] ||
+      hv?.['CustomerMobile'] ||
+      ''
+    ).trim();
+
+    return { partyName, partyMobile };
+  }
+
+  private async resolveAndApplyCustomerName(
+    chassisNo: string,
+    fallbackName: string = '',
+    fallbackMobile: string = ''
+  ): Promise<void> {
+    const cleanKey = (chassisNo || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (!cleanKey) {
+      this.customerObj.customerName = fallbackName;
+      if (fallbackMobile) {
+        this.customerObj.customerMobile = fallbackMobile;
+      }
+      return;
+    }
+
+    try {
+      const hv: any = await this.exactHistory(cleanKey, 'all');
+      const { partyName, partyMobile } = this.extractPartyDetailsFromHistory(hv);
+
+      if (partyName) {
+        this.customerObj.customerLedgerId = 0;
+        this.customerObj.customerName = partyName;
+        if (partyMobile) {
+          this.customerObj.customerMobile = partyMobile;
+        }
+        return;
+      }
+    } catch (err) {
+      console.warn('resolveAndApplyCustomerName failed:', err);
+    }
+
+    if (fallbackName) {
+      this.customerObj.customerName = fallbackName;
+    }
+    if (fallbackMobile && !this.customerObj.customerMobile) {
+      this.customerObj.customerMobile = fallbackMobile;
+    }
+  }
+
+
+  private normalizeName(val: any): string {
+  return String(val ?? '').trim().toLowerCase();
+}
+
+private isDealerName(name: string, extraNames: Set<string> = new Set()): boolean {
+  const n = this.normalizeName(name);
+  if (!n) return true;
+
+  const knownDealerNames = new Set<string>([
+    ...extraNames,
+    this.normalizeName(this.dealerCode),
+    this.normalizeName(this.storageService.getDealerCode()),
+    this.normalizeName((this.storageService as any).getDealerName?.())
+  ]);
+
+  return knownDealerNames.has(n);
+}
+
+private setCustomerNameSafely(name: string, mobile?: string, force = false): void {
+  const cleanName = String(name ?? '').trim();
+  const cleanMobile = String(mobile ?? '').trim();
+
+  if (!force && this.lockedCustomerName && this.customerObj.customerName === this.lockedCustomerName) {
+    if (cleanMobile && !this.customerObj.customerMobile) {
+      this.customerObj.customerMobile = cleanMobile;
+    }
+    return;
+  }
+
+  if (cleanName && !this.isDealerName(cleanName)) {
+    this.customerObj.customerName = cleanName;
+    this.lockedCustomerName = cleanName;
+  } else if (force) {
+    this.customerObj.customerName = cleanName;
+    this.lockedCustomerName = cleanName || null;
+  }
+
+  if (cleanMobile) {
+    this.customerObj.customerMobile = cleanMobile;
+  }
+}
+
+}
