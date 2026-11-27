@@ -28,6 +28,8 @@ export class BgFreeService implements OnInit {
   supplierList: any[] = [];
   pendingClaims: any[] = [];
   selectedLocation = '';
+  fromDate = '';         
+  toDate = '';  
 
   claimFormData: any = {
     id: 0,
@@ -58,14 +60,26 @@ export class BgFreeService implements OnInit {
     }
   }
 
+  // ngOnInit(): void {
+  //   this.loadWorkShopLocations();
+  //   this.getSupplierList();
+  //   this.route.queryParams.subscribe(q => {
+  //     this.claimId = Number(q['claimId'] || 0);
+  //     this.loadRows();
+  //   });
+  // }
   ngOnInit(): void {
-    this.loadWorkShopLocations();
-    this.getSupplierList();
-    this.route.queryParams.subscribe(q => {
-      this.claimId = Number(q['claimId'] || 0);
-      this.loadRows();
-    });
-  }
+  const now = new Date();
+  this.fromDate = new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString('en-CA'); 
+  this.toDate = now.toLocaleDateString('en-CA');                                            
+
+  this.loadWorkShopLocations();
+  this.getSupplierList();
+  this.route.queryParams.subscribe(q => {
+    this.claimId = Number(q['claimId'] || 0);
+    this.loadRows();
+  });
+}
 
   loadWorkShopLocations() {
     this.locationMasterService.getLocationByDealerCodeAndAreaId(this.dealerCode, 2).subscribe({
@@ -164,7 +178,8 @@ export class BgFreeService implements OnInit {
 
     this.loader.show();
    
-    this.freeServiceClaimService.getPendingApprovalClaims(dealer).subscribe({
+    // this.freeServiceClaimService.getPendingApprovalClaims(dealer).subscribe({
+    this.freeServiceClaimService.getPendingApprovalClaims(dealer, this.fromDate, this.toDate, true).subscribe({
       next: (res: any) => {
         let data = res || [];
        
@@ -184,7 +199,7 @@ export class BgFreeService implements OnInit {
 
  
   onDecision(row: any, decision: 'approve' | 'reject') {
-   
+    if (row.isApproved !== null && row.isApproved !== undefined) return;
     const userRole = this.storageService.getRole() || '';
     if (userRole.toLowerCase() !== 'superadmin' && userRole.toLowerCase() !== 'admin') {
       this.toaster.show('Fakt admin ch approve karu shakto.', { classname: 'bg-danger text-white', delay: 5000 });

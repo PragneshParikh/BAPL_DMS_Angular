@@ -80,13 +80,15 @@
                                         <th> Claim No / Claim Date </th>
                                         <th> Location Name </th>
                                         <th> Status </th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
                                     <tr *ngFor="let claim of dataSource;" class="table-row"
                                         (dblclick)="onDoubleClick(claim)">
-                                        <td>{{ claim?.id }}</td>
+                                        <!-- <td>{{ claim?.id }}</td> -->
+                                         <td>{{ claim?.srNo }}</td>
                                         <td>{{ claim?.claimPrefix }}</td>
                                         <td>
                                             {{ claim?.claimNo }} <br>
@@ -101,6 +103,16 @@
                                                                 'bg-warning text-dark': claim?.status === 'Pending' || claim?.status === 'Partially Processed'}">
                                                     {{ claim?.status }}
                                                 </span>
+                                        </td>
+
+                                        <td class="text-nowrap">
+                                            <button class="btn btn-sm btn-primary me-1"
+                                                    *ngIf="claim.approvedCount > 0 && claim.pendingCount === 0 && !claim.invoiceNo"
+                                                    (click)="generateInvoice(claim)">Generate Invoice</button>
+                                            <button class="btn btn-sm btn-outline-secondary me-1" *ngIf="claim.invoiceNo"
+                                                    (click)="printClaim(claim)">Print Claim</button>
+                                            <button class="btn btn-sm btn-outline-success" *ngIf="claim.invoiceNo"
+                                                    (click)="printInvoice(claim)">Print Invoice</button>
                                         </td>
                                     </tr>
 

@@ -245,19 +245,20 @@ export class ItemMaster implements OnInit {
       ? this.canEdit && this.isSelectedItemOwner
       : this.canEdit || this.isSuperAdmin;
 
-    this.selectedItem = this.canEditSelectedItem
-      ? {
-          ...item,
-          itemtype: 4,
-          iselectric: true,
-          uom: 56,
-          custprice: 120,
-          sgst: 2.5,
-          cgst: 2.5,
-          igst: 5,
-          ugst: 2.5
-        }
-      : { ...item };
+    // this.selectedItem = this.canEditSelectedItem
+    //   ? {
+    //       ...item,
+    //       itemtype: 4,
+    //       iselectric: true,
+    //       uom: 56,
+    //       custprice: 120,
+    //       sgst: 2.5,
+    //       cgst: 2.5,
+    //       igst: 5,
+    //       ugst: 2.5
+    //     }
+    //   : { ...item };
+    this.selectedItem = { ...item };
     this.modalService.open(modal, { size: 'xl' });
   }
 
